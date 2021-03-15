@@ -39,6 +39,15 @@
         </betty-titlebar>
     </div>
     <div class="content-container-inner" style="width:60%; margin:0 auto;">
+        <coral-alert size="L" variant="warning" data-sly-test=${context.disabled}>
+            <coral-alert-header>OSGi CONFIGURATION MISSING</coral-alert-header>
+            <coral-alert-content>RedirecFilter is disabled and requires an OSGi configuration to start.
+                Please create an OSGi configuration for PID <i>com.adobe.acs.commons.redirects.filter.RedirectFilter</i>
+                <p>
+                    For more information, see the <a target="_blank" href="https://adobe-consulting-services.github.io/acs-aem-commons/features/redirect-manager/index.html">ACS AEM Commons Redirect Manager feature doc page</a>.
+                </p>
+            </coral-alert-content>
+        </coral-alert>
         <coral-tabview>
             <coral-tablist target="main-panel-1">
                 <coral-tab>Manage</coral-tab>
