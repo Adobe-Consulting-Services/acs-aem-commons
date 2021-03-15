@@ -30,8 +30,8 @@ import java.util.Map;
 public interface PropertyAggregatorService {
 
     /**
-     * Iterates up the content tree to aggregate all the current page properties and inherited
-     * page properties. Assigns the appropriate namespace to the properties as well.
+     * Uses a list of {@link ContentVariableProvider} classes to create a map of properties available for content
+     * variable replacement to be used in supporting classes.
      *
      * @param request The currently scoped request
      * @return The map of properties
