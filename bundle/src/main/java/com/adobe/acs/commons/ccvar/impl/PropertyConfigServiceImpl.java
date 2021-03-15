@@ -65,7 +65,7 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
     }
 
     @ObjectClassDefinition(
-            name = "Property Aggregator Service Configuration"
+            name = "ACS AEM Commons - Contextual Content Variable Property Aggregator Service Configuration"
     )
     @interface Config {
 
