@@ -254,7 +254,7 @@ public class ContentVariableJsonFilter implements Filter {
         }
     }
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Contextual Content Variable Filter Configuration", description = "JSON Rewriting"
+    @ObjectClassDefinition(name = "ACS AEM Commons - Contextual Content Variable JSON Filter Configuration", description = "JSON Rewriting"
             + " Filter for supporting Content Variable Property replacement in JSON responses. This filter only applies to"
             + " /content/* and *.json requests. Additional filtering options are available below.")
     @interface Config {
