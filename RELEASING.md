@@ -59,7 +59,7 @@ if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 
 6. Ensure **Java 8** is active (Java 11 breaks on the JavaDocs build in `mvn release:perform`)
 
-7. Run the release: `mvn release:prepare` followed by `mvn release:perform`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`
+7. Run the release: `mvn release:prepare` followed by `git checkout master`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`
 
 8. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
 
