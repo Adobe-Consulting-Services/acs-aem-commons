@@ -412,7 +412,7 @@ public class Renovator extends ProcessDefinition {
     }
 
     private Resource getAuditCategoryResource(ResourceResolver rr, String auditCategory, String contentPath) {
-        final StringBuffer auditCategoryPath = new StringBuffer(AUDIT_ROOT);
+        final StringBuilder auditCategoryPath = new StringBuilder(AUDIT_ROOT);
         auditCategoryPath.append("/").append(auditCategory.replace('/', '.'));
         auditCategoryPath.append(contentPath);
 
