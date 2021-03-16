@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -331,7 +332,7 @@ public class Renovator extends ProcessDefinition {
             instance.defineCriticalAction("Move Tree", rr, this::moveTree);
 
             if(auditTrails) {
-                instance.defineAction("Add Move Audit", rr, this::addMoveAudits);
+                instance.defineAction("Add Move Audit Entries", rr, this::addMoveAuditEntries);
                 instance.defineAction("Create Audit Structure Folders", rr, this::buildAuditStructure);
                 instance.defineAction("Move Audit Entries", rr, this::moveAudits);
             }
@@ -346,19 +347,107 @@ public class Renovator extends ProcessDefinition {
         }
     }
 
-    private void addMoveAudits(ActionManager actionManager) {
-
+    private void addMoveAuditEntries(ActionManager manager) {
+        moves.forEach(node -> {
+            manager.deferredWithResolver(rr -> {
+                node.auditMove(rr, auditLog);
+            });
+        });
     }
 
-    private void moveAudits(ActionManager actionManager) {
-
+    private void buildAuditStructure(ActionManager manager) {
+        manager.deferredWithResolver(rr -> {
+            moves.forEach(node -> {
+                if(node.isAuditableMove()) {
+                    manager.deferredWithResolver(rr2 -> {
+                        String[] categories = auditLog.getCategories();
+                        for (String auditCategory : categories) {
+                            Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, node.getSourcePath());
+                            if (sourceAuditRes != null) {
+                                getOrCreateAuditCategoryResource(rr2, auditCategory, node.getDestinationPath());
+                            }
+                        }
+                    });
+                }
+            });
+        });
     }
 
-    private void buildAuditStructure(ActionManager actionManager) {
+    private Resource getOrCreateAuditCategoryResource(ResourceResolver rr, String auditCategory, String contentPath) throws PersistenceException {
+        Resource auditCategoryRes = getAuditCategoryResource(rr, auditCategory, contentPath);
+        if (auditCategoryRes == null) {
+            String auditCategoryPath = AUDIT_ROOT + "/" + auditCategory.replace('/', '.');
 
+            //this should, at least in theory always exist, because by the time we get here we know an entry exists for the source exists
+            //but null check JIC
+            Resource auditCatRootRes = rr.getResource(auditCategoryPath);
+            if (auditCatRootRes != null) {
+                String[] pathParts = contentPath.split("/");
+                Resource currentRes = auditCatRootRes;
+
+                for (String part : pathParts) {
+                    String nextPath = currentRes.getPath() + "/" + part;
+                    Resource parentRes = currentRes;
+                    currentRes = rr.getResource(nextPath);
+                    if (currentRes == null) {
+                        //create it
+                        Map<String, Object> folderProps = new HashMap<>();
+                        folderProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER);
+
+                        currentRes = rr.create(parentRes, part, folderProps);
+                        rr.commit();
+                        rr.refresh();
+                        LOG.debug("created audit folder at {}", currentRes.getPath());
+                    }
+                }
+            }
+        }
+        return auditCategoryRes;
     }
 
+    private Resource getAuditCategoryResource(ResourceResolver rr, String auditCategory, String contentPath) {
+        final StringBuffer auditCategoryPath = new StringBuffer(AUDIT_ROOT);
+        auditCategoryPath.append("/").append(auditCategory.replace('/', '.'));
+        auditCategoryPath.append(contentPath);
 
+        return rr.getResource(auditCategoryPath.toString());
+    }
+
+    private void moveAudits(ActionManager manager) {
+        manager.deferredWithResolver(rr -> {
+            movePaths.forEach((source, dest) -> {
+                Actions.setCurrentItem(source);
+
+                manager.deferredWithResolver(rr2 -> {
+                    String[] categories = auditLog.getCategories();
+                    int movedCount = 0;
+                    for (String auditCategory : categories) {
+                        Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, source);
+                        if (sourceAuditRes != null) {
+                            Resource destAuditRes = getAuditCategoryResource(rr2, auditCategory, dest);
+                            if(destAuditRes!=null) {
+                                Iterator<Resource> resourceIterator = sourceAuditRes.listChildren();
+                                LOG.debug("moving audit entries for category {} from {} to {}", auditCategory, source, dest);
+                                while (resourceIterator.hasNext()) {
+                                    Resource auditEntry = resourceIterator.next();
+                                    rr2.move(auditEntry.getPath(), destAuditRes.getPath());
+                                    rr2.commit();
+                                    rr2.refresh();
+
+                                    LOG.debug("moved entry {} to {}", auditEntry.getPath(), destAuditRes.getPath());
+
+                                    movedCount++;
+                                }
+                            } else {
+                                throw new RepositoryException("destination audit res failed to create at " + auditCategory +  dest);
+                            }
+                        }
+                    }
+                });
+
+            });
+        });
+    }
 
     protected void identifyStructure(ActionManager manager) {
         manager.deferredWithResolver(rr -> {

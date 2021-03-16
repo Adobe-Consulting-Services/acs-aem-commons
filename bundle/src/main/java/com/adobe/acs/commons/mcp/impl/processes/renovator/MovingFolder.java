@@ -60,6 +60,11 @@ public class MovingFolder extends MovingNode {
     }
 
     @Override
+    protected boolean isAuditableMove() {
+        return false;
+    }
+
+    @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws MovingException {
         try {
             Session session = rr.adaptTo(Session.class);

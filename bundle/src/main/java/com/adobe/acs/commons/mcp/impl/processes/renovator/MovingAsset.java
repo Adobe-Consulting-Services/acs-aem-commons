@@ -19,17 +19,25 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
+import com.day.cq.audit.AuditLog;
+import com.day.cq.audit.AuditLogEntry;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.NameConstants;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
+import com.day.cq.wcm.api.PageEvent;
+import com.day.cq.wcm.api.PageModification;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -57,6 +65,11 @@ public class MovingAsset extends MovingNode {
     @Override
     public boolean isAbleToHaveChildren() {
         return false;
+    }
+
+    @Override
+    protected boolean isAuditableMove() {
+        return true;
     }
 
     @Override
@@ -143,4 +156,5 @@ public class MovingAsset extends MovingNode {
             }
         }
     }
+
 }
