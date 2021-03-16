@@ -365,18 +365,22 @@ public class Renovator extends ProcessDefinition {
                     if(childNode.isAuditableMove()) {
                         manager.deferredWithResolver(rr2 -> {
                             String[] categories = auditLog.getCategories();
-                            for (String auditCategory : categories) {
-                                Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, childNode.getSourcePath());
-                                if (sourceAuditRes != null) {
-                                    LOG.debug("Found audit source at {}", sourceAuditRes.getPath());
-                                    getOrCreateAuditCategoryResource(rr2, auditCategory, childNode.getDestinationPath());
-                                }
-                            }
+                            buildAuditCategoryFolders(rr2, childNode, categories);
                         });
                     }
                 });
             });
         });
+    }
+
+    private void buildAuditCategoryFolders(ResourceResolver rr2, MovingNode childNode, String[] categories) throws PersistenceException {
+        for (String auditCategory : categories) {
+            Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, childNode.getSourcePath());
+            if (sourceAuditRes != null) {
+                LOG.debug("Found audit source at {}", sourceAuditRes.getPath());
+                getOrCreateAuditCategoryResource(rr2, auditCategory, childNode.getDestinationPath());
+            }
+        }
     }
 
     private Resource getOrCreateAuditCategoryResource(ResourceResolver rr, String auditCategory, String contentPath) throws PersistenceException {
@@ -401,6 +405,7 @@ public class Renovator extends ProcessDefinition {
                         folderProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER);
 
                         currentRes = rr.create(parentRes, part, folderProps);
+                        auditCategoryRes = currentRes;
                         rr.commit();
                         rr.refresh();
                         LOG.debug("created audit folder at {}", currentRes.getPath());
@@ -423,38 +428,46 @@ public class Renovator extends ProcessDefinition {
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
                 node.visit(childNode -> {
-                    manager.deferredWithResolver(rr2 -> {
-                        if(childNode.isAuditableMove()) {
-                            String[] categories = auditLog.getCategories();
-                            int movedCount = 0;
-                            for (String auditCategory : categories) {
-                                Resource sourceAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getSourcePath());
-                                if (sourceAuditRes != null) {
-                                    Resource destAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getDestinationPath());
-                                    if(destAuditRes!=null) {
-                                        Iterator<Resource> resourceIterator = sourceAuditRes.listChildren();
-                                        LOG.debug("moving audit entries for category {} from {} to {}", auditCategory, childNode.getSourcePath(), childNode.getDestinationPath());
-                                        while (resourceIterator.hasNext()) {
-                                            Resource auditEntry = resourceIterator.next();
-                                            rr2.move(auditEntry.getPath(), destAuditRes.getPath());
-                                            rr2.commit();
-                                            rr2.refresh();
-
-                                            LOG.debug("moved entry {} to {}", auditEntry.getPath(), destAuditRes.getPath());
-
-                                            movedCount++;
-                                        }
-                                    } else {
-                                        throw new RepositoryException("destination audit resource failed to create for category " + auditCategory +  " " + childNode.getDestinationPath());
-                                    }
-                                }
-                            }
-                            note(childNode.getSourcePath(), Report.moved_audit_entries, movedCount);
-                        }
-                    });
+                    moveAuditsForChildNode(manager, rr, childNode);
                 });
             });
         });
+    }
+
+    private void moveAuditsForChildNode(ActionManager manager, ResourceResolver rr, MovingNode childNode) {
+        manager.deferredWithResolver(rr2 -> {
+            if(childNode.isAuditableMove()) {
+                String[] categories = auditLog.getCategories();
+                moveAuditsForChildNodeCategories(rr, childNode, rr2, categories);
+            }
+        });
+    }
+
+    private void moveAuditsForChildNodeCategories(ResourceResolver rr, MovingNode childNode, ResourceResolver rr2, String[] categories) throws PersistenceException, RepositoryException {
+        int movedCount = 0;
+        for (String auditCategory : categories) {
+            Resource sourceAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getSourcePath());
+            if (sourceAuditRes != null) {
+                Resource destAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getDestinationPath());
+                if(destAuditRes!=null) {
+                    Iterator<Resource> resourceIterator = sourceAuditRes.listChildren();
+                    LOG.debug("moving audit entries for category {} from {} to {}", auditCategory, childNode.getSourcePath(), childNode.getDestinationPath());
+                    while (resourceIterator.hasNext()) {
+                        Resource auditEntry = resourceIterator.next();
+                        rr2.move(auditEntry.getPath(), destAuditRes.getPath());
+                        rr2.commit();
+                        rr2.refresh();
+
+                        LOG.debug("moved entry {} to {}", auditEntry.getPath(), destAuditRes.getPath());
+
+                        movedCount++;
+                    }
+                } else {
+                    throw new RepositoryException("destination audit resource failed to create for category " + auditCategory +  " " + childNode.getDestinationPath());
+                }
+            }
+        }
+        note(childNode.getSourcePath(), Report.moved_audit_entries, movedCount);
     }
 
     protected void identifyStructure(ActionManager manager) {
