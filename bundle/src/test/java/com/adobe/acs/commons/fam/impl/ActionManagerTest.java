@@ -111,6 +111,30 @@ public class ActionManagerTest {
                 when(mockResolver.getResource(path)).thenReturn(res);
                 return res;
             });
+            when(mockResolver.move(anyString(), anyString())).then((InvocationOnMock invocation) -> {
+                String srcPath = invocation.getArgument(0);
+                String destParentPath = invocation.getArgument(1);
+                Resource src = mockResolver.getResource(srcPath);
+                if(src==null) {
+                    throw new PersistenceException("Resource at " + srcPath + " does not exist.");
+                }
+                Resource destParent = mockResolver.getResource(destParentPath);
+                if(destParent==null) {
+                    throw new PersistenceException("Resource at " + destParentPath + " does not exist.");
+                }
+
+                String destPath = destParentPath + "/" + src.getName();
+                Resource dest = mockResolver.getResource(destPath);
+                if(dest!=null) {
+                    throw new PersistenceException("Resource at " + destPath + " already exists.");
+                }
+                dest = new AbstractResourceImpl(destPath, src.getResourceType(), src.getResourceSuperType(), src.getResourceMetadata());
+
+                when(mockResolver.getResource(destPath)).thenReturn(dest);
+                when(mockResolver.getResource(srcPath)).thenReturn(null);
+
+                return destParent;
+            });
         }
         return mockResolver;
     }

@@ -396,6 +396,10 @@ public class Renovator extends ProcessDefinition {
                 Resource currentRes = auditCatRootRes;
 
                 for (String part : pathParts) {
+                    if(StringUtils.isEmpty(part)) {
+                        //first part will be empty string, so skip it.
+                        continue;
+                    }
                     String nextPath = currentRes.getPath() + "/" + part;
                     Resource parentRes = currentRes;
                     currentRes = rr.getResource(nextPath);
@@ -463,7 +467,7 @@ public class Renovator extends ProcessDefinition {
                         movedCount++;
                     }
                 } else {
-                    throw new RepositoryException("destination audit resource failed to create for category " + auditCategory +  " " + childNode.getDestinationPath());
+                    throw new RepositoryException("destination audit resource failed to create for category " + auditCategory +  childNode.getDestinationPath());
                 }
             }
         }

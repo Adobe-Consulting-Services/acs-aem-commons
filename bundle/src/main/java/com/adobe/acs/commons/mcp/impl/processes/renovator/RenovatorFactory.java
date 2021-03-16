@@ -65,4 +65,12 @@ public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
     public void setReplicator(Replicator replicator) {
         this.replicator = replicator;
     }
+
+    /**
+     * Used to inject mock services
+     * @param auditLog mock audit log service
+     */
+    public void setAuditLog(AuditLog auditLog) {
+        this.auditLog = auditLog;
+    }
 }
