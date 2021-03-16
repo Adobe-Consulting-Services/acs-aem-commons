@@ -348,9 +348,12 @@ public class Renovator extends ProcessDefinition {
     }
 
     private void addMoveAuditEntries(ActionManager manager) {
-        moves.forEach(node -> {
-            manager.deferredWithResolver(rr -> {
-                node.auditMove(rr, auditLog);
+        manager.deferredWithResolver(rr -> {
+            moves.forEach(node -> {
+                node.visit(childNode -> {
+                    LOG.debug("adding audit entry for move of {} to {}", childNode.getSourcePath(), childNode.getDestinationPath());
+                    childNode.auditMove(rr, auditLog);
+                });
             });
         });
     }
@@ -358,17 +361,20 @@ public class Renovator extends ProcessDefinition {
     private void buildAuditStructure(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
-                if(node.isAuditableMove()) {
-                    manager.deferredWithResolver(rr2 -> {
-                        String[] categories = auditLog.getCategories();
-                        for (String auditCategory : categories) {
-                            Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, node.getSourcePath());
-                            if (sourceAuditRes != null) {
-                                getOrCreateAuditCategoryResource(rr2, auditCategory, node.getDestinationPath());
+                node.visit(childNode -> {
+                    if(childNode.isAuditableMove()) {
+                        manager.deferredWithResolver(rr2 -> {
+                            String[] categories = auditLog.getCategories();
+                            for (String auditCategory : categories) {
+                                Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, childNode.getSourcePath());
+                                if (sourceAuditRes != null) {
+                                    LOG.debug("Found audit source at {}", sourceAuditRes.getPath());
+                                    getOrCreateAuditCategoryResource(rr2, auditCategory, childNode.getDestinationPath());
+                                }
                             }
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
     }
@@ -415,36 +421,38 @@ public class Renovator extends ProcessDefinition {
 
     private void moveAudits(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
-            movePaths.forEach((source, dest) -> {
-                Actions.setCurrentItem(source);
+            moves.forEach(node -> {
+                node.visit(childNode -> {
+                    manager.deferredWithResolver(rr2 -> {
+                        if(childNode.isAuditableMove()) {
+                            String[] categories = auditLog.getCategories();
+                            int movedCount = 0;
+                            for (String auditCategory : categories) {
+                                Resource sourceAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getSourcePath());
+                                if (sourceAuditRes != null) {
+                                    Resource destAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getDestinationPath());
+                                    if(destAuditRes!=null) {
+                                        Iterator<Resource> resourceIterator = sourceAuditRes.listChildren();
+                                        LOG.debug("moving audit entries for category {} from {} to {}", auditCategory, childNode.getSourcePath(), childNode.getDestinationPath());
+                                        while (resourceIterator.hasNext()) {
+                                            Resource auditEntry = resourceIterator.next();
+                                            rr2.move(auditEntry.getPath(), destAuditRes.getPath());
+                                            rr2.commit();
+                                            rr2.refresh();
 
-                manager.deferredWithResolver(rr2 -> {
-                    String[] categories = auditLog.getCategories();
-                    int movedCount = 0;
-                    for (String auditCategory : categories) {
-                        Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, source);
-                        if (sourceAuditRes != null) {
-                            Resource destAuditRes = getAuditCategoryResource(rr2, auditCategory, dest);
-                            if(destAuditRes!=null) {
-                                Iterator<Resource> resourceIterator = sourceAuditRes.listChildren();
-                                LOG.debug("moving audit entries for category {} from {} to {}", auditCategory, source, dest);
-                                while (resourceIterator.hasNext()) {
-                                    Resource auditEntry = resourceIterator.next();
-                                    rr2.move(auditEntry.getPath(), destAuditRes.getPath());
-                                    rr2.commit();
-                                    rr2.refresh();
+                                            LOG.debug("moved entry {} to {}", auditEntry.getPath(), destAuditRes.getPath());
 
-                                    LOG.debug("moved entry {} to {}", auditEntry.getPath(), destAuditRes.getPath());
-
-                                    movedCount++;
+                                            movedCount++;
+                                        }
+                                    } else {
+                                        throw new RepositoryException("destination audit resource failed to create for category " + auditCategory +  " " + childNode.getDestinationPath());
+                                    }
                                 }
-                            } else {
-                                throw new RepositoryException("destination audit res failed to create at " + auditCategory +  dest);
                             }
+                            note(childNode.getSourcePath(), Report.moved_audit_entries, movedCount);
                         }
-                    }
+                    });
                 });
-
             });
         });
     }
@@ -762,7 +770,7 @@ public class Renovator extends ProcessDefinition {
 
     @SuppressWarnings("squid:S00115")
     enum Report {
-        misc, target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time, referred_in
+        misc, target, acl_check, all_references, published_references, moved_audit_entries, move_time, activate_time, deactivate_time, referred_in
     }
 
     private final Map<String, EnumMap<Report, Object>> reportData = new LinkedHashMap<>();
