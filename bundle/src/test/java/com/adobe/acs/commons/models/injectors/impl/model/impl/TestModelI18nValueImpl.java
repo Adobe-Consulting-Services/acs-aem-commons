@@ -38,14 +38,24 @@ public class TestModelI18nValueImpl implements TestModelI18nValue {
     @I18N("com.acs.commmons.test")
     private String validI18nField;
 
+    @I18N(value = "com.acs.commmons.test.resource", localeIgnoreContent = true, forceRetrievalFromUnderlyingResource = true)
+    private String validI18nFieldResource;
+
     @I18N
     private String invalidI18nField;
 
     @I18N
     private String anotherValidI18nField;
 
+    @I18N(localeIgnoreContent = true, forceRetrievalFromUnderlyingResource = true)
+    private String anotherValidI18nFieldResource;
+
     @Inject
     private I18n i18n;
+
+    @I18N(forceRetrievalFromUnderlyingResource = true, localeIgnoreContent = true)
+    private I18n alternateI18n;
+
 
     @Inject
     private String injectField;
@@ -74,5 +84,20 @@ public class TestModelI18nValueImpl implements TestModelI18nValue {
     @Override
     public I18n getI18n() {
         return i18n;
+    }
+
+    @Override
+    public String getValidI18nFieldResource() {
+        return validI18nFieldResource;
+    }
+
+    @Override
+    public String getAnotherValidI18nFieldResource() {
+        return anotherValidI18nFieldResource;
+    }
+
+    @Override
+    public I18n getAlternateI18n() {
+        return alternateI18n;
     }
 }

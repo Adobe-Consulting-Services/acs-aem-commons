@@ -1,0 +1,13 @@
+.coral-InputGroup-input {
+	width: 300px;
+}
+
+.acs-tooltip {
+    margin-left: 160px !important;
+}
+
+.code-java {
+    font-size:11px;
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace
+}

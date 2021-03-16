@@ -32,12 +32,14 @@ import com.adobe.acs.commons.mcp.model.GenericReport;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import com.day.crx.JcrConstants;
@@ -66,21 +68,25 @@ public class DataImporter extends ProcessDefinition {
     private static final String SLASH = "/";
 
     public enum MergeMode {
-        CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
-        CREATE_AND_MERGE_PROPERTIES(true, true, false),
-        CREATE_ONLY_SKIP_EXISTING(true, false, false),
-        OVERWRITE_EXISTING_ONLY(false, true, true),
-        MERGE_EXISTING_ONLY(false, true, false),
-        DO_NOTHING(false, false, false);
+        CREATE_NODES_AND_OVERWRITE_PROPERTIES(true, true, true, false),
+        CREATE_NODES_AND_OVERWRITE_PROPERTIES_AND_APPEND_ARRAYS(true, true, true, true),
+        CREATE_NODES_AND_MERGE_PROPERTIES(true, true, false, false),
+        CREATE_ONLY_SKIP_EXISTING(true, false, false, false),
+        OVERWRITE_EXISTING_ONLY(false, true, true, false),
+        OVERWRITE_EXISTING_ONLY_AND_APPEND_ARRAYS(false, true, true, true),
+        MERGE_EXISTING_ONLY(false, true, false, false),
+        DO_NOTHING(false, false, false, false);
 
         boolean create = false;
         boolean update = false;
         boolean overwriteProps = false; // Note that this is moot if update is false
+        boolean appendArrays = false; // Note that this is moot if update is false
 
-        MergeMode(boolean c, boolean u, boolean o) {
+        MergeMode(boolean c, boolean u, boolean o, boolean a) {
             create = c;
             update = u;
             overwriteProps = o;
+            appendArrays = a;
         }
     }
 
@@ -98,7 +104,7 @@ public class DataImporter extends ProcessDefinition {
             component = RadioComponent.EnumerationSelector.class,
             options = {"default=create_and_overwrite_properties", "vertical"}
     )
-    private MergeMode mergeMode = MergeMode.CREATE_AND_OVERWRITE_PROPERTIES;
+    private MergeMode mergeMode = MergeMode.CREATE_NODES_AND_OVERWRITE_PROPERTIES;
 
     @FormField(
             name = "Structure node type",
@@ -303,24 +309,23 @@ public class DataImporter extends ProcessDefinition {
      * @param nodeInfo Map of properties from the row.
      * @throws PersistenceException PersistenceException
      */
-    private void updateMetadata(String path, ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException {
+    private void updateMetadata(String path, ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException, RepositoryException {
         LOG.debug("Start of updateMetaData");
 
-        Resource node = rr.getResource(path);
-        ModifiableValueMap resourceProperties = node.adaptTo(ModifiableValueMap.class);
-        populateMetadataFromRow(resourceProperties, createPropertyMap(nodeInfo));
+        Resource resource = rr.getResource(path);
+
+        populateMetadataFromRow(resource, createPropertyMap(nodeInfo));
 
         if (includeJcrContent) {
             Map<String, Object> jcrContentProps = createJcrContentPropertyMap(nodeInfo);
-            Resource jcrContent = node.getChild(JcrConstants.JCR_CONTENT);
+            Resource jcrContent = resource.getChild(JcrConstants.JCR_CONTENT);
             if (jcrContent == null) {
                 if (!jcrContentProps.containsKey(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
                     jcrContentProps.put(JcrConstants.JCR_PRIMARYTYPE, defaultJcrContentType);
                 }
-                rr.create(node, JcrConstants.JCR_CONTENT, jcrContentProps);
+                rr.create(resource, JcrConstants.JCR_CONTENT, jcrContentProps);
             } else {
-                ModifiableValueMap contentResourceProperties = jcrContent.adaptTo(ModifiableValueMap.class);
-                populateMetadataFromRow(contentResourceProperties, jcrContentProps);
+                populateMetadataFromRow(jcrContent, jcrContentProps);
             }
         }
 
@@ -332,6 +337,7 @@ public class DataImporter extends ProcessDefinition {
             if (!dryRunMode) {
                 rr.commit();
             }
+            rr.revert();
             rr.refresh();
         } else {
             if (detailedReport) {
@@ -344,20 +350,37 @@ public class DataImporter extends ProcessDefinition {
     }
 
     /**
-     * Update the resourceProperties with the properties from the row.
+     * Append the new values to the already existing values in the array
      *
      * @param resourceProperties ModifiableValueMap of resource.
-     * @param nodeInfo           Map of properties from the row.
+     * @param entry Key-value pair of property from the row
      */
-    private void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, Object> nodeInfo) {
+    private void appendArray(ModifiableValueMap resourceProperties, Map.Entry entry) {
+        Object[] currentArray = resourceProperties.get((String) entry.getKey(), Object[].class);
+        ArrayList<Object> currentList = new ArrayList<>(Arrays.asList(currentArray));
+        currentList.addAll(Arrays.asList((Object[]) entry.getValue()));
+        resourceProperties.put((String) entry.getKey(), currentList.toArray());
+    }
+
+    /**
+     * Update the resource with the properties from the row.
+     *
+     * @param resource Resource object of which the properties are to be modified.
+     * @param nodeInfo Map of properties from the row.
+     */
+    private void populateMetadataFromRow(Resource resource, Map<String, Object> nodeInfo) throws RepositoryException {
         LOG.debug("Start of populateMetadataFromRow");
 
+        ModifiableValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+        Node node = resource.adaptTo(Node.class);
         for (Map.Entry entry : nodeInfo.entrySet()) {
-            String key = (String)entry.getKey();
-            if (key != null
-                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(key))) {
-                Object value = entry.getValue();
-                if (value != null) {
+            String key = (String) entry.getKey();
+            Object value = entry.getValue();
+
+            if (key != null && (mergeMode.overwriteProps || !resourceProperties.containsKey(key))) {
+                if (node.hasProperty(key) && node.getProperty(key).isMultiple() && mergeMode.appendArrays) {
+                    appendArray(resourceProperties, entry);
+                } else if (value != null) {
                     resourceProperties.put(key, value);
                 }
             }

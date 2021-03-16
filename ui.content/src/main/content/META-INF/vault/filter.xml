@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/conf/rep:policy"/>
+    <filter root="/conf/acs-commons/redirects" mode="merge"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
@@ -89,8 +90,6 @@
     <filter root="/home/groups/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
-    <filter root="/oak:index/rep:policy"/>
-    <filter root="/rep:policy"/>
     <filter root="/var/acs-commons">
         <include pattern="/var/acs-commons/rep:policy"/>
         <include pattern="/var/acs-commons/jcr:content"/>
@@ -103,6 +102,4 @@
         <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
         <include pattern="/var/acs-commons/mcp"/>
     </filter>
-    <filter root="/var/workflow/instances/rep:policy"/>
-    <filter root="/var/workflow/packages/rep:policy"/>
 </workspaceFilter>
