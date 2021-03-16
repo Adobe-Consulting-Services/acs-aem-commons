@@ -257,7 +257,7 @@ public abstract class MovingNode {
         return props;
     }
 
-    public void auditMove(ResourceResolver rr, AuditLog auditLog) {
+    public void addAuditRecordForMove(ResourceResolver rr, AuditLog auditLog) {
         if(isAuditableMove()) {
             Map<String, Object> props = new HashMap<>();
 

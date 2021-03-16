@@ -352,7 +352,7 @@ public class Renovator extends ProcessDefinition {
             moves.forEach(node -> {
                 node.visit(childNode -> {
                     LOG.debug("adding audit entry for move of {} to {}", childNode.getSourcePath(), childNode.getDestinationPath());
-                    childNode.auditMove(rr, auditLog);
+                    childNode.addAuditRecordForMove(rr, auditLog);
                 });
             });
         });
