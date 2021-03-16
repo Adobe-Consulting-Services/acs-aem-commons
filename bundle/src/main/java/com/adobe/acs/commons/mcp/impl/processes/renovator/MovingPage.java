@@ -20,12 +20,9 @@
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.day.cq.audit.AuditLog;
-import com.day.cq.audit.AuditLogEntry;
-import com.day.cq.wcm.api.PageEvent;
+
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
-import com.day.cq.wcm.api.PageModification;
 import com.day.cq.wcm.api.WCMException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
@@ -35,9 +32,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.lang.reflect.Field;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 

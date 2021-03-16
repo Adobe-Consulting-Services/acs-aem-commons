@@ -19,25 +19,17 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
-import com.day.cq.audit.AuditLog;
-import com.day.cq.audit.AuditLogEntry;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.NameConstants;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-
-import com.day.cq.wcm.api.PageEvent;
-import com.day.cq.wcm.api.PageModification;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -88,14 +80,14 @@ public class MovingAsset extends MovingNode {
                      JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
                              DEFAULT_LAST_MODIFIED_BY);
                 }
-               
+
             }
             updateReferences(replicatorQueue, rr);
         } catch (RepositoryException e) {
             throw new MovingException(getSourcePath(), e);
         }
     }
-    
+
     void updateReferences(ReplicatorQueue rep, ResourceResolver rr) {
         getAllReferences().forEach(ref -> updateReferences(rep, rr, ref));
     }
@@ -120,13 +112,13 @@ public class MovingAsset extends MovingNode {
                 updateMultiValuedReferences(key, val, session, map, changedMultiValuedProperty, ref);
             }
         });
-        
+
         for (Resource child : res.getChildren()) {
             if (!child.isResourceType(NameConstants.NT_PAGE)) {
                 updateReferences(rep, rr, child.getPath());
             }
         }
-        
+
         try {
             if (changedProperty.get() || changedMultiValuedProperty.get()) {
                 rep.replicate(null, ReplicationActionType.ACTIVATE, ref);
@@ -135,7 +127,7 @@ public class MovingAsset extends MovingNode {
             LOG.error("Cannot replicate '{}'", ref, ex);
         }
     }
-    
+
     void updateMultiValuedReferences(String key, Object val, Session session, ModifiableValueMap map, AtomicBoolean changedMultiValuedProperty, String ref) {
         Object[] valList = (Object[]) val;
         for (int index = 0; index < valList.length; index++) {
@@ -156,5 +148,4 @@ public class MovingAsset extends MovingNode {
             }
         }
     }
-
 }
