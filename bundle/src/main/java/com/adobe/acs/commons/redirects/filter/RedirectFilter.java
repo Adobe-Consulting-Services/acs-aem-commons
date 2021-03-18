@@ -43,6 +43,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -101,7 +102,8 @@ import static org.osgi.framework.Constants.SERVICE_ID;
 /**
  * A request filter that implements support for virtual redirects.
  */
-@Component(service = {Filter.class, RedirectFilterMBean.class, EventHandler.class}, property = {
+@Component(service = {Filter.class, RedirectFilterMBean.class, EventHandler.class},
+        configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
         SERVICE_DESCRIPTION + "=A request filter implementing support for virtual redirects",
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
         SERVICE_RANKING + ":Integer=10000",
@@ -153,7 +155,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
+            policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
     private LocationHeaderAdjuster urlAdjuster;
