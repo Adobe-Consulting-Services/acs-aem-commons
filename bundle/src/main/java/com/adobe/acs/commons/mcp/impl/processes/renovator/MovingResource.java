@@ -48,6 +48,11 @@ public class MovingResource extends MovingNode {
     }
 
     @Override
+    protected boolean isAuditableMove() {
+        return false;
+    }
+
+    @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws MovingException {
         String destinationParent = StringUtils.substringBeforeLast(getDestinationPath(), "/");
         try {

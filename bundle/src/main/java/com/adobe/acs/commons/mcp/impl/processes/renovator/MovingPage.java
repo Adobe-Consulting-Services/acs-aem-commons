@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
+
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
 import com.day.cq.wcm.api.WCMException;
@@ -31,8 +32,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 
@@ -59,6 +58,11 @@ public class MovingPage extends MovingNode {
 
     @Override
     public boolean isAbleToHaveChildren() {
+        return true;
+    }
+
+    @Override
+    protected boolean isAuditableMove() {
         return true;
     }
 

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import com.day.cq.audit.AuditLog;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
 import org.apache.felix.scr.annotations.Component;
@@ -36,6 +37,9 @@ public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
     @Reference
     Replicator replicator;
 
+    @Reference
+    AuditLog auditLog;
+
     @Override
     public String getName() {
         return "Renovator";
@@ -43,7 +47,7 @@ public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
 
     @Override
     public Renovator createProcessDefinitionInstance() {
-        return new Renovator(pageManagerFactory, replicator);
+        return new Renovator(pageManagerFactory, replicator, auditLog);
     }
     
     /**
@@ -60,5 +64,13 @@ public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
      */
     public void setReplicator(Replicator replicator) {
         this.replicator = replicator;
+    }
+
+    /**
+     * Used to inject mock services
+     * @param auditLog mock audit log service
+     */
+    public void setAuditLog(AuditLog auditLog) {
+        this.auditLog = auditLog;
     }
 }

@@ -7,12 +7,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.4...HEAD
 
 ### Added
+- #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.
 - #2512 - Added Contextual Content Variables feature
 
-## 5.0.0 - 2021-03-14
+## 5.0.4 - 2021-03-14
+
+### Fixed
+- #2542 - Declaring VanityUrlAdjuster dynamic reference volatile 
+- #2548 - RedirectFilter#urlAdjuster dynamic reference volatile, and requires OSGi configurations to enable Redirect Manager Filter
+
+## 5.0.2 - 2021-03-14
 
 ### Fixed
 - #2546 - org.apache.sling.jcr.repoinit.RepositoryInitializer-aem-cs.config prevents repository startup of AEM Cloud Quickstart due to usage of /etc/tags

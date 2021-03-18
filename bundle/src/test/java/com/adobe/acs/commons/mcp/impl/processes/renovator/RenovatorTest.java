@@ -26,6 +26,7 @@ import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +59,8 @@ import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 
+import com.day.cq.audit.AuditLog;
+import com.day.cq.audit.AuditLogEntry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -89,11 +93,17 @@ public class RenovatorTest {
     ProcessInstanceImpl instance;
     ReplicatorQueue queue;
     ResourceResolver rr;
+    AuditLog mockAudit;
 
     @Before
     public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException {
         queue = spy(new ReplicatorQueue());
         factory.setReplicator(queue);
+
+        mockAudit = mock(AuditLog.class);
+        when(mockAudit.getCategories()).thenReturn(new String[]{"com/day/cq/dam", "com/day/cq/wcm/core/page"});
+        factory.setAuditLog(mockAudit);
+
         tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
         instance = prepareProcessInstance(
                 new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
@@ -121,6 +131,24 @@ public class RenovatorTest {
         instance.run(rr);
         assertEquals(1.0, instance.updateProgress(), 0.00001);
         verify(rr, atLeast(3)).commit();
+    }
+
+    @Test
+    public void testMoveAssetsWithAudits() throws DeserializeException, RepositoryException {
+        Map<String, Object> values = new HashMap<>();
+        values.put("sourceJcrPath", "/content/dam/folderA");
+        values.put("destinationJcrPath", "/content/dam/folderB");
+        values.put("auditTrails", "true");
+        instance.init(rr, values);
+        instance.run(rr);
+
+        verify(mockAudit, times(2)).add(any(AuditLogEntry.class));
+
+        assertNotNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderB/asset1/created"));
+        assertNotNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderB/asset2/created"));
+
+        assertNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderA/asset1/created"));
+        assertNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderA/asset2/created"));
     }
 
     @Test
@@ -175,6 +203,8 @@ public class RenovatorTest {
         assertEquals("/target", test1.get("attr1"));
         assertEquals("/target", test2.get("attr2"));
     }
+
+
     
     @Test
     public void testUpdateMultiValuedReferences() throws RepositoryException, PersistenceException, LoginException, IllegalAccessException {
@@ -226,6 +256,17 @@ public class RenovatorTest {
             put("/content/dam/folderA/asset2", DamConstants.NT_DAM_ASSET);
             put("/test", "NT:UNSTRUCTURED");
             put("/test/child1", "NT:UNSTRUCTURED");
+            put("/var", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset1", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset1/created", "cq:AuditEvent");
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset2", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset2/created", "cq:AuditEvent");
+            put("/var/audit/com.day.cq.wcm.core.page", JcrResourceConstants.NT_SLING_FOLDER);
         }
     };
 
