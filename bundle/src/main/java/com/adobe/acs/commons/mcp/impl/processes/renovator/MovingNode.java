@@ -19,11 +19,16 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
+import com.day.cq.audit.AuditLog;
+import com.day.cq.audit.AuditLogEntry;
+import com.day.cq.wcm.api.PageEvent;
+import com.day.cq.wcm.api.PageModification;
 import com.day.cq.wcm.commons.ReferenceSearch;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +62,8 @@ public abstract class MovingNode {
     public abstract boolean isSupposedToBeReferenced();
 
     public abstract boolean isAbleToHaveChildren();
+
+    protected abstract boolean isAuditableMove();
 
     public void addChild(MovingNode child) {
         if (child != this) {
@@ -250,4 +257,21 @@ public abstract class MovingNode {
         return props;
     }
 
+    public void addAuditRecordForMove(ResourceResolver rr, AuditLog auditLog) {
+        if(isAuditableMove()) {
+            Map<String, Object> props = new HashMap<>();
+
+            props.put("path", getSourcePath());
+            props.put("destination", getDestinationPath());
+            props.put("type", PageModification.ModificationType.MOVED.toString());
+
+            AuditLogEntry moveAuditEntry = new AuditLogEntry(PageEvent.EVENT_TOPIC,
+                    Calendar.getInstance().getTime(),
+                    rr.getUserID() != null ? rr.getUserID() : "renovator",
+                    getSourcePath(),
+                    PageModification.ModificationType.MOVED.toString(),
+                    props);
+            auditLog.add(moveAuditEntry);
+        }
+    }
 }

@@ -35,6 +35,7 @@ import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.util.visitors.TraversalException;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import com.day.cq.audit.AuditLog;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.replication.ReplicationActionType;
@@ -51,6 +52,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -66,6 +68,7 @@ import javax.jcr.security.Privilege;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
+import org.apache.jackrabbit.oak.spi.security.privilege.PrivilegeConstants;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -88,13 +91,15 @@ public class Renovator extends ProcessDefinition {
     private static final String SOURCE_COL = "source";
     private static final transient Logger LOG = LoggerFactory.getLogger(Renovator.class);
 
-    public Renovator(PageManagerFactory pageManagerFactory, Replicator replicator) {
+    public Renovator(PageManagerFactory pageManagerFactory, Replicator replicator, AuditLog auditLog) {
         this.pageManagerFactory = pageManagerFactory;
         this.replicator = replicator;
+        this.auditLog = auditLog;
     }
 
     private final PageManagerFactory pageManagerFactory;
     private final Replicator replicator;
+    private final AuditLog auditLog;
 
     public enum PublishMethod {
         @Description("No publishing will occur")
@@ -174,6 +179,11 @@ public class Renovator extends ProcessDefinition {
             options = {"checked"})
     private boolean dryRun = true;
 
+    @FormField(name = "Audit Trails",
+            description = "This will update audit trail entries based on what is moved.",
+            component = CheckboxComponent.class)
+    private boolean auditTrails = false;
+
     @FormField(name = "Detailed report",
             description = "Record extra details in the report, can be rather extensive.  Not recommended for large jobs.",
             component = CheckboxComponent.class)
@@ -200,6 +210,12 @@ public class Renovator extends ProcessDefinition {
             Privilege.JCR_WRITE
     };
     Privilege[] requiredUpdatePrivileges;
+
+    private final transient String[] requiredAuditPrivilegeNames = {
+            Privilege.JCR_READ,
+            PrivilegeConstants.REP_WRITE
+    };
+    Privilege[] requiredAuditPrivileges;
 
     ReplicatorQueue replicatorQueue = new ReplicatorQueue();
     ReplicationOptions replicationOptions;
@@ -293,6 +309,7 @@ public class Renovator extends ProcessDefinition {
     }
 
     private static final String DAM_ROOT = "/content/dam";
+    private static final String AUDIT_ROOT = "/var/audit";
 
     ManagedProcess instanceInfo;
 
@@ -306,12 +323,20 @@ public class Renovator extends ProcessDefinition {
         requiredMovePrivileges = getPrivilegesFromNames(rr, requiredMovePrivilegeNames);
         requiredUpdatePrivileges = getPrivilegesFromNames(rr, requiredUpdatePrivilegeNames);
         requiredPublishPrivileges = getPrivilegesFromNames(rr, requiredPublishPrivilegeNames);
+        requiredAuditPrivileges = getPrivilegesFromNames(rr, requiredAuditPrivilegeNames);
         instance.defineCriticalAction("Eval Struct", rr, this::identifyStructure);
         instance.defineCriticalAction("Eval Refs", rr, this::identifyReferences);
         instance.defineCriticalAction("Check ACLs", rr, this::validateAllAcls);
         if (!dryRun) {
             instance.defineCriticalAction("Build destination", rr, this::buildStructures);
             instance.defineCriticalAction("Move Tree", rr, this::moveTree);
+
+            if(auditTrails) {
+                instance.defineAction("Add Move Audit Entries", rr, this::addMoveAuditEntries);
+                instance.defineAction("Create Audit Structure Folders", rr, this::buildAuditStructure);
+                instance.defineAction("Move Audit Entries", rr, this::moveAudits);
+            }
+
             if (publishMethod != PublishMethod.NONE) {
                 instance.defineAction("Activate Tree", rr, this::activateTreeStructure);
                 instance.defineAction("Activate New", rr, this::activateNew);
@@ -320,6 +345,133 @@ public class Renovator extends ProcessDefinition {
             }
             instance.defineAction("Remove source", rr, this::removeSource);
         }
+    }
+
+    private void addMoveAuditEntries(ActionManager manager) {
+        manager.deferredWithResolver(rr -> {
+            moves.forEach(node -> {
+                node.visit(childNode -> {
+                    LOG.debug("adding audit entry for move of {} to {}", childNode.getSourcePath(), childNode.getDestinationPath());
+                    childNode.addAuditRecordForMove(rr, auditLog);
+                });
+            });
+        });
+    }
+
+    private void buildAuditStructure(ActionManager manager) {
+        manager.deferredWithResolver(rr -> {
+            moves.forEach(node -> {
+                node.visit(childNode -> {
+                    if(childNode.isAuditableMove()) {
+                        manager.deferredWithResolver(rr2 -> {
+                            String[] categories = auditLog.getCategories();
+                            buildAuditCategoryFolders(rr2, childNode, categories);
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    private void buildAuditCategoryFolders(ResourceResolver rr2, MovingNode childNode, String[] categories) throws PersistenceException {
+        for (String auditCategory : categories) {
+            Resource sourceAuditRes = getAuditCategoryResource(rr2, auditCategory, childNode.getSourcePath());
+            if (sourceAuditRes != null) {
+                LOG.debug("Found audit source at {}", sourceAuditRes.getPath());
+                getOrCreateAuditCategoryResource(rr2, auditCategory, childNode.getDestinationPath());
+            }
+        }
+    }
+
+    private Resource getOrCreateAuditCategoryResource(ResourceResolver rr, String auditCategory, String contentPath) throws PersistenceException {
+        Resource auditCategoryRes = getAuditCategoryResource(rr, auditCategory, contentPath);
+        if (auditCategoryRes == null) {
+            String auditCategoryPath = AUDIT_ROOT + "/" + auditCategory.replace('/', '.');
+
+            //this should, at least in theory always exist, because by the time we get here we know an entry exists for the source exists
+            //but null check JIC
+            Resource auditCatRootRes = rr.getResource(auditCategoryPath);
+            if (auditCatRootRes != null) {
+                String[] pathParts = contentPath.split("/");
+                Resource currentRes = auditCatRootRes;
+
+                for (String part : pathParts) {
+                    if(StringUtils.isEmpty(part)) {
+                        //first part will be empty string, so skip it.
+                        continue;
+                    }
+                    String nextPath = currentRes.getPath() + "/" + part;
+                    Resource parentRes = currentRes;
+                    currentRes = rr.getResource(nextPath);
+                    if (currentRes == null) {
+                        //create it
+                        Map<String, Object> folderProps = new HashMap<>();
+                        folderProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER);
+
+                        currentRes = rr.create(parentRes, part, folderProps);
+                        auditCategoryRes = currentRes;
+                        rr.commit();
+                        rr.refresh();
+                        LOG.debug("created audit folder at {}", currentRes.getPath());
+                    }
+                }
+            }
+        }
+        return auditCategoryRes;
+    }
+
+    private Resource getAuditCategoryResource(ResourceResolver rr, String auditCategory, String contentPath) {
+        final StringBuilder auditCategoryPath = new StringBuilder(AUDIT_ROOT);
+        auditCategoryPath.append("/").append(auditCategory.replace('/', '.'));
+        auditCategoryPath.append(contentPath);
+
+        return rr.getResource(auditCategoryPath.toString());
+    }
+
+    private void moveAudits(ActionManager manager) {
+        manager.deferredWithResolver(rr -> {
+            moves.forEach(node -> {
+                node.visit(childNode -> {
+                    moveAuditsForChildNode(manager, rr, childNode);
+                });
+            });
+        });
+    }
+
+    private void moveAuditsForChildNode(ActionManager manager, ResourceResolver rr, MovingNode childNode) {
+        manager.deferredWithResolver(rr2 -> {
+            if(childNode.isAuditableMove()) {
+                String[] categories = auditLog.getCategories();
+                moveAuditsForChildNodeCategories(rr, childNode, rr2, categories);
+            }
+        });
+    }
+
+    private void moveAuditsForChildNodeCategories(ResourceResolver rr, MovingNode childNode, ResourceResolver rr2, String[] categories) throws PersistenceException, RepositoryException {
+        int movedCount = 0;
+        for (String auditCategory : categories) {
+            Resource sourceAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getSourcePath());
+            if (sourceAuditRes != null) {
+                Resource destAuditRes = getAuditCategoryResource(rr, auditCategory, childNode.getDestinationPath());
+                if(destAuditRes!=null) {
+                    Iterator<Resource> resourceIterator = sourceAuditRes.listChildren();
+                    LOG.debug("moving audit entries for category {} from {} to {}", auditCategory, childNode.getSourcePath(), childNode.getDestinationPath());
+                    while (resourceIterator.hasNext()) {
+                        Resource auditEntry = resourceIterator.next();
+                        rr2.move(auditEntry.getPath(), destAuditRes.getPath());
+                        rr2.commit();
+                        rr2.refresh();
+
+                        LOG.debug("moved entry {} to {}", auditEntry.getPath(), destAuditRes.getPath());
+
+                        movedCount++;
+                    }
+                } else {
+                    throw new RepositoryException("destination audit resource failed to create for category " + auditCategory +  childNode.getDestinationPath());
+                }
+            }
+        }
+        note(childNode.getSourcePath(), Report.moved_audit_entries, movedCount);
     }
 
     protected void identifyStructure(ActionManager manager) {
@@ -467,6 +619,10 @@ public class Renovator extends ProcessDefinition {
                     });
                 });
             });
+
+            if(auditTrails) {
+                checkNodeAcls(rr, AUDIT_ROOT, requiredAuditPrivileges);
+            }
         });
     }
 
@@ -631,7 +787,7 @@ public class Renovator extends ProcessDefinition {
 
     @SuppressWarnings("squid:S00115")
     enum Report {
-        misc, target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time, referred_in
+        misc, target, acl_check, all_references, published_references, moved_audit_entries, move_time, activate_time, deactivate_time, referred_in
     }
 
     private final Map<String, EnumMap<Report, Object>> reportData = new LinkedHashMap<>();

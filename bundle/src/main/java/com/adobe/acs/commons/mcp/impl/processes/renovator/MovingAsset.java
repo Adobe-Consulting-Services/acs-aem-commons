@@ -60,6 +60,11 @@ public class MovingAsset extends MovingNode {
     }
 
     @Override
+    protected boolean isAuditableMove() {
+        return true;
+    }
+
+    @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, MovingException {
          Session session = rr.adaptTo(Session.class);
         // Inhibits some workflows
@@ -75,14 +80,14 @@ public class MovingAsset extends MovingNode {
                      JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
                              DEFAULT_LAST_MODIFIED_BY);
                 }
-               
+
             }
             updateReferences(replicatorQueue, rr);
         } catch (RepositoryException e) {
             throw new MovingException(getSourcePath(), e);
         }
     }
-    
+
     void updateReferences(ReplicatorQueue rep, ResourceResolver rr) {
         getAllReferences().forEach(ref -> updateReferences(rep, rr, ref));
     }
@@ -107,13 +112,13 @@ public class MovingAsset extends MovingNode {
                 updateMultiValuedReferences(key, val, session, map, changedMultiValuedProperty, ref);
             }
         });
-        
+
         for (Resource child : res.getChildren()) {
             if (!child.isResourceType(NameConstants.NT_PAGE)) {
                 updateReferences(rep, rr, child.getPath());
             }
         }
-        
+
         try {
             if (changedProperty.get() || changedMultiValuedProperty.get()) {
                 rep.replicate(null, ReplicationActionType.ACTIVATE, ref);
@@ -122,7 +127,7 @@ public class MovingAsset extends MovingNode {
             LOG.error("Cannot replicate '{}'", ref, ex);
         }
     }
-    
+
     void updateMultiValuedReferences(String key, Object val, Session session, ModifiableValueMap map, AtomicBoolean changedMultiValuedProperty, String ref) {
         Object[] valList = (Object[]) val;
         for (int index = 0; index < valList.length; index++) {
