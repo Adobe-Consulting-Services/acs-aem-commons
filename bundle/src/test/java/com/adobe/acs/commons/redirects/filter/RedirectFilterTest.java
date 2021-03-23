@@ -21,6 +21,7 @@ package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.RedirectRules;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
 import org.apache.http.Header;
@@ -31,14 +32,17 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
+import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.builder.ContentBuilder;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.service.event.Event;
 import org.powermock.reflect.Whitebox;
 
@@ -68,10 +72,11 @@ public class RedirectFilterTest {
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
+    private ConfigurationResourceResolver configResolver;
 
     private RedirectFilter filter;
     private FilterChain filterChain;
-    private String redirectStoragePath = "/conf/acs-commons/redirects";
+    private String redirectStoragePath = "/conf/global/acs-commons/redirects";
 
     private String[] contentRoots = new String[]{
             "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail"};
@@ -89,9 +94,10 @@ public class RedirectFilterTest {
         when(configuration.mapUrls()).thenReturn(true);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
-        when(configuration.storagePath()).thenReturn(redirectStoragePath);
         when(configuration.paths()).thenReturn(contentRoots);
         when(configuration.additionalHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
+        when(configuration.bucketName()).thenReturn("acs-commons");
+        when(configuration.configName()).thenReturn("redirects");
         filter.activate(configuration, context.bundleContext());
 
         filterChain = mock(FilterChain.class);
@@ -108,6 +114,11 @@ public class RedirectFilterTest {
                 return path;
             }
         }).when(filter).mapUrl(anyString(), any(ResourceResolver.class));
+
+        configResolver = Mockito.mock(ConfigurationResourceResolver.class);
+        Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(context.resourceResolver().getResource(redirectStoragePath));
+        Whitebox.setInternalState(filter, "configResolver", configResolver);
 
     }
 
@@ -129,7 +140,6 @@ public class RedirectFilterTest {
     @Test
     public void testActivate() {
         assertTrue(filter.isEnabled());
-        assertEquals(redirectStoragePath, filter.getStoragePath());
         assertEquals(new HashSet<>(), filter.getExtensions());
         assertEquals(new HashSet<>(Arrays.asList(contentRoots)), filter.getPaths());
         assertEquals(Arrays.asList("GET", "HEAD"), filter.getMethods());
@@ -388,50 +398,41 @@ public class RedirectFilterTest {
 
     @Test
     public void testUpdateCache() throws Exception {
-        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/research/page1.html");
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
 
         assertEquals(null, response.getHeader("Location"));
-        assertEquals(0, filter.getPathRules().size());
-        assertEquals(0, filter.getPatternRules().size());
-        context.build()
-                .resource(redirectStoragePath)
-                .siblingsMode()
-                .resource("redirect-1",
-                        "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/we-retail/en/one",
-                        "target", "/content/we-retail/en/moved/page", "statusCode", 301)
-                .resource("redirect-2",
-                        "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/we-retail/en/research/*",
-                        "target", "/content/we-retail/en/moved/page", "statusCode", 302);
-        filter.refreshCache();
-        assertEquals(1, filter.getPathRules().size());
-        assertEquals(1, filter.getPatternRules().size());
+
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
+                        302, null));
+        filter.invalidate(redirectStoragePath);
 
         filter.doFilter(context.request(), response, filterChain);
         assertEquals(302, response.getStatus());
-        assertEquals("/en/moved/page", response.getHeader("Location"));
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+
+        RedirectRules rules = filter.getRulesCache().getIfPresent(redirectStoragePath);
+        assertEquals(1, rules.getPathRules().size());
+        assertEquals(0, rules.getPatternRules().size());
     }
 
     @Test
     public void testInvalidateOnChange() throws Exception {
-        verify(filter, times(1)).refreshCache(); // refreshCache is called in @Activate
 
         filter.onChange(Arrays.asList(new ResourceChange(ResourceChange.ChangeType.ADDED, redirectStoragePath + "/redirect-1",
                 false, null, null, null)));
-        verify(filter, times(1)).refreshCache();
+        //verify(filter, times(1)).invalidate(anyString()); //invalidation runs asynchronously
 
     }
 
     @Test
     public void testInvalidateOnReplication() throws Exception {
-        verify(filter, times(1)).refreshCache(); // refreshCache is called in @Activate
 
         Event event = new Event(ReplicationAction.EVENT_TOPIC,
                 Collections.singletonMap(SlingConstants.PROPERTY_PATH, redirectStoragePath + "/redirect-1"));
 
         filter.handleEvent(event);
-        verify(filter, times(1)).refreshCache();
+        //verify(filter, times(1)).invalidate(anyString()); //invalidation runs asynchronously
 
     }
 
@@ -538,11 +539,26 @@ public class RedirectFilterTest {
     }
 
     private void withRules(RedirectRule... rules) {
+        withRules(redirectStoragePath, rules);
+
+    }
+
+    private void withRules(String configPath, RedirectRule... rules) {
         Map<Pattern, RedirectRule> patternRules = Arrays.stream(rules).filter(r -> r.getRegex() != null).collect(Collectors.toMap(r -> r.getRegex(), r -> r));
         Map<String, RedirectRule> pathRules = Arrays.stream(rules).filter(r -> r.getRegex() == null).collect(Collectors.toMap(r -> r.getSource(), r -> r));
 
-        doReturn(patternRules).when(filter).getPatternRules();
-        doReturn(pathRules).when(filter).getPathRules();
+        ContentBuilder cb = context.create();
+        Resource configResource = cb.resource(configPath);
+        int c = 0;
+        for(RedirectRule rule : rules){
+            cb.resource(configPath + "/rule-" + c,
+                    "sling:resourceType", "acs-commons/components/utilities/manage-redirects/redirect-row",
+                    "source", rule.getSource(),
+                    "target", rule.getTarget(), "statusCode", rule.getStatusCode(),
+                    "untilDate", rule.getUntilDate());
+            c++;
+        }
+        doAnswer(invocation -> configResource).when(configResolver).getResource(any(Resource.class), any(String.class), any(String.class));
 
     }
 
@@ -572,7 +588,7 @@ public class RedirectFilterTest {
                 new RedirectRule("/content/geometrixx/en/contact-us", "/content/geometrixx/en/contact-them",
                         302, null));
 
-        TabularData data = filter.getRedirectConfigurations();
+        TabularData data = filter.getRedirectRules(redirectStoragePath);
         assertEquals(2, data.size());
     }
 

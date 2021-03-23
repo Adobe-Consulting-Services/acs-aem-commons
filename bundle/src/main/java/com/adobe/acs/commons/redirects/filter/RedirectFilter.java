@@ -22,9 +22,12 @@ package com.adobe.acs.commons.redirects.filter;
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.RedirectRules;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -38,6 +41,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
+import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.engine.EngineConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -88,9 +92,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Hashtable;
 import java.util.Dictionary;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -115,7 +119,6 @@ import static org.osgi.framework.Constants.SERVICE_ID;
 public class RedirectFilter extends AnnotatedStandardMBean
         implements Filter, EventHandler, ResourceChangeListener, RedirectFilterMBean {
 
-    public static final String DEFAULT_STORAGE_PATH = "/conf/acs-commons/redirects";
     public static final String ACS_REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects";
     public static final String REDIRECT_RULE_RESOURCE_TYPE = ACS_REDIRECTS_RESOURCE_TYPE + "/redirect-row";
 
@@ -142,16 +145,25 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
-        @AttributeDefinition(name = "Storage Path", description = "The path in the repository to store redirect configurations", type = AttributeType.STRING)
-        String storagePath() default DEFAULT_STORAGE_PATH;
-
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
         String[] additionalHeaders() default {};
+
+        @AttributeDefinition(name = "Configuration bucket name", description = "name of the parent folder where to store redirect rules."
+                + " Default is settings. ", type = AttributeType.STRING)
+        String bucketName() default "settings";
+
+        @AttributeDefinition(name = "Configuration Name", description = "The node name to store redirect configurations. Default is 'redirects' "
+                + " which means the default path to store redirects is /conf/global/settings/redirects "
+                + " where 'settings' is the bucket and 'redirects' is the config name", type = AttributeType.STRING)
+        String configName() default  "redirects";
     }
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
@@ -168,10 +180,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
     private Collection<String> exts;
     private Collection<String> paths;
-    private String storagePath;
-    private Map<String, RedirectRule> pathRules;
-    private Map<Pattern, RedirectRule> patternRules;
+    private Configuration config;
     private ExecutorService executor;
+    private Cache<String, RedirectRules> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
@@ -185,10 +196,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
     @Activate
     @Modified
     protected final void activate(Configuration config, BundleContext context) {
+        this.config = config;
         enabled = config.enabled();
 
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put(ResourceChangeListener.PATHS, config.storagePath());
+        properties.put(ResourceChangeListener.PATHS, "/conf");
         listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
         log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
 
@@ -197,7 +209,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
                     : Arrays.stream(config.extensions()).filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
             mapUrls = config.mapUrls();
-            storagePath = config.storagePath();
             onDeliveryHeaders = new ArrayList<>();
             for(String kv : config.additionalHeaders()){
                 int idx = kv.indexOf(':');
@@ -210,11 +221,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 onDeliveryHeaders.add(new BasicHeader(name, value));
             }
             preserveQueryString = config.preserveQueryString();
-            log.debug("exts: {}, paths: {}, rewriteUrls: {}, storagePath: {}",
-                    exts, paths, mapUrls, storagePath);
+            log.debug("exts: {}, paths: {}, rewriteUrls: {}",
+                    exts, paths, mapUrls);
             executor = Executors.newSingleThreadExecutor();
 
-            refreshCache();
+            rulesCache = CacheBuilder.newBuilder().build();
+
         }
     }
 
@@ -239,32 +251,56 @@ public class RedirectFilter extends AnnotatedStandardMBean
     @Override
     public void handleEvent(Event event) {
         String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-        if (path.startsWith(getStoragePath())) {
+        String redirectSubPath = config.bucketName() + "/" + config.configName();
+        if (path.contains(redirectSubPath)) {
             log.debug(event.toString());
             // loading redirect configurations can be expensive and needs to run
             // asynchronously,
             // outside of the Sling event processing chain
-            executor.submit(() -> refreshCache());
+            executor.submit(() -> invalidate(path));
         }
     }
 
     @Override
     public void onChange(List<ResourceChange> changes) {
-        boolean changed = changes.stream().anyMatch(e -> e.getPath().startsWith(getStoragePath()));
-        if(changed) {
-            log.debug(changes.toString());
-            executor.submit(() -> refreshCache());
+        String redirectSubPath = config.bucketName() + "/" + config.configName();
+        for(ResourceChange e : changes){
+            String path = e.getPath();
+            if(path.contains(redirectSubPath)){
+                executor.submit(() -> invalidate(path));
+            }
+        }
+    }
+
+    void invalidate(String changePath) {
+        String redirectSubPath = config.bucketName() + "/" + config.configName();
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
+                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
+            Resource resource = resolver.resolve(changePath);
+            while(resource != null){
+                if(resource.getPath().endsWith(redirectSubPath)){
+                    rulesCache.invalidate(changePath);
+                    break;
+                }
+                resource = resource.getParent();
+            }
+        } catch (LoginException e) {
+            log.error("Failed to get resolver for {}", SERVICE_NAME, e);
         }
     }
 
     @Override
-    public void refreshCache() {
+    public void invalidateAll() {
+        rulesCache.invalidateAll();
+    }
+
+    public RedirectRules loadRules(String storagePath) {
         Map<String, RedirectRule> pathMatchingRules = new HashMap<>();
         Map<Pattern, RedirectRule> patternMatchingRules = new LinkedHashMap<>();
         long t0 = System.currentTimeMillis();
         try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
                 Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
-            Resource storageResource = resolver.getResource(getStoragePath());
+            Resource storageResource = resolver.getResource(storagePath);
             if (storageResource != null) {
                 Collection<RedirectRule> rules = getRules(storageResource);
                 for (RedirectRule rule : rules) {
@@ -278,20 +314,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         } catch (LoginException e) {
             log.error("Failed to get resolver for {}", SERVICE_NAME, e);
         }
-        synchronized (this) {
-            this.pathRules = pathMatchingRules;
-            this.patternRules = patternMatchingRules;
-        }
-        log.debug("{} rules loaded in {} ms", pathMatchingRules.size() + patternMatchingRules.size(),
-                System.currentTimeMillis() - t0);
-    }
-
-    Map<String, RedirectRule> getPathRules() {
-        return pathRules;
-    }
-
-    Map<Pattern, RedirectRule> getPatternRules() {
-        return patternRules;
+        RedirectRules rules = new RedirectRules(pathMatchingRules, patternMatchingRules);
+        log.debug("{} rules loaded from {} in {} ms", pathMatchingRules.size() + patternMatchingRules.size(),
+                storagePath, System.currentTimeMillis() - t0);
+        return rules;
     }
 
     /**
@@ -310,6 +336,20 @@ public class RedirectFilter extends AnnotatedStandardMBean
             }
         }
         return rules;
+    }
+
+    Cache<String, RedirectRules> getRulesCache(){
+        return rulesCache;
+    }
+
+    @Override
+    public String getBucket(){
+        return config.bucketName();
+    }
+
+    @Override
+    public String getConfigName(){
+        return config.configName();
     }
 
     @Override
@@ -408,10 +448,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return enabled;
     }
 
-    public String getStoragePath() {
-        return storagePath;
-    }
-
     protected Collection<String> getExtensions() {
         return exts;
     }
@@ -488,34 +524,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     /**
      * Match a path to a redirect configuration.
      * <p>
-     * If multiple rules match then the exact rule by path takes precedence over
-     * pattern matches, for example, if two rules match then the exact match by path
-     * will be used:
-     *
-     * @param requestPath path to match
-     * @return redirect match or <code>null</code>
-     */
-    RedirectMatch match(String requestPath) {
-        RedirectMatch match = null;
-        RedirectRule rule = getPathRules().get(requestPath);
-        if (rule != null) {
-            match = new RedirectMatch(rule, null);
-        } else {
-            for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                Matcher m = entry.getKey().matcher(requestPath);
-                if (m.matches()) {
-                    match = new RedirectMatch(entry.getValue(), m);
-                    break;
-                }
-            }
-        }
-        return match;
-
-    }
-
-    /**
-     * Match a path to a redirect configuration.
-     * <p>
      * This method performs two tries: first for the request path, e.g.
      * /content/we.retail/en/page. If the first try didn't match then rewrite the url
      * ( /content/we.retail/en/page -> /en/page ) and try it.
@@ -525,12 +533,26 @@ public class RedirectFilter extends AnnotatedStandardMBean
      * @return redirect match or <code>null</code>
      */
     RedirectMatch match(SlingHttpServletRequest slingRequest) {
-        String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
-        RedirectMatch rule = match(resourcePath);
-        if (rule == null) {
-            rule = match(mapUrl(resourcePath, slingRequest.getResourceResolver()));
+        Resource resource = slingRequest.getResource();
+        Resource configResource = configResolver.getResource(resource, config.bucketName(), config.configName());
+        if(configResource == null){
+            log.debug("no caconfig found for {}, bucketName: {}, configName: {}",
+                    resource.getPath(), config.bucketName(), config.configName());
+            return null;
         }
-        return rule;
+        String configPath = configResource.getPath();
+        try {
+            RedirectRules rules = rulesCache.get(configPath, () -> loadRules(configPath));
+            String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
+            RedirectMatch rule = rules.match(resourcePath);
+            if (rule == null) {
+                rule = rules.match(mapUrl(resourcePath, slingRequest.getResourceResolver()));
+            }
+            return rule;
+        } catch (ExecutionException e){
+            log.error("failed to load redirect rules from {}", configPath, e);
+            return null;
+        }
     }
 
     /**
@@ -539,7 +561,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
      * @return the redirect configurations in a tabular format for the MBean
      */
     @Override
-    public TabularData getRedirectConfigurations() throws OpenDataException {
+    public TabularData getRedirectRules(String storagePath) throws OpenDataException {
         String sourceUrl = "Source Url";
         String targetUrl = "Target Url";
         String statusCode = "Status Code";
@@ -552,12 +574,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
         TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(redirectRules, redirectRules, cacheEntryType, new String[]{sourceUrl}));
 
+
+        RedirectRules cfg = loadRules(storagePath);
         Collection<RedirectRule> rules = new ArrayList<>();
-        Map<String, RedirectRule> pathMatchingRules = getPathRules();
+        Map<String, RedirectRule> pathMatchingRules = cfg.getPathRules();
         if (pathMatchingRules != null) {
             rules.addAll(pathMatchingRules.values());
         }
-        Map<Pattern, RedirectRule> patternMatchingRules = getPatternRules();
+        Map<Pattern, RedirectRule> patternMatchingRules = cfg.getPatternRules();
         if (patternMatchingRules != null) {
             rules.addAll(patternMatchingRules.values());
         }
@@ -570,6 +594,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
         return tabularData;
+    }
+
+    @Override
+    public Collection<String> getRedirectConfigurations() {
+        return rulesCache.asMap().keySet();
     }
 
 }

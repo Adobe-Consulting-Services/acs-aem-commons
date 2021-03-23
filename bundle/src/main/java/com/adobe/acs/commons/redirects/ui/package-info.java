@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,10 @@
  * limitations under the License.
  * #L%
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package com.adobe.acs.commons.redirects.servlets;
+/**
+ * Miscellaneous Utilities.
+ */
+@Version("1.0.0")
+
+package com.adobe.acs.commons.redirects.ui;
+import org.osgi.annotation.versioning.Version;

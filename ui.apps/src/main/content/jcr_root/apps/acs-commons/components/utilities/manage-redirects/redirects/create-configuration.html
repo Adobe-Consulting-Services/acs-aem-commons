@@ -1,0 +1,64 @@
+<coral-dialog id="createDialog">
+    <form action="${resource.path}.create.html" method="post" class="coral-Form--aligned acs-redirect-rule-form"
+    id="fn-acsCommons-save_redirects">
+   <coral-dialog-header>Create </coral-dialog-header>
+   <coral-dialog-content>
+      <div class="coral-Well">
+            <input type="hidden" name=":http-equiv-accept" value="application/json"/>
+
+            <div class="coral-Form-fieldwrapper">
+               <label class="coral-Form-fieldlabel">
+                  Parent Path *
+               </label>
+               </a>
+               <div class="coral-InputGroup coral-Form-field">
+                  <span class="coral-PathBrowser"
+                        data-init="pathbrowser" data-root-path="/content"
+                        data-option-loader="granite.ui.pathBrowser.pages.hierarchyNotFile"
+                        data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/conf?predicate=configfolder"
+                        data-picker-title="Select Source Path"
+                        data-delay="30000"
+                        data-picker-multiselect="false" data-root-path-valid-selection="false">
+                     <span
+                             class="coral-InputGroup coral-InputGroup--block">
+                        <input
+                                class="coral-InputGroup-input js-coral-pathbrowser-input coral-Textfield source"
+                                is="coral-textfield" placeholder="Select/Enter source path"
+                                name="path" value="" aria-invalid="false"
+                                aria-haspopup="true" aria-expanded="false" aria-owns="coral-26"
+                                required>
+                        <span class="coral-InputGroup-button">
+                           <button
+                                   class="js-coral-pathbrowser-button coral-Button coral-Button--secondary"
+                                   type="button" title="Browse" is="coral-button"
+                                   icon="folderSearch" iconsize="S" size="M" variant="secondary">
+                              <coral-icon
+                                      class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"
+                                      icon="folderSearch" size="S" role="img"
+                                      aria-label="folder search"></coral-icon>
+                           </button>
+                        </span>
+                     </span>
+                  </span>
+               </div>
+               <coral-icon class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS acs-tooltip"
+                           icon="infoCircle" size="S" id="red-source-url" role="img" aria-label="info circle"></coral-icon>
+               <coral-tooltip variant="info" placement="right" target="#red-source-url"
+                              class="coral3-Tooltip coral3-Tooltip--info" aria-hidden="true" tabindex="-1" role="tooltip" style="display: none;">
+                  <coral-tooltip-content>
+                     The path in AEM for which you want to set up the redirects. Appending a (*) wildcard character will
+                     match all requests with the base.
+                  </coral-tooltip-content>
+               </coral-tooltip>
+            </div>
+      </div>
+      <br/>
+   </coral-dialog-content>
+   <coral-dialog-footer>
+      <button class="coral-Button caconfig-configuration-submit" icon="save" is="coral-button" variant="primary">Save</button>
+      <button is="coral-button" variant="primary" coral-close="" class="close-dialog-box coral-Button coral-Button--primary" size="M">
+         <coral-button-label>Cancel</coral-button-label>
+      </button>
+   </coral-dialog-footer>
+   </form>
+</coral-dialog>

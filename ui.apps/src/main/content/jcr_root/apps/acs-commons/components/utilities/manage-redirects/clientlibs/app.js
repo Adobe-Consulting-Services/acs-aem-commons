@@ -253,6 +253,37 @@
 
     });
 
+    $(document).on("click", "#addConfigurationButton", function (e) {
+    	e.preventDefault();
+        var dialog = document.querySelector('#createDialog');
+        dialog.show();
+
+    });
+
+    $(document).on("click", ".caconfig-configuration-submit", function (e) {
+    	e.preventDefault();
+        var $form = $(this).closest('form');
+        var action = $form.attr('action');
+        var data = $form.serialize();
+        $.ajax({
+            url: action,
+            type: "POST",
+            data: data,
+            async: false
+        }).success(function(response /*json response from the Sling POST servlet*/){
+           location.reload(true);
+        }).error(function (data, status, headers, config) {
+            var dialog = new Coral.Dialog();
+            dialog.header.innerHTML = 'Failed to create configuration';
+    		dialog.content.innerHTML = data.responseJSON.message;
+            dialog.variant = 'error';
+            dialog.closable = "on";
+            dialog.show();
+        });
+        return false;
+    });
+
+
 })($, $(document));
 
 
