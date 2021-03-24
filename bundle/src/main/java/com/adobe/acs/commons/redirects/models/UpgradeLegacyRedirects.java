@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.redirects.ui;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
@@ -20,6 +39,14 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 
+/**
+ * In v5.0.4  redirects were stored under /conf/acs-commons/redirects.
+ * In 5.0.5+ the default path to store redirect was changed to /conf/global/settings/redirects to be
+ * compatible with Sling context aware configurations.
+ *
+ * This class is invoked from /apps/acs-commons/content/redirect-manager/redirects.html and
+ * it moves redirect rules from /conf/acs-commons/redirects to /conf/global/settings/redirects
+ */
 @Model(adaptables = SlingHttpServletRequest.class)
 public class UpgradeLegacyRedirects {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -64,6 +91,7 @@ public class UpgradeLegacyRedirects {
             }
             if (numMoved > 0) {
                 moved = true;
+                // this flag will trigger an alert on the page
                 legacyHome.adaptTo(ModifiableValueMap.class).put("moved", true);
                 resolver.commit();
             }
