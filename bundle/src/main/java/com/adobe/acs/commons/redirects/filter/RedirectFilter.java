@@ -279,6 +279,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             Resource resource = resolver.resolve(changePath);
             while(resource != null){
                 if(resource.getPath().endsWith(redirectSubPath)){
+                    log.debug("invaliding {}", changePath);
                     rulesCache.invalidate(changePath);
                     break;
                 }
@@ -294,7 +295,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         rulesCache.invalidateAll();
     }
 
-    public RedirectRules loadRules(String storagePath) {
+    RedirectRules loadRules(String storagePath) {
         Map<String, RedirectRule> pathMatchingRules = new HashMap<>();
         Map<Pattern, RedirectRule> patternMatchingRules = new LinkedHashMap<>();
         long t0 = System.currentTimeMillis();
@@ -343,16 +344,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     @Override
-    public String getBucket(){
-        return config.bucketName();
-    }
-
-    @Override
-    public String getConfigName(){
-        return config.configName();
-    }
-
-    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!(request instanceof SlingHttpServletRequest)
                 || !(response instanceof SlingHttpServletResponse)) {
@@ -369,7 +360,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         chain.doFilter(request, response);
     }
 
-    public boolean handleRedirect(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
+    boolean handleRedirect(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
         long t0 = System.currentTimeMillis();
         boolean redirected = false;
         RedirectMatch match = match(slingRequest);
@@ -556,7 +547,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     /**
-     * Display cache contents in the MBean
+     * JMX Operation: Display loaded rules for a path, e.g. /conf/global/settings/redirects
      *
      * @return the redirect configurations in a tabular format for the MBean
      */
@@ -596,9 +587,23 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return tabularData;
     }
 
+    /**
+     * JMX Operation: get a list of loaded configurations,
+     * e.g. [/conf/global/settings/redirects, /conf/wknd/settings/redirects]
+     */
     @Override
     public Collection<String> getRedirectConfigurations() {
         return rulesCache.asMap().keySet();
+    }
+
+    @Override
+    public String getBucket(){
+        return config.bucketName();
+    }
+
+    @Override
+    public String getConfigName(){
+        return config.configName();
     }
 
 }
