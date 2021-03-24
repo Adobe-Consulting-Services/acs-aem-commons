@@ -21,7 +21,7 @@ package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import com.adobe.acs.commons.redirects.models.RedirectRules;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
 import org.apache.http.Header;
@@ -76,7 +76,7 @@ public class RedirectFilterTest {
 
     private RedirectFilter filter;
     private FilterChain filterChain;
-    private String redirectStoragePath = "/conf/global/acs-commons/redirects";
+    private String redirectStoragePath = "/conf/global/settings/redirects";
 
     private String[] contentRoots = new String[]{
             "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail"};
@@ -119,7 +119,7 @@ public class RedirectFilterTest {
         Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(context.resourceResolver().getResource(redirectStoragePath));
         Whitebox.setInternalState(filter, "configResolver", configResolver);
-
+        context.addModelsForClasses(RedirectConfiguration.class);
     }
 
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
@@ -411,7 +411,7 @@ public class RedirectFilterTest {
         assertEquals(302, response.getStatus());
         assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
 
-        RedirectRules rules = filter.getRulesCache().getIfPresent(redirectStoragePath);
+        RedirectConfiguration rules = filter.getRulesCache().getIfPresent(redirectStoragePath);
         assertEquals(1, rules.getPathRules().size());
         assertEquals(0, rules.getPatternRules().size());
     }
@@ -589,6 +589,11 @@ public class RedirectFilterTest {
                         302, null));
 
         TabularData data = filter.getRedirectRules(redirectStoragePath);
+        assertEquals(0, data.size());
+
+        assertEquals("/content/geometrixx/en/two", navigate("/content/geometrixx/en/one").getHeader("Location"));
+
+        data = filter.getRedirectRules(redirectStoragePath);
         assertEquals(2, data.size());
     }
 

@@ -17,16 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.redirects.ui;
+package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.query.Query;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -35,25 +39,29 @@ import java.util.List;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class Redirects {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     @SlingObject
     private SlingHttpServletRequest request;
+
     @OSGiService
     private RedirectFilterMBean redirectFilter;
 
     private static final String REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects/redirects";
 
-    public Collection<CaConfig> getConfigurations() {
+    public Collection<RedirectConfiguration> getConfigurations() {
         String sql = "SELECT * FROM [nt:unstructured] AS s WHERE ISDESCENDANTNODE([/conf]) "
                 + "AND s.[sling:resourceType]='" + REDIRECTS_RESOURCE_TYPE + "'";
+        log.debug(sql);
         Iterator<Resource> it = request.getResourceResolver().findResources(sql, Query.JCR_SQL2);
-        List<CaConfig> lst = new ArrayList<>();
-        String suffix = "/" + redirectFilter.getBucket() + "/" + redirectFilter.getConfigName();
+        List<RedirectConfiguration> lst = new ArrayList<>();
         while (it.hasNext()) {
-            String path = it.next().getPath();
-            String name = path.replace(suffix, "");
-            lst.add(new CaConfig(path, name));
+            Resource resource = it.next();
+            String storageSuffix = redirectFilter.getBucket() + "/" + redirectFilter.getConfigName();
+            RedirectConfiguration cfg = new RedirectConfiguration(resource, storageSuffix);
+            lst.add(cfg);
         }
-        lst.sort(Comparator.comparing(o -> o.name));
+        lst.sort(Comparator.comparing(o -> o.getName()));
         return lst;
     }
 }

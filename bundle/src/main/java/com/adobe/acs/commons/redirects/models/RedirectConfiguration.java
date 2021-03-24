@@ -1,17 +1,65 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.redirects.models;
 
+import com.adobe.acs.commons.redirects.filter.RedirectFilter;
+import org.apache.sling.api.resource.Resource;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RedirectRules {
+/**
+ * A collection of redirect rules
+ */
+public class RedirectConfiguration {
     private Map<String, RedirectRule> pathRules;
     private Map<Pattern, RedirectRule> patternRules;
+    private String path;
+    private String name;
 
-    public RedirectRules(Map<String, RedirectRule> pathRules, Map<Pattern, RedirectRule> patternRules) {
-        this.pathRules = pathRules;
-        this.patternRules = patternRules;
+    public static final RedirectConfiguration EMPTY = new RedirectConfiguration();
+
+    private RedirectConfiguration(){
+        pathRules = new LinkedHashMap<>();
+        patternRules = new LinkedHashMap<>();
     }
+
+    public RedirectConfiguration(Resource resource, String storageSuffix) {
+        pathRules = new LinkedHashMap<>();
+        patternRules = new LinkedHashMap<>();
+        path = resource.getPath();
+        name = path.replace("/" + storageSuffix, "");
+        Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
+        for (RedirectRule rule : rules) {
+            if (rule.getRegex() != null) {
+                patternRules.put(rule.getRegex(), rule);
+            } else {
+                pathRules.put(rule.getSource(), rule);
+            }
+        }
+
+    }
+
 
     public Map<String, RedirectRule> getPathRules() {
         return pathRules;
@@ -19,6 +67,14 @@ public class RedirectRules {
 
     public Map<Pattern, RedirectRule> getPatternRules() {
         return patternRules;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public RedirectMatch match(String requestPath) {

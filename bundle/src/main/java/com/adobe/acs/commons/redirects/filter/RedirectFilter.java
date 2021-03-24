@@ -22,7 +22,7 @@ package com.adobe.acs.commons.redirects.filter;
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import com.adobe.acs.commons.redirects.models.RedirectRules;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
@@ -92,6 +92,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Hashtable;
 import java.util.Dictionary;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -182,7 +183,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private Collection<String> paths;
     private Configuration config;
     private ExecutorService executor;
-    private Cache<String, RedirectRules> rulesCache;
+    private Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
@@ -279,7 +280,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             Resource resource = resolver.resolve(changePath);
             while(resource != null){
                 if(resource.getPath().endsWith(redirectSubPath)){
-                    log.debug("invaliding {}", changePath);
+                    log.debug("invalidating {}", changePath);
                     rulesCache.invalidate(changePath);
                     break;
                 }
@@ -295,40 +296,26 @@ public class RedirectFilter extends AnnotatedStandardMBean
         rulesCache.invalidateAll();
     }
 
-    RedirectRules loadRules(String storagePath) {
-        Map<String, RedirectRule> pathMatchingRules = new HashMap<>();
-        Map<Pattern, RedirectRule> patternMatchingRules = new LinkedHashMap<>();
+    RedirectConfiguration loadRules(String storagePath) {
+        RedirectConfiguration rules = null;
         long t0 = System.currentTimeMillis();
         try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
                 Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
             Resource storageResource = resolver.getResource(storagePath);
-            if (storageResource != null) {
-                Collection<RedirectRule> rules = getRules(storageResource);
-                for (RedirectRule rule : rules) {
-                    if (rule.getRegex() != null) {
-                        patternMatchingRules.put(rule.getRegex(), rule);
-                    } else {
-                        pathMatchingRules.put(rule.getSource(), rule);
-                    }
-                }
+            if(storageResource != null) {
+                String storageSuffix = getBucket() + "/" + getConfigName();
+                rules = new RedirectConfiguration(storageResource, storageSuffix);
+                log.debug("{} rules loaded from {} in {} ms", rules.getPathRules().size() + rules.getPatternRules().size(),
+                        storagePath, System.currentTimeMillis() - t0);
+            } else {
+                log.warn("redirects not found in {}", storagePath);
             }
         } catch (LoginException e) {
             log.error("Failed to get resolver for {}", SERVICE_NAME, e);
         }
-        RedirectRules rules = new RedirectRules(pathMatchingRules, patternMatchingRules);
-        log.debug("{} rules loaded from {} in {} ms", pathMatchingRules.size() + patternMatchingRules.size(),
-                storagePath, System.currentTimeMillis() - t0);
         return rules;
     }
 
-    /**
-     * Read redirect configurations from the repository, i.e.
-     *  /conf/acs-commons/redirects --> Collection<RedirectRule>
-     *
-     * @param resource the parent resource containing redirect configurations
-     * @return a list of redirect configurations . Can be empty if no redirects are
-     * configured.
-     */
     public static Collection<RedirectRule> getRules(Resource resource) {
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
@@ -339,7 +326,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return rules;
     }
 
-    Cache<String, RedirectRules> getRulesCache(){
+    Cache<String, RedirectConfiguration> getRulesCache(){
         return rulesCache;
     }
 
@@ -533,7 +520,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         String configPath = configResource.getPath();
         try {
-            RedirectRules rules = rulesCache.get(configPath, () -> loadRules(configPath));
+            RedirectConfiguration rules = rulesCache.get(configPath, () -> {
+                RedirectConfiguration cfg = loadRules(configPath);
+                return cfg == null ? RedirectConfiguration.EMPTY : cfg;
+            });
             String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
             RedirectMatch rule = rules.match(resourcePath);
             if (rule == null) {
@@ -566,23 +556,25 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 new TabularType(redirectRules, redirectRules, cacheEntryType, new String[]{sourceUrl}));
 
 
-        RedirectRules cfg = loadRules(storagePath);
-        Collection<RedirectRule> rules = new ArrayList<>();
-        Map<String, RedirectRule> pathMatchingRules = cfg.getPathRules();
-        if (pathMatchingRules != null) {
-            rules.addAll(pathMatchingRules.values());
-        }
-        Map<Pattern, RedirectRule> patternMatchingRules = cfg.getPatternRules();
-        if (patternMatchingRules != null) {
-            rules.addAll(patternMatchingRules.values());
-        }
-        for (RedirectRule rule : rules) {
-            Map<String, Object> row = new LinkedHashMap<>();
+        RedirectConfiguration cfg = rulesCache.getIfPresent(storagePath);
+        if(cfg != null) {
+            Collection<RedirectRule> rules = new ArrayList<>();
+            Map<String, RedirectRule> pathMatchingRules = cfg.getPathRules();
+            if (pathMatchingRules != null) {
+                rules.addAll(pathMatchingRules.values());
+            }
+            Map<Pattern, RedirectRule> patternMatchingRules = cfg.getPatternRules();
+            if (patternMatchingRules != null) {
+                rules.addAll(patternMatchingRules.values());
+            }
+            for (RedirectRule rule : rules) {
+                Map<String, Object> row = new LinkedHashMap<>();
 
-            row.put(sourceUrl, rule.getSource());
-            row.put(targetUrl, rule.getTarget());
-            row.put(statusCode, rule.getStatusCode());
-            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+                row.put(sourceUrl, rule.getSource());
+                row.put(targetUrl, rule.getTarget());
+                row.put(statusCode, rule.getStatusCode());
+                tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+            }
         }
         return tabularData;
     }
