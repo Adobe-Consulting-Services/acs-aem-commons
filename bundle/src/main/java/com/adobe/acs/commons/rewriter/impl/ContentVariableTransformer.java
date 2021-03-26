@@ -90,10 +90,10 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
                 // If the placeholder key is in the map then replace it
                 if (contentVariableReplacements.containsKey(key)) {
                     final String placeholderReplacement = String.valueOf(contentVariableReplacements.get(key));
-                    final String replacedChunk = currentChunk.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
-                    chunkLength = replacedChunk.length();
-                    currentString = replaceOnceAfterStart(currentString, start, currentChunk, replacedChunk);
-                    currentChunk = replacedChunk;
+                    final String chunkWithReplacements = currentChunk.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
+                    chunkLength = chunkWithReplacements.length();
+                    currentString = replaceOnceAfterStart(currentString, start, currentChunk, chunkWithReplacements);
+                    currentChunk = chunkWithReplacements;
                 }
             }
         }

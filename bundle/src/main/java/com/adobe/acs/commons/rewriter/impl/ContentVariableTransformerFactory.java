@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * the service used to aggregate properties.
  */
 @Component(service = TransformerFactory.class, property = {
-        "pipeline.type=templated-transformer"
+        "pipeline.type=ccvar-transformer"
 })
 public class ContentVariableTransformerFactory implements TransformerFactory {
     private static final Logger LOG = LoggerFactory.getLogger(ContentVariableTransformerFactory.class);
@@ -43,7 +43,7 @@ public class ContentVariableTransformerFactory implements TransformerFactory {
 
     @Override
     public Transformer createTransformer() {
-        LOG.trace("Templated Transformer");
+        LOG.trace("Content Variable Transformer");
         return new ContentVariableTransformer(propertyAggregatorService);
     }
 }

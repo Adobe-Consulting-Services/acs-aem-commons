@@ -3,7 +3,7 @@
   "jcr:title": "Accordion",
   "cq:isContainer": "true",
   "sling:resourceSuperType": "core/wcm/components/accordion/v1/accordion",
-  "componentGroup": "Templated Test - Content",
+  "componentGroup": "CCVAR Test - Content",
   "cq:editConfig": {
     "jcr:primaryType": "cq:EditConfig",
     "cq:listeners": {
@@ -19,13 +19,13 @@
       "jcr:primaryType": "nt:unstructured",
       "jcr:title": "Item 1",
       "layout": "responsiveGrid",
-      "sling:resourceType": "templated/components/container"
+      "sling:resourceType": "ccvar/components/container"
     },
     "item_2": {
       "jcr:primaryType": "nt:unstructured",
       "jcr:title": "Item 2",
       "layout": "responsiveGrid",
-      "sling:resourceType": "templated/components/container"
+      "sling:resourceType": "ccvar/components/container"
     }
   }
 }

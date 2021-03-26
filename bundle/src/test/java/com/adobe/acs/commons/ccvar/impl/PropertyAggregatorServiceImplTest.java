@@ -74,9 +74,9 @@ public class PropertyAggregatorServiceImplTest {
     @Test
     public void testAggregationOfNonPageResource() {
         service = defaultService(context);
-        context.load().json(getClass().getResourceAsStream("PropertyAggregatorServiceAppsContent.json"), "/apps/templated/components/accordion");
+        context.load().json(getClass().getResourceAsStream("PropertyAggregatorServiceAppsContent.json"), "/apps/ccvar/components/accordion");
 
-        Resource componentResource = context.resourceResolver().getResource("/apps/templated/components/accordion");
+        Resource componentResource = context.resourceResolver().getResource("/apps/ccvar/components/accordion");
         context.request().setResource(componentResource);
         Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = new HashMap<>();
