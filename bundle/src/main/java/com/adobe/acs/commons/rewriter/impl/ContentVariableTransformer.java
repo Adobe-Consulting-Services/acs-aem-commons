@@ -22,6 +22,7 @@ package com.adobe.acs.commons.rewriter.impl;
 import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
 import com.adobe.acs.commons.ccvar.util.ContentVariableReplacementUtil;
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
@@ -91,13 +92,32 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
                     final String placeholderReplacement = String.valueOf(contentVariableReplacements.get(key));
                     final String replacedChunk = currentChunk.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
                     chunkLength = replacedChunk.length();
-                    currentString = currentString.replace(currentChunk, replacedChunk);
+                    currentString = replaceOnceAfterStart(currentString, start, currentChunk, replacedChunk);
                     currentChunk = replacedChunk;
                 }
             }
         }
 
         getContentHandler().characters(currentString.toCharArray(), start, chunkLength);
+    }
+
+    /**
+     * Replaces the first instance of the supplied string after the supplied start value.
+     * Example:
+     * input = "{{page_properties.pageTitle}} and {{page_properties.pageTitle}}"
+     * start = 30
+     *
+     * output = "{{page_properties.pageTitle}} and actualPageTitle"
+     *
+     * @param input Full input string with potentially multiple applicable replacements
+     * @param start int for the string start
+     * @param searchString The string to search for to be replaced
+     * @param replacement The string to replace the string found in the search
+     * @return The string with the replacement after the specified start
+     */
+    private String replaceOnceAfterStart(String input, int start, String searchString, String replacement) {
+        String afterStart = input.substring(start);
+        return input.substring(0, start) + StringUtils.replaceOnce(afterStart, searchString, replacement);
     }
 
     private boolean shouldRun() {
