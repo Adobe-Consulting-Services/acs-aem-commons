@@ -78,46 +78,22 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
-        String currentString = new String(ch);
-        int chunkLength = length;
+        String currentString = new String(ch, start, length);
 
         if (shouldRun()) {
-            String currentChunk = currentString.substring(start, start + length);
 
             // Get the current placeholders in the string
-            final List<String> keys = ContentVariableReplacementUtil.getKeys(currentChunk);
+            final List<String> keys = ContentVariableReplacementUtil.getKeys(currentString);
             for (String key : keys) {
                 // If the placeholder key is in the map then replace it
                 if (contentVariableReplacements.containsKey(key)) {
                     final String placeholderReplacement = String.valueOf(contentVariableReplacements.get(key));
-                    final String chunkWithReplacements = currentChunk.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
-                    chunkLength = chunkWithReplacements.length();
-                    currentString = replaceOnceAfterStart(currentString, start, currentChunk, chunkWithReplacements);
-                    currentChunk = chunkWithReplacements;
+                    currentString = currentString.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
                 }
             }
         }
 
-        getContentHandler().characters(currentString.toCharArray(), start, chunkLength);
-    }
-
-    /**
-     * Replaces the first instance of the supplied string after the supplied start value.
-     * Example:
-     * input = "{{page_properties.pageTitle}} and {{page_properties.pageTitle}}"
-     * start = 30
-     *
-     * output = "{{page_properties.pageTitle}} and actualPageTitle"
-     *
-     * @param input Full input string with potentially multiple applicable replacements
-     * @param start int for the string start
-     * @param searchString The string to search for to be replaced
-     * @param replacement The string to replace the string found in the search
-     * @return The string with the replacement after the specified start
-     */
-    private String replaceOnceAfterStart(String input, int start, String searchString, String replacement) {
-        String afterStart = input.substring(start);
-        return input.substring(0, start) + StringUtils.replaceOnce(afterStart, searchString, replacement);
+        getContentHandler().characters(currentString.toCharArray(), 0, currentString.length());
     }
 
     private boolean shouldRun() {
