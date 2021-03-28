@@ -82,10 +82,11 @@ public class UpgradeLegacyRedirects {
             int numMoved = 0;
             for (Resource ch : legacyHome.getChildren()) {
                 if (ch.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
-                    String nodeName = ResourceUtil.createUniqueChildName(globalHome, "rule");
+                    String nodeName = ResourceUtil.createUniqueChildName(globalHome, ch.getName());
                     Map<String, Object> props = ch.getValueMap();
-                    resolver.create(globalHome, nodeName, props);
+                    Resource r = resolver.create(globalHome, nodeName, props);
                     resolver.delete(ch);
+                    log.debug("moved {} to {}", ch.getPath(), r.getPath());
                     numMoved++;
                 }
             }

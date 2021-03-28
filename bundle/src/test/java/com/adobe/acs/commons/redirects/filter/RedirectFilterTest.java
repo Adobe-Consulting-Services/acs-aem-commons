@@ -24,6 +24,7 @@ import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
+import com.google.common.cache.Cache;
 import org.apache.http.Header;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -96,7 +97,7 @@ public class RedirectFilterTest {
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
         when(configuration.additionalHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
-        when(configuration.bucketName()).thenReturn("acs-commons");
+        when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
         filter.activate(configuration, context.bundleContext());
 
@@ -119,7 +120,6 @@ public class RedirectFilterTest {
         Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(context.resourceResolver().getResource(redirectStoragePath));
         Whitebox.setInternalState(filter, "configResolver", configResolver);
-        context.addModelsForClasses(RedirectConfiguration.class);
     }
 
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
@@ -419,23 +419,22 @@ public class RedirectFilterTest {
     @Test
     public void testInvalidateOnChange() throws Exception {
 
-        filter.onChange(Arrays.asList(new ResourceChange(ResourceChange.ChangeType.ADDED, redirectStoragePath + "/redirect-1",
-                false, null, null, null)));
-        //verify(filter, times(1)).invalidate(anyString()); //invalidation runs asynchronously
+        Cache<String, RedirectConfiguration> rulesCache = mock(Cache.class);
+        Whitebox.setInternalState(filter, "rulesCache", rulesCache);
 
+        withRules("/conf/global/settings/redirects",
+                new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
+                        301, null));
+
+        filter.invalidate("/conf/global/settings/redirects/redirect-1");
+        verify(rulesCache, times(1)).invalidate(eq("/conf/global/settings/redirects"));
+
+        withRules("/conf/my-site/en/settings/redirects",
+                new RedirectRule("/content/my-site/en/one", "/contentmy-site/en/two",
+                        301, null));
+        filter.invalidate("/conf/my-site/en/settings/redirects/redirect-1");
+        verify(rulesCache, times(1)).invalidate(eq("/conf/my-site/en/settings/redirects"));
     }
-
-    @Test
-    public void testInvalidateOnReplication() throws Exception {
-
-        Event event = new Event(ReplicationAction.EVENT_TOPIC,
-                Collections.singletonMap(SlingConstants.PROPERTY_PATH, redirectStoragePath + "/redirect-1"));
-
-        filter.handleEvent(event);
-        //verify(filter, times(1)).invalidate(anyString()); //invalidation runs asynchronously
-
-    }
-
 
     @Test
     public void testNoopRewrite() throws Exception {

@@ -88,11 +88,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Hashtable;
 import java.util.Dictionary;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -280,8 +278,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
             Resource resource = resolver.resolve(changePath);
             while(resource != null){
                 if(resource.getPath().endsWith(redirectSubPath)){
-                    log.debug("invalidating {}", changePath);
-                    rulesCache.invalidate(changePath);
+                    log.debug("invalidating {}", resource.getPath());
+                    rulesCache.invalidate(resource.getPath());
                     break;
                 }
                 resource = resource.getParent();
@@ -356,12 +354,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
             ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime untilDateTime = redirectRule.getUntilDateTime();
             if (untilDateTime != null && untilDateTime.isBefore(now)) {
-                log.info("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
+                log.debug("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
 
                 String resourcePath = pathInfo.getResourcePath();
-                log.info("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
+                log.debug("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
                         System.currentTimeMillis() - t0);
 
                 String location = redirectRule.evaluate(match.getMatcher());
@@ -393,7 +391,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                     }
                 }
 
-                log.info("Redirecting {} to {}, statusCode: {}",
+                log.debug("Redirecting {} to {}, statusCode: {}",
                         resourcePath, location, redirectRule.getStatusCode());
                 slingResponse.setHeader("Location", location);
                 for(Header header : onDeliveryHeaders){
@@ -512,6 +510,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     RedirectMatch match(SlingHttpServletRequest slingRequest) {
         Resource resource = slingRequest.getResource();
+        // find context aware configuration for the requested resource, e.g. /conf/my-site/settings/redirects
         Resource configResource = configResolver.getResource(resource, config.bucketName(), config.configName());
         if(configResource == null){
             log.debug("no caconfig found for {}, bucketName: {}, configName: {}",
