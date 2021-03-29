@@ -64,7 +64,7 @@
         </coral-alert>
 
         <button class="coral-Button" icon="add" is="coral-button" style="margin-top: 1rem; margin-bottom: 1rem;" variant="primary" id="addConfigurationButton">Add Configuration</button>
-        <coral-anchorlist data-sly-use.defs="com.adobe.acs.commons.redirects.models.Redirects" data-sly-list="${defs.configurations}">
+        <coral-anchorlist data-sly-use.defs="com.adobe.acs.commons.redirects.models.Configurations" data-sly-list="${defs.configurations}">
         	<a icon="viewList" is="coral-anchorlist-item" 
         	href="/apps/acs-commons/content/redirect-manager.html${item.path}">${item.name}</a>
         </coral-anchorlist>

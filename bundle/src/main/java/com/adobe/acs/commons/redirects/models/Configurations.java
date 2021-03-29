@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
-import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -38,7 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Model(adaptables = SlingHttpServletRequest.class)
-public class Redirects {
+public class Configurations {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @SlingObject

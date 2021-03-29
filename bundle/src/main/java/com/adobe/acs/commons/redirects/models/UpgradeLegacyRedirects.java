@@ -44,8 +44,8 @@ import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RUL
  * In 5.0.5+ the default path to store redirect was changed to /conf/global/settings/redirects to be
  * compatible with Sling context aware configurations.
  *
- * This class is invoked from /apps/acs-commons/content/redirect-manager/redirects.html and
- * it moves redirect rules from /conf/acs-commons/redirects to /conf/global/settings/redirects
+ * This class is invoked from /apps/acs-commons/content/redirect-manager/redirects.html to
+ * move redirect rules from /conf/acs-commons/redirects to /conf/global/settings/redirects
  */
 @Model(adaptables = SlingHttpServletRequest.class)
 public class UpgradeLegacyRedirects {

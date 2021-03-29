@@ -525,7 +525,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             });
             String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
             RedirectMatch rule = rules.match(resourcePath);
-            if (rule == null) {
+            if (rule == null && mapUrls()) {
                 rule = rules.match(mapUrl(resourcePath, slingRequest.getResourceResolver()));
             }
             return rule;
