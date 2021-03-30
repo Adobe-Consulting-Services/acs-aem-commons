@@ -108,6 +108,56 @@ public class ContentVariableJsonFilterTest {
     }
 
     @Test
+    public void testModelJsonResponseWithSinglePropAndUrlEncodeAction() throws IOException, ServletException {
+        initServices(null);
+        context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image_1");
+        context.request().setResource(context.currentResource());
+        context.request().setPathInfo("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image_1.model.json");
+        context.requestPathInfo().setExtension("json");
+
+        FilterChain mocked = mock(MockFilterChain.class);
+        String before = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"property\":\"{{page_properties.property|urlEncode}}\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
+        doAnswer(invocation -> {
+            HttpServletResponse response =
+                    (HttpServletResponse) invocation.getArguments()[1];
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("application/json");
+            response.getWriter().println(before);
+            return null;
+        }).when(mocked).doFilter(any(), any());
+
+        String after = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"property\":\"test+space\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
+        filter.doFilter(context.request(), context.response(), mocked);
+        assertTrue(startsWith(after)
+                .matches(context.response().getOutputAsString()));
+    }
+
+    @Test
+    public void testModelJsonResponseWithSinglePropAndInvalidAction() throws IOException, ServletException {
+        initServices(null);
+        context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image_2");
+        context.request().setResource(context.currentResource());
+        context.request().setPathInfo("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image_2.model.json");
+        context.requestPathInfo().setExtension("json");
+
+        FilterChain mocked = mock(MockFilterChain.class);
+        String before = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"property\":\"{{page_properties.property|fakeAction}}\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
+        doAnswer(invocation -> {
+            HttpServletResponse response =
+                    (HttpServletResponse) invocation.getArguments()[1];
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("application/json");
+            response.getWriter().println(before);
+            return null;
+        }).when(mocked).doFilter(any(), any());
+
+        String after = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"property\":\"test space\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
+        filter.doFilter(context.request(), context.response(), mocked);
+        assertTrue(startsWith(after)
+                .matches(context.response().getOutputAsString()));
+    }
+
+    @Test
     public void testModelJsonResponseWithMultiProps() throws IOException, ServletException {
         initServices(null);
         context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");

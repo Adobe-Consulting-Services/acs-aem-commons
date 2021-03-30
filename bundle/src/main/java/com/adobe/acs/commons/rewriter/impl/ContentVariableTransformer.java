@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.PropertyConfigService;
 import com.adobe.acs.commons.ccvar.util.ContentVariableReplacementUtil;
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,15 +41,19 @@ import java.util.Map;
  * rendered HTML.
  */
 public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
+    private static final Map<String, String> REQUIRED_ESCAPE = escapeMap();
 
     private Map<String, Object> contentVariableReplacements;
     private PropertyAggregatorService aggregatorService;
+    private PropertyConfigService propertyConfigService;
 
     public ContentVariableTransformer() {
     }
 
-    public ContentVariableTransformer(PropertyAggregatorService propertyAggregatorService) {
+    public ContentVariableTransformer(PropertyAggregatorService propertyAggregatorService,
+                                      PropertyConfigService propertyConfigService) {
         this.aggregatorService = propertyAggregatorService;
+        this.propertyConfigService = propertyConfigService;
     }
 
     @Override
@@ -58,16 +64,19 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
     }
 
     public void startElement(String uri, String localName, String quaName, Attributes atts) throws SAXException {
-        if (shouldRun() && localName.equals("a")) {
+        if (shouldRun()) {
             AttributesImpl newAttrs = new AttributesImpl(atts);
             for (int i = 0; i < newAttrs.getLength(); i++) {
                 String currentAttribute = newAttrs.getValue(i);
                 final List<String> keys = ContentVariableReplacementUtil.getKeys(currentAttribute);
                 for (String key : keys) {
                     // If the placeholder key is in the map then replace it
-                    if (contentVariableReplacements.containsKey(key)) {
-                        String replaceValue = (String) contentVariableReplacements.get(key);
-                        newAttrs.setValue(i, currentAttribute.replace(ContentVariableReplacementUtil.getPlaceholder(key), replaceValue));
+                    if (ContentVariableReplacementUtil.hasKey(contentVariableReplacements, key)) {
+                        String replaceValue =
+                                (String) ContentVariableReplacementUtil.getValue(contentVariableReplacements, key);
+                        String newAttrValue = ContentVariableReplacementUtil.doReplacement(currentAttribute, key,
+                                baseEscaping(replaceValue), propertyConfigService.getAction(key));
+                        newAttrs.setValue(i, newAttrValue);
                     }
                 }
             }
@@ -86,9 +95,11 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
             final List<String> keys = ContentVariableReplacementUtil.getKeys(currentString);
             for (String key : keys) {
                 // If the placeholder key is in the map then replace it
-                if (contentVariableReplacements.containsKey(key)) {
-                    final String placeholderReplacement = String.valueOf(contentVariableReplacements.get(key));
-                    currentString = currentString.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
+                if (ContentVariableReplacementUtil.hasKey(contentVariableReplacements, key)) {
+                    final String placeholderReplacement =
+                            String.valueOf(ContentVariableReplacementUtil.getValue(contentVariableReplacements, key));
+                    currentString = ContentVariableReplacementUtil.doReplacement(currentString, key,
+                            baseEscaping(placeholderReplacement), propertyConfigService.getAction(key));
                 }
             }
         }
@@ -96,7 +107,39 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
         getContentHandler().characters(currentString.toCharArray(), 0, currentString.length());
     }
 
+    /**
+     * Applies the base level escaping unless otherwise overridden.
+     *
+     * @param input String to escape
+     * @return Escaped string
+     */
+    private String baseEscaping(String input) {
+        if (propertyConfigService.disableBaseEscaping()) {
+            return input;
+        }
+        for (String key : REQUIRED_ESCAPE.keySet()) {
+            if (input.contains(key)) {
+                input = input.replace(key, REQUIRED_ESCAPE.get(key));
+            }
+        }
+        return input;
+    }
+
+    /**
+     * Generates the map of characters to automatically escape
+     *
+     * @return Map of escape keys/values
+     */
+    private static Map<String, String> escapeMap() {
+        Map<String, String> escapes = new HashMap<>();
+        escapes.put("\"", "&quot;");
+        escapes.put("'", "&apos;");
+        escapes.put("<", "&lt;");
+        escapes.put(">", "&gt;");
+        return escapes;
+    }
+
     private boolean shouldRun() {
-        return aggregatorService != null && contentVariableReplacements != null;
+        return aggregatorService != null && contentVariableReplacements != null && contentVariableReplacements.size() > 0;
     }
 }

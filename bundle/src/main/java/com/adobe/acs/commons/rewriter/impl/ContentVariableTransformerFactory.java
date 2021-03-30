@@ -21,6 +21,7 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
 
+import com.adobe.acs.commons.ccvar.PropertyConfigService;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
 import org.osgi.service.component.annotations.Component;
@@ -41,9 +42,12 @@ public class ContentVariableTransformerFactory implements TransformerFactory {
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
 
+    @Reference
+    private PropertyConfigService propertyConfigService;
+
     @Override
     public Transformer createTransformer() {
         LOG.trace("Content Variable Transformer");
-        return new ContentVariableTransformer(propertyAggregatorService);
+        return new ContentVariableTransformer(propertyAggregatorService, propertyConfigService);
     }
 }

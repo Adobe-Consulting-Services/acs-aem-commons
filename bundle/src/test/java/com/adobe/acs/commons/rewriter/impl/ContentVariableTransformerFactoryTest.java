@@ -20,6 +20,11 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 
+import com.adobe.acs.commons.ccvar.ContextualContentVariableTestUtil;
+import com.adobe.acs.commons.ccvar.impl.AllPagePropertiesContentVariableProvider;
+import com.adobe.acs.commons.ccvar.impl.PropertyAggregatorServiceImpl;
+import com.adobe.acs.commons.ccvar.impl.PropertyConfigServiceImpl;
+import com.adobe.acs.commons.ccvar.impl.UrlEncodeAction;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
@@ -37,6 +42,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
+
+import java.util.Map;
 
 import static com.adobe.acs.commons.ccvar.ContextualContentVariableTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;
@@ -75,6 +82,70 @@ public class ContentVariableTransformerFactoryTest {
 
         String input = "{{page_properties.jcr:title}}";
         String output = "Arctic Surfing In Lofoten";
+        transformer.characters(input.toCharArray(), 0, input.length());
+
+        ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);
+        ArgumentCaptor<Integer> lengthCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(handler, atLeast(1)).characters(charCaptor.capture(), eq(0), lengthCaptor.capture());
+
+        String outputTitle = new String(charCaptor.getValue());
+        assertEquals(output, outputTitle);
+        assertEquals(Integer.valueOf(output.length()), lengthCaptor.getValue());
+    }
+
+    @Test
+    public void testBaseConstructor() throws Exception {
+        ContentVariableTransformer localTransformer = new ContentVariableTransformer();
+    }
+
+    @Test
+    public void testWithInvalidConfiguration() throws Exception {
+        context.registerInjectActivateService(new PropertyConfigServiceImpl(),
+                ContextualContentVariableTestUtil.defaultConfigMap());
+        context.registerInjectActivateService(new UrlEncodeAction());
+        context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
+        reinitTransformer(false);
+
+        AttributesImpl attributes = new AttributesImpl();
+        attributes.addAttribute(null, "href", null, "CDATA", "/content/page.html?title={{inherited_page_properties.inheritedProperty}}");
+        transformer.startElement(null, "a", null, attributes);
+
+        ArgumentCaptor<AttributesImpl> attributesCaptor = ArgumentCaptor.forClass(AttributesImpl.class);
+        verify(handler, atLeast(1)).startElement(isNull(String.class), eq("a"), isNull(String.class), attributesCaptor.capture());
+
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/content/page.html?title={{inherited_page_properties.inheritedProperty}}", out.getValue(0));
+    }
+
+    @Test
+    public void testSingleReplacementWithEscape() throws Exception {
+        reinitTransformer(true);
+
+        String input = "{{page_properties.propToEscape}}";
+        String output = "&lt;html&gt;";
+        transformer.characters(input.toCharArray(), 0, input.length());
+
+        ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);
+        ArgumentCaptor<Integer> lengthCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(handler, atLeast(1)).characters(charCaptor.capture(), eq(0), lengthCaptor.capture());
+
+        String outputTitle = new String(charCaptor.getValue());
+        assertEquals(output, outputTitle);
+        assertEquals(Integer.valueOf(output.length()), lengthCaptor.getValue());
+    }
+
+    @Test
+    public void testSingleReplacementWithEscapeDisabled() throws Exception {
+        Map<String, Object> configMap = ContextualContentVariableTestUtil.defaultConfigMap();
+        configMap.put("disable.base.escape", true);
+        context.registerInjectActivateService(new PropertyConfigServiceImpl(), configMap);
+        context.registerInjectActivateService(new AllPagePropertiesContentVariableProvider());
+        context.registerInjectActivateService(new UrlEncodeAction());
+        context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
+        reinitTransformer(false);
+
+        String input = "{{page_properties.propToEscape}}";
+        String output = "<html>";
         transformer.characters(input.toCharArray(), 0, input.length());
 
         ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);

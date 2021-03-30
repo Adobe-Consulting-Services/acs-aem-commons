@@ -20,13 +20,19 @@
 package com.adobe.acs.commons.ccvar.impl;
 
 import com.adobe.acs.commons.ccvar.PropertyConfigService;
+import com.adobe.acs.commons.ccvar.TransformAction;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +42,13 @@ import java.util.regex.Pattern;
 @Designate(ocd = PropertyConfigServiceImpl.Config.class)
 public class PropertyConfigServiceImpl implements PropertyConfigService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PropertyConfigServiceImpl.class);
+
     private List<Pattern> exclusionList;
+    private boolean disableBaseEscape;
+
+    @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.MULTIPLE)
+    private List<TransformAction> actions;
 
     @Override
     public boolean isAllowed(final String propertyName) {
@@ -53,6 +65,25 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
         return String.class.equals(object.getClass()) || Long.class.equals(object.getClass());
     }
 
+    @Override
+    public boolean disableBaseEscaping() {
+        return this.disableBaseEscape;
+    }
+
+    @Override
+    public TransformAction getAction(String key) {
+        if (StringUtils.contains(key, PARSER_SEPARATOR)) {
+            String actionName = StringUtils.substringAfter(key, PARSER_SEPARATOR);
+            for (TransformAction action : actions) {
+                if (StringUtils.equals(action.getName(), actionName)) {
+                    return action;
+                }
+            }
+            LOG.warn("Action specified with name [{}] was not found in map.", actionName);
+        }
+        return null;
+    }
+
     @Activate
     protected void activate(Config config) {
         List<Pattern> excludeList = new ArrayList<>();
@@ -62,6 +93,7 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
             }
         }
         this.exclusionList = excludeList;
+        this.disableBaseEscape = config.disable_base_escape();
     }
 
     @ObjectClassDefinition(
@@ -80,5 +112,18 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
                 type = AttributeType.STRING
         )
         String[] exclude_list() default {"cq:.*"};
+
+        /**
+         * The flag to disable the basic HTML entity escaping.
+         *
+         * @return The boolean config value
+         */
+        @AttributeDefinition(
+                name = "Disable HTML Escape?",
+                description = "By default the transformer will escape HTML entities (\", ', <, >) to ensure " +
+                        "HTML can render safely. This will disable that check to enable HTML replacement values.",
+                type = AttributeType.BOOLEAN
+        )
+        boolean disable_base_escape() default false;
     }
 }

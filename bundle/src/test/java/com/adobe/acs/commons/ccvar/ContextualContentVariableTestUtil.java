@@ -26,11 +26,12 @@ import com.adobe.acs.commons.ccvar.impl.AllPagePropertiesContentVariableProvider
 import com.adobe.acs.commons.ccvar.impl.PropertyAggregatorServiceImpl;
 
 import com.adobe.acs.commons.ccvar.impl.PropertyConfigServiceImpl;
+import com.adobe.acs.commons.ccvar.impl.UrlEncodeAction;
 import io.wcm.testing.mock.aem.junit.AemContext;
 
 public class ContextualContentVariableTestUtil {
 
-    public static  Map<String, Object> defaultConfigMap() {
+    public static Map<String, Object> defaultConfigMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("exclude.list", "cq:.*");
         return map;
@@ -39,6 +40,7 @@ public class ContextualContentVariableTestUtil {
     public static PropertyAggregatorService defaultService(AemContext context) {
         context.registerInjectActivateService(new PropertyConfigServiceImpl(), defaultConfigMap());
         context.registerInjectActivateService(new AllPagePropertiesContentVariableProvider());
+        context.registerInjectActivateService(new UrlEncodeAction());
         return context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
     }
 }

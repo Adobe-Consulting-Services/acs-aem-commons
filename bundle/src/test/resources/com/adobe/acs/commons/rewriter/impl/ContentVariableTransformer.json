@@ -16,6 +16,7 @@
     "jcr:content": {
       "jcr:primaryType": "cq:PageContent",
       "jcr:title": "Arctic Surfing In Lofoten",
+      "propToEscape": "<html>",
       "cq:template": "/conf/we-retail/settings/wcm/templates/experience-page",
       "sling:resourceType": "weretail/components/structure/page",
       "root": {

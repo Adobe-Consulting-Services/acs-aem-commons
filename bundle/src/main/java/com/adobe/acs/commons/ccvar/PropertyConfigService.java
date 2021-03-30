@@ -25,6 +25,7 @@ package com.adobe.acs.commons.ccvar;
  * type.
  */
 public interface PropertyConfigService {
+    String PARSER_SEPARATOR = "|";
 
     /**
      * Checks whether the passed property name should be excluded or not. This check is based on the OSGi
@@ -42,4 +43,20 @@ public interface PropertyConfigService {
      * @return whether it is allowed or not
      */
     boolean isAllowedType(Object object);
+
+    /**
+     * Takes the key and determines if there is an action specified in it and checks the action specified against the
+     * full configured list of actions present in the system.
+     *
+     * @param key The key that may contain an action
+     * @return The configured action or null
+     */
+    TransformAction getAction(String key);
+
+    /**
+     * Returns the configuration value stored that controls whether HTML content is automatically escaped.
+     *
+     * @return Configuration value
+     */
+    boolean disableBaseEscaping();
 }

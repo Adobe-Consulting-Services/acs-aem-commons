@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.ccvar.filter;
 
 import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.PropertyConfigService;
 import com.adobe.acs.commons.ccvar.util.ContentVariableReplacementUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,6 +78,9 @@ public class ContentVariableJsonFilter implements Filter {
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
+
+    @Reference
+    private PropertyConfigService propertyConfigService;
 
     private List<Pattern> includePatterns;
     private List<Pattern> excludePatterns;
@@ -216,9 +220,9 @@ public class ContentVariableJsonFilter implements Filter {
         final List<String> keys = ContentVariableReplacementUtil.getKeys(input);
         for (String key : keys) {
             // If the placeholder key is in the map then replace it
-            if (contentVariableReplacements.containsKey(key)) {
-                String replaceValue = (String) contentVariableReplacements.get(key);
-                input = input.replace(ContentVariableReplacementUtil.getPlaceholder(key), replaceValue);
+            if (ContentVariableReplacementUtil.hasKey(contentVariableReplacements, key)) {
+                String replaceValue = (String) ContentVariableReplacementUtil.getValue(contentVariableReplacements, key);
+                input = ContentVariableReplacementUtil.doReplacement(input, key, replaceValue, propertyConfigService.getAction(key));
             }
         }
         return input;
