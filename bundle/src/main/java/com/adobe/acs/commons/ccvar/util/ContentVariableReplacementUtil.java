@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.adobe.acs.commons.ccvar.PropertyConfigService.PARSER_SEPARATOR;
+import static com.adobe.acs.commons.ccvar.impl.PropertyConfigServiceImpl.PARSER_SEPARATOR;
 
 /**
  * Util class used to provide helper methods for finding and replacing the tokens used in this feature.

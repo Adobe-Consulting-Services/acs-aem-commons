@@ -117,9 +117,9 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
         if (propertyConfigService.disableBaseEscaping()) {
             return input;
         }
-        for (String key : REQUIRED_ESCAPE.keySet()) {
-            if (input.contains(key)) {
-                input = input.replace(key, REQUIRED_ESCAPE.get(key));
+        for (Map.Entry<String, String> entry : REQUIRED_ESCAPE.entrySet()) {
+            if (input.contains(entry.getKey())) {
+                input = input.replace(entry.getKey(), entry.getValue());
             }
         }
         return input;

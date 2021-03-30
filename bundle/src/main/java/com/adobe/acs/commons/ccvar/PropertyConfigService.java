@@ -25,7 +25,6 @@ package com.adobe.acs.commons.ccvar;
  * type.
  */
 public interface PropertyConfigService {
-    String PARSER_SEPARATOR = "|";
 
     /**
      * Checks whether the passed property name should be excluded or not. This check is based on the OSGi
