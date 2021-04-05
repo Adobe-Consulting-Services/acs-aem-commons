@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html  lang="en" >
 <head>
     <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
 </head>
@@ -31,7 +32,11 @@
     <div class="foundation-layout-panel-header">
         <betty-titlebar>
             <betty-titlebar-title>
-                <span aria-level="1" class="granite-title" role="heading">${properties.jcr:title}</span>
+                <betty-breadcrumbs  class="granite-collection-navigator" id="granite-collection-breadcrumbs-toggle" trackingfeature="aem:collectionpage" trackingelement="breadcrumbs" data-granite-collection-navigator-target=".granite-request-collection">
+                    <betty-breadcrumbs-item  data-granite-collection-navigator-href="#">Manage Redirects</betty-breadcrumbs-item>
+                    <betty-breadcrumbs-item  data-granite-collection-navigator-href="/apps/acs-commons/content/redirect-manager/redirects.html">Redirect Configurations</betty-breadcrumbs-item>
+                </betty-breadcrumbs>
+            </betty-titlebar-title>
             </betty-titlebar-title>
             <betty-titlebar-primary></betty-titlebar-primary>
             <betty-titlebar-secondary>
@@ -151,3 +156,4 @@
     </div>
 </div>
 </body>
+</html>
