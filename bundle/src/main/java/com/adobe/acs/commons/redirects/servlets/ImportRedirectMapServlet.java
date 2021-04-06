@@ -47,6 +47,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -140,12 +141,12 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 String target = row.getCell(1).getStringCellValue();
                 int statusCode = (int) row.getCell(2).getNumericCellValue();
                 Cell c4 = row.getCell(3);
-                String untilDate = null;
+                Calendar untilDate = null;
                 if (c4 != null) {
                     try {
                         Instant instant = DateUtil.getJavaDate(c4.getNumericCellValue()).toInstant();
                         ZonedDateTime zdate = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-                        untilDate = RedirectRule.DATE_FORMATTER.format(zdate);
+                        untilDate = GregorianCalendar.from(zdate);
                     } catch (Exception e) {
                         log.error("cannot set data from {}", c4.toString(), e);
                     }

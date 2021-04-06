@@ -33,6 +33,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -45,7 +49,7 @@ public class RedirectRule {
     public static final String TARGET_PROPERTY_NAME = "target";
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
 
     @Inject
     private String source;
@@ -56,18 +60,42 @@ public class RedirectRule {
     @Inject
     private int statusCode;
 
-    private String untilDate;
+    private ZonedDateTime untilDate;
 
     private Pattern ptrn;
 
     private SubstitutionElement[] substitutions;
 
-    public RedirectRule(ValueMap resource) {
-        this(resource.get(SOURCE_PROPERTY_NAME, ""), resource.get(TARGET_PROPERTY_NAME, ""),
-                resource.get(STATUS_CODE_PROPERTY_NAME, 0), resource.get(UNTIL_DATE_PROPERTY_NAME, String.class));
+    public static RedirectRule from(ValueMap resource) {
+        String source = resource.get(SOURCE_PROPERTY_NAME, "");
+        String target = resource.get(TARGET_PROPERTY_NAME, "");
+        int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
+        Calendar calendar = resource.get(UNTIL_DATE_PROPERTY_NAME, (Calendar) null);
+        if(calendar == null && resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
+            String untilStr = resource.get(UNTIL_DATE_PROPERTY_NAME, String.class);
+            calendar = parseDate(untilStr);
+        }
+        return new RedirectRule(source, target, statusCode, calendar);
     }
 
-    public RedirectRule(String source, String target, int statusCode, String untilStr) {
+    private static Calendar parseDate(String dateStr){
+        Calendar calendar = null;
+        if(!StringUtils.isEmpty(dateStr)) {
+            try {
+                LocalDate ld = DATE_FORMATTER.parse(dateStr).query(LocalDate::from);
+                if (ld != null) {
+                    ZonedDateTime zdt = ld.atStartOfDay().plusDays(1).minusSeconds(1).atZone(ZoneId.systemDefault());
+                    calendar = GregorianCalendar.from(zdt);
+                }
+            } catch (DateTimeParseException e) {
+                // not fatal. log and continue
+                log.error("Invalid UntilDateTime {}", dateStr, e);
+            }
+        }
+        return calendar;
+    }
+
+    public RedirectRule(String source, String target, int statusCode, Calendar calendar) {
         this.source = source.trim();
         this.target = target.trim();
         this.statusCode = statusCode;
@@ -78,9 +106,13 @@ public class RedirectRule {
         }
         ptrn = toRegex(regex);
         substitutions = SubstitutionElement.parse(this.target);
-        if (StringUtils.isNotBlank(untilStr)) {
-            untilDate = untilStr.trim();
+        if (calendar != null) {
+            untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
         }
+    }
+
+    public RedirectRule(String source, String target, int statusCode, String dateStr) {
+        this(source, target, statusCode, parseDate(dateStr));
     }
 
     public String getSource() {
@@ -99,21 +131,8 @@ public class RedirectRule {
         return ptrn;
     }
 
-    public String getUntilDate() {
+    public ZonedDateTime getUntilDate() {
         return untilDate;
-    }
-
-    public ZonedDateTime getUntilDateTime() {
-        if (untilDate != null && !untilDate.isEmpty()) {
-            try {
-                LocalDate ld = DATE_FORMATTER.parse(untilDate).query(LocalDate::from);
-                return ld == null ? null : ld.atStartOfDay().plusDays(1).minusSeconds(1).atZone(ZoneId.systemDefault());
-            } catch (DateTimeParseException e){
-                // not fatal. log and continue
-                log.error("Invalid UntilDateTime {}", untilDate, e);
-            }
-        }
-        return null;
     }
 
     @Override
@@ -132,7 +151,7 @@ public class RedirectRule {
         }
         RedirectRule that = (RedirectRule) o;
 
-        return source != null ? source.equals(that.source) : that.source == null;
+        return Objects.equals(source, that.source);
     }
 
     @Override

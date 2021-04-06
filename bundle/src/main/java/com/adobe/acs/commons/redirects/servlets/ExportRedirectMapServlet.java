@@ -112,17 +112,11 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             row.createCell(0).setCellValue(rule.getSource());
             row.createCell(1).setCellValue(rule.getTarget());
             row.createCell(2).setCellValue(rule.getStatusCode());
-            String untilDate = rule.getUntilDate();
+            ZonedDateTime untilDateTime = rule.getUntilDate();
             Cell cell = row.createCell(3);
-            if (untilDate != null) {
-                ZonedDateTime untilDateTime = rule.getUntilDateTime();
-                LocalDate date = untilDateTime == null ? null : untilDateTime.query(LocalDate::from);
-                if (date != null) {
-                    cell.setCellValue(Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-                    cell.setCellStyle(dateStyle);
-                } else {
-                    cell.setCellValue(untilDate);
-                }
+            if (untilDateTime != null) {
+                cell.setCellValue(Date.from(untilDateTime.toInstant()));
+                cell.setCellStyle(dateStyle);
             }
         }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 2));

@@ -58,12 +58,12 @@ public class ImportRedirectMapServletTest {
     private String redirectStoragePath = "/conf/acs-commons/redirects";
     private List<RedirectRule> savedRules = Arrays.asList(
             new RedirectRule("/content/one", "/content/two", 302, "16 February 1974"),
-            new RedirectRule("/content/three", "/content/four", 301, null)
+            new RedirectRule("/content/three", "/content/four", 301, (String)null)
     );
     private List<RedirectRule> excelRules = Arrays.asList(
             new RedirectRule("/content/1", "/en/we-retail", 301, "16 February 1974"),
             new RedirectRule("/content/2", "/en/we-retail", 301, "16-02-1974"),
-            new RedirectRule("/content/three", "/en/we-retail", 301, null)
+            new RedirectRule("/content/three", "/en/we-retail", 301, (String)null)
     );
     private byte[] excelBytes;
 
@@ -109,7 +109,7 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule1 = rules.get("/content/one");
         assertEquals("/content/two", rule1.getTarget());
         assertEquals("16 February 1974", rule1.getUntilDate());
-        assertEquals(rule1.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule1.getUntilDateTime()));
+        assertEquals(rule1.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule1.getUntilDate()));
 
         RedirectRule rule2 = rules.get("/content/three");
         assertEquals("/en/we-retail", rule2.getTarget());
@@ -118,11 +118,11 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule3 = rules.get("/content/1");
         assertEquals("/en/we-retail", rule3.getTarget());
         assertEquals("16 February 1974", rule3.getUntilDate());
-        assertEquals(rule3.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule3.getUntilDateTime()));
+        assertEquals(rule3.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule3.getUntilDate()));
 
         RedirectRule rule4 = rules.get("/content/2");
         assertEquals("/en/we-retail", rule3.getTarget());
-        assertEquals(null, rule4.getUntilDateTime());
+        assertEquals(null, rule4.getUntilDate());
 
     }
 
@@ -144,7 +144,7 @@ public class ImportRedirectMapServletTest {
             assertEquals(excelRules.get(idx).getSource(), rule.getSource());
             assertEquals(excelRules.get(idx).getTarget(), rule.getTarget());
             assertEquals(excelRules.get(idx).getStatusCode(), rule.getStatusCode());
-            ZonedDateTime untilDateTime = excelRules.get(idx).getUntilDateTime();
+            ZonedDateTime untilDateTime = excelRules.get(idx).getUntilDate();
             LocalDate dt = untilDateTime == null ? null : untilDateTime.query(LocalDate::from);
             if (dt != null) {
                 // importer converts input date to dd MMMM yyyy

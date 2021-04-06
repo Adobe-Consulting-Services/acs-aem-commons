@@ -43,12 +43,12 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", "11 January 2021");
 
-        RedirectRule rule = new RedirectRule(resource.getValueMap());
+        RedirectRule rule = RedirectRule.from(resource.getValueMap());
         assertEquals("/content/we-retail/en/one", rule.getSource());
         assertEquals("/content/we-retail/en/two", rule.getTarget());
         assertEquals(302, rule.getStatusCode());
         assertEquals("11 January 2021", rule.getUntilDate());
-        assertEquals("11 January 2021", RedirectRule.DATE_FORMATTER.format(rule.getUntilDateTime()));
+        assertEquals("11 January 2021", RedirectRule.DATE_FORMATTER.format(rule.getUntilDate()));
 
     }
 
@@ -60,9 +60,9 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", "11 xxx 2021");
 
-        RedirectRule rule = new RedirectRule(resource.getValueMap());
+        RedirectRule rule = RedirectRule.from(resource.getValueMap());
         assertEquals("11 xxx 2021", rule.getUntilDate());
-        assertEquals(null, rule.getUntilDateTime());
+        assertEquals(null, rule.getUntilDate());
 
     }
 
@@ -77,8 +77,8 @@ public class RedirectRuleTest {
 
         Resource resource2 = context.create().resource("/var/acs-commons/redirects/rule2", props);
 
-        RedirectRule rule1 = new RedirectRule(resource1.getValueMap());
-        RedirectRule rule2 = new RedirectRule(resource2.getValueMap());
+        RedirectRule rule1 = RedirectRule.from(resource1.getValueMap());
+        RedirectRule rule2 = RedirectRule.from(resource2.getValueMap());
 
         assertTrue(rule1.equals(rule2));
         assertTrue(rule1.hashCode() == rule2.hashCode());
