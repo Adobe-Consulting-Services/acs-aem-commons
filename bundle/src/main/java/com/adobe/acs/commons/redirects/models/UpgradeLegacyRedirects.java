@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -35,9 +36,19 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 
 import java.lang.invoke.MethodHandles;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.UNTIL_DATE_PROPERTY_NAME;
 
 /**
  * In v5.0.4  redirects were stored under /conf/acs-commons/redirects.
@@ -51,6 +62,7 @@ import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RUL
 public class UpgradeLegacyRedirects {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final String REDIRECTS_HOME_5_0_4 = "/conf/acs-commons/redirects";
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
 
     private boolean moved;
 
@@ -83,7 +95,16 @@ public class UpgradeLegacyRedirects {
             for (Resource ch : legacyHome.getChildren()) {
                 if (ch.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
                     String nodeName = ResourceUtil.createUniqueChildName(globalHome, ch.getName());
-                    Map<String, Object> props = ch.getValueMap();
+                    Map<String, Object> props = new HashMap<>(ch.getValueMap());
+                    // convert untilDate to Calendar
+                    Object untilDate = props.get(UNTIL_DATE_PROPERTY_NAME);
+                    if(untilDate instanceof String && !StringUtils.isEmpty((String)untilDate)){
+                        String str = (String)untilDate;
+                        Calendar c = toCalendar(str);
+                        if(c != null) {
+                            props.put(UNTIL_DATE_PROPERTY_NAME, c);
+                        }
+                    }
                     Resource r = resolver.create(globalHome, nodeName, props);
                     resolver.delete(ch);
                     log.debug("moved {} to {}", ch.getPath(), r.getPath());
@@ -96,12 +117,31 @@ public class UpgradeLegacyRedirects {
                 legacyHome.adaptTo(ModifiableValueMap.class).put("moved", true);
                 resolver.commit();
             }
-        } catch (PersistenceException e){
+        } catch (Exception e){
             log.error("failed to move {} to {}", REDIRECTS_HOME_5_0_4, globalPath,  e);
+            resolver.revert();
         }
     }
 
     public boolean isMoved() {
         return moved;
     }
+
+    public static Calendar toCalendar(String dateStr){
+        Calendar calendar = null;
+        if(!StringUtils.isEmpty(dateStr)) {
+            try {
+                LocalDate ld = DATE_FORMATTER.parse(dateStr).query(LocalDate::from);
+                if (ld != null) {
+                    ZonedDateTime zdt = ld.atStartOfDay().plusDays(1).minusSeconds(1).atZone(ZoneId.systemDefault());
+                    calendar = GregorianCalendar.from(zdt);
+                }
+            } catch (DateTimeParseException e) {
+                // not fatal. log and continue
+                log.error("Invalid UntilDateTime {}", dateStr, e);
+            }
+        }
+        return calendar;
+    }
+
 }

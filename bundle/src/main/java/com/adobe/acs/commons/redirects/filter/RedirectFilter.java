@@ -318,7 +318,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                rules.add(new RedirectRule(res.getValueMap()));
+                rules.add(RedirectRule.from(res.getValueMap()));
             }
         }
         return rules;
@@ -352,7 +352,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (match != null) {
             RedirectRule redirectRule = match.getRule();
             ZonedDateTime now = ZonedDateTime.now();
-            ZonedDateTime untilDateTime = redirectRule.getUntilDateTime();
+            ZonedDateTime untilDateTime = redirectRule.getUntilDate();
             if (untilDateTime != null && untilDateTime.isBefore(now)) {
                 log.debug("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
             } else {

@@ -49,7 +49,6 @@ public class RedirectRule {
     public static final String TARGET_PROPERTY_NAME = "target";
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
 
     @Inject
     private String source;
@@ -70,29 +69,14 @@ public class RedirectRule {
         String source = resource.get(SOURCE_PROPERTY_NAME, "");
         String target = resource.get(TARGET_PROPERTY_NAME, "");
         int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
-        Calendar calendar = resource.get(UNTIL_DATE_PROPERTY_NAME, (Calendar) null);
-        if(calendar == null && resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
-            String untilStr = resource.get(UNTIL_DATE_PROPERTY_NAME, String.class);
-            calendar = parseDate(untilStr);
-        }
-        return new RedirectRule(source, target, statusCode, calendar);
-    }
-
-    private static Calendar parseDate(String dateStr){
         Calendar calendar = null;
-        if(!StringUtils.isEmpty(dateStr)) {
-            try {
-                LocalDate ld = DATE_FORMATTER.parse(dateStr).query(LocalDate::from);
-                if (ld != null) {
-                    ZonedDateTime zdt = ld.atStartOfDay().plusDays(1).minusSeconds(1).atZone(ZoneId.systemDefault());
-                    calendar = GregorianCalendar.from(zdt);
-                }
-            } catch (DateTimeParseException e) {
-                // not fatal. log and continue
-                log.error("Invalid UntilDateTime {}", dateStr, e);
+        if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
+            Object o = resource.get(UNTIL_DATE_PROPERTY_NAME);
+            if(o instanceof Calendar) {
+                calendar = (Calendar)o;
             }
         }
-        return calendar;
+        return new RedirectRule(source, target, statusCode, calendar);
     }
 
     public RedirectRule(String source, String target, int statusCode, Calendar calendar) {
@@ -109,10 +93,6 @@ public class RedirectRule {
         if (calendar != null) {
             untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
         }
-    }
-
-    public RedirectRule(String source, String target, int statusCode, String dateStr) {
-        this(source, target, statusCode, parseDate(dateStr));
     }
 
     public String getSource() {

@@ -113,8 +113,8 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             row.createCell(1).setCellValue(rule.getTarget());
             row.createCell(2).setCellValue(rule.getStatusCode());
             ZonedDateTime untilDateTime = rule.getUntilDate();
-            Cell cell = row.createCell(3);
             if (untilDateTime != null) {
+                Cell cell = row.createCell(3);
                 cell.setCellValue(Date.from(untilDateTime.toInstant()));
                 cell.setCellStyle(dateStyle);
             }

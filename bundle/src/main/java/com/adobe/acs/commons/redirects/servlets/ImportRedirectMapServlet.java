@@ -119,7 +119,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             props.put(RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget());
             props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(rule.getStatusCode()));
             if (rule.getUntilDate() != null) {
-                props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, rule.getUntilDate());
+                props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, GregorianCalendar.from(rule.getUntilDate()) );
             }
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
             props.put(JCR_CREATED, Calendar.getInstance());
@@ -142,7 +142,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 int statusCode = (int) row.getCell(2).getNumericCellValue();
                 Cell c4 = row.getCell(3);
                 Calendar untilDate = null;
-                if (c4 != null) {
+                if (DateUtil.isCellDateFormatted(c4)) {
                     try {
                         Instant instant = DateUtil.getJavaDate(c4.getNumericCellValue()).toInstant();
                         ZonedDateTime zdate = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
