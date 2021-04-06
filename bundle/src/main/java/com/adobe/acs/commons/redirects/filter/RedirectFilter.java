@@ -351,13 +351,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
         RedirectMatch match = match(slingRequest);
         if (match != null) {
             RedirectRule redirectRule = match.getRule();
-            ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime untilDateTime = redirectRule.getUntilDate();
-            if (untilDateTime != null && untilDateTime.isBefore(now)) {
+            if (untilDateTime != null && untilDateTime.isBefore(ZonedDateTime.now())) {
                 log.debug("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
-
                 String resourcePath = pathInfo.getResourcePath();
                 log.debug("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
                         System.currentTimeMillis() - t0);
@@ -374,18 +372,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
                     if(preserveQueryString) {
                         String queryString = slingRequest.getQueryString();
                         if (queryString != null) {
-                            int idx = location.indexOf('?');
-                            if (idx == -1) {
-                                idx = location.indexOf('#');
-                            }
-                            if (idx != -1) {
-                                location = location.substring(0, idx);
-                            }
-
-                            location += "?" + queryString;
+                            location = addQueryString(location, queryString);
                         }
                     }
-
                     if(urlAdjuster != null){
                         location = urlAdjuster.adjust(slingRequest, location);
                     }
@@ -402,6 +391,20 @@ public class RedirectFilter extends AnnotatedStandardMBean
             }
         }
         return redirected;
+    }
+
+    private String addQueryString(String location, String queryString){
+        int idx = location.indexOf('?');
+        if (idx == -1) {
+            idx = location.indexOf('#');
+        }
+        if (idx != -1) {
+            location = location.substring(0, idx);
+        }
+
+        location += "?" + queryString;
+
+        return location;
     }
 
     String mapUrl(String url, ResourceResolver resourceResolver) {
