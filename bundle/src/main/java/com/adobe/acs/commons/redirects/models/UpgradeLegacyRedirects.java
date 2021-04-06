@@ -86,28 +86,15 @@ public class UpgradeLegacyRedirects {
         }
 
         String globalPath = "/conf/global/" + redirectFilter.getBucket() + "/" + redirectFilter.getConfigName();
-        Resource globalHome = resolver.getResource(globalPath);
-        if (globalHome == null) {
+        Resource globalConf = resolver.getResource(globalPath);
+        if (globalConf == null) {
             return;
         }
         try {
             int numMoved = 0;
             for (Resource ch : legacyHome.getChildren()) {
                 if (ch.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
-                    String nodeName = ResourceUtil.createUniqueChildName(globalHome, ch.getName());
-                    Map<String, Object> props = new HashMap<>(ch.getValueMap());
-                    // convert untilDate to Calendar
-                    Object untilDate = props.get(UNTIL_DATE_PROPERTY_NAME);
-                    if(untilDate instanceof String && !StringUtils.isEmpty((String)untilDate)){
-                        String str = (String)untilDate;
-                        Calendar c = toCalendar(str);
-                        if(c != null) {
-                            props.put(UNTIL_DATE_PROPERTY_NAME, c);
-                        }
-                    }
-                    Resource r = resolver.create(globalHome, nodeName, props);
-                    resolver.delete(ch);
-                    log.debug("moved {} to {}", ch.getPath(), r.getPath());
+                    move(ch, globalConf);
                     numMoved++;
                 }
             }
@@ -121,6 +108,25 @@ public class UpgradeLegacyRedirects {
             log.error("failed to move {} to {}", REDIRECTS_HOME_5_0_4, globalPath,  e);
             resolver.revert();
         }
+    }
+
+    private void move(Resource legacyRedirect, Resource globalConf) throws PersistenceException {
+        String nodeName = ResourceUtil.createUniqueChildName(globalConf, legacyRedirect.getName());
+        Map<String, Object> props = new HashMap<>(legacyRedirect.getValueMap());
+        // convert untilDate to Calendar
+        Object untilDate = props.get(UNTIL_DATE_PROPERTY_NAME);
+        if(untilDate instanceof String && !StringUtils.isEmpty((String)untilDate)){
+            String str = (String)untilDate;
+            Calendar c = toCalendar(str);
+            if(c != null) {
+                props.put(UNTIL_DATE_PROPERTY_NAME, c);
+            }
+        }
+        ResourceResolver resolver = legacyRedirect.getResourceResolver();
+        Resource r = resolver.create(globalConf, nodeName, props);
+        resolver.delete(legacyRedirect);
+        log.debug("moved {} to {}", legacyRedirect.getPath(), r.getPath());
+
     }
 
     public boolean isMoved() {

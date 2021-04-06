@@ -24,9 +24,10 @@ import org.junit.Test;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.adobe.acs.commons.redirects.models.SubstitutionElement.BackReferenceElement;
+import static com.adobe.acs.commons.redirects.models.SubstitutionElement.StaticElement;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static com.adobe.acs.commons.redirects.models.SubstitutionElement.*;
 
 public class SubstitutionElementTest {
 

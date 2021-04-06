@@ -26,7 +26,6 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Map;
 
