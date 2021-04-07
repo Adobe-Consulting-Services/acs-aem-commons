@@ -36,6 +36,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ *  A Sling model to list available redirect configurations on
+ *  /apps/acs-commons/content/redirect-manager/redirects.html
+ */
 @Model(adaptables = SlingHttpServletRequest.class)
 public class Configurations {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -60,7 +64,7 @@ public class Configurations {
             RedirectConfiguration cfg = new RedirectConfiguration(resource, storageSuffix);
             lst.add(cfg);
         }
-        lst.sort(Comparator.comparing(o -> o.getName()));
+        lst.sort(Comparator.comparing(RedirectConfiguration::getName));
         return lst;
     }
 }

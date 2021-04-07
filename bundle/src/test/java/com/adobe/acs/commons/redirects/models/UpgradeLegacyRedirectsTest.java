@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -28,7 +29,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.Calendar;
+
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -67,15 +71,22 @@ public class UpgradeLegacyRedirectsTest {
                 "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
                 RedirectRule.SOURCE_PROPERTY_NAME, "/1",
                 RedirectRule.TARGET_PROPERTY_NAME, "/2",
-                RedirectRule.STATUS_CODE_PROPERTY_NAME, "301");
+                RedirectRule.STATUS_CODE_PROPERTY_NAME, "301",
+                RedirectRule.UNTIL_DATE_PROPERTY_NAME, "16 February 2021");
 
         UpgradeLegacyRedirects model =
                 context.getService(ModelFactory.class).createModel(context.request(), UpgradeLegacyRedirects.class);
         assertTrue(model.isMoved());
         assertNull("/conf/acs-commons/redirects/redirect-1 should be moved to \"/conf/global/settings/redirects/redirect-1\"",
                 context.resourceResolver().getResource("/conf/acs-commons/redirects/redirect-1"));
+        Resource movedRule = context.resourceResolver().getResource("/conf/global/settings/redirects/redirect-1");
         assertNotNull("/conf/acs-commons/redirects/redirect-1 should be moved to \"/conf/global/settings/redirects/redirect-1\"",
-                context.resourceResolver().getResource("/conf/global/settings/redirects/redirect-1"));
+                movedRule);
+        // string date should  be converted to Java Calendar
+        Calendar untilDate = movedRule.getValueMap().get(RedirectRule.UNTIL_DATE_PROPERTY_NAME, Calendar.class);
+        assertEquals(2021, untilDate.get(Calendar.YEAR));
+        assertEquals(1, untilDate.get(Calendar.MONTH)); // 0-based
+        assertEquals(16, untilDate.get(Calendar.DATE));
         assertTrue(context.resourceResolver().getResource("/conf/acs-commons/redirects").getValueMap().get("moved", false));
     }
 }

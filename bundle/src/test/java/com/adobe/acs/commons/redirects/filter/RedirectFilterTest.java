@@ -98,7 +98,6 @@ public class RedirectFilterTest {
         Whitebox.setInternalState(filter, "resourceResolverFactory", resourceResolverFactory);
 
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
-        when(configuration.mapUrls()).thenReturn(true);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
@@ -120,7 +119,7 @@ public class RedirectFilterTest {
             } else {
                 return path;
             }
-        }).when(filter).mapUrl(anyString(), any(ResourceResolver.class));
+        }).when(filter).mapUrl(anyString(), any(SlingHttpServletRequest.class));
 
         configResolver = Mockito.mock(ConfigurationResourceResolver.class);
         Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -230,13 +229,14 @@ public class RedirectFilterTest {
         MockSlingHttpServletResponse response = navigate("/content/we-retail/en/one.html");
 
         assertEquals(301, response.getStatus());
-        assertEquals("/en/two", response.getHeader("Location"));
+        assertEquals("/content/we-retail/en/two.html", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
 
     @Test
     public void testNavigateWithRewrite() throws Exception {
+        when(filter.mapUrls()).thenReturn(true); // turn on resolver.map()
         withRules(
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
                         302, (Calendar)null));
@@ -253,7 +253,6 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
                         302, (Calendar)null));
-        when(filter.mapUrls()).thenReturn(false); // turn off resolver.map() in osgi config
 
         MockSlingHttpServletResponse response = navigate("/content/we-retail/en/one.html");
 
@@ -321,7 +320,7 @@ public class RedirectFilterTest {
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
 
-        assertEquals("/en/two", response.getHeader("Location"));
+        assertEquals("/content/we-retail/en/two", response.getHeader("Location"));
     }
 
     @Test
@@ -334,21 +333,7 @@ public class RedirectFilterTest {
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
 
-        assertEquals("/en/two", response.getHeader("Location"));
-    }
-
-    @Test
-    public void testMatchRewrittenPagePath() throws Exception {
-        withRules(
-                new RedirectRule("/en/one", "/en/two",
-                        302, (Calendar)null));
-        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/one.html");
-
-        assertEquals(302, response.getStatus());
-        assertEquals("/en/two.html", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
-
+        assertEquals("/content/we-retail/en/two", response.getHeader("Location"));
     }
 
     @Test

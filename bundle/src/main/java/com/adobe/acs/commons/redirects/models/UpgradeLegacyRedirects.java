@@ -55,7 +55,7 @@ import static com.adobe.acs.commons.redirects.models.RedirectRule.UNTIL_DATE_PRO
  * In 5.0.5+ the default path to store redirect was changed to /conf/global/settings/redirects to be
  * compatible with Sling context aware configurations.
  *
- * This class is invoked from /apps/acs-commons/content/redirect-manager/redirects.html to
+ * This model is invoked from /apps/acs-commons/content/redirect-manager/redirects.html to
  * move redirect rules from /conf/acs-commons/redirects to /conf/global/settings/redirects
  */
 @Model(adaptables = SlingHttpServletRequest.class)
@@ -110,7 +110,7 @@ public class UpgradeLegacyRedirects {
         }
     }
 
-    private void move(Resource legacyRedirect, Resource globalConf) throws PersistenceException {
+    void move(Resource legacyRedirect, Resource globalConf) throws PersistenceException {
         String nodeName = ResourceUtil.createUniqueChildName(globalConf, legacyRedirect.getName());
         Map<String, Object> props = new HashMap<>(legacyRedirect.getValueMap());
         // convert untilDate to Calendar
@@ -133,7 +133,7 @@ public class UpgradeLegacyRedirects {
         return moved;
     }
 
-    public static Calendar toCalendar(String dateStr){
+    static Calendar toCalendar(String dateStr){
         Calendar calendar = null;
         if(!StringUtils.isEmpty(dateStr)) {
             try {

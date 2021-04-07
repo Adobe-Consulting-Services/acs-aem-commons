@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
@@ -28,14 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.lang.invoke.MethodHandles;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,20 +58,6 @@ public class RedirectRule {
 
     private SubstitutionElement[] substitutions;
 
-    public static RedirectRule from(ValueMap resource) {
-        String source = resource.get(SOURCE_PROPERTY_NAME, "");
-        String target = resource.get(TARGET_PROPERTY_NAME, "");
-        int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
-        Calendar calendar = null;
-        if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
-            Object o = resource.get(UNTIL_DATE_PROPERTY_NAME);
-            if(o instanceof Calendar) {
-                calendar = (Calendar)o;
-            }
-        }
-        return new RedirectRule(source, target, statusCode, calendar);
-    }
-
     public RedirectRule(String source, String target, int statusCode, Calendar calendar) {
         this.source = source.trim();
         this.target = target.trim();
@@ -93,6 +72,20 @@ public class RedirectRule {
         if (calendar != null) {
             untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
         }
+    }
+
+    public static RedirectRule from(ValueMap resource) {
+        String source = resource.get(SOURCE_PROPERTY_NAME, "");
+        String target = resource.get(TARGET_PROPERTY_NAME, "");
+        int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
+        Calendar calendar = null;
+        if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
+            Object o = resource.get(UNTIL_DATE_PROPERTY_NAME);
+            if(o instanceof Calendar) {
+                calendar = (Calendar)o;
+            }
+        }
+        return new RedirectRule(source, target, statusCode, calendar);
     }
 
     public String getSource() {

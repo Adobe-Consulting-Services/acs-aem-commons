@@ -129,11 +129,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
         @AttributeDefinition(name = "Enable Redirect Filter", description = "Indicates whether the redirect filter is enabled or not.", type = AttributeType.BOOLEAN)
-        boolean enabled() default true;
+        boolean enabled() default false;
 
         @AttributeDefinition(name = "Rewrite Location Header", description = "Apply Sling Resource Mappings (/etc/map) to Location header. "
-                + "Use if Location header should rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
-        boolean mapUrls() default true;
+                + "Use if Location header should be rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
+        boolean mapUrls() default false;
 
         @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
         String[] extensions() default {};
@@ -367,7 +367,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                         location += "." + ext;
                     }
                     if (mapUrls()) {
-                        location = mapUrl(location, slingRequest.getResourceResolver());
+v                        location = mapUrl(location, slingRequest);
                     }
                     if(preserveQueryString) {
                         String queryString = slingRequest.getQueryString();
@@ -407,8 +407,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return location;
     }
 
-    String mapUrl(String url, ResourceResolver resourceResolver) {
-        return resourceResolver.map(url);
+    String mapUrl(String url, SlingHttpServletRequest slingRequest) {
+        return slingRequest.getResourceResolver().map(slingRequest, url);
     }
 
     @Override
@@ -516,8 +516,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         // find context aware configuration for the requested resource, e.g. /conf/my-site/settings/redirects
         Resource configResource = configResolver.getResource(resource, config.bucketName(), config.configName());
         if(configResource == null){
-            log.debug("no caconfig found for {}, bucketName: {}, configName: {}",
-                    resource.getPath(), config.bucketName(), config.configName());
+            log.warn("no caconfig found for {}, bucketName: {}, configName: {}, user: {}",
+                    resource.getPath(), config.bucketName(), config.configName(), slingRequest.getResourceResolver().getUserID());
             return null;
         }
         String configPath = configResource.getPath();
@@ -527,11 +527,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 return cfg == null ? RedirectConfiguration.EMPTY : cfg;
             });
             String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
-            RedirectMatch rule = rules.match(resourcePath);
-            if (rule == null && mapUrls()) {
-                rule = rules.match(mapUrl(resourcePath, slingRequest.getResourceResolver()));
-            }
-            return rule;
+            return rules.match(resourcePath);
         } catch (ExecutionException e){
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;

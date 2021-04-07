@@ -39,7 +39,9 @@ public interface RedirectFilterMBean {
     @Description("Known redirect configurations")
     Collection<String> getRedirectConfigurations();
 
+    @Description("Configuration bucket to store redirects")
     String getBucket();
 
+    @Description("Node name to store redirect configurations")
     String getConfigName();
 }

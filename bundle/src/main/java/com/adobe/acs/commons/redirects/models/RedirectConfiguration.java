@@ -32,7 +32,14 @@ import java.util.regex.Pattern;
  * A collection of redirect rules
  */
 public class RedirectConfiguration {
+    /**
+     * path rules keyed by source, e.g. path1 -> path2.
+     * This makes lookup by path a O(1) operation
+     */
     private Map<String, RedirectRule> pathRules;
+    /**
+     * regex rules keyed by their regex pattern.
+     */
     private Map<Pattern, RedirectRule> patternRules;
     private String path;
     private String name;

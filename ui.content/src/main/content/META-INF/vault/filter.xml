@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/conf/rep:policy"/>
-    <filter root="/conf/acs-commons/redirects" mode="merge"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
