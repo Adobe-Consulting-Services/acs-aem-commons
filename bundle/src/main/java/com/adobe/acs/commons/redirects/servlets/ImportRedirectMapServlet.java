@@ -156,6 +156,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 first = false;
             }
         }
+        log.debug("{} rules read from spreadsheet", rules.size());
         return rules;
     }
 

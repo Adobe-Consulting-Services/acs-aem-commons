@@ -79,6 +79,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
@@ -271,6 +272,15 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
     }
 
+    /**
+     * Detect the redirect configuration and invalidate the cached rules
+     *
+     * Given an even path, e.g. /conf/global/settings/redirects/redirect-rule-2
+     * this method will figure out the corresponding configuration (/conf/global/settings/redirects)
+     * and invalidate the cached rules
+     *
+     * @param changePath    the event path
+     */
     void invalidate(String changePath) {
         String redirectSubPath = config.bucketName() + "/" + config.configName();
         try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
@@ -357,28 +367,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
                 String resourcePath = pathInfo.getResourcePath();
-                log.debug("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
-                        System.currentTimeMillis() - t0);
 
-                String location = redirectRule.evaluate(match.getMatcher());
-                if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
-                    String ext = pathInfo.getExtension();
-                    if (ext != null && !location.endsWith(ext)) {
-                        location += "." + ext;
-                    }
-                    if (mapUrls()) {
-v                        location = mapUrl(location, slingRequest);
-                    }
-                    if(preserveQueryString) {
-                        String queryString = slingRequest.getQueryString();
-                        if (queryString != null) {
-                            location = addQueryString(location, queryString);
-                        }
-                    }
-                    if(urlAdjuster != null){
-                        location = urlAdjuster.adjust(slingRequest, location);
-                    }
-                }
+                String location = evaluate(match, slingRequest);
+                log.trace("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
+                        System.currentTimeMillis() - t0);
 
                 log.debug("Redirecting {} to {}, statusCode: {}",
                         resourcePath, location, redirectRule.getStatusCode());
@@ -393,7 +385,37 @@ v                        location = mapUrl(location, slingRequest);
         return redirected;
     }
 
-    private String addQueryString(String location, String queryString){
+    /**
+     * Evaluate the rule and return the value to put in Location header
+     *
+     * Depending on the configuration appends query string and rewrites the result using
+     * {@link ResourceResolver#map(HttpServletRequest, String)}
+     */
+    String evaluate(RedirectMatch match, SlingHttpServletRequest slingRequest){
+        RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
+        String location = match.getRule().evaluate(match.getMatcher());
+        if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
+            String ext = pathInfo.getExtension();
+            if (ext != null && !location.endsWith(ext)) {
+                location += "." + ext;
+            }
+            if (mapUrls()) {
+                location = mapUrl(location, slingRequest);
+            }
+            if(preserveQueryString) {
+                String queryString = slingRequest.getQueryString();
+                if (queryString != null) {
+                    location = preserveQueryString(location, queryString);
+                }
+            }
+            if(urlAdjuster != null){
+                location = urlAdjuster.adjust(slingRequest, location);
+            }
+        }
+        return location;
+    }
+
+    String preserveQueryString(String location, String queryString){
         int idx = location.indexOf('?');
         if (idx == -1) {
             idx = location.indexOf('#');
@@ -502,11 +524,6 @@ v                        location = mapUrl(location, slingRequest);
 
     /**
      * Match a path to a redirect configuration.
-     * <p>
-     * This method performs two tries: first for the request path, e.g.
-     * /content/we.retail/en/page. If the first try didn't match then rewrite the url
-     * ( /content/we.retail/en/page -> /en/page ) and try it.
-     * </p>
      *
      * @param slingRequest the request to match
      * @return redirect match or <code>null</code>
