@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.4...HEAD
 
+### Fixed
+- #2562 - Fixed cache refresh on versioned clientlibs request when enforceMd5 is false (default).
+
 ### Added
 - #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.
 - #2512 - Added Contextual Content Variables feature
