@@ -510,19 +510,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     /**
-     * @return resource path without extension
-     */
-    private static String getResourcePath(RequestPathInfo pathInfo) {
-        String resourcePath = pathInfo.getResourcePath();
-        int sep = resourcePath.indexOf('.');
-        if (sep != -1 && !resourcePath.startsWith("/content/dam/")) {
-            // strip off extension if present
-            resourcePath = resourcePath.substring(0, sep);
-        }
-        return resourcePath;
-    }
-
-    /**
      * Match a path to a redirect configuration.
      *
      * @param slingRequest the request to match
@@ -543,8 +530,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 RedirectConfiguration cfg = loadRules(configPath);
                 return cfg == null ? RedirectConfiguration.EMPTY : cfg;
             });
-            String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
-            return rules.match(resourcePath);
+            return rules.match(slingRequest.getRequestPathInfo().getResourcePath());
         } catch (ExecutionException e){
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;

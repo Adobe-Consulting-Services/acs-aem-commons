@@ -61,12 +61,24 @@ public class RedirectConfiguration {
             if (rule.getRegex() != null) {
                 patternRules.put(rule.getRegex(), rule);
             } else {
-                pathRules.put(rule.getSource(), rule);
+                pathRules.put(normalizePath(rule.getSource()), rule);
             }
         }
 
     }
 
+    /**
+     * @return resource path without .html extension
+     */
+
+    public static String normalizePath(String resourcePath) {
+        int sep = resourcePath.lastIndexOf('.');
+        if (sep != -1 && !resourcePath.startsWith("/content/dam/")) {
+            // strip off extension if present
+            resourcePath = resourcePath.substring(0, sep);
+        }
+        return resourcePath;
+    }
 
     public Map<String, RedirectRule> getPathRules() {
         return pathRules;
@@ -84,14 +96,26 @@ public class RedirectConfiguration {
         return name;
     }
 
+    /**
+     * Match a request path to a redirect configuration
+     * Performs two tries:
+     * <ol>
+     *     <li>Match by exact path. This is O(1) lookup in a hashtable keyed by path</li>
+     *     <li>Match by a regular expression. This is O(N) linear lookup in a list of rules keyed by their regex patterns</li>
+     * </ol>
+     *
+     * @param requestPath   the request to match
+     * @return  match or null
+     */
     public RedirectMatch match(String requestPath) {
+        String normalizedPath = normalizePath(requestPath);
         RedirectMatch match = null;
-        RedirectRule rule = getPathRules().get(requestPath);
+        RedirectRule rule = getPathRules().get(normalizedPath);
         if (rule != null) {
             match = new RedirectMatch(rule, null);
         } else {
             for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                Matcher m = entry.getKey().matcher(requestPath);
+                Matcher m = entry.getKey().matcher(normalizedPath);
                 if (m.matches()) {
                     match = new RedirectMatch(entry.getValue(), m);
                     break;

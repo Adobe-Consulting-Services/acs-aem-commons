@@ -291,6 +291,19 @@ public class RedirectFilterTest {
     }
 
     @Test
+    public void testMatchWithHtmlExtension() throws Exception {
+        withRules(
+                new RedirectRule("/content/we-retail/en/events/test.html", "/content/we-retail/en.html",
+                        302, (Calendar)null));
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/events/test.html");
+
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        assertEquals("/content/we-retail/en.html", response.getHeader("Location"));
+    }
+
+    @Test
     public void testMatchRegexAsset() throws Exception {
         withRules(
                 new RedirectRule("/content/dam/we-retail/en/events/(.*?).pdf", "/content/dam/geometrixx/en/target/welcome.pdf",
