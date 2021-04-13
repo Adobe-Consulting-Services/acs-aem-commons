@@ -651,7 +651,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM);
@@ -665,7 +665,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
@@ -679,7 +679,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCacheWithDot_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.foobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
@@ -702,6 +702,25 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5Match() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(htmlLibrary);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+
+        verify(htmlLibraryManager).getLibrary(LibraryType.JS, "/etc/clientlibs/some");
+        verify(htmlLibrary, never()).getInputStream(false);
+    }
+
+    @Test
+    public void doFilter_foundInCache_md5Match_enforceMd5() throws Exception {
+        PrivateAccessor.setField(factory, "enforceMd5", true);
+
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
@@ -712,11 +731,14 @@ public class VersionedClientlibsTransformerFactoryTest {
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
         verifyNo404();
+
+        verify(htmlLibraryManager).getLibrary(LibraryType.JS, "/etc/clientlibs/some");
+        verify(htmlLibrary, never()).getInputStream(false);
     }
 
     @Test
     public void doFilter_foundInCacheWithDot_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min." + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -730,7 +752,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -744,7 +766,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCacheWithDot_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.foobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -791,7 +813,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     
         assertEquals(PATH +".css", attributesCaptor.getValue().getValue(0));
     }
-    
+
     private void verifyNothingHappened() throws IOException, ServletException {
         verifyNoInteractions(htmlLibraryManager);
         verifyNo404();
