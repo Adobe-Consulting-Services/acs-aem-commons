@@ -82,6 +82,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.List;
@@ -530,7 +531,16 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 RedirectConfiguration cfg = loadRules(configPath);
                 return cfg == null ? RedirectConfiguration.EMPTY : cfg;
             });
-            return rules.match(slingRequest.getRequestPathInfo().getResourcePath());
+            String resourcePath = slingRequest.getRequestPathInfo().getResourcePath(); // /content/mysite/en/page.html
+            RedirectMatch m = rules.match(resourcePath);
+            if (m == null && mapUrls()) { // try mapped url
+                String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
+                if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
+                    String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
+                    m = rules.match(mappedPath);
+                }
+            }
+            return m;
         } catch (ExecutionException e){
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;

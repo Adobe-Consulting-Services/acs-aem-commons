@@ -28,7 +28,6 @@ import org.apache.http.Header;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
@@ -111,11 +110,10 @@ public class RedirectFilterTest {
         // mimic url shortening and removing extension by Sling Mappings
         doAnswer(invocation -> {
             String path = invocation.getArgument(0, String.class);
-            // /content/we-retail/en/page.html --> /en/page
+            // /content/we-retail/en/page.html --> https://www.we-retail.com/en/page.html
             if (path.startsWith("/content/we-retail/")) {
                 return path
-                        .replace("/content/we-retail/", "/")
-                        .replace(".html", "");
+                        .replace("/content/we-retail/", "https://www.we-retail.com/");
             } else {
                 return path;
             }
@@ -243,7 +241,22 @@ public class RedirectFilterTest {
         MockSlingHttpServletResponse response = navigate("/content/we-retail/en/one.html");
 
         assertEquals(302, response.getStatus());
-        assertEquals("/en/two", response.getHeader("Location"));
+        assertEquals("https://www.we-retail.com/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+
+    @Test
+    public void testMatchWithRewrite() throws Exception {
+        when(filter.mapUrls()).thenReturn(true); // turn on resolver.map()
+        withRules(
+                new RedirectRule("/en/one", "/en/two",
+                        302, (Calendar)null));
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/en/two.html", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
