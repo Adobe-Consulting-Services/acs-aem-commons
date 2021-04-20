@@ -253,7 +253,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     public void handleEvent(Event event) {
         String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
         String redirectSubPath = config.bucketName() + "/" + config.configName();
-        if (path.contains(redirectSubPath)) {
+        if (path != null && path.contains(redirectSubPath)) {
             log.debug(event.toString());
             // loading redirect configurations can be expensive and needs to run
             // asynchronously,
