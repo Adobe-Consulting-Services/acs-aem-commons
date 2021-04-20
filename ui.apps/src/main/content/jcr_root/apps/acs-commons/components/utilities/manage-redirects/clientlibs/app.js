@@ -182,6 +182,7 @@
 
         var source = tr.find('.source').data('value');
         var target = tr.find('.target').data('value');
+        var note = tr.find('.note').data('value');
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
         var cloudFront = tr.find('.cloudFront').html();
@@ -191,6 +192,7 @@
         var select = $('#status-code-select-box').get(0);
         select.value =statusCode;
         dialog.find('.untilDate').val(untilDate);
+        dialog.find('.note').val(note);
 
         dialog.find('.acs-redirect-rule-form').attr('action', path);
         dialog.find('.acs-redirect-rule-form').attr('id', name);
@@ -242,11 +244,13 @@
            $.each(rows, function(rowIndex, row) {
                var source = $(row).find('.source').data('value');
                var target  = $(row).find('.target').data('value');
+               var comment  = $(row).find('.note').data('value');
                if(( source && source.toLowerCase().indexOf(searchText.toLowerCase()) != -1 ) ||
-                (target && target.toLowerCase().indexOf(searchText.toLowerCase()) != -1)) {
+                (target && target.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
+                (comment && comment.toLowerCase().indexOf(searchText.toLowerCase()) != -1)) {
                    $(row).show();
                } else {
-                   $(row).hide();
+                   if(rowIndex > 0) $(row).hide();
                }
            });
         });

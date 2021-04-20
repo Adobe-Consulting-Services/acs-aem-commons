@@ -42,6 +42,7 @@ public class RedirectRule {
     public static final String TARGET_PROPERTY_NAME = "target";
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
+    public static final String NOTE_PROPERTY_NAME = "note";
 
     @Inject
     private String source;
@@ -52,16 +53,20 @@ public class RedirectRule {
     @Inject
     private int statusCode;
 
+    @Inject
+    private String note;
+
     private ZonedDateTime untilDate;
 
     private Pattern ptrn;
 
     private SubstitutionElement[] substitutions;
 
-    public RedirectRule(String source, String target, int statusCode, Calendar calendar) {
+    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
         this.source = source.trim();
         this.target = target.trim();
         this.statusCode = statusCode;
+        this.note = note;
 
         String regex = this.source;
         if (regex.endsWith("*")) {
@@ -77,6 +82,7 @@ public class RedirectRule {
     public static RedirectRule from(ValueMap resource) {
         String source = resource.get(SOURCE_PROPERTY_NAME, "");
         String target = resource.get(TARGET_PROPERTY_NAME, "");
+        String note = resource.get(NOTE_PROPERTY_NAME, "");
         int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
         Calendar calendar = null;
         if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
@@ -85,7 +91,7 @@ public class RedirectRule {
                 calendar = (Calendar)o;
             }
         }
-        return new RedirectRule(source, target, statusCode, calendar);
+        return new RedirectRule(source, target, statusCode, calendar, note);
     }
 
     public String getSource() {
@@ -94,6 +100,10 @@ public class RedirectRule {
 
     public String getTarget() {
         return target;
+    }
+
+    public String getNote() {
+        return note;
     }
 
     public int getStatusCode() {
@@ -110,8 +120,8 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s}",
-                source, target, statusCode, untilDate);
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s}",
+                source, target, statusCode, untilDate, note);
     }
 
     @Override
