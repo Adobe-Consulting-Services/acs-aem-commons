@@ -49,7 +49,7 @@
     <div class="notification success hidden">
         <h2>Success</h2>
 
-        <p>A new ACL package has been created at: <a class="package-manager-link" target="_blank" x-cq-linkchecker="skip" href=""><span
+        <p>A new package has been created at: <a class="package-manager-link" target="_blank" x-cq-linkchecker="skip" href=""><span
                 class="package-path"></span></a></p>
 
         <ul class="filters"></ul>
