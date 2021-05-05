@@ -209,7 +209,7 @@ public class WorkflowRemoverTest {
         remover.performCleanupActivity(actionManager);
 
         Mockito.verify(workflowInstanceRemover, Mockito.times(1)).removeWorkflowInstances(Mockito.eq(ctx.resourceResolver()),
-                Mockito.eq(remover.getModelIds()), Mockito.eq(remover.getStatuses()), Mockito.eq(remover.getPayloads()), Mockito.eq(remover.getOlderThan()),
+                Mockito.eq(remover.getModelIds()), Mockito.eq(remover.getStatuses()), Mockito.eq(remover.getPayloads()), Mockito.eq(remover.getOlderThan()), Mockito.eq(remover.getOlderThanMillis()),
                 Mockito.anyInt(), Mockito.anyInt());
 
     }

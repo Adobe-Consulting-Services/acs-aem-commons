@@ -133,6 +133,13 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     public static final String PROP_WORKFLOWS_OLDER_THAN = "workflow.older-than";
 
 
+    private long olderThanMillis = 0L;
+
+    @Property(label = "Older Than Milliseconds",
+        description = "Only remove Workflow Instances whose payloads start date was at least desired Milliseconds ago",
+        longValue = 0)
+    public static final String PROP_WORKFLOWS_OLDER_THAN_MILLIS = "workflow.older-than-millis";
+
     private static final int DEFAULT_BATCH_SIZE = 1000;
     private int batchSize = DEFAULT_BATCH_SIZE;
     @Property(label = "Batch Size",
@@ -162,7 +169,8 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
                     models,
                     statuses,
                     payloads,
-                    olderThan, 
+                    olderThan,
+                    olderThanMillis,
                     batchSize,
                     maxDuration);
 
@@ -220,6 +228,8 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             olderThan = Calendar.getInstance();
             olderThan.setTimeInMillis(olderThanTs);
         }
+
+        olderThanMillis = PropertiesUtil.toLong(config.get(PROP_WORKFLOWS_OLDER_THAN_MILLIS), 0);
         
         batchSize = PropertiesUtil.toInteger(config.get(PROP_BATCH_SIZE), DEFAULT_BATCH_SIZE);
         if (batchSize < 1) {

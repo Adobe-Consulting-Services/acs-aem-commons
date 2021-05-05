@@ -194,9 +194,10 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<String> modelIds,
                                        final Collection<String> statuses,
                                        final Collection<Pattern> payloads,
-                                       final Calendar olderThan)
+                                       final Calendar olderThan,
+                                       final long olderThanMillis)
             throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
-        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, BATCH_SIZE);
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, olderThanMillis, BATCH_SIZE);
     }
 
     /**
@@ -207,9 +208,10 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<String> statuses,
                                        final Collection<Pattern> payloads,
                                        final Calendar olderThan,
+                                       final long olderThanMillis,
                                        final int batchSize)
             throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
-        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, batchSize, -1);
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, olderThanMillis, batchSize, -1);
     }
 
     /**
@@ -221,6 +223,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                        final Collection<String> statuses,
                                        final Collection<Pattern> payloads,
                                        final Calendar olderThan,
+                                       final long olderThanMillis,
                                        final int batchSize,
                                        final int maxDurationInMins)
             throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
@@ -280,6 +283,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                         final String model = properties.get(PN_MODEL_ID, String.class);
                         final Calendar startTime = properties.get(PN_START_TIME, properties.get(PN_STARTED_AT, Calendar.class));
                         final String payload = properties.get(PAYLOAD_PATH, String.class);
+                        final long startTimeDelta = start - olderThanMillis;
 
                         if (StringUtils.isBlank(payload)) {
                             log.warn("Unable to find payload for Workflow instance [ {} ]", instance.getPath());
@@ -296,6 +300,11 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                         } else if (olderThan != null && startTime != null && startTime.after(olderThan)) {
                             log.trace("Workflow instance [ {} ] has non-matching start time of [ {} ]", instance.getPath(),
                                     startTime);
+                            remaining++;
+                            continue;
+                        } else if (olderThanMillis > 0 && startTime != null && start - olderThanMillis < startTime.getTimeInMillis()) {
+                            log.trace("Workflow instance [ {} ] has non-matching start time delta of [ {} ]ms", instance.getPath(),
+                                olderThanMillis);
                             remaining++;
                             continue;
                         } else {

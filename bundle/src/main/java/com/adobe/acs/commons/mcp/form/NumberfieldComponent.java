@@ -17,10 +17,21 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Form components for MCP
- */
-@Version("5.3.0")
 package com.adobe.acs.commons.mcp.form;
 
-import org.osgi.annotation.versioning.Version;
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * date picker field component
+ */
+@ProviderType
+public class NumberfieldComponent extends FieldComponent {
+    public NumberfieldComponent(){
+      setResourceType("granite/ui/components/coral/foundation/form/numberfield");
+    }
+
+    @Override
+    public void init() {
+      // Nothing special happens here
+    }
+}

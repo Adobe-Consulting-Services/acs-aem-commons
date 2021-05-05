@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.mcp.form.NumberfieldComponent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,6 +70,10 @@ public class WorkflowRemover extends ProcessDefinition {
     @FormField(name = "Workflows Older Than", description = "only remove workflows older than the specified date",
             component = DatePickerComponent.class)
     public String olderThanVal;
+
+    @FormField(name = "Workflows Older Than Milliseconds", description = "only remove workflows that were started longer than the specified milliseconds ago",
+            component = NumberfieldComponent.class)
+    public long olderThanMillis;
 
     @FormField(
             name = "Workflow Models",
@@ -125,7 +130,7 @@ public class WorkflowRemover extends ProcessDefinition {
 
             parseParameters();
 
-            workflowInstanceRemover.removeWorkflowInstances(rr, modelIds, statuses, payloads, olderThan, BATCH_SIZE,
+            workflowInstanceRemover.removeWorkflowInstances(rr, modelIds, statuses, payloads, olderThan, olderThanMillis, BATCH_SIZE,
                     MAX_DURATION_MINS);
 
             WorkflowRemovalStatus status = workflowInstanceRemover.getStatus();
@@ -185,6 +190,10 @@ public class WorkflowRemover extends ProcessDefinition {
 
     public Calendar getOlderThan() {
         return olderThan;
+    }
+
+    public long getOlderThanMillis() {
+        return olderThanMillis;
     }
 
     public List<String> getStatuses() {

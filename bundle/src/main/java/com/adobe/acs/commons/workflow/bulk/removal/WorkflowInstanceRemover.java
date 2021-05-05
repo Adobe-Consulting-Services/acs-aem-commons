@@ -52,13 +52,15 @@ public interface WorkflowInstanceRemover {
      * @param statuses WF Statuses to remove
      * @param payloads Regexes; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
+     * @param olderThanMillis Milliseconds; only delete WF's started after this milliseconds ago
      * @return the number of WF instances removed
      */
     int removeWorkflowInstances(final ResourceResolver resourceResolver,
                                 final Collection<String> modelIds,
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
-                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
+                                final Calendar olderThan,
+                                final long olderThanMillis) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
 
 
     /**
@@ -69,6 +71,7 @@ public interface WorkflowInstanceRemover {
      * @param statuses WF Statuses to remove
      * @param payloads Regexes; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
+     * @param olderThanMillis Milliseconds; only delete WF's started after this milliseconds ago
      * @param batchSize number of workflow instances to delete per JCR save
      * @return the number of WF instances removed
      */
@@ -77,6 +80,7 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,
+                                final long olderThanMillis,
                                 final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
 
 
@@ -88,6 +92,7 @@ public interface WorkflowInstanceRemover {
      * @param statuses WF Statuses to remove
      * @param payloads Regexes; WF Payloads to remove
      * @param olderThan UTC time in milliseconds; only delete WF's started after this time
+     * @param olderThanMillis Milliseconds; only delete WF's started after this milliseconds ago
      * @param batchSize number of workflow instances to delete per JCR save
      * @param maxDurationInMins max number of mins the workflow removal process is allowed to run
      * @return the number of WF instances removed
@@ -97,6 +102,7 @@ public interface WorkflowInstanceRemover {
                                 final Collection<String> statuses,
                                 final Collection<Pattern> payloads,
                                 final Calendar olderThan,
+                                final long olderThanMillis,
                                 final int batchSize,
                                 final int maxDurationInMins) throws PersistenceException, WorkflowRemovalException,
             InterruptedException, WorkflowRemovalForceQuitException;
