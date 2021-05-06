@@ -22,6 +22,7 @@ package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
 
@@ -163,16 +164,11 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         try (ResourceResolver adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             final long start = System.currentTimeMillis();
+            WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(models,statuses,payloads,olderThan,olderThanMillis);
+            workflowRemovalConfig.setBatchSize(batchSize);
+            workflowRemovalConfig.setMaxDurationInMins(maxDuration);
 
-            int count = workflowInstanceRemover.removeWorkflowInstances(
-                    adminResourceResolver,
-                    models,
-                    statuses,
-                    payloads,
-                    olderThan,
-                    olderThanMillis,
-                    batchSize,
-                    maxDuration);
+            int count = workflowInstanceRemover.removeWorkflowInstances(adminResourceResolver, workflowRemovalConfig);
 
             if (log.isInfoEnabled()) {
                 log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -208,9 +209,7 @@ public class WorkflowRemoverTest {
 
         remover.performCleanupActivity(actionManager);
 
-        Mockito.verify(workflowInstanceRemover, Mockito.times(1)).removeWorkflowInstances(Mockito.eq(ctx.resourceResolver()),
-                Mockito.eq(remover.getModelIds()), Mockito.eq(remover.getStatuses()), Mockito.eq(remover.getPayloads()), Mockito.eq(remover.getOlderThan()), Mockito.eq(remover.getOlderThanMillis()),
-                Mockito.anyInt(), Mockito.anyInt());
-
+        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(remover.getModelIds(), remover.getStatuses(), remover.getPayloads(), remover.getOlderThan(), remover.getOlderThanMillis());
+        Mockito.verify(workflowInstanceRemover, Mockito.times(1)).removeWorkflowInstances(Mockito.eq(ctx.resourceResolver()), Mockito.eq(remover.getWorkflowRemovalConfig()));
     }
 }

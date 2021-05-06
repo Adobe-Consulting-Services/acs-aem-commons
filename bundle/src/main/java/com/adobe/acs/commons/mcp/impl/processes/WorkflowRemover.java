@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.form.NumberfieldComponent;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,6 +91,8 @@ public class WorkflowRemover extends ProcessDefinition {
                     + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowStatusSelector" })
     public List<String> statuses = new ArrayList<>();
 
+    private WorkflowRemovalConfig workflowRemovalConfig;
+
     public WorkflowRemover(WorkflowInstanceRemover workflowInstanceRemover) {
         super();
         this.workflowInstanceRemover = workflowInstanceRemover;
@@ -130,8 +133,7 @@ public class WorkflowRemover extends ProcessDefinition {
 
             parseParameters();
 
-            workflowInstanceRemover.removeWorkflowInstances(rr, modelIds, statuses, payloads, olderThan, olderThanMillis, BATCH_SIZE,
-                    MAX_DURATION_MINS);
+            workflowInstanceRemover.removeWorkflowInstances(rr, workflowRemovalConfig);
 
             WorkflowRemovalStatus status = workflowInstanceRemover.getStatus();
             EnumMap<ReportColumns, Object> reportRow = report(status);
@@ -178,6 +180,10 @@ public class WorkflowRemover extends ProcessDefinition {
             olderThan = Calendar.getInstance();
             olderThan.setTime(d);
         }
+
+        workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, olderThan, olderThanMillis);
+        workflowRemovalConfig.setBatchSize(BATCH_SIZE);
+        workflowRemovalConfig.setMaxDurationInMins(MAX_DURATION_MINS);
     }
 
     public List<String> getModelIds() {
@@ -198,6 +204,10 @@ public class WorkflowRemover extends ProcessDefinition {
 
     public List<String> getStatuses() {
         return statuses;
+    }
+
+    public WorkflowRemovalConfig getWorkflowRemovalConfig() {
+        return workflowRemovalConfig;
     }
 
     public enum ReportColumns {
