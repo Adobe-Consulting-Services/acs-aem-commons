@@ -31,6 +31,7 @@ import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.commons.testing.sling.MockResource;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
@@ -85,6 +86,9 @@ public class VersionedClientlibsTransformerFactoryTest {
     private HtmlLibrary proxiedHtmlLibrary;
 
     @Mock
+    private HtmlLibrary resourceResolverHtmlLibrary;
+
+    @Mock
     private ContentHandler handler;
 
     @Mock
@@ -115,6 +119,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     private ResourceResolver resourceResolver;
 
     private static final String PATH = "/etc/clientlibs/test";
+    private static final String MAP_PATH = "/mylib/test";
     private static final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f"; // md5 of "I love strings"
     private static final String PROXIED_FAKE_STREAM_CHECKSUM="669a712c318596cd7e7520e3e2000cfb"; // md5 of "I love strings when they are proxied"
     private static final byte[] BYTES;
@@ -148,6 +153,9 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(proxiedHtmlLibrary.getLibraryPath()).thenReturn(PROXIED_PATH);
         when(proxiedHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
 
+        when(resourceResolverHtmlLibrary.getLibraryPath()).thenReturn(MAP_PATH);
+        when(resourceResolverHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are resolved".getBytes()));
+
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/libs/", "/apps/" });
@@ -162,7 +170,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @After
     public void tearDown() throws Exception {
-        reset(htmlLibraryManager, htmlLibrary, handler);
+        reset(htmlLibraryManager, htmlLibrary, resourceResolverHtmlLibrary, handler);
         transformer = null;
     }
 
@@ -469,6 +477,27 @@ public class VersionedClientlibsTransformerFactoryTest {
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testClientLibFoundWithResourceResolverMapping() throws Exception {
+
+        MockResource clientlib = new MockResource(resourceResolver, PATH,"");
+        when(resourceResolver.resolve(slingRequest, MAP_PATH)).thenReturn(clientlib);
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", MAP_PATH + ".min.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        assertEquals(MAP_PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
 
     @Test

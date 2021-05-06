@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2585 - Added option in workflow-remover to define a millisecond delta for the workflows to be cleared.
 
 ### Fixed
+- #2581 - Versioned ClientLibs no longer works with proxied clientlibs
 - #2562 - Fixed cache refresh on versioned clientlibs request when enforceMd5 is false (default).
 
 ### Added
