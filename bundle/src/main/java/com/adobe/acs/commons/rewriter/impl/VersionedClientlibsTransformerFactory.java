@@ -135,7 +135,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     private static final String MD5_PREFIX = "ACSHASH";
 
     // pattern used to parse paths in the filter - group 1 = path; group 2 = md5; group 3 = extension
-    private static final Pattern FILTER_PATTERN = Pattern.compile("(.*?)\\.(?:min.)?" + MD5_PREFIX + "([a-zA-Z0-9]+)\\.(js|css)");
+    private static final Pattern FILTER_PATTERN = Pattern.compile("(.*?)\\.(?:min.)?([a-zA-Z0-9]+)\\.(js|css)");
+    private static final Pattern FILTER_PATTERN_ENFORCE_MD5 = Pattern.compile("(.*?)\\.(?:min.)?" + MD5_PREFIX + "([a-zA-Z0-9]+)\\.(js|css)");
 
     private static final String PROXY_PREFIX = "/etc.clientlibs/";
     private static final String PROXIED_STATIC_RESOURCE_PATH = "/resources/";
@@ -280,18 +281,16 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private String resolvePath(LibraryType libraryType, String libraryPath, SlingHttpServletRequest request) {
-        Resource libraryResource = request.getResourceResolver().resolve(request, libraryPath);
-        if (libraryResource != null && !(libraryResource instanceof NonExistingResource)) {
-            return libraryResource.getPath();
-        }
-        return resolvePathIfProxied(libraryType, libraryPath, request.getResourceResolver());
-    }
-
-    private String resolvePathIfProxied(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
         if (!libraryPath.startsWith(PROXY_PREFIX)) {
+            Resource libraryResource = request.getResourceResolver().resolve(request, libraryPath);
+            if (libraryResource != null && !(libraryResource instanceof NonExistingResource)) {
+                return libraryResource.getPath();
+            }
+            // Default behavior, to keep consistency with previous implementation and to not return a null path in case
+            // the resolver can't find the clientlib
             return libraryPath;
         }
-        return resolveProxiedClientLibrary(libraryType, libraryPath, resourceResolver, true);
+        return resolveProxiedClientLibrary(libraryType, libraryPath, request.getResourceResolver(), true);
     }
 
     private String resolveProxiedClientLibrary(LibraryType libraryType, String proxiedPath, ResourceResolver resourceResolver, boolean refreshCacheIfNotFound) {
@@ -415,7 +414,12 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     @Nonnull
     UriInfo getUriInfo(@Nullable final String uri, @Nonnull SlingHttpServletRequest request) {
         if (uri != null) {
-            Matcher matcher = FILTER_PATTERN.matcher(uri);
+            Matcher matcher;
+            if (enforceMd5) {
+                matcher = FILTER_PATTERN_ENFORCE_MD5.matcher(uri);
+            } else {
+                matcher = FILTER_PATTERN.matcher(uri);
+            }
             if (matcher.matches()) {
                 final String libraryPath = matcher.group(1);
                 final String md5 = matcher.group(2);

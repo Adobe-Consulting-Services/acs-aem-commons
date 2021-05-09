@@ -31,6 +31,7 @@ import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.commons.testing.sling.MockResource;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
@@ -85,6 +86,9 @@ public class VersionedClientlibsTransformerFactoryTest {
     private HtmlLibrary proxiedHtmlLibrary;
 
     @Mock
+    private HtmlLibrary resourceResolverHtmlLibrary;
+
+    @Mock
     private ContentHandler handler;
 
     @Mock
@@ -115,6 +119,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     private ResourceResolver resourceResolver;
 
     private static final String PATH = "/etc/clientlibs/test";
+    private static final String MAP_PATH = "/mylib/test";
     private static final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f"; // md5 of "I love strings"
     private static final String PROXIED_FAKE_STREAM_CHECKSUM="669a712c318596cd7e7520e3e2000cfb"; // md5 of "I love strings when they are proxied"
     private static final byte[] BYTES;
@@ -148,6 +153,9 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(proxiedHtmlLibrary.getLibraryPath()).thenReturn(PROXIED_PATH);
         when(proxiedHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
 
+        when(resourceResolverHtmlLibrary.getLibraryPath()).thenReturn(MAP_PATH);
+        when(resourceResolverHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are resolved".getBytes()));
+
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/libs/", "/apps/" });
@@ -162,7 +170,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @After
     public void tearDown() throws Exception {
-        reset(htmlLibraryManager, htmlLibrary, handler);
+        reset(htmlLibraryManager, htmlLibrary, resourceResolverHtmlLibrary, handler);
         transformer = null;
     }
 
@@ -472,6 +480,27 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testClientLibFoundWithResourceResolverMapping() throws Exception {
+
+        MockResource clientlib = new MockResource(resourceResolver, PATH,"");
+        when(resourceResolver.resolve(slingRequest, MAP_PATH)).thenReturn(clientlib);
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", MAP_PATH + ".min.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        assertEquals(MAP_PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testCssClientLibraryWithInvalidExtension() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
@@ -651,7 +680,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM);
@@ -665,7 +694,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
@@ -679,7 +708,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCacheWithDot_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.foobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
@@ -702,6 +731,25 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5Match() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(htmlLibrary);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+
+        verify(htmlLibraryManager).getLibrary(LibraryType.JS, "/etc/clientlibs/some");
+        verify(htmlLibrary, never()).getInputStream(false);
+    }
+
+    @Test
+    public void doFilter_foundInCache_md5Match_enforceMd5() throws Exception {
+        PrivateAccessor.setField(factory, "enforceMd5", true);
+
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
@@ -712,11 +760,14 @@ public class VersionedClientlibsTransformerFactoryTest {
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
         verifyNo404();
+
+        verify(htmlLibraryManager).getLibrary(LibraryType.JS, "/etc/clientlibs/some");
+        verify(htmlLibrary, never()).getInputStream(false);
     }
 
     @Test
     public void doFilter_foundInCacheWithDot_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min." + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -730,7 +781,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -744,7 +795,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCacheWithDot_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.foobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -791,7 +842,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     
         assertEquals(PATH +".css", attributesCaptor.getValue().getValue(0));
     }
-    
+
     private void verifyNothingHappened() throws IOException, ServletException {
         verifyNoInteractions(htmlLibraryManager);
         verifyNo404();
