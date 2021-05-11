@@ -281,18 +281,16 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private String resolvePath(LibraryType libraryType, String libraryPath, SlingHttpServletRequest request) {
-        Resource libraryResource = request.getResourceResolver().resolve(request, libraryPath);
-        if (libraryResource != null && !(libraryResource instanceof NonExistingResource)) {
-            return libraryResource.getPath();
-        }
-        return resolvePathIfProxied(libraryType, libraryPath, request.getResourceResolver());
-    }
-
-    private String resolvePathIfProxied(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
         if (!libraryPath.startsWith(PROXY_PREFIX)) {
+            Resource libraryResource = request.getResourceResolver().resolve(request, libraryPath);
+            if (libraryResource != null && !(libraryResource instanceof NonExistingResource)) {
+                return libraryResource.getPath();
+            }
+            // Default behavior, to keep consistency with previous implementation and to not return a null path in case
+            // the resolver can't find the clientlib
             return libraryPath;
         }
-        return resolveProxiedClientLibrary(libraryType, libraryPath, resourceResolver, true);
+        return resolveProxiedClientLibrary(libraryType, libraryPath, request.getResourceResolver(), true);
     }
 
     private String resolveProxiedClientLibrary(LibraryType libraryType, String proxiedPath, ResourceResolver resourceResolver, boolean refreshCacheIfNotFound) {
