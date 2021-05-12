@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
 @Component(service = TransformAction.class)
 public class UrlEncodeAction implements TransformAction {
     private static final Logger LOG = LoggerFactory.getLogger(UrlEncodeAction.class);
-    private static final String ACTION_NAME = "urlEncode";
+    private static final String ACTION_NAME = "url";
 
     @Override
     public String getName() {
@@ -46,7 +46,7 @@ public class UrlEncodeAction implements TransformAction {
         try {
             return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            LOG.warn("Unable to URL encode value {}", value);
+            LOG.error("Unable to URL encode value {}", value);
         }
         return value;
     }

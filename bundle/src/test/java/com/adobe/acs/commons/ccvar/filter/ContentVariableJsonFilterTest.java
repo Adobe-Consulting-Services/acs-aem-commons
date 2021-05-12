@@ -116,7 +116,7 @@ public class ContentVariableJsonFilterTest {
         context.requestPathInfo().setExtension("json");
 
         FilterChain mocked = mock(MockFilterChain.class);
-        String before = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"property\":\"{{page_properties.property|urlEncode}}\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
+        String before = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"property\":\"{{page_properties.property|url}}\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
         doAnswer(invocation -> {
             HttpServletResponse response =
                     (HttpServletResponse) invocation.getArguments()[1];

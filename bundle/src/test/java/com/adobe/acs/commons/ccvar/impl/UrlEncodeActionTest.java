@@ -39,7 +39,7 @@ public class UrlEncodeActionTest {
     public void testSuccessfulUrlEncodeAction() {
         TransformAction urlEncodeAction = context.registerService(TransformAction.class, new UrlEncodeAction());
         assertNotNull(urlEncodeAction);
-        assertEquals("urlEncode", urlEncodeAction.getName());
+        assertEquals("url", urlEncodeAction.getName());
         assertEquals("test+space", urlEncodeAction.execute("test space"));
         assertEquals("%2Fcontent%2Fpath", urlEncodeAction.execute("/content/path"));
     }

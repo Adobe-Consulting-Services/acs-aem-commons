@@ -38,7 +38,7 @@
           "jcr:primaryType": "nt:unstructured",
           "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
           "useFullWidth": "true",
-          "property": "{{page_properties.property|urlEncode}}",
+          "property": "{{page_properties.property|url}}",
           "sling:resourceType": "weretail/components/content/heroimage"
         },
         "hero_image_2": {

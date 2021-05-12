@@ -106,7 +106,7 @@ public class ContentVariableReplacementUtil {
      * Utility method to replace values and optionally execute actions on the values to be replaced.
      *
      * @param input The input string containing the placeholders
-     * @param key The property key present in the variable map
+     * @param key The key containing the property name and an optional action
      * @param replacement The value to be replaced and optionally transformed
      * @param action The action found in the placeholder key
      * @return The fully replaced value
