@@ -47,6 +47,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -118,8 +119,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             props.put(RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget());
             props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(rule.getStatusCode()));
             if (rule.getUntilDate() != null) {
-                props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, rule.getUntilDate());
+                props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, GregorianCalendar.from(rule.getUntilDate()) );
             }
+            props.put(RedirectRule.NOTE_PROPERTY_NAME, rule.getNote());
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
             props.put(JCR_CREATED, Calendar.getInstance());
             props.put(JCR_CREATED_BY, resolver.getUserID());
@@ -138,23 +140,29 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if (!first) {
                 String source = row.getCell(0).getStringCellValue();
                 String target = row.getCell(1).getStringCellValue();
-                int statusCode = (int) row.getCell(2).getNumericCellValue();
+                 int statusCode = (int) row.getCell(2).getNumericCellValue();
                 Cell c4 = row.getCell(3);
-                String untilDate = null;
-                if (c4 != null) {
+                Calendar untilDate = null;
+                if (DateUtil.isCellDateFormatted(c4)) {
                     try {
                         Instant instant = DateUtil.getJavaDate(c4.getNumericCellValue()).toInstant();
                         ZonedDateTime zdate = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-                        untilDate = RedirectRule.DATE_FORMATTER.format(zdate);
+                        untilDate = GregorianCalendar.from(zdate);
                     } catch (Exception e) {
                         log.error("cannot set data from {}", c4.toString(), e);
                     }
                 }
-                rules.add(new RedirectRule(source, target, statusCode, untilDate));
+                Cell c5 = row.getCell(4);
+                String note = null;
+                if(c5 != null){
+                    note = c5.getStringCellValue();
+                }
+                rules.add(new RedirectRule(source, target, statusCode, untilDate, note));
             } else {
                 first = false;
             }
         }
+        log.debug("{} rules read from spreadsheet", rules.size());
         return rules;
     }
 

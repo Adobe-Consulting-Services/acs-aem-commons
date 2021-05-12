@@ -97,7 +97,8 @@
                             com.adobe.acs.commons.mcp.model,
                             com.adobe.acs.commons.reports.models,
                             com.adobe.acs.commons.indesign.dynamicdeckdynamo.models,
-                            com.adobe.acs.commons.sorter
+                            com.adobe.acs.commons.sorter,
+                            com.adobe.acs.commons.redirects.models
                         </Sling-Model-Packages>
                     </instructions>
                 </configuration>
