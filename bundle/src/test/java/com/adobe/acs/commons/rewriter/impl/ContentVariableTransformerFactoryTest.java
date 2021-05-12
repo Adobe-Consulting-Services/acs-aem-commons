@@ -69,7 +69,7 @@ public class ContentVariableTransformerFactoryTest {
 
     @Before
     public void setup() throws Exception {
-        context.load().json(getClass().getResourceAsStream("ContentVariableTransformer.json"), "/content/we-retail/language-masters/en/experience");
+        context.load().json(getClass().getResourceAsStream("ContentVariableTransformerContent.json"), "/content/we-retail/language-masters/en/experience");
 
         MockSlingHttpServletRequest request = context.request();
         request.setResource(context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/responsivegrid/text"));
