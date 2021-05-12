@@ -281,7 +281,7 @@ public class ContentVariableJsonFilterTest {
             return null;
         }).when(mocked).doFilter(any(), any());
 
-        String after = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"title\":\"Arctic Surfing In Lofoten\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
+        String after = "{\"jcr:primaryType\":\"nt:unstructured\",\"fileReference\":\"/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg\",\"useFullWidth\":\"true\",\"title\":\"{{page_properties.jcr:title}}\",\"sling:resourceType\":\"weretail/components/content/heroimage\"}";
         filter.doFilter(context.request(), context.response(), mocked);
         assertTrue(startsWith(after)
                 .matches(context.response().getOutputAsString()));

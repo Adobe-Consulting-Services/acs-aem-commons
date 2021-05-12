@@ -84,6 +84,7 @@ public class ContentVariableJsonFilter implements Filter {
 
     private List<Pattern> includePatterns;
     private List<Pattern> excludePatterns;
+    private boolean allInvalidIncludes;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -125,6 +126,12 @@ public class ContentVariableJsonFilter implements Filter {
      * @return if the request should be processed
      */
     private boolean shouldProcess(String urlPath) {
+        // If includes are specified but none are valid we skip all requests.
+        if (allInvalidIncludes) {
+            LOG.debug("Include patterns are empty due to invalid regex, not processing any requests");
+            return false;
+        }
+        // If include and exclude lists are both empty we process all requests.
         if (includePatterns.isEmpty() && excludePatterns.isEmpty()) {
             LOG.debug("Include and Exclude patterns are empty, processing all requests");
             return true;
@@ -238,11 +245,13 @@ public class ContentVariableJsonFilter implements Filter {
         includePatterns = new ArrayList<>();
         excludePatterns = new ArrayList<>();
 
+        boolean invalidInclude = false;
         for (String item : config.includes()) {
             if (StringUtils.isNotBlank(item)) {
                 try {
                     includePatterns.add(Pattern.compile(item));
                 } catch (PatternSyntaxException e) {
+                    invalidInclude = true;
                     LOG.error("Error adding includePattern. Invalid syntax in {}", item);
                 }
             }
@@ -255,6 +264,9 @@ public class ContentVariableJsonFilter implements Filter {
                     LOG.error("Error adding excludePattern. Invalid syntax in {}", item);
                 }
             }
+        }
+        if (invalidInclude && includePatterns.size() == 0) {
+            allInvalidIncludes = true;
         }
     }
 
