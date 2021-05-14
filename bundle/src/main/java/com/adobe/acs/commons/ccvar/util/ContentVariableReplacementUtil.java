@@ -36,7 +36,7 @@ import static com.adobe.acs.commons.ccvar.impl.PropertyConfigServiceImpl.PARSER_
  */
 public class ContentVariableReplacementUtil {
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{([a-zA-Z0-9_:\\-]+\\.[a-zA-Z0-9_:\\-]+(\\|?[a-zA-Z0-9_:\\-]*))}}");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{([a-zA-Z0-9_:\\-]+\\.[a-zA-Z0-9_:\\-]+(\\|[a-zA-Z0-9_:\\-]*)?)}}");
     private static final Map<String, String> REQUIRED_ESCAPE = escapeMap();
     private static final String PLACEHOLDER_BEGIN = "{{";
     private static final String PLACEHOLDER_END = "}}";
@@ -117,7 +117,7 @@ public class ContentVariableReplacementUtil {
      */
     public static String doReplacement(String input, String key, String replacement, TransformAction action) {
         if (action != null) {
-            if (!action.disableEscaping()) {
+            if (action.disableEscaping()) {
                 return input.replace(getPlaceholder(key), action.execute(replacement));
             }
             return input.replace(getPlaceholder(key), baseEscaping(action.execute(replacement)));
