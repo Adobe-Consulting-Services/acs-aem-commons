@@ -41,7 +41,6 @@ import java.util.Map;
  * rendered HTML.
  */
 public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
-    private static final Map<String, String> REQUIRED_ESCAPE = escapeMap();
 
     private Map<String, Object> contentVariableReplacements;
     private PropertyAggregatorService aggregatorService;
@@ -75,7 +74,7 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
                         String replaceValue =
                                 (String) ContentVariableReplacementUtil.getValue(contentVariableReplacements, key);
                         String newAttrValue = ContentVariableReplacementUtil.doReplacement(currentAttribute, key,
-                                baseEscaping(replaceValue), propertyConfigService.getAction(key));
+                                replaceValue, propertyConfigService.getAction(key));
                         newAttrs.setValue(i, newAttrValue);
                     }
                 }
@@ -99,44 +98,12 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
                     final String placeholderReplacement =
                             String.valueOf(ContentVariableReplacementUtil.getValue(contentVariableReplacements, key));
                     currentString = ContentVariableReplacementUtil.doReplacement(currentString, key,
-                            baseEscaping(placeholderReplacement), propertyConfigService.getAction(key));
+                            placeholderReplacement, propertyConfigService.getAction(key));
                 }
             }
         }
 
         getContentHandler().characters(currentString.toCharArray(), 0, currentString.length());
-    }
-
-    /**
-     * Applies the base level escaping unless otherwise overridden.
-     *
-     * @param input String to escape
-     * @return Escaped string
-     */
-    private String baseEscaping(String input) {
-        if (propertyConfigService.disableBaseEscaping()) {
-            return input;
-        }
-        for (Map.Entry<String, String> entry : REQUIRED_ESCAPE.entrySet()) {
-            if (input.contains(entry.getKey())) {
-                input = input.replace(entry.getKey(), entry.getValue());
-            }
-        }
-        return input;
-    }
-
-    /**
-     * Generates the map of characters to automatically escape
-     *
-     * @return Map of escape keys/values
-     */
-    private static Map<String, String> escapeMap() {
-        Map<String, String> escapes = new HashMap<>();
-        escapes.put("\"", "&quot;");
-        escapes.put("'", "&apos;");
-        escapes.put("<", "&lt;");
-        escapes.put(">", "&gt;");
-        return escapes;
     }
 
     private boolean shouldRun() {

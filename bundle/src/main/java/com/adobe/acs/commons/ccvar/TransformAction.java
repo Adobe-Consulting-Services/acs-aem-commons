@@ -40,4 +40,12 @@ public interface TransformAction {
      * @return The transformed value
      */
     String execute(String value);
+
+    /**
+     * Boolean value to impact whether the replacement services (HTML or JSON) perform basic HTML entity escaping. List
+     * of escaped characters can be found in {@link com.adobe.acs.commons.ccvar.util.ContentVariableReplacementUtil}.
+     *
+     * @return boolean value for disabling escaping
+     */
+    boolean disableEscaping();
 }

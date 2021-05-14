@@ -135,17 +135,16 @@ public class ContentVariableTransformerFactoryTest {
     }
 
     @Test
-    public void testSingleReplacementWithEscapeDisabled() throws Exception {
+    public void testSingleReplacementWithActionDisablingEscaping() throws Exception {
         Map<String, Object> configMap = ContextualContentVariableTestUtil.defaultConfigMap();
-        configMap.put("disable.base.escape", true);
         context.registerInjectActivateService(new PropertyConfigServiceImpl(), configMap);
         context.registerInjectActivateService(new AllPagePropertiesContentVariableProvider());
         context.registerInjectActivateService(new UrlEncodeAction());
         context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
         reinitTransformer(false);
 
-        String input = "{{page_properties.propToEscape}}";
-        String output = "<html>";
+        String input = "{{page_properties.urlPropToEscape|url}}";
+        String output = "%3Cp%3EparamValue%3C%2Fp%3E";
         transformer.characters(input.toCharArray(), 0, input.length());
 
         ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);

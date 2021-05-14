@@ -46,7 +46,6 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(PropertyConfigServiceImpl.class);
 
     private List<Pattern> exclusionList;
-    private boolean disableBaseEscape;
 
     @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.MULTIPLE)
     private List<TransformAction> actions;
@@ -64,11 +63,6 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
     @Override
     public boolean isAllowedType(Object object) {
         return String.class.equals(object.getClass()) || Long.class.equals(object.getClass());
-    }
-
-    @Override
-    public boolean disableBaseEscaping() {
-        return this.disableBaseEscape;
     }
 
     @Override
@@ -94,7 +88,6 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
             }
         }
         this.exclusionList = excludeList;
-        this.disableBaseEscape = config.disable_base_escape();
     }
 
     @ObjectClassDefinition(
@@ -113,18 +106,5 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
                 type = AttributeType.STRING
         )
         String[] exclude_list() default {"cq:.*"};
-
-        /**
-         * The flag to disable the basic HTML entity escaping.
-         *
-         * @return The boolean config value
-         */
-        @AttributeDefinition(
-                name = "Disable HTML Escape?",
-                description = "By default the transformer will escape HTML entities (\", ', <, >) to ensure "
-                        + "HTML can render safely. This will disable that check to enable HTML replacement values.",
-                type = AttributeType.BOOLEAN
-        )
-        boolean disable_base_escape() default false;
     }
 }

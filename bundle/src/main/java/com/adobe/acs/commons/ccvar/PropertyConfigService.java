@@ -51,11 +51,4 @@ public interface PropertyConfigService {
      * @return The configured action or null
      */
     TransformAction getAction(String key);
-
-    /**
-     * Returns the configuration value stored that controls whether HTML content is automatically escaped.
-     *
-     * @return Configuration value
-     */
-    boolean disableBaseEscaping();
 }

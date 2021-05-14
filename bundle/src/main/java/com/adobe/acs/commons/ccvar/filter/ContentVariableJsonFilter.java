@@ -128,7 +128,7 @@ public class ContentVariableJsonFilter implements Filter {
     private boolean shouldProcess(String urlPath) {
         // If includes are specified but none are valid we skip all requests.
         if (allInvalidIncludes) {
-            LOG.debug("Include patterns are empty due to invalid regex, not processing any requests");
+            LOG.debug("Include patterns are empty due to invalid regex patterns, not processing any requests");
             return false;
         }
         // If include and exclude lists are both empty we process all requests.

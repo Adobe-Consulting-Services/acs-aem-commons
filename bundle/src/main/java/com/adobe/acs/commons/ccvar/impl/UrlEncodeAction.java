@@ -50,4 +50,9 @@ public class UrlEncodeAction implements TransformAction {
         }
         return value;
     }
+
+    @Override
+    public boolean disableEscaping() {
+        return true;
+    }
 }
