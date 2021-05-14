@@ -25,13 +25,23 @@ import org.apache.sling.api.SlingHttpServletResponse;
 
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
+import java.util.Collection;
 
 @Description("ACS Redirect Manager MBean")
 public interface RedirectFilterMBean {
 
-    @Description("Refreshes the cache of registered configurations")
-    void refreshCache();
+    @Description("Invalidate all cached rules")
+    void invalidateAll();
 
-    @Description("Loaded redirect configurations")
-    TabularData getRedirectConfigurations() throws OpenDataException;
+    @Description("Loaded redirect rules")
+    TabularData getRedirectRules(String storagePath) throws OpenDataException;
+
+    @Description("Known redirect configurations")
+    Collection<String> getRedirectConfigurations();
+
+    @Description("Configuration bucket to store redirects")
+    String getBucket();
+
+    @Description("Node name to store redirect configurations")
+    String getConfigName();
 }

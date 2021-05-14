@@ -182,6 +182,7 @@
 
         var source = tr.find('.source').data('value');
         var target = tr.find('.target').data('value');
+        var note = tr.find('.note').data('value');
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
         var cloudFront = tr.find('.cloudFront').html();
@@ -191,6 +192,7 @@
         var select = $('#status-code-select-box').get(0);
         select.value =statusCode;
         dialog.find('.untilDate').val(untilDate);
+        dialog.find('.note').val(note);
 
         dialog.find('.acs-redirect-rule-form').attr('action', path);
         dialog.find('.acs-redirect-rule-form').attr('id', name);
@@ -242,16 +244,49 @@
            $.each(rows, function(rowIndex, row) {
                var source = $(row).find('.source').data('value');
                var target  = $(row).find('.target').data('value');
+               var comment  = $(row).find('.note').data('value');
                if(( source && source.toLowerCase().indexOf(searchText.toLowerCase()) != -1 ) ||
-                (target && target.toLowerCase().indexOf(searchText.toLowerCase()) != -1)) {
+                (target && target.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
+                (comment && comment.toLowerCase().indexOf(searchText.toLowerCase()) != -1)) {
                    $(row).show();
                } else {
-                   $(row).hide();
+                   if(rowIndex > 0) $(row).hide();
                }
            });
         });
 
     });
+
+    $(document).on("click", "#addConfigurationButton", function (e) {
+    	e.preventDefault();
+        var dialog = document.querySelector('#createDialog');
+        dialog.show();
+
+    });
+
+    $(document).on("click", ".caconfig-configuration-submit", function (e) {
+    	e.preventDefault();
+        var $form = $(this).closest('form');
+        var action = $form.attr('action');
+        var data = $form.serialize();
+        $.ajax({
+            url: action,
+            type: "POST",
+            data: data,
+            async: false
+        }).success(function(response /*json response from the Sling POST servlet*/){
+           location.reload(true);
+        }).error(function (data, status, headers, config) {
+            var dialog = new Coral.Dialog();
+            dialog.header.innerHTML = 'Failed to create configuration';
+    		dialog.content.innerHTML = data.responseJSON.message;
+            dialog.variant = 'error';
+            dialog.closable = "on";
+            dialog.show();
+        });
+        return false;
+    });
+
 
 })($, $(document));
 
