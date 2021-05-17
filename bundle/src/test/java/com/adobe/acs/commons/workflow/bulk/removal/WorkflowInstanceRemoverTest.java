@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.adobe.acs.commons.workflow.bulk.removal.impl.WorkflowInstanceRemoverImpl;
-import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
 import com.adobe.granite.workflow.exec.Workflow;
@@ -33,9 +32,7 @@ import com.day.cq.workflow.WorkflowService;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -97,15 +94,12 @@ public class WorkflowInstanceRemoverTest {
         payloadPaths.add("/content/dam/.*");
         Collection<Pattern> payloads = payloadPaths.stream().map(Pattern::compile).collect(Collectors.toList());
 
-        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, 0);
-
         WorkflowInstanceRemover workflowInstanceRemover = ctx.getService(WorkflowInstanceRemover.class);
 
-        int removed = workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), workflowRemovalConfig);
+        workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), modelIds, statuses, payloads, null);
 
-        assertEquals("All sample workflows should be removed.", 3, removed);
         assertEquals(3, workflowInstanceRemover.getStatus().getChecked());
-
+        assertEquals("All workflows should be deleted",3, workflowInstanceRemover.getStatus().getRemoved());
     }
 
     @Test
@@ -121,18 +115,18 @@ public class WorkflowInstanceRemoverTest {
         payloadPaths.add("/content/dam/.*");
         Collection<Pattern> payloads = payloadPaths.stream().map(Pattern::compile).collect(Collectors.toList());
 
-        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, 0);
+        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, -1);
+        workflowRemovalConfig.setBatchSize(1);
 
         WorkflowInstanceRemover workflowInstanceRemover = ctx.getService(WorkflowInstanceRemover.class);
-        int removed = workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), workflowRemovalConfig);
+        workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), workflowRemovalConfig);
 
-        assertEquals("Only completed workflows should be deleted", 1, removed);
-        assertEquals(3, workflowInstanceRemover.getStatus().getChecked());
-        assertEquals(1, workflowInstanceRemover.getStatus().getRemoved());
+        assertEquals("All workflows should have been checked",3, workflowInstanceRemover.getStatus().getChecked());
+        assertEquals("Only completed workflows should be deleted",1, workflowInstanceRemover.getStatus().getRemoved());
     }
 
     @Test
-    public void removePayloadSpecifWorkflow() throws Exception {
+    public void removePayloadSpecifiedWorkflow() throws Exception {
         Collection<String> modelIds = new ArrayList<>();
         modelIds.add("/var/workflow/models/test-workflow");
         modelIds.add("/var/workflow/models/test-workflow-two");
@@ -146,14 +140,13 @@ public class WorkflowInstanceRemoverTest {
         payloadPaths.add("/content/dam/any/special/.*");
         Collection<Pattern> payloads = payloadPaths.stream().map(Pattern::compile).collect(Collectors.toList());
 
-        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, 0);
+        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, -1);
 
         WorkflowInstanceRemover workflowInstanceRemover = ctx.getService(WorkflowInstanceRemover.class);
-        int removed = workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), workflowRemovalConfig);
+        workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), workflowRemovalConfig);
 
-        assertEquals("Only workflows with specified payload should be deleted", 1, removed);
-        assertEquals(3, workflowInstanceRemover.getStatus().getChecked());
-
+        assertEquals("All workflows should have been checked",3, workflowInstanceRemover.getStatus().getChecked());
+        assertEquals("Only workflows with specified workflow should be deleted", 1, workflowInstanceRemover.getStatus().getRemoved());
     }
 
     @Test
@@ -170,12 +163,12 @@ public class WorkflowInstanceRemoverTest {
         payloadPaths.add("/content/dam/.*");
         Collection<Pattern> payloads = payloadPaths.stream().map(Pattern::compile).collect(Collectors.toList());
 
-        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, 0);
+        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, null, -1);
 
         WorkflowInstanceRemover workflowInstanceRemover = ctx.getService(WorkflowInstanceRemover.class);
         int removed = workflowInstanceRemover.removeWorkflowInstances(ctx.resourceResolver(), workflowRemovalConfig);
 
-        assertEquals("Only workflows with specified modelId should be deleted", 2, removed);
-        assertEquals(3, workflowInstanceRemover.getStatus().getChecked());
+        assertEquals("All workflows should have been checked",3, workflowInstanceRemover.getStatus().getChecked());
+        assertEquals("Only workflows with specified modelID should be deleted", 2, workflowInstanceRemover.getStatus().getRemoved());
     }
 }

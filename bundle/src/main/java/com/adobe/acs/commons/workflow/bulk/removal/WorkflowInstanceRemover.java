@@ -23,6 +23,10 @@ package com.adobe.acs.commons.workflow.bulk.removal;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.regex.Pattern;
+
 @SuppressWarnings("squid:S1214")
 public interface WorkflowInstanceRemover {
 
@@ -44,13 +48,70 @@ public interface WorkflowInstanceRemover {
      * Removes workflow instances that match the parameter criteria.
      *
      * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
+     * @param modelIds WF Models to remove
+     * @param statuses WF Statuses to remove
+     * @param payloads Regexes; WF Payloads to remove
+     * @param olderThan UTC time in milliseconds; only delete WF's started after this time
+     * @return the number of WF instances removed
+     */
+    int removeWorkflowInstances(final ResourceResolver resourceResolver,
+                                final Collection<String> modelIds,
+                                final Collection<String> statuses,
+                                final Collection<Pattern> payloads,
+                                final Calendar olderThan) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
+
+
+    /**
+     * Removes workflow instances that match the parameter criteria.
+     *
+     * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
+     * @param modelIds WF Models to remove
+     * @param statuses WF Statuses to remove
+     * @param payloads Regexes; WF Payloads to remove
+     * @param olderThan UTC time in milliseconds; only delete WF's started after this time
+     * @param batchSize number of workflow instances to delete per JCR save
+     * @return the number of WF instances removed
+     */
+    int removeWorkflowInstances(final ResourceResolver resourceResolver,
+                                final Collection<String> modelIds,
+                                final Collection<String> statuses,
+                                final Collection<Pattern> payloads,
+                                final Calendar olderThan,
+                                final int batchSize) throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException;
+
+
+    /**
+     * Removes workflow instances that match the parameter criteria.
+     *
+     * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
+     * @param modelIds WF Models to remove
+     * @param statuses WF Statuses to remove
+     * @param payloads Regexes; WF Payloads to remove
+     * @param olderThan UTC time in milliseconds; only delete WF's started after this time
+     * @param batchSize number of workflow instances to delete per JCR save
+     * @param maxDurationInMins max number of mins the workflow removal process is allowed to run
+     * @return the number of WF instances removed
+     */
+    int removeWorkflowInstances(final ResourceResolver resourceResolver,
+                                final Collection<String> modelIds,
+                                final Collection<String> statuses,
+                                final Collection<Pattern> payloads,
+                                final Calendar olderThan,
+                                final int batchSize,
+                                final int maxDurationInMins) throws PersistenceException, WorkflowRemovalException,
+            InterruptedException, WorkflowRemovalForceQuitException;
+
+
+    /**
+     * Removes workflow instances that match the parameter criteria.
+     *
+     * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
      * @param workflowRemovalConfig WF Models to remove
      * @return the number of WF instances removed
      */
     int removeWorkflowInstances(final ResourceResolver resourceResolver,
-                                final WorkflowRemovalConfig workflowRemovalConfig) throws PersistenceException, WorkflowRemovalException,
-            InterruptedException, WorkflowRemovalForceQuitException;
-
+        final WorkflowRemovalConfig workflowRemovalConfig) throws PersistenceException, WorkflowRemovalException,
+        InterruptedException, WorkflowRemovalForceQuitException;
 
     /**
      * Gets the Workflow Remover's status.

@@ -93,6 +93,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final Pattern NN_DATE_FOLDER_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.*");
     
+    private static final int BATCH_SIZE = 1000;
+
     private static final int MAX_SAVE_RETRIES = 5;
 
     private static final long MS_IN_ONE_MINUTE = 60000;
@@ -186,6 +188,34 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
         this.forceQuit.set(true);
     }
 
+    @Override
+    public int removeWorkflowInstances(ResourceResolver resourceResolver,
+        Collection<String> modelIds, Collection<String> statuses,
+        Collection<Pattern> payloads, Calendar olderThan)
+        throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, BATCH_SIZE);
+    }
+
+    @Override
+    public int removeWorkflowInstances(ResourceResolver resourceResolver,
+        Collection<String> modelIds, Collection<String> statuses,
+        Collection<Pattern> payloads, Calendar olderThan, int batchSize)
+        throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
+        return removeWorkflowInstances(resourceResolver, modelIds, statuses, payloads, olderThan, batchSize, -1);
+    }
+
+    @Override
+    public int removeWorkflowInstances(ResourceResolver resourceResolver,
+        Collection<String> modelIds, Collection<String> statuses,
+        Collection<Pattern> payloads, Calendar olderThan, int batchSize,
+        int maxDurationInMins)
+        throws PersistenceException, WorkflowRemovalException, InterruptedException, WorkflowRemovalForceQuitException {
+        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(modelIds,statuses,payloads,olderThan,-1);
+        workflowRemovalConfig.setBatchSize(batchSize);
+        workflowRemovalConfig.setMaxDurationInMins(maxDurationInMins);
+        return removeWorkflowInstances(resourceResolver, workflowRemovalConfig);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -275,7 +305,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                                     startTime);
                             remaining++;
                             continue;
-                        } else if (olderThanMillis > 0 && startTime != null && startTimeDelta < startTime.getTimeInMillis()) {
+                        } else if (olderThanMillis > -1 && startTime != null && startTimeDelta < startTime.getTimeInMillis()) {
                             log.trace("Workflow instance [ {} ] has non-matching start time delta of [ {} ]ms", instance.getPath(),
                                 olderThanMillis);
                             remaining++;

@@ -134,12 +134,13 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     public static final String PROP_WORKFLOWS_OLDER_THAN = "workflow.older-than";
 
 
-    private long olderThanMillis = 0L;
-
+    private static final long DEFAULT_OLDER_THAN_MILLIS = -1L;
+    private long olderThanMillis = DEFAULT_OLDER_THAN_MILLIS;
     @Property(label = "Older Than Milliseconds",
         description = "Only remove Workflow Instances whose payloads start date was at least desired Milliseconds ago",
-        longValue = 0)
+        longValue = DEFAULT_OLDER_THAN_MILLIS)
     public static final String PROP_WORKFLOWS_OLDER_THAN_MILLIS = "workflow.older-than-millis";
+    
 
     private static final int DEFAULT_BATCH_SIZE = 1000;
     private int batchSize = DEFAULT_BATCH_SIZE;
