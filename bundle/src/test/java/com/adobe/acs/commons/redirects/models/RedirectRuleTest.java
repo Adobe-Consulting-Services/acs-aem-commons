@@ -26,8 +26,10 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.Calendar;
 import java.util.Map;
 
+import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -37,18 +39,41 @@ public class RedirectRuleTest {
 
     @Test
     public void testCreateFromResource() {
+        Calendar untilDate = new Calendar.Builder().setDate(2021, 0, 11).build();
+        Resource resource = context.create().resource("/var/acs-commons/redirects/rule",
+                "source", "/content/we-retail/en/one",
+                "target", "/content/we-retail/en/two",
+                "statusCode", 302,
+                "untilDate", untilDate,
+                "note", "note-1");
+
+        RedirectRule rule = RedirectRule.from(resource.getValueMap());
+        assertEquals("/content/we-retail/en/one", rule.getSource());
+        assertEquals("/content/we-retail/en/two", rule.getTarget());
+        assertEquals(302, rule.getStatusCode());
+        assertDateEquals("11 January 2021", rule.getUntilDate());
+        assertEquals("note-1", rule.getNote());
+
+    }
+
+    /**
+     * v5.0.4 saved Until Date as a 'dd MMMM yyyy' string.
+     * These should be converted into JCR Date by {@link UpgradeLegacyRedirects}
+     * If a value was not converted then RedirectRule#getUntilDate returns null
+     */
+    @Test
+    public void testCreateFromResourceDateString() {
         Resource resource = context.create().resource("/var/acs-commons/redirects/rule",
                 "source", "/content/we-retail/en/one",
                 "target", "/content/we-retail/en/two",
                 "statusCode", 302,
                 "untilDate", "11 January 2021");
 
-        RedirectRule rule = new RedirectRule(resource.getValueMap());
+        RedirectRule rule = RedirectRule.from(resource.getValueMap());
         assertEquals("/content/we-retail/en/one", rule.getSource());
         assertEquals("/content/we-retail/en/two", rule.getTarget());
         assertEquals(302, rule.getStatusCode());
-        assertEquals("11 January 2021", rule.getUntilDate());
-        assertEquals("11 January 2021", RedirectRule.DATE_FORMATTER.format(rule.getUntilDateTime()));
+        assertEquals(null, rule.getUntilDate());
 
     }
 
@@ -60,9 +85,8 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", "11 xxx 2021");
 
-        RedirectRule rule = new RedirectRule(resource.getValueMap());
-        assertEquals("11 xxx 2021", rule.getUntilDate());
-        assertEquals(null, rule.getUntilDateTime());
+        RedirectRule rule = RedirectRule.from(resource.getValueMap());
+        assertEquals(null, rule.getUntilDate());
 
     }
 
@@ -77,8 +101,8 @@ public class RedirectRuleTest {
 
         Resource resource2 = context.create().resource("/var/acs-commons/redirects/rule2", props);
 
-        RedirectRule rule1 = new RedirectRule(resource1.getValueMap());
-        RedirectRule rule2 = new RedirectRule(resource2.getValueMap());
+        RedirectRule rule1 = RedirectRule.from(resource1.getValueMap());
+        RedirectRule rule2 = RedirectRule.from(resource2.getValueMap());
 
         assertTrue(rule1.equals(rule2));
         assertTrue(rule1.hashCode() == rule2.hashCode());

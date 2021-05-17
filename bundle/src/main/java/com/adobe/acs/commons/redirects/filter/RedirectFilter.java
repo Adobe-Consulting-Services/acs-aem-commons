@@ -22,9 +22,12 @@ package com.adobe.acs.commons.redirects.filter;
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -38,6 +41,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
+import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.engine.EngineConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -75,8 +79,10 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.List;
@@ -84,13 +90,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Hashtable;
 import java.util.Dictionary;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -115,7 +120,6 @@ import static org.osgi.framework.Constants.SERVICE_ID;
 public class RedirectFilter extends AnnotatedStandardMBean
         implements Filter, EventHandler, ResourceChangeListener, RedirectFilterMBean {
 
-    public static final String DEFAULT_STORAGE_PATH = "/conf/acs-commons/redirects";
     public static final String ACS_REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects";
     public static final String REDIRECT_RULE_RESOURCE_TYPE = ACS_REDIRECTS_RESOURCE_TYPE + "/redirect-row";
 
@@ -127,11 +131,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
         @AttributeDefinition(name = "Enable Redirect Filter", description = "Indicates whether the redirect filter is enabled or not.", type = AttributeType.BOOLEAN)
-        boolean enabled() default true;
+        boolean enabled() default false;
 
         @AttributeDefinition(name = "Rewrite Location Header", description = "Apply Sling Resource Mappings (/etc/map) to Location header. "
-                + "Use if Location header should rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
-        boolean mapUrls() default true;
+                + "Use if Location header should be rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
+        boolean mapUrls() default false;
 
         @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
         String[] extensions() default {};
@@ -142,16 +146,25 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
-        @AttributeDefinition(name = "Storage Path", description = "The path in the repository to store redirect configurations", type = AttributeType.STRING)
-        String storagePath() default DEFAULT_STORAGE_PATH;
-
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
         String[] additionalHeaders() default {};
+
+        @AttributeDefinition(name = "Configuration bucket name", description = "name of the parent folder where to store redirect rules."
+                + " Default is settings. ", type = AttributeType.STRING)
+        String bucketName() default "settings";
+
+        @AttributeDefinition(name = "Configuration Name", description = "The node name to store redirect configurations. Default is 'redirects' "
+                + " which means the default path to store redirects is /conf/global/settings/redirects "
+                + " where 'settings' is the bucket and 'redirects' is the config name", type = AttributeType.STRING)
+        String configName() default  "redirects";
     }
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
@@ -168,10 +181,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
     private Collection<String> exts;
     private Collection<String> paths;
-    private String storagePath;
-    private Map<String, RedirectRule> pathRules;
-    private Map<Pattern, RedirectRule> patternRules;
+    private Configuration config;
     private ExecutorService executor;
+    private Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
@@ -185,10 +197,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
     @Activate
     @Modified
     protected final void activate(Configuration config, BundleContext context) {
+        this.config = config;
         enabled = config.enabled();
 
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put(ResourceChangeListener.PATHS, config.storagePath());
+        properties.put(ResourceChangeListener.PATHS, "/conf");
         listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
         log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
 
@@ -197,7 +210,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
                     : Arrays.stream(config.extensions()).filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
             mapUrls = config.mapUrls();
-            storagePath = config.storagePath();
             onDeliveryHeaders = new ArrayList<>();
             for(String kv : config.additionalHeaders()){
                 int idx = kv.indexOf(':');
@@ -210,11 +222,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 onDeliveryHeaders.add(new BasicHeader(name, value));
             }
             preserveQueryString = config.preserveQueryString();
-            log.debug("exts: {}, paths: {}, rewriteUrls: {}, storagePath: {}",
-                    exts, paths, mapUrls, storagePath);
+            log.debug("exts: {}, paths: {}, rewriteUrls: {}",
+                    exts, paths, mapUrls);
             executor = Executors.newSingleThreadExecutor();
 
-            refreshCache();
+            rulesCache = CacheBuilder.newBuilder().build();
+
         }
     }
 
@@ -239,77 +252,91 @@ public class RedirectFilter extends AnnotatedStandardMBean
     @Override
     public void handleEvent(Event event) {
         String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-        if (path.startsWith(getStoragePath())) {
+        String redirectSubPath = config.bucketName() + "/" + config.configName();
+        if (path != null && path.contains(redirectSubPath)) {
             log.debug(event.toString());
             // loading redirect configurations can be expensive and needs to run
             // asynchronously,
             // outside of the Sling event processing chain
-            executor.submit(() -> refreshCache());
+            executor.submit(() -> invalidate(path));
         }
     }
 
     @Override
     public void onChange(List<ResourceChange> changes) {
-        boolean changed = changes.stream().anyMatch(e -> e.getPath().startsWith(getStoragePath()));
-        if(changed) {
-            log.debug(changes.toString());
-            executor.submit(() -> refreshCache());
+        String redirectSubPath = config.bucketName() + "/" + config.configName();
+        for(ResourceChange e : changes){
+            String path = e.getPath();
+            if(path.contains(redirectSubPath)){
+                executor.submit(() -> invalidate(path));
+            }
         }
     }
 
-    @Override
-    public void refreshCache() {
-        Map<String, RedirectRule> pathMatchingRules = new HashMap<>();
-        Map<Pattern, RedirectRule> patternMatchingRules = new LinkedHashMap<>();
-        long t0 = System.currentTimeMillis();
+    /**
+     * Detect the redirect configuration and invalidate the cached rules
+     *
+     * Given an even path, e.g. /conf/global/settings/redirects/redirect-rule-2
+     * this method will figure out the corresponding configuration (/conf/global/settings/redirects)
+     * and invalidate the cached rules
+     *
+     * @param changePath    the event path
+     */
+    void invalidate(String changePath) {
+        String redirectSubPath = config.bucketName() + "/" + config.configName();
         try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
                 Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
-            Resource storageResource = resolver.getResource(getStoragePath());
-            if (storageResource != null) {
-                Collection<RedirectRule> rules = getRules(storageResource);
-                for (RedirectRule rule : rules) {
-                    if (rule.getRegex() != null) {
-                        patternMatchingRules.put(rule.getRegex(), rule);
-                    } else {
-                        pathMatchingRules.put(rule.getSource(), rule);
-                    }
+            Resource resource = resolver.resolve(changePath);
+            while(resource != null){
+                if(resource.getPath().endsWith(redirectSubPath)){
+                    log.debug("invalidating {}", resource.getPath());
+                    rulesCache.invalidate(resource.getPath());
+                    break;
                 }
+                resource = resource.getParent();
             }
         } catch (LoginException e) {
             log.error("Failed to get resolver for {}", SERVICE_NAME, e);
         }
-        synchronized (this) {
-            this.pathRules = pathMatchingRules;
-            this.patternRules = patternMatchingRules;
+    }
+
+    @Override
+    public void invalidateAll() {
+        rulesCache.invalidateAll();
+    }
+
+    RedirectConfiguration loadRules(String storagePath) {
+        RedirectConfiguration rules = null;
+        long t0 = System.currentTimeMillis();
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
+                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
+            Resource storageResource = resolver.getResource(storagePath);
+            if(storageResource != null) {
+                String storageSuffix = getBucket() + "/" + getConfigName();
+                rules = new RedirectConfiguration(storageResource, storageSuffix);
+                log.debug("{} rules loaded from {} in {} ms", rules.getPathRules().size() + rules.getPatternRules().size(),
+                        storagePath, System.currentTimeMillis() - t0);
+            } else {
+                log.warn("redirects not found in {}", storagePath);
+            }
+        } catch (LoginException e) {
+            log.error("Failed to get resolver for {}", SERVICE_NAME, e);
         }
-        log.debug("{} rules loaded in {} ms", pathMatchingRules.size() + patternMatchingRules.size(),
-                System.currentTimeMillis() - t0);
+        return rules;
     }
 
-    Map<String, RedirectRule> getPathRules() {
-        return pathRules;
-    }
-
-    Map<Pattern, RedirectRule> getPatternRules() {
-        return patternRules;
-    }
-
-    /**
-     * Read redirect configurations from the repository, i.e.
-     *  /conf/acs-commons/redirects --> Collection<RedirectRule>
-     *
-     * @param resource the parent resource containing redirect configurations
-     * @return a list of redirect configurations . Can be empty if no redirects are
-     * configured.
-     */
     public static Collection<RedirectRule> getRules(Resource resource) {
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                rules.add(new RedirectRule(res.getValueMap()));
+                rules.add(RedirectRule.from(res.getValueMap()));
             }
         }
         return rules;
+    }
+
+    Cache<String, RedirectConfiguration> getRulesCache(){
+        return rulesCache;
     }
 
     @Override
@@ -329,53 +356,24 @@ public class RedirectFilter extends AnnotatedStandardMBean
         chain.doFilter(request, response);
     }
 
-    public boolean handleRedirect(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
+    boolean handleRedirect(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
         long t0 = System.currentTimeMillis();
         boolean redirected = false;
         RedirectMatch match = match(slingRequest);
         if (match != null) {
             RedirectRule redirectRule = match.getRule();
-            ZonedDateTime now = ZonedDateTime.now();
-            ZonedDateTime untilDateTime = redirectRule.getUntilDateTime();
-            if (untilDateTime != null && untilDateTime.isBefore(now)) {
-                log.info("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
+            ZonedDateTime untilDateTime = redirectRule.getUntilDate();
+            if (untilDateTime != null && untilDateTime.isBefore(ZonedDateTime.now())) {
+                log.debug("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
-
                 String resourcePath = pathInfo.getResourcePath();
-                log.info("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
+
+                String location = evaluate(match, slingRequest);
+                log.trace("matched {} to {} in {} ms", resourcePath, redirectRule.toString(),
                         System.currentTimeMillis() - t0);
 
-                String location = redirectRule.evaluate(match.getMatcher());
-                if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
-                    String ext = pathInfo.getExtension();
-                    if (ext != null && !location.endsWith(ext)) {
-                        location += "." + ext;
-                    }
-                    if (mapUrls()) {
-                        location = mapUrl(location, slingRequest.getResourceResolver());
-                    }
-                    if(preserveQueryString) {
-                        String queryString = slingRequest.getQueryString();
-                        if (queryString != null) {
-                            int idx = location.indexOf('?');
-                            if (idx == -1) {
-                                idx = location.indexOf('#');
-                            }
-                            if (idx != -1) {
-                                location = location.substring(0, idx);
-                            }
-
-                            location += "?" + queryString;
-                        }
-                    }
-
-                    if(urlAdjuster != null){
-                        location = urlAdjuster.adjust(slingRequest, location);
-                    }
-                }
-
-                log.info("Redirecting {} to {}, statusCode: {}",
+                log.debug("Redirecting {} to {}, statusCode: {}",
                         resourcePath, location, redirectRule.getStatusCode());
                 slingResponse.setHeader("Location", location);
                 for(Header header : onDeliveryHeaders){
@@ -388,8 +386,52 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return redirected;
     }
 
-    String mapUrl(String url, ResourceResolver resourceResolver) {
-        return resourceResolver.map(url);
+    /**
+     * Evaluate the rule and return the value to put in Location header
+     *
+     * Depending on the configuration appends query string and rewrites the result using
+     * {@link ResourceResolver#map(HttpServletRequest, String)}
+     */
+    String evaluate(RedirectMatch match, SlingHttpServletRequest slingRequest){
+        RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
+        String location = match.getRule().evaluate(match.getMatcher());
+        if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
+            String ext = pathInfo.getExtension();
+            if (ext != null && !location.endsWith(ext)) {
+                location += "." + ext;
+            }
+            if (mapUrls()) {
+                location = mapUrl(location, slingRequest);
+            }
+            if(preserveQueryString) {
+                String queryString = slingRequest.getQueryString();
+                if (queryString != null) {
+                    location = preserveQueryString(location, queryString);
+                }
+            }
+            if(urlAdjuster != null){
+                location = urlAdjuster.adjust(slingRequest, location);
+            }
+        }
+        return location;
+    }
+
+    String preserveQueryString(String location, String queryString){
+        int idx = location.indexOf('?');
+        if (idx == -1) {
+            idx = location.indexOf('#');
+        }
+        if (idx != -1) {
+            location = location.substring(0, idx);
+        }
+
+        location += "?" + queryString;
+
+        return location;
+    }
+
+    String mapUrl(String url, SlingHttpServletRequest slingRequest) {
+        return slingRequest.getResourceResolver().map(slingRequest, url);
     }
 
     @Override
@@ -406,10 +448,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     protected boolean isEnabled() {
         return enabled;
-    }
-
-    public String getStoragePath() {
-        return storagePath;
     }
 
     protected Collection<String> getExtensions() {
@@ -473,73 +511,49 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     /**
-     * @return resource path without extension
-     */
-    private static String getResourcePath(RequestPathInfo pathInfo) {
-        String resourcePath = pathInfo.getResourcePath();
-        int sep = resourcePath.indexOf('.');
-        if (sep != -1 && !resourcePath.startsWith("/content/dam/")) {
-            // strip off extension if present
-            resourcePath = resourcePath.substring(0, sep);
-        }
-        return resourcePath;
-    }
-
-    /**
      * Match a path to a redirect configuration.
-     * <p>
-     * If multiple rules match then the exact rule by path takes precedence over
-     * pattern matches, for example, if two rules match then the exact match by path
-     * will be used:
-     *
-     * @param requestPath path to match
-     * @return redirect match or <code>null</code>
-     */
-    RedirectMatch match(String requestPath) {
-        RedirectMatch match = null;
-        RedirectRule rule = getPathRules().get(requestPath);
-        if (rule != null) {
-            match = new RedirectMatch(rule, null);
-        } else {
-            for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                Matcher m = entry.getKey().matcher(requestPath);
-                if (m.matches()) {
-                    match = new RedirectMatch(entry.getValue(), m);
-                    break;
-                }
-            }
-        }
-        return match;
-
-    }
-
-    /**
-     * Match a path to a redirect configuration.
-     * <p>
-     * This method performs two tries: first for the request path, e.g.
-     * /content/we.retail/en/page. If the first try didn't match then rewrite the url
-     * ( /content/we.retail/en/page -> /en/page ) and try it.
-     * </p>
      *
      * @param slingRequest the request to match
      * @return redirect match or <code>null</code>
      */
     RedirectMatch match(SlingHttpServletRequest slingRequest) {
-        String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
-        RedirectMatch rule = match(resourcePath);
-        if (rule == null) {
-            rule = match(mapUrl(resourcePath, slingRequest.getResourceResolver()));
+        Resource resource = slingRequest.getResource();
+        // find context aware configuration for the requested resource, e.g. /conf/my-site/settings/redirects
+        Resource configResource = configResolver.getResource(resource, config.bucketName(), config.configName());
+        if(configResource == null){
+            log.warn("no caconfig found for {}, bucketName: {}, configName: {}, user: {}",
+                    resource.getPath(), config.bucketName(), config.configName(), slingRequest.getResourceResolver().getUserID());
+            return null;
         }
-        return rule;
+        String configPath = configResource.getPath();
+        try {
+            RedirectConfiguration rules = rulesCache.get(configPath, () -> {
+                RedirectConfiguration cfg = loadRules(configPath);
+                return cfg == null ? RedirectConfiguration.EMPTY : cfg;
+            });
+            String resourcePath = slingRequest.getRequestPathInfo().getResourcePath(); // /content/mysite/en/page.html
+            RedirectMatch m = rules.match(resourcePath);
+            if (m == null && mapUrls()) { // try mapped url
+                String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
+                if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
+                    String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
+                    m = rules.match(mappedPath);
+                }
+            }
+            return m;
+        } catch (ExecutionException e){
+            log.error("failed to load redirect rules from {}", configPath, e);
+            return null;
+        }
     }
 
     /**
-     * Display cache contents in the MBean
+     * JMX Operation: Display loaded rules for a path, e.g. /conf/global/settings/redirects
      *
      * @return the redirect configurations in a tabular format for the MBean
      */
     @Override
-    public TabularData getRedirectConfigurations() throws OpenDataException {
+    public TabularData getRedirectRules(String storagePath) throws OpenDataException {
         String sourceUrl = "Source Url";
         String targetUrl = "Target Url";
         String statusCode = "Status Code";
@@ -552,24 +566,47 @@ public class RedirectFilter extends AnnotatedStandardMBean
         TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(redirectRules, redirectRules, cacheEntryType, new String[]{sourceUrl}));
 
-        Collection<RedirectRule> rules = new ArrayList<>();
-        Map<String, RedirectRule> pathMatchingRules = getPathRules();
-        if (pathMatchingRules != null) {
-            rules.addAll(pathMatchingRules.values());
-        }
-        Map<Pattern, RedirectRule> patternMatchingRules = getPatternRules();
-        if (patternMatchingRules != null) {
-            rules.addAll(patternMatchingRules.values());
-        }
-        for (RedirectRule rule : rules) {
-            Map<String, Object> row = new LinkedHashMap<>();
 
-            row.put(sourceUrl, rule.getSource());
-            row.put(targetUrl, rule.getTarget());
-            row.put(statusCode, rule.getStatusCode());
-            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+        RedirectConfiguration cfg = rulesCache.getIfPresent(storagePath);
+        if(cfg != null) {
+            Collection<RedirectRule> rules = new ArrayList<>();
+            Map<String, RedirectRule> pathMatchingRules = cfg.getPathRules();
+            if (pathMatchingRules != null) {
+                rules.addAll(pathMatchingRules.values());
+            }
+            Map<Pattern, RedirectRule> patternMatchingRules = cfg.getPatternRules();
+            if (patternMatchingRules != null) {
+                rules.addAll(patternMatchingRules.values());
+            }
+            for (RedirectRule rule : rules) {
+                Map<String, Object> row = new LinkedHashMap<>();
+
+                row.put(sourceUrl, rule.getSource());
+                row.put(targetUrl, rule.getTarget());
+                row.put(statusCode, rule.getStatusCode());
+                tabularData.put(new CompositeDataSupport(cacheEntryType, row));
+            }
         }
         return tabularData;
+    }
+
+    /**
+     * JMX Operation: get a list of loaded configurations,
+     * e.g. [/conf/global/settings/redirects, /conf/wknd/settings/redirects]
+     */
+    @Override
+    public Collection<String> getRedirectConfigurations() {
+        return rulesCache.asMap().keySet();
+    }
+
+    @Override
+    public String getBucket(){
+        return config.bucketName();
+    }
+
+    @Override
+    public String getConfigName(){
+        return config.configName();
     }
 
 }

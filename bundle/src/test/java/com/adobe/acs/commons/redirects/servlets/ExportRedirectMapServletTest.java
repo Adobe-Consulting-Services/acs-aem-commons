@@ -60,7 +60,7 @@ public class ExportRedirectMapServletTest {
         context.build().resource(redirectStoragePath)
                 .siblingsMode()
                 .resource("redirect-1",                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/one", "target", "/content/two", "statusCode", 302)
+                        "source", "/content/one", "target", "/content/two", "statusCode", 302, "note", "note-1")
                 .resource("redirect-2",                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
                         "source", "/content/three", "target", "/content/four", "statusCode", 301)
         ;
@@ -95,6 +95,7 @@ public class ExportRedirectMapServletTest {
         assertNotNull(sheet);
         XSSFRow row1 = sheet.getRow(1);
         assertEquals("/content/one", row1.getCell(0).getStringCellValue());
+        assertEquals("note-1", row1.getCell(4).getStringCellValue());
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
         XSSFRow row2 = sheet.getRow(2);

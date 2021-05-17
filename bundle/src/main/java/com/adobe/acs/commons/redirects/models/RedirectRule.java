@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
@@ -28,11 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.lang.invoke.MethodHandles;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.Calendar;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -45,7 +42,7 @@ public class RedirectRule {
     public static final String TARGET_PROPERTY_NAME = "target";
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+    public static final String NOTE_PROPERTY_NAME = "note";
 
     @Inject
     private String source;
@@ -56,21 +53,20 @@ public class RedirectRule {
     @Inject
     private int statusCode;
 
-    private String untilDate;
+    @Inject
+    private String note;
+
+    private ZonedDateTime untilDate;
 
     private Pattern ptrn;
 
     private SubstitutionElement[] substitutions;
 
-    public RedirectRule(ValueMap resource) {
-        this(resource.get(SOURCE_PROPERTY_NAME, ""), resource.get(TARGET_PROPERTY_NAME, ""),
-                resource.get(STATUS_CODE_PROPERTY_NAME, 0), resource.get(UNTIL_DATE_PROPERTY_NAME, String.class));
-    }
-
-    public RedirectRule(String source, String target, int statusCode, String untilStr) {
+    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
         this.source = source.trim();
         this.target = target.trim();
         this.statusCode = statusCode;
+        this.note = note;
 
         String regex = this.source;
         if (regex.endsWith("*")) {
@@ -78,9 +74,24 @@ public class RedirectRule {
         }
         ptrn = toRegex(regex);
         substitutions = SubstitutionElement.parse(this.target);
-        if (StringUtils.isNotBlank(untilStr)) {
-            untilDate = untilStr.trim();
+        if (calendar != null) {
+            untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
         }
+    }
+
+    public static RedirectRule from(ValueMap resource) {
+        String source = resource.get(SOURCE_PROPERTY_NAME, "");
+        String target = resource.get(TARGET_PROPERTY_NAME, "");
+        String note = resource.get(NOTE_PROPERTY_NAME, "");
+        int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
+        Calendar calendar = null;
+        if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
+            Object o = resource.get(UNTIL_DATE_PROPERTY_NAME);
+            if(o instanceof Calendar) {
+                calendar = (Calendar)o;
+            }
+        }
+        return new RedirectRule(source, target, statusCode, calendar, note);
     }
 
     public String getSource() {
@@ -91,6 +102,10 @@ public class RedirectRule {
         return target;
     }
 
+    public String getNote() {
+        return note;
+    }
+
     public int getStatusCode() {
         return statusCode;
     }
@@ -99,27 +114,14 @@ public class RedirectRule {
         return ptrn;
     }
 
-    public String getUntilDate() {
+    public ZonedDateTime getUntilDate() {
         return untilDate;
-    }
-
-    public ZonedDateTime getUntilDateTime() {
-        if (untilDate != null && !untilDate.isEmpty()) {
-            try {
-                LocalDate ld = DATE_FORMATTER.parse(untilDate).query(LocalDate::from);
-                return ld == null ? null : ld.atStartOfDay().plusDays(1).minusSeconds(1).atZone(ZoneId.systemDefault());
-            } catch (DateTimeParseException e){
-                // not fatal. log and continue
-                log.error("Invalid UntilDateTime {}", untilDate, e);
-            }
-        }
-        return null;
     }
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s}",
-                source, target, statusCode, untilDate);
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s}",
+                source, target, statusCode, untilDate, note);
     }
 
     @Override
@@ -132,7 +134,7 @@ public class RedirectRule {
         }
         RedirectRule that = (RedirectRule) o;
 
-        return source != null ? source.equals(that.source) : that.source == null;
+        return Objects.equals(source, that.source);
     }
 
     @Override
