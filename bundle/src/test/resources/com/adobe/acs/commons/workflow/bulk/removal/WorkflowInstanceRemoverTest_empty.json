@@ -1,0 +1,10 @@
+{
+  "jcr:primaryType": "sling:Folder",
+  "server0": {
+    "jcr:primaryType": "sling:Folder",
+    "2021-05-06": {
+      "jcr:primaryType": "sling:Folder",
+      "jcr:createdBy": "workflow-service"
+    }
+  }
+}

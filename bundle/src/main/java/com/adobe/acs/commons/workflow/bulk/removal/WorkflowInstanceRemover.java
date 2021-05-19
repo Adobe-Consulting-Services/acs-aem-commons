@@ -103,6 +103,17 @@ public interface WorkflowInstanceRemover {
 
 
     /**
+     * Removes workflow instances that match the parameter criteria.
+     *
+     * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
+     * @param workflowRemovalConfig WF Models to remove
+     * @return the number of WF instances removed
+     */
+    int removeWorkflowInstances(final ResourceResolver resourceResolver,
+        final WorkflowRemovalConfig workflowRemovalConfig) throws PersistenceException, WorkflowRemovalException,
+        InterruptedException, WorkflowRemovalForceQuitException;
+
+    /**
      * Gets the Workflow Remover's status.
      * *
      * @return the workflow remover's status object 

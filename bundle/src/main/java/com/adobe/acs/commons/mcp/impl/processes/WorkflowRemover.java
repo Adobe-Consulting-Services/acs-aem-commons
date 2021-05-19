@@ -20,6 +20,8 @@
 
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.mcp.form.NumberfieldComponent;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,6 +72,10 @@ public class WorkflowRemover extends ProcessDefinition {
             component = DatePickerComponent.class)
     public String olderThanVal;
 
+    @FormField(name = "Workflows Older Than Milliseconds", description = "only remove workflows that were started longer than the specified milliseconds ago",
+            component = NumberfieldComponent.class)
+    public long olderThanMillis;
+
     @FormField(
             name = "Workflow Models",
             description = "If no Workflow Models are selected, Workflow Instances will not be filtered by Workflow Model.",
@@ -84,6 +90,8 @@ public class WorkflowRemover extends ProcessDefinition {
             options = { MultifieldComponent.USE_CLASS
                     + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowStatusSelector" })
     public List<String> statuses = new ArrayList<>();
+
+    private WorkflowRemovalConfig workflowRemovalConfig;
 
     public WorkflowRemover(WorkflowInstanceRemover workflowInstanceRemover) {
         super();
@@ -125,8 +133,7 @@ public class WorkflowRemover extends ProcessDefinition {
 
             parseParameters();
 
-            workflowInstanceRemover.removeWorkflowInstances(rr, modelIds, statuses, payloads, olderThan, BATCH_SIZE,
-                    MAX_DURATION_MINS);
+            workflowInstanceRemover.removeWorkflowInstances(rr, workflowRemovalConfig);
 
             WorkflowRemovalStatus status = workflowInstanceRemover.getStatus();
             EnumMap<ReportColumns, Object> reportRow = report(status);
@@ -173,6 +180,10 @@ public class WorkflowRemover extends ProcessDefinition {
             olderThan = Calendar.getInstance();
             olderThan.setTime(d);
         }
+
+        workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, olderThan, olderThanMillis);
+        workflowRemovalConfig.setBatchSize(BATCH_SIZE);
+        workflowRemovalConfig.setMaxDurationInMins(MAX_DURATION_MINS);
     }
 
     public List<String> getModelIds() {
@@ -187,8 +198,16 @@ public class WorkflowRemover extends ProcessDefinition {
         return olderThan;
     }
 
+    public long getOlderThanMillis() {
+        return olderThanMillis;
+    }
+
     public List<String> getStatuses() {
         return statuses;
+    }
+
+    public WorkflowRemovalConfig getWorkflowRemovalConfig() {
+        return workflowRemovalConfig;
     }
 
     public enum ReportColumns {
