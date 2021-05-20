@@ -80,7 +80,7 @@ public class ContentVariableTransformerFactoryTest {
     public void testSingleReplacement() throws Exception {
         reinitTransformer(true);
 
-        String input = "{{page_properties.jcr:title}}";
+        String input = "((page_properties.jcr:title))";
         String output = "Arctic Surfing In Lofoten";
         transformer.characters(input.toCharArray(), 0, input.length());
 
@@ -107,21 +107,21 @@ public class ContentVariableTransformerFactoryTest {
         reinitTransformer(false);
 
         AttributesImpl attributes = new AttributesImpl();
-        attributes.addAttribute(null, "href", null, "CDATA", "/content/page.html?title={{inherited_page_properties.inheritedProperty}}");
+        attributes.addAttribute(null, "href", null, "CDATA", "/content/page.html?title=((inherited_page_properties.inheritedProperty))");
         transformer.startElement(null, "a", null, attributes);
 
         ArgumentCaptor<AttributesImpl> attributesCaptor = ArgumentCaptor.forClass(AttributesImpl.class);
         verify(handler, atLeast(1)).startElement(isNull(String.class), eq("a"), isNull(String.class), attributesCaptor.capture());
 
         Attributes out = attributesCaptor.getValue();
-        assertEquals("/content/page.html?title={{inherited_page_properties.inheritedProperty}}", out.getValue(0));
+        assertEquals("/content/page.html?title=((inherited_page_properties.inheritedProperty))", out.getValue(0));
     }
 
     @Test
     public void testSingleReplacementWithEscape() throws Exception {
         reinitTransformer(true);
 
-        String input = "{{page_properties.propToEscape}}";
+        String input = "((page_properties.propToEscape))";
         String output = "&lt;html&gt;";
         transformer.characters(input.toCharArray(), 0, input.length());
 
@@ -143,7 +143,7 @@ public class ContentVariableTransformerFactoryTest {
         context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
         reinitTransformer(false);
 
-        String input = "{{page_properties.urlPropToEscape|url}}";
+        String input = "((page_properties.urlPropToEscape!url))";
         String output = "%3Cp%3EparamValue%3C%2Fp%3E";
         transformer.characters(input.toCharArray(), 0, input.length());
 
@@ -160,7 +160,7 @@ public class ContentVariableTransformerFactoryTest {
     public void testMultipleReplacements() throws Exception {
         reinitTransformer(true);
 
-        String input = "{{page_properties.jcr:title}} and {{inherited_page_properties.inheritedProperty}}";
+        String input = "((page_properties.jcr:title)) and ((inherited_page_properties.inheritedProperty))";
         String output = "Arctic Surfing In Lofoten and inheritedValue";
         transformer.characters(input.toCharArray(), 0, input.length());
 
@@ -177,8 +177,8 @@ public class ContentVariableTransformerFactoryTest {
     public void testInvalidAndValidReplacement() throws Exception {
         reinitTransformer(true);
 
-        String input = "{{page_properties.jcr:title}} and {{page_properties.nonexisting}}";
-        String output = "Arctic Surfing In Lofoten and {{page_properties.nonexisting}}";
+        String input = "((page_properties.jcr:title)) and ((page_properties.nonexisting))";
+        String output = "Arctic Surfing In Lofoten and ((page_properties.nonexisting))";
         transformer.characters(input.toCharArray(), 0, input.length());
 
         ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);
@@ -194,8 +194,8 @@ public class ContentVariableTransformerFactoryTest {
     public void testInvalidReplacement() throws Exception {
         reinitTransformer(true);
 
-        String input = "{{page_properties.nonexisting}}";
-        String output = "{{page_properties.nonexisting}}";
+        String input = "((page_properties.nonexisting))";
+        String output = "((page_properties.nonexisting))";
         transformer.characters(input.toCharArray(), 0, input.length());
 
         ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);
@@ -212,7 +212,7 @@ public class ContentVariableTransformerFactoryTest {
         reinitTransformer(true);
 
         AttributesImpl attributes = new AttributesImpl();
-        attributes.addAttribute(null, "href", null, "CDATA", "/content/page.html?title={{inherited_page_properties.inheritedProperty}}");
+        attributes.addAttribute(null, "href", null, "CDATA", "/content/page.html?title=((inherited_page_properties.inheritedProperty))");
         transformer.startElement(null, "a", null, attributes);
 
         ArgumentCaptor<AttributesImpl> attributesCaptor = ArgumentCaptor.forClass(AttributesImpl.class);

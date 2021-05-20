@@ -67,6 +67,9 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
             AttributesImpl newAttrs = new AttributesImpl(atts);
             for (int i = 0; i < newAttrs.getLength(); i++) {
                 String currentAttribute = newAttrs.getValue(i);
+                if (StringUtils.isBlank(currentAttribute)) {
+                    continue;
+                }
                 final List<String> keys = ContentVariableReplacementUtil.getKeys(currentAttribute);
                 for (String key : keys) {
                     // If the placeholder key is in the map then replace it

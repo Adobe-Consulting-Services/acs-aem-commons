@@ -36,10 +36,10 @@ import static com.adobe.acs.commons.ccvar.impl.PropertyConfigServiceImpl.PARSER_
  */
 public class ContentVariableReplacementUtil {
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{([a-zA-Z0-9_:\\-]+\\.[a-zA-Z0-9_:\\-]+(\\|[a-zA-Z0-9_:\\-]*)?)}}");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\(\\(([a-zA-Z0-9_:\\-]+\\.[a-zA-Z0-9_:\\-]+(![a-zA-Z0-9_:\\-]*)?)\\)\\)");
     private static final Map<String, String> REQUIRED_ESCAPE = escapeMap();
-    private static final String PLACEHOLDER_BEGIN = "{{";
-    private static final String PLACEHOLDER_END = "}}";
+    private static final String PLACEHOLDER_BEGIN = "((";
+    private static final String PLACEHOLDER_END = "))";
 
     private ContentVariableReplacementUtil() {
     }
@@ -86,7 +86,7 @@ public class ContentVariableReplacementUtil {
     }
 
     /**
-     * Takes the current string and returns the placeholder value. Ex: {{value}}
+     * Takes the current string and returns the placeholder value. Ex: ((value))
      *
      * @param string The full input string
      * @return A list of placeholders

@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 @Component(service = PropertyConfigService.class)
 @Designate(ocd = PropertyConfigServiceImpl.Config.class)
 public class PropertyConfigServiceImpl implements PropertyConfigService {
-    public static final String PARSER_SEPARATOR = "|";
+    public static final String PARSER_SEPARATOR = "!";
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyConfigServiceImpl.class);
 
