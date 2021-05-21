@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.
+- #2512 - Added Contextual Content Variables feature
 
 ## 5.0.4 - 2021-03-14
 
