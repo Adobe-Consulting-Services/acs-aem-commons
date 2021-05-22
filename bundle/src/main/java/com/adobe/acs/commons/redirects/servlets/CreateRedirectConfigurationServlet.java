@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.redirects.servlets;
 
+import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -33,6 +34,7 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A servlet to create coconfig redirect configurations
+ * A servlet to create caconfig redirect configurations
  */
 @Component(service = Servlet.class, immediate = true, name = "CreateRedirectConfigurationServlet", property = {
         "sling.servlet.label=ACS AEM Commons - Create Redirect Configuration",
@@ -59,7 +61,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(CreateRedirectConfigurationServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
 
-    @Reference
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
     private RedirectFilterMBean redirectFilter;
 
     @Override
@@ -81,16 +83,18 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
         Map<String, String> rsp = new HashMap<>();
         ObjectMapper om = new ObjectMapper();
         try {
-            Resource bucket = root.getChild(redirectFilter.getBucket());
+            String bucketName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_BUCKET : redirectFilter.getBucket();
+            String configName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_NAME : redirectFilter.getConfigName();
+            Resource bucket = root.getChild(bucketName);
             if (bucket == null) {
-                bucket = resolver.create(root, redirectFilter.getBucket(),
+                bucket = resolver.create(root, bucketName,
                         ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, "sling:Folder"));
                 log.info("created {}", bucket.getPath());
             }
 
-            Resource config = bucket.getChild(redirectFilter.getConfigName());
+            Resource config = bucket.getChild(configName);
             if (config == null) {
-                config = resolver.create(bucket, redirectFilter.getConfigName(),
+                config = resolver.create(bucket, configName,
                         ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED,
                                 ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH));
                 log.info("created {}", config.getPath());
