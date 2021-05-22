@@ -102,8 +102,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
                 rsp.put("path", config.getPath());
             } else {
                 resolver.revert();
-                String msg = "Configuration already exist: "
-                        + (rootPath + "/" + redirectFilter.getBucket() + "/" + redirectFilter.getConfigName());
+                String msg = "Configuration already exist: " + (rootPath + "/" + bucketName + "/" + configName);
                 rsp.put("message", msg);
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
             }
