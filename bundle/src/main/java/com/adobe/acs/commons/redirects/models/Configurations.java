@@ -19,10 +19,12 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
+import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ import javax.jcr.query.Query;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -47,7 +50,7 @@ public class Configurations {
     @SlingObject
     private SlingHttpServletRequest request;
 
-    @OSGiService
+    @OSGiService(injectionStrategy= InjectionStrategy.OPTIONAL)
     private RedirectFilterMBean redirectFilter;
 
     private static final String REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects/redirects";
@@ -58,9 +61,12 @@ public class Configurations {
         log.debug(sql);
         Iterator<Resource> it = request.getResourceResolver().findResources(sql, Query.JCR_SQL2);
         List<RedirectConfiguration> lst = new ArrayList<>();
+        String bucketName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_BUCKET : redirectFilter.getBucket();
+        String configName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_NAME : redirectFilter.getConfigName();
+
         while (it.hasNext()) {
             Resource resource = it.next();
-            String storageSuffix = redirectFilter.getBucket() + "/" + redirectFilter.getConfigName();
+            String storageSuffix = bucketName + "/" + configName;
             RedirectConfiguration cfg = new RedirectConfiguration(resource, storageSuffix);
             lst.add(cfg);
         }

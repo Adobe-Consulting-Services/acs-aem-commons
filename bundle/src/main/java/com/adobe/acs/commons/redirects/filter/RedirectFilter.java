@@ -123,6 +123,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
     public static final String ACS_REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects";
     public static final String REDIRECT_RULE_RESOURCE_TYPE = ACS_REDIRECTS_RESOURCE_TYPE + "/redirect-row";
 
+    public static final String DEFAULT_CONFIG_BUCKET = "settings";
+    public static final String DEFAULT_CONFIG_NAME = "redirects";
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -152,12 +154,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         @AttributeDefinition(name = "Configuration bucket name", description = "name of the parent folder where to store redirect rules."
                 + " Default is settings. ", type = AttributeType.STRING)
-        String bucketName() default "settings";
+        String bucketName() default DEFAULT_CONFIG_BUCKET;
 
         @AttributeDefinition(name = "Configuration Name", description = "The node name to store redirect configurations. Default is 'redirects' "
                 + " which means the default path to store redirects is /conf/global/settings/redirects "
                 + " where 'settings' is the bucket and 'redirects' is the config name", type = AttributeType.STRING)
-        String configName() default  "redirects";
+        String configName() default  DEFAULT_CONFIG_NAME;
     }
 
     @Reference
