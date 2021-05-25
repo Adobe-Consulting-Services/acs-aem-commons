@@ -168,7 +168,7 @@ public class EtagMessageDigestServletFilter implements Filter {
                 return;
             }
             if (slingHttpServletResponse.isCommitted()) {
-                log.error("Can not send ETag header because response is already committed, try to give this filter a higher ranking!");
+                log.warn("Can not send ETag header because response is already committed, try to give this filter a higher ranking!");
                 return;
             }
 
