@@ -3,6 +3,9 @@
     <filter root="/conf/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
+    <filter root="/conf/global/settings">
+        <include pattern="/conf/global/settings/redirects"/>
+    </filter>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/jcr:content"/>
         <include pattern="/etc/acs-commons/automatic-package-replication"/>
