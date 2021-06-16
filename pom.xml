@@ -688,11 +688,6 @@
         </profile>
         <profile>
             <id>dependency-check</id>
-            <activation>
-                <property>
-                    <name>env.DEPENDENCY_CHECK</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
