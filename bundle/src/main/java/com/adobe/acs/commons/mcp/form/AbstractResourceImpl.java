@@ -63,6 +63,11 @@ public class AbstractResourceImpl extends AbstractResource {
             meta.put("sling:resourceType", resourceType);
         }
         meta.put(JCR_PRIMARYTYPE, "nt:unstructured");
+        // Required property; Set this to the resource's path
+        meta.put(ResourceMetadata.RESOLUTION_PATH, this.path);
+        // Required property; This information does not exist in this context so set to pl
+        meta.put(ResourceMetadata.RESOLUTION_PATH_INFO, "");
+
     }
 
     @Override
