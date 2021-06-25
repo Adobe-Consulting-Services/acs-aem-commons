@@ -179,6 +179,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     public void setPath(String path) {
         this.path = path;
+        meta.put(ResourceMetadata.RESOLUTION_PATH, this.path);
     }
 
     @Override
