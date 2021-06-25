@@ -49,4 +49,4 @@ jobs:
           CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.event.after }}/checks
           # Needed to get some information about the pull request, if any
           COVERALLS_SECRET: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -e -B -V clean verify coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check -DrepoToken=${{ secrets.COVERALLS_SECRET }}
+        run: mvn -e -B -V clean verify coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
