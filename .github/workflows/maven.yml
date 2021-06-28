@@ -1,0 +1,52 @@
+name: Java CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest] # windows currently returns test errors
+        jdk: [8, 11]
+        include:
+          # lengthy build steps should only be performed on linux with Java 11 (Sonar analysis, deployment)
+          - os: ubuntu-latest
+            jdk: 11
+            isMainBuildEnv: true
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up cache for ~/.m2/repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ matrix.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ matrix.os }}-
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: ${{ matrix.jdk }}
+
+      - name: Build with Maven
+        if: '!matrix.isMainBuildEnv'
+        run: mvn -e -B -V clean verify
+
+      - name: Build and Analyse with Maven
+        if: matrix.isMainBuildEnv
+        env: 
+          # these environment variables are evaluated by coveralls-maven-plugin (https://github.com/trautonen/coveralls-maven-plugin/blob/8b8995e42768a25c8db6e85ede62238bf4606cb2/src/main/java/org/eluder/coveralls/maven/plugin/service/General.java#L37)
+          CI_NAME: github
+          BRANCH_NAME_OR_REF: ${{ github.head_ref || github.ref }}
+          CI_BUILD_NUMBER: ${{ github.run_id }}
+          CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.event.after }}/checks
+          # Needed to get some information about the pull request, if any
+          COVERALLS_SECRET: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -e -B -V clean verify coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
