@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
+import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -28,6 +29,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.slf4j.Logger;
@@ -69,11 +71,13 @@ public class UpgradeLegacyRedirects {
 
     @SlingObject
     private SlingHttpServletRequest request;
-    @OSGiService
+
+    @OSGiService(injectionStrategy= InjectionStrategy.OPTIONAL)
     private RedirectFilterMBean redirectFilter;
 
     @PostConstruct
     protected void init() {
+
         ResourceResolver resolver = request.getResourceResolver();
         Resource legacyHome = resolver.getResource(REDIRECTS_HOME_5_0_4);
         if (legacyHome == null) {
@@ -85,7 +89,9 @@ public class UpgradeLegacyRedirects {
             return;
         }
 
-        String globalPath = "/conf/global/" + redirectFilter.getBucket() + "/" + redirectFilter.getConfigName();
+        String bucketName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_BUCKET : redirectFilter.getBucket();
+        String configName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_NAME : redirectFilter.getConfigName();
+        String globalPath = "/conf/global/" + bucketName + "/" + configName;
         Resource globalConf = resolver.getResource(globalPath);
         if (globalConf == null) {
             return;
