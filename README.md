@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/Adobe-Consulting-Services/acs-aem-commons](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Adobe-Consulting-Services/acs-aem-commons?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://github.comAdobe-Consulting-Services/acs-aem-commons/actions/workflows/maven.yml/badge.svg)](https://github.com/Adobe-Consulting-Services/acs-aem-commons/actions)
+[![Build Status](https://github.com/Adobe-Consulting-Services/acs-aem-commons/actions/workflows/maven.yml/badge.svg)](https://github.com/Adobe-Consulting-Services/acs-aem-commons/actions)
 
 [![Code Climate Issues](https://img.shields.io/codeclimate/issues/Adobe-Consulting-Services/acs-aem-commons.svg)](https://codeclimate.com/github/Adobe-Consulting-Services/acs-aem-commons)
 
