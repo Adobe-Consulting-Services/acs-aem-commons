@@ -43,10 +43,9 @@ jobs:
         if: matrix.isMainBuildEnv
         env: 
           # these environment variables are evaluated by coveralls-maven-plugin (https://github.com/trautonen/coveralls-maven-plugin/blob/8b8995e42768a25c8db6e85ede62238bf4606cb2/src/main/java/org/eluder/coveralls/maven/plugin/service/General.java#L37)
-          CI_NAME: github
-          BRANCH_NAME_OR_REF: ${{ github.head_ref || github.ref }}
+          CI_NAME: Github
           CI_BUILD_NUMBER: ${{ github.run_id }}
           CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.event.after }}/checks
-          # Needed to get some information about the pull request, if any
-          COVERALLS_SECRET: ${{ secrets.GITHUB_TOKEN }}
+          CI_BRANCH: ${{ steps.refs.outputs.branch_name }}
+          CI_PULL_REQUEST: ${{ steps.refs.outputs.pr_number }}
         run: mvn -e -B -V clean verify coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
