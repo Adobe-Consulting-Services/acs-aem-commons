@@ -71,10 +71,12 @@ public class AemEnvironmentIndicatorFilterTest {
     public AemEnvironmentIndicatorFilter filter;
   
     public Map<String, Object> props = new HashMap<>();
-  
+
   
     @Before
     public void setup() {
+        context.load().json(getClass().getResourceAsStream("AemEnvironmentIndicatorFilterTest.json"), "/content");
+
         AemEnvironmentIndicatorFilter aei = new AemEnvironmentIndicatorFilter();
         filter = spy(aei);
     
@@ -320,7 +322,65 @@ public class AemEnvironmentIndicatorFilterTest {
         context.request().setAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME, WCMMode.valueOf("DESIGN"));
         innerFilter.doFilter(req, context.response(), mockChain);
         assertEquals(Boolean.FALSE, req.getAttribute(AemEnvironmentIndicatorFilter.INJECT_INDICATOR_PARAMETER));
-
     }
 
+    @Test
+    public void isUnsupportedExtension_Defaults() {
+        context.currentResource("/content/test");
+
+        context.registerInjectActivateService(filter);
+
+        context.request().setPathInfo("/content/test.html");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.html");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.jsp");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.model.json");
+        assertTrue(filter.isUnsupportedExtension(context.request().getRequestURI()));
+    }
+
+
+    @Test
+    public void isUnsupportedExtension_Configured() {
+        context.currentResource("/content/test");
+
+        props.put("allowed-extensions", new String[] { "html", "htm", ""} );
+        context.registerInjectActivateService(filter, props);
+
+        context.request().setPathInfo("/content/test.html/foo");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.htm");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.jsp");
+        assertTrue(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.model.json");
+        assertTrue(filter.isUnsupportedExtension(context.request().getRequestURI()));
+    }
+
+    @Test
+    public void isUnsupportedExtension_Blank() {
+        context.currentResource("/content/test");
+
+        props.put("allowed-extensions", new String[] { } );
+        context.registerInjectActivateService(filter, props);
+
+        context.request().setPathInfo("/content/test.html");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+
+        context.request().setPathInfo("/content/test.model.json");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
+    }
 }

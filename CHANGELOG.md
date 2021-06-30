@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #2593 - Etag log level changed from error to warn for already committed response
+- #2587 - Added default HTML extensions filtering for AEM Environment Indicator filter (since it only works for HTML request/responses) 
 
 ### Added
 - #2585 - Added option in workflow-remover to define a millisecond delta for the workflows to be cleared.

@@ -35,9 +35,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
 import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
+import com.day.cq.commons.PathInfo;
 import com.day.cq.wcm.api.WCMMode;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -105,7 +106,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     /* Property: Default Color */
 
-
     private String color = "";
 
     @Property(label = "Color",
@@ -159,7 +159,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
         boolValue = false)
     public static final String PROP_ALWAYS_INCLUDE_COLOR_CSS = "always-include-color-css";
-    
 
     @Property(label = "Browser Title",
             description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
@@ -172,6 +171,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
+
+
+    private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", ""};
+    @Property (label = "Allowed URI extensions",
+            description = "Only inject the environment indicator on URI that use these extensions.",
+            cardinality = Integer.MAX_VALUE)
+    public static final String PROP_ALLOWED_EXTENSIONS = "allowed-extensions";
+    private String[] allowedExtensions;
 
     private String css = "";
 
@@ -266,6 +273,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     "AEM Environment Indicator is not properly configured; If this feature is unwanted, "
                             + "remove the OSGi configuration and disable completely.");
             return false;
+        } else if (isUnsupportedExtension(request.getRequestURI())) {
+            log.debug("Request's extension does not match allowed extensions");
+            return false;
         } else if (isUnsupportedRequestMethod(request.getMethod())) {
             log.debug("Request was not a GET request");
             return false;
@@ -279,6 +289,21 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         // Checking for WcmMode does not make sense, it is not available here
         log.debug("All checks pass, filter can execute");
         return true;
+    }
+
+    protected boolean isUnsupportedExtension(String requestURI) {
+        if (org.apache.commons.lang3.ArrayUtils.isEmpty(allowedExtensions)) {
+            return false;
+        }
+
+        final PathInfo pathInfo = new PathInfo(requestURI);
+        final String extension = pathInfo.getExtension();
+
+        if (StringUtils.isBlank(extension)) {
+            return false;
+        } else {
+            return !ArrayUtils.contains(allowedExtensions, extension);
+        }
     }
 
     boolean isImproperlyConfigured(final String css, final String titlePrefix) {
@@ -334,6 +359,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         
         excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
                 DEFAULT_EXCLUDED_WCMMODES);
+
+        allowedExtensions = PropertiesUtil.toStringArray(config.get(PROP_ALLOWED_EXTENSIONS),
+                DEFAULT_ALLOWED_EXTENSIONS);
 
         if (StringUtils.isNotBlank(css) || StringUtils.isNotBlank(titlePrefix)) {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
