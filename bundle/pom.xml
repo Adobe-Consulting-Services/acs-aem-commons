@@ -842,14 +842,5 @@
             <artifactId>javax.annotation-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Github Actions + Coveralls -->
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <classifier>runtime</classifier>
-            <scope>test</scope>
-            <version>${jacoco.version}</version>
-        </dependency>
     </dependencies>
 </project>
