@@ -1,6 +1,8 @@
 name: Java CI
 
-on: [push, pull_request]
+# Run PRs from forks against the origins workflow (with access to secrets)
+# https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
+on: [push, pull_request_target]
 
 jobs:
   build:
