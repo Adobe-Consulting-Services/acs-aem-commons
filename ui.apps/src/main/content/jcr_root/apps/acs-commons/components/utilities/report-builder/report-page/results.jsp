@@ -77,15 +77,15 @@
 </div>
 <div class="pagination">
     <c:if test="${results.previousPage != -1}">
-        <a href="${resource.path}.results.html?page=0&${reportExecutor.parameters}" data-page="0" class="coral-Button coral-Button--square pagination__link pagination__prev">
+        <a href="${slingRequest.contextPath}${resource.path}.results.html?page=0&${reportExecutor.parameters}" data-page="0" class="coral-Button coral-Button--square pagination__link pagination__prev">
             First
         </a>
-        <a href="${resource.path}.results.html?page=${results.previousPage}&${reportExecutor.parameters}" data-page="${results.previousPage}" class="coral-Button coral-Button--square pagination__link pagination__prev">
+        <a href="${slingRequest.contextPath}${resource.path}.results.html?page=${results.previousPage}&${reportExecutor.parameters}" data-page="${results.previousPage}" class="coral-Button coral-Button--square pagination__link pagination__prev">
             Previous
         </a>
     </c:if>
     <c:if test="${results.nextPage != -1}">
-        <a href="${resource.path}.results.html?page=${results.nextPage}&${reportExecutor.parameters}" data-page="${results.nextPage}" class="coral-Button coral-Button--square pagination__link pagination__next">
+        <a href="${slingRequest.contextPath}${resource.path}.results.html?page=${results.nextPage}&${reportExecutor.parameters}" data-page="${results.nextPage}" class="coral-Button coral-Button--square pagination__link pagination__next">
             Next
         </a>
     </c:if>

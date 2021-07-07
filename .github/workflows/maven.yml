@@ -9,7 +9,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest] # windows currently returns test errors
         jdk: [8, 11]
         include:
-          # lengthy build steps should only be performed on linux with Java 11 (Sonar analysis, deployment)
+          # lengthy build steps should only be performed on linux with Java 11 (coveralls analysis, deployment)
           - os: ubuntu-latest
             jdk: 11
             isMainBuildEnv: true
@@ -34,18 +34,34 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.jdk }}
+          # generate settings.xml with the correct values
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username in deploy
+          server-password: MAVEN_PASSWORD # env variable for token in deploy
+
+      # sets environment variables to be used in subsequent steps: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      - name: Set environment variables
+        shell: bash
+        run: |
+          if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
+            # these environment variables are evaluated by coveralls-maven-plugin (https://github.com/trautonen/coveralls-maven-plugin/blob/8b8995e42768a25c8db6e85ede62238bf4606cb2/src/main/java/org/eluder/coveralls/maven/plugin/service/General.java#L37)
+            echo "CI_NAME=Github" >> $GITHUB_ENV
+            echo "CI_BUILD_NUMBER=${{ github.run_id }}" >> $GITHUB_ENV
+            echo "CI_BUILD_URL=https://github.com/${{ github.repository }}/commit/${{ github.event.after }}/checks" >> $GITHUB_ENV
+            echo "CI_BRANCH=${{ steps.refs.outputs.branch_name }}" >> $GITHUB_ENV
+            echo "CI_PULL_REQUEST=${{ steps.refs.outputs.pr_number }}" >> $GITHUB_ENV
+            echo "MVN_ADDITIONAL_OPTS=coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check -DrepoToken=${{ secrets.COVERALLS_TOKEN }}" >> $GITHUB_ENV
+            if [ "${{github.ref}}" = "refs/heads/master" ]; then
+              echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
+              echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
+              echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
+            else
+              echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
+            fi
+          else
+            echo "MVN_ADDITIONAL_OPTS=" >> $GITHUB_ENV
+            echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
+          fi
 
       - name: Build with Maven
-        if: '!matrix.isMainBuildEnv'
-        run: mvn -e -B -V clean verify
-
-      - name: Build and Analyse with Maven
-        if: matrix.isMainBuildEnv
-        env: 
-          # these environment variables are evaluated by coveralls-maven-plugin (https://github.com/trautonen/coveralls-maven-plugin/blob/8b8995e42768a25c8db6e85ede62238bf4606cb2/src/main/java/org/eluder/coveralls/maven/plugin/service/General.java#L37)
-          CI_NAME: Github
-          CI_BUILD_NUMBER: ${{ github.run_id }}
-          CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.event.after }}/checks
-          CI_BRANCH: ${{ steps.refs.outputs.branch_name }}
-          CI_PULL_REQUEST: ${{ steps.refs.outputs.pr_number }}
-        run: mvn -e -B -V clean verify coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
+        run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}

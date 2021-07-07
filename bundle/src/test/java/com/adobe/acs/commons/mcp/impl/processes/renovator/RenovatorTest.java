@@ -31,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -61,6 +62,9 @@ import javax.jcr.security.Privilege;
 
 import com.day.cq.audit.AuditLog;
 import com.day.cq.audit.AuditLogEntry;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.Replicator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -71,6 +75,7 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -94,11 +99,13 @@ public class RenovatorTest {
     ReplicatorQueue queue;
     ResourceResolver rr;
     AuditLog mockAudit;
+    Replicator replicator;
 
     @Before
-    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException {
-        queue = spy(new ReplicatorQueue());
-        factory.setReplicator(queue);
+    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException, ReplicationException {
+        queue = new ReplicatorQueue();
+        replicator =  mock(Replicator.class);
+        factory.replicator = replicator;
 
         mockAudit = mock(AuditLog.class);
         when(mockAudit.getCategories()).thenReturn(new String[]{"com/day/cq/dam", "com/day/cq/wcm/core/page"});
@@ -161,8 +168,16 @@ public class RenovatorTest {
 
         instance.init(rr, values);
         instance.run(rr);
-        assertTrue("Should unpublish the source folder", queue.getDeactivateOperations().containsKey("/content/dam/folderA"));
-        assertTrue("Should publish the moved source folder", queue.getActivateOperations().containsKey("/content/dam/republishA"));
+
+        ArgumentCaptor<String> deactivationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(1))
+                .replicate(any(Session.class), eq(ReplicationActionType.DEACTIVATE), deactivationCaptor.capture());
+        assertTrue("Should unpublish the source folder", deactivationCaptor.getValue().equals("/content/dam/folderA"));
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(1))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture());
+        assertTrue("Should publish the moved source folder", activationCaptor.getValue().equals("/content/dam/republishA"));
     }
 
     @Test
@@ -224,7 +239,7 @@ public class RenovatorTest {
     }
 
     @Test
-    public void testMoveManyAssets() throws DeserializeException, RepositoryException {
+    public void testMoveManyAssets() throws DeserializeException, RepositoryException, ReplicationException {
         Map<String, Object> values = new HashMap<>();
         values.put("dryRun", "false");
         // Provide input so that the init() method doesn't error out, but this should be ignored later
@@ -242,8 +257,12 @@ public class RenovatorTest {
         assertNotNull(rr.getResource("/content/dam/folderC/subfolder"));
         // Ensure process finished
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC"));
-        assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC/subfolder"));
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, atLeast(2))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture());
+        assertTrue("Should publish new folders", activationCaptor.getAllValues().contains("/content/dam/folderC"));
+        assertTrue("Should publish new folders", activationCaptor.getAllValues().contains("/content/dam/folderC/subfolder"));
     }
 
     Map<String, String> testNodes = new TreeMap<String, String>() {
