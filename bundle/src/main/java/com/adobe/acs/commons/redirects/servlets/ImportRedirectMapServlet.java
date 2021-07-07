@@ -121,7 +121,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if (rule.getUntilDate() != null) {
                 props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, GregorianCalendar.from(rule.getUntilDate()) );
             }
-            props.put(RedirectRule.NOTE_PROPERTY_NAME, rule.getNote());
+            if(rule.getNote() != null){
+                props.put(RedirectRule.NOTE_PROPERTY_NAME, rule.getNote());
+            }
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
             props.put(JCR_CREATED, Calendar.getInstance());
             props.put(JCR_CREATED_BY, resolver.getUserID());
