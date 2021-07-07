@@ -73,7 +73,7 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
         		if(window.location.hash !== '' && window.location.hash !== '#'){
             		var params = window.location.hash.substr(1);
             		loadResults(params).done(function(){
-            			var url = new URL("http://localhost:4502"+window.location.hash.replace('#','?'));
+            			var url = new URL(window.location.hash.replace('#','?'));
                 		url.searchParams.forEach(function(val,key){
                 			$('input[name="'+key+'"]:not([type="checkbox"])').val(val);
                 			var $sel = $('coral-select[name="'+key+'"]');
@@ -95,8 +95,6 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
             	}
 
             	var tools = $('.endor-Crumbs-item')[1];
-            	tools.innerText = 'Reports';
-            	tools.href='/etc/acs-commons/reports.html';
         	});
 
         	
