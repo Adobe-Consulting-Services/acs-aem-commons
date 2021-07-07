@@ -65,3 +65,7 @@ jobs:
 
       - name: Build with Maven
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
+          
+      - name: Upload code coverage to CodeCov (Main build)
+        if: ${{ matrix.isMainBuildEnv }}
+        run: bash <(curl -s https://codecov.io/bash)
