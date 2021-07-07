@@ -27,6 +27,7 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,7 +57,7 @@ public class Redirects {
     }
 
     public List<Resource> getItems() {
-        return pages.get(pageNumber - 1);
+        return pages.isEmpty() ? Collections.emptyList() : pages.get(pageNumber - 1);
     }
 
     public boolean isPaginated() {

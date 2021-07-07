@@ -28,7 +28,7 @@ pageContext.setAttribute("page", pageManager.getContainingPage(result));
 <sling2:getResource path="${result.path}" var="resultRsrc" />
 <td is="coral-table-cell" value="${page.path}">        
 	<c:if test="${not empty page.path}">
-		<a target="_blank" href="#" data-href="/sites.html${page.path}" class="coral-Link">
+		<a target="_blank" href="#" data-href="${slingRequest.contextPath}/sites.html${page.path}" class="coral-Link">
 			<c:out value="${page.pageTitle}" default="${page.title}" />
 		</a>
 	</c:if>

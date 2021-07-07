@@ -18,7 +18,7 @@
  * #L%
  */
 
-@Version("2.1.2")
+@Version("2.2.0")
 package com.adobe.acs.commons.synth;
 
 import org.osgi.annotation.versioning.Version;

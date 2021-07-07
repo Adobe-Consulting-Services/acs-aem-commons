@@ -25,9 +25,12 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.ReplicatorQueue;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.ReplicationOptions;
+import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +51,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.getActionManager;
@@ -58,10 +62,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -74,13 +82,13 @@ public class TreeReplicationTest {
     TreeReplicationFactory factory = new TreeReplicationFactory();
     TreeReplication tool;
     ProcessInstanceImpl instance;
-    ReplicatorQueue queue;
     ResourceResolver rr;
+    Replicator replicator;
 
     @Before
-    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException {
-        queue = spy(new ReplicatorQueue());
-        factory.replicator = queue;
+    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException, ReplicationException {
+        replicator =  mock(Replicator.class);
+        factory.replicator = replicator;
         tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
         instance = prepareProcessInstance(
                 new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
@@ -92,11 +100,11 @@ public class TreeReplicationTest {
     @Test
     public void testFactory() {
         TreeReplication replicationProcess = factory.createProcessDefinition();
-        assertEquals("Should inject replicator service", replicationProcess.replicatorService, queue);
+        assertEquals("Should inject replicator service", replicationProcess.replicatorService, replicator);
     }
 
     @Test
-    public void testTreeOnlyActivation() throws DeserializeException, RepositoryException {
+    public void testTreeOnlyActivation() throws DeserializeException, RepositoryException, ReplicationException {
         Map<String, Object> values = new HashMap<>();
         values.put("startingPath", "/content/dam");
         values.put("publishFilter", "FOLDERS_AND_PAGES_ONLY");
@@ -106,15 +114,23 @@ public class TreeReplicationTest {
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        assertTrue("Should publish /content/dam", queue.getActivateOperations().containsKey("/content/dam"));
-        assertTrue("Should publish /content/dam/folderA", queue.getActivateOperations().containsKey("/content/dam/folderA"));
-        assertTrue("Should publish /content/dam/folderB", queue.getActivateOperations().containsKey("/content/dam/folderB"));
-        assertEquals("Should only publish 3 things", 3, queue.getActivateOperations().size());
-        assertEquals("Should only publish", 0, queue.getDeactivateOperations().size());
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(3))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture(), any(ReplicationOptions.class));
+
+        ArgumentCaptor<String> deactivationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, never())
+                .replicate(any(Session.class), eq(ReplicationActionType.DEACTIVATE), deactivationCaptor.capture(), any(ReplicationOptions.class));
+
+        assertTrue("Should publish /content/dam", activationCaptor.getAllValues().contains("/content/dam"));
+        assertTrue("Should publish /content/dam/folderA", activationCaptor.getAllValues().contains("/content/dam/folderA"));
+        assertTrue("Should publish /content/dam/folderB", activationCaptor.getAllValues().contains("/content/dam/folderB"));
+        assertEquals("Should only publish 3 things", 3, activationCaptor.getAllValues().size());
     }
 
     @Test
-    public void testActivateAll() throws DeserializeException, RepositoryException {
+    public void testActivateAll() throws DeserializeException, RepositoryException, ReplicationException {
         Map<String, Object> values = new HashMap<>();
         values.put("startingPath", "/content/dam");
         values.put("publishFilter", "ALL");
@@ -123,18 +139,26 @@ public class TreeReplicationTest {
         instance.init(rr, values);
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(5))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture(), any(ReplicationOptions.class));
+
+        ArgumentCaptor<String> deactivationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, never())
+                .replicate(any(Session.class), eq(ReplicationActionType.DEACTIVATE), deactivationCaptor.capture(), any(ReplicationOptions.class));
+
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        assertTrue("Should publish /content/dam", queue.getActivateOperations().containsKey("/content/dam"));
-        assertTrue("Should publish /content/dam/folderA", queue.getActivateOperations().containsKey("/content/dam/folderA"));
-        assertTrue("Should publish /content/dam/folderB", queue.getActivateOperations().containsKey("/content/dam/folderB"));
-        assertTrue("Should publish /content/dam/folderA/asset1", queue.getActivateOperations().containsKey("/content/dam/folderA/asset1"));
-        assertTrue("Should publish /content/dam/folderA/asset2", queue.getActivateOperations().containsKey("/content/dam/folderA/asset2"));
-        assertEquals("Should only publish 5 things", 5, queue.getActivateOperations().size());
-        assertEquals("Should only publish", 0, queue.getDeactivateOperations().size());
+        assertTrue("Should publish /content/dam", activationCaptor.getAllValues().contains("/content/dam"));
+        assertTrue("Should publish /content/dam/folderA", activationCaptor.getAllValues().contains("/content/dam/folderA"));
+        assertTrue("Should publish /content/dam/folderB", activationCaptor.getAllValues().contains("/content/dam/folderB"));
+        assertTrue("Should publish /content/dam/folderA/asset1", activationCaptor.getAllValues().contains("/content/dam/folderA/asset1"));
+        assertTrue("Should publish /content/dam/folderA/asset2", activationCaptor.getAllValues().contains("/content/dam/folderA/asset2"));
+        assertEquals("Should only publish 5 things", 5, activationCaptor.getAllValues().size());
     }
 
     @Test
-    public void testActivateSite() throws DeserializeException, RepositoryException {
+    public void testActivateSite() throws DeserializeException, RepositoryException, ReplicationException {
         Map<String, Object> values = new HashMap<>();
         values.put("startingPath", "/content/siteA");
         values.put("publishFilter", "FOLDERS_AND_PAGES_ONLY");
@@ -143,17 +167,25 @@ public class TreeReplicationTest {
         instance.init(rr, values);
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(4))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture(), any(ReplicationOptions.class));
+
+        ArgumentCaptor<String> deactivationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, never())
+                .replicate(any(Session.class), eq(ReplicationActionType.DEACTIVATE), deactivationCaptor.capture(), any(ReplicationOptions.class));
+
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        assertTrue("Should publish /content/siteA", queue.getActivateOperations().containsKey("/content/siteA"));
-        assertTrue("Should publish /content/siteA/page1", queue.getActivateOperations().containsKey("/content/siteA/page1"));
-        assertTrue("Should publish /content/siteA/page1/page1a", queue.getActivateOperations().containsKey("/content/siteA/page1/page1a"));
-        assertTrue("Should publish /content/siteA/page2", queue.getActivateOperations().containsKey("/content/siteA/page2"));
-        assertEquals("Should only publish 4 things", 4, queue.getActivateOperations().size());
-        assertEquals("Should only publish", 0, queue.getDeactivateOperations().size());
+        assertTrue("Should publish /content/siteA", activationCaptor.getAllValues().contains("/content/siteA"));
+        assertTrue("Should publish /content/siteA/page1",  activationCaptor.getAllValues().contains("/content/siteA/page1"));
+        assertTrue("Should publish /content/siteA/page1/page1a",  activationCaptor.getAllValues().contains("/content/siteA/page1/page1a"));
+        assertTrue("Should publish /content/siteA/page2",  activationCaptor.getAllValues().contains("/content/siteA/page2"));
+        assertEquals("Should only publish 4 things", 4,  activationCaptor.getAllValues().size());
     }
 
     @Test
-    public void testDeactivate() throws DeserializeException, RepositoryException {
+    public void testDeactivate() throws DeserializeException, RepositoryException, ReplicationException {
         Map<String, Object> values = new HashMap<>();
         values.put("startingPath", "/content");
         values.put("publishFilter", "FOLDERS_AND_PAGES_ONLY");
@@ -162,10 +194,17 @@ public class TreeReplicationTest {
         instance.init(rr, values);
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, never())
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture(), any(ReplicationOptions.class));
+
+        ArgumentCaptor<String> deactivationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(1))
+                .replicate(any(Session.class), eq(ReplicationActionType.DEACTIVATE), deactivationCaptor.capture(), any(ReplicationOptions.class));
+
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        assertEquals("Should only unpublish", 0, queue.getActivateOperations().size());
-        assertTrue("Should unpublish /content", queue.getDeactivateOperations().containsKey("/content"));
-        assertEquals("Should only unpublish 1", 1, queue.getDeactivateOperations().size());
+        assertTrue("Should unpublish /content", deactivationCaptor.getValue().equals("/content"));
     }
 
     Map<String, String> testNodes = new TreeMap<String, String>() {
