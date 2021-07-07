@@ -34,6 +34,10 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.jdk }}
+          # generate settings.xml with the correct values
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username in deploy
+          server-password: MAVEN_PASSWORD # env variable for token in deploy
 
       # sets environment variables to be used in subsequent steps: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
 #      - name: Set environment variables
