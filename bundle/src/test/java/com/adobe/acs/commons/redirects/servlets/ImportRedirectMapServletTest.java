@@ -22,6 +22,7 @@ package com.adobe.acs.commons.redirects.servlets;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -50,6 +51,7 @@ import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class ImportRedirectMapServletTest {
     @Rule
@@ -161,8 +163,21 @@ public class ImportRedirectMapServletTest {
     @Test
     public void testUpdate() throws IOException {
         Resource root = context.resourceResolver().getResource(redirectStoragePath);
-        Collection<RedirectRule> rules = Arrays.asList();
+        RedirectRule rule1 = new RedirectRule("/a1", "/b1", 301, null, null);
+        RedirectRule rule2 = new RedirectRule("/a2", "/b2", 302, Calendar.getInstance(), "note");
+        Collection<RedirectRule> rules = Arrays.asList(rule1, rule2);
         servlet.update(root, rules);
+
+        ValueMap vm1 = root.getChild("redirect-rule-1").getValueMap();
+        assertEquals(vm1.get(RedirectRule.SOURCE_PROPERTY_NAME), rule1.getSource());
+        assertEquals(vm1.get(RedirectRule.TARGET_PROPERTY_NAME), rule1.getTarget());
+        assertFalse(vm1.containsKey(RedirectRule.UNTIL_DATE_PROPERTY_NAME));
+        assertFalse(vm1.containsKey(RedirectRule.NOTE_PROPERTY_NAME));
+
+        ValueMap vm2 = root.getChild("redirect-rule-2").getValueMap();
+        assertEquals(vm2.get(RedirectRule.SOURCE_PROPERTY_NAME), rule2.getSource());
+        assertEquals(vm2.get(RedirectRule.TARGET_PROPERTY_NAME), rule2.getTarget());
+        assertEquals(vm2.get(RedirectRule.NOTE_PROPERTY_NAME), rule2.getNote());
     }
 
 }
