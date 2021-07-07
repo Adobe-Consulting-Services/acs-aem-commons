@@ -9,7 +9,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest] # windows currently returns test errors
         jdk: [8, 11]
         include:
-          # lengthy build steps should only be performed on linux with Java 11 (coveralls analysis, deployment)
+          # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
           - os: ubuntu-latest
             jdk: 11
             isMainBuildEnv: true
