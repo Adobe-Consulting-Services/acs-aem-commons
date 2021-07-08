@@ -213,7 +213,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                         entry -> {
                             List<String> brokenPaths =  collectPaths(entry, htmlFields)
                                     .filter(href -> regex.matcher(href).matches())
-                                    .filter(path -> resource.getResourceResolver().resolve(path) == null || ResourceUtil.isNonExistingResource(resource.getResourceResolver().resolve(path)))
+                                    .filter(path -> ResourceUtil.isNonExistingResource(resource.getResourceResolver().resolve(path)))
                                     .collect(Collectors.toList());
                             return brokenPaths;
                         })).entrySet().stream().filter(e -> !e.getValue().isEmpty())
