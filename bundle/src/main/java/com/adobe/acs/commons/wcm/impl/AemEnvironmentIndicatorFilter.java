@@ -83,6 +83,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private static final String DIV_ID = "acs-commons-env-indicator";
     
     static final String INJECT_INDICATOR_PARAMETER = "AemEnvironmentIndicatorFilter.includeIndicator";
+    static final String NO_EXTENSION_PLACEHOLDER = "<NONE>";
 
     private static final String BASE_DEFAULT_STYLE =
             ";background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3NpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NDkxMSwgMjAxMy8xMC8yOS0xMTo0NzoxNiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5ZmViMDk1Ni00MTMwLTQ0NGMtYWM3Ny02MjU0NjY0OTczZWIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MDk4RTBGQkYzMjA5MTFFNDg5MDFGQzVCQkEyMjY0NDQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MDk4RTBGQkUzMjA5MTFFNDg5MDFGQzVCQkEyMjY0NDQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6Mjc5NmRkZmItZDVlYi00N2RlLWI1NDMtNDgxNzU2ZjIwZDc1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjlmZWIwOTU2LTQxMzAtNDQ0Yy1hYzc3LTYyNTQ2NjQ5NzNlYiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ps64/vsAAAAkSURBVHjaYvz//z8DGjBmAAkiYWOwInQBZEFjZB0YAiAMEGAAVBk/wkPTSYQAAAAASUVORK5CYII=');"
@@ -173,9 +174,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private String[] excludedWCMModes;
 
 
-    private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", ""};
+    private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", NO_EXTENSION_PLACEHOLDER};
     @Property (label = "Allowed URI extensions",
-            description = "Only inject the environment indicator on URI that use these extensions.",
+            description = "Only inject the environment indicator on URI that use these extensions. Use '"+ NO_EXTENSION_PLACEHOLDER + "' to match on no extension.",
             cardinality = Integer.MAX_VALUE)
     public static final String PROP_ALLOWED_EXTENSIONS = "allowed-extensions";
     private String[] allowedExtensions;
@@ -292,14 +293,15 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
 
     protected boolean isUnsupportedExtension(String requestURI) {
-        if (org.apache.commons.lang3.ArrayUtils.isEmpty(allowedExtensions)) {
+        if (ArrayUtils.isEmpty(allowedExtensions)) {
             return false;
         }
 
         final PathInfo pathInfo = new PathInfo(requestURI);
         final String extension = pathInfo.getExtension();
 
-        if (StringUtils.isBlank(extension)) {
+        if (StringUtils.isBlank(extension) && ArrayUtils.contains(allowedExtensions, NO_EXTENSION_PLACEHOLDER)) {
+            // Special care of blank extension
             return false;
         } else {
             return !ArrayUtils.contains(allowedExtensions, extension);

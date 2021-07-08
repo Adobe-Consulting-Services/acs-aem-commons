@@ -333,7 +333,7 @@ public class AemEnvironmentIndicatorFilterTest {
         context.request().setPathInfo("/content/test.html");
         assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
 
-        context.request().setPathInfo("/content/test.html");
+        context.request().setPathInfo("/content/test.htm");
         assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
 
         context.request().setPathInfo("/content/test.jsp");
@@ -351,7 +351,7 @@ public class AemEnvironmentIndicatorFilterTest {
     public void isUnsupportedExtension_Configured() {
         context.currentResource("/content/test");
 
-        props.put("allowed-extensions", new String[] { "html", "htm", ""} );
+        props.put("allowed-extensions", new String[] { "html", "htm", AemEnvironmentIndicatorFilter.NO_EXTENSION_PLACEHOLDER} );
         context.registerInjectActivateService(filter, props);
 
         context.request().setPathInfo("/content/test.html/foo");
