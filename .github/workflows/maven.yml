@@ -1,6 +1,12 @@
 name: Java CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 
 jobs:
   build:
@@ -13,8 +19,10 @@ jobs:
           - os: ubuntu-latest
             jdk: 11
             isMainBuildEnv: true
+            namePrefix: 'Main '
       fail-fast: false
 
+    name: ${{ matrix.namePrefix }} Maven build (${{ matrix.os }}, JDK ${{ matrix.jdk }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -49,6 +57,7 @@ jobs:
               echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
               echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
               echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
+              echo "STEP_NAME_SUFFIX=(Deploys to OSSRH)" >> $GITHUB_ENV
             else
               echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
             fi
@@ -57,9 +66,9 @@ jobs:
             echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
           fi
 
-      - name: Build with Maven
+      - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
-        
+
       - name: Upload code coverage to CodeCov (Main build)
         if: ${{ matrix.isMainBuildEnv }}
-        run: bash <(curl -s https://codecov.io/bash)        
+        run: bash <(curl -s https://codecov.io/bash)
