@@ -347,7 +347,7 @@ public class AemEnvironmentIndicatorFilterTest {
     }
 
 
-    @Test
+   @Test
     public void isUnsupportedExtension_Configured() {
         context.currentResource("/content/test");
 
@@ -376,6 +376,9 @@ public class AemEnvironmentIndicatorFilterTest {
 
         props.put("allowed-extensions", new String[] { } );
         context.registerInjectActivateService(filter, props);
+
+        context.request().setPathInfo("/content/test");
+        assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));
 
         context.request().setPathInfo("/content/test.html");
         assertFalse(filter.isUnsupportedExtension(context.request().getRequestURI()));

@@ -300,10 +300,11 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         final PathInfo pathInfo = new PathInfo(requestURI);
         final String extension = pathInfo.getExtension();
 
-        if (StringUtils.isBlank(extension) && ArrayUtils.contains(allowedExtensions, NO_EXTENSION_PLACEHOLDER)) {
-            // Special care of blank extension
-            return false;
+        if (StringUtils.isBlank(extension)) {
+            // Special case handle of blank extension
+            return !ArrayUtils.contains(allowedExtensions, NO_EXTENSION_PLACEHOLDER);
         } else {
+            // If extension is not blank, check to make sure it is allowed
             return !ArrayUtils.contains(allowedExtensions, extension);
         }
     }
