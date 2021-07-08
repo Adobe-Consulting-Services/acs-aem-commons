@@ -67,7 +67,7 @@ public class AbstractResourceImpl extends AbstractResource {
         meta.put(ResourceMetadata.RESOLUTION_PATH, this.path);
         
         if (meta.get(ResourceMetadata.RESOLUTION_PATH_INFO) == null) {
-           // Required property; This information does not exist in this context so set to pl
+           // Required property; This information does not exist in this context so set to blank
           meta.put(ResourceMetadata.RESOLUTION_PATH_INFO, "");
         }
 
