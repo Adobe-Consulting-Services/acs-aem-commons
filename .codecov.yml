@@ -1,0 +1,9 @@
+# https://docs.codecov.com/docs/codecovyml-reference
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        # each PR must not lower the coverage
+        threshold: 0%
