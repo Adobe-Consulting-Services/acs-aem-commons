@@ -35,9 +35,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
 import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
+import com.day.cq.commons.PathInfo;
 import com.day.cq.wcm.api.WCMMode;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -82,6 +83,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private static final String DIV_ID = "acs-commons-env-indicator";
     
     static final String INJECT_INDICATOR_PARAMETER = "AemEnvironmentIndicatorFilter.includeIndicator";
+    static final String NO_EXTENSION_PLACEHOLDER = "<NONE>";
 
     private static final String BASE_DEFAULT_STYLE =
             ";background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3NpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NDkxMSwgMjAxMy8xMC8yOS0xMTo0NzoxNiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5ZmViMDk1Ni00MTMwLTQ0NGMtYWM3Ny02MjU0NjY0OTczZWIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MDk4RTBGQkYzMjA5MTFFNDg5MDFGQzVCQkEyMjY0NDQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MDk4RTBGQkUzMjA5MTFFNDg5MDFGQzVCQkEyMjY0NDQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6Mjc5NmRkZmItZDVlYi00N2RlLWI1NDMtNDgxNzU2ZjIwZDc1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjlmZWIwOTU2LTQxMzAtNDQ0Yy1hYzc3LTYyNTQ2NjQ5NzNlYiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ps64/vsAAAAkSURBVHjaYvz//z8DGjBmAAkiYWOwInQBZEFjZB0YAiAMEGAAVBk/wkPTSYQAAAAASUVORK5CYII=');"
@@ -104,7 +106,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private XSSAPI xss;
 
     /* Property: Default Color */
-
 
     private String color = "";
 
@@ -159,7 +160,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
         boolValue = false)
     public static final String PROP_ALWAYS_INCLUDE_COLOR_CSS = "always-include-color-css";
-    
 
     @Property(label = "Browser Title",
             description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
@@ -172,6 +172,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
+
+
+    private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", NO_EXTENSION_PLACEHOLDER};
+    @Property (label = "Allowed URI extensions",
+            description = "Only inject the environment indicator on URI that use these extensions. Use '"+ NO_EXTENSION_PLACEHOLDER + "' to match on no extension.",
+            cardinality = Integer.MAX_VALUE)
+    public static final String PROP_ALLOWED_EXTENSIONS = "allowed-extensions";
+    private String[] allowedExtensions;
 
     private String css = "";
 
@@ -266,6 +274,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     "AEM Environment Indicator is not properly configured; If this feature is unwanted, "
                             + "remove the OSGi configuration and disable completely.");
             return false;
+        } else if (isUnsupportedExtension(request.getRequestURI())) {
+            log.debug("Request's extension does not match allowed extensions");
+            return false;
         } else if (isUnsupportedRequestMethod(request.getMethod())) {
             log.debug("Request was not a GET request");
             return false;
@@ -279,6 +290,23 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         // Checking for WcmMode does not make sense, it is not available here
         log.debug("All checks pass, filter can execute");
         return true;
+    }
+
+    protected boolean isUnsupportedExtension(String requestURI) {
+        if (ArrayUtils.isEmpty(allowedExtensions)) {
+            return false;
+        }
+
+        final PathInfo pathInfo = new PathInfo(requestURI);
+        final String extension = pathInfo.getExtension();
+
+        if (StringUtils.isBlank(extension)) {
+            // Special case handle of blank extension
+            return !ArrayUtils.contains(allowedExtensions, NO_EXTENSION_PLACEHOLDER);
+        } else {
+            // If extension is not blank, check to make sure it is allowed
+            return !ArrayUtils.contains(allowedExtensions, extension);
+        }
     }
 
     boolean isImproperlyConfigured(final String css, final String titlePrefix) {
@@ -334,6 +362,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         
         excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
                 DEFAULT_EXCLUDED_WCMMODES);
+
+        allowedExtensions = PropertiesUtil.toStringArray(config.get(PROP_ALLOWED_EXTENSIONS),
+                DEFAULT_ALLOWED_EXTENSIONS);
 
         if (StringUtils.isNotBlank(css) || StringUtils.isNotBlank(titlePrefix)) {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
