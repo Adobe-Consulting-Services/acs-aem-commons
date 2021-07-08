@@ -1,0 +1,8 @@
+{
+  "test": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent"
+    }
+  }
+}
