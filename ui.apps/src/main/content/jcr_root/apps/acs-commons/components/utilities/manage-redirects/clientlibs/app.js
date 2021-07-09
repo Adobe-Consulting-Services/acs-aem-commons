@@ -71,7 +71,7 @@
             var dialog = $('#demoDialog');
             var id = dialog.find('.acs-redirect-rule-form').attr('id');
             var editRedirectTable = $('#edit-redirect-coral-table');
-            var $rows = editRedirectTable.find('.coral-Table-row');
+            var $rows = editRedirectTable.find('tr');
     		var tr = editRedirectTable.find('#'+id);
     		var idx = tr.index();
             if(cmd.indexOf("$prev") > 0){
@@ -200,7 +200,7 @@
 
     $(document).on("click", ".edit-redirect-rule", function (e) {
     	e.preventDefault();
-         var tr = $(this).parents('.coral-Table-row');
+         var tr = $(this).closest('tr');
          updateFormData(tr);
     	 showEditDialog();
 
@@ -240,7 +240,7 @@
         $("#redirect-search-box").bind("keyup keydown change", function(e) {
            var searchText = $(this).val();
            var editRedirectTable = $('#edit-redirect-coral-table');
-           var rows = editRedirectTable.find('.coral-Table-row');
+           var rows = editRedirectTable.find('tr');
            $.each(rows, function(rowIndex, row) {
                var source = $(row).find('.source').data('value');
                var target  = $(row).find('.target').data('value');
