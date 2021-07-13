@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.4...HEAD
 
+## 5.0.6 - 2021-06-12
+
 ### Changed
 - #2593 - Etag log level changed from error to warn for already committed response
 - #2587 - Added default HTML extensions filtering for AEM Environment Indicator filter (since it only works for HTML request/responses) 
