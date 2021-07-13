@@ -57,7 +57,7 @@ public class Configurations {
 
     public Collection<RedirectConfiguration> getConfigurations() {
         String sql = "SELECT * FROM [nt:unstructured] AS s WHERE ISDESCENDANTNODE([/conf]) "
-                + "AND s.[sling:resourceType]='" + REDIRECTS_RESOURCE_TYPE + "'";
+                + "AND (s.[sling:resourceType]='" + REDIRECTS_RESOURCE_TYPE + "' OR s.[jcr:path]='/conf/global/settings/redirects')";
         log.debug(sql);
         Iterator<Resource> it = request.getResourceResolver().findResources(sql, Query.JCR_SQL2);
         List<RedirectConfiguration> lst = new ArrayList<>();
