@@ -1,12 +1,32 @@
 name: Java CI
 
 on:
+  # for regular master build (after the merge)
   push:
     branches:
     - master
+  # for PRs from forked repos
+  # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
+  pull_request_target:
+    branches:
+    - master
+  # for PRs from ACS AEM Commons repository directly (non-forked repo)
   pull_request:
     branches:
     - master
+
+# restrict privileges except for setting commit status
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  deployments: read
+  issues: read
+  packages: read
+  pull-requests: read
+  repository-projects: read
+  security-events: read
+  statuses: write
 
 jobs:
   build:
@@ -28,6 +48,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        # always act on the modified source code (even for event pull_request_target)
+        # is considered potentially unsafe (https://securitylab.github.com/research/github-actions-preventing-pwn-requests/) but actions are only executed after approval from committers
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          # no additional git operations after checkout triggered in workflow, no need to store credentials
+          persist-credentials: false
 
       - name: Set up cache for ~/.m2/repository
         uses: actions/cache@v2
