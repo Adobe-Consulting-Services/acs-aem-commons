@@ -15,15 +15,15 @@ on:
     branches:
     - master
 
-# restrict privileges except for setting commit status
+# restrict privileges except for setting commit status, adding PR comments and writing statuses
 permissions:
   actions: read
-  checks: read
+  checks: write
   contents: read
   deployments: read
   issues: read
   packages: read
-  pull-requests: read
+  pull-requests: write
   repository-projects: read
   security-events: read
   statuses: write
