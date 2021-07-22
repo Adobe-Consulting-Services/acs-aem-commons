@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.apache.sling.discovery.DiscoveryService;
 import org.apache.sling.discovery.TopologyEvent;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,9 +38,6 @@ import com.adobe.acs.commons.util.ClusterLeader;
 public class DiscoveryServiceHelperTest {
     private DiscoveryServiceHelper helper;
     
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private DiscoveryService discoveryService;
-
     @Mock
     private BundleContext bundleContext;
 
@@ -51,14 +47,19 @@ public class DiscoveryServiceHelperTest {
     @Before
     public void setUp() {
         helper = new DiscoveryServiceHelper();
-        helper.discoveryService = discoveryService;
         Mockito.when(bundleContext.registerService(Mockito.eq(ClusterLeader.class), Mockito.any(ClusterLeader.class), Mockito.isNull())).thenReturn(serviceRegistration);
+    }
+
+    private TopologyEvent createTopologyEvent(boolean leader) {
+        TopologyEvent topologyEvent = Mockito.mock(TopologyEvent.class, Answers.RETURNS_DEEP_STUBS);
+        Mockito.when(topologyEvent.getNewView().getLocalInstance().isLeader()).thenReturn(leader);
+        return topologyEvent;
     }
 
     @Test
     public void testActivateOnLeader() {
-        Mockito.when(discoveryService.getTopology().getLocalInstance().isLeader()).thenReturn(true);
         helper.activate(bundleContext);
+        helper.handleTopologyEvent(createTopologyEvent(true));
         Assert.assertNotNull(helper.clusterLeaderServiceRegistration);
         helper.deactivate();
         Assert.assertNull(helper.clusterLeaderServiceRegistration);
@@ -66,14 +67,13 @@ public class DiscoveryServiceHelperTest {
 
     @Test
     public void testActivateNotOnLeader() {
-        Mockito.when(discoveryService.getTopology().getLocalInstance().isLeader()).thenReturn(false);
         helper.activate(bundleContext);
+        helper.handleTopologyEvent(createTopologyEvent(false));
         Mockito.verify(bundleContext, Mockito.never()).registerService(Mockito.eq(ClusterLeader.class), Mockito.any(ClusterLeader.class), Mockito.isNull());
     }
 
     @Test
     public void testRegisterUnregister() {
-        Mockito.when(discoveryService.getTopology().getLocalInstance().isLeader()).thenReturn(false);
         helper.activate(bundleContext);
         Assert.assertNull(helper.clusterLeaderServiceRegistration);
 

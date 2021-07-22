@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.apache.sling.discovery.DiscoveryService;
 import org.apache.sling.discovery.TopologyEvent;
 import org.apache.sling.discovery.TopologyEventListener;
 import org.apache.sling.discovery.TopologyView;
@@ -28,7 +27,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.acs.commons.util.ClusterLeader;
 
@@ -41,9 +39,6 @@ import com.adobe.acs.commons.util.ClusterLeader;
  */
 @Component
 public class DiscoveryServiceHelper implements TopologyEventListener {
-
-    @Reference
-    DiscoveryService discoveryService;
 
     private BundleContext bundleContext;
 
@@ -64,9 +59,6 @@ public class DiscoveryServiceHelper implements TopologyEventListener {
     @Activate
     public void activate(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-        if (discoveryService.getTopology().getLocalInstance().isLeader()) {
-            registerClusterLeader();
-        }
     }
 
     @Deactivate
