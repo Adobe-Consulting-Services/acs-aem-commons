@@ -8,6 +8,8 @@ on:
   # for PRs from forked repos
   # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
   pull_request_target:
+  # for PRs from ACS AEM Commons repository directly (non-forked repo)
+  pull_request:
 
 # restrict privileges except for setting commit status, adding PR comments and writing statuses
 permissions:
@@ -40,6 +42,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Debug Event
+        shell: bash
+        run: 
+          echo "Event that triggered action: ${{ github.event }}" 
       - name: Checkout
         uses: actions/checkout@v2
         # always act on the modified source code (even for event pull_request_target)
