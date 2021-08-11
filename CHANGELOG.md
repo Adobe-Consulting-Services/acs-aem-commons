@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.4...HEAD
 
+# 5.0.10
+
+- #2660 - Remove Halt button from MCP as it's use can result in repository corruption.
+
 ## 5.0.8
 
 ### Fixed
