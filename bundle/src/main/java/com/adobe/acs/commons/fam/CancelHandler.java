@@ -61,7 +61,6 @@ public class CancelHandler implements Serializable {
     public void trackActiveWork(Thread t) {
         if (cancelled) {
             // Halt UI button has been removed, but just to be safe...
-            // t.interrupt();
             log.warn("Thread interruption is no longer supported as it can result in repository corruption.");
         } else {
             activeWork.add(t);

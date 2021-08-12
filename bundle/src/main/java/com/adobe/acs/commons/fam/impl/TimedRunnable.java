@@ -112,7 +112,6 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
             }
             if (!finished1) {
                 // The watchdog condition should never be met as task.timeout is forced to -1, however just to be safe...
-                // workThread.interrupt();
                 LOG.warn("Thread interruption is no longer supported.");
             }
         };

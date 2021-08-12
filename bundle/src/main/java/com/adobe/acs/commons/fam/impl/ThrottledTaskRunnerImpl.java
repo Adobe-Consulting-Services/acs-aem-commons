@@ -322,7 +322,6 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
          * #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
          * Force to -1, which disabled the timeout/watchdog
          */
-        //taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 3600000);
         taskTimeout = -1;
 
         try {
