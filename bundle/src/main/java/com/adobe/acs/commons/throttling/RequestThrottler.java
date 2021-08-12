@@ -225,8 +225,16 @@ public class RequestThrottler implements Filter {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
-            // We no longer perform thread interrupts anywhere. Log the error instead.
-            LOG.error("InterruptedException while trying to sleep ACS Commons Fast Action Manager thread", e);
+            // We no longer perform thread interrupts, so something else in AEM is causing this interruption.
+            //
+            LOG.warn("An ACS AEM Commons Fast Action Manager thread running sleep(..) was interrupted." +
+                    "The interruption did NOT come FROM ACS AEM Commons as it's code no longer interrupts ANY thread. " +
+                    "ACS AEM Commons is simply alerting you of this interruption in this log message, " +
+                    "and will now restore the interrupted status via a call to: Thread.currentThread().interrupt();" +
+                    "", e);
+
+            // Restore the interrupted status
+            Thread.currentThread().interrupt();
         }
     }
 
