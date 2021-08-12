@@ -54,9 +54,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@Component(metatype = true, immediate = true,
-           label = "ACS AEM Commons - Throttled Task Runner Service",
-           description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
+@Component(metatype = true,
+           label = "ACS AEM Commons - Throttled Task Runner Service")
 @Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
 @Properties({
     @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
