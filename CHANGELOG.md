@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 # 5.0.10
 
-- #2660 - Remove Halt button from MCP as it's use can result in repository corruption.
+- #2660 - Remove Halt button from MCP as it's use can result in repository corruption. Also removed ability to set task.timeout on ThrottledTaskRunnerImpl, forcing the timeout to be disabled (-1).
 
 ## 5.0.8
 
