@@ -225,7 +225,9 @@ public class RequestThrottler implements Filter {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            LOG.error("InterruptedException while trying to sleep ACS Commons Fast Action Manager thread", e);
+            // We no longer perform thread interrupts anywhere. Log the error instead.
+            // Thread.currentThread().interrupt();
         }
     }
 
