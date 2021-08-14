@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -47,11 +49,12 @@ import org.apache.sling.models.annotations.Model;
 
 /**
  * Describes a very simple table, which is up to the process definition to
- * outline.
+ * outline. This report type is not efficient with large number of resulting
+ * rows, because it creates a JCR node for each row.
  */
 @ProviderType
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class GenericReport {
+public class GenericReport extends AbstractReport {
     public static final String GENERIC_REPORT_RESOURCE_TYPE = ProcessInstance.RESOURCE_TYPE + "/process-generic-report";
 
     @Inject
@@ -67,6 +70,12 @@ public class GenericReport {
         return GENERIC_REPORT_RESOURCE_TYPE;
     }
     
+    @PostConstruct
+    public void init() {
+        this.columnsData = columns;
+        this.rowsData = rows;
+    }
+
     public void persist(ResourceResolver rr, String path) throws PersistenceException, RepositoryException {
         ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, path, getResourceType(), null, false).adaptTo(ModifiableValueMap.class);
         jcrContent.put("jcr:primaryType", "nt:unstructured");
@@ -86,92 +95,5 @@ public class GenericReport {
         rr.refresh();
     }
 
-    public <E extends Enum<E>, V> void setRows(Map<String, EnumMap<E, V>> reportData, String keyName, Class<E> enumClass) throws PersistenceException, RepositoryException {
-        getColumns().clear();
-        getColumns().add(keyName);
-        Stream.of().map(Object::toString).collect(Collectors.toCollection(this::getColumns));
-        for (Enum e : enumClass.getEnumConstants()) {
-            this.getColumns().add(e.toString());
-            ValueFormat format = ValueFormat.forField(e);
-            if (format.columnCount > 1) {
-                this.getColumns().add(e.toString() + format.suffix);
-            }
-        }
-        getRows().clear();
-        reportData.forEach((path, row) -> {
-            Map<String, Object> rowData = new LinkedHashMap<>();
-            rowData.put(keyName, path);
-            for (Enum<E> c : enumClass.getEnumConstants()) {
-                if (row.containsKey(c)) {
-                    ValueFormat format = ValueFormat.forField(c);
-                    rowData.put(c.toString(), row.get(c));
-                    if (format.columnCount > 1) {
-                        rowData.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
-                    }
-                }
-            }
-            getRows().add(new ValueMapDecorator(rowData));
-        });
-    }
-    
-    public <E extends Enum<E>, V> void setRows(List<EnumMap<E, V>> reportData, Class<E> enumClass) throws PersistenceException, RepositoryException {
-        getColumns().clear();
-        Stream.of().map(Object::toString).collect(Collectors.toCollection(this::getColumns));
-        for (Enum e : enumClass.getEnumConstants()) {
-            this.getColumns().add(e.toString());
-            ValueFormat format = ValueFormat.forField(e);
-            if (format.columnCount > 1) {
-                this.getColumns().add(e.toString() + format.suffix);
-            }
-        }
-        getRows().clear();
-        reportData.forEach(row -> {
-            Map<String, Object> rowData = new LinkedHashMap<>();
-            for (Enum<E> c : enumClass.getEnumConstants()) {
-                if (row.containsKey(c)) {
-                    ValueFormat format = ValueFormat.forField(c);
-                    rowData.put(c.toString(), row.get(c));
-                    if (format.columnCount > 1) {
-                        rowData.put(c.toString()+format.suffix, format.getAlternateValue(row.get(c)));
-                    }
-                }
-            }
-            getRows().add(new ValueMapDecorator(rowData));
-        });
-    }    
 
-    /**
-     * @return the columns
-     */
-    public List<String> getColumns() {
-        if (columns == null) {
-            columns = new ArrayList<>();
-        }
-        return columns;
-    }
-
-    /**
-     * @return the rows
-     */
-    public List<ValueMap> getRows() {
-        if (rows == null) {
-            rows = new ArrayList<>();
-        }
-        return rows;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<String> getColumnNames() {
-        return columns.stream().map(StringUtil::getFriendlyName).collect(Collectors.toList());
-    }
 }
