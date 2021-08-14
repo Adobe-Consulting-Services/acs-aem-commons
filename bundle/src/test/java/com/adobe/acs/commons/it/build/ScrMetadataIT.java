@@ -142,6 +142,10 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:enabled");
 
+        // change due to #2507 MCP reports
+        COMPONENT_PROPERTIES_TO_IGNORE
+                .add("com.adobe.acs.commons.mcp.impl.GenericReportExcelServlet:sling.servlet.resourceTypes");
+
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");

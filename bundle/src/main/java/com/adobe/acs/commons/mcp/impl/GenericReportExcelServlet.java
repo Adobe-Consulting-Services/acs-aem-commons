@@ -53,7 +53,8 @@ import java.util.List;
 /**
  * Export a generic report as an excel spreadsheet
  */
-@SlingServlet(resourceTypes = GenericReport.GENERIC_REPORT_RESOURCE_TYPE, extensions = {"xlsx","xls"})
+@SlingServlet(resourceTypes = { GenericReport.GENERIC_REPORT_RESOURCE_TYPE,
+        GenericBlobReport.BLOB_REPORT_RESOURCE_TYPE }, extensions = { "xlsx", "xls" })
 public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenericReportExcelServlet.class);
 

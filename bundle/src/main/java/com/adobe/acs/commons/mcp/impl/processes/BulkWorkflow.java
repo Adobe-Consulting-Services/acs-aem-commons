@@ -27,7 +27,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.form.TextareaComponent;
 import com.adobe.acs.commons.mcp.form.workflow.WorkflowModelSelector;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.util.impl.QueryHelperImpl;
@@ -115,7 +115,7 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
     )
     public String relativePayloadPath = "";
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
     private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private transient List<Resource> payloads;
@@ -176,7 +176,7 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
                 }));
     }
 
-    public GenericReport getReport() {
+    public GenericBlobReport getReport() {
         return report;
     }
 
