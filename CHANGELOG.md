@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors
+- #2669 - Store MCP reports in a single node instead of a large node structure (fixes #2507)
 
 ## 5.0.6 - 2021-06-12
 
