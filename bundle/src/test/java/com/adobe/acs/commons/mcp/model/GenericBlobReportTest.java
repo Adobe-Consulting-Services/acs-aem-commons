@@ -1,11 +1,28 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.mcp.model;
 
-import static org.junit.Assert.assertThat;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,13 +36,12 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.commons.JcrUtils;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.Before;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -33,9 +49,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.hamcrest.Matchers;
 
 
 
@@ -49,25 +62,15 @@ public class GenericBlobReportTest {
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
-
-    @Before
-    public void setup() {
-
-
-
-    }
-
     enum Report {
         column1, column2, column3
     }
 
     @Test
     public void testPersist() throws RepositoryException, JsonProcessingException, IOException {
-        GenericBlobReport report = new GenericBlobReport();
 
         context.build().resource(REPORT_PATH, "sling:resourceType", GenericBlobReport.BLOB_REPORT_RESOURCE_TYPE, "name",
                 "myName", "columns", new String[] { "column1", "colum2", "column3" });
-
         Map<String, EnumMap<Report, Object>> reportData = new LinkedHashMap<>();
         reportData.put(PATH1, new EnumMap<>(Report.class));
         reportData.get(PATH1).put(Report.column1, "abc");
@@ -75,6 +78,7 @@ public class GenericBlobReportTest {
         reportData.get(PATH1).put(Report.column3, "def");
         reportData.put(PATH2, new EnumMap<>(Report.class));
 
+        GenericBlobReport report = new GenericBlobReport();
         report.setName("test");
         report.setRows(reportData, "source", Report.class);
         report.persist(context.resourceResolver(), REPORT_PATH);
