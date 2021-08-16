@@ -42,10 +42,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -56,29 +54,18 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.request.RequestDispatcherOptions;
-import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.request.RequestParameterMap;
-import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.SyntheticResource;
 
 /**
  * Fake request object, used to support mapping requests without using a "real"
  * request. Based on the Apache Sling Testing Mock Servlet Request.
  */
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1149", "squid:S1168"})
-public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
-
-    private Resource resource;
+public class FakeHttpServletRequest implements HttpServletRequest {
 
     private String method;
 
@@ -90,19 +77,13 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     public static final String RESOURCE_TYPE = "foo/bar";
 
-    private ResourceResolver resolver;
 
-    public FakeSlingHttpServletRequest(ResourceResolver resolver, String scheme, String server, int port) {
-        this.resource = new SyntheticResource(null, "", RESOURCE_TYPE);
+    public FakeHttpServletRequest(String scheme, String server, int port) {
         this.scheme = scheme;
         this.server = server;
         this.port = port;
 
         setMethod(null);
-    }
-
-    public void setResource(Resource resource) {
-        this.resource = resource;
     }
 
     public void setSecure(boolean secure) {
@@ -114,82 +95,7 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public Cookie getCookie(String name) {
-        return null;
-    }
-
-    @Override
-    public RequestDispatcher getRequestDispatcher(String path, RequestDispatcherOptions options) {
-        return null;
-    }
-
-    @Override
-    public RequestDispatcher getRequestDispatcher(Resource resource, RequestDispatcherOptions options) {
-        return null;
-    }
-
-    @Override
-    public RequestDispatcher getRequestDispatcher(Resource resource) {
-        return null;
-    }
-
-    @Override
     public RequestDispatcher getRequestDispatcher(String path) {
-        return null;
-    }
-
-    @Override
-    public RequestParameter getRequestParameter(String name) {
-        return null;
-    }
-
-    @Override
-    public RequestParameterMap getRequestParameterMap() {
-        return null;
-    }
-
-    @Override
-    public RequestParameter[] getRequestParameters(String name) {
-        return null;
-    }
-
-    @Override
-    public RequestPathInfo getRequestPathInfo() {
-        return null;
-    }
-
-    @Override
-    public RequestProgressTracker getRequestProgressTracker() {
-        return null;
-    }
-
-    @Override
-    public Resource getResource() {
-        return resource;
-    }
-
-    @Override
-    public ResourceBundle getResourceBundle(Locale locale) {
-        return null;
-    }
-
-    @Override
-    public ResourceBundle getResourceBundle(String baseName, Locale locale) {
-        return null;
-    }
-
-    @Override
-    public ResourceResolver getResourceResolver() {
-        return resolver;
-    }
-
-    @Override
-    public String getResponseContentType() {
-        return null;
-    }
-
-    @Override
-    public Enumeration<String> getResponseContentTypes() {
         return null;
     }
 
@@ -477,11 +383,6 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        return null;
-    }
-
-    @Override
     public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
         return false;
     }
@@ -547,8 +448,4 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
         return null;
     }
 
-    @Override
-    public List<RequestParameter> getRequestParameterList() {
-        return null;
-    }
 }
