@@ -12,7 +12,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest] # windows currently returns test errors
+        os: [ubuntu-latest, macOS-latest, windows-latest]
         jdk: [8, 11]
         include:
           # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
@@ -68,6 +68,12 @@ jobs:
 
       - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
+
+      - name: Publish Test Report
+        if: ${{ always() }}
+        uses: scacap/action-surefire-report@v1
+        with:
+          check_name: Test report (${{ matrix.os }}, JDK ${{ matrix.jdk }})
 
       - name: Upload code coverage to CodeCov (Main build)
         if: ${{ matrix.isMainBuildEnv }}
