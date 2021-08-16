@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 5.0.8
 
 ### Fixed
+- #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors
 
 ## 5.0.6 - 2021-06-12
