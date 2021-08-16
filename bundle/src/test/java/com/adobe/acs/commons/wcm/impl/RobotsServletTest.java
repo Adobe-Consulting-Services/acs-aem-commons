@@ -78,9 +78,7 @@ public class RobotsServletTest {
         context.registerService(PageManagerFactory.class, new MockPageManagerFactory());
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en/jcr:content"));
 
-
         lenient().when(externalizer.externalLink(eq(context.resourceResolver()), eq("publish"), anyString())).then(i -> "https://www.geometrixx.com" + i.getArgument(2));
-
     }
 
     @Test
@@ -109,7 +107,6 @@ public class RobotsServletTest {
 
     @Test
     public void testWriteFromPageProperties() throws ServletException, IOException {
-
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("user.agent.directives", new String[]{
@@ -136,7 +133,6 @@ public class RobotsServletTest {
 
     @Test
     public void testWriteFromOsgiConfigSimple() throws ServletException, IOException {
-
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("user.agent.directives", new String[]{
@@ -154,7 +150,6 @@ public class RobotsServletTest {
 
     @Test
     public void testWriteFromOsgiConfig() throws ServletException, IOException {
-
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("print.grouping.comments", true);
@@ -187,7 +182,6 @@ public class RobotsServletTest {
 
     @Test
     public void testWriteFromNonExistentPropertyAbsolute() throws ServletException, IOException {
-
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data");
@@ -198,7 +192,6 @@ public class RobotsServletTest {
 
     @Test
     public void testWriteFromNonExistentPropertyRelative() throws ServletException, IOException {
-
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "jcr:content/thisPropDoesntExist");
@@ -208,10 +201,9 @@ public class RobotsServletTest {
     }
 
     private void assertResponse(InputStream resourceAsStream, MockSlingHttpServletResponse response) throws IOException {
-        // convert the platform dependent server's response to Unix line separators
-        String output = response.getOutputAsString().replaceAll("\\r\\n", "\n");
+        // both response and input stream contains OS dependent line endings (no need to normalize)
         String expected = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8.name());
-        assertEquals(expected, output);
+        assertEquals(expected, response.getOutputAsString());
     }
 
 }
