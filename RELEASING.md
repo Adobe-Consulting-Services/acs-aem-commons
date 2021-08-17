@@ -3,7 +3,7 @@
 ## Prerequistes
 
 * You must have commit rights on this repository.
-* You must have deploy rights to [Sonatype's SS Repository Hosting (OSSRH)][OSSRH].
+* You must have deploy rights to [Sonatype's OSS Repository Hosting (OSSRH)][OSSRH].
 
 ### Setup
 
