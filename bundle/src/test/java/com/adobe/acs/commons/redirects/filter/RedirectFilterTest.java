@@ -29,6 +29,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -48,20 +49,20 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -92,7 +93,7 @@ public class RedirectFilterTest {
 
         filter = spy(new RedirectFilter());
         ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
-        when(resourceResolverFactory.getServiceResourceResolver(anyMapOf(String.class, Object.class)))
+        when(resourceResolverFactory.getServiceResourceResolver(any(Map.class)))
                 .thenReturn(context.resourceResolver());
         Whitebox.setInternalState(filter, "resourceResolverFactory", resourceResolverFactory);
 
@@ -591,4 +592,30 @@ public class RedirectFilterTest {
         assertEquals(2, data.size());
     }
 
+    @Test
+    public void testNotEnabledDeactivate() throws Exception {
+        RedirectFilter filter = spy(new RedirectFilter());
+
+        RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
+        when(configuration.enabled()).thenReturn(false);
+
+        // #2673 : ensure no NPE in deactivate() when filter is disabled
+        filter.deactivate();
+    }
+
+    @Test
+    public void testNotEnabledOnChange() throws Exception {
+        RedirectFilter filter = spy(new RedirectFilter());
+
+        RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
+        when(configuration.enabled()).thenReturn(false);
+        when(configuration.bucketName()).thenReturn("settings");
+        when(configuration.configName()).thenReturn("redirects");
+
+        ResourceChange event = new ResourceChange(ResourceChange.ChangeType.CHANGED,
+                "/conf/global/setting/redirects/rule", false, null, null, null);
+
+        // #2673 : ensure no NPE in onChange() when filter is disabled
+        filter.onChange(Collections.singletonList(event));
+    }
 }

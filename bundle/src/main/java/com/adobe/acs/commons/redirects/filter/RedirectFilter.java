@@ -202,12 +202,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
         this.config = config;
         enabled = config.enabled();
 
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put(ResourceChangeListener.PATHS, "/conf");
-        listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
-        log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
-
         if (enabled) {
+            Dictionary<String, Object> properties = new Hashtable<>();
+            properties.put(ResourceChangeListener.PATHS, "/conf");
+            listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
+            log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
+
             exts = config.extensions() == null ? Collections.emptySet()
                     : Arrays.stream(config.extensions()).filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
@@ -242,8 +242,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Deactivate
     public void deactivate() {
-        executor.shutdown();
-
+        if(enabled) {
+            executor.shutdown();
+        }
         if (listenerRegistration != null) {
             log.debug("unregistering ... ");
             listenerRegistration.unregister();
@@ -255,7 +256,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     public void handleEvent(Event event) {
         String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
         String redirectSubPath = config.bucketName() + "/" + config.configName();
-        if (path != null && path.contains(redirectSubPath)) {
+        if (enabled && path != null && path.contains(redirectSubPath)) {
             log.debug(event.toString());
             // loading redirect configurations can be expensive and needs to run
             // asynchronously,
@@ -266,6 +267,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Override
     public void onChange(List<ResourceChange> changes) {
+        if(!enabled){
+            return;
+        }
         String redirectSubPath = config.bucketName() + "/" + config.configName();
         for(ResourceChange e : changes){
             String path = e.getPath();
