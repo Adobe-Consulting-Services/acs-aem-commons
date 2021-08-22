@@ -25,6 +25,7 @@ import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.wcm.api.WCMMode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -113,7 +114,8 @@ import static org.osgi.framework.Constants.SERVICE_ID;
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
         SERVICE_RANKING + ":Integer=10000",
         "jmx.objectname=" + "com.adobe.acs.commons:type=Redirect Manager",
-        EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC
+        EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC,
+        EventConstants.EVENT_TOPIC + "=" + ReplicationEvent.EVENT_TOPIC
 
 })
 @Designate(ocd = RedirectFilter.Configuration.class)
@@ -254,14 +256,20 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Override
     public void handleEvent(Event event) {
-        String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-        String redirectSubPath = config.bucketName() + "/" + config.configName();
-        if (enabled && path != null && path.contains(redirectSubPath)) {
-            log.debug(event.toString());
-            // loading redirect configurations can be expensive and needs to run
-            // asynchronously,
-            // outside of the Sling event processing chain
-            executor.submit(() -> invalidate(path));
+        ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
+        if(enabled && replicationEvent != null){
+            String redirectSubPath = config.bucketName() + "/" + config.configName();
+            String[] paths = replicationEvent.getReplicationAction().getPaths();
+            if(paths != null) {
+                for (String path : paths) {
+                    if (path.contains(redirectSubPath)) {
+                        // loading redirect configurations can be expensive and needs to run
+                        // asynchronously,
+                        // outside of the Sling event processing chain
+                        executor.submit(() -> invalidate(path));
+                    }
+                }
+            }
         }
     }
 
