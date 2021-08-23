@@ -259,9 +259,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
         ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
         if(enabled && replicationEvent != null){
             String redirectSubPath = config.bucketName() + "/" + config.configName();
-            String[] paths = replicationEvent.getReplicationAction().getPaths();
-            if(paths != null) {
-                for (String path : paths) {
+            String[] replicationPaths = replicationEvent.getReplicationAction().getPaths();
+            if(replicationPaths != null) {
+                for (String path : replicationPaths) {
                     if (path.contains(redirectSubPath)) {
                         // loading redirect configurations can be expensive and needs to run
                         // asynchronously,

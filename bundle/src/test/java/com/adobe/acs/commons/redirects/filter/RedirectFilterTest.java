@@ -594,28 +594,31 @@ public class RedirectFilterTest {
 
     @Test
     public void testNotEnabledDeactivate() throws Exception {
-        RedirectFilter filter = spy(new RedirectFilter());
-
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(false);
 
+        RedirectFilter redirectFilter = spy(new RedirectFilter());
+        redirectFilter.activate(configuration, context.bundleContext());
+
         // #2673 : ensure no NPE in deactivate() when filter is disabled
-        filter.deactivate();
+        redirectFilter.deactivate();
     }
 
     @Test
     public void testNotEnabledOnChange() throws Exception {
-        RedirectFilter filter = spy(new RedirectFilter());
 
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(false);
         when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
 
+        RedirectFilter redirectFilter = spy(new RedirectFilter());
+        redirectFilter.activate(configuration, context.bundleContext());
+
         ResourceChange event = new ResourceChange(ResourceChange.ChangeType.CHANGED,
                 "/conf/global/setting/redirects/rule", false, null, null, null);
 
         // #2673 : ensure no NPE in onChange() when filter is disabled
-        filter.onChange(Collections.singletonList(event));
+        redirectFilter.onChange(Collections.singletonList(event));
     }
 }
