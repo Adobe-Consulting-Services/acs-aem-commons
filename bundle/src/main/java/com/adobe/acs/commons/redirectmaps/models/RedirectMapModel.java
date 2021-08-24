@@ -46,7 +46,7 @@ import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.redirectmaps.impl.FakeSlingHttpServletRequest;
+import com.adobe.acs.commons.redirectmaps.impl.FakeHttpServletRequest;
 import com.day.cq.commons.jcr.JcrConstants;
 
 /**
@@ -88,7 +88,7 @@ public class RedirectMapModel {
       if (child != null) {
         properties = child.getValueMap();
       }
-      FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver, config.getProtocol(),
+      FakeHttpServletRequest mockRequest = new FakeHttpServletRequest(config.getProtocol(),
           config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
       String pageUrl = config.getProtocol() + "://" + config.getDomain()
           + resourceResolver.map(mockRequest, item.getPath() + suffix);

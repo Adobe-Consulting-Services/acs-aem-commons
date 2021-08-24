@@ -21,31 +21,21 @@ package com.adobe.acs.commons.redirectmaps.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.redirectmaps.models.RedirectMapModelTest;
+public class FakeHttpServletRequestTest {
 
-@RunWith(MockitoJUnitRunner.class)
-public class FakeSlingHttpSerlvetRequestTest {
+    private FakeHttpServletRequest test;
 
-    private FakeSlingHttpServletRequest test;
-
-    @Mock
-    private ResourceResolver resolver;
-
-    private static final Logger log = LoggerFactory.getLogger(RedirectMapModelTest.class);
+    private static final Logger log = LoggerFactory.getLogger(FakeHttpServletRequestTest.class);
 
     @Before
     public void init() {
         log.info("init");
-        test = new FakeSlingHttpServletRequest(resolver, "http", "www.adobe.com", 80);
+        test = new FakeHttpServletRequest("http", "www.adobe.com", 80);
     }
 
     @Test

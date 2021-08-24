@@ -3,7 +3,7 @@
     "jcr:primaryType": "cq:Page",
     "jcr:content": {
       "jcr:primaryType": "cq:PageContent",
-      "robotsContents": "User-agent: *\nDisallow: /",
+      "robotsContents": "User-agent: *",
       "allowRobots": true,
       "isSiteMap": true
     },
