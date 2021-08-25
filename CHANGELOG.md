@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors
 - #2660 - Remove Halt button from MCP as it's use can result in repository corruption. Also removed ability to set task.timeout on ThrottledTaskRunnerImpl, forcing the timeout to be disabled (-1).
 - #2670 - Remove AEM 6.3 support (oak-pal)
+- #xxxx - Fixed uploading of CodeCov data from PR'S
 
 ## 5.0.6 - 2021-06-12
 
