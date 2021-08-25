@@ -43,11 +43,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Debug Event
-        env:
-          GH_EVENT: ${{ toJSON(github.event) }}
-        shell: bash
-        run: echo "Event that triggered the action $GH_EVENT"
       - name: Checkout
         uses: actions/checkout@v2
         # always act on the modified source code (even for event pull_request_target)
@@ -74,7 +69,7 @@ jobs:
         run: |
           if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
             echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check" >> $GITHUB_ENV
-            if [ "${{github.ref}}" = "refs/heads/master" ]; then
+            if [ "${{github.ref}}" = "refs/heads/master" && "${{github.event_name}}" = "push" ]; then
               echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
               echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
               echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
