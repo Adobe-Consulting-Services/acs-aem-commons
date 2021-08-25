@@ -41,7 +41,7 @@ public class ThrottledTaskRunnerTest {
 
     @Test
     public void testExecutionOrderOverflow() throws NotCompliantMBeanException, InterruptedException {
-        ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
+        ThrottledTaskRunner ttr = osgiContext.registerService(new ThrottledTaskRunnerImpl());
 
         List<Long> executions = Collections.synchronizedList(new ArrayList<>());
 
@@ -86,7 +86,7 @@ public class ThrottledTaskRunnerTest {
 
     @Test
     public void testExecutionOrder() throws NotCompliantMBeanException, InterruptedException {
-        ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
+        ThrottledTaskRunner ttr = osgiContext.registerService(new ThrottledTaskRunnerImpl());
 
         final List<Long> executions = Collections.synchronizedList(new ArrayList<>());
 
@@ -132,7 +132,7 @@ public class ThrottledTaskRunnerTest {
 
     @Test
     public void assertFifoOrder() throws NotCompliantMBeanException, InterruptedException {
-        ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
+        ThrottledTaskRunner ttr = osgiContext.registerService(new ThrottledTaskRunnerImpl());
 
         List<Integer> executions = Collections.synchronizedList(new ArrayList<>());
 
