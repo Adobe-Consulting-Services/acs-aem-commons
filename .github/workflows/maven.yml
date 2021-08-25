@@ -98,11 +98,18 @@ jobs:
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
 
       - name: Publish Test Report
-        if: ${{ always() }}
         uses: scacap/action-surefire-report@v1
         with:
           check_name: Test report (${{ matrix.os }}, JDK ${{ matrix.jdk }})
 
       - name: Upload code coverage to CodeCov (Main build)
-        if: ${{ matrix.isMainBuildEnv }}
+        if: matrix.isMainBuildEnv
         run: bash <(curl -s https://codecov.io/bash)
+
+      # https://github.com/marketplace/actions/changelog-enforcer
+      - name: Enforce a changelog entry
+        if: matrix.isMainBuildEnv && github.event_name == 'pull_request'
+        uses: dangoslen/changelog-enforcer@v2
+        with:
+          changeLogPath: 'CHANGELOG.md'
+          skipLabels: 'Skip-Changelog,skip-changelog'
