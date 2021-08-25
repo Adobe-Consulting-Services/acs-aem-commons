@@ -141,6 +141,7 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:storagePath");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:enabled");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:event.topics");
 
         // https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/2667
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:task.timeout");
