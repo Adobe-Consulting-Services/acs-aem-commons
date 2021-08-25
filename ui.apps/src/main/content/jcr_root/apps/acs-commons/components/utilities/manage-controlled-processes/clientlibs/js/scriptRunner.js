@@ -292,8 +292,15 @@ var ScriptRunner = {
                         innerHTML: response
                     },
                     footer: {
+                        innerHTML: '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+
+                        /*
+                        - https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/2660
+                        - Remove Halt button as this is reported to result in Oak repo corruption sometimes
+
                         innerHTML: (!ended ? '<button id="haltButton" is="coral-button" variant="default">Halt</button>':'') +
                                 '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+                        */
                     },
                     closable: true,
                     variant: "info"
