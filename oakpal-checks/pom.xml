@@ -162,7 +162,7 @@
                                 </goals>
                                 <configuration>
                                     <defaults>
-                                        <aemVersion>6.3</aemVersion>
+                                        <aemVersion>6.4</aemVersion>
                                     </defaults>
                                     <source>${pom.basedir}/src/main/script/ExtractBundleInfo.groovy</source>
                                 </configuration>
