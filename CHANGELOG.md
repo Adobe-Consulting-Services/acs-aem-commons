@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
 
+## 5.0.8 - 2021-08-25
+
 ### Fixed
 - #2612 - Fix build on Windows
 - #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
