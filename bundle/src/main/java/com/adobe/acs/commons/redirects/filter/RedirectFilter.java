@@ -25,6 +25,7 @@ import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.wcm.api.WCMMode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -113,7 +114,8 @@ import static org.osgi.framework.Constants.SERVICE_ID;
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
         SERVICE_RANKING + ":Integer=10000",
         "jmx.objectname=" + "com.adobe.acs.commons:type=Redirect Manager",
-        EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC
+        EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC,
+        EventConstants.EVENT_TOPIC + "=" + ReplicationEvent.EVENT_TOPIC
 
 })
 @Designate(ocd = RedirectFilter.Configuration.class)
@@ -202,12 +204,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
         this.config = config;
         enabled = config.enabled();
 
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put(ResourceChangeListener.PATHS, "/conf");
-        listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
-        log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
-
         if (enabled) {
+            Dictionary<String, Object> properties = new Hashtable<>();
+            properties.put(ResourceChangeListener.PATHS, "/conf");
+            listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
+            log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
+
             exts = config.extensions() == null ? Collections.emptySet()
                     : Arrays.stream(config.extensions()).filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
@@ -242,8 +244,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Deactivate
     public void deactivate() {
-        executor.shutdown();
-
+        if(enabled) {
+            executor.shutdown();
+        }
         if (listenerRegistration != null) {
             log.debug("unregistering ... ");
             listenerRegistration.unregister();
@@ -253,19 +256,28 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Override
     public void handleEvent(Event event) {
-        String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-        String redirectSubPath = config.bucketName() + "/" + config.configName();
-        if (path != null && path.contains(redirectSubPath)) {
-            log.debug(event.toString());
-            // loading redirect configurations can be expensive and needs to run
-            // asynchronously,
-            // outside of the Sling event processing chain
-            executor.submit(() -> invalidate(path));
+        ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
+        if(enabled && replicationEvent != null){
+            String redirectSubPath = config.bucketName() + "/" + config.configName();
+            String[] replicationPaths = replicationEvent.getReplicationAction().getPaths();
+            if(replicationPaths != null) {
+                for (String path : replicationPaths) {
+                    if (path.contains(redirectSubPath)) {
+                        // loading redirect configurations can be expensive and needs to run
+                        // asynchronously,
+                        // outside of the Sling event processing chain
+                        executor.submit(() -> invalidate(path));
+                    }
+                }
+            }
         }
     }
 
     @Override
     public void onChange(List<ResourceChange> changes) {
+        if(!enabled){
+            return;
+        }
         String redirectSubPath = config.bucketName() + "/" + config.configName();
         for(ResourceChange e : changes){
             String path = e.getPath();
