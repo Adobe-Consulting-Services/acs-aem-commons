@@ -1,0 +1,101 @@
+# Automates the release steps outlined at https://github.com/Adobe-Consulting-Services/acs-aem-commons/blob/master/RELEASING.md
+name: Release to Sonatype OSSRH (Maven Central)
+
+# Only support manual trigger (https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Release version (major.minor.patch)'
+        required: false
+        default: ''
+      email:
+        description: 'Email Release Manager'
+        required: true
+        default: ''
+      dryRun:
+        description: 'Dry Run? (false to do an actual release)'
+        required: true
+        default: 'true'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce master branch
+        if: github.ref != 'refs/heads/master'
+        uses: actions/github-script@v3
+        with:
+          script: |
+              core.setFailed('Releases can only be triggered from master branch!')
+
+      # Check out Git repository
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Set up environment with Java and Maven
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          cache: 'maven'
+          distribution: 'adopt'
+          java-version: 8
+          # generate settings.xml with the correct values
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username in deploy
+          server-password: MAVEN_PASSWORD # env variable for token in deploy
+
+      # Import GPG key from env variable into keychain
+      - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
+        run: |
+          echo $GPG_PRIVATE_KEY | base64 --decode | gpg --import --no-tty --batch --yes
+          echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust --no-tty --batch --yes
+
+      - name: Configure git user for release commits
+        run: |
+          git config user.email "${{ github.event.inputs.email }}"
+          git config user.name "${{ github.actor }}"
+
+      # Build and deploy to OSSRH, which will automatically sync to Central Repository
+      - name: Build and Deploy ${{ github.event.inputs.releaseVersion }} to Central Repository
+        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdryRun=${{ github.event.inputs.dryRun }} -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Close milestone ${{ github.event.inputs.releaseVersion }}
+        if: !github.event.inputs.dryRun
+        uses: Beakyn/gha-close-milestone@v1.1.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          repository: ${{ github.repository }}
+          milestone-title: ${{ github.event.inputs.releaseVersion }}
+
+      - name: Build Changelog
+        id: github_release
+        uses: okcredit/changelog-creator-action@{latest-release}
+        with:
+          milestone: ${{ github.event.inputs.releaseVersion }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        if: !github.event.inputs.dryRun
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.releaseVersion }}
+          release_name: ${{ steps.github_release.outputs.milestone }}
+          body: ${{ steps.github_release.outputs.changelog }}
+          draft: ${{ github.event.inputs.dryRun }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Draft Release
+        if: !github.event.inputs.dryRun
+        uses: actions/create-release@v1
+        with:
+          release_name: ${{ steps.github_release.outputs.milestone }}
+          body: ${{ steps.github_release.outputs.changelog }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
