@@ -69,7 +69,7 @@ jobs:
         run: |
           if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
             echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check" >> $GITHUB_ENV
-            if [ "${{github.ref}}" = "refs/heads/master" && "${{github.event_name}}" = "push" ]; then
+            if [ "${{github.ref}}" = "refs/heads/master" ] && [ "${{github.event_name}}" = "push" ]; then
               echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
               echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
               echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
@@ -86,6 +86,7 @@ jobs:
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
 
       - name: Publish Test Report
+        if: ${{ always() }} # make sure to run even if previous Maven execution failed (due to failed test)
         uses: scacap/action-surefire-report@v1
         with:
           check_name: Test report (${{ matrix.os }}, JDK ${{ matrix.jdk }})
