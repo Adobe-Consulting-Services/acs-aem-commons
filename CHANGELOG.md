@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 - #2669 - Store MCP reports in a single node instead of a large node structure (fixes #2507)
 
+### Fixed
+- #2687 - Fixes regression introduced in #2660 MCP Tools, and properly fixes setting so threads never terminate, using an "infinitely far-future" timeout.  
+
 ## 5.0.8 - 2021-08-25
 
 ### Fixed
