@@ -11,6 +11,7 @@
     <content-packagers/>
     <automatic-package-replication/>
     <dispatcher-flush/>
+    <redirect-manager/>
     <redirect-maps/>
     <version-replicator/>
 
