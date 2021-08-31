@@ -53,7 +53,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.RangeIterator;
 import com.day.cq.tagging.Tag;
@@ -114,7 +114,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
       "vertical", "default=DEFAULT_TAG_FIND" })
   public ReferenceMethod referenceMethod = ReferenceMethod.DEFAULT_TAG_MANAGER_FIND;
 
-  private final transient GenericReport report = new GenericReport();
+  private final transient GenericBlobReport report = new GenericBlobReport();
 
   private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
@@ -191,7 +191,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     }
   }
 
-  public GenericReport getReport() {
+  public GenericBlobReport getReport() {
     return report;
   }
 

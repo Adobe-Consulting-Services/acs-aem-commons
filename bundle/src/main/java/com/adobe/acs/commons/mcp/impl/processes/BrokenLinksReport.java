@@ -25,7 +25,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -104,7 +104,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         regex = Pattern.compile(propertyRegex);
     }
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
 
     @SuppressWarnings("squid:S00115")
     enum Report {
@@ -123,7 +123,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        GenericReport genericReport = new GenericReport();
+        GenericBlobReport genericReport = new GenericBlobReport();
         genericReport.setRows(reportData, "Source", Report.class);
         genericReport.persist(rr, instance.getPath() + "/jcr:content/report");
 
