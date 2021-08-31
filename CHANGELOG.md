@@ -9,10 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
 
+## 5.0.10 - 2021-08-31
+
 ### Changed
+
 - #2669 - Store MCP reports in a single node instead of a large node structure (fixes #2507)
 
 ### Fixed
+
 - #2687 - Fixes regression introduced in #2660 MCP Tools, and properly fixes setting so threads never terminate, using an "infinitely far-future" timeout.  
 
 ## 5.0.8 - 2021-08-25
