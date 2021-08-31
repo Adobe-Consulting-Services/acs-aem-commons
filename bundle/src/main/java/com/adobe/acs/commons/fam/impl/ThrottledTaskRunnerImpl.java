@@ -67,7 +67,7 @@ import java.util.concurrent.TimeUnit;
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);
-    private int taskTimeout;
+    private long taskTimeout;
     private int cooldownWaitTime;
     private int maxThreads;
     private double maxCpu;
@@ -297,6 +297,9 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         if (workerPool != null && workerPool.getMaximumPoolSize() != maxThreads) {
             try {
                 workerPool.shutdown();
+                // #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
+                // Never thread termination
+                // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html#%3Cinit%3E(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)
                 workerPool.awaitTermination(taskTimeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOG.error("Timeout occurred when waiting to terminate worker pool", ex);
@@ -305,6 +308,9 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             workerPool = null;
         }
         if (!isRunning()) {
+            // #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
+            // Never thread termination
+            // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html#%3Cinit%3E(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)
             workerPool = new PriorityThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
         }
     }
@@ -320,9 +326,10 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
         /**
          * #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
-         * Force to -1, which disabled the timeout/watchdog
+         * Force to Long.MAX_VALUE, which disables the timeout/watchdog
+         * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html#%3Cinit%3E(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)
          */
-        taskTimeout = -1;
+        taskTimeout = Long.MAX_VALUE;
 
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");
