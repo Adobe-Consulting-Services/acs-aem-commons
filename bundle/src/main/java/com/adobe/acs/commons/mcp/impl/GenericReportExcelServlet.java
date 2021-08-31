@@ -168,7 +168,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
      * Retrieve the actual report from the path
      *
      * @param reportResource the resource from where to take the report
-     * @return the report or null if there is not report
+     * @return the report or null if there is no report
      */
     AbstractReport getReport(Resource reportResource) {
         AbstractReport result = reportResource.adaptTo(GenericReport.class);
