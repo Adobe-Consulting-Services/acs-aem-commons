@@ -49,12 +49,6 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
     Optional<CancelHandler> cancelHandler = Optional.empty();
     private static final Logger LOG = LoggerFactory.getLogger(TimedRunnable.class);
 
-    @Deprecated
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, int priority) {
-       this(work, runner, Long.valueOf(timeout), timeoutUnit, priority);
-        LOG.debug("Task created");
-    }
-
     public TimedRunnable(Runnable work, ThrottledTaskRunner runner, long timeout, TimeUnit timeoutUnit, int priority) {
         this.work = work;
         this.runner = runner;
@@ -62,12 +56,6 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
         this.timeoutUnit = timeoutUnit;
         this.priority = priority;
         LOG.debug("Task created");
-    }
-
-    @Deprecated
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
-        this(work, runner, Long.valueOf(timeout), timeoutUnit, priority);
-        this.cancelHandler = Optional.of(cancelHandler);
     }
 
     public TimedRunnable(Runnable work, ThrottledTaskRunner runner, long timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
