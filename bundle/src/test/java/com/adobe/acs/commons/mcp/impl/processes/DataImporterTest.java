@@ -87,7 +87,7 @@ public class DataImporterTest {
         doAnswer(this::runImmediately).when(runner).scheduleWork(any(), any());
         doAnswer(this::runImmediately).when(runner).scheduleWork(any(), anyInt());
         doAnswer(this::runImmediately).when(runner).scheduleWork(any(), any(), anyInt());
-        slingContext.registerInjectActivateService(runner);
+        slingContext.registerService(runner);
 
         // Set up FAM action manager factory
         actionManagerFactory = new ActionManagerFactoryImpl();

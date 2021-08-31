@@ -3,7 +3,7 @@
     jcr:primaryType="nt:unstructured"
     jcr:title="Manage Redirects"
     jcr:description="Manage redirects"
-    icon="forward"
+    icon="orbit"
     href="/apps/acs-commons/content/redirect-manager/redirects.html"
     id="acs-commons__redirect-manager"
     target="_blank"/>
