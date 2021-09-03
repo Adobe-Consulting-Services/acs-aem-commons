@@ -417,14 +417,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
             }
-            if(preserveQueryString) {
-                String queryString = slingRequest.getQueryString();
-                if (queryString != null) {
-                    location = preserveQueryString(location, queryString);
-                }
-            }
             if(urlAdjuster != null){
                 location = urlAdjuster.adjust(slingRequest, location);
+            }
+        }
+        if(preserveQueryString) {
+            String queryString = slingRequest.getQueryString();
+            if (queryString != null) {
+                location = preserveQueryString(location, queryString);
             }
         }
         return location;
