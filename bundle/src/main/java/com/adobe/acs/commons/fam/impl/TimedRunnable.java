@@ -44,12 +44,12 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
     int priority;
     Runnable work;
     ThrottledTaskRunner runner;
-    int timeout;
+    Long timeout;
     TimeUnit timeoutUnit;
     Optional<CancelHandler> cancelHandler = Optional.empty();
     private static final Logger LOG = LoggerFactory.getLogger(TimedRunnable.class);
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, int priority) {
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, long timeout, TimeUnit timeoutUnit, int priority) {
         this.work = work;
         this.runner = runner;
         this.timeout = timeout;
@@ -58,7 +58,7 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
         LOG.debug("Task created");
     }
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, long timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
         this(work, runner, timeout, timeoutUnit, priority);
         this.cancelHandler = Optional.of(cancelHandler);
     }

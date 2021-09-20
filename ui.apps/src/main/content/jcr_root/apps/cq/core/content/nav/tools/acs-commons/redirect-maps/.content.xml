@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Redirect Maps"
+          jcr:description="Define redirect Apache httpd redirect maps."
+          icon="forward"
+          href="/acs-commons.html/etc/acs-commons/redirect-maps"
+          id="acs-commons__redirect-maps"
+          target="_blank"/>

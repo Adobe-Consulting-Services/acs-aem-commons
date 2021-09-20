@@ -46,7 +46,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.DatePickerComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.MultifieldComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
 
@@ -61,7 +61,7 @@ public class WorkflowRemover extends ProcessDefinition {
 
     private final WorkflowInstanceRemover workflowInstanceRemover;
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
     private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     @FormField(name = "Workflow Payload Paths", description = "Payload path regex", hint = "/content/dam/.*",

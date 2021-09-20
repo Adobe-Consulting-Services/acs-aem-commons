@@ -26,7 +26,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
@@ -317,7 +317,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     /** Reporting **/
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
 
     private final transient ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
