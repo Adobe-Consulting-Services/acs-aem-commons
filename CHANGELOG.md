@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
 
+## 5.0.12 - 2021-09-24
+
 ### Fixed
 
 - #2701 - Fixed UI issues on MCP UI on AEM as a Cloud Service
