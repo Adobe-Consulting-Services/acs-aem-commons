@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2690 - Require an OSGi configuration to be present for AEM Environment Indicator to display
+- #2691 - Fixed support for type module scripts for versioned clientlibs 
+- #2694 - Fixed parsys-limiter counting clipboard items also when the action is not paste
 
 ## 5.0.10 - 2021-08-31
 
@@ -26,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 5.0.8 - 2021-08-25
 
 ### Fixed
+
 - #2612 - Fix build on Windows
 - #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors
