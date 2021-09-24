@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2701 - Fixed UI issues on MCP UI on AEM as a Cloud Service
 - #2690 - Require an OSGi configuration to be present for AEM Environment Indicator to display
 - #2691 - Fixed support for type module scripts for versioned clientlibs 
 - #2694 - Fixed parsys-limiter counting clipboard items also when the action is not paste
