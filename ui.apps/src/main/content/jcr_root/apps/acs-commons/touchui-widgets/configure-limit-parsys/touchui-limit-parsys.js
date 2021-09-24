@@ -115,7 +115,7 @@
         return children;
     }
 
-    function isWithinLimit(parsysEditable){
+    function isWithinLimit(parsysEditable, itemsToAdd){
         var isWithin = true, currentLimit = "";
 
         currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
@@ -124,8 +124,7 @@
         }
         var limit = parseInt(currentLimit);
         var children = getChildEditables(parsysEditable);
-        //Take into account also the number of components in the clipboard in case this is a "paste"
-        var itemsToAdd = Granite.author.clipboard.length < 1 ? 1 : Granite.author.clipboard.length;
+        itemsToAdd = itemsToAdd ? itemsToAdd : 1;
         isWithin = children.length - 1 + itemsToAdd <= limit;
 
         if(!isWithin){
@@ -162,7 +161,7 @@
                 return function (editableBefore) {
                     // only prevent copy but not move operations (if previous operation was cut)
                     if(!Granite.author.clipboard.shouldCut()) {
-                        if(!isWithinLimit(editableBefore.getParent())){
+                        if(!isWithinLimit(editableBefore.getParent(), Granite.author.clipboard.length)){
                             return;
                         }
                     }
