@@ -305,8 +305,9 @@ var ScriptRunner = {
                     closable: true,
                     variant: "info"
                 });
-//                window.top.document.body.appendChild(diag);
-                diag.show();                
+
+                diag.show();
+                diag.querySelector('[handle="wrapper"]').classList.add("coral--light");
                 diag.on('click', '#haltButton', function () {
                     diag.hide();
                     ScriptRunner.haltProcess(processId);                    
@@ -329,8 +330,9 @@ var ScriptRunner = {
             closable: true,
             variant: "warning"
         });
-//        window.top.document.body.appendChild(haltDialog);
+
         haltDialog.show();
+        haltDialog.querySelector('[handle="wrapper"]').classList.add("coral--light");
         haltDialog.on('click', '#haltButton', function () {
             jQuery.ajax({
                 url: ScriptRunner.SERVLET_URL + ".halt.json",
