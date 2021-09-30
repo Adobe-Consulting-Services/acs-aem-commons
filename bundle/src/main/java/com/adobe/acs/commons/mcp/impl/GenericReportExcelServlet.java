@@ -172,7 +172,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
      */
     AbstractReport getReport(Resource reportResource) {
         AbstractReport result = reportResource.adaptTo(GenericReport.class);
-        if (result != null) {
+        if (result != null && result.getRows() != null && result.getRows().size() > 0) {
             return result;
         }
         return reportResource.adaptTo(GenericBlobReport.class);
