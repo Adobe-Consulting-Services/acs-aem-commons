@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
 
+### Fixed
+
+- #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
+
 ## 5.0.12 - 2021-09-24
 
 ### Fixed
