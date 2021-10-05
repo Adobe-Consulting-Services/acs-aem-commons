@@ -142,6 +142,7 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:enabled");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:event.topics");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:service.ranking");
 
         // change due to #2669 
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.mcp.impl.GenericReportExcelServlet:sling.servlet.resourceTypes");
