@@ -112,7 +112,7 @@ import static org.osgi.framework.Constants.SERVICE_ID;
         configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
         SERVICE_DESCRIPTION + "=A request filter implementing support for virtual redirects",
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
-        SERVICE_RANKING + ":Integer=10000",
+        SERVICE_RANKING + ":Integer=1900",
         "jmx.objectname=" + "com.adobe.acs.commons:type=Redirect Manager",
         EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC,
         EventConstants.EVENT_TOPIC + "=" + ReplicationEvent.EVENT_TOPIC

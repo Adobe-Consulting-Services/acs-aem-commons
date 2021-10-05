@@ -17,5 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@org.osgi.annotation.versioning.Version("6.0.1")
+@org.osgi.annotation.versioning.Version("6.0.2")
 package com.adobe.acs.commons.redirects.filter;
