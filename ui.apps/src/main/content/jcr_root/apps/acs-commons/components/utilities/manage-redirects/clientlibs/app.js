@@ -91,6 +91,19 @@
         return false;
      });
 
+    /**
+        The ui.success handler is called by the Granite Form component via a 'successresponse' reference:
+
+      + form
+        - sling:resourceType = "granite/ui/components/coral/foundation/form"
+        - method = "post"
+        - foundationForm = true
+        + successresponse
+          - sling:resourceType = "acs-commons/components/utilities/manage-redirects/redirects/submithandler"
+
+        where acs-commons/components/utilities/manage-redirects/redirects/submithandler writes  'acs.redirects.update'
+        in the form metadata 
+    */
 	registry.register("foundation.form.response.ui.success", {
         name: "acs.redirects.update",
         handler: function(form, config, response, textStatus, xhr) {
