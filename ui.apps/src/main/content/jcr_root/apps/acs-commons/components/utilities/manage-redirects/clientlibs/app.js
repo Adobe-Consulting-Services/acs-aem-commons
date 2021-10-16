@@ -1,10 +1,16 @@
 (function($, $document) {
-    "use strict";
+     "use strict";
+
+	var registry = $(window).adaptTo("foundation-registry"); 
+    var DIALOG_FORM_SELECTOR = "#fn-acsCommons-save_redirects";
+    var DIALOG_SELECTOR = "#editRuleDialog";
+    var TABLE_SELECTOR = "#edit-redirect-coral-table";
 
     function showEditDialog() {
-        var dialog = document.querySelector('#editRuleDialog');
+        var dialog = document.querySelector(DIALOG_SELECTOR);
         dialog.show();
     }
+
 
     [
         'coral-table:change',
@@ -19,14 +25,14 @@
         'coral-table:beforeroworder',
       ]
       .forEach(function(eventName) {
-        $document.on(eventName, '#edit-redirect-coral-table', function(e) {
+        $document.on(eventName, TABLE_SELECTOR, function(e) {
           if(e.type=='coral-table:beforeroworder') {
         	  var thisElement = $(this);
           	  var rowIndex = e.detail.row.rowIndex;
           	  var beforeRow = e.detail.before;
           	  var beforeIndex;
               if(!beforeRow) {
-        		  beforeIndex = $('#edit-redirect-coral-table').get(0)._items.length + 1;
+        		  beforeIndex = $(TABLE_SELECTOR).get(0)._items.length + 1;
         	  } else {
         		  beforeIndex =e.detail.before.rowIndex;
         	  }
@@ -34,7 +40,7 @@
               var target = $(e.detail.row).find('.target').data('value');
         	  updateFormData($(e.detail.row));
 
-        	  var $form = $("#fn-acsCommons-save_redirects");
+        	  var $form = $(DIALOG_FORM_SELECTOR);
               var data = $form.serialize();
               var nextIndex = beforeIndex - 1;
               if(rowIndex == beforeIndex || rowIndex == nextIndex) {
@@ -75,7 +81,7 @@
             data: data,
             async: false
         }).done(function(response /*json response from the Sling POST servlet*/){
-        	var dialog = $('#editRuleDialog');
+        	var dialog = $(DIALOG_SELECTOR);
     		dialog.find('.close-dialog-box').click();
 
             var ruleId = $form.attr('ruleId');
@@ -85,43 +91,33 @@
         return false;
      });
 
-    $(document).on("click", "button[icon='save']", function (e) {
-    	e.preventDefault();
-        var formId = $(this).attr('form');
-        var $form = $("#" + formId);
-        var data = $form.serialize();
+	registry.register("foundation.form.response.ui.success", {
+        name: "acs.redirects.update",
+        handler: function(form, config, response, textStatus, xhr) {
+                var dialog = $(DIALOG_SELECTOR);
+                dialog.find('.close-dialog-box').click();
 
-        $.ajax({
-            url: $form.attr('action'),
-            type: "POST",
-            data: data,
-            async: false
-        }).done(function(response /*json response from the Sling POST servlet*/){
+                var redirectPath = response.path;
+                // redirectId is the node name, i.e. the last segment of the path
+                var redirectId = redirectPath.substring(redirectPath.lastIndexOf('/') + 1);
 
-        	var dialog = $('#editRuleDialog');
-    		dialog.find('.close-dialog-box').click();
+                // fetch the table row and update/insert it in the table
+                $.ajax({
+                    url: redirectPath + ".html"
+                }).done(function(trHtml){
+                    if(response.isCreate){
+                        var editRedirectTable = $(TABLE_SELECTOR);
+                        var tr = editRedirectTable.find("tbody")[0].appendChild(document.createElement('tr'));
+                        $(tr).replaceWith(trHtml);
+                    } else {
+                        $('#'+redirectId).replaceWith(trHtml);
+                    }
+                    var ui = $(window).adaptTo('foundation-ui');
+					ui.clearWait();
 
-            var redirectPath = response.path;
-            // redirectId is the node name, i.e. the last segment of the path
-            var redirectId = redirectPath.substring(redirectPath.lastIndexOf('/') + 1);
-
-            // fetch the table row and update/insert it in the table
-            $.ajax({
-                url: redirectPath + ".html"
-            }).done(function(trHtml){
-                if(response.isCreate){
-			    	var editRedirectTable = $('#edit-redirect-coral-table');
-				    var tr = editRedirectTable.find("tbody")[0].appendChild(document.createElement('tr'));
-                    $(tr).replaceWith(trHtml);
-                } else {
-                    $('#'+redirectId).replaceWith(trHtml);
-                }
-            });
-        });
-        return false;
-
-     });
-
+                });
+        }
+    }); 
     $(document).on("click", ".cq-dialog-upload", function (e) {
         var $form = $(this).closest('form');
         var data = new FormData($form[0]);

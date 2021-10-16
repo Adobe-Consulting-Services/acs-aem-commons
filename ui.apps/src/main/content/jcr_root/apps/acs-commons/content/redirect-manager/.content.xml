@@ -30,7 +30,7 @@
                                     style="vertical">
                                     <successresponse
                                         jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
+                                        sling:resourceType="acs-commons/components/utilities/manage-redirects/redirects/submithandler"/>
                                     <items jcr:primaryType="nt:unstructured">
                                         <source
                                             jcr:primaryType="nt:unstructured"
@@ -141,7 +141,6 @@
                         close="{Boolean}true"/>
                 </cancel>
                 <remove
-                    granite:class="cq-dialog-submit"
                     granite:id=":operation=delete"
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"
@@ -150,7 +149,6 @@
                     text="Remove"
                     variant="warning"/>
                 <save
-                    granite:class="cq-dialog-submit"
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"
                     formId="fn-acsCommons-save_redirects"
