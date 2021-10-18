@@ -70,9 +70,8 @@
                     <section class="coral-Form coral-Form--vertical">
                         <div clas="coral-Form-fieldset">
                             <br>
-                            <div class="coral-Form-fieldwrapper" style="width: 100%; display: inline-block;">
-                                <input is="coral-textfield" id="redirect-search-box" class="coral-Form-field" placeholder="Search" name="name" labelledby="label-vertical-textfield-0">
-                            </div>
+                            <coral-search placeholder="Search" class="coral-Form-field" name="name" id="redirect-search-box"/>
+                            </coral-search>
                         </div>
 
                         <table is="coral-table" id="edit-redirect-coral-table" class="table-sticky" orderable  style="height:500px">
@@ -163,7 +162,7 @@
             </coral-panelstack>
         </coral-tabview>
         <sly data-sly-list="${resource.getChildren}">
-	        <sly data-sly-resource="${item.path}"></sly>
+            <sly data-sly-resource="${item.path}"></sly>
         </sly>
 
     </div>
