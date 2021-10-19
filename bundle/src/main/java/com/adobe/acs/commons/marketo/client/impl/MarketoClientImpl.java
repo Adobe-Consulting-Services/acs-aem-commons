@@ -92,7 +92,7 @@ public class MarketoClientImpl implements MarketoClient {
         Dictionary<String, Object> properties = config.getProperties();
         if (isEnabled(properties)) {
           String host = String.class.cast(properties.get("proxy.host"));
-          int port = Integer.parseInt(String.class.cast(properties.get("proxy.port")), 10);
+          int port = Integer.class.cast(properties.get("proxy.port"));
 
           log.debug("Using proxy host: {}", host);
           HttpHost proxyhost = new HttpHost(host, port);
@@ -140,6 +140,7 @@ public class MarketoClientImpl implements MarketoClient {
   protected @Nonnull String getApiResponse(@Nonnull String url, String bearerToken) throws IOException {
 
     try (CloseableHttpClient httpClient = clientBuilder.build()) {
+      log.debug("Sending request to: {}", url);
       HttpGet httpGet = new HttpGet(url);
       if (StringUtils.isNotBlank(bearerToken)) {
         httpGet.setHeader(AUTH.WWW_AUTH_RESP, "Bearer " + bearerToken);
