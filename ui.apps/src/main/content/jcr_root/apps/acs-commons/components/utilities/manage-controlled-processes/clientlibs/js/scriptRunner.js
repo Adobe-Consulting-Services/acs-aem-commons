@@ -292,14 +292,22 @@ var ScriptRunner = {
                         innerHTML: response
                     },
                     footer: {
+                        innerHTML: '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+
+                        /*
+                        - https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/2660
+                        - Remove Halt button as this is reported to result in Oak repo corruption sometimes
+
                         innerHTML: (!ended ? '<button id="haltButton" is="coral-button" variant="default">Halt</button>':'') +
                                 '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+                        */
                     },
                     closable: true,
                     variant: "info"
                 });
-//                window.top.document.body.appendChild(diag);
-                diag.show();                
+
+                diag.show();
+                diag.querySelector('[handle="wrapper"]').classList.add("coral--light");
                 diag.on('click', '#haltButton', function () {
                     diag.hide();
                     ScriptRunner.haltProcess(processId);                    
@@ -322,8 +330,9 @@ var ScriptRunner = {
             closable: true,
             variant: "warning"
         });
-//        window.top.document.body.appendChild(haltDialog);
+
         haltDialog.show();
+        haltDialog.querySelector('[handle="wrapper"]').classList.add("coral--light");
         haltDialog.on('click', '#haltButton', function () {
             jQuery.ajax({
                 url: ScriptRunner.SERVLET_URL + ".halt.json",

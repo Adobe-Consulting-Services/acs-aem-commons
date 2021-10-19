@@ -28,8 +28,7 @@ import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
-
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -218,7 +217,7 @@ public class DataImporter extends ProcessDefinition {
         instance.defineCriticalAction("Import Data", rr, this::importData);
     }
 
-    private transient GenericReport report = new GenericReport();
+    private transient GenericBlobReport report = new GenericBlobReport();
 
     @Override
     public synchronized void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {

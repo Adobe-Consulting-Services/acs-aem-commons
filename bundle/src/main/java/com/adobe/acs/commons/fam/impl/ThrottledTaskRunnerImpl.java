@@ -54,21 +54,20 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@Component(metatype = true, immediate = true,
-           label = "ACS AEM Commons - Throttled Task Runner Service",
-           description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
+@Component(metatype = true,
+           label = "ACS AEM Commons - Throttled Task Runner Service")
 @Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
 @Properties({
     @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
     @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
     @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", doubleValue = 0.75),
     @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", doubleValue = 0.85),
-    @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100"),
-    @Property(name = "task.timeout", label = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", value = "3600000"),})
+    @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100")
+})
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);
-    private int taskTimeout;
+    private long taskTimeout;
     private int cooldownWaitTime;
     private int maxThreads;
     private double maxCpu;
@@ -298,6 +297,9 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         if (workerPool != null && workerPool.getMaximumPoolSize() != maxThreads) {
             try {
                 workerPool.shutdown();
+                // #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
+                // Never thread termination
+                // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html#%3Cinit%3E(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)
                 workerPool.awaitTermination(taskTimeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOG.error("Timeout occurred when waiting to terminate worker pool", ex);
@@ -306,6 +308,9 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             workerPool = null;
         }
         if (!isRunning()) {
+            // #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
+            // Never thread termination
+            // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html#%3Cinit%3E(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)
             workerPool = new PriorityThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
         }
     }
@@ -318,7 +323,13 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         maxHeap = PropertiesUtil.toDouble(properties.get("max.heap"), 0.85);
         maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), defaultThreadCount);
         cooldownWaitTime = PropertiesUtil.toInteger(properties.get("cooldown.wait.time"), 100);
-        taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 3600000);
+
+        /**
+         * #2660 - Remove configurable timeout/watchdog as this can result in repository corruption.
+         * Force to Long.MAX_VALUE, which disables the timeout/watchdog
+         * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html#%3Cinit%3E(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)
+         */
+        taskTimeout = Long.MAX_VALUE;
 
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");

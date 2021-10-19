@@ -7,13 +7,40 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.4...HEAD
-
-## 5.0.8
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
 
 ### Fixed
+
+- #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
+
+## 5.0.12 - 2021-09-24
+
+### Fixed
+
+- #2701 - Fixed UI issues on MCP UI on AEM as a Cloud Service
+- #2690 - Require an OSGi configuration to be present for AEM Environment Indicator to display
+- #2691 - Fixed support for type module scripts for versioned clientlibs 
+- #2694 - Fixed parsys-limiter counting clipboard items also when the action is not paste
+
+## 5.0.10 - 2021-08-31
+
+### Changed
+
+- #2669 - Store MCP reports in a single node instead of a large node structure (fixes #2507)
+
+### Fixed
+
+- #2687 - Fixes regression introduced in #2660 MCP Tools, and properly fixes setting so threads never terminate, using an "infinitely far-future" timeout.  
+
+## 5.0.8 - 2021-08-25
+
+### Fixed
+
+- #2612 - Fix build on Windows
 - #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors
+- #2660 - Remove Halt button from MCP as it's use can result in repository corruption. Also removed ability to set task.timeout on ThrottledTaskRunnerImpl, forcing the timeout to be disabled (-1).
+- #2670 - Remove AEM 6.3 support (oak-pal)
 
 ## 5.0.6 - 2021-06-12
 

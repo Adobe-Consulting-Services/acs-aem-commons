@@ -141,7 +141,14 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:storagePath");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:enabled");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:event.topics");
 
+        // change due to #2669 
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.mcp.impl.GenericReportExcelServlet:sling.servlet.resourceTypes");
+
+        // https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/2667
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:task.timeout");
+        
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");

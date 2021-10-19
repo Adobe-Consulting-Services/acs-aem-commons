@@ -3,6 +3,10 @@
     jcr:primaryType="sling:OrderedFolder"
     jcr:title="ACS AEM Commons"
     id="acs-commons">
+    <dynamic-deck-dynamo/>
+    <exporters-tags/>
+    <redirect-manager/>
+    <sort-nodes/>
     <generic-lists/>
 
     <reports/>
