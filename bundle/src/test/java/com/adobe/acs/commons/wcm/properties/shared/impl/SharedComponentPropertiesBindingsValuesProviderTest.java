@@ -88,9 +88,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     when(resourceResolver.getResource(sharedPropsPath)).thenReturn(sharedPropsResource);
     when(resourceResolver.getResource(globalPropsPath)).thenReturn(globalPropsResource);
 
-    when(page.getPath()).thenReturn(SITE_ROOT);
-    when(pageRootProvider.getRootPage(resource)).thenReturn(page);
-
     when(resource.getPath()).thenReturn(SITE_ROOT);
     when(pageRootProvider.getRootPagePath(anyString())).thenReturn(SITE_ROOT);
 
