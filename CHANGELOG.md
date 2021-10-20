@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
+- #2714 - Implemented shared and global component properties to work in experience fragments.
 
 ## 5.0.12 - 2021-09-24
 
