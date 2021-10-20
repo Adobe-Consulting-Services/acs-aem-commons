@@ -1,8 +1,163 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
         jcr:title="Manage Redirects"
-        sling:resourceType="acs-commons/components/utilities/manage-redirects"/>
+        sling:resourceType="acs-commons/components/utilities/manage-redirects">
+        <edit-dlg
+            granite:class="edit-dialog"
+            granite:id="editRuleDialog"
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Configure Redirection Rule"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog">
+            <items jcr:primaryType="nt:unstructured">
+                <header
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                    <items jcr:primaryType="nt:unstructured">
+                        <content
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                            <items jcr:primaryType="nt:unstructured">
+                                <form
+                                    granite:id="fn-acsCommons-save_redirects"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                                    async="{Boolean}true"
+                                    foundationForm="{Boolean}true"
+                                    method="post"
+                                    style="vertical">
+                                    <successresponse
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="acs-commons/components/utilities/manage-redirects/redirects/submithandler"/>
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <source
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            emptyText="Select/Enter source path"
+                                            fieldLabel="Source Path"
+                                            name="./source"
+                                            required="{Boolean}true"
+                                            rootPath="/content"/>
+                                        <target
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            emptyText="Select/Enter target path"
+                                            fieldLabel="Target Path"
+                                            name="./target"
+                                            required="{Boolean}true"
+                                            rootPath="/content"/>
+                                        <statusCode
+                                            granite:class="statusCode"
+                                            granite:id="status-code-select-box"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            fieldLabel="Status Code"
+                                            name="./statusCode"
+                                            required="{Boolean}true">
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <_x0033_02
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="302 (Temporarily Moved)"
+                                                    value="302"/>
+                                                <_x0033_01
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="301 (Permanently Moved)"
+                                                    value="301"/>
+                                            </items>
+                                        </statusCode>
+                                        <untilDate
+                                            granite:class="untilDate"
+                                            granite:rel="until-date-picker"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                                            displayedFormat="&#x9;&#xa;YYYY-MM-DD HH:mm"
+                                            displayTimezoneMessage="{Boolean}true"
+                                            emptyText="Until Date"
+                                            fieldLabel="Redirect Until"
+                                            minDate="today"
+                                            name="./untilDate"
+                                            type="datetime"/>
+                                        <note
+                                            granite:class="note"
+                                            granite:id="redirect-note"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Notes"
+                                            name="./note"/>
+                                        <http-equiv-accept
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name=":http-equiv-accept"
+                                            value="application/json"/>
+                                        <resourceType
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./sling:resourceType"
+                                            value="acs-commons/components/utilities/manage-redirects/redirect-row"/>
+                                        <created
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./jcr:created"/>
+                                        <untilDate_x0040_TypeHint
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./untilDate@TypeHint"
+                                            value="Date"/>
+                                        <createdBy
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./jcr:createdBy"/>
+                                        <modified
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./jcr:modified"/>
+                                        <statusCode_x0040_TypeHint
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./statusCode@TypeHint"
+                                            value="Long"/>
+                                        <primaryType
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./jcr:primaryType"
+                                            value="nt:unstructured"/>
+                                    </items>
+                                </form>
+                            </items>
+                        </content>
+                    </items>
+                </header>
+            </items>
+            <footer jcr:primaryType="nt:unstructured">
+                <cancel
+                    granite:class="close-dialog-box"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    text="Cancel">
+                    <parentConfig
+                        jcr:primaryType="nt:unstructured"
+                        close="{Boolean}true"/>
+                </cancel>
+                <remove
+                    granite:id=":operation=delete"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    formId="fn-acsCommons-save_redirects"
+                    icon="delete"
+                    text="Remove"
+                    variant="warning"/>
+                <save
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    formId="fn-acsCommons-save_redirects"
+                    icon="save"
+                    text="Save"
+                    type="submit"
+                    variant="primary"/>
+            </footer>
+        </edit-dlg>
+    </jcr:content>
+    <redirects/>
 </jcr:root>
