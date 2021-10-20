@@ -21,16 +21,12 @@ package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
 import org.apache.felix.scr.annotations.Component;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.commons.WCMUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
