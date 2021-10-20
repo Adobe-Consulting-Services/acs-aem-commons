@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Shared Components Root"
+    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+    <items jcr:primaryType="nt:unstructured">
+        <form
+            granite:id="cq-common-createfolderform"
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/form"
+            action="${granite:encodeURIPath(requestPathInfo.suffix)}/"
+            foundationForm="{Boolean}true"
+            method="post"
+            style="vertical">
+            <items jcr:primaryType="nt:unstructured">
+                <label
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                    text="A folder that allows for Shared Component Properties." />
+                <title
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                    fieldLabel="Title"
+                    name="./jcr:title"
+                    required="{Boolean}true"/>
+                <name
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                    fieldLabel="Name"
+                    name=":name"
+                    validation="foundation.jcr.name"/>
+                <primarytype
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                    name="./jcr:primaryType"
+                    value="sling:OrderedFolder"/>
+                <charset
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                    name="_charset_"
+                    value="utf-8"/>
+                <jcrPrimarytype
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                    name="./jcr:content/jcr:primaryType"
+                    value="nt:unstructured"/>
+            </items>
+        </form>
+    </items>
+    <footer jcr:primaryType="nt:unstructured">
+        <cancel
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/button"
+            text="Cancel">
+            <parentConfig
+                jcr:primaryType="nt:unstructured"
+                close="{Boolean}true"/>
+        </cancel>
+        <create
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/button"
+            formId="cq-common-createfolderform"
+            text="Create"
+            type="submit"
+            variant="primary"/>
+    </footer>
+</jcr:root>
