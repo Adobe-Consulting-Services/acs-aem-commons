@@ -25,6 +25,8 @@ import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.Page;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -65,18 +67,18 @@ public class SharedValueMapValueInjector implements Injector {
         Resource resource = getResource(adaptable);
 
         if (resource != null) {
-            Page pageRoot = pageRootProvider.getRootPage(resource);
-            if (pageRoot != null) {
+            String rootPagePath = pageRootProvider.getRootPagePath(resource.getPath());
+            if (StringUtils.isNotBlank(rootPagePath)) {
                 ValueMap valueMap = null;
                 switch (element.getAnnotation(SharedValueMapValue.class).type()) {
                     case MERGED:
-                        valueMap = getMergedProperties(pageRoot, resource);
+                        valueMap = getMergedProperties(rootPagePath, resource);
                         break;
                     case SHARED:
-                        valueMap = getSharedProperties(pageRoot, resource);
+                        valueMap = getSharedProperties(rootPagePath, resource);
                         break;
                     case GLOBAL:
-                        valueMap = getGlobalProperties(pageRoot, resource);
+                        valueMap = getGlobalProperties(rootPagePath, resource);
                         break;
                     default:
                         break;
@@ -93,8 +95,8 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get shared properties ValueMap the current resource.
      */
-    protected ValueMap getSharedProperties(Page pageRoot, Resource resource) {
-        String sharedPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/" + resource.getResourceType();
+    protected ValueMap getSharedProperties(String rootPagePath, Resource resource) {
+        String sharedPropsPath = rootPagePath + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/" + resource.getResourceType();
         Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
         return sharedPropsResource != null ? sharedPropsResource.getValueMap() : ValueMap.EMPTY;
     }
@@ -102,8 +104,8 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get global properties ValueMap for the current resource.
      */
-    protected ValueMap getGlobalProperties(Page pageRoot, Resource resource) {
-        String globalPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
+    protected ValueMap getGlobalProperties(String rootPagePath, Resource resource) {
+        String globalPropsPath = rootPagePath + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
         Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
         return globalPropsResource != null ? globalPropsResource.getValueMap() : ValueMap.EMPTY;
     }
@@ -111,11 +113,11 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get merged properties ValueMap for the current resource.
      */
-    protected ValueMap getMergedProperties(Page pageRoot, Resource resource) {
-        Map<String, Object> mergedProperties = new HashMap<String, Object>();
+    protected ValueMap getMergedProperties(String rootPagePath, Resource resource) {
+        Map<String, Object> mergedProperties = new HashMap<>();
 
-        mergedProperties.putAll(getGlobalProperties(pageRoot, resource));
-        mergedProperties.putAll(getSharedProperties(pageRoot, resource));
+        mergedProperties.putAll(getGlobalProperties(rootPagePath, resource));
+        mergedProperties.putAll(getSharedProperties(rootPagePath, resource));
         mergedProperties.putAll(resource.getValueMap());
 
         return new ValueMapDecorator(mergedProperties);

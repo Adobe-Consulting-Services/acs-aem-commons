@@ -22,8 +22,11 @@ package com.adobe.acs.commons.wcm.properties.shared.impl;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.Page;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import com.day.cq.wcm.api.components.Component;
+import com.day.cq.wcm.commons.WCMUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
@@ -106,19 +109,21 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
     }
 
     private void setSharedProperties(Bindings bindings, Resource resource) {
-        Page pageRoot = pageRootProvider.getRootPage(resource);
-        if (pageRoot != null) {
-            String globalPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
+        String rootPagePath = pageRootProvider.getRootPagePath(resource.getPath());
+        if (StringUtils.isNotBlank(rootPagePath)) {
+            String rootPageContentPath = rootPagePath + "/jcr:content/";
+            String globalPropsPath = rootPageContentPath + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
+
             Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
             if (globalPropsResource != null) {
                 bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, globalPropsResource.getValueMap());
                 bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE, globalPropsResource);
             }
-
+          
             final String resourceTypeRelativePath = getCanonicalResourceTypeRelativePath(resource.getResourceType(),
                     resource.getResourceResolver().getSearchPath());
             if (resourceTypeRelativePath != null) {
-                String sharedPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/"
+                String sharedPropsPath = rootPageContentPath + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/"
                         + resourceTypeRelativePath;
                 Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
                 if (sharedPropsResource != null) {
