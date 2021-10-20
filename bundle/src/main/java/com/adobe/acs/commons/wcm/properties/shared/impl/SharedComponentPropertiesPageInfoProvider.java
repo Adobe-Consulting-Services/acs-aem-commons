@@ -21,12 +21,13 @@ package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageInfoProvider;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
@@ -107,21 +108,22 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
         org.apache.sling.commons.json.JSONObject props = new org.apache.sling.commons.json.JSONObject();
         props.put("enabled", false);
 
-        Page page = pageRootProvider.getRootPage(resource);
-        if (page != null) {
+        String rootPagePath = pageRootProvider.getRootPagePath(resource.getPath());
+        if (StringUtils.isNotBlank(rootPagePath)) {
             Session session = request.getResourceResolver().adaptTo(Session.class);
             try {
+                String rootPageContentPath = rootPagePath + "/jcr:content";
                 AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
                 Privilege privilegeAddChild = accessControlManager.privilegeFromName("jcr:addChildNodes");
                 Privilege privilegeModifyProps = accessControlManager.privilegeFromName("jcr:modifyProperties");
                 Privilege[] requiredPrivs = new Privilege[]{privilegeAddChild, privilegeModifyProps};
 
-                if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
+                if (accessControlManager.hasPrivileges(rootPageContentPath, requiredPrivs)) {
                     props.put("enabled", true);
-                    props.put("root", page.getPath());
+                    props.put("root", rootPagePath);
                     props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) org.apache.sling.commons.json.JSONArray::new));
                 } else {
-                    log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, page.getPath() + "/jcr:content");
+                    log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, rootPageContentPath);
                 }
             } catch (RepositoryException e) {
                 log.error("Unexpected error checking permissions to modify shared component properties", e);
