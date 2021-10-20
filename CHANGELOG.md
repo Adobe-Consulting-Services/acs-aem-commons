@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
 
-### 5.0.14 - 2021-10-20
+## 5.0.14 - 2021-10-20
 
 ### Fixed
 
