@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### 5.0.14 - 2021-10-20
 
+### Fixed
+
 - #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
 - #2716 - Fixed issue with Shared Component Properties Bindings Values Provider facing lock contention
 - #2718 - Fixes CM Code Quality Pipeline failure caused by TestMarketoInterfaces and Jacoco instrumentation
