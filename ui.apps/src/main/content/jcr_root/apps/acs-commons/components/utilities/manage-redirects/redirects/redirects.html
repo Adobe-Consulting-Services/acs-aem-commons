@@ -68,7 +68,10 @@
         	<a icon="viewList" is="coral-anchorlist-item" 
         	href="/apps/acs-commons/content/redirect-manager.html${item.path}">${item.name}</a>
         </coral-anchorlist>
-        <sly data-sly-include="/apps/acs-commons/components/utilities/manage-redirects/redirects/create-configuration.html"></sly>
+
+        <sly data-sly-list="${resource.getChildren}">
+	        <sly data-sly-resource="${item.path}"></sly>
+        </sly>
     </div>
 </div>
 </body>

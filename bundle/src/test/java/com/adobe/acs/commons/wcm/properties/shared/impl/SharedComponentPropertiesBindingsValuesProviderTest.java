@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -84,8 +85,8 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     when(resourceResolver.adaptTo(ComponentManager.class)).thenReturn(componentManager);
     when(componentManager.getComponentOfResource(resource)).thenReturn(component);
 
-    when(page.getPath()).thenReturn(SITE_ROOT);
-    when(pageRootProvider.getRootPage(resource)).thenReturn(page);
+    when(resource.getPath()).thenReturn(SITE_ROOT);
+    when(pageRootProvider.getRootPagePath(anyString())).thenReturn(SITE_ROOT);
     when(component.getResourceType()).thenReturn(RESOURCE_TYPE);
 
     sharedProps = new ValueMapDecorator(new HashMap<String, Object>());
