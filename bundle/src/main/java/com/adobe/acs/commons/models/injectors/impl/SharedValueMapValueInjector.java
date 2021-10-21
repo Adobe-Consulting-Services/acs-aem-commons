@@ -74,10 +74,12 @@ public class SharedValueMapValueInjector implements Injector {
         final ValueMap valueMap;
         if (sharedComponentProperties != null) {
             valueMap = getValueMap(adaptable, element);
-        } else {
+        } else if (getValueType(element) == SharedComponentProperties.ValueTypes.MERGED) {
             valueMap = Optional.ofNullable(getResource(adaptable))
                     .map(Resource::getValueMap)
                     .orElse(ValueMap.EMPTY);
+        } else {
+            valueMap = ValueMap.EMPTY;
         }
 
         return ReflectionUtil.convertValueMapValue(valueMap, name, declaredType);
