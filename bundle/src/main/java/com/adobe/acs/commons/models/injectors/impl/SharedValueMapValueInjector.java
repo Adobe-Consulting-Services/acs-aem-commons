@@ -22,8 +22,6 @@ package com.adobe.acs.commons.models.injectors.impl;
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -31,10 +29,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingBindings;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
@@ -42,17 +38,14 @@ import org.osgi.framework.Constants;
 import javax.servlet.ServletRequest;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResource;
 
 /**
- * The SharedValueMapValueInjector depends on two other services related to script bindings executing first.
- * 1. The {@link com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider}
- * defines bindings for "globalProperties", "sharedProperties", and "mergedProperties".
- * 2. The {@code org.apache.sling.models.impl.injectors.BindingsInjector} provides those
+ * The SharedValueMapValueInjector depends on
+ * {@link com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider} to execute
+ * first.
  */
 @Component
 @Service
@@ -71,31 +64,35 @@ public class SharedValueMapValueInjector implements Injector {
     }
 
     @Override
-    public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
+    public Object getValue(Object adaptable, String name, Type declaredType,
+                           AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
         // sanity check
         if (element.getAnnotation(SharedValueMapValue.class) == null) {
             return null;
         }
 
-        final ValueMap valueMap = getValueMap(adaptable, element);
-
-        if (valueMap != null) {
-            return ReflectionUtil.convertValueMapValue(valueMap, name, declaredType);
+        final ValueMap valueMap;
+        if (sharedComponentProperties != null) {
+            valueMap = getValueMap(adaptable, element);
+        } else {
+            valueMap = Optional.ofNullable(getResource(adaptable))
+                    .map(Resource::getValueMap)
+                    .orElse(ValueMap.EMPTY);
         }
 
-        return null;
+        return ReflectionUtil.convertValueMapValue(valueMap, name, declaredType);
     }
 
     private ValueMap getValueMap(Object adaptable, AnnotatedElement element) {
         final SharedComponentProperties.ValueTypes valueType = getValueType(element);
         if (valueType == null) {
-            return null;
+            return ValueMap.EMPTY;
         }
 
         final Resource resource = getResource(adaptable);
         // we always need a resource, if only to determine if cached global properties are valid for the resource path
         if (resource == null) {
-            return null;
+            return ValueMap.EMPTY;
         }
 
         // the root page path is used to test the validity of bindings
@@ -122,7 +119,7 @@ public class SharedValueMapValueInjector implements Injector {
             case MERGED:
                 return getMergedProperties(resource);
             default:
-                return null;
+                return ValueMap.EMPTY;
         }
     }
 
