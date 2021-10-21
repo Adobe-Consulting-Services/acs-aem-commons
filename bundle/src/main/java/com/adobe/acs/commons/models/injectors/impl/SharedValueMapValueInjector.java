@@ -108,46 +108,79 @@ public class SharedValueMapValueInjector implements Injector {
         // first attempt to retrieve from bindings
         final SlingBindings bindings = getBindings(adaptable);
         if (bindings != null) {
-            if (valueType == SharedComponentProperties.ValueTypes.MERGED
-                    && resource.getPath().equals(bindings.get(SharedComponentProperties.MERGED_PROPERTIES_PATH))) {
-                return (ValueMap) bindings.get(SharedComponentProperties.MERGED_PROPERTIES);
-            }
-
-            if (rootPagePath.equals(bindings.get(SharedComponentProperties.SHARED_PROPERTIES_PAGE_PATH))) {
-                final ValueMap globalVmBound = (ValueMap) bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES);
-                if (valueType == SharedComponentProperties.ValueTypes.GLOBAL) {
-                    return globalVmBound;
-                }
-
-                final String sharedPropertiesPath = sharedComponentProperties.getSharedPropertiesPath(resource);
-                if (valueType == SharedComponentProperties.ValueTypes.SHARED && sharedPropertiesPath == null) {
-                    return null;
-                }
-
-                if (sharedPropertiesPath != null
-                        && sharedPropertiesPath.equals(bindings.get(SharedComponentProperties.SHARED_PROPERTIES_PATH))) {
-                    final ValueMap sharedVmBound = (ValueMap) bindings.get(SharedComponentProperties.SHARED_PROPERTIES);
-                    if (valueType == SharedComponentProperties.ValueTypes.SHARED) {
-                        return sharedVmBound;
-                    } else if (valueType == SharedComponentProperties.ValueTypes.MERGED) {
-                        return sharedComponentProperties.mergeProperties(globalVmBound, sharedVmBound, resource);
-                    }
-                } else if (sharedPropertiesPath == null && valueType == SharedComponentProperties.ValueTypes.MERGED) {
-                    return sharedComponentProperties.mergeProperties(globalVmBound, null, resource);
-                }
+            final ValueMap fromBindings = getValueMapFromBindings(bindings, valueType, resource, rootPagePath);
+            if (fromBindings != null) {
+                return fromBindings;
             }
         }
 
         switch (valueType) {
             case GLOBAL:
-                return getGlobalProperties(rootPagePath, resource);
+                return getGlobalProperties(resource);
             case SHARED:
-                return getSharedProperties(rootPagePath, resource);
+                return getSharedProperties(resource);
             case MERGED:
-                return getMergedProperties(rootPagePath, resource);
+                return getMergedProperties(resource);
+            default:
+                return null;
+        }
+    }
+
+    ValueMap getValueMapFromBindings(final SlingBindings bindings,
+                                     final SharedComponentProperties.ValueTypes valueType,
+                                     final Resource resource,
+                                     final String rootPagePath) {
+        // if the merged path in bindings matches the resource path, just assume that the merged properties in
+        // bindings are sufficient
+        if (valueType == SharedComponentProperties.ValueTypes.MERGED
+                && resource.getPath().equals(bindings.get(SharedComponentProperties.MERGED_PROPERTIES_PATH))) {
+            return Optional.ofNullable((ValueMap) bindings.get(SharedComponentProperties.MERGED_PROPERTIES))
+                    .orElse(ValueMap.EMPTY);
         }
 
-        return null;
+        // next check that the root page path matches the shared properties page path in bindings
+        // this might not match if a request wrapper was constructed for a non-child resource of the original request
+        // but which was not subjected to its own script bindings phase
+        if (!rootPagePath.equals(bindings.get(SharedComponentProperties.SHARED_PROPERTIES_PAGE_PATH))) {
+            // return null to indicate that the Injector should construct the value map
+            return null;
+        }
+
+        final ValueMap globalVmBound = (ValueMap) bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES);
+        // if GLOBAL is requested, just return it from bindings
+        if (valueType == SharedComponentProperties.ValueTypes.GLOBAL) {
+            return Optional.ofNullable(globalVmBound).orElse(ValueMap.EMPTY);
+        }
+
+        final String sharedPropertiesPath = sharedComponentProperties.getSharedPropertiesPath(resource);
+        // it is possible for getSharedPropertiesPath to return null for a resource if its resource type is invalid
+        // i.e., String.EMPTY, sling:nonexisting, nt:unstructured, or /var/absolute/path/not/in/resolver/search/path
+        if (sharedPropertiesPath == null) {
+            // if SHARED is requested in this case, return ValueMap.EMPTY
+            if (valueType == SharedComponentProperties.ValueTypes.SHARED) {
+                return ValueMap.EMPTY;
+            } else { // otherwise, pass null for sharedProperties and merge with global and resource
+                return sharedComponentProperties.mergeProperties(globalVmBound, null, resource);
+            }
+        }
+
+        // it is also possible for the shared properties path to differ from the path in bindings for the same
+        // reason that shared properties page path may differ (a wrapped request for a child resource of a
+        // different resource type)
+        final ValueMap sharedVmBound;
+        if (sharedPropertiesPath.equals(bindings.get(SharedComponentProperties.SHARED_PROPERTIES_PATH))) {
+            sharedVmBound = (ValueMap) bindings.get(SharedComponentProperties.SHARED_PROPERTIES);
+        } else {
+            sharedVmBound = Optional.ofNullable(resource.getResourceResolver().getResource(sharedPropertiesPath))
+                    .map(Resource::getValueMap).orElse(ValueMap.EMPTY);
+        }
+
+        // now that shared properties have been retrieved either return them directly if SHARED is requested
+        if (valueType == SharedComponentProperties.ValueTypes.SHARED) {
+            return Optional.ofNullable(sharedVmBound).orElse(ValueMap.EMPTY);
+        } else { // or return everything merged
+            return sharedComponentProperties.mergeProperties(globalVmBound, sharedVmBound, resource);
+        }
     }
 
     private SharedComponentProperties.ValueTypes getValueType(final AnnotatedElement element) {
@@ -166,7 +199,7 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get shared properties ValueMap the current resource.
      */
-    protected ValueMap getSharedProperties(String rootPagePath, Resource resource) {
+    protected ValueMap getSharedProperties(Resource resource) {
         return Optional.ofNullable(sharedComponentProperties.getSharedPropertiesPath(resource))
                 .map(resource.getResourceResolver()::getResource)
                 .map(Resource::getValueMap)
@@ -176,7 +209,7 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get global properties ValueMap for the current resource.
      */
-    protected ValueMap getGlobalProperties(String rootPagePath, Resource resource) {
+    protected ValueMap getGlobalProperties(Resource resource) {
         return Optional.ofNullable(sharedComponentProperties.getGlobalPropertiesPath(resource))
                 .map(resource.getResourceResolver()::getResource)
                 .map(Resource::getValueMap)
@@ -186,10 +219,10 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get merged properties ValueMap for the current resource.
      */
-    protected ValueMap getMergedProperties(String rootPagePath, Resource resource) {
+    protected ValueMap getMergedProperties(Resource resource) {
         return sharedComponentProperties.mergeProperties(
-                getGlobalProperties(rootPagePath, resource),
-                getSharedProperties(rootPagePath, resource),
+                getGlobalProperties(resource),
+                getSharedProperties(resource),
                 resource);
     }
 
