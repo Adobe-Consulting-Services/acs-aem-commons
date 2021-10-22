@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +40,13 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
@@ -54,9 +62,7 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   private Resource globalPropsResource;
   private Page page;
   private Bindings bindings;
-  private Component component;
   private ResourceResolver resourceResolver;
-  private ComponentManager componentManager;
   private ValueMap sharedProps;
   private ValueMap globalProps;
 
@@ -66,11 +72,9 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     pageRootProvider = mock(PageRootProvider.class);
     page = mock(Page.class);
     bindings = new SimpleBindings();
-    component = mock(Component.class);
     sharedPropsResource = mock(Resource.class);
     globalPropsResource = mock(Resource.class);
     resourceResolver = mock(ResourceResolver.class);
-    componentManager = mock(ComponentManager.class);
 
     final String globalPropsPath = SITE_ROOT + "/jcr:content/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
     final String sharedPropsPath = SITE_ROOT + "/jcr:content/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES +  "/"
@@ -79,15 +83,15 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     bindings.put("resource", resource);
 
     when(resource.getResourceResolver()).thenReturn(resourceResolver);
+    when(resource.getResourceType()).thenReturn(RESOURCE_TYPE);
+    when(resourceResolver.getSearchPath()).thenReturn(new String[]{"/apps/", "/libs/"});
     when(resourceResolver.getResource(sharedPropsPath)).thenReturn(sharedPropsResource);
     when(resourceResolver.getResource(globalPropsPath)).thenReturn(globalPropsResource);
-    when(resourceResolver.adaptTo(ComponentManager.class)).thenReturn(componentManager);
-    when(componentManager.getComponentOfResource(resource)).thenReturn(component);
 
-    when(page.getPath()).thenReturn(SITE_ROOT);
-    when(pageRootProvider.getRootPage(resource)).thenReturn(page);
-    when(component.getResourceType()).thenReturn(RESOURCE_TYPE);
+    when(resource.getPath()).thenReturn(SITE_ROOT);
+    when(pageRootProvider.getRootPagePath(anyString())).thenReturn(SITE_ROOT);
 
+    
     sharedProps = new ValueMapDecorator(new HashMap<String, Object>());
     globalProps = new ValueMapDecorator(new HashMap<String, Object>());
     sharedProps.put("shared", "value");
@@ -95,6 +99,41 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
 
     when(globalPropsResource.getValueMap()).thenReturn(globalProps);
     when(sharedPropsResource.getValueMap()).thenReturn(sharedProps);
+  }
+
+  @Test
+  public void testGetCanonicalResourceTypeRelativePath() {
+    // make this test readable by wrapping the long method name with a function
+    final BiFunction<String, List<String>, String> asFunction =
+            (resourceType, searchPaths) -> SharedComponentPropertiesBindingsValuesProvider
+                    .getCanonicalResourceTypeRelativePath(resourceType,
+                            Optional.ofNullable(searchPaths)
+                                    .map(list -> list.toArray(new String[0])).orElse(null));
+
+    final List<String> emptySearchPaths = Collections.emptyList();
+    final List<String> realSearchPaths = Arrays.asList("/apps/", "/libs/");
+    assertNull("expect null for null rt", asFunction.apply(null, emptySearchPaths));
+    assertNull("expect null for empty rt", asFunction.apply("", emptySearchPaths));
+    assertNull("expect null for absolute rt and null search paths",
+            asFunction.apply("/fail/" + RESOURCE_TYPE, null));
+    assertNull("expect null for cq:Page",
+            asFunction.apply("cq:Page", realSearchPaths));
+    assertNull("expect null for nt:unstructured",
+            asFunction.apply("nt:unstructured", realSearchPaths));
+    assertNull("expect null for absolute rt and empty search paths",
+            asFunction.apply("/fail/" + RESOURCE_TYPE, emptySearchPaths));
+    assertNull("expect null for sling nonexisting rt",
+            asFunction.apply(Resource.RESOURCE_TYPE_NON_EXISTING, emptySearchPaths));
+    assertEquals("expect same for relative rt", RESOURCE_TYPE,
+            asFunction.apply(RESOURCE_TYPE, emptySearchPaths));
+    assertEquals("expect same for relative rt and real search paths", RESOURCE_TYPE,
+            asFunction.apply(RESOURCE_TYPE, realSearchPaths));
+    assertEquals("expect relative for /apps/ + relative and real search paths", RESOURCE_TYPE,
+            asFunction.apply("/apps/" + RESOURCE_TYPE, realSearchPaths));
+    assertEquals("expect relative for /libs/ + relative and real search paths", RESOURCE_TYPE,
+            asFunction.apply("/libs/" + RESOURCE_TYPE, realSearchPaths));
+    assertNull("expect null for /fail/ + relative and real search paths",
+            asFunction.apply("/fail/" + RESOURCE_TYPE, realSearchPaths));
   }
 
   @Test

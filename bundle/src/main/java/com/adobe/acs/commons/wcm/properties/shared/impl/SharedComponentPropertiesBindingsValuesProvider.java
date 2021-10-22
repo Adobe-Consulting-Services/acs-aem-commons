@@ -21,9 +21,9 @@ package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.commons.WCMUtils;
+import org.apache.felix.scr.annotations.Component;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
@@ -52,7 +52,7 @@ import java.util.Map;
  * to instance-level values, then shared values, and finally global
  * values when properties exist at multiple levels with the same name.
  */
-@org.apache.felix.scr.annotations.Component
+@Component
 @Service
 public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesBindingsValuesProvider.class);
@@ -66,10 +66,9 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
     @Override
     public void addBindings(Bindings bindings) {
         Resource resource = (Resource) bindings.get("resource");
-        Component component = WCMUtils.getComponent(resource);
-        if (component != null) {
+        if (resource != null) {
             if (pageRootProvider != null) {
-                setSharedProperties(bindings, resource, component);
+                setSharedProperties(bindings, resource);
             } else {
                 log.debug("Page Root Provider must be configured for shared component properties to be supported");
             }
@@ -77,22 +76,56 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
         }
     }
 
-    private void setSharedProperties(Bindings bindings, Resource resource, Component component) {
-        Page pageRoot = pageRootProvider.getRootPage(resource);
-        if (pageRoot != null) {
-            String globalPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
+    /**
+     * Construct a canonical resource type relative path for the provided resource type,
+     * or null if the result is not acceptable.
+     * Step 1: discard empty and JCR node types / sling:nonexisting (contains ":")
+     * Step 2: return result if already relative (does not start with /)
+     * Step 3: relativize an absolute path using elements of {@code searchPaths} and return the first match found.
+     *
+     * @param resourceType the request resource resourceType
+     * @param searchPaths {@link org.apache.sling.api.resource.ResourceResolver#getSearchPath()}
+     * @return the canonical resource type or null
+     */
+    static String getCanonicalResourceTypeRelativePath(final String resourceType, final String[] searchPaths) {
+        if (StringUtils.isEmpty(resourceType) || resourceType.contains(":")) {
+            return null;
+        }
+
+        if (resourceType.charAt(0) != '/') {
+            return resourceType;
+        } else if (searchPaths != null) {
+            for (final String searchPath : searchPaths) {
+                if (resourceType.startsWith(searchPath)) {
+                    return resourceType.substring(searchPath.length());
+                }
+            }
+        }
+        return null;
+    }
+
+    private void setSharedProperties(Bindings bindings, Resource resource) {
+        String rootPagePath = pageRootProvider.getRootPagePath(resource.getPath());
+        if (StringUtils.isNotBlank(rootPagePath)) {
+            String rootPageContentPath = rootPagePath + "/jcr:content/";
+            String globalPropsPath = rootPageContentPath + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
+
             Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
             if (globalPropsResource != null) {
                 bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, globalPropsResource.getValueMap());
                 bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE, globalPropsResource);
             }
-
-            String sharedPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES +  "/"
-                    + component.getResourceType();
-            Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
-            if (sharedPropsResource != null) {
-                bindings.put(SharedComponentProperties.SHARED_PROPERTIES, sharedPropsResource.getValueMap());
-                bindings.put(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE, sharedPropsResource);
+          
+            final String resourceTypeRelativePath = getCanonicalResourceTypeRelativePath(resource.getResourceType(),
+                    resource.getResourceResolver().getSearchPath());
+            if (resourceTypeRelativePath != null) {
+                String sharedPropsPath = rootPageContentPath + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/"
+                        + resourceTypeRelativePath;
+                Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
+                if (sharedPropsResource != null) {
+                    bindings.put(SharedComponentProperties.SHARED_PROPERTIES, sharedPropsResource.getValueMap());
+                    bindings.put(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE, sharedPropsResource);
+                }
             }
         } else {
             log.debug("Could not determine shared properties root for resource {}", resource.getPath());
