@@ -20,19 +20,26 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
+import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticMetaDataMap;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.cq.workflow.model.WorkflowNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.UUID;
 
-public class SyntheticWorkItem implements WorkItem {
+public class SyntheticWorkItem implements InvocationHandler, WrappedSyntheticWorkItem {
+    private static final Logger LOG = LoggerFactory.getLogger(WrappedSyntheticWorkItem.class);
     private static final String CURRENT_ASSIGNEE = "Synthetic Workflow";
     private final UUID uuid = UUID.randomUUID();
     private Date timeStarted = null;
@@ -43,22 +50,59 @@ public class SyntheticWorkItem implements WorkItem {
 
     private MetaDataMap metaDataMap = new SyntheticMetaDataMap();
 
-    public SyntheticWorkItem(final WorkflowData workflowData) {
+    private SyntheticWorkItem(final WorkflowData workflowData) {
         this.workflowData = workflowData;
         this.timeStarted = new Date();
     }
 
+    public static WrappedSyntheticWorkItem createSyntheticWorkItem(WorkflowData workflowData) {
+        InvocationHandler handler = new SyntheticWorkItem(workflowData);
+        return (WrappedSyntheticWorkItem) Proxy.newProxyInstance(WrappedSyntheticWorkItem.class.getClassLoader(), new Class[] { WrappedSyntheticWorkItem.class, WorkItem.class  }, handler);
+    }
+
     @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        String methodName = method.getName();
+        WorkItem workItem = (WorkItem) proxy;
+        switch (methodName) {
+            case "getTimeStarted":
+                return getTimeStarted();
+            case "getTimeEnded":
+                return getTimeEnded();
+            case "getWorkflow":
+                return getWorkflow();
+            case "getNode":
+                return getNode();
+            case "getId":
+                return getId();
+            case "getWorkflowData":
+                return getWorkflowData();
+            case "getCurrentAssignee":
+                return getCurrentAssignee();
+            case "getMetaData":
+                return getMetaData();
+            case "getMetaDataMap":
+                return getMetaDataMap();
+            case "setWorkflow":
+                this.setWorkflow((SyntheticWorkflow) args[0]);
+                return new Object();
+            case "setTimeEnded":
+                this.setTimeEnded((Date) args[0]);
+                return new Object();
+            default:
+                LOG.error("CQ SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR {}", methodName);
+                throw new UnsupportedOperationException();
+        }
+    }
+
     public final String getId() {
         return uuid.toString() + "_" + this.getWorkflowData().getPayload();
     }
 
-    @Override
     public final Date getTimeStarted() {
         return this.timeStarted == null ? null : (Date) this.timeStarted.clone();
     }
 
-    @Override
     public final Date getTimeEnded() {
         return this.timeEnded == null ? null : (Date) this.timeEnded.clone();
     }
@@ -71,12 +115,10 @@ public class SyntheticWorkItem implements WorkItem {
         }
     }
 
-    @Override
     public final WorkflowData getWorkflowData() {
         return this.workflowData;
     }
 
-    @Override
     public final String getCurrentAssignee() {
         return CURRENT_ASSIGNEE;
     }
@@ -85,7 +127,6 @@ public class SyntheticWorkItem implements WorkItem {
      * @deprecated deprecated in interface
      */
     @Deprecated
-    @Override
     @SuppressWarnings("squid:S1149")
     public final Dictionary<String, String> getMetaData() {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
@@ -103,12 +144,10 @@ public class SyntheticWorkItem implements WorkItem {
      *
      * @return the WorkItem's MetaDataMap
      */
-    @Override
     public final MetaDataMap getMetaDataMap() {
         return this.metaDataMap;
     }
 
-    @Override
     public final Workflow getWorkflow() {
         return this.workflow;
     }
@@ -120,7 +159,6 @@ public class SyntheticWorkItem implements WorkItem {
 
     /* Unimplemented Methods */
 
-    @Override
     public final WorkflowNode getNode() {
         return null;
     }

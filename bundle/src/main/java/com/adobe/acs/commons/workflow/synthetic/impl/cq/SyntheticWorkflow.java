@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
+import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.Workflow;
@@ -42,7 +43,7 @@ public class SyntheticWorkflow implements Workflow {
 
     private SyntheticWorkflowData workflowData;
 
-    private SyntheticWorkItem activeWorkItem;
+    private WrappedSyntheticWorkItem activeWorkItem;
 
     public SyntheticWorkflow(final String id,
                              final SyntheticWorkflowData workflowData) {
@@ -51,7 +52,7 @@ public class SyntheticWorkflow implements Workflow {
         this.timeStarted = new Date();
     }
 
-    public final void setActiveWorkItem(final SyntheticWorkItem workItem) {
+    public final void setActiveWorkItem(final WrappedSyntheticWorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 
@@ -62,7 +63,7 @@ public class SyntheticWorkflow implements Workflow {
 
     @Override
     public final List<WorkItem> getWorkItems() {
-        return Arrays.asList(new WorkItem[]{this.activeWorkItem});
+        return Arrays.asList(new WorkItem[]{(WorkItem)this.activeWorkItem});
     }
 
     @Override

@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
+import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticCompleteWorkflowException;
@@ -111,7 +112,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     @SuppressWarnings("squid:S1192")
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
-        if (workItem instanceof SyntheticWorkItem) {
+        if (workItem instanceof WrappedSyntheticWorkItem) {
             throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
                     + workItem.getWorkflow().getId() + " : " + workItem.getId() + " ] completed");
         } else {

@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
+import com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.adobe.granite.workflow.exec.WorkItem;
 import com.adobe.granite.workflow.exec.Workflow;
@@ -40,7 +41,7 @@ public class SyntheticWorkflow implements Workflow {
 
     private final SyntheticWorkflowData workflowData;
 
-    private WorkItem activeWorkItem;
+    private WrappedSyntheticWorkItem activeWorkItem;
 
     public SyntheticWorkflow(final String id,
                              final SyntheticWorkflowData workflowData) {
@@ -49,7 +50,7 @@ public class SyntheticWorkflow implements Workflow {
         this.timeStarted = new Date();
     }
 
-    public final void setActiveWorkItem(final WorkItem workItem) {
+    public final void setActiveWorkItem(final WrappedSyntheticWorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 
@@ -60,7 +61,7 @@ public class SyntheticWorkflow implements Workflow {
 
     @Override
     public final List<WorkItem> getWorkItems() {
-        return Arrays.asList(new WorkItem[]{this.activeWorkItem});
+        return Arrays.asList(new WorkItem[]{(WorkItem)this.activeWorkItem});
     }
 
     @Override
