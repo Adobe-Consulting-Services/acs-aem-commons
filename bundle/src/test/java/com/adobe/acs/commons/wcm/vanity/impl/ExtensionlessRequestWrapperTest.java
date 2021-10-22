@@ -56,7 +56,7 @@ public class ExtensionlessRequestWrapperTest {
         request.setResource(context.resourceResolver().getResource("/content/null-extension"));
 
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
-        requestPathInfo.setExtension("xyz");
+        requestPathInfo.setExtension(null);
 
         ExtensionlessRequestWrapper wrapper = new ExtensionlessRequestWrapper(request);
         assertNull(wrapper.getRequestPathInfo().getExtension());

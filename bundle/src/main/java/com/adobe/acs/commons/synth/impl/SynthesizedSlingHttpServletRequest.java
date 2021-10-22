@@ -22,7 +22,7 @@ package com.adobe.acs.commons.synth.impl;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.StringUtils;
+import com.day.cq.commons.PathInfo;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -68,7 +68,7 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
     public SynthesizedSlingHttpServletRequest(final SlingHttpServletRequest request) {
         super(request);
 
-        requestPathInfo = new WrappedRequestPathInfo();
+        requestPathInfo = new PathInfo(getSlingRequest().getRequestPathInfo().getResourcePath());
     }
 
     @Override
@@ -178,49 +178,4 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
         return this;
     }
 
-
-    private class WrappedRequestPathInfo implements RequestPathInfo {
-
-        private RequestPathInfo getOriginal() {
-            return getSlingRequest().getRequestPathInfo();
-        }
-
-        @Override
-        public String getResourcePath() {
-            return isResourcePathOverridden ? resourcePath : getOriginal().getResourcePath();
-        }
-
-        @Override
-        public String getExtension() {
-            return isExtensionOverridden ? extension : getOriginal().getExtension();
-        }
-
-        @Override
-        public String getSelectorString() {
-            if (isSelectorOverridden) {
-                return StringUtils.join(selectors, ".");
-            }
-
-            return getOriginal().getSelectorString();
-        }
-
-        @Override
-        public String[] getSelectors() {
-            return isSelectorOverridden ? selectors : getOriginal().getSelectors();
-        }
-
-        @Override
-        public String getSuffix() {
-            return isSuffixOverridden ? suffix : getOriginal().getSuffix();
-        }
-
-        @Override
-        public Resource getSuffixResource() {
-            if (isSuffixOverridden) {
-                return getSlingRequest().getResourceResolver().getResource(suffix);
-            }
-
-            return getOriginal().getSuffixResource();
-        }
-    }
 }
