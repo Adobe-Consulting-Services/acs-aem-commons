@@ -25,8 +25,6 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 
 public class ExtensionlessRequestWrapper extends SlingHttpServletRequestWrapper {
 
-    private static final String SLING_STATUS = "sling:status";
-
     public ExtensionlessRequestWrapper(SlingHttpServletRequest wrappedRequest) {
         super(wrappedRequest);
     }
