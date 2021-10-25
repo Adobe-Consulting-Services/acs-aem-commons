@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
-import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticMetaDataMap;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.Workflow;
@@ -38,8 +37,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.UUID;
 
-public class SyntheticWorkItem implements InvocationHandler, WrappedSyntheticWorkItem {
-    private static final Logger LOG = LoggerFactory.getLogger(WrappedSyntheticWorkItem.class);
+public class SyntheticWorkItem implements InvocationHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(SyntheticWorkItem.class);
     private static final String CURRENT_ASSIGNEE = "Synthetic Workflow";
     private final UUID uuid = UUID.randomUUID();
     private Date timeStarted = null;
@@ -55,15 +54,13 @@ public class SyntheticWorkItem implements InvocationHandler, WrappedSyntheticWor
         this.timeStarted = new Date();
     }
 
-    public static WrappedSyntheticWorkItem createSyntheticWorkItem(WorkflowData workflowData) {
-        InvocationHandler handler = new SyntheticWorkItem(workflowData);
-        return (WrappedSyntheticWorkItem) Proxy.newProxyInstance(WrappedSyntheticWorkItem.class.getClassLoader(), new Class[] { WrappedSyntheticWorkItem.class, WorkItem.class  }, handler);
+    public static SyntheticWorkItem createSyntheticWorkItem(WorkflowData workflowData) {
+        return new SyntheticWorkItem(workflowData);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
-        WorkItem workItem = (WorkItem) proxy;
         switch (methodName) {
             case "getTimeStarted":
                 return getTimeStarted();
@@ -83,12 +80,6 @@ public class SyntheticWorkItem implements InvocationHandler, WrappedSyntheticWor
                 return getMetaData();
             case "getMetaDataMap":
                 return getMetaDataMap();
-            case "setWorkflow":
-                this.setWorkflow((SyntheticWorkflow) args[0]);
-                return new Object();
-            case "setTimeEnded":
-                this.setTimeEnded((Date) args[0]);
-                return new Object();
             default:
                 LOG.error("CQ SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR {}", methodName);
                 throw new UnsupportedOperationException();
@@ -152,8 +143,8 @@ public class SyntheticWorkItem implements InvocationHandler, WrappedSyntheticWor
         return this.workflow;
     }
 
-    public final void setWorkflow(final SyntheticWorkflow workflow) {
-        workflow.setActiveWorkItem(this);
+    public void setWorkflow(final WorkItem proxy, final SyntheticWorkflow workflow) {
+        workflow.setActiveWorkItem(proxy);
         this.workflow = workflow;
     }
 

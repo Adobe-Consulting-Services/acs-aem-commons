@@ -43,7 +43,7 @@ public class SyntheticWorkflow implements Workflow {
 
     private SyntheticWorkflowData workflowData;
 
-    private WrappedSyntheticWorkItem activeWorkItem;
+    private WorkItem activeWorkItem;
 
     public SyntheticWorkflow(final String id,
                              final SyntheticWorkflowData workflowData) {
@@ -52,7 +52,7 @@ public class SyntheticWorkflow implements Workflow {
         this.timeStarted = new Date();
     }
 
-    public final void setActiveWorkItem(final WrappedSyntheticWorkItem workItem) {
+    final void setActiveWorkItem(final WorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 

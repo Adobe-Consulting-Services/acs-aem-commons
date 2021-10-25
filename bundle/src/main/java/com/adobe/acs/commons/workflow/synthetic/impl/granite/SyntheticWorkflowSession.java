@@ -41,22 +41,19 @@ import com.adobe.granite.workflow.exec.filter.WorkItemFilter;
 import com.adobe.granite.workflow.model.WorkflowModel;
 import com.adobe.granite.workflow.model.WorkflowModelFilter;
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class SyntheticWorkflowSession implements InvocationHandler, WrappedSyntheticWorkflowSession {
+public class SyntheticWorkflowSession implements InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowSession.class);
 
     private static final String UNSUPPORTED_OPERATION_MESSAGE = "Operation not supported by Synthetic Workflow";
@@ -79,47 +76,28 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
         this.backRoutes.add(new SyntheticRoute(true));
     }
 
-    public static WrappedSyntheticWorkflowSession createSyntheticWorkflowSession(SyntheticWorkflowRunnerImpl workflowService, Session session) {
-        InvocationHandler handler = new SyntheticWorkflowSession(workflowService, session);
-        return (WrappedSyntheticWorkflowSession) Proxy.newProxyInstance(WrappedSyntheticWorkflowSession.class.getClassLoader(), new Class[] { WrappedSyntheticWorkflowSession.class, WorkflowSession.class }, handler);
+    public static SyntheticWorkflowSession createSyntheticWorkflowSession(SyntheticWorkflowRunnerImpl workflowService, Session session) {
+        return new SyntheticWorkflowSession(workflowService, session);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
-        WorkflowSession workflowSession = (WorkflowSession) proxy;
         switch (methodName) {
             case "deployModel":
                 deployModel((WorkflowModel) args[0]);
                 return new Object();
             case "createNewModel":
-                if (args.length > 1) {
-                    return createNewModel((String) args[0], (String) args[1]);
-                } else {
-                    return createNewModel((String) args[0]);
-                }
+                return createNewModel(args);
             case "deleteModel":
                 deleteModel((String) args[0]);
                 return new Object();
             case "getModels":
-                if (args.length == 1) {
-                    return getModels((WorkflowModelFilter) args[0]);
-                } else if (args.length == 2) {
-                    return getModels((Long) args[0], (Long) args[1]);
-                } else if (args.length == 3) {
-                    return getModels((Long) args[0], (Long) args[1], (WorkflowModelFilter) args[2]);
-                }
-                return getModels();
+                return getModels(args);
             case "getModel":
-                if (args.length > 1) {
-                    return getModel((String) args[0], (String) args[1]);
-                }
-                return getModel((String) args[0]);
+                return getModel(args);
             case "startWorkflow":
-                if (args.length == 3) {
-                    return startWorkflow((WorkflowModel) args[0], (WorkflowData) args[1], (Map<String, Object>) args[2]);
-                }
-                return startWorkflow((WorkflowModel) args[0], (WorkflowData) args[1]);
+                return startWorkflow(args);
             case "terminateWorkflow":
                 terminateWorkflow((Workflow) args[0]);
                 return new Object();
@@ -130,29 +108,15 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
                 suspendWorkflow((Workflow) args[0]);
                 return new Object();
             case "getActiveWorkItems":
-                if (args.length == 2) {
-                    return getActiveWorkItems((Long) args[0], (Long) args[1]);
-                } else if (args.length == 3) {
-                    return getActiveWorkItems((Long) args[0], (Long) args[1], (WorkItemFilter) args[2]);
-                }
-                return getActiveWorkItems();
+                return getActiveWorkItems(args);
             case "getActiveInboxItems":
-                if (args.length == 4) {
-                    return getActiveInboxItems((Long) args[0], (Long) args[1], (String) args[2], (InboxItemFilter) args[3]);
-                }
-                return getActiveInboxItems((Long) args[0], (Long) args[1], (InboxItemFilter) args[2]);
+               return getActiveInboxItems(args);
             case "getAllWorkItems":
-                if (args.length > 1) {
-                    return getAllWorkItems((Long) args[0], (Long) args[1]);
-                }
-                return getAllWorkItems();
+                return getAllWorkItems(args);
             case "getWorkItem":
                 return getWorkItem((String) args[0]);
             case "getWorkflows":
-                if (args.length == 3) {
-                    return getWorkflows((String[]) args[0], (Long) args[1], (Long) args[2]);
-                }
-                return getWorkflows((String[]) args[0]);
+                return getWorkflows(args);
             case "getAllWorkflows":
                 return getAllWorkflows();
             case "getWorkflow":
@@ -226,11 +190,19 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkflowModel createNewModel(final String s) throws WorkflowException {
+    public final WorkflowModel createNewModel(Object[] args) throws WorkflowException {
+        if (args.length > 1) {
+            return createNewModel((String) args[0], (String) args[1]);
+        } else {
+            return createNewModel((String) args[0]);
+        }
+    }
+
+    private WorkflowModel createNewModel(final String s) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkflowModel createNewModel(final String s, final String s2) throws WorkflowException {
+    private WorkflowModel createNewModel(final String s, final String s2) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
@@ -238,25 +210,43 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkflowModel[] getModels() throws WorkflowException {
+    public final Object getModels(Object[] args) throws WorkflowException {
+        if (args.length == 1) {
+            return getModels((WorkflowModelFilter) args[0]);
+        } else if (args.length == 2) {
+            return getModels((Long) args[0], (Long) args[1]);
+        } else if (args.length == 3) {
+            return getModels((Long) args[0], (Long) args[1], (WorkflowModelFilter) args[2]);
+        }
+        return getModels();
+    }
+
+    private WorkflowModel[] getModels() throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkflowModel[] getModels(final WorkflowModelFilter workflowModelFilter) throws WorkflowException {
+    private WorkflowModel[] getModels(final WorkflowModelFilter workflowModelFilter) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final ResultSet<WorkflowModel> getModels(final long l, final long l2) throws WorkflowException {
+    private ResultSet<WorkflowModel> getModels(final long l, final long l2) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final ResultSet<WorkflowModel> getModels(final long l, final long l2,
+    private ResultSet<WorkflowModel> getModels(final long l, final long l2,
                                                     final WorkflowModelFilter workflowModelFilter)
             throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkflowModel getModel(final String modelId) throws WorkflowException {
+    public final Object getModel(Object[] args) throws WorkflowException {
+        if (args.length > 1) {
+            return getModel((String) args[0], (String) args[1]);
+        }
+        return getModel((String) args[0]);
+    }
+
+    private WorkflowModel getModel(final String modelId) throws WorkflowException {
         final WorkflowSession workflowSession;
         try {
             workflowSession = this.workflowService.getResourceResolver(this.session).adaptTo(WorkflowSession.class);
@@ -266,16 +256,23 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
         }
     }
 
-    public final WorkflowModel getModel(final String s, final String s2) throws WorkflowException {
+    private WorkflowModel getModel(final String s, final String s2) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final Workflow startWorkflow(final WorkflowModel workflowModel, final WorkflowData workflowData)
+    public final Object startWorkflow(Object[] args) throws WorkflowException {
+        if (args.length == 3) {
+            return startWorkflow((WorkflowModel) args[0], (WorkflowData) args[1], (Map<String, Object>) args[2]);
+        }
+        return startWorkflow((WorkflowModel) args[0], (WorkflowData) args[1]);
+    }
+
+    private Workflow startWorkflow(final WorkflowModel workflowModel, final WorkflowData workflowData)
             throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final Workflow startWorkflow(final WorkflowModel workflowModel, final WorkflowData workflowData,
+    private Workflow startWorkflow(final WorkflowModel workflowModel, final WorkflowData workflowData,
                                         final Map<String, Object> stringObjectMap) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
@@ -288,33 +285,56 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkItem[] getActiveWorkItems() throws WorkflowException {
+    public final Object getActiveWorkItems(Object[] args) throws WorkflowException {
+        if (args.length == 2) {
+            return getActiveWorkItems((Long) args[0], (Long) args[1]);
+        } else if (args.length == 3) {
+            return getActiveWorkItems((Long) args[0], (Long) args[1], (WorkItemFilter) args[2]);
+        }
+        return getActiveWorkItems();
+    }
+
+    private WorkItem[] getActiveWorkItems() throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final ResultSet<WorkItem> getActiveWorkItems(final long l, final long l2) throws WorkflowException {
+    private ResultSet<WorkItem> getActiveWorkItems(final long l, final long l2) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final ResultSet<WorkItem> getActiveWorkItems(final long l, final long l2,
+    private ResultSet<WorkItem> getActiveWorkItems(final long l, final long l2,
                                                         final WorkItemFilter workItemFilter)
             throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public ResultSet<InboxItem> getActiveInboxItems(long l, long l1, InboxItemFilter inboxItemFilter) throws WorkflowException {
+    private Object getActiveInboxItems(Object[] args) throws WorkflowException {
+        if (args.length == 4) {
+            return getActiveInboxItems((Long) args[0], (Long) args[1], (String) args[2], (InboxItemFilter) args[3]);
+        }
+        return getActiveInboxItems((Long) args[0], (Long) args[1], (InboxItemFilter) args[2]);
+    }
+
+    private ResultSet<InboxItem> getActiveInboxItems(long l, long l1, InboxItemFilter inboxItemFilter) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public ResultSet<InboxItem> getActiveInboxItems(long l, long l1, String s, InboxItemFilter inboxItemFilter) throws WorkflowException {
+    private ResultSet<InboxItem> getActiveInboxItems(long l, long l1, String s, InboxItemFilter inboxItemFilter) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final WorkItem[] getAllWorkItems() throws WorkflowException {
+    public Object getAllWorkItems(Object[] args) throws WorkflowException {
+        if (args.length > 1) {
+            return getAllWorkItems((Long) args[0], (Long) args[1]);
+        }
+        return getAllWorkItems();
+    }
+
+    private WorkItem[] getAllWorkItems() throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final ResultSet<WorkItem> getAllWorkItems(final long l, final long l2) throws WorkflowException {
+    private ResultSet<WorkItem> getAllWorkItems(final long l, final long l2) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
@@ -322,11 +342,18 @@ public class SyntheticWorkflowSession implements InvocationHandler, WrappedSynth
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final Workflow[] getWorkflows(final String[] strings) throws WorkflowException {
+    public final Object getWorkflows(Object[] args) throws WorkflowException {
+        if (args.length == 3) {
+            return getWorkflows((String[]) args[0], (Long) args[1], (Long) args[2]);
+        }
+        return getWorkflows((String[]) args[0]);
+    }
+
+    private Workflow[] getWorkflows(final String[] strings) throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
-    public final ResultSet<Workflow> getWorkflows(final String[] strings, final long l, final long l2)
+    private ResultSet<Workflow> getWorkflows(final String[] strings, final long l, final long l2)
             throws WorkflowException {
         throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
