@@ -112,7 +112,9 @@ import static org.osgi.framework.Constants.SERVICE_ID;
         configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
         SERVICE_DESCRIPTION + "=A request filter implementing support for virtual redirects",
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
-        SERVICE_RANKING + ":Integer=10000",
+        // to correctly work in Author RedirectFilter needs to run after WCMRequestFilter which has rank 2000 in
+        // AEM 6.5 and Cloud SDK, see issue 2707
+        SERVICE_RANKING + ":Integer=1900",
         "jmx.objectname=" + "com.adobe.acs.commons:type=Redirect Manager",
         EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC,
         EventConstants.EVENT_TOPIC + "=" + ReplicationEvent.EVENT_TOPIC

@@ -1,11 +1,15 @@
 (function($, $document) {
-    "use strict";
+     "use strict";
+
+	var registry = $(window).adaptTo("foundation-registry"); 
+    var DIALOG_FORM_SELECTOR = "#fn-acsCommons-save_redirects";
+    var DIALOG_SELECTOR = "#editRuleDialog";
+    var TABLE_SELECTOR = "#edit-redirect-coral-table";
 
     function showEditDialog() {
-        var dialog = document.querySelector('#demoDialog');
+        var dialog = document.querySelector(DIALOG_SELECTOR);
         dialog.show();
     }
-
 
 
     [
@@ -21,14 +25,14 @@
         'coral-table:beforeroworder',
       ]
       .forEach(function(eventName) {
-        $document.on(eventName, '#edit-redirect-coral-table', function(e) {
+        $document.on(eventName, TABLE_SELECTOR, function(e) {
           if(e.type=='coral-table:beforeroworder') {
         	  var thisElement = $(this);
           	  var rowIndex = e.detail.row.rowIndex;
           	  var beforeRow = e.detail.before;
           	  var beforeIndex;
               if(!beforeRow) {
-        		  beforeIndex = $('#edit-redirect-coral-table').get(0)._items.length + 1;
+        		  beforeIndex = $(TABLE_SELECTOR).get(0)._items.length + 1;
         	  } else {
         		  beforeIndex =e.detail.before.rowIndex;
         	  }
@@ -36,7 +40,7 @@
               var target = $(e.detail.row).find('.target').data('value');
         	  updateFormData($(e.detail.row));
 
-        	  var $form = $("form.acs-redirect-rule-form");
+        	  var $form = $(DIALOG_FORM_SELECTOR);
               var data = $form.serialize();
               var nextIndex = beforeIndex - 1;
               if(rowIndex == beforeIndex || rowIndex == nextIndex) {
@@ -60,28 +64,14 @@
         });
       });
 
-    $(document).on("click", ".cq-dialog-submit", function (e) {
+    $(document).on("click", "button[icon='delete']", function (e) {
     	e.preventDefault();
-        var $form = $(this).closest('form');
-        var cmd = $(this).attr('cmd');
+        var formId = $(this).attr('form');
+        var $form = $("#" + formId);
+        var buttonId = $(this).attr('id');
+        var cmd = buttonId && buttonId.startsWith(":") ? buttonId : null;
         var data = $form.serialize();
-        var command;
         if(cmd){
-            if(cmd.indexOf(":order") === 0){
-            var dialog = $('#demoDialog');
-            var id = dialog.find('.acs-redirect-rule-form').attr('id');
-            var editRedirectTable = $('#edit-redirect-coral-table');
-            var $rows = editRedirectTable.find('tr');
-    		var tr = editRedirectTable.find('#'+id);
-    		var idx = tr.index();
-            if(cmd.indexOf("$prev") > 0){
-                cmd = cmd.replace("$prev", idx > 0 ? idx-1 : 0);
-                command = 'prev';
-            } else {
-                cmd = cmd.replace("$next", idx < $rows.length ? idx+1 : $rows.length);
-                command = 'next';
-            }
-        }
             data += "&" + cmd;
         }
         var message = $(this).attr('alert');
@@ -91,43 +81,43 @@
             data: data,
             async: false
         }).done(function(response /*json response from the Sling POST servlet*/){
-
-        	var dialog = $('#demoDialog');
-            var id = dialog.find('.acs-redirect-rule-form').attr('id');
+        	var dialog = $(DIALOG_SELECTOR);
     		dialog.find('.close-dialog-box').click();
-       		var editRedirectTable = $('#edit-redirect-coral-table');
 
-        	if(command == 'prev') {
-        		var trPrev = editRedirectTable.find('#'+id);
-        		if(trPrev.prev()) {
-        			$('#'+id).prev().before($('#'+id));
-        		}
-        	} else if(command == 'next') {
-        		var tr = editRedirectTable.find('#'+id);
-        		if(tr.next()) {
-        			$('#'+id).next().after($('#'+id));
-        		}
-        	}  else if(cmd == ':operation=delete'){
-        		$('#'+id).remove();
-        	}  else {
-        	    var redirectPath = response.path;
-        	    // redirectId is the node name, i.e. the last segment of the path
-        	    var redirectId = redirectPath.substring(redirectPath.lastIndexOf('/') + 1);
-        	    // fetch the table row and update/insert it in the table
-        	    $.ajax({
+            var ruleId = $form.attr('ruleId');
+
+       		$('#'+ruleId).remove();
+        });
+        return false;
+     });
+
+	registry.register("foundation.form.response.ui.success", {
+        name: "acs.redirects.update",
+        handler: function(form, config, response, textStatus, xhr) {
+                var dialog = $(DIALOG_SELECTOR);
+                dialog.find('.close-dialog-box').click();
+
+                var redirectPath = response.path;
+                // redirectId is the node name, i.e. the last segment of the path
+                var redirectId = redirectPath.substring(redirectPath.lastIndexOf('/') + 1);
+
+                // fetch the table row and update/insert it in the table
+                $.ajax({
                     url: redirectPath + ".html"
                 }).done(function(trHtml){
                     if(response.isCreate){
-                        editRedirectTable.find("tbody")[0].insertAdjacentHTML("beforeend", trHtml);
+                        var editRedirectTable = $(TABLE_SELECTOR);
+                        var tr = editRedirectTable.find("tbody")[0].appendChild(document.createElement('tr'));
+                        $(tr).replaceWith(trHtml);
                     } else {
                         $('#'+redirectId).replaceWith(trHtml);
                     }
-                });
-        	}
-        });
-        return false;
-    });
+                    var ui = $(window).adaptTo('foundation-ui');
+					ui.clearWait();
 
+                });
+        }
+    }); 
     $(document).on("click", ".cq-dialog-upload", function (e) {
         var $form = $(this).closest('form');
         var data = new FormData($form[0]);
@@ -185,17 +175,18 @@
         var note = tr.find('.note').data('value');
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
-        var cloudFront = tr.find('.cloudFront').html();
-        var dialog = $('#demoDialog');
-        dialog.find('.source').val(source);
-        dialog.find('.target').val(target);
+
+        var form = $('#editRuleDialog').find("form");
+        form[0].reset();
+        if(source) form.find('foundation-autocomplete[name="./source"]').val(source);
+        if(target) form.find('foundation-autocomplete[name="./target"]').val(target);
         var select = $('#status-code-select-box').get(0);
         select.value =statusCode;
-        dialog.find('.untilDate').val(untilDate);
-        dialog.find('.note').val(note);
+        form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
+        form.find('input[name="./note"]').val(note);
 
-        dialog.find('.acs-redirect-rule-form').attr('action', path);
-        dialog.find('.acs-redirect-rule-form').attr('id', name);
+        form.attr('action', path);
+        form.attr('ruleId', name);
     }
 
     $(document).on("click", ".edit-redirect-rule", function (e) {
@@ -213,22 +204,6 @@
 
     });
 
-
-    $("#status-code-select-box").change(function (e) {
-        var val = $(e.target).find(":selected").val();
-        if(val == 301){
-			$("#until-date-picker").val("");
-
-            var dialog = new Coral.Dialog();
-            dialog.header.innerHTML = 'Warning';
-            dialog.content.innerHTML = "Permanent Redirect Selected" +
-                "<p>The HTTP 301 status code is cached in browsers with no expiry date and cannot be reverted.<br>"+
-                   "The Until Date was cleared because once 301 is applied, it is forever</p>";
-            dialog.footer.innerHTML = '<button is="coral-button" variant="primary" coral-close>Ok</button>';
-            dialog.variant = 'warning';
-            dialog.show();
-        }
-    });
 
 
     $(document).ready(function() {
@@ -254,6 +229,23 @@
                }
            });
         });
+
+        $("#status-code-select-box").change(function (e) {
+            var val = $(e.target).find(":selected").val();
+            if(val == 301){
+                $("#until-date-picker").val("");
+    
+                var dialog = new Coral.Dialog();
+                dialog.header.innerHTML = 'Warning';
+                dialog.content.innerHTML = "Permanent Redirect Selected" +
+                    "<p>The HTTP 301 status code is cached in browsers with no expiry date and cannot be reverted.<br>"+
+                       "The Until Date was cleared because once 301 is applied, it is forever</p>";
+                dialog.footer.innerHTML = '<button is="coral-button" variant="primary" coral-close>Ok</button>';
+                dialog.variant = 'warning';
+                dialog.show();
+            }
+        });
+
 
     });
 

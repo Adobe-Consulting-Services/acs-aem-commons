@@ -21,6 +21,9 @@ package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
 
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationOptions;
+import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
 import com.day.cq.wcm.api.WCMException;
@@ -31,7 +34,11 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import javax.jcr.Session;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 
@@ -70,8 +77,26 @@ public class MovingPage extends MovingNode {
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, MovingException {
         // For starters, create a page manager with a modified replicator queue
         PageManager manager = pageManagerFactory.getPageManager(rr);
+        Replicator replicator = (Replicator) Proxy.newProxyInstance(
+                Replicator.class.getClassLoader(),
+                new Class[]{Replicator.class},
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        switch (method.getName()){
+                            case "replicate":
+                                if(args.length == 3){
+                                    replicatorQueue.replicate((Session)args[0], (ReplicationActionType)args[1], (String)args[2]);
+                                } else if (args.length == 4){
+                                    replicatorQueue.replicate((Session)args[0], (ReplicationActionType)args[1], (String)args[2], (ReplicationOptions)args[3]);
+                                }
+                                break;
+                        }
+                        return null;
+                    }
+                });
         Field replicatorField = FieldUtils.getDeclaredField(manager.getClass(), "replicator", true);
-        FieldUtils.writeField(replicatorField, manager, replicatorQueue);
+        FieldUtils.writeField(replicatorField, manager, replicator, true);
 
         // Some simple transformations
         String contentPath = getSourcePath() + "/" + JcrConstants.JCR_CONTENT;

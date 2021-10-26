@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -73,14 +74,14 @@ public class GenericReport extends AbstractReport {
 
     public void persist(ResourceResolver rr, String path) throws PersistenceException, RepositoryException {
         ModifiableValueMap jcrContent = ResourceUtil.getOrCreateResource(rr, path, getResourceType(), null, false).adaptTo(ModifiableValueMap.class);
-        jcrContent.put("jcr:primaryType", "nt:unstructured");
+        jcrContent.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
         jcrContent.put("columns", getColumns().toArray(new String[0]));
         jcrContent.put("name", name);
         rr.commit();
         rr.refresh();
-        JcrUtil.createPath(path + "/rows", "nt:unstructured", rr.adaptTo(Session.class));
+        JcrUtil.createPath(path + "/rows", JcrConstants.NT_UNSTRUCTURED, rr.adaptTo(Session.class));
         int rowCounter = 0;
-        for (Map<String, Object> row : rows) {
+        for (Map<String, Object> row : this.getRows()) {
             // First strip out null values
             Map<String, Object> properties = row.entrySet().stream().filter(e -> e.getValue() != null).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
             rowCounter++;
