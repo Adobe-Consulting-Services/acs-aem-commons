@@ -22,6 +22,8 @@ package com.adobe.acs.commons.models.injectors.impl;
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import com.adobe.acs.commons.wcm.properties.shared.SharedValueMapResourceAdapter;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -34,6 +36,8 @@ import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletRequest;
 import java.lang.reflect.AnnotatedElement;
@@ -43,20 +47,33 @@ import java.util.Optional;
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResource;
 
 /**
- * The SharedValueMapValueInjector depends on
- * {@link com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider} to execute
- * first.
+ * The SharedValueMapValueInjector handles {@link SharedValueMapValue} model annotations. This injector can have
+ * poor performance characteristics for models adapted from Resources rather than requests, because when the model is
+ * adapted from a request, the injector can leverage the SlingBindings populated by the
+ * {@link com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider}
+ * is able to provide SlingBindings on a request adaptable.
  */
 @Component
 @Service
 @Property(name = Constants.SERVICE_RANKING, intValue = 4500)
 public class SharedValueMapValueInjector implements Injector {
+    private static final Logger LOG = LoggerFactory.getLogger(SharedValueMapValueInjector.class);
 
     /**
      * Bind if available, check for null when reading.
      */
     @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private SharedComponentProperties sharedComponentProperties;
+
+    @Activate
+    protected void activate() {
+        /* indicate injector status for developers */
+        if (sharedComponentProperties == null) {
+            LOG.info("SharedComponentProperties is not active. @SharedValueMapValue model annotations will not have access to global or shared properties.");
+        } else {
+            LOG.info("SharedComponentProperties is active. @SharedValueMapValue model annotations are fully operational.");
+        }
+    }
 
     @Override
     public String getName() {
@@ -104,7 +121,7 @@ public class SharedValueMapValueInjector implements Injector {
             return valueType == SharedComponentProperties.ValueTypes.MERGED ? resource.getValueMap() : null;
         }
 
-        // first attempt to retrieve from bindings
+        // first: attempt to retrieve from bindings
         final SlingBindings bindings = getBindings(adaptable);
         if (bindings != null) {
             final ValueMap fromBindings = getValueMapFromBindings(bindings, valueType, resource, rootPagePath);
@@ -113,13 +130,22 @@ public class SharedValueMapValueInjector implements Injector {
             }
         }
 
+        // next: attempt to retrieve from adapter, which may not work if the adaptTo chain is broken by a resource
+        // wrapper, falling back to direct retrieval from the adaptable resource.
+        final SharedValueMapResourceAdapter adapter = resource.adaptTo(SharedValueMapResourceAdapter.class);
         switch (valueType) {
             case GLOBAL:
-                return getGlobalProperties(resource);
+                return Optional.ofNullable(adapter)
+                        .map(SharedValueMapResourceAdapter::getGlobalProperties)
+                        .orElseGet(() -> getGlobalProperties(resource));
             case SHARED:
-                return getSharedProperties(resource);
+                return Optional.ofNullable(adapter)
+                        .map(SharedValueMapResourceAdapter::getSharedProperties)
+                        .orElseGet(() -> getSharedProperties(resource));
             case MERGED:
-                return getMergedProperties(resource);
+                return Optional.ofNullable(adapter)
+                        .map(SharedValueMapResourceAdapter::getMergedProperties)
+                        .orElseGet(() -> getMergedProperties(resource));
             default:
                 return ValueMap.EMPTY;
         }

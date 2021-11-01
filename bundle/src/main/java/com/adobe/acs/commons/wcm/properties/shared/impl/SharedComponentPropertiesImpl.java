@@ -21,25 +21,38 @@ package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import com.adobe.acs.commons.wcm.properties.shared.SharedValueMapResourceAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component(policy = ConfigurationPolicy.REQUIRE)
-@Service
-public class SharedComponentPropertiesImpl implements SharedComponentProperties {
+@Service(value = {SharedComponentProperties.class, AdapterFactory.class})
+@Properties(value = {
+        @Property(name = SlingConstants.PROPERTY_ADAPTABLE_CLASSES, classValue = Resource.class),
+        @Property(name = SlingConstants.PROPERTY_ADAPTER_CLASSES, classValue = SharedValueMapResourceAdapter.class),
+})
+public class SharedComponentPropertiesImpl implements SharedComponentProperties, AdapterFactory {
     private static final Logger LOG = LoggerFactory.getLogger(SharedComponentPropertiesImpl.class);
     private static final String INFIX_JCR_CONTENT = "/jcr:content/";
     /**
@@ -133,5 +146,31 @@ public class SharedComponentPropertiesImpl implements SharedComponentProperties 
             mergedProperties.putAll(resource.getValueMap());
         }
         return new ValueMapDecorator(mergedProperties);
+    }
+
+    @SuppressWarnings("unchecked")
+    @CheckForNull
+    @Override
+    public <AdapterType> AdapterType getAdapter(@Nonnull final Object adaptable,
+                                                @Nonnull final Class<AdapterType> adapterType) {
+        if (adaptable instanceof Resource && adapterType == SharedValueMapResourceAdapter.class) {
+            return (AdapterType) getSharedValueMapResourceAdapter((Resource) adaptable);
+        }
+        return null;
+    }
+
+    @Nonnull
+    SharedValueMapResourceAdapter getSharedValueMapResourceAdapter(@Nonnull final Resource adaptable) {
+        final ResourceResolver resolver = adaptable.getResourceResolver();
+        final ValueMap globalProperties = Optional.ofNullable(getGlobalPropertiesPath(adaptable))
+                .map(resolver::getResource)
+                .map(Resource::getValueMap)
+                .orElse(ValueMap.EMPTY);
+        final ValueMap sharedProperties = Optional.ofNullable(getSharedPropertiesPath(adaptable))
+                .map(resolver::getResource)
+                .map(Resource::getValueMap)
+                .orElse(ValueMap.EMPTY);
+        final ValueMap mergedProperties = mergeProperties(globalProperties, sharedProperties, adaptable);
+        return new SharedValueMapResourceAdapterImpl(globalProperties, sharedProperties, mergedProperties);
     }
 }
