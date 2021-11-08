@@ -143,7 +143,7 @@ public class SyntheticWorkflowSession implements InvocationHandler {
         return true;
     }
 
-    public final Object getModel(Object[] args) throws WorkflowException, Throwable {
+    public final Object getModel(Object[] args) throws WorkflowException {
         if (args.length > 1) {
             throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE + "getModel with multiple arguments");
         }
