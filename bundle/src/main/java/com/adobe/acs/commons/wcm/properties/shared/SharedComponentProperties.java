@@ -78,6 +78,7 @@ public interface SharedComponentProperties {
      * @return global properties or empty
      */
     ValueMap getGlobalProperties(Resource resource);
+
     /**
      * Construct an absolute resource path for retrieval of a shared component properties value map.
      *
