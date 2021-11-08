@@ -96,8 +96,7 @@ public class SyntheticWorkItem implements InvocationHandler {
             case "getMetaDataMap":
                 return getMetaDataMap();
             default:
-                LOG.error("GRANITE SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR {}", methodName);
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("GRANITE SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR " + methodName);
         }
     }
 

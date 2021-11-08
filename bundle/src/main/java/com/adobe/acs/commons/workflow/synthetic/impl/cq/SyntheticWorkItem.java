@@ -81,8 +81,7 @@ public class SyntheticWorkItem implements InvocationHandler {
             case "getMetaDataMap":
                 return getMetaDataMap();
             default:
-                LOG.error("CQ SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR {}", methodName);
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("CQ SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR " + methodName);
         }
     }
 

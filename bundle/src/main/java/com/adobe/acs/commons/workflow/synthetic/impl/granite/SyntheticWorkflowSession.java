@@ -84,9 +84,6 @@ public class SyntheticWorkflowSession implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
         switch (methodName) {
-            case "deployModel":
-                deployModel((WorkflowModel) args[0]);
-                return new Object();
             case "createNewModel":
                 return createNewModel(args);
             case "deleteModel":
@@ -149,8 +146,7 @@ public class SyntheticWorkflowSession implements InvocationHandler {
                 restartWorkflow((Workflow) args[0]);
                 return new Object();
             default:
-                log.error("SYNTHETICWORKFLOW SESSION >> NO IMPLEMENTATION FOR {}", methodName);
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("SYNTHETICWORKFLOW SESSION >> NO IMPLEMENTATION FOR " + methodName);
         }
     }
 
@@ -184,10 +180,6 @@ public class SyntheticWorkflowSession implements InvocationHandler {
 
     public final boolean isSuperuser() {
         return true;
-    }
-
-    public final void deployModel(final WorkflowModel workflowModel) throws WorkflowException {
-        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION_MESSAGE);
     }
 
     public final WorkflowModel createNewModel(Object[] args) throws WorkflowException {
