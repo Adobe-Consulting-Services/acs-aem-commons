@@ -70,7 +70,7 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
             if (sharedComponentProperties != null) {
                 setSharedProperties(bindings, resource, cache);
             } else {
-                log.debug("Shared Component Properties must be configured enable this provider");
+                log.debug("Shared Component Properties must be configured to enable this provider");
             }
         }
         setDefaultBindings(bindings, resource);

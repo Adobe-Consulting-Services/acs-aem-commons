@@ -34,7 +34,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
@@ -117,6 +116,17 @@ public class SharedComponentPropertiesImpl implements SharedComponentProperties,
     }
 
     @Override
+    public ValueMap getGlobalProperties(final Resource resource) {
+        if (resource == null) {
+            return ValueMap.EMPTY;
+        }
+        return Optional.ofNullable(getGlobalPropertiesPath(resource))
+                .map(resource.getResourceResolver()::getResource)
+                .map(Resource::getValueMap)
+                .orElse(ValueMap.EMPTY);
+    }
+
+    @Override
     public String getSharedPropertiesPath(final Resource resource) {
         final String rootPagePath = getSharedPropertiesPagePath(resource);
         if (StringUtils.isBlank(rootPagePath)) {
@@ -129,6 +139,17 @@ public class SharedComponentPropertiesImpl implements SharedComponentProperties,
             return rootPagePath + INFIX_JCR_CONTENT + NN_SHARED_COMPONENT_PROPERTIES + "/" + resourceTypeRelativePath;
         }
         return null;
+    }
+
+    @Override
+    public ValueMap getSharedProperties(final Resource resource) {
+        if (resource == null) {
+            return ValueMap.EMPTY;
+        }
+        return Optional.ofNullable(getSharedPropertiesPath(resource))
+                .map(resource.getResourceResolver()::getResource)
+                .map(Resource::getValueMap)
+                .orElse(ValueMap.EMPTY);
     }
 
     @Override
@@ -161,15 +182,8 @@ public class SharedComponentPropertiesImpl implements SharedComponentProperties,
 
     @Nonnull
     SharedValueMapResourceAdapter getSharedValueMapResourceAdapter(@Nonnull final Resource adaptable) {
-        final ResourceResolver resolver = adaptable.getResourceResolver();
-        final ValueMap globalProperties = Optional.ofNullable(getGlobalPropertiesPath(adaptable))
-                .map(resolver::getResource)
-                .map(Resource::getValueMap)
-                .orElse(ValueMap.EMPTY);
-        final ValueMap sharedProperties = Optional.ofNullable(getSharedPropertiesPath(adaptable))
-                .map(resolver::getResource)
-                .map(Resource::getValueMap)
-                .orElse(ValueMap.EMPTY);
+        final ValueMap globalProperties = getGlobalProperties(adaptable);
+        final ValueMap sharedProperties = getSharedProperties(adaptable);
         final ValueMap mergedProperties = mergeProperties(globalProperties, sharedProperties, adaptable);
         return new SharedValueMapResourceAdapterImpl(globalProperties, sharedProperties, mergedProperties);
     }

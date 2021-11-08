@@ -151,10 +151,10 @@ public class SharedValueMapValueInjector implements Injector {
         }
     }
 
-    ValueMap getValueMapFromBindings(final SlingBindings bindings,
-                                     final SharedComponentProperties.ValueTypes valueType,
-                                     final Resource resource,
-                                     final String rootPagePath) {
+    private ValueMap getValueMapFromBindings(final SlingBindings bindings,
+                                             final SharedComponentProperties.ValueTypes valueType,
+                                             final Resource resource,
+                                             final String rootPagePath) {
         // if the merged path in bindings matches the resource path, just assume that the merged properties in
         // bindings are sufficient
         if (valueType == SharedComponentProperties.ValueTypes.MERGED
@@ -224,20 +224,18 @@ public class SharedValueMapValueInjector implements Injector {
     /**
      * Get shared properties ValueMap the current resource.
      */
-    protected ValueMap getSharedProperties(Resource resource) {
-        return Optional.ofNullable(sharedComponentProperties.getSharedPropertiesPath(resource))
-                .map(resource.getResourceResolver()::getResource)
-                .map(Resource::getValueMap)
+    protected ValueMap getSharedProperties(final Resource resource) {
+        return Optional.ofNullable(sharedComponentProperties)
+                .map(scp -> scp.getSharedProperties(resource))
                 .orElse(ValueMap.EMPTY);
     }
 
     /**
      * Get global properties ValueMap for the current resource.
      */
-    protected ValueMap getGlobalProperties(Resource resource) {
-        return Optional.ofNullable(sharedComponentProperties.getGlobalPropertiesPath(resource))
-                .map(resource.getResourceResolver()::getResource)
-                .map(Resource::getValueMap)
+    protected ValueMap getGlobalProperties(final Resource resource) {
+        return Optional.ofNullable(sharedComponentProperties)
+                .map(scp -> scp.getGlobalProperties(resource))
                 .orElse(ValueMap.EMPTY);
     }
 
@@ -245,10 +243,12 @@ public class SharedValueMapValueInjector implements Injector {
      * Get merged properties ValueMap for the current resource.
      */
     protected ValueMap getMergedProperties(Resource resource) {
-        return sharedComponentProperties.mergeProperties(
-                getGlobalProperties(resource),
-                getSharedProperties(resource),
-                resource);
+        return Optional.ofNullable(sharedComponentProperties)
+                .map(scp -> scp.mergeProperties(
+                        getGlobalProperties(resource),
+                        getSharedProperties(resource),
+                        resource))
+                .orElse(resource.getValueMap());
     }
 
 }

@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 /**
  * Simple cache for global and shared properties bindings keyed by path and persisted in a request attribute.
  */
-final class SharedPropertiesRequestCache {
+public final class SharedPropertiesRequestCache {
     private static final String REQUEST_ATTRIBUTE_NAME = SharedPropertiesRequestCache.class.getName();
 
     private final Map<String, Bindings> cache = new HashMap<>();

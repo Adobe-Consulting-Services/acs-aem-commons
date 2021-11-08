@@ -72,12 +72,27 @@ public interface SharedComponentProperties {
     String getGlobalPropertiesPath(Resource resource);
 
     /**
+     * Get the global properties of the current resource, or an empty map.
+     *
+     * @param resource the current resource
+     * @return global properties or empty
+     */
+    ValueMap getGlobalProperties(Resource resource);
+    /**
      * Construct an absolute resource path for retrieval of a shared component properties value map.
      *
      * @param resource the resource to evaluate
      * @return an absolute path to a possible shared component properties resource or null
      */
     String getSharedPropertiesPath(Resource resource);
+
+    /**
+     * Get the shared component properties of the current resource, or an empty map.
+     *
+     * @param resource the current resource
+     * @return shared component properties or empty
+     */
+    ValueMap getSharedProperties(Resource resource);
 
     /**
      * Merge global and shared properties into the valuemap retrieved from the provided resource.
