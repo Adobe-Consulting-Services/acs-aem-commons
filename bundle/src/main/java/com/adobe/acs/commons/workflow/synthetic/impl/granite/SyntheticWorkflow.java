@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
-import com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.adobe.granite.workflow.exec.WorkItem;
 import com.adobe.granite.workflow.exec.Workflow;
@@ -30,7 +29,6 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.model.WorkflowModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;

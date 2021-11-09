@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
-import com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkflowSession;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticCompleteWorkflowException;
@@ -28,18 +27,11 @@ import com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.Syntheti
 import com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
-import com.adobe.granite.workflow.collection.util.ResultSet;
-import com.adobe.granite.workflow.exec.HistoryItem;
-import com.adobe.granite.workflow.exec.InboxItem;
-import com.adobe.granite.workflow.exec.Participant;
 import com.adobe.granite.workflow.exec.Route;
 import com.adobe.granite.workflow.exec.WorkItem;
 import com.adobe.granite.workflow.exec.Workflow;
 import com.adobe.granite.workflow.exec.WorkflowData;
-import com.adobe.granite.workflow.exec.filter.InboxItemFilter;
-import com.adobe.granite.workflow.exec.filter.WorkItemFilter;
 import com.adobe.granite.workflow.model.WorkflowModel;
-import com.adobe.granite.workflow.model.WorkflowModelFilter;
 import org.apache.sling.api.resource.LoginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +39,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Session;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.security.AccessControlException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class SyntheticWorkflowSession implements InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowSession.class);

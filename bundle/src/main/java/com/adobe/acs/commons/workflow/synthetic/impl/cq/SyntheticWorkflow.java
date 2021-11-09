@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
-import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.Workflow;
@@ -30,7 +29,6 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.cq.workflow.model.WorkflowModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
