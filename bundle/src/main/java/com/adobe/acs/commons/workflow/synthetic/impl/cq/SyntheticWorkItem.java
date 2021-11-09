@@ -38,7 +38,6 @@ import java.util.Hashtable;
 import java.util.UUID;
 
 public class SyntheticWorkItem implements InvocationHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(SyntheticWorkItem.class);
     private static final String CURRENT_ASSIGNEE = "Synthetic Workflow";
     private final UUID uuid = UUID.randomUUID();
     private Date timeStarted = null;

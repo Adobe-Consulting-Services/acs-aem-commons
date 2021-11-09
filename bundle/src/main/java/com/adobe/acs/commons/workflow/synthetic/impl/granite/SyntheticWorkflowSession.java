@@ -93,9 +93,9 @@ public class SyntheticWorkflowSession implements InvocationHandler {
                 complete((WorkItem) args[0], (Route) args[1]);
                 return new Object();
             case "getRoutes":
-                return getRoutes((WorkItem) args[0], (Boolean) args[1]);
+                return getRoutes();
             case "getBackRoutes":
-                return getBackRoutes((WorkItem) args[0], (Boolean) args[1]);
+                return getBackRoutes();
             case "newWorkflowData":
                 return newWorkflowData((String) args[0], args[1]);
             case "updateWorkflowData":
@@ -160,12 +160,12 @@ public class SyntheticWorkflowSession implements InvocationHandler {
         }
     }
 
-    public final List<Route> getRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
+    public final List<Route> getRoutes() throws WorkflowException {
         log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
         return this.routes;
     }
 
-    public final List<Route> getBackRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
+    public final List<Route> getBackRoutes() throws WorkflowException {
         log.debug("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
         return this.backRoutes;
     }
