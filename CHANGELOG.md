@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is a member of required groups or an admin.
 - #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
 - #2716 - Fixed issue with Shared Component Properties Bindings Values Provider facing lock contention
 - #2718 - Fixes CM Code Quality Pipeline failure caused by TestMarketoInterfaces and Jacoco instrumentation
