@@ -15,6 +15,18 @@
       "jcr:content": {
         "jcr:primaryType": "nt:unstructured"
       }
+    },
+    "child3" : {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "nt:unstructured",
+        "seo": {
+          "jcr:primaryType": "nt:unstructured",
+          "canonicalUrlOverride": "/content/xero/gb/en2",
+          "noindex": "true",
+          "priority": "1"
+        }
+      }
     }
   },
   "asset" : {
