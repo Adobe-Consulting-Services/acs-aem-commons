@@ -107,7 +107,7 @@ public class AbstractContainerComponent extends FieldComponent {
     private void extractFieldComponents(Class clazz) {
         if (clazz == String.class || clazz.isPrimitive()) {
             FieldComponent comp = generateDefaultChildComponent();
-            FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null);
+            FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null, false, null);
             comp.setup(getName(), null, fieldDef, getHelper());
             comp.getComponentMetadata().put("title", getName());
             // TODO: Provide a proper mechanism for setting path when creating components
