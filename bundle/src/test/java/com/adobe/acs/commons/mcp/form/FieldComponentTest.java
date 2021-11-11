@@ -183,6 +183,16 @@ public class FieldComponentTest {
                 public boolean showOnCreate() {
                     return true;
                 }
+
+                @Override
+                public boolean localize() {
+                    return false;
+                }
+
+                @Override
+                public String[] languages() {
+                    return null;
+                }
             };
             setup("test", null, field, null);
         }
