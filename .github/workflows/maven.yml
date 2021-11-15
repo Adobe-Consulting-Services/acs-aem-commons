@@ -95,7 +95,6 @@ jobs:
       - name: Upload code coverage to CodeCov (Main build)
         if: matrix.isMainBuildEnv
         uses: codecov/codecov-action@v2
-        with:
 
       # https://github.com/marketplace/actions/changelog-enforcer
       - name: Enforce a changelog entry
