@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+Copyright 2017 Adobe.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html data-sly-use.report="com.adobe.acs.commons.mcp.model.GenericBlobReport">
+    <head>
+        <title>${report.name}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+             data-sly-call="${clientlib.all @ categories='coralui3'}"/>
+    </head>
+    <body class="coral--light">
+        <div style="padding: 1rem 2rem;">
+            <table is="coral-table" lockable>
+                <colgroup data-sly-list.column="${report.columnNames}">
+                    <col is="coral-table-column" sortable orderable/>
+                    <col    data-sly-test="${columnList.last}"
+                            is="coral-table-column"/>
+                </colgroup>
+                <thead is="coral-table-head" sticky>
+                    <tr is="coral-table-row"
+                        data-sly-list.column="${report.columnNames}">
+                        <th is="coral-table-headercell">${column}</th>
+                        <th is="coral-table-headercell"
+                            data-sly-test="${columnList.last}"></th>
+                    </tr>
+                </thead>
+                <tbody is="coral-table-body"
+                       data-sly-list.row="${report.rows}">
+                    <tr is="coral-table-row"
+                        data-sly-list.column="${report.columns}">
+                        <td is="coral-table-cell">${row[column]}</td>
+                        <td is="coral-table-cell"
+                            data-sly-test="${columnList.last}">
+                            <button is="coral-button" type="button" icon="lockOn" variant="minimal" coral-table-rowlock></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

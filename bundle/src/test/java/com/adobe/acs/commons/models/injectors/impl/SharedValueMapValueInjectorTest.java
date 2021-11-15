@@ -25,6 +25,8 @@ import com.adobe.acs.commons.models.injectors.impl.model.impl.TestSharedValueMap
 import com.adobe.acs.commons.wcm.impl.PageRootProviderConfig;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderMultiImpl;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider;
+import com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesImpl;
 import com.day.cq.wcm.api.NameConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.util.JcrConstants;
@@ -74,6 +76,7 @@ public class SharedValueMapValueInjectorTest {
     public void setup() throws RepositoryException {
         this.context.registerInjectActivateService(new PageRootProviderConfig(), "page.root.path", "/content/mysite/[a-z]{2}");
         this.context.registerInjectActivateService(new PageRootProviderMultiImpl());
+        this.context.registerInjectActivateService(new SharedComponentPropertiesImpl());
         this.context.registerInjectActivateService(new SharedValueMapValueAnnotationProcessorFactory());
         this.context.registerInjectActivateService(new SharedValueMapValueInjector());
         this.context.addModelsForClasses(TestSharedValueMapValueModelImpl.class);
