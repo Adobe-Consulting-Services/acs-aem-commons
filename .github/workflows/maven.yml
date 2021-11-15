@@ -96,7 +96,6 @@ jobs:
         if: matrix.isMainBuildEnv
         uses: codecov/codecov-action@v2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
 
       # https://github.com/marketplace/actions/changelog-enforcer
       - name: Enforce a changelog entry
