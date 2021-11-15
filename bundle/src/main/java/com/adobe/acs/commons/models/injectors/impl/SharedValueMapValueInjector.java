@@ -118,7 +118,7 @@ public class SharedValueMapValueInjector implements Injector {
         final String rootPagePath = sharedComponentProperties.getSharedPropertiesPagePath(resource);
         if (rootPagePath == null) {
             // when we have a resource but no root page path, we can at least satisfy MERGED with the resource valuemap
-            return valueType == SharedComponentProperties.ValueTypes.MERGED ? resource.getValueMap() : null;
+            return valueType == SharedComponentProperties.ValueTypes.MERGED ? resource.getValueMap() : ValueMap.EMPTY;
         }
 
         // first: attempt to retrieve from bindings
