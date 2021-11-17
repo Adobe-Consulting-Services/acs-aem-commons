@@ -19,11 +19,18 @@
  */
 package com.adobe.acs.commons.audit_log_search.impl;
 
-import com.adobe.granite.security.user.UserPropertiesManager;
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import static org.junit.Assert.assertEquals;
+
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+import javax.jcr.Session;
+
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.commons.cnd.CndImporter;
@@ -39,15 +46,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
-
-import javax.annotation.Nullable;
-import javax.jcr.Session;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.adobe.granite.security.user.UserPropertiesManager;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditLogSearchServletTest {

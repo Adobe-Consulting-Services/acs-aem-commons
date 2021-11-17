@@ -34,6 +34,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jcr.RepositoryException;
+
 import junitx.util.PrivateAccessor;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -222,6 +224,12 @@ public class DesignHtmlLibraryManagerImplTest {
         public Map<String, ClientLibrary> getLibraries() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public void invalidateOutputCache() throws RepositoryException {
+            // TODO Auto-generated method stub
+            
         }
     }
 

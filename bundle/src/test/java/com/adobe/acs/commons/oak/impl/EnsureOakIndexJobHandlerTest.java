@@ -39,8 +39,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
@@ -53,9 +51,7 @@ import com.adobe.acs.commons.oak.EnsureOakIndexManager;
  * 
  *
  */
-
 @RunWith(MockitoJUnitRunner.class)
-@PrepareForTest({EnsureOakIndexJobHandler.class, LoggerFactory.class})
 public class EnsureOakIndexJobHandlerTest {
 
     

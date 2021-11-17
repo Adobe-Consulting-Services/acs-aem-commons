@@ -20,7 +20,9 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
+import com.adobe.acs.commons.util.BufferedSlingHttpServletResponse;
 import com.adobe.acs.commons.util.ResourceDataUtil;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,14 +40,16 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import javax.servlet.RequestDispatcher;
 
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
+public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageCacheImpl.class);
 
     private static final int KB_IN_BYTES = 1000;
@@ -76,7 +80,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
 
         if (!serveAuthenticatedFromCache && !isAnonymousRequest(request)) {
             // For authenticated requests, don't return from cache
-            return ResourceDataUtil.getIncludeAsString(path, request, response);
+            return getIncludeAsString(path, request, response);
         }
 
         final long start = System.currentTimeMillis();
@@ -86,7 +90,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         if (newEntry || cacheEntry.isExpired(new Date())) {
 
             // Cache Miss
-            String data = ResourceDataUtil.getIncludeAsString(path, request, response);
+            String data = getIncludeAsString(path, request, response);
 
             if (data == null) {
                 log.debug("Error page representation to cache is null. Setting to empty string.");
@@ -235,5 +239,21 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         }
 
         return cacheEntry.getData();
+    }
+
+    public String getIncludeAsString(final String path, final SlingHttpServletRequest slingRequest, final SlingHttpServletResponse slingResponse) {
+        BufferedSlingHttpServletResponse responseWrapper = null;
+        
+        try {
+            responseWrapper = new BufferedSlingHttpServletResponse(slingResponse, new StringWriter(), null);
+            final RequestDispatcher requestDispatcher = slingRequest.getRequestDispatcher(path);
+            requestDispatcher.include(slingRequest, responseWrapper);
+            if (responseWrapper.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
+                return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
+            }
+        } catch (Exception ex) {
+            log.error("Error creating the String representation for: " + path, ex);
+        }
+        return null;
     }
 }

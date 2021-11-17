@@ -19,16 +19,36 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.AssetManager;
-import com.google.common.base.Function;
-import com.google.common.io.Files;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.FILE_PATHS;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.FOLDER_PATHS;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.util.Vector;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.jcr.RepositoryException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -48,29 +68,16 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nullable;
-import javax.jcr.RepositoryException;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Vector;
-import java.util.stream.Collectors;
-
-import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.times;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.AssetIngestorPaths;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
+import com.google.common.io.Files;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileAssetIngestorTest {

@@ -59,7 +59,7 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
      * Bind if available, check for null when reading.
      */
     @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-    private SharedComponentProperties sharedComponentProperties;
+    SharedComponentProperties sharedComponentProperties;
 
     @Override
     public void addBindings(final Bindings bindings) {

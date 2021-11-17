@@ -185,15 +185,13 @@
                 <artifactId>oakpal-maven-plugin</artifactId>
                 <configuration>
                     <deferBuildFailure>true</deferBuildFailure>
+                    <cndNames>
+                        <!-- part of acs-aem-commons-oakpal-checks -->
+                        <cndName>nodetypes-aem640.cnd</cndName>
+                    </cndNames>
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
-                    nodetypes.cnd and privileges.xml in the package -->
-                    <websterTargets>
-                        <nodetypes />
-                        <privileges />
-                    </websterTargets>
                 </configuration>
                 <executions>
                     <execution>

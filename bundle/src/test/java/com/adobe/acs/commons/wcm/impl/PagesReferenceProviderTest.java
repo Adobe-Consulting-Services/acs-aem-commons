@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -44,7 +45,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
-import com.google.common.base.Function;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PagesReferenceProviderTest {

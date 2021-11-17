@@ -41,7 +41,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.powermock.reflect.Whitebox;
 
 import javax.management.openmbean.TabularData;
 import javax.servlet.FilterChain;
@@ -95,7 +94,7 @@ public class RedirectFilterTest {
         ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
         when(resourceResolverFactory.getServiceResourceResolver(any(Map.class)))
                 .thenReturn(context.resourceResolver());
-        Whitebox.setInternalState(filter, "resourceResolverFactory", resourceResolverFactory);
+        filter.resourceResolverFactory = resourceResolverFactory;
 
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(true);
@@ -123,7 +122,7 @@ public class RedirectFilterTest {
         configResolver = Mockito.mock(ConfigurationResourceResolver.class);
         Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(context.resourceResolver().getResource(redirectStoragePath));
-        Whitebox.setInternalState(filter, "configResolver", configResolver);
+        filter.configResolver = configResolver;
     }
 
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
@@ -454,7 +453,7 @@ public class RedirectFilterTest {
     public void testInvalidateOnChange() throws Exception {
 
         Cache<String, RedirectConfiguration> rulesCache = mock(Cache.class);
-        Whitebox.setInternalState(filter, "rulesCache", rulesCache);
+        filter.rulesCache = rulesCache;
 
         withRules("/conf/global/settings/redirects",
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
@@ -581,7 +580,7 @@ public class RedirectFilterTest {
                 return location.replace(".html", ".adjusted.html");
             }
         };
-        Whitebox.setInternalState(filter, "urlAdjuster", urlAdjuster);
+        filter.urlAdjuster = urlAdjuster;
         withRules(
                 new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
                         302, null, null));

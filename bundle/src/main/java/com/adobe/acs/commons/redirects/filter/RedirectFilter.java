@@ -167,17 +167,17 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private ConfigurationResourceResolver configResolver;
+    ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private LocationHeaderAdjuster urlAdjuster;
+    LocationHeaderAdjuster urlAdjuster;
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;

@@ -19,8 +19,9 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 class LineImpl<T> implements Line<T> {
@@ -69,9 +70,9 @@ class LineImpl<T> implements Line<T> {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("left", left)
-                .add("right", right)
+        return new ToStringBuilder(this)
+                .append("left", left)
+                .append("right", right)
                 .toString();
     }
 }

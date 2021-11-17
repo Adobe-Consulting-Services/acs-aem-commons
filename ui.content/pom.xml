@@ -92,9 +92,10 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
-                    nodetypes.cnd and privileges.xml in the package -->
-
+                    <cndNames>
+                        <!-- part of acs-aem-commons-oakpal-checks -->
+                        <cndName>nodetypes-aem640.cnd</cndName>
+                    </cndNames>
                     <checks>
                         <!-- Enforce separation of content and code (CONTENT ONLY) -->
                         <check>
@@ -285,6 +286,7 @@
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <profiles>
