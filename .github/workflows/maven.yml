@@ -99,8 +99,7 @@ jobs:
       # https://github.com/marketplace/actions/changelog-enforcer
       - name: Enforce a changelog entry
         if: matrix.isMainBuildEnv && github.event_name == 'pull_request_target'
-        # use v3 due to https://github.com/dangoslen/changelog-enforcer/issues/142
-        uses: dangoslen/changelog-enforcer@releases/v3.0
+        uses: dangoslen/changelog-enforcer@v2
         with:
           changeLogPath: 'CHANGELOG.md'
           skipLabels: 'Skip-Changelog,skip-changelog'
