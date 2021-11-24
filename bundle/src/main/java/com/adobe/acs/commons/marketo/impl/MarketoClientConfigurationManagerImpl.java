@@ -19,33 +19,54 @@
  */
 package com.adobe.acs.commons.marketo.impl;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
-import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.injectorspecific.OSGiService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Collections;
+
+import javax.inject.Inject;
 
 import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
 import com.adobe.acs.commons.marketo.MarketoClientConfigurationManager;
 import com.day.cq.commons.jcr.JcrConstants;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Model(adaptables = { SlingHttpServletRequest.class }, adapters = { MarketoClientConfigurationManager.class })
 public class MarketoClientConfigurationManagerImpl implements MarketoClientConfigurationManager {
 
+  private static final String SUBSERVICE_NAME = "marketo-conf";
+
   private static final Logger log = LoggerFactory.getLogger(MarketoClientConfigurationManagerImpl.class);
 
-  @OSGiService
-  private ConfigurationResourceResolver configRsrcRslvr;
+  private final ConfigurationResourceResolver configRsrcRslvr;
 
-  private Resource resource;
+  private final Resource resource;
 
-  public MarketoClientConfigurationManagerImpl(SlingHttpServletRequest slingRequest) {
+  @Inject
+  public MarketoClientConfigurationManagerImpl(@Self SlingHttpServletRequest slingRequest,
+      @OSGiService ConfigurationResourceResolver configRsrcRslvr, @OSGiService ResourceResolverFactory resolverFactory)
+      throws LoginException {
+    this.configRsrcRslvr = configRsrcRslvr;
     if (slingRequest.getResource().getPath().startsWith("/content")) {
-      resource = slingRequest.getResource();
+      resource = getResource(resolverFactory, slingRequest.getResource());
     } else {
-      resource = slingRequest.getRequestPathInfo().getSuffixResource();
+      resource = getResource(resolverFactory, slingRequest.getRequestPathInfo().getSuffixResource());
+    }
+
+  }
+
+  private Resource getResource(ResourceResolverFactory resolverFactory, Resource resource) throws LoginException {
+    try (ResourceResolver resolver = resolverFactory
+        .getServiceResourceResolver(Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SUBSERVICE_NAME))) {
+      return resolver.getResource(resource.getPath());
     }
   }
 
@@ -62,7 +83,4 @@ public class MarketoClientConfigurationManagerImpl implements MarketoClientConfi
         .orElse(null);
   }
 
-  public void setConfigRsrcRslvr(ConfigurationResourceResolver configRsrcRslvr) {
-    this.configRsrcRslvr = configRsrcRslvr;
-  }
 }

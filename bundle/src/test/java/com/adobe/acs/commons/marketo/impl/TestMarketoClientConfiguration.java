@@ -22,12 +22,17 @@ package com.adobe.acs.commons.marketo.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
 
 import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
 
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,6 +54,7 @@ public class TestMarketoClientConfiguration {
     context.load().json("/com/adobe/acs/commons/marketo/cloudconfig.json", "/conf/test");
 
     configrr = Mockito.mock(ConfigurationResourceResolver.class);
+    
     Mockito.when(configrr.getResourceCollection(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(Collections.singletonList(context.resourceResolver().getResource("/conf/test/default")));
     context.registerService(ConfigurationResourceResolver.class, configrr);
@@ -56,10 +62,12 @@ public class TestMarketoClientConfiguration {
   }
 
   @Test
-  public void testConfigMgr() {
+  public void testConfigMgr() throws LoginException {
     context.request().setResource(context.resourceResolver().getResource("/content/page"));
-    MarketoClientConfigurationManagerImpl mccm = new MarketoClientConfigurationManagerImpl(context.request());
-    mccm.setConfigRsrcRslvr(configrr);
+    ResourceResolverFactory resolverFactory = mock(ResourceResolverFactory.class);
+    when(resolverFactory.getServiceResourceResolver(anyMap())).thenReturn(context.resourceResolver());
+
+    MarketoClientConfigurationManagerImpl mccm = new MarketoClientConfigurationManagerImpl(context.request(), configrr, resolverFactory);
 
     assertNotNull(mccm);
     assertNotNull(mccm.getConfiguration());
