@@ -46,41 +46,47 @@ public class MarketoClientConfigurationManagerImpl implements MarketoClientConfi
 
   private static final Logger log = LoggerFactory.getLogger(MarketoClientConfigurationManagerImpl.class);
 
-  private final ConfigurationResourceResolver configRsrcRslvr;
-
-  private final Resource resource;
+  private final MarketoClientConfiguration configuration;
 
   @Inject
   public MarketoClientConfigurationManagerImpl(@Self SlingHttpServletRequest slingRequest,
       @OSGiService ConfigurationResourceResolver configRsrcRslvr, @OSGiService ResourceResolverFactory resolverFactory)
       throws LoginException {
-    this.configRsrcRslvr = configRsrcRslvr;
-    if (slingRequest.getResource().getPath().startsWith("/content")) {
-      resource = getResource(resolverFactory, slingRequest.getResource());
-    } else {
-      resource = getResource(resolverFactory, slingRequest.getRequestPathInfo().getSuffixResource());
-    }
 
-  }
-
-  private Resource getResource(ResourceResolverFactory resolverFactory, Resource resource) throws LoginException {
     try (ResourceResolver resolver = resolverFactory
         .getServiceResourceResolver(Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SUBSERVICE_NAME))) {
-      return resolver.getResource(resource.getPath());
+      String resourcePath = null;
+      if (slingRequest.getResource().getPath().startsWith("/content")) {
+        resourcePath = slingRequest.getResource().getPath();
+      } else {
+        resourcePath = slingRequest.getRequestPathInfo().getSuffixResource().getPath();
+      }
+      Resource serviceResource = resolver.getResource(resourcePath);
+
+      if (serviceResource != null) {
+
+        log.debug("Using context path: {}", configRsrcRslvr.getContextPath(serviceResource));
+        configuration = configRsrcRslvr.getResourceCollection(serviceResource, "settings", "cloudconfigs").stream()
+            .filter(c -> {
+              boolean matches = "/apps/acs-commons/templates/utilities/marketocloudconfig"
+                  .equals(c.getValueMap().get("jcr:content/cq:template", ""));
+              log.debug("Resource: {} matches: {}", c, matches);
+              return matches;
+            }).findFirst().map(c -> c.getChild(JcrConstants.JCR_CONTENT))
+            .map(c -> c.adaptTo(MarketoClientConfiguration.class))
+            .orElse(null);
+      } else {
+        log.warn("Cannot get resource from path: {} for retrieving configuration", resourcePath);
+        configuration = null;
+      }
+
     }
+
   }
 
   @Override
   public MarketoClientConfiguration getConfiguration() {
-    log.trace("getConfiguration");
-    log.debug("Using context path: {}", configRsrcRslvr.getContextPath(resource));
-    return configRsrcRslvr.getResourceCollection(resource, "settings", "cloudconfigs").stream().filter(c -> {
-      boolean matches = "/apps/acs-commons/templates/utilities/marketocloudconfig"
-          .equals(c.getValueMap().get("jcr:content/cq:template", ""));
-      log.debug("Resource: {} matches: {}", c, matches);
-      return matches;
-    }).findFirst().map(c -> c.getChild(JcrConstants.JCR_CONTENT)).map(c -> c.adaptTo(MarketoClientConfiguration.class))
-        .orElse(null);
+    return configuration;
   }
 
 }
