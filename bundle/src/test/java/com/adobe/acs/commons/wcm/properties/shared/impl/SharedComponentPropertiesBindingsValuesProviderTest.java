@@ -28,11 +28,11 @@ import static org.mockito.Mockito.when;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.api.components.ComponentManager;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
@@ -60,6 +59,7 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   private Resource resource;
   private Resource sharedPropsResource;
   private Resource globalPropsResource;
+  private SlingHttpServletRequest request;
   private Page page;
   private Bindings bindings;
   private ResourceResolver resourceResolver;
@@ -75,12 +75,14 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     sharedPropsResource = mock(Resource.class);
     globalPropsResource = mock(Resource.class);
     resourceResolver = mock(ResourceResolver.class);
+    request = mock(SlingHttpServletRequest.class);
 
     final String globalPropsPath = SITE_ROOT + "/jcr:content/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
     final String sharedPropsPath = SITE_ROOT + "/jcr:content/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES +  "/"
         + RESOURCE_TYPE;
 
-    bindings.put("resource", resource);
+    bindings.put(SlingBindings.REQUEST, request);
+    bindings.put(SlingBindings.RESOURCE, resource);
 
     when(resource.getResourceResolver()).thenReturn(resourceResolver);
     when(resource.getResourceType()).thenReturn(RESOURCE_TYPE);
@@ -99,13 +101,14 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
 
     when(globalPropsResource.getValueMap()).thenReturn(globalProps);
     when(sharedPropsResource.getValueMap()).thenReturn(sharedProps);
+    when(resource.getValueMap()).thenReturn(ValueMap.EMPTY);
   }
 
   @Test
   public void testGetCanonicalResourceTypeRelativePath() {
     // make this test readable by wrapping the long method name with a function
     final BiFunction<String, List<String>, String> asFunction =
-            (resourceType, searchPaths) -> SharedComponentPropertiesBindingsValuesProvider
+            (resourceType, searchPaths) -> SharedComponentPropertiesImpl
                     .getCanonicalResourceTypeRelativePath(resourceType,
                             Optional.ofNullable(searchPaths)
                                     .map(list -> list.toArray(new String[0])).orElse(null));
@@ -138,10 +141,14 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
 
   @Test
   public void addBindings() {
+    final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
+    Whitebox.setInternalState(sharedComponentProperties, "pageRootProvider", pageRootProvider);
+
     final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
         = new SharedComponentPropertiesBindingsValuesProvider();
 
-    Whitebox.setInternalState(sharedComponentPropertiesBindingsValuesProvider, "pageRootProvider", pageRootProvider);
+    Whitebox.setInternalState(sharedComponentPropertiesBindingsValuesProvider,
+            "sharedComponentProperties", sharedComponentProperties);
 
     sharedComponentPropertiesBindingsValuesProvider.addBindings(bindings);
 
