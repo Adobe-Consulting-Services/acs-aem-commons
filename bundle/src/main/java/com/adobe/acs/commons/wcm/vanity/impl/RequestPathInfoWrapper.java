@@ -27,72 +27,72 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 public class RequestPathInfoWrapper implements InvocationHandler {
-	private final RequestPathInfo requestPathInfo;
-	private final Resource resource;
-	private static final String SLING_STATUS = "sling:status";
+    private final RequestPathInfo requestPathInfo;
+    private final Resource resource;
+    private static final String SLING_STATUS = "sling:status";
 
-	private RequestPathInfoWrapper(RequestPathInfo requestPathInfo, Resource resource) {
-		this.requestPathInfo = requestPathInfo;
-		this.resource = resource;
-	}
+    private RequestPathInfoWrapper(RequestPathInfo requestPathInfo, Resource resource) {
+        this.requestPathInfo = requestPathInfo;
+        this.resource = resource;
+    }
 
-	public static RequestPathInfoWrapper createRequestPathInfoWrapper(final RequestPathInfo requestPathInfo, final Resource resource) {
-		return new RequestPathInfoWrapper(requestPathInfo, resource);
-	}
+    public static RequestPathInfoWrapper createRequestPathInfoWrapper(final RequestPathInfo requestPathInfo, final Resource resource) {
+        return new RequestPathInfoWrapper(requestPathInfo, resource);
+    }
 
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		String methodName = method.getName();
-		switch (methodName) {
-			case "getResourcePath":
-				return getResourcePath();
-			case "getExtension":
-				return getExtension();
-			case "getSelectorString":
-				return getSelectorString();
-			case "getSelectors":
-				return getSelectors();
-			case "getSuffix":
-				return getSuffix();
-			case "getSuffixResource":
-				return getSuffixResource();
-			default:
-				throw new UnsupportedOperationException("REQUESTPATHINFOWRAPPER >> NO IMPLEMENTATION FOR " + methodName);
-		}
-	}
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        String methodName = method.getName();
+        switch (methodName) {
+            case "getResourcePath":
+                return getResourcePath();
+            case "getExtension":
+                return getExtension();
+            case "getSelectorString":
+                return getSelectorString();
+            case "getSelectors":
+                return getSelectors();
+            case "getSuffix":
+                return getSuffix();
+            case "getSuffixResource":
+                return getSuffixResource();
+            default:
+                throw new UnsupportedOperationException("REQUESTPATHINFOWRAPPER >> NO IMPLEMENTATION FOR " + methodName);
+        }
+    }
 
-	public String getResourcePath() {
-		return requestPathInfo.getResourcePath();
-	}
+    public String getResourcePath() {
+        return requestPathInfo.getResourcePath();
+    }
 
-	public String getExtension() {
-		final ValueMap properties = resource.getValueMap();
-		if (properties != null) {
-			if (properties.get(SLING_STATUS, -1) < 0) {
-				// Internal redirect; so keep extension
-				return requestPathInfo.getExtension();
-			} else {
-				// External redirect; like 301 or 302 then kill the extension else it gets double added. Note this will also kill any selector addition.
-				return null;
-			}
-		} else {
-			return requestPathInfo.getExtension();
-		}
-	}
+    public String getExtension() {
+        final ValueMap properties = resource.getValueMap();
+        if (properties != null) {
+            if (properties.get(SLING_STATUS, -1) < 0) {
+                // Internal redirect; so keep extension
+                return requestPathInfo.getExtension();
+            } else {
+                // External redirect; like 301 or 302 then kill the extension else it gets double added. Note this will also kill any selector addition.
+                return null;
+            }
+        } else {
+            return requestPathInfo.getExtension();
+        }
+    }
 
-	public String getSelectorString() {
-		return requestPathInfo.getSelectorString();
-	}
+    public String getSelectorString() {
+        return requestPathInfo.getSelectorString();
+    }
 
-	public String[] getSelectors() {
-		return requestPathInfo.getSelectors();
-	}
+    public String[] getSelectors() {
+        return requestPathInfo.getSelectors();
+    }
 
-	public String getSuffix() {
-		return requestPathInfo.getSuffix();
-	}
+    public String getSuffix() {
+        return requestPathInfo.getSuffix();
+    }
 
-	public Resource getSuffixResource() {
-		return requestPathInfo.getSuffixResource();
-	}
+    public Resource getSuffixResource() {
+        return requestPathInfo.getSuffixResource();
+    }
 }
