@@ -112,7 +112,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     @SuppressWarnings("squid:S1192")
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
-        if (workItem instanceof WrappedSyntheticWorkItem) {
+        if (workItem instanceof WrappedSyntheticWorkItem && workItem.getWorkflow() != null) {
             throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
                     + workItem.getWorkflow().getId() + " : " + workItem.getId() + " ] completed");
         } else {
