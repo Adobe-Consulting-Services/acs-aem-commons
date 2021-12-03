@@ -173,7 +173,7 @@ public class SyntheticWorkflowSession implements InvocationHandler {
     }
 
     public Object adaptTo(Class<?> type) {
-        if (Session.class == type) {
+        if (Session.class.equals(type)) {
             return session;
         }
 
