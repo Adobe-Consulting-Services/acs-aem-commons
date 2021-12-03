@@ -8,13 +8,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SyntheticWorkItemTest {
-	@Mock
-	SyntheticWorkflow syntheticWorkflow;
+    @Mock
+    SyntheticWorkflow syntheticWorkflow;
 
-	@Test
-	public void test_getMetaData() throws Exception {
-		SyntheticWorkItem syntheticWorkItem = SyntheticWorkItem.createSyntheticWorkItem(syntheticWorkflow.getWorkflowData());
-		Assert.assertNotNull(syntheticWorkItem.getMetaData());
-	}
+    @Test
+    public void test_getMetaData() throws Exception {
+        SyntheticWorkItem syntheticWorkItem = SyntheticWorkItem.createSyntheticWorkItem(syntheticWorkflow.getWorkflowData());
+        Assert.assertNotNull(syntheticWorkItem.getMetaData());
+    }
 }
 
