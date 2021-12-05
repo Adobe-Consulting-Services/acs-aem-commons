@@ -28,6 +28,7 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,7 +121,9 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
             result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
-        getGson().toJson(result, response.getWriter());
+        PrintWriter writer = response.getWriter();
+        getGson().toJson(result, writer);
+        writer.flush(); // #2749
     }
 
     Gson getGson() {
