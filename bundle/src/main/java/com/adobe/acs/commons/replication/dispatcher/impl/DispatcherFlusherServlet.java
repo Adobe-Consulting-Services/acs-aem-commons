@@ -143,6 +143,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
                 resultMap.put(result.agentId, result.success);
             }
             gson.toJson(resultMap, response.getWriter());
+            response.getWriter().close(); // #2749
         } else {
             String suffix;
             if (caughtException) {

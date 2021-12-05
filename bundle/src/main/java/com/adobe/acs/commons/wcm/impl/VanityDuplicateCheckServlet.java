@@ -84,6 +84,7 @@ public final class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet {
 
         Gson gson = new Gson();
         gson.toJson(paths, response.getWriter());
+        response.getWriter().close(); // #2749
     }
 
 }

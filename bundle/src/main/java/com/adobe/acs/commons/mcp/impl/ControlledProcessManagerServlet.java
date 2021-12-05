@@ -121,7 +121,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
         getGson().toJson(result, response.getWriter());
-        response.getWriter().flush(); // #2749
+        response.getWriter().close(); // #2749
     }
 
     Gson getGson() {
