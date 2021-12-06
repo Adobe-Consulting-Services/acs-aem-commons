@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           cache: 'maven'
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
