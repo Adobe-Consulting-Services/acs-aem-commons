@@ -57,11 +57,11 @@ public class SynthesizedSlingHttpServletRequestTest {
     @Test
     public void test_getAndSetResource() throws Exception {
         String testResourcePath = "/test/resource";
-        String newTestResourcePath = "/new/test/resource";
         Assert.assertNull(synthesizedSlingHttpServletRequest.getResource());
         context.load().json("/com/adobe/acs/commons/cloudconfig/cloudconfig.json", testResourcePath);
         synthesizedSlingHttpServletRequest.setResource(context.resourceResolver().getResource(testResourcePath));
         Assert.assertEquals(synthesizedSlingHttpServletRequest.getResource().getPath(), testResourcePath);
+        String newTestResourcePath = "/new/test/resource";
         synthesizedSlingHttpServletRequest.setResourcePath(newTestResourcePath);
         Assert.assertEquals(synthesizedSlingHttpServletRequest.getRequestPathInfo().getResourcePath(), newTestResourcePath);
     }
