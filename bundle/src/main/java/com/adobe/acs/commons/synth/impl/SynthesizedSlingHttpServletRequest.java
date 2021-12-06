@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
+import com.adobe.acs.commons.synth.WrappedRequestPathInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -72,7 +73,7 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
         super(request);
 
         WrappedRequestPathInfo wrappedRequestPathInfo = createWrappedRequestPathInfo();
-        RequestPathInfo wrappedRequestInfo = (RequestPathInfo) Proxy.newProxyInstance(RequestPathInfo.class.getClassLoader(), new Class[] { RequestPathInfo.class, WrappedRequestPathInfo.class  }, wrappedRequestPathInfo);
+        RequestPathInfo wrappedRequestInfo = (RequestPathInfo) Proxy.newProxyInstance(RequestPathInfo.class.getClassLoader(), new Class[] { RequestPathInfo.class, com.adobe.acs.commons.synth.WrappedRequestPathInfo.class  }, wrappedRequestPathInfo);
         requestPathInfo = wrappedRequestInfo;
     }
 
@@ -183,11 +184,11 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
         return this;
     }
 
-    private WrappedRequestPathInfo createWrappedRequestPathInfo() {
+    public WrappedRequestPathInfo createWrappedRequestPathInfo() {
         return new WrappedRequestPathInfo();
     }
 
-    private class WrappedRequestPathInfo implements InvocationHandler {
+    class WrappedRequestPathInfo implements InvocationHandler {
 
         private RequestPathInfo getOriginal() {
             return getSlingRequest().getRequestPathInfo();
