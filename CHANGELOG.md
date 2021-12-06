@@ -17,16 +17,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+<<<<<<< Upstream, based on master
 - #2749 and #2488: Manage Controlled Processes does not show any process fixed via #2751
 - #2337 - Marketo form null on publish fixed via #2758
 - #2735 - Redirect Manager: preserve query string in external redirects fixed via #2736
 - #2658 - Fixed issue where implementing RequestPathInfo was being caught by CQRules:CQBP-84
+=======
+- #2261 - Update to latest mocking libraries
+>>>>>>> 75ac3a5 update changelog
 - #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
+<<<<<<< Upstream, based on master
 - #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
 
 ### Changed
 
 - #2742 - Provided a way to author localized titles for Generic Lists.
+=======
+- #2753 - Update to AEM 6.4 dependencies
+- #2754 - Support building with Java 17
+>>>>>>> 75ac3a5 update changelog
 
 ## 5.0.14 - 2021-10-20
 
