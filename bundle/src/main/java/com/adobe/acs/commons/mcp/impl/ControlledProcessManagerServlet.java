@@ -120,8 +120,8 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
             result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
-        getGson().toJson(result, response.getWriter());
-        response.getWriter().close(); // #2749
+        String json = getGson().toJson(result); // #2749
+        response.getWriter().write(json);
     }
 
     Gson getGson() {
