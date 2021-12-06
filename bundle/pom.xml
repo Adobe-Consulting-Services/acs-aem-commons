@@ -85,8 +85,6 @@
                             !org.checkerframework.checker.nullness.qual,
                             !android.util.*,
                             <!-- shaded libraries -->
-                            !com.google.common.*,
-                            !com.google.thirdparty.*,
                             !com.jcraft.*,
                             !io.jsonwebtoken.*,
                             *
@@ -257,7 +255,6 @@
                                     <!-- here we need to explicitly list the set of dependencies which 
                                     are allowed with scope=compile -->
                                     <includes>
-                                        <include>com.google.guava:failureaccess</include>
                                         <include>io.jsonwebtoken:jjwt-api</include>
                                         <include>io.jsonwebtoken:jjwt-impl</include>
                                         <include>io.jsonwebtoken:jjwt-gson</include>
@@ -285,7 +282,6 @@
                             <shadeSourcesContent>true</shadeSourcesContent>
                             <artifactSet>
                                 <includes>
-                                    <include>com.google.guava:failureaccess</include>
                                     <include>com.jcraft:jsch</include>
                                     <include>com.jcraft:jzlib</include>
                                     <include>io.jsonwebtoken:jjwt-api</include>
@@ -294,14 +290,6 @@
                                 </includes>
                             </artifactSet>
                             <relocations>
-                                <relocation>
-                                    <pattern>com.google.common</pattern>
-                                    <shadedPattern>acscommons.com.google.common</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google.thirdparty</pattern>
-                                    <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
-                                </relocation>
                                 <relocation>
                                     <pattern>com.jcraft</pattern>
                                     <shadedPattern>acscommons.com.jcraft</shadedPattern>
@@ -312,12 +300,6 @@
                                 </relocation>
                             </relocations>
                             <filters>
-                                <filter>
-                                    <artifact>com.google.guava:failureaccess</artifact>
-                                    <includes>
-                                        <include>com/google/**</include>
-                                    </includes>
-                                </filter>
                                 <filter>
                                     <artifact>com.jcraft:jsch</artifact>
                                     <includes>
@@ -562,12 +544,6 @@
         <!-- END: optional dependencies which are neither part of AEM nor ACS AEM Commons but need separate installation -->
          <!-- ======================== -->
         <!-- START: shaded and relocated dependencies -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>failureaccess</artifactId>
-            <version>1.0.1</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
