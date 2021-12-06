@@ -164,6 +164,7 @@ public class ControlledProcessManagerServletTest {
 
         servlet.doGet(request, response);
 
+        writer.close(); // the servlet engine closes the response stream
         String json = bos.toString(); // the string returned in the response
         Type list = new TypeToken<ArrayList<ArchivedProcessInstance>>() {}.getType();
         List<ProcessInstance> instances = servlet.getGson().fromJson(json, list);
