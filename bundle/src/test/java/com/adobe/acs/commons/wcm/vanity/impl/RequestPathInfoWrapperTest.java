@@ -46,7 +46,7 @@ public class RequestPathInfoWrapperTest {
         context = new AemContext(ResourceResolverType.JCR_OAK);
         context.load().json(getClass().getResourceAsStream("RequestPathInfoWrapperContent.json"), TEST_PATH);
         resourceResolver = context.resourceResolver();
-        requestPathInfoWrapper = RequestPathInfoWrapper.createRequestPathInfoWrapper(context.requestPathInfo(), context.currentResource());
+        requestPathInfoWrapper = RequestPathInfoWrapper.createRequestPathInfoWrapper(context.requestPathInfo(), resourceResolver.getResource(TEST_PATH));
     }
 
     @Test
@@ -56,10 +56,10 @@ public class RequestPathInfoWrapperTest {
     }
 
 
-    @Test (expected = NullPointerException.class) //todo: fix this by passing in a real resource
+    @Test
     public void test_getExtension() throws Exception {
         context.requestPathInfo().setExtension(TEST_EXTENSION);
-        Assert.assertEquals(requestPathInfoWrapper.getExtension(), TEST_PATH);
+        Assert.assertEquals(requestPathInfoWrapper.getExtension(), TEST_EXTENSION);
     }
 
     @Test
