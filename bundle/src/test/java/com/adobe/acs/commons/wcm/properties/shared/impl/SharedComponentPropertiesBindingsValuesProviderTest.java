@@ -140,6 +140,7 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   @Test
   public void addBindings() {
     final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
+    sharedComponentProperties.pageRootProvider = pageRootProvider;
 
     final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
         = new SharedComponentPropertiesBindingsValuesProvider();
