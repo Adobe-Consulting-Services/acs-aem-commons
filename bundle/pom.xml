@@ -85,6 +85,8 @@
                             !org.checkerframework.checker.nullness.qual,
                             !android.util.*,
                             <!-- shaded libraries -->
+                            !com.google.common.*,
+                            !com.google.thirdparty.*,
                             !com.jcraft.*,
                             !io.jsonwebtoken.*,
                             *
@@ -255,6 +257,7 @@
                                     <!-- here we need to explicitly list the set of dependencies which 
                                     are allowed with scope=compile -->
                                     <includes>
+                                        <include>com.google.guava:*</include>
                                         <include>io.jsonwebtoken:jjwt-api</include>
                                         <include>io.jsonwebtoken:jjwt-impl</include>
                                         <include>io.jsonwebtoken:jjwt-gson</include>
@@ -282,6 +285,7 @@
                             <shadeSourcesContent>true</shadeSourcesContent>
                             <artifactSet>
                                 <includes>
+                                    <include>com.google.guava:*</include>
                                     <include>com.jcraft:jsch</include>
                                     <include>com.jcraft:jzlib</include>
                                     <include>io.jsonwebtoken:jjwt-api</include>
@@ -290,6 +294,15 @@
                                 </includes>
                             </artifactSet>
                             <relocations>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>acscommons.com.google.common</shadedPattern>
+                                </relocation>
+                                <!-- contained in guava as well -->
+                                <relocation>
+                                    <pattern>com.google.thirdparty</pattern>
+                                    <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
+                                </relocation>
                                 <relocation>
                                     <pattern>com.jcraft</pattern>
                                     <shadedPattern>acscommons.com.jcraft</shadedPattern>
@@ -300,6 +313,12 @@
                                 </relocation>
                             </relocations>
                             <filters>
+                                <filter>
+                                    <artifact>com.google.guava:guava</artifact>
+                                    <includes>
+                                        <include>com/google/**</include>
+                                    </includes>
+                                </filter>
                                 <filter>
                                     <artifact>com.jcraft:jsch</artifact>
                                     <includes>
@@ -361,6 +380,16 @@
         </plugins>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- use and shade newer Guava version than shipped with AEM -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>30.1-jre</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <!-- ======================== -->
         <!-- START build dependencies -->
@@ -389,6 +418,11 @@
             <artifactId>org.apache.sling.servlets.annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- @PostConstruct -->
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -408,11 +442,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -484,27 +513,6 @@
             <artifactId>jcr</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.adobe.cq</groupId>
-            <artifactId>cq-dialog-conversion</artifactId>
-            <version>1.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <!-- MCP: Apache POI used for exporting Excel spreadsheets -->
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -514,12 +522,6 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Http Cache Dependencies -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -541,9 +543,39 @@
             <artifactId>twitter4j-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.adobe.cq</groupId>
+            <artifactId>cq-dialog-conversion</artifactId>
+            <version>1.0.2</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- END: optional dependencies which are neither part of AEM nor ACS AEM Commons but need separate installation -->
          <!-- ======================== -->
         <!-- START: shaded and relocated dependencies -->
+        <!-- Http Cache Dependencies -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.google.j2objc</groupId>
+                <artifactId>j2objc-annotations</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
@@ -578,6 +610,12 @@
             <artifactId>jjwt-gson</artifactId>
             <version>${jjwt.version}</version>
             <scope>compile</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         <!-- END: shaded and relocated dependencies -->
         <!-- ======================== -->
@@ -613,6 +651,12 @@
             <artifactId>compile-testing</artifactId>
             <version>0.18</version>
             <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         <!-- Downgrade from 2.4 to 2.1 for AEM 6.4 support -->
         <dependency>
@@ -631,6 +675,10 @@
                 <exclusion>
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>com.google.code.findbugs</groupId>
+                  <artifactId>jsr305</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -704,6 +752,10 @@
                     <groupId>com.drewnoakes</groupId>
                     <artifactId>metadata-extractor</artifactId>
                 </exclusion>
+                <exclusion>
+                  <groupId>com.google.code.gson</groupId>
+                  <artifactId>gson</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -772,9 +824,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>com.day.cq</groupId>
-          <artifactId>cq-commons</artifactId>
-          <scope>test</scope>
+            <groupId>com.day.cq</groupId>
+            <artifactId>cq-commons</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- END: test dependencies -->
         <!-- ======================== -->

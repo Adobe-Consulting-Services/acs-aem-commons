@@ -98,10 +98,6 @@
                 <artifactId>oakpal-maven-plugin</artifactId>
                 <configuration>
                     <deferBuildFailure>true</deferBuildFailure>
-                    <cndNames>
-                        <!-- part of acs-aem-commons-oakpal-checks -->
-                        <cndName>nodetypes-aem640.cnd</cndName>
-                    </cndNames>
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>

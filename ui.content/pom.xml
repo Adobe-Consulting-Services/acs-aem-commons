@@ -92,10 +92,6 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    <cndNames>
-                        <!-- part of acs-aem-commons-oakpal-checks -->
-                        <cndName>nodetypes-aem640.cnd</cndName>
-                    </cndNames>
                     <checks>
                         <!-- Enforce separation of content and code (CONTENT ONLY) -->
                         <check>

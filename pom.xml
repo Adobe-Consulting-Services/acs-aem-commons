@@ -237,7 +237,7 @@
                     </dependencies>
                     <configuration>
                         <cndNames>
-                            <cndName>nodetypes/nodetypes.cnd</cndName>
+                            <cndName>nodetypes-aem640.cnd</cndName>
                         </cndNames>
                         <jcrNamespaces>
                             <jcrNamespace>
