@@ -132,6 +132,10 @@ public class RedirectFilterTest {
         if (idx > 0) {
             context.requestPathInfo().setExtension(resourcePath.substring(idx + 1));
         }
+        int qs = resourcePath.lastIndexOf('?');
+        if (qs > 0) {
+            request.setQueryString(resourcePath.substring(qs + 1));
+        }
         context.requestPathInfo().setResourcePath(resourcePath);
         request.setResource(context.create().resource(resourcePath));
 
@@ -221,6 +225,19 @@ public class RedirectFilterTest {
     }
 
     @Test
+    public void testNavigateToExternalSiteWithQueryString() throws Exception {
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "https://www.geometrixx.com",
+                        302, null, null));
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2&c=3");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("https://www.geometrixx.com?a=1&b=2&c=3", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
     public void testNavigate301() throws Exception {
         withRules(
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
@@ -282,8 +299,7 @@ public class RedirectFilterTest {
                 new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
                         302, null, null));
 
-        context.request().setQueryString("a=1&b=2");
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2");
 
         assertEquals(302, response.getStatus());
         assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
