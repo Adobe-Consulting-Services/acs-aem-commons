@@ -423,7 +423,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 location = urlAdjuster.adjust(slingRequest, location);
             }
         }
-        if(preserveQueryString) {
+        if (preserveQueryString) {
+
             String queryString = slingRequest.getQueryString();
             if (queryString != null) {
                 location = preserveQueryString(location, queryString);
