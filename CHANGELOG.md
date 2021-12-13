@@ -9,9 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Added
+
+- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is a member of required groups or an admin.
+
 ### Fixed
 
 - #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
+- #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
 
 ## 5.0.14 - 2021-10-20
 
