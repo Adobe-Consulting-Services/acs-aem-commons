@@ -81,11 +81,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
 
         CacheContent retrievedContent = caffeine.getIfPresent(key);
         String retrievedContentString = IOUtils.toString(retrievedContent.getInputDataStream(), StandardCharsets.UTF_8);
-        // This causes issues when running tests in GA Actions; pulled it out to simply use the string.
-        //String expectedContentString = IOUtils.toString(getClass().getResourceAsStream("cachecontent.html"), StandardCharsets.UTF_8);
-        String expectedContentString = "<div class=\"acs-commons\">\n" +
-                "    Some awesome cached content!\n" +
-                "</div>";
+        String expectedContentString = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         assertEquals(expectedContentString, retrievedContentString);
     }
 
