@@ -33,6 +33,7 @@ import com.adobe.granite.workflow.exec.Workflow;
 import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.model.WorkflowModel;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,9 +173,17 @@ public class SyntheticWorkflowSession implements InvocationHandler {
         }
     }
 
-    public Object adaptTo(Class<?> type) {
-        if (Session.class.equals(type)) {
-            return session;
+    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+        if (ResourceResolver.class.equals(type)) {
+            if (this.session != null) {
+                try {
+                    return (AdapterType) this.workflowService.getResourceResolver(this.session);
+                } catch (LoginException e) {
+                    log.error("Failed to adapt Synthetic Granite WorkflowSession to ResourceResolver", e);
+                }
+            }
+        } else if (Session.class.equals(type)) {
+            return (AdapterType) this.session;
         }
 
         return null;

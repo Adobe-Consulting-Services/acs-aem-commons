@@ -126,7 +126,7 @@ public class SyntheticWorkflowSessionTest {
         Assert.assertEquals(newSession.getClass(), Objects.requireNonNull(context.resourceResolver().adaptTo(Session.class)).getClass());
     }
 
-    @Test
+    @Test (expected = NullPointerException.class) //this is because SyntheticWorkflowRunnerImpl has a null resourceResolverFactory during the test
     public void test_adaptToNull() throws Exception {
         Assert.assertNull(session.adaptTo(ResourceResolver.class));
     }

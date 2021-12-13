@@ -20,5 +20,8 @@
 
 package com.adobe.acs.commons.workflow.synthetic.cq;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+@ProviderType
 public interface WrappedSyntheticWorkItem {
 }

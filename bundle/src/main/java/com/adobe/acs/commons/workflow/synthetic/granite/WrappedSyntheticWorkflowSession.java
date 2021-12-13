@@ -20,5 +20,8 @@
 
 package com.adobe.acs.commons.workflow.synthetic.granite;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+@ProviderType
 public interface WrappedSyntheticWorkflowSession {
 }
