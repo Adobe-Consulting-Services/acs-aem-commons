@@ -158,16 +158,17 @@ public class ControlledProcessManagerServletTest {
         when(request.getRequestPathInfo()).thenReturn(pathInfo);
 
         SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        PrintWriter writer = new PrintWriter(bos);
-        when(response.getWriter()).thenReturn(writer);
 
-        servlet.doGet(request, response);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            try (PrintWriter writer = new PrintWriter(bos)) {
+                when(response.getWriter()).thenReturn(writer);
+                servlet.doGet(request, response);
+            } // the servlet engine closes the response stream
 
-        writer.close(); // the servlet engine closes the response stream
-        String json = bos.toString(); // the string returned in the response
-        Type list = new TypeToken<ArrayList<ArchivedProcessInstance>>() {}.getType();
-        List<ProcessInstance> instances = servlet.getGson().fromJson(json, list);
-        assertEquals(1, instances.size());
+            String json = bos.toString(); // the string returned in the response
+            Type list = new TypeToken<ArrayList<ArchivedProcessInstance>>() {}.getType();
+            List<ProcessInstance> instances = servlet.getGson().fromJson(json, list);
+            assertEquals(1, instances.size());
+        }
     }
 }
