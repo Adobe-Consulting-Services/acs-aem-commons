@@ -29,7 +29,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.cq.workflow.model.WorkflowModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -42,7 +42,7 @@ public class SyntheticWorkflow implements Workflow {
 
     private SyntheticWorkflowData workflowData;
 
-    private SyntheticWorkItem activeWorkItem;
+    private WorkItem activeWorkItem;
 
     public SyntheticWorkflow(final String id,
                              final SyntheticWorkflowData workflowData) {
@@ -51,7 +51,7 @@ public class SyntheticWorkflow implements Workflow {
         this.timeStarted = new Date();
     }
 
-    public final void setActiveWorkItem(final SyntheticWorkItem workItem) {
+    final void setActiveWorkItem(final WorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 
@@ -62,7 +62,7 @@ public class SyntheticWorkflow implements Workflow {
 
     @Override
     public final List<WorkItem> getWorkItems() {
-        return Arrays.asList(new WorkItem[]{this.activeWorkItem});
+        return Collections.singletonList((WorkItem) this.activeWorkItem);
     }
 
     @Override
