@@ -20,16 +20,11 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import com.adobe.acs.commons.util.BufferedSlingHttpServletResponse;
-import com.adobe.acs.commons.util.ResourceDataUtil;
-import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -40,14 +35,15 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import javax.servlet.RequestDispatcher;
 
-import java.io.StringWriter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.util.ResourceDataUtil;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageCacheImpl.class);
@@ -242,18 +238,6 @@ public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorP
     }
 
     public String getIncludeAsString(final String path, final SlingHttpServletRequest slingRequest, final SlingHttpServletResponse slingResponse) {
-        BufferedSlingHttpServletResponse responseWrapper = null;
-        
-        try {
-            responseWrapper = new BufferedSlingHttpServletResponse(slingResponse, new StringWriter(), null);
-            final RequestDispatcher requestDispatcher = slingRequest.getRequestDispatcher(path);
-            requestDispatcher.include(slingRequest, responseWrapper);
-            if (responseWrapper.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
-                return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
-            }
-        } catch (Exception ex) {
-            log.error("Error creating the String representation for: " + path, ex);
-        }
-        return null;
+       return ResourceDataUtil.getIncludeAsString(path, slingRequest, slingResponse);
     }
 }
