@@ -86,33 +86,34 @@ public class MarketoClientImpl implements MarketoClient {
     try {
       configs = configAdmin.listConfigurations("(service.factoryPid=org.apache.http.proxyconfigurator)");
 
-      for (Configuration config : configs) {
-        log.info("Evaluating proxy configuration: {}", config.getPid());
+      if (configs != null) {
+        for (Configuration config : configs) {
+          log.info("Evaluating proxy configuration: {}", config.getPid());
 
-        Dictionary<String, Object> properties = config.getProperties();
-        if (isEnabled(properties)) {
-          String host = String.class.cast(properties.get("proxy.host"));
-          int port = Integer.class.cast(properties.get("proxy.port"));
+          Dictionary<String, Object> properties = config.getProperties();
+          if (isEnabled(properties)) {
+            String host = String.class.cast(properties.get("proxy.host"));
+            int port = Integer.class.cast(properties.get("proxy.port"));
 
-          log.debug("Using proxy host: {}", host);
-          HttpHost proxyhost = new HttpHost(host, port);
-          HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyhost);
-          clientBuilder.setRoutePlanner(routePlanner);
+            log.debug("Using proxy host: {}", host);
+            HttpHost proxyhost = new HttpHost(host, port);
+            HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyhost);
+            clientBuilder.setRoutePlanner(routePlanner);
 
-          String user = String.class.cast(properties.get("proxy.user"));
-          String password = String.class.cast(properties.get("proxy.password"));
-          if (StringUtils.isNotBlank(user)) {
-            log.debug("Using proxy authentication with user: {}", user);
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(new AuthScope(host, port),
-                new UsernamePasswordCredentials(user, password));
-            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            String user = String.class.cast(properties.get("proxy.user"));
+            String password = String.class.cast(properties.get("proxy.password"));
+            if (StringUtils.isNotBlank(user)) {
+              log.debug("Using proxy authentication with user: {}", user);
+              BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+              credentialsProvider.setCredentials(new AuthScope(host, port),
+                  new UsernamePasswordCredentials(user, password));
+              clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            }
+
+          } else {
+            log.debug("Proxy configuration not enabled");
           }
-
-        } else {
-          log.debug("Proxy configuration not enabled");
         }
-
       }
     } catch (IOException | InvalidSyntaxException e) {
       log.error("Failed to load proxy configuration", e);
