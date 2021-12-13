@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2658 - Fixed issue where implementing RequestPathInfo was being caught by CQRules:CQBP-84
 - #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
 - #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
 
