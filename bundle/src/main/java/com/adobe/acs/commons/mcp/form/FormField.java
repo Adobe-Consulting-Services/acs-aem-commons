@@ -59,6 +59,10 @@ public @interface FormField {
             // Factory cannot be instantiated
         }
 
+        public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options) {
+            return create(name, hint, description, category, required, clazz, options, false, new String[]{"en"});
+        }
+
         // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
         public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options, boolean localize, String[] languages) {
             return new FormField() {
