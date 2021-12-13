@@ -15,7 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- #2735 - Redirect Manager: preserve query string in external redirects via #2736
+
+- #2749 and #2488: Manage Controlled Processes does not show any process fixed via #2751
+- #2337 - Marketo form null on publish fixed via #2758
+- #2735 - Redirect Manager: preserve query string in external redirects fixed via #2736
 - #2658 - Fixed issue where implementing RequestPathInfo was being caught by CQRules:CQBP-84
 - #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
 - #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
