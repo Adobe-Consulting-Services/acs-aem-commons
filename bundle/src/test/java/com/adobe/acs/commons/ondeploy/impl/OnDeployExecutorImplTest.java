@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.doThrow;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -64,7 +64,6 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mock;
 
 public class OnDeployExecutorImplTest {
     @Rule

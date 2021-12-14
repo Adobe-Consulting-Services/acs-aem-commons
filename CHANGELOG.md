@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Changed
+
+- #2261 - Update to latest mocking libraries
+- #2753 - Update to AEM 6.4 dependencies
+- #2754 - Support building with Java 17
+
 ## 5.1.0 - 2021-12-13
 
 ### Added

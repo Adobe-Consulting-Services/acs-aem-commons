@@ -26,7 +26,6 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.powermock.reflect.Whitebox;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -41,10 +40,8 @@ public class CreateRedirectConfigurationServletTest {
 
     CreateRedirectConfigurationServlet servlet;
 
-
     @Rule
-    public SlingContext context = new SlingContext(
-            ResourceResolverType.RESOURCERESOLVER_MOCK);
+    public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     @Before
     public void setUp() {
@@ -52,7 +49,7 @@ public class CreateRedirectConfigurationServletTest {
         RedirectFilterMBean redirectFilter = mock(RedirectFilterMBean.class);
         when(redirectFilter.getBucket()).thenReturn("settings");
         when(redirectFilter.getConfigName()).thenReturn("redirects");
-        Whitebox.setInternalState(servlet, "redirectFilter", redirectFilter);
+        servlet.redirectFilter = redirectFilter;
     }
 
     @Test

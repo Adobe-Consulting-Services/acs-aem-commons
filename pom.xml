@@ -57,14 +57,17 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
-        <sl4fj.version>1.7.21</sl4fj.version>
+        <sl4fj.version>1.7.25</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
         <oakpal.version>2.0.0</oakpal.version>
 
         <!-- Supress CQRules:CQBP-84-\-dependencies -->
         <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
 
-        <jacoco.version>0.8.2</jacoco.version>
+        <jacoco.version>0.8.6</jacoco.version>
+        <!-- affects both m-compiler-p and m-javadoc-p-->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <build>
@@ -75,8 +78,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <showDeprecation>true</showDeprecation>
+                        <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -97,11 +100,17 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>2.22.2</version>
+                    <configuration>
+                        <trimStackTrace>false</trimStackTrace>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>2.22.2</version>
+                    <configuration>
+                        <trimStackTrace>false</trimStackTrace>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
@@ -228,7 +237,7 @@
                     </dependencies>
                     <configuration>
                         <cndNames>
-                            <cndName>nodetypes/nodetypes.cnd</cndName>
+                            <cndName>nodetypes-aem640.cnd</cndName>
                         </cndNames>
                         <jcrNamespaces>
                             <jcrNamespace>
@@ -243,8 +252,8 @@
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmaven</groupId>
-                    <artifactId>gmaven-plugin</artifactId>
-                    <version>1.5</version>
+                    <artifactId>groovy-maven-plugin</artifactId>
+                    <version>2.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
@@ -314,36 +323,70 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Runtime dependencies should be AEM 6.4 compatible -->
             <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.core</artifactId>
-                <version>6.0.0</version>
-                <scope>provided</scope>
+                <groupId>io.wcm.maven</groupId>
+                <artifactId>io.wcm.maven.aem-dependencies</artifactId>
+                <version>6.4.0.0004</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--  https://wcm-io.atlassian.net/browse/WTOOL-82 -->
+            <dependency>
+                <groupId>com.day.cq</groupId>
+                <artifactId>cq-commons</artifactId>
+                <version>5.8.32</version><!-- 5.11.12 is shipped with AEM 6.4, but this is the newest version provided in any public Maven repo -->
+            </dependency>
+            <!-- https://wcm-io.atlassian.net/browse/WTOOL-83 -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
             </dependency>
             <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.cmpn</artifactId>
-                <version>6.0.0</version>
-                <scope>provided</scope>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-parsers</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <!-- should match https://github.com/apache/jackrabbit-oak/blob/jackrabbit-oak-1.8.0/oak-blob-cloud/pom.xml#L121 shipped with AEM 6.4 -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>1.11.24</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
                 <version>1.9.8</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>biz.aQute</groupId>
-                <artifactId>bndlib</artifactId>
-                <version>1.50.0</version>
-                <scope>provided</scope>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+            <!-- should match Bnd version used by maven-bundle-plugin -->
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bnd.annotation</artifactId>
+                <version>3.4.0</version>
+            </dependency>
+            <!-- Optional dependency: Needs to be explicitly installed, not part of AEM 6.4 Standard nor ACS AEM Commons -->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.6.2</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${sl4fj.version}</version>
-                <scope>provided</scope>
+                <groupId>org.twitter4j</groupId>
+                <artifactId>twitter4j-core</artifactId>
+                <version>3.0.6</version>
             </dependency>
+            <!-- Testing dependencies -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
@@ -357,40 +400,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>javax.jcr</groupId>
-                <artifactId>jcr</artifactId>
-                <version>2.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.adobe.aem</groupId>
-                <artifactId>uber-jar</artifactId>
-                <version>6.3.0</version>
-                <classifier>apis</classifier>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient-osgi</artifactId>
-                <version>4.5.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -410,39 +422,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.twitter4j</groupId>
-                <artifactId>twitter4j-core</artifactId>
-                <version>3.0.6</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>2.6.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.5</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>3.2.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>2.0.4</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>2.0.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -454,32 +436,20 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
-                <version>2.3.18</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.sling-mock</artifactId>
-                <version>2.3.18</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.sling-mock-jackrabbit</artifactId>
-                <version>1.0.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
-                <version>2.1.8-1.16.0</version>
+                <version>3.1.2-1.40.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+                <version>3.2.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
-                <version>2.7.2</version>
+                <version>4.1.8</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -500,7 +470,6 @@
                 <version>1.3</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>net.adamcin.oakpal</groupId>
                 <artifactId>oakpal-api</artifactId>
@@ -518,55 +487,6 @@
                 <artifactId>oakpal-testing</artifactId>
                 <version>${oakpal.version}</version>
                 <scope>test</scope>
-            </dependency>
-
-            <!-- Http Cache Dependency -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>30.1-jre</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>failureaccess</artifactId>
-                <version>1.0.1</version>
-                <scope>provided</scope>
-            </dependency>
-
-             <!-- Due to the split of the JJWT library we need  
-                  - the api for compilation 
-                  - and the impl for embedding together with
-                  - the extension for serialization/deserialization support -->
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-api</artifactId>
-                <version>0.11.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-impl</artifactId>
-                <version>0.11.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-gson</artifactId>
-                 <version>0.11.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>javax.annotation-api</artifactId>
-                <version>1.3.2</version>
-                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

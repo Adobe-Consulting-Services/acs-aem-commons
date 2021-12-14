@@ -45,6 +45,7 @@ import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.settings.SlingSettingsService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,19 +69,36 @@ public class SystemNotificationsImplTest {
         zeroHour.setTime(new Date(0));
     }
 
+    public <T> void assertNoSystemNotificationsImplService(Class<T> serviceClass) {
+        for (T service : aemContext.getServices(serviceClass, null)) {
+            if (service instanceof SystemNotificationsImpl) {
+                Assert.fail("Found unexpected service implementation SystemNotificationsImpl for type " + serviceClass);
+            }
+        }
+    }
+
+    public <T> void assertSystemNotificationsImplService(Class<T> serviceClass) {
+        for (T service : aemContext.getServices(serviceClass, null)) {
+            if (service instanceof SystemNotificationsImpl) {
+                return;
+            }
+        }
+        Assert.fail("Found no service implementation SystemNotificationsImpl for type " + serviceClass);
+    }
+
     @Test
     public void testOnPublish() {
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(0, aemContext.getServices(ResourceChangeListener.class, null).length);
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
     public void testOnAuthorNoNotifications() {
         setAuthorRunmode();
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(ResourceChangeListener.class, null).length);
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
@@ -91,17 +109,17 @@ public class SystemNotificationsImplTest {
                 .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
         commit();
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(ResourceChangeListener.class, null).length);
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
 
         aemContext.create().resource("/etc/acs-commons/notifications/first", JCR_PRIMARYTYPE, NT_PAGE);
         commit();
         sendEvent();
-        assertEquals(1, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(Filter.class);
 
         notifications.deactivate(aemContext.componentContext());
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
-        assertEquals(0, aemContext.getServices(ResourceChangeListener.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
@@ -109,18 +127,18 @@ public class SystemNotificationsImplTest {
         setAuthorRunmode();
         createEnabledNotification();
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(ResourceChangeListener.class, null).length);
-        assertEquals(1, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertSystemNotificationsImplService(Filter.class);
 
         // then remove the resource
         delete("/etc/acs-commons/notifications/enabled");
         commit();
         sendEvent();
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertNoSystemNotificationsImplService(Filter.class);
 
         notifications.deactivate(aemContext.componentContext());
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
-        assertEquals(0, aemContext.getServices(ResourceChangeListener.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
@@ -132,18 +150,18 @@ public class SystemNotificationsImplTest {
 
         createEnabledNotification("/etc/acs-commons/notifications/subfolder/enabled");
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(ResourceChangeListener.class, null).length);
-        assertEquals(1, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertSystemNotificationsImplService(Filter.class);
 
         // then remove the resource
         delete("/etc/acs-commons/notifications/subfolder/enabled");
         commit();
         sendEvent();
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertNoSystemNotificationsImplService(Filter.class);
 
         notifications.deactivate(aemContext.componentContext());
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
-        assertEquals(0, aemContext.getServices(ResourceChangeListener.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test

@@ -19,21 +19,24 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.commons.io.IOUtils;
-import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jcr.RepositoryException;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
 public class RemoteAssetsTestUtil {
     public static final String TEST_SERVER_URL = "https://remote-aem-server:4502";
     public static final String TEST_SERVER_USERNAME = "admin";
     public static final String TEST_SERVER_PASSWORD = "passwd";
-    public static final String TEST_TAGS_PATH_A = "/etc/tags/a";
-    public static final String TEST_TAGS_PATH_B = "/etc/tags/b";
+    public static final String TEST_TAGS_PATH_A = "/content/cq:tags/a";
+    public static final String TEST_TAGS_PATH_B = "/content/cq:tags/b";
     public static final String TEST_DAM_PATH_A = "/content/dam/a";
     public static final String TEST_DAM_PATH_B = "/content/dam/b";
     public static final int TEST_RETRY_DELAY = 30;
@@ -70,9 +73,9 @@ public class RemoteAssetsTestUtil {
         return remoteAssetsConfigs;
     }
 
-    public static void setupRemoteAssetsServiceUser(AemContext context) {
+    public static void setupRemoteAssetsServiceUser(AemContext context) throws RepositoryException {
         Map<String, Object> serviceUserMapperConfig = new HashMap<>();
-        serviceUserMapperConfig.put("user.mapping", context.bundleContext().getBundle().getSymbolicName() + ":remote-assets=acs-commons-remote-assets-service");
+        serviceUserMapperConfig.put("user.mapping", context.bundleContext().getBundle().getSymbolicName() + ":remote-assets=[acs-commons-remote-assets-service]");
         context.registerInjectActivateService(new MappingConfigAmendment(), serviceUserMapperConfig);
     }
 }

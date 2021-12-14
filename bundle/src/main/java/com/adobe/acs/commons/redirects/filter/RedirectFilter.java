@@ -167,17 +167,17 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private ConfigurationResourceResolver configResolver;
+    ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private LocationHeaderAdjuster urlAdjuster;
+    LocationHeaderAdjuster urlAdjuster;
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
@@ -189,7 +189,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private Collection<String> paths;
     private Configuration config;
     private ExecutorService executor;
-    private Cache<String, RedirectConfiguration> rulesCache;
+    Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);

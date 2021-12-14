@@ -101,9 +101,7 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
-                    nodetypes.cnd and privileges.xml in the package -->
-
+                    
                     <!-- Enforce separation of content and code (CODE ONLY) -->
                     <checks>
                         <check>
@@ -245,7 +243,7 @@
             <!-- configuration to create minimal package -->
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
+                <artifactId>groovy-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>create-min-package</id>
@@ -300,59 +298,30 @@
         <dependency>
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-taglib</artifactId>
-            <version>5.6.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.scripting.jsp.taglib</artifactId>
-            <version>2.1.8</version>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.day.commons</groupId>
-            <artifactId>day-commons-jstl</artifactId>
-            <version>1.1.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
+        <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
+            <groupId>com.adobe.aem</groupId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
     <profiles>
         <profile>

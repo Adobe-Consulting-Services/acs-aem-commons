@@ -89,7 +89,7 @@ public class TagCreatorTest {
 
     @Test
     public void testCreateAssetFolders() throws Exception {
-        final String rootPath = "/etc/tags";
+        final String rootPath = "/content/cq:tags";
 
         ctx.create().resource(rootPath, JcrConstants.JCR_PRIMARYTYPE, "sling:Folder");
         ctx.resourceResolver().commit();

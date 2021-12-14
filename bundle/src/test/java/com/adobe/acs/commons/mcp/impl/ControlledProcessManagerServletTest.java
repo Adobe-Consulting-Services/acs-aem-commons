@@ -58,7 +58,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
 
 import javax.servlet.ServletException;
 
@@ -87,7 +86,7 @@ public class ControlledProcessManagerServletTest {
         List<ProcessInstance> activeProcesses = new ArrayList<>();
         ArchivedProcessInstance p1 = new ArchivedProcessInstance();
         ManagedProcess infoBean = new ManagedProcess();
-        Whitebox.setInternalState(p1, "infoBean", infoBean);
+        p1.infoBean = infoBean;
 
         List<ProcessInstance> inactiveProcesses = new ArrayList<>();
         inactiveProcesses.add(p1);
