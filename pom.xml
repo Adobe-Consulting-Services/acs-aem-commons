@@ -27,15 +27,6 @@
         <url>https://adobe-consulting-services.github.io/acs-aem-commons/</url>
     </organization>
 
-    <developers>
-        <developer>
-            <id>acs-aem-commons</id>
-            <organization>Adobe Consulting Services</organization>
-            <organizationUrl>https://www.adobe.com</organizationUrl>
-            <url>https://adobe-consulting-services.github.io/acs-aem-commons/</url>
-        </developer>
-    </developers>
-
     <scm>
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
         <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
