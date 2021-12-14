@@ -51,7 +51,7 @@
         <sl4fj.version>1.7.25</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
         <oakpal.version>2.0.0</oakpal.version>
-
+        <bnd.version>6.1.0</bnd.version>
         <!-- Supress CQRules:CQBP-84-\-dependencies -->
         <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
 
@@ -65,6 +65,10 @@
         <pluginManagement>
             <plugins>
                 <!-- all standard Maven plugins (in group org.apache.maven.plugins) -->
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
@@ -144,40 +148,70 @@
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>1.6</version>
                 </plugin>
-                <!-- all custom plugins -->
-                <!-- TODO: Remove this plugin -->
+                <!-- Bnd Maven Plugin -->
                 <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>${scr.plugin.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-simple</artifactId>
-                            <version>${sl4fj.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <!-- There are issues when trying to use other maven bundle plugin versions:
-                        4.x : Baseline fails to work properly, ignores the package-version class version numbers
-                        3.5.1: Manifest XML files are generated but are completely empty
-                        3.5.0: Produces 57 test failures
-                    -->
-                    <version>3.4.0</version>
-                    <extensions>true</extensions>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
                     <executions>
                         <execution>
-                            <id>baseline</id>
+                            <id>bnd-process</id>
                             <goals>
-                                <goal>baseline</goal>
+                                <goal>bnd-process</goal>
                             </goals>
+                            <configuration>
+                                <bnd><![CDATA[
+# a lot of bundle header are generated from pom elements by default: https://github.com/bndtools/bnd/tree/master/maven/bnd-maven-plugin#default-bundle-headers
+Bundle-Category: acs-aem-commons
+# export all versioned packages except for conditional ones (https://github.com/bndtools/bnd/issues/3721#issuecomment-579026778)
+-exportcontents: ${removeall;${packages;VERSIONED};${packages;CONDITIONAL}}
+# see https://issues.apache.org/jira/browse/SLING-8980
+-snapshot: SNAPSHOT
+# reproducible builds (https://github.com/bndtools/bnd/issues/3521)
+-noextraheaders: true
+# we cannot let bnd-maven-plugin generate it automatically, as Maven applies some inheritance logic which is incorrect for Sling (https://issues.apache.org/jira/browse/SLING-8537)
+Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
+# generate error (instead of warning) when exported package uses private (non-exported) reference
+-fixupmessages:"Export *,  has \\d+,  private references"; \
+    restrict:=warning; \
+    is:=error
+_dsannotations-inherit: true
+# enable plugins (https://bnd.bndtools.org/instructions/plugin.html)
+-plugin.models: org.apache.sling.bnd.models.ModelsScannerPlugin
+-plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
+# support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
+-plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory};log=error
+                                ]]></bnd>
+                            </configuration>
                         </execution>
                     </executions>
+                    <dependencies>
+                          <!-- enable generating the manifest header for Sling Models, https://sling.apache.org/documentation/bundles/models.html#registration-of-sling-models-classes-via-bnd-plugin -->
+                          <dependency>
+                              <groupId>org.apache.sling</groupId>
+                              <artifactId>org.apache.sling.bnd.models</artifactId>
+                              <version>1.0.0</version>
+                          </dependency>
+                          <!-- enable generating the 'Sling-ContextAware-Configuration-Classes' bundle header, https://sling.apache.org/documentation/bundles/context-aware-configuration/context-aware-configuration.html#context-aware-configuration-bnd-plugin -->
+                          <dependency>
+                              <groupId>org.apache.sling</groupId>
+                              <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
+                              <version>1.0.2</version>
+                          </dependency>
+                          <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
+                              with the Bnd process -->
+                          <dependency>
+                              <groupId>org.apache.felix</groupId>
+                              <artifactId>org.apache.felix.scr.bnd</artifactId>
+                              <version>1.9.6</version>
+                          </dependency>
+                      </dependencies>
                 </plugin>
-
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-baseline-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>sling-maven-plugin</artifactId>
@@ -353,7 +387,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.9.8</version>
+                <version>1.12.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>

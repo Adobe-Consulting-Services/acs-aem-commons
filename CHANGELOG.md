@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- #1718 - Use bnd-maven-plugin instead of maven-bundle-plugin
 - #2261 - Update to latest mocking libraries
 - #2753 - Update to AEM 6.4 dependencies
 - #2754 - Support building with Java 17
