@@ -189,7 +189,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private Collection<String> paths;
     private Configuration config;
     private ExecutorService executor;
-    private Cache<String, RedirectConfiguration> rulesCache;
+    Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
