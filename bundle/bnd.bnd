@@ -1,6 +1,5 @@
-Bundle-Activator: com.adobe.acs.commons.util.impl.Activator
 Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-bundle
-Import-Package:
+Import-Package: \
   com.adobe.cq.dialogconversion;resolution:=optional,\
   com.amazonaws.*;resolution:=optional,\
   com.github.jknack.handlebars;resolution:=optional,\
@@ -20,7 +19,6 @@ Import-Package:
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
   !android.util.*,\
-# shaded dependencies
   !com.google.common.*,\
   !com.google.thirdparty.*,\
   !com.jcraft.*,\

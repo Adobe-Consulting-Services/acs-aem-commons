@@ -19,31 +19,21 @@
  */
 package com.adobe.acs.commons.it.build;
 
-import com.adobe.acs.commons.http.JsonObjectResponseHandler;
-import com.google.gson.JsonObject;
-import junit.framework.TestCase;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.fluent.Request;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.osgi.framework.Constants;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -53,6 +43,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.fluent.Request;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Test;
+import org.osgi.framework.Constants;
+
+import com.adobe.acs.commons.http.JsonObjectResponseHandler;
+import com.google.gson.JsonObject;
 
 /**
  * The purpose of this test is to validate that SCR and Metatype properties are not inadvertantly changed between ACS AEM Commons releases.
@@ -152,7 +161,7 @@ public class ScrMetadataIT {
 
             if (!problems.isEmpty()) {
                 problems.forEach(System.err::println);
-                TestCase.fail();
+                Assert.fail();
             }
         }
     }
@@ -207,12 +216,11 @@ public class ScrMetadataIT {
         return parseJar(new FileInputStream(cachedFile), false);
     }
 
-
     private DescriptorList getDescriptorsFromCurrent() throws Exception {
         String artifactPath = System.getProperty("artifactPath");
         if (artifactPath == null) {
-            System.err.println("Artifact Path not set, presumably because this test is run from an IDE. Not checking JAR contents.");//NOPMD
-            return null;
+            System.err.println("Artifact Path not set, presumably because this test is run from an IDE. Not checking JAR contents but rather target/classes/OSGI-INF");//NOPMD
+            return parseClassesDirectory(Paths.get("target", "classes"), true);
         }
 
         return parseJar(new FileInputStream(artifactPath), true);
@@ -221,95 +229,137 @@ public class ScrMetadataIT {
     private DescriptorList parseJar(InputStream is, boolean checkNs) throws Exception {
         DescriptorList result = new DescriptorList();
 
+        List<Descriptor> metatypeDescriptors = new LinkedList<>();
         try (ZipInputStream zis = new ZipInputStream(is)) {
             ZipEntry entry = zis.getNextEntry();
             while (entry != null) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".xml")) {
                     if (entry.getName().startsWith("OSGI-INF/metatype")) {
-                        result.merge(parseMetatype(new InputStreamFacade(zis), entry.getName()));
+                        metatypeDescriptors.add(parseMetatype(new InputStreamFacade(zis), entry.getName()));
                     } else if (entry.getName().startsWith("OSGI-INF/")) {
                         result.merge(parseScr(new InputStreamFacade(zis), entry.getName(), checkNs));
                     }
                 }
-
                 entry = zis.getNextEntry();
             }
         }
-
-
+        // metatype descriptors must come last (after component descriptions)
+        for (Descriptor metatypeDescriptor : metatypeDescriptors) {
+            result.merge(metatypeDescriptor);
+        }
         return result;
     }
 
-    private Descriptor parseScr(InputStream is, String name, boolean checkNs) throws Exception {
-        Descriptor result = new Descriptor();
+    private DescriptorList parseClassesDirectory(Path classesDirectory, boolean checkNs) throws Exception {
+        DescriptorList result = new DescriptorList();
 
-        XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
-        while (reader.hasNext()) {
-            XMLEvent event = reader.nextEvent();
-            if (event.isStartElement()) {
-                StartElement start = event.asStartElement();
-                String elementName = start.getName().getLocalPart();
-                if (elementName.equals("component")) {
-                    result.name = start.getAttributeByName(new QName("name")).getValue();
-                    if (checkNs) {
-                        String scrUri = start.getName().getNamespaceURI();
-                        if (!ALLOWED_SCR_NS_URIS.contains(scrUri)) {
-                            throw new Exception(String.format("Banned Namespace URI %s found for %s", scrUri, name));
+        Path osgiInfDirectory = classesDirectory.resolve("OSGI-INF");
+        if (!Files.isDirectory(osgiInfDirectory)) {
+            throw new IllegalStateException("Path " + osgiInfDirectory + " cannot be found or is no directory");
+        }
+        List<Descriptor> metatypeDescriptors = new LinkedList<>();
+        Files.walkFileTree(osgiInfDirectory, new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (file.getFileName().toString().endsWith(".xml")) {
+                    String parentDirectoryName = file.getParent().getFileName().toString();
+                    if ("OSGI-INF".equals(parentDirectoryName)) {
+                        try (InputStream input = Files.newInputStream(file)) {
+                            result.merge(parseScr(input, file.getFileName().toString(), checkNs));
+                        }
+                    } else if ("metatype".equals(parentDirectoryName)) {
+                        try (InputStream input = Files.newInputStream(file)) {
+                            metatypeDescriptors.add(parseMetatype(input, file.getFileName().toString()));
                         }
                     }
-                } else if (elementName.equals("property")) {
-                    String propName = start.getAttributeByName(new QName("name")).getValue();
-                    Attribute value = start.getAttributeByName(new QName("value"));
-                    Attribute typeAttr = start.getAttributeByName(new QName("type"));
-                    String type = typeAttr == null ? "String" : typeAttr.getValue();
-                    if (value != null) {
-                        result.properties.add(new Property(propName, value.getValue(), type));
-                    } else {
-                        result.properties.add(new Property(propName, cleanText(reader.getElementText()), type));
+                }
+                return super.visitFile(file, attrs);
+            }
+            
+        });
+        // metatype descriptors must come last (after component descriptions)
+        for (Descriptor metatypeDescriptor : metatypeDescriptors) {
+            result.merge(metatypeDescriptor);
+        }
+        return result;
+    }
+
+    private Descriptor parseScr(InputStream is, String name, boolean checkNs) throws IOException {
+        Descriptor result = new Descriptor();
+
+        try {
+            XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
+            while (reader.hasNext()) {
+                XMLEvent event = reader.nextEvent();
+                if (event.isStartElement()) {
+                    StartElement start = event.asStartElement();
+                    String elementName = start.getName().getLocalPart();
+                    if (elementName.equals("component")) {
+                        result.name = start.getAttributeByName(new QName("name")).getValue();
+                        if (checkNs) {
+                            String scrUri = start.getName().getNamespaceURI();
+                            if (!ALLOWED_SCR_NS_URIS.contains(scrUri)) {
+                                throw new IllegalArgumentException(String.format("Banned Namespace URI %s found for %s", scrUri, name));
+                            }
+                        }
+                    } else if (elementName.equals("property")) {
+                        String propName = start.getAttributeByName(new QName("name")).getValue();
+                        Attribute value = start.getAttributeByName(new QName("value"));
+                        Attribute typeAttr = start.getAttributeByName(new QName("type"));
+                        String type = typeAttr == null ? "String" : typeAttr.getValue();
+                        if (value != null) {
+                            result.properties.add(new Property(propName, value.getValue(), type));
+                        } else {
+                            result.properties.add(new Property(propName, cleanText(reader.getElementText()), type));
+                        }
                     }
                 }
             }
+        } catch (XMLStreamException e) {
+            throw new IOException("Error parsing XML", e);
         }
-
         return result;
     }
 
-    private Descriptor parseMetatype(InputStream is, String name) throws Exception {
+    private Descriptor parseMetatype(InputStream is, String name) throws IOException {
         Descriptor result = new Descriptor();
-
-        XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
-        while (reader.hasNext()) {
-            XMLEvent event = reader.nextEvent();
-            if (event.isStartElement()) {
-                StartElement start = event.asStartElement();
-                String elementName = start.getName().getLocalPart();
-                if (elementName.equals("Designate")) {
-                    Attribute pidAttribute = start.getAttributeByName(new QName("pid"));
-                    if (pidAttribute != null) {
-                        result.name = pidAttribute.getValue();
-                    } else {
-                        pidAttribute = start.getAttributeByName(new QName("factoryPid"));
+        try {
+            XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
+            while (reader.hasNext()) {
+                XMLEvent event = reader.nextEvent();
+                if (event.isStartElement()) {
+                    StartElement start = event.asStartElement();
+                    String elementName = start.getName().getLocalPart();
+                    if (elementName.equals("Designate")) {
+                        Attribute pidAttribute = start.getAttributeByName(new QName("pid"));
                         if (pidAttribute != null) {
                             result.name = pidAttribute.getValue();
+                        } else {
+                            pidAttribute = start.getAttributeByName(new QName("factoryPid"));
+                            if (pidAttribute != null) {
+                                result.name = pidAttribute.getValue();
+                            }
+                            result.factory = true;
                         }
-                        result.factory = true;
-                    }
-                } else if (elementName.equals("AD")) {
-                    String propName = start.getAttributeByName(new QName("id")).getValue();
-                    Attribute value = start.getAttributeByName(new QName("default"));
-                    Attribute typeAttr = start.getAttributeByName(new QName("type"));
-                    String type = typeAttr == null ? "String" : typeAttr.getValue();
-                    if (value == null) {
-                        result.properties.add(new Property(propName, "", type));
-                    } else {
-                        result.properties.add(new Property(propName, value.getValue(), type));
+                    } else if (elementName.equals("AD")) {
+                        String propName = start.getAttributeByName(new QName("id")).getValue();
+                        Attribute value = start.getAttributeByName(new QName("default"));
+                        Attribute typeAttr = start.getAttributeByName(new QName("type"));
+                        String type = typeAttr == null ? "String" : typeAttr.getValue();
+                        if (value == null) {
+                            result.properties.add(new Property(propName, "(metatype)", type));
+                        } else {
+                            result.properties.add(new Property(propName, "(metatype)" + value.getValue(), type));
+                        }
                     }
                 }
             }
+        } catch (XMLStreamException e) {
+            throw new IOException("Error parsing XML", e);
         }
-
         if (result.name == null) {
-            throw new Exception("Could not identify pid for " + name);
+            throw new IllegalArgumentException("Could not identify pid for " + name);
         }
         return result;
     }
@@ -327,6 +377,10 @@ public class ScrMetadataIT {
 
         private List<Descriptor> list = new ArrayList<>();
 
+        /**
+         * Properties with same name overwrite existing properties in an existing descriptor with the same name
+         * @param toAdd
+         */
         private void merge(Descriptor toAdd) {
             Optional<Descriptor> current = list.stream().filter(cd -> cd.name.equals(toAdd.name)).findFirst();
             if (current.isPresent()) {
@@ -351,7 +405,7 @@ public class ScrMetadataIT {
     }
 
     private class Descriptor {
-        private String name;
+        private String name; // this is component name or pid/factory pid
         private List<Property> properties = new ArrayList<>();
         private boolean factory;
 
