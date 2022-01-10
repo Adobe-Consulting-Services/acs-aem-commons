@@ -19,23 +19,21 @@
  */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
-import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.commons.WCMUtils;
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.Bindings;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Bindings Values Provider that adds bindings for globalProperties,
@@ -52,79 +50,86 @@ import java.util.Map;
  * to instance-level values, then shared values, and finally global
  * values when properties exist at multiple levels with the same name.
  */
-@org.apache.felix.scr.annotations.Component
+@Component
 @Service
 public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesBindingsValuesProvider.class);
 
-    @Reference
-    private PageRootProvider pageRootProvider;
-
-    @Reference
-    private SharedComponentProperties sharedComponentProperties;
+    /**
+     * Bind if available, check for null when reading.
+     */
+    @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    SharedComponentProperties sharedComponentProperties;
 
     @Override
-    public void addBindings(Bindings bindings) {
-        Resource resource = (Resource) bindings.get("resource");
-        Component component = WCMUtils.getComponent(resource);
-        if (component != null) {
-            if (pageRootProvider != null) {
-                setSharedProperties(bindings, resource, component);
+    public void addBindings(final Bindings bindings) {
+        final SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
+        final Resource resource = (Resource) bindings.get(SlingBindings.RESOURCE);
+        if (request != null && resource != null) {
+            final SharedPropertiesRequestCache cache = SharedPropertiesRequestCache.fromRequest(request);
+            if (sharedComponentProperties != null) {
+                setSharedProperties(bindings, resource, cache);
             } else {
-                log.debug("Page Root Provider must be configured for shared component properties to be supported");
+                log.debug("Shared Component Properties must be configured to enable this provider");
             }
-            setMergedProperties(bindings, resource);
         }
+        setDefaultBindings(bindings, resource);
     }
 
-    private void setSharedProperties(Bindings bindings, Resource resource, Component component) {
-        Page pageRoot = pageRootProvider.getRootPage(resource);
-        if (pageRoot != null) {
-            String globalPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
-            Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
-            if (globalPropsResource != null) {
-                bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, globalPropsResource.getValueMap());
-                bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE, globalPropsResource);
+    private void setSharedProperties(final Bindings bindings,
+                                     final Resource resource,
+                                     final SharedPropertiesRequestCache cache) {
+        String rootPagePath = sharedComponentProperties.getSharedPropertiesPagePath(resource);
+        if (rootPagePath != null) {
+            // set this value even when global or shared resources are not found to indicate cache validity downstream
+            bindings.put(SharedComponentProperties.SHARED_PROPERTIES_PAGE_PATH, rootPagePath);
+            String globalPropsPath = sharedComponentProperties.getGlobalPropertiesPath(resource);
+            if (globalPropsPath != null) {
+                bindings.putAll(cache.getBindings(globalPropsPath, (newBindings) -> {
+                    final Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
+                    if (globalPropsResource != null) {
+                        newBindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, globalPropsResource.getValueMap());
+                        newBindings.put(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE, globalPropsResource);
+                    }
+                }));
             }
 
-            String sharedPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES +  "/"
-                    + component.getResourceType();
-            Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
-            if (sharedPropsResource != null) {
-                bindings.put(SharedComponentProperties.SHARED_PROPERTIES, sharedPropsResource.getValueMap());
-                bindings.put(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE, sharedPropsResource);
+            final String sharedPropsPath = sharedComponentProperties.getSharedPropertiesPath(resource);
+            if (sharedPropsPath != null) {
+                bindings.putAll(cache.getBindings(sharedPropsPath, (newBindings) -> {
+                    Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
+                    if (sharedPropsResource != null) {
+                        newBindings.put(SharedComponentProperties.SHARED_PROPERTIES, sharedPropsResource.getValueMap());
+                        newBindings.put(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE, sharedPropsResource);
+                    }
+                }));
+                bindings.put(SharedComponentProperties.SHARED_PROPERTIES_PATH, sharedPropsPath);
             }
-        } else {
-            log.debug("Could not determine shared properties root for resource {}", resource.getPath());
+
+            final String mergedPropertiesPath = resource.getPath();
+            bindings.putAll(cache.getBindings(mergedPropertiesPath, (newBindings) -> {
+                ValueMap globalPropertyMap = (ValueMap) bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES);
+                ValueMap sharedPropertyMap = (ValueMap) bindings.get(SharedComponentProperties.SHARED_PROPERTIES);
+                newBindings.put(SharedComponentProperties.MERGED_PROPERTIES,
+                        sharedComponentProperties.mergeProperties(globalPropertyMap, sharedPropertyMap, resource));
+            }));
+            // set this value to indicate cache validity downstream
+            bindings.put(SharedComponentProperties.MERGED_PROPERTIES_PATH, resource.getPath());
         }
     }
 
-    private void setMergedProperties(Bindings bindings, Resource resource) {
-        ValueMap globalPropertyMap = (ValueMap) bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES);
-        ValueMap sharedPropertyMap = (ValueMap) bindings.get(SharedComponentProperties.SHARED_PROPERTIES);
-        ValueMap localPropertyMap = resource.getValueMap();
-
-        bindings.put(SharedComponentProperties.MERGED_PROPERTIES, mergeProperties(localPropertyMap, sharedPropertyMap, globalPropertyMap));
+    private void setDefaultBindings(final Bindings bindings,
+                                    final Resource resource) {
+        if (!bindings.containsKey(SharedComponentProperties.GLOBAL_PROPERTIES)) {
+            bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, ValueMap.EMPTY);
+        }
+        if (!bindings.containsKey(SharedComponentProperties.SHARED_PROPERTIES)) {
+            bindings.put(SharedComponentProperties.SHARED_PROPERTIES, ValueMap.EMPTY);
+        }
+        if (!bindings.containsKey(SharedComponentProperties.MERGED_PROPERTIES)) {
+            bindings.put(SharedComponentProperties.MERGED_PROPERTIES,
+                    resource == null ? ValueMap.EMPTY : resource.getValueMap());
+        }
     }
 
-    private ValueMap mergeProperties(ValueMap instanceProperties, ValueMap sharedProperties, ValueMap globalProperties) {
-        Map<String, Object> mergedProperties = new HashMap<String, Object>();
-
-        // Add Component Global Configs
-        if (globalProperties != null) {
-            mergedProperties.putAll(globalProperties);
-        }
-
-        // Add Component Shared Configs
-        if (sharedProperties != null) {
-            mergedProperties.putAll(sharedProperties);
-        }
-
-        // Merge in the Component Local Configs
-        if (instanceProperties != null) {
-            mergedProperties.putAll(instanceProperties);
-        }
-
-        return new ValueMapDecorator(mergedProperties);
-    }
 }

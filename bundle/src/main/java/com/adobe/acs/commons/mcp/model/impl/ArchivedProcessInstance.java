@@ -60,7 +60,7 @@ public class ArchivedProcessInstance implements ProcessInstance, Serializable {
 
     @Inject
     @Named("jcr:content")
-    ManagedProcess infoBean;
+    public ManagedProcess infoBean;
 
     @Override
     public String getName() {

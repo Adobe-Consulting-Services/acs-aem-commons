@@ -42,11 +42,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.engine.EngineConstants;
@@ -76,7 +72,9 @@ import org.slf4j.LoggerFactory;
         label = "ACS AEM Commons - AEM Environment Indicator",
         description = "Adds a visual cue to the AEM WebUI indicating which environment is being access "
                 + "(localdev, dev, qa, staging)",
-        metatype = true)
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE
+)
 public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);
 

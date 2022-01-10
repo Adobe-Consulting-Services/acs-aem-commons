@@ -79,6 +79,12 @@ public class SaxElementUtilsTest {
                                 "src", "/js.js",
                                 "type", SaxElementUtils.JS_TYPE)));
 
+        assertTrue("JS Module Happy Path",
+                SaxElementUtils.isJavaScript("script",
+                        makeAtts(
+                                "src", "/js.js",
+                                "type", SaxElementUtils.JS_MODULE_TYPE)));
+
         assertTrue("JS Happy Path - Optional Type Attribute",
                 SaxElementUtils.isJavaScript("script",
                         makeAtts(

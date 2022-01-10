@@ -28,7 +28,7 @@ import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.contentsync.handler.util.RequestResponseFactory;
@@ -150,7 +150,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        GenericReport report = new GenericReport();
+        GenericBlobReport report = new GenericBlobReport();
         report.setName("Rebuild thumbnails " + startingPath);
         report.setRows(reportData, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");

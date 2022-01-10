@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.0.9-SNAPSHOT</version>
+        <version>5.1.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -18,6 +18,10 @@
     <packaging>bundle</packaging>
     <name>ACS AEM Commons Bundle</name>
     <description>Main ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
+
+    <properties>
+        <jjwt.version>0.11.2</jjwt.version>
+    </properties>
 
     <!-- ====================================================================== -->
     <!-- B U I L D D E F I N I T I O N -->
@@ -221,9 +225,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <showDeprecation>true</showDeprecation>
                     <annotationProcessors>
                         com.adobe.acs.commons.mcp.form.DialogProviderAnnotationProcessor
                     </annotationProcessors>
@@ -256,8 +257,7 @@
                                     <!-- here we need to explicitly list the set of dependencies which 
                                     are allowed with scope=compile -->
                                     <includes>
-                                        <include>com.google.guava:guava</include>
-                                        <include>com.google.guava:failureaccess</include>
+                                        <include>com.google.guava:*</include>
                                         <include>io.jsonwebtoken:jjwt-api</include>
                                         <include>io.jsonwebtoken:jjwt-impl</include>
                                         <include>io.jsonwebtoken:jjwt-gson</include>
@@ -285,8 +285,7 @@
                             <shadeSourcesContent>true</shadeSourcesContent>
                             <artifactSet>
                                 <includes>
-                                    <include>com.google.guava:guava</include>
-                                    <include>com.google.guava:failureaccess</include>
+                                    <include>com.google.guava:*</include>
                                     <include>com.jcraft:jsch</include>
                                     <include>com.jcraft:jzlib</include>
                                     <include>io.jsonwebtoken:jjwt-api</include>
@@ -299,6 +298,7 @@
                                     <pattern>com.google.common</pattern>
                                     <shadedPattern>acscommons.com.google.common</shadedPattern>
                                 </relocation>
+                                <!-- contained in guava as well -->
                                 <relocation>
                                     <pattern>com.google.thirdparty</pattern>
                                     <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
@@ -315,12 +315,6 @@
                             <filters>
                                 <filter>
                                     <artifact>com.google.guava:guava</artifact>
-                                    <includes>
-                                        <include>com/google/**</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.google.guava:failureaccess</artifact>
                                     <includes>
                                         <include>com/google/**</include>
                                     </includes>
@@ -363,7 +357,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
                 <configuration>
                     <reuseForks>false</reuseForks>
                     <forkCount>1C</forkCount>
@@ -387,22 +380,54 @@
         </plugins>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- use and shade newer Guava version than shipped with AEM -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>30.1-jre</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
+        <!-- ======================== -->
+        <!-- START build dependencies -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-osgi</artifactId>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.versioning</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.cmpn</artifactId>
+            <artifactId>org.osgi.annotation.bundle</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.metatype.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.servlets.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- @PostConstruct -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -410,87 +435,112 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>biz.aQute</groupId>
-            <artifactId>bndlib</artifactId>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bnd.annotation</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-atinject_1.0_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- END build dependencies -->
+        <!-- ======================== -->
+        <!-- START runtime dependencies not contained in uber-jar -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.dto</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.tracker</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.metatype</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.cm</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <scope>test</scope>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <scope>provided</scope>
         </dependency>
-
+        <!-- for com.adobe.acs.commons.logging.impl.SyslogAppender  -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.jcr</groupId>
-            <artifactId>jcr</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-email</artifactId>
-            <version>1.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>jsp-api</artifactId>
-            <version>2.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <version>1.1.1</version>
+            <groupId>javax.jcr</groupId>
+            <artifactId>jcr</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- MCP: Apache POI used for exporting Excel spreadsheets -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.scribe</groupId>
-            <artifactId>scribe</artifactId>
-            <version>1.3.0</version>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.13</version>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- END runtime dependencies not contained in uber-jar -->
+        <!-- ======================== -->
+        <!-- START: optional dependencies which are neither part of AEM nor ACS AEM Commons but need separate installation -->
+        <!-- must be installed separately: https://adobe-consulting-services.github.io/acs-aem-commons/features/http-cache/subpages/activating-caffeine-cache.html -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -499,94 +549,32 @@
             <version>1.0.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- for disabling components in AEM 6.0 -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr</artifactId>
-            <version>1.8.2</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <!-- for disabling components in AEM 6.1 (leveraging DS 1.3 API) -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.component</artifactId>
-            <version>1.3.0</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.util.promise</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <version>4.6.1</version>
-            <scope>provided</scope>
-        </dependency>
+        <!-- END: optional dependencies which are neither part of AEM nor ACS AEM Commons but need separate installation -->
+         <!-- ======================== -->
+        <!-- START: shaded and relocated dependencies -->
         <!-- Http Cache Dependencies -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>failureaccess</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <!-- MCP: Apache POI used for exporting Excel spreadsheets -->
-        <dependency>
-            <groupId>com.adobe.granite</groupId>
-            <artifactId>com.adobe.granite.poi</artifactId>
-            <version>2.0.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>1.14</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
-            <version>1.5</version>
-            <scope>provided</scope>
             <exclusions>
-                <exclusion>
-                    <groupId>com.drewnoakes</groupId>
-                    <artifactId>metadata-extractor</artifactId>
-                </exclusion>
+              <exclusion>
+                <groupId>com.google.j2objc</groupId>
+                <artifactId>j2objc-annotations</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+              </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-osgi</artifactId>
-            <version>1.10.76</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -601,31 +589,56 @@
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
+        <!-- Due to the split of the JJWT library we need  
+                  - the api for compilation 
+                  - and the impl for embedding together with
+                  - the extension for serialization/deserialization support -->
         <dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-core</artifactId>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>compile</scope>
         </dependency>
-
-        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-gson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- END: shaded and relocated dependencies -->
+        <!-- ======================== -->
+        <!-- START: test dependencies -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit-addons</groupId>
             <artifactId>junit-addons</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
@@ -638,6 +651,12 @@
             <artifactId>compile-testing</artifactId>
             <version>0.18</version>
             <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         <!-- Downgrade from 2.4 to 2.1 for AEM 6.4 support -->
         <dependency>
@@ -657,6 +676,10 @@
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
+                <exclusion>
+                  <groupId>com.google.code.findbugs</groupId>
+                  <artifactId>jsr305</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -669,13 +692,11 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.commons.osgi</artifactId>
-            <version>2.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.impl</artifactId>
-            <version>1.3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -688,13 +709,11 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.api</artifactId>
-            <version>1.3.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.jackrabbit</groupId>
             <artifactId>jackrabbit-jcr-commons</artifactId>
-            <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -706,35 +725,38 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-imaging</artifactId>
-            <version>1.0-R1534292</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
+            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.sling-mock</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.sling-mock-jackrabbit</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!-- execute tests with Oak 1.40.0 to make them run on Java 17 as well -->
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.drewnoakes</groupId>
+                    <artifactId>metadata-extractor</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>com.google.code.gson</groupId>
+                  <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.wcm</groupId>
@@ -751,6 +773,22 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.testing</artifactId>
+            <version>2.1.2</version>
+            <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.agent</artifactId>
             <classifier>runtime</classifier>
@@ -759,6 +797,7 @@
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>me.alexpanov</groupId>
@@ -785,61 +824,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.jknack</groupId>
-            <artifactId>handlebars</artifactId>
-            <version>4.0.6</version>
-            <scope>provided</scope>
+            <groupId>com.day.cq</groupId>
+            <artifactId>cq-commons</artifactId>
+            <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- END: test dependencies -->
+        <!-- ======================== -->
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-gson</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.8.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.8.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.8.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Build Dependencies -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation</artifactId>
-            <version>6.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

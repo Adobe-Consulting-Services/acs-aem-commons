@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.0.9-SNAPSHOT</version>
+        <version>5.1.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -92,9 +92,6 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
-                    nodetypes.cnd and privileges.xml in the package -->
-
                     <checks>
                         <!-- Enforce separation of content and code (CONTENT ONLY) -->
                         <check>
@@ -235,7 +232,7 @@
             <!-- configuration to create minimal package -->
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
+                <artifactId>groovy-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>create-min-package</id>
@@ -285,6 +282,7 @@
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <profiles>

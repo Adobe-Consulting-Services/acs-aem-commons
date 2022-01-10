@@ -29,6 +29,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -63,18 +67,21 @@ public class ComponentDisabler implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
-    @Reference(policyOption = ReferencePolicyOption.GREEDY)
-    private ComponentDisablerDriver componentDisablerDriver;
-
     @Property(label = "Disabled components", description = "The names of the components/services you want to disable",
             cardinality = Integer.MAX_VALUE)
     private static final String DISABLED_COMPONENTS = "components";
 
     private String[] disabledComponents;
 
+    @Reference
+    private ServiceComponentRuntime scr;
+
+    private BundleContext bundleContext;
+
     @Activate
-    protected void activate(Map<String, Object> properties) {
+    protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
         disabledComponents = PropertiesUtil.toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
+        this.bundleContext = bundleContext;
         handleEvent(null);
     }
 
@@ -85,7 +92,17 @@ public class ComponentDisabler implements EventHandler {
         log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
-            componentDisablerDriver.disable(component);
+            disable(component);
+        }
+    }
+
+    public void disable(String componentName) {
+        for (Bundle bundle : bundleContext.getBundles()) {
+            ComponentDescriptionDTO dto = scr.getComponentDescriptionDTO(bundle, componentName);
+            if (dto != null && scr.isComponentEnabled(dto)) {
+                log.info("Component {} disabled by configuration.", dto.implementationClass);
+                scr.disableComponent(dto);
+            }
         }
     }
 }

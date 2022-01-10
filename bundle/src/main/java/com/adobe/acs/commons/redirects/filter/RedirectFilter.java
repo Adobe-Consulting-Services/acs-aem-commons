@@ -112,7 +112,9 @@ import static org.osgi.framework.Constants.SERVICE_ID;
         configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
         SERVICE_DESCRIPTION + "=A request filter implementing support for virtual redirects",
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
-        SERVICE_RANKING + ":Integer=10000",
+        // to correctly work in Author RedirectFilter needs to run after WCMRequestFilter which has rank 2000 in
+        // AEM 6.5 and Cloud SDK, see issue 2707
+        SERVICE_RANKING + ":Integer=1900",
         "jmx.objectname=" + "com.adobe.acs.commons:type=Redirect Manager",
         EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC,
         EventConstants.EVENT_TOPIC + "=" + ReplicationEvent.EVENT_TOPIC
@@ -165,17 +167,17 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private ConfigurationResourceResolver configResolver;
+    ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private LocationHeaderAdjuster urlAdjuster;
+    LocationHeaderAdjuster urlAdjuster;
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
@@ -187,7 +189,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private Collection<String> paths;
     private Configuration config;
     private ExecutorService executor;
-    private Cache<String, RedirectConfiguration> rulesCache;
+    Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
@@ -417,14 +419,15 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
             }
-            if(preserveQueryString) {
-                String queryString = slingRequest.getQueryString();
-                if (queryString != null) {
-                    location = preserveQueryString(location, queryString);
-                }
-            }
             if(urlAdjuster != null){
                 location = urlAdjuster.adjust(slingRequest, location);
+            }
+        }
+        if (preserveQueryString) {
+
+            String queryString = slingRequest.getQueryString();
+            if (queryString != null) {
+                location = preserveQueryString(location, queryString);
             }
         }
         return location;

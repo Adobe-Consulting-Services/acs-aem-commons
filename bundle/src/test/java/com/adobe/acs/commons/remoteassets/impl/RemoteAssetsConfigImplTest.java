@@ -37,6 +37,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import javax.jcr.AccessDeniedException;
+import javax.jcr.InvalidItemStateException;
+import javax.jcr.ItemExistsException;
+import javax.jcr.ReferentialIntegrityException;
+import javax.jcr.RepositoryException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
+
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -46,10 +56,10 @@ import static org.junit.Assert.fail;
 public class RemoteAssetsConfigImplTest {
 
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     @Before
-    public final void setup() {
+    public final void setup() throws RepositoryException {
         setupRemoteAssetsServiceUser(context);
         
         // does not work with a Mock here
@@ -141,7 +151,8 @@ public class RemoteAssetsConfigImplTest {
 
         ResourceResolver resourceResolver = config.getResourceResolver();
         assertNotNull(resourceResolver);
-        assertEquals("acs-commons-remote-assets-service", resourceResolver.getUserID());
+        // the following does not work due to https://issues.apache.org/jira/browse/SLING-10995
+        //assertEquals("acs-commons-remote-assets-service", resourceResolver.getUserID());
     }
 
     @Test

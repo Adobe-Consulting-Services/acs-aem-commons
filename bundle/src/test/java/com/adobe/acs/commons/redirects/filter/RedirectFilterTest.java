@@ -41,7 +41,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.powermock.reflect.Whitebox;
 
 import javax.management.openmbean.TabularData;
 import javax.servlet.FilterChain;
@@ -95,7 +94,7 @@ public class RedirectFilterTest {
         ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
         when(resourceResolverFactory.getServiceResourceResolver(any(Map.class)))
                 .thenReturn(context.resourceResolver());
-        Whitebox.setInternalState(filter, "resourceResolverFactory", resourceResolverFactory);
+        filter.resourceResolverFactory = resourceResolverFactory;
 
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(true);
@@ -123,7 +122,7 @@ public class RedirectFilterTest {
         configResolver = Mockito.mock(ConfigurationResourceResolver.class);
         Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(context.resourceResolver().getResource(redirectStoragePath));
-        Whitebox.setInternalState(filter, "configResolver", configResolver);
+        filter.configResolver = configResolver;
     }
 
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
@@ -131,6 +130,10 @@ public class RedirectFilterTest {
         int idx = resourcePath.lastIndexOf('.');
         if (idx > 0) {
             context.requestPathInfo().setExtension(resourcePath.substring(idx + 1));
+        }
+        int qs = resourcePath.lastIndexOf('?');
+        if (qs > 0) {
+            request.setQueryString(resourcePath.substring(qs + 1));
         }
         context.requestPathInfo().setResourcePath(resourcePath);
         request.setResource(context.create().resource(resourcePath));
@@ -221,6 +224,19 @@ public class RedirectFilterTest {
     }
 
     @Test
+    public void testNavigateToExternalSiteWithQueryString() throws Exception {
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "https://www.geometrixx.com",
+                        302, null, null));
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2&c=3");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("https://www.geometrixx.com?a=1&b=2&c=3", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
     public void testNavigate301() throws Exception {
         withRules(
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
@@ -282,8 +298,7 @@ public class RedirectFilterTest {
                 new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
                         302, null, null));
 
-        context.request().setQueryString("a=1&b=2");
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2");
 
         assertEquals(302, response.getStatus());
         assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
@@ -438,7 +453,7 @@ public class RedirectFilterTest {
     public void testInvalidateOnChange() throws Exception {
 
         Cache<String, RedirectConfiguration> rulesCache = mock(Cache.class);
-        Whitebox.setInternalState(filter, "rulesCache", rulesCache);
+        filter.rulesCache = rulesCache;
 
         withRules("/conf/global/settings/redirects",
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
@@ -565,7 +580,7 @@ public class RedirectFilterTest {
                 return location.replace(".html", ".adjusted.html");
             }
         };
-        Whitebox.setInternalState(filter, "urlAdjuster", urlAdjuster);
+        filter.urlAdjuster = urlAdjuster;
         withRules(
                 new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
                         302, null, null));

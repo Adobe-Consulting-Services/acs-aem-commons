@@ -23,6 +23,6 @@ public class OnDeployScriptTestExampleSuccessWithPause extends OnDeployScriptBas
     @Override
     protected void execute() throws Exception {
         logger.info("Executing test script: OnDeployScriptTestExampleSuccessWithPause");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
     }
 }

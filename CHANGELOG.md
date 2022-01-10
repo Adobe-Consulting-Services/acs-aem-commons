@@ -7,11 +7,68 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+
+### Changed
+
+- #2261 - Update to latest mocking libraries
+- #2753 - Update to AEM 6.4 dependencies
+- #2754 - Support building with Java 17
+
+## 5.1.0 - 2021-12-13
+
+### Added
+
+- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is a member of required groups or an admin.
+
+### Fixed
+
+- #2749 and #2488: Manage Controlled Processes does not show any process fixed via #2751
+- #2337 - Marketo form null on publish fixed via #2758
+- #2735 - Redirect Manager: preserve query string in external redirects fixed via #2736
+- #2658 - Fixed issue where implementing RequestPathInfo was being caught by CQRules:CQBP-84
+- #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
+- #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
+
+### Changed
+
+- #2742 - Provided a way to author localized titles for Generic Lists.
+
+## 5.0.14 - 2021-10-20
+
+### Fixed
+
+- #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
+- #2716 - Fixed issue with Shared Component Properties Bindings Values Provider facing lock contention
+- #2718 - Fixes CM Code Quality Pipeline failure caused by TestMarketoInterfaces and Jacoco instrumentation
+- #2713 - Marketo form/cloud config root missing
+- #2714 - Implemented shared and global component properties to work in experience fragments.
+- #2721 - Redirect Manager: Fix Broken UI in Cloud SDK
+- #2724 - Marketo proxy request support
+
+## 5.0.12 - 2021-09-24
+
+### Fixed
+
+- #2701 - Fixed UI issues on MCP UI on AEM as a Cloud Service
+- #2690 - Require an OSGi configuration to be present for AEM Environment Indicator to display
+- #2691 - Fixed support for type module scripts for versioned clientlibs 
+- #2694 - Fixed parsys-limiter counting clipboard items also when the action is not paste
+
+## 5.0.10 - 2021-08-31
+
+### Changed
+
+- #2669 - Store MCP reports in a single node instead of a large node structure (fixes #2507)
+
+### Fixed
+
+- #2687 - Fixes regression introduced in #2660 MCP Tools, and properly fixes setting so threads never terminate, using an "infinitely far-future" timeout.  
 
 ## 5.0.8 - 2021-08-25
 
 ### Fixed
+
 - #2612 - Fix build on Windows
 - #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors

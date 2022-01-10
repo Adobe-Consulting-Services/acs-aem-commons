@@ -26,6 +26,7 @@ import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.Map;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Test;
 
@@ -116,7 +117,11 @@ public class SyntheticFormResourceTest {
     public void syntheticResourceTest() throws DeserializeException {
         SlingHttpServletRequest mockRequest = mock(SlingHttpServletRequest.class);
         SlingScriptHelper mockScriptHelper = mock(SlingScriptHelper.class);
+        ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
         when(mockScriptHelper.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getResourceResolver()).thenReturn(mockResourceResolver);
+        when(mockResourceResolver.getResource(anyString())).thenReturn(null);
+
         Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), mockScriptHelper);
         assertNotNull(form.get("textComponentTest"));
         Resource fieldResource = form.get("textComponentTest").buildComponentResource();

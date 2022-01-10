@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.0.9-SNAPSHOT</version>
+        <version>5.1.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -27,7 +27,7 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
-                <version>4.1.0</version>
+                <version>5.1.1</version><!-- use newer version due to https://github.com/bndtools/bnd/issues/3903 -->
                 <executions>
                     <execution>
                         <goals>
@@ -265,6 +265,16 @@
         </profile>
     </profiles>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- override managed version from io.wcm.maven.aem-dependencies -->
+            <dependency>
+                <artifactId>oak-jcr</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <version>1.26.0</version><!-- use Oak version used in oakpal-core -->
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.jetbrains</groupId>

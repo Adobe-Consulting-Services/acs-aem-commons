@@ -1,8 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
         jcr:title="Context Aware Redirect Configurations"
-        sling:resourceType="acs-commons/components/utilities/manage-redirects/redirects"/>
+        sling:resourceType="acs-commons/components/utilities/manage-redirects/redirects">
+        <create-configuration
+            granite:id="createDialog"
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Create Context Aware Redirect Configuration"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog">
+            <items jcr:primaryType="nt:unstructured">
+                <header
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                    <items
+                        jcr:primaryType="nt:unstructured"
+                        path="/conf/fleetcorbizcard">
+                        <content
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                            <items jcr:primaryType="nt:unstructured">
+                                <form
+                                    granite:id="fn-acsCommons-save_redirects"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                                    action="${granite:relativeParent(requestPathInfo.resourcePath,7)}.create.html"
+                                    async="{Boolean}true"
+                                    foundationForm="{Boolean}true"
+                                    method="post"
+                                    style="vertical">
+                                    <successresponse
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <path
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            emptyText="Select conf root, e.g. /conf/&lt;my-site>"
+                                            fieldLabel="Conf Root"
+                                            name="path"
+                                            nodeTypes="sling:Folder, sling:OrderedFolder"
+                                            required="{Boolean}true"
+                                            rootPath="/conf"/>
+                                        <http-equiv-accept
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name=":http-equiv-accept"
+                                            value="application/json"/>
+                                    </items>
+                                </form>
+                            </items>
+                        </content>
+                    </items>
+                </header>
+            </items>
+            <footer jcr:primaryType="nt:unstructured">
+                <cancel
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    text="Cancel">
+                    <parentConfig
+                        jcr:primaryType="nt:unstructured"
+                        close="{Boolean}true"/>
+                </cancel>
+                <create
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    formId="fn-acsCommons-save_redirects"
+                    text="Create"
+                    type="submit"
+                    variant="primary"/>
+            </footer>
+        </create-configuration>
+    </jcr:content>
 </jcr:root>
