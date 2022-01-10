@@ -169,22 +169,21 @@ Bundle-Category: acs-aem-commons
 -snapshot: SNAPSHOT
 # reproducible builds (https://github.com/bndtools/bnd/issues/3521)
 -noextraheaders: true
-# we cannot let bnd-maven-plugin generate it automatically, as Maven applies some inheritance logic which is incorrect for Sling (https://issues.apache.org/jira/browse/SLING-8537)
+# we cannot let bnd-maven-plugin generate it automatically, as Maven applies some inheritance logic which is incorrect
 Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # generate error (instead of warning) when exported package uses private (non-exported) reference
 -fixupmessages:"Export *,  has \\d+,  private references"; \
     restrict:=warning; \
     is:=error
-_dsannotations-inherit: true
 # enable plugins (https://bnd.bndtools.org/instructions/plugin.html)
 -plugin.models: org.apache.sling.bnd.models.ModelsScannerPlugin
 -plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
 # support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
 # paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
 -plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
-# TODO: allow only ds 1.4 max and metatype 1.3 max
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0
+_dsannotations-inherit: true
 -metatypeannotations-options: version;maximum=1.3.0
                                 ]]></bnd>
                             </configuration>
