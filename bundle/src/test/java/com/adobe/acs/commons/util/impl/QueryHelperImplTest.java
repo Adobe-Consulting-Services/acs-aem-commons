@@ -77,7 +77,7 @@ public class QueryHelperImplTest {
 
     @Test
     public void testIsTraversal() throws Exception {
-        Resource root = context.currentResource("/");
+        final Resource root = context.currentResource("/");
         assertNotNull("expect root not null", root);
         context.resourceResolver().create(root, "foo", singletonMap("jcr:primaryType", "sling:Folder"));
         context.resourceResolver().commit();
@@ -86,24 +86,23 @@ public class QueryHelperImplTest {
 
     @Test
     public void testGetResourcesFromQuery() throws Exception {
-        Resource root = context.currentResource("/");
+        final Resource root = context.currentResource("/");
         assertNotNull("expect root not null", root);
-        Resource foo = context.resourceResolver().create(root, "foo", singletonMap("jcr:primaryType", "sling:Folder"));
-        Resource bar = context.resourceResolver().create(foo, "bar", singletonMap("jcr:primaryType", "sling:Folder"));
+        final Resource foo = context.resourceResolver().create(root, "foo", singletonMap("jcr:primaryType", "sling:Folder"));
+        final Resource bar = context.resourceResolver().create(foo, "bar", singletonMap("jcr:primaryType", "sling:Folder"));
         context.resourceResolver().commit();
-
         List<Resource> results = helper.findResources(context.resourceResolver(), Query.JCR_SQL2, "select * from [sling:Folder] where name() = 'foo'", "bar");
         assertEquals("expect result", bar.getPath(), results.get(0).getPath());
     }
 
     @Test
     public void testGetResourcesFromQueryBuilder() throws Exception {
-        Resource root = context.currentResource("/");
+        final Resource root = context.currentResource("/");
         assertNotNull("expect root not null", root);
-        Resource foo = context.resourceResolver().create(root, "foo", singletonMap("jcr:primaryType", "sling:Folder"));
-        Resource bar = context.resourceResolver().create(foo, "bar", singletonMap("jcr:primaryType", "sling:Folder"));
+        final Resource foo = context.resourceResolver().create(root, "foo", singletonMap("jcr:primaryType", "sling:Folder"));
+        final Resource bar = context.resourceResolver().create(foo, "bar", singletonMap("jcr:primaryType", "sling:Folder"));
         context.resourceResolver().commit();
-        Hit hit = mock(Hit.class);
+        final Hit hit = mock(Hit.class);
         when(hit.getResource()).thenReturn(foo);
         when(hit.getPath()).thenReturn(foo.getPath());
         when(searchResult.getHits()).thenReturn(singletonList(hit));
@@ -113,7 +112,7 @@ public class QueryHelperImplTest {
 
     @Test
     public void testIsTraversalQueryBuilder() throws Exception {
-        Resource root = context.currentResource("/");
+        final Resource root = context.currentResource("/");
         assertNotNull("expect root not null", root);
         context.resourceResolver().create(root, "foo", singletonMap("jcr:primaryType", "sling:Folder"));
         context.resourceResolver().commit();
