@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.search.impl;
+package com.adobe.acs.commons.cqsearch.impl;
 
 import com.day.cq.search.Predicate;
 import com.day.cq.search.eval.AbstractPredicateEvaluator;

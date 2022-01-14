@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2021 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
+
 /**
- * Http Injectors.
+ * Synthetic AEM Workflow APIs.
  */
-@org.osgi.annotation.versioning.Version("4.0.0")
-package com.adobe.acs.commons.wrap.cqsearch;
+@org.osgi.annotation.versioning.Version("5.1.0")
+package com.adobe.acs.commons.workflow.synthetic.cq;

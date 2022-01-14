@@ -21,8 +21,7 @@
 package com.adobe.acs.commons.dam.impl;
 
 
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.asset.api.AssetVersionManager;
@@ -30,6 +29,8 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -127,7 +128,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
     private Scheduler scheduler;
 
     @Reference
-    private CloseableQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
 
     private static final String DEFAULT_DEFAULT_CONFLICT_RESOLUTION = CONFLICT_RESOLUTION_NEW_VERSION;
     private String defaultConflictResolution = DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
@@ -159,7 +160,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
 
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             final String path = (String) event.getProperty("TaskId");
             final Resource taskResource = resourceResolver.getResource(path);
 
@@ -195,7 +196,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
         @Override
         public void run() {
-            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
                 // Access data passed into the Job from the Event
                 Resource resource = resourceResolver.getResource(path);
@@ -206,18 +207,17 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     String contentPath = taskProperties.get(PN_CONTENT_PATH, String.class);
 
                     if (StringUtils.startsWith(contentPath, PATH_CONTENT_DAM)) {
-                        try (CloseableQuery query = findAssets(resourceResolver, contentPath)) {
-                            log.debug("Found [ {} ] assets under [ {} ] that were reviewed and require processing.",
-                                    query.getResult().getHits().size(),
-                                    contentPath);
+                        Query query = findAssets(resourceResolver, contentPath);
+                        log.debug("Found [ {} ] assets under [ {} ] that were reviewed and require processing.",
+                                query.getResult().getHits().size(),
+                                contentPath);
 
-                            final Iterator<Resource> assets = query.getResult().getResources();
-                            resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(USER_EVENT_TYPE);
+                        final Iterator<Resource> assets = query.getResult().getResources();
+                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(USER_EVENT_TYPE);
 
-                            while (assets.hasNext()) {
-                                final Asset asset = assetManager.getAsset(assets.next().getPath());
-                                moveAsset(resourceResolver, assetManager, asset, taskProperties);
-                            }
+                        while (assets.hasNext()) {
+                            final Asset asset = assetManager.getAsset(assets.next().getPath());
+                            moveAsset(resourceResolver, assetManager, asset, taskProperties);
                         }
                     }
                 }
@@ -233,7 +233,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * @param contentPath      the DAM contentPath which the task covers.
          * @return the CloseableQuery whose result represents dam:Assets for which dam:status is set to approved or rejected
          */
-        private CloseableQuery findAssets(ResourceResolver resourceResolver, String contentPath) {
+        private Query findAssets(ResourceResolver resourceResolver, String contentPath) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("type", DamConstants.NT_DAM_ASSET);
             params.put("path", contentPath);
@@ -243,7 +243,9 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             params.put("p.offset", "0");
             params.put("p.limit", "-1");
 
-            return queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver);
+            Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+            QueryUtil.setResourceResolverOn(resourceResolver, query);
+            return query;
         }
 
 
@@ -283,7 +285,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * Creates a new revision of an asset and replaces its renditions (including original), and metadata node.
          *
          * @param resourceResolver the ResourceResolver object
-         * @param assetManager the AssetManager object
+         * @param assetManager     the AssetManager object
          * @param originalAsset    the asset to create a new version for
          * @param reviewedAsset    the asset to that will represent the new version
          * @throws PersistenceException

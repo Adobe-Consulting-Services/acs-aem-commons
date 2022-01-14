@@ -284,15 +284,13 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
