@@ -39,15 +39,22 @@ public final class QueryUtil {
         // private constructor
     }
 
+    // accepts any object so that the logic itself is unit testable, because we 1) can't extend Query without violating
+    // CQBP84, and 2) we can't expose a writeable resourceResolver field on a Proxy instance.
+    static void internalSetResourceResolverOn(ResourceResolver resolver, Object any)
+            throws NoSuchFieldException, IllegalAccessException {
+        Class<?> clazz = any.getClass();
+        Field resourceResolverField = clazz.getDeclaredField("resourceResolver");
+        resourceResolverField.setAccessible(true);
+        resourceResolverField.set(any, resolver);
+    }
+
     /**
      * Uses reflection to forcibly set the Query object's ResourceResolver to the provided.
      */
     public static void setResourceResolverOn(ResourceResolver resolver, Query query) {
-        Class<? extends Query> clazz = query.getClass();
         try {
-            Field resourceResolverField = clazz.getDeclaredField("resourceResolver");
-            resourceResolverField.setAccessible(true);
-            resourceResolverField.set(query, resolver);
+            internalSetResourceResolverOn(resolver, query);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             log.debug("Could not set ResourceResolver on provided Query: {} => {}",
                     e.getClass().getName(), e.getMessage());

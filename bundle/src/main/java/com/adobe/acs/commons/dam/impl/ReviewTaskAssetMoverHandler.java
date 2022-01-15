@@ -75,7 +75,7 @@ import java.util.Map;
 @Properties({
         @Property(
                 label = "Event Topics",
-                value = {"com/adobe/granite/taskmanagement/event"},
+                value = {ReviewTaskAssetMoverHandler.DEFAULT_TOPIC},
                 description = "[Required] Event Topics this event handler will to respond to. Defaults to: com/adobe/granite/taskmanagement/event",
                 name = EventConstants.EVENT_TOPIC,
                 propertyPrivate = true
@@ -96,6 +96,7 @@ import java.util.Map;
 public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoverHandler.class);
 
+    public static final String DEFAULT_TOPIC = "com/adobe/granite/taskmanagement/event";
     private static final String PATH_CONTENT_DAM = DamConstants.MOUNTPOINT_ASSETS;
     private static final String APPROVED = "approved";
     private static final String REJECTED = "rejected";
@@ -391,6 +392,42 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                 resourceResolver.revert();
                 resourceResolver.refresh();
             }
+        }
+    }
+
+    protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
+        if (this.resourceResolverFactory == null) {
+            this.resourceResolverFactory = resourceResolverFactory;
+        }
+    }
+
+    protected void unbindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
+        if (this.resourceResolverFactory == resourceResolverFactory) {
+            this.resourceResolverFactory = null;
+        }
+    }
+
+    protected void bindScheduler(Scheduler scheduler) {
+        if (this.scheduler == null) {
+            this.scheduler = scheduler;
+        }
+    }
+
+    protected void unbindScheduler(Scheduler scheduler) {
+        if (this.scheduler == scheduler) {
+            this.scheduler = null;
+        }
+    }
+
+    protected void bindQueryBuilder(QueryBuilder queryBuilder) {
+        if (this.queryBuilder == null) {
+            this.queryBuilder = queryBuilder;
+        }
+    }
+
+    protected void unbindQueryBuilder(QueryBuilder queryBuilder) {
+        if (this.queryBuilder == queryBuilder) {
+            this.queryBuilder = null;
         }
     }
 }

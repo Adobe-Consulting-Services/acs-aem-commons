@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import javax.jcr.RepositoryException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +41,8 @@ import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 public class QueryBuilderViewQueryTest {
@@ -49,7 +52,7 @@ public class QueryBuilderViewQueryTest {
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     @Mock
     QueryBuilder queryBuilder;
@@ -88,4 +91,13 @@ public class QueryBuilderViewQueryTest {
         assertFalse("expect nonempty", hits.isEmpty());
         assertEquals("expect path", EXPECT_TITLE, hits.iterator().next().get("title"));
     }
+
+    @Test
+    public void testExecute_withException() throws Exception {
+        doThrow(RepositoryException.class).when(hit).getExcerpt();
+        final QueryBuilderViewQuery viewQuery = new QueryBuilderViewQuery(query);
+        Collection<com.day.cq.wcm.core.contentfinder.Hit> hits = viewQuery.execute();
+        assertTrue("expect empty", hits.isEmpty());
+    }
+
 }
