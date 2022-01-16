@@ -43,10 +43,12 @@ public final class QueryUtil {
     // CQBP84, and 2) we can't expose a writeable resourceResolver field on a Proxy instance.
     static void internalSetResourceResolverOn(ResourceResolver resolver, Object any)
             throws NoSuchFieldException, IllegalAccessException {
-        Class<?> clazz = any.getClass();
-        Field resourceResolverField = clazz.getDeclaredField("resourceResolver");
-        resourceResolverField.setAccessible(true);
-        resourceResolverField.set(any, resolver);
+        if (any != null) {
+            Class<?> clazz = any.getClass();
+            Field resourceResolverField = clazz.getDeclaredField("resourceResolver");
+            resourceResolverField.setAccessible(true);
+            resourceResolverField.set(any, resolver);
+        }
     }
 
     /**
