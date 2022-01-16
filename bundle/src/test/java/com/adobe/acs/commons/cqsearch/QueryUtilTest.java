@@ -69,4 +69,10 @@ public class QueryUtilTest {
         QueryUtil.setResourceResolverOn(context.resourceResolver(), query);
         // expect no changes.
     }
+
+    @Test
+    public void testSetResourceResolverOnNull() {
+        QueryUtil.setResourceResolverOn(context.resourceResolver(), null);
+        // expect no changes.
+    }
 }
