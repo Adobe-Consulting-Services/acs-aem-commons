@@ -82,13 +82,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     private boolean printGroupingComments;
 
-    private RobotsRuleSet rules;
+    private transient RobotsRuleSet rules;
 
     @Reference
-    private Externalizer externalizer;
+    private transient Externalizer externalizer;
 
     @Reference
-    private PageManagerFactory pageManagerFactory;
+    private transient PageManagerFactory pageManagerFactory;
 
     @Activate
     protected void activate(RobotsServletConfig config) {

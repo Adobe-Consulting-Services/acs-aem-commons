@@ -62,7 +62,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = -3564475196678277711L;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL) 
-    RedirectFilterMBean redirectFilter;
+    transient RedirectFilterMBean redirectFilter;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
