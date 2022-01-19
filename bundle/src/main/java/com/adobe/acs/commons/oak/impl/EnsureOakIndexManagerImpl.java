@@ -45,8 +45,10 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -222,6 +224,8 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     
     
     protected String[] getIgnoredProperties() {
-        return this.additionalIgnoreProperties;
+        return Optional.ofNullable(this.additionalIgnoreProperties)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
     }
 }

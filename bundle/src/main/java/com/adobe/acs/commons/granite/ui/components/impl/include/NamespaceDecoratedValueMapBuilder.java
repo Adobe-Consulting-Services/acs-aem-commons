@@ -27,9 +27,11 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +53,9 @@ public class NamespaceDecoratedValueMapBuilder {
     public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties) {
         this.request = request;
         this.copyMap = new HashMap<>(resource.getValueMap());
-        this.namespacedProperties = namespacedProperties;
+        this.namespacedProperties = Optional.ofNullable(namespacedProperties)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(new String[0]);
 
         this.applyDynamicVariables();
         this.applyNameSpacing();

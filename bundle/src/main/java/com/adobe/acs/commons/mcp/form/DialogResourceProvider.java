@@ -45,6 +45,7 @@ public interface DialogResourceProvider {
         return (DialogProvider) getTargetClass().getAnnotation(DialogProvider.class);
     }
 
+    @SuppressWarnings("squid:S2386")
     public static Map<Class, ServiceRegistration> registeredProviders = Collections.synchronizedMap(new HashMap<>());
 
     @SuppressWarnings("squid:S1149") // Yes HashTable sucks but it's required here.

@@ -22,6 +22,7 @@ package com.adobe.acs.commons.remoteassets.impl;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -217,14 +218,14 @@ public class RemoteAssetsConfigImpl {
      * @return List<String>
      */
     public List<String> getTagSyncPaths() {
-        return this.tagSyncPaths;
+        return Collections.unmodifiableList(this.tagSyncPaths);
     }
 
     /**
      * @return List<String>
      */
     public List<String> getDamSyncPaths() {
-        return this.damSyncPaths;
+        return Collections.unmodifiableList(this.damSyncPaths);
     }
 
     /**
@@ -252,7 +253,7 @@ public class RemoteAssetsConfigImpl {
      * @return String
      */
     public Set<String> getWhitelistedServiceUsers() {
-        return this.whitelistedServiceUsers;
+        return Collections.unmodifiableSet(this.whitelistedServiceUsers);
     }
 
     /**

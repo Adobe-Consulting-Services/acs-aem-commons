@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -383,7 +384,9 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
     }
 
     final String[] getPathMatches() {
-        return this.pathMatches;
+        return Optional.ofNullable(this.pathMatches)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(DEFAULT_MATCH_PATH);
     }
 
     /**

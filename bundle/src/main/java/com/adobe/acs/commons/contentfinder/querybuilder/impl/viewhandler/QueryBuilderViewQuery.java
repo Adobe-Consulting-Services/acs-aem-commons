@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public final class QueryBuilderViewQuery implements ViewQuery {
             hits = new ArrayList<>();
 
             if (this.query == null) {
-                return hits;
+                return Collections.unmodifiableList(hits);
             }
 
             final SearchResult result = this.query.getResult();
@@ -64,7 +65,7 @@ public final class QueryBuilderViewQuery implements ViewQuery {
             }
 
         }
-        return hits;
+        return Collections.unmodifiableList(hits);
     }
 
     /**

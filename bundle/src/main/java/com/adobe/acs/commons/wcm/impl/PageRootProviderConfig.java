@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -72,7 +73,9 @@ public class PageRootProviderConfig {
      * @return list of page root patterns.
      */
     public List<Pattern> getPageRootPatterns() {
-        return this.pageRootPatterns;
+        return Optional.ofNullable(this.pageRootPatterns)
+                .map(Collections::unmodifiableList)
+                .orElse(null);
     }
 
     @Activate
