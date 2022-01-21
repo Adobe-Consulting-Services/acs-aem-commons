@@ -11,13 +11,12 @@ Import-Package: \
   org.apache.poi.ss.util;version="[3.0,6)",\
   org.apache.poi.xssf.usermodel;version="[2.0,6)",\
   javax.annotation;version=0.0.0,\
-  !com.google.errorprone.annotations.*,\
-  !com.google.errorprone.annotations.concurrent,\
-  !org.bouncycastle.jce.*,\
-  !org.checkerframework.checker.nullness.qual,\
   !android.util.*,\
   !com.google.common.*,\
+  !com.google.errorprone.annotations.*,\
   !com.google.thirdparty.*,\
   !com.jcraft.*,\
   !io.jsonwebtoken.*,\
+  !org.bouncycastle.jce.*,\
+  !org.checkerframework.checker.nullness.qual,\
   *

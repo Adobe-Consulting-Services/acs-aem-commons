@@ -181,8 +181,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
 -plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
--dsannotations-options: version;maximum=1.4.0
-_dsannotations-inherit: true
+-dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.3.0
                                 ]]></bnd>
                             </configuration>
