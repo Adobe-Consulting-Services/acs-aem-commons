@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>5.1.3-SNAPSHOT</version>
+    <version>5.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -353,13 +353,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-bundle</artifactId>
-                <version>5.1.3-SNAPSHOT</version>
+                <version>5.1.1-SNAPSHOT</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                <version>5.1.3-SNAPSHOT</version>
+                <version>5.1.1-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <!-- Runtime dependencies should be AEM 6.4 compatible -->
