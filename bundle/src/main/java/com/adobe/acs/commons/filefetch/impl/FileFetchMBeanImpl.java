@@ -20,9 +20,11 @@
 package com.adobe.acs.commons.filefetch.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
@@ -61,7 +63,7 @@ public class FileFetchMBeanImpl extends AnnotatedStandardMBean implements FileFe
   private static final String PN_LAST_MODIFIED = "Last Modified";
 
   @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.AT_LEAST_ONE)
-  private List<FileFetcher> fetchers;
+  private List<FileFetcher> fetchers = new ArrayList<>();
 
   public FileFetchMBeanImpl() throws NotCompliantMBeanException {
     super(FileFetchMBean.class);
@@ -105,7 +107,8 @@ public class FileFetchMBeanImpl extends AnnotatedStandardMBean implements FileFe
   }
 
   public void setFetchers(List<FileFetcher> fetchers) {
-    this.fetchers = fetchers;
+    this.fetchers.clear();
+    Optional.ofNullable(fetchers).ifPresent(this.fetchers::addAll);
   }
 
 }

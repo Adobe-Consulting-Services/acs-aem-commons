@@ -36,8 +36,10 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 abstract class AbstractDynamicClientLibraryServlet extends SlingSafeMethodsServlet {
 
@@ -78,7 +80,9 @@ abstract class AbstractDynamicClientLibraryServlet extends SlingSafeMethodsServl
     }
 
     protected void activate(String[] categories, boolean excludeAll, HtmlLibraryManager htmlLibraryManager) {
-        this.categories = categories;
+        this.categories = Optional.ofNullable(categories)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(null);
         this.excludeAll = excludeAll;
         this.htmlLibraryManager = htmlLibraryManager;
     }

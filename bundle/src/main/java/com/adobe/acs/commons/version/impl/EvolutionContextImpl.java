@@ -32,6 +32,7 @@ import javax.jcr.version.Version;
 import javax.jcr.version.VersionHistory;
 import javax.jcr.version.VersionManager;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,12 +55,12 @@ public class EvolutionContextImpl implements EvolutionContext {
 
     @Override
     public List<Evolution> getEvolutionItems() {
-        return evolutionItems;
+        return Collections.unmodifiableList(evolutionItems);
     }
 
     @Override
     public List<Evolution> getVersions() {
-        return versions;
+        return Collections.unmodifiableList(versions);
     }
 
     private void populateEvolutions() {

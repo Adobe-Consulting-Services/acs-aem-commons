@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.jcr.RepositoryException;
@@ -89,7 +90,9 @@ public class AuditLogSearchRequest {
     }
 
     public Date getEndDate() {
-        return endDate;
+        return Optional.ofNullable(endDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     public String getOrder() {
@@ -126,7 +129,9 @@ public class AuditLogSearchRequest {
     }
 
     public Date getStartDate() {
-        return startDate;
+        return Optional.ofNullable(startDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     public String getType() {

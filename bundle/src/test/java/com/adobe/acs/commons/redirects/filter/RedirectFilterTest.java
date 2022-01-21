@@ -47,6 +47,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -147,9 +148,9 @@ public class RedirectFilterTest {
     @Test
     public void testActivate() {
         assertTrue(filter.isEnabled());
-        assertEquals(new HashSet<>(), filter.getExtensions());
-        assertEquals(new HashSet<>(Arrays.asList(contentRoots)), filter.getPaths());
-        assertEquals(Arrays.asList("GET", "HEAD"), filter.getMethods());
+        assertEquals(new HashSet<>(), new HashSet<>(filter.getExtensions()));
+        assertEquals(new HashSet<>(Arrays.asList(contentRoots)), new HashSet<>(filter.getPaths()));
+        assertEquals(Arrays.asList("GET", "HEAD"), new ArrayList<>(filter.getMethods()));
         List<Header> headers = filter.getOnDeliveryHeaders();
         assertEquals(1, headers.size());
         Header header = headers.iterator().next();

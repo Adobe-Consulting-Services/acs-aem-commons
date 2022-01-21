@@ -82,13 +82,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     private boolean printGroupingComments;
 
-    private RobotsRuleSet rules;
+    private transient RobotsRuleSet rules;
 
     @Reference
-    private Externalizer externalizer;
+    private transient Externalizer externalizer;
 
     @Reference
-    private PageManagerFactory pageManagerFactory;
+    private transient PageManagerFactory pageManagerFactory;
 
     @Activate
     protected void activate(RobotsServletConfig config) {
@@ -325,19 +325,19 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             groups = new LinkedHashMap<>();
 
             String[] userAgents = config.user_agent_directives();
-            processConfig(userAgents, RobotsRuleGroup::getUserAgents);
+            processConfig(userAgents, group -> group.userAgents);
 
             String[] allowed = config.allow_directives();
-            processConfig(allowed, RobotsRuleGroup::getAllowed);
+            processConfig(allowed, group -> group.allowed);
 
             String[] disallowed = config.disallow_directives();
-            processConfig(disallowed, RobotsRuleGroup::getDisallowed);
+            processConfig(disallowed, group -> group.disallowed);
 
             String[] disallowProps = config.disallow_property_names();
-            processConfig(disallowProps, RobotsRuleGroup::getDisallowProperties);
+            processConfig(disallowProps, group -> group.disallowProperties);
 
             String[] allowProps = config.allow_property_names();
-            processConfig(allowProps, RobotsRuleGroup::getAllowProperties);
+            processConfig(allowProps, group -> group.allowProperties);
         }
 
         private void processConfig(String[] configs, Function<RobotsRuleGroup, List<String>> configListGetFunc) {
@@ -400,23 +400,23 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         }
 
         public List<String> getUserAgents() {
-            return userAgents;
+            return Collections.unmodifiableList(userAgents);
         }
 
         public List<String> getAllowed() {
-            return allowed;
+            return Collections.unmodifiableList(allowed);
         }
 
         public List<String> getDisallowed() {
-            return disallowed;
+            return Collections.unmodifiableList(disallowed);
         }
 
         public List<String> getAllowProperties() {
-            return allowProperties;
+            return Collections.unmodifiableList(allowProperties);
         }
 
         public List<String> getDisallowProperties() {
-            return disallowProperties;
+            return Collections.unmodifiableList(disallowProperties);
         }
     }
 }

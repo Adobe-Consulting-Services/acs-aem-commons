@@ -28,7 +28,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Optional;
 
 
 public class NamespaceResourceWrapper extends FilteringResourceWrapper {
@@ -44,7 +46,9 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
         super(resource, expressionResolver, request);
         this.expressionResolver = expressionResolver;
         this.request = request;
-        this.namespacedProperties = namespacedProperties;
+        this.namespacedProperties = Optional.ofNullable(namespacedProperties)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(new String[0]);
 
         valueMap = new NamespaceDecoratedValueMapBuilder(request, resource, namespacedProperties).build();
     }

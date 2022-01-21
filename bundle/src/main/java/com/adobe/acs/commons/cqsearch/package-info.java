@@ -21,6 +21,6 @@
  * This package provides Search relation functionality
  */
 @Version("1.0.0")
-package com.adobe.acs.commons.search;
+package com.adobe.acs.commons.cqsearch;
 
 import org.osgi.annotation.versioning.Version;

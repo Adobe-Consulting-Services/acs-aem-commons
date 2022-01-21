@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.cloudconfig.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,6 +64,6 @@ public class CloudConfigurationListImpl implements CloudConfigurationList {
   @NotNull
   @Override
   public List<CloudConfiguration> getCloudConfigurations() {
-    return configs;
+    return Collections.unmodifiableList(configs);
   }
 }

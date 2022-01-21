@@ -133,30 +133,31 @@ public final class PackageHelperImpl implements PackageHelper {
             while (children.hasNext()) {
                 final Node child = children.nextNode();
 
-                final JcrPackage jcrPackage = jcrPackageManager.open(child, true);
-                if (jcrPackage == null
-                        || jcrPackage.getDefinition() == null
-                        || jcrPackage.getDefinition().getId() == null) {
+                try (final JcrPackage jcrPackage = jcrPackageManager.open(child, true)) {
+                    if (jcrPackage == null
+                            || jcrPackage.getDefinition() == null
+                            || jcrPackage.getDefinition().getId() == null) {
 
-                    log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node",
-                            child.getPath());
-                    continue;
+                        log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node",
+                                child.getPath());
+                        continue;
 
-                } else if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
-                    // Name mismatch - so just skip
-                    continue;
-                }
+                    } else if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
+                        // Name mismatch - so just skip
+                        continue;
+                    }
 
-                final Version packageVersion = jcrPackage.getDefinition().getId().getVersion();
+                    final Version packageVersion = jcrPackage.getDefinition().getId().getVersion();
 
-                log.debug("{} compareTo {} = {}", packageVersion.toString(), latestVersion.toString(), packageVersion.compareTo(latestVersion));
+                    log.debug("{} compareTo {} = {}", packageVersion.toString(), latestVersion.toString(), packageVersion.compareTo(latestVersion));
 
-                if (packageVersion.compareTo(latestVersion) >= 1) {
-                    latestVersion = packageVersion;
-                    log.debug("Found a new latest version: {}", latestVersion);
-                } else if (packageVersion.compareTo(configVersion) == 0) {
-                    configVersionEligible = false;
-                    log.debug("Found a package with the same version as the config version");
+                    if (packageVersion.compareTo(latestVersion) >= 1) {
+                        latestVersion = packageVersion;
+                        log.debug("Found a new latest version: {}", latestVersion);
+                    } else if (packageVersion.compareTo(configVersion) == 0) {
+                        configVersionEligible = false;
+                        log.debug("Found a package with the same version as the config version");
+                    }
                 }
             }
 
@@ -212,13 +213,14 @@ public final class PackageHelperImpl implements PackageHelper {
             final String groupName, final String name,
             final String version) throws RepositoryException {
         final PackageId packageId = new PackageId(groupName, name, version);
-        final JcrPackage jcrPackage = jcrPackageManager.open(packageId);
+        try (final JcrPackage jcrPackage = jcrPackageManager.open(packageId)) {
 
-        if (jcrPackage != null && jcrPackage.getNode() != null) {
-            jcrPackage.getNode().remove();
-            jcrPackage.getNode().getSession().save();
-        } else {
-            log.debug("Nothing to remove at: {} ", packageId.getInstallationPath());
+            if (jcrPackage != null && jcrPackage.getNode() != null) {
+                jcrPackage.getNode().remove();
+                jcrPackage.getNode().getSession().save();
+            } else {
+                log.debug("Nothing to remove at: {} ", packageId.getInstallationPath());
+            }
         }
     }
 
@@ -264,6 +266,7 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("squid:S2095") // closing is responsibility of caller
     public JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets,
             final Session session,
             final String groupName, final String name, String version,

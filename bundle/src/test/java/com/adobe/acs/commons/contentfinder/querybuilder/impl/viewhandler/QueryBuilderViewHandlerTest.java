@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.Session;
 
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.commons.predicate.PredicateProvider;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -58,10 +58,10 @@ public class QueryBuilderViewHandlerTest {
     public SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     @Mock
-    CloseableQueryBuilder queryBuilder;
+    QueryBuilder queryBuilder;
 
     @Mock
-    CloseableQuery query;
+    Query query;
 
     @Mock
     SearchResult searchResult;
@@ -72,7 +72,7 @@ public class QueryBuilderViewHandlerTest {
     @Before
     public void setUp() throws Exception {
         slingContext.registerService(PredicateProvider.class, predicateProvider);
-        slingContext.registerService(CloseableQueryBuilder.class, queryBuilder);
+        slingContext.registerService(QueryBuilder.class, queryBuilder);
         when(searchResult.getHits()).thenReturn(new ArrayList<>());
         when(query.getResult()).thenReturn(searchResult);
         when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(invocation -> {

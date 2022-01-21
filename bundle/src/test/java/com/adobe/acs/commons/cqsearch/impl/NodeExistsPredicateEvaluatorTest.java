@@ -18,8 +18,9 @@
  * #L%
  */
 
-package com.adobe.acs.commons.search.impl;
+package com.adobe.acs.commons.cqsearch.impl;
 
+import com.adobe.acs.commons.cqsearch.impl.NodeExistsPredicateEvaluator;
 import com.day.cq.search.Predicate;
 import com.day.cq.search.eval.EvaluationContext;
 import com.day.cq.search.eval.PredicateEvaluator;

@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2261 - Update to latest mocking libraries
 - #2753 - Update to AEM 6.4 dependencies
 - #2754 - Support building with Java 17
+- #2760 - Remove CloseableQuery and CloseableQueryBuilder from API
+
+### Fixed
+
+- #2772 - Resolved Cloud Manager Code Scan reported Blockers, Criticals, and Vulnerabilities
 
 ## 5.1.0 - 2021-12-13
 

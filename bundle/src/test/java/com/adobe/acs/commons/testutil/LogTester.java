@@ -37,6 +37,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class LogTester extends AppenderBase<LoggingEvent> {
     private static final String ALL = "overall";
+    private static final String OAK_AUDIT_LOGGER = "org.apache.jackrabbit.oak.audit";
 
     private static ThreadLocal<Map<String, List<LoggingEvent>>> loggingEventsThreadLocal = ThreadLocal.withInitial(() -> {
         Map<String, List<LoggingEvent>> events = new HashMap<>();
@@ -131,7 +132,14 @@ public class LogTester extends AppenderBase<LoggingEvent> {
                     found = events.get(line - 1).getFormattedMessage().equals(expected);
                 }
             } else {
-                for (LoggingEvent event : loggingEvents().get(loggerName)) {
+                for (LoggingEvent event : events) {
+                    // the logger name represented by OAK_AUDIT_LOGGER will fill output with stack traces if
+                    // event.getFormattedMessage() is checked after closing the original JCR session, and it's deep
+                    // enough that this library will likely need to examine that particular logger's output for test
+                    // assertions.
+                    if (event.getLoggerName().startsWith(OAK_AUDIT_LOGGER)) {
+                        continue;
+                    }
                     if (event.getFormattedMessage().equals(expected)) {
                         found = true;
                         break;

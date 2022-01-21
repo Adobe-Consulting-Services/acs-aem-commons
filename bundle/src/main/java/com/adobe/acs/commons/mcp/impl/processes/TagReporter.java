@@ -196,7 +196,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   }
 
   public List<EnumMap<ReportColumns, Object>> getReportRows() {
-    return reportRows;
+    return Collections.unmodifiableList(reportRows);
   }
 
   @Override

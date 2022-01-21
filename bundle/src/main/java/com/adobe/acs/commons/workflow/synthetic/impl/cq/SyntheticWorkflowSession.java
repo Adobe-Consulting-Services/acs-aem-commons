@@ -48,6 +48,7 @@ import javax.jcr.Session;
 import javax.jcr.version.VersionException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
@@ -283,25 +284,25 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final List<Route> getRoutes(final WorkItem workItem) throws WorkflowException {
         log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
-        return this.routes;
+        return Collections.unmodifiableList(this.routes);
     }
 
     @Override
     public final List<Route> getRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
         log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
-        return this.routes;
+        return Collections.unmodifiableList(this.routes);
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem) throws WorkflowException {
         log.debug("Synthetic Workflow does not support back routes; Defaults to a single Synthetic Route");
-        return this.backRoutes;
+        return Collections.unmodifiableList(this.backRoutes);
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
         log.debug("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
-        return this.backRoutes;
+        return Collections.unmodifiableList(this.backRoutes);
     }
 
     @Override

@@ -28,7 +28,7 @@ import java.util.Comparator;
 class HierarchyNodeComparator implements Comparator<Node> {
     public static final String RP_NOT_HIERARCHY_FIRST = ":nonHierarchyFirst";
 
-    public static HierarchyNodeComparator INSTANCE = new HierarchyNodeComparator();
+    public static final HierarchyNodeComparator INSTANCE = new HierarchyNodeComparator();
 
     private HierarchyNodeComparator(){
         // ensure singleton

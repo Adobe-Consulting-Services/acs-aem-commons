@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.functions;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +33,7 @@ public class RoundRobin<T> implements Iterable<T> {
     private final List<T> items;
 
     public RoundRobin(final List<T> coll) {
-        this.items = coll;
+        this.items = Collections.unmodifiableList(coll);
     }
 
     @Override

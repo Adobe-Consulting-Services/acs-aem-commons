@@ -28,6 +28,7 @@ import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.cq.dam.cfm.ContentFragmentException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.Node;
@@ -119,7 +120,7 @@ public class ContentFragmentImportTest {
         for (int i = 0; i < values.length - 1; i += 2) {
             row.put(values[i], new CompositeVariant(values[i + 1]));
         }
-        importer.spreadsheet.getDataRowsAsCompositeVariants().add(row);
+        importer.spreadsheet.appendData(Collections.singletonList(row));
     }
 
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException, PersistenceException {

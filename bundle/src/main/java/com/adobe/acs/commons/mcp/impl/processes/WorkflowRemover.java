@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -187,11 +188,11 @@ public class WorkflowRemover extends ProcessDefinition {
     }
 
     public List<String> getModelIds() {
-        return modelIds;
+        return Collections.unmodifiableList(modelIds);
     }
 
     public List<Pattern> getPayloads() {
-        return payloads;
+        return Collections.unmodifiableList(payloads);
     }
 
     public Calendar getOlderThan() {
@@ -203,7 +204,7 @@ public class WorkflowRemover extends ProcessDefinition {
     }
 
     public List<String> getStatuses() {
-        return statuses;
+        return Collections.unmodifiableList(statuses);
     }
 
     public WorkflowRemovalConfig getWorkflowRemovalConfig() {

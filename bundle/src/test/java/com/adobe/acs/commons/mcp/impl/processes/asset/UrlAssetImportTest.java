@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,7 @@ public class UrlAssetImportTest {
         for (int i = 0; i < cols.length && i < header.size(); i++) {
             row.put(header.get(i), new CompositeVariant(cols[i]));
         }
-        importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
+        importProcess.fileData.appendData(Collections.singletonList(row));
     }
 
     @Test

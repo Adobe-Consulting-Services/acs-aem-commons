@@ -174,7 +174,7 @@ public class HttpCacheEngineBindingsDelegate {
     }
 
     public List<HttpCacheConfig> getCacheConfigs() {
-        return cacheConfigs;
+        return Collections.unmodifiableList(cacheConfigs);
     }
 
     public Map<String, HttpCacheStore> getCacheStoresMap() {
