@@ -73,7 +73,7 @@ public class CurrentEvolutionImpl implements Evolution {
 
     @Override
     public List<EvolutionEntry> getVersionEntries() {
-        return this.versionEntries;
+        return Collections.unmodifiableList(this.versionEntries);
     }
 
     private void populate(Resource r, int depth) throws PathNotFoundException, RepositoryException {

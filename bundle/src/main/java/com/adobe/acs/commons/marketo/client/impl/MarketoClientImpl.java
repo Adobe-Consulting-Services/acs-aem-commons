@@ -46,6 +46,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AUTH;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.routing.HttpRoutePlanner;
@@ -71,11 +72,17 @@ public class MarketoClientImpl implements MarketoClient {
 
   private static final Logger log = LoggerFactory.getLogger(MarketoClientImpl.class);
 
+  private static final int SOCKET_TIMEOUT_MS = 5000;
+  private static final int CONNECT_TIMEOUT_MS = 5000;
   private static final int PAGE_SIZE = 200;
 
   private ObjectMapper mapper = new ObjectMapper();
 
-  private HttpClientBuilder clientBuilder = HttpClients.custom();
+  private final HttpClientBuilder clientBuilder = HttpClients.custom()
+          .setDefaultRequestConfig(RequestConfig.copy(RequestConfig.DEFAULT)
+                  .setSocketTimeout(SOCKET_TIMEOUT_MS)
+                  .setConnectTimeout(CONNECT_TIMEOUT_MS)
+                  .build());
 
   @Reference
   protected ConfigurationAdmin configAdmin;

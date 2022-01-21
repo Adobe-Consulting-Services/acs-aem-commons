@@ -99,12 +99,12 @@ public class SyntheticWorkflowSessionTest {
 
     @Test
     public void test_getRoutes() throws Exception {
-        Assert.assertEquals(session.getRoutes().getClass(), ArrayList.class);
+        Assert.assertNotNull(session.getRoutes());
     }
 
     @Test
     public void test_getBackRoutes() throws Exception {
-        Assert.assertEquals(session.getBackRoutes().getClass(), ArrayList.class);
+        Assert.assertNotNull(session.getBackRoutes());
     }
 
     @Test

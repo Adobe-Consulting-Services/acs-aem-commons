@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -203,7 +204,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     @Override
     public List<String> getIgnoreProperties() {
-        return this.ignoreProperties;
+        return Collections.unmodifiableList(this.ignoreProperties);
     }
 
     @Override

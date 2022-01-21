@@ -57,7 +57,7 @@ public class DiscoveryServiceHelper implements TopologyEventListener {
     }
 
     @Activate
-    public void activate(BundleContext bundleContext) {
+    public synchronized void activate(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 

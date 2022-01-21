@@ -183,10 +183,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private boolean enabled;
     private boolean mapUrls;
     private boolean preserveQueryString;
-    private List<Header> onDeliveryHeaders;
+    private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
-    private Collection<String> exts;
-    private Collection<String> paths;
+    private Collection<String> exts = Collections.emptySet();
+    private Collection<String> paths = Collections.emptySet();
     private Configuration config;
     private ExecutorService executor;
     Cache<String, RedirectConfiguration> rulesCache;
@@ -468,19 +468,19 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     protected Collection<String> getExtensions() {
-        return exts;
+        return Collections.unmodifiableCollection(exts);
     }
 
     protected Collection<String> getPaths() {
-        return paths;
+        return Collections.unmodifiableCollection(paths);
     }
 
     protected Collection<String> getMethods() {
-        return methods;
+        return Collections.unmodifiableCollection(methods);
     }
 
     protected List<Header> getOnDeliveryHeaders() {
-        return onDeliveryHeaders;
+        return Collections.unmodifiableList(onDeliveryHeaders);
     }
 
     /**

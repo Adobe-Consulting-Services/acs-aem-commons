@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.search.impl;
+package com.adobe.acs.commons.wrap.impl;
 
 import javax.annotation.Nonnull;
 import javax.jcr.Session;

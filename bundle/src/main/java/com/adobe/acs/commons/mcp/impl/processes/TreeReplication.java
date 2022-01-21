@@ -82,7 +82,7 @@ public class TreeReplication extends ProcessDefinition {
         PUBLISH, UNPUBLISH
     }
 
-    public static int ASYNC_LIMIT = 10000;
+    public static final int ASYNC_LIMIT = 10000;
 
     Replicator replicatorService;
 
@@ -217,7 +217,7 @@ public class TreeReplication extends ProcessDefinition {
         t.deferredWithResolver(rr -> visitor.accept(rr.getResource(startingPath)));
     }
 
-    public AtomicInteger replicationCount = new AtomicInteger();
+    private final AtomicInteger replicationCount = new AtomicInteger();
 
     private void performReplication(ActionManager t, String path) {
         int counter = replicationCount.incrementAndGet();

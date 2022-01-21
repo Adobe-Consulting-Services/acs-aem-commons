@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
@@ -84,12 +85,10 @@ public class ManagedProcess implements Serializable {
      * @return the reportedErrorsList
      */
     public Collection<ArchivedProcessFailure> getReportedErrorsList() {
-        if (reportedErrorsList == null) {
-            return Collections.EMPTY_LIST;
-        } else {
-            return reportedErrorsList;
-        }
-    }    
+        return Optional.ofNullable(reportedErrorsList)
+                .map(Collections::unmodifiableCollection)
+                .orElse(Collections.emptyList());
+    }
 
     /**
      * @param reportedErrors the reportedErrors to set

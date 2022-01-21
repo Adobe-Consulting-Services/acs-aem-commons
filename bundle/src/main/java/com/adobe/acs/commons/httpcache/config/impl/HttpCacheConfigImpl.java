@@ -101,7 +101,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               cardinality = Integer.MAX_VALUE)
     static final String PROP_REQUEST_URI_PATTERNS = "httpcache.config.requesturi.patterns";
     private List<String> requestUriPatterns;
-    private List<Pattern> requestUriPatternsAsRegEx;
+    private List<Pattern> requestUriPatternsAsRegEx = Collections.emptyList();
 
     // Request URIs - Blacklisted.
     @Property(label = "Blacklisted request URI patterns",
@@ -111,7 +111,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS =
             "httpcache.config.requesturi.patterns.blacklisted";
     private List<String> blacklistedRequestUriPatterns;
-    private List<Pattern> blacklistedRequestUriPatternsAsRegEx;
+    private List<Pattern> blacklistedRequestUriPatternsAsRegEx = Collections.emptyList();
 
     // Authentication requirement
     // @formatter:off
@@ -139,7 +139,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               cardinality = Integer.MAX_VALUE)
     static final String PROP_CACHE_INVALIDATION_PATH_PATTERNS = "httpcache.config.invalidation.oak.paths";
     private List<String> cacheInvalidationPathPatterns;
-    private List<Pattern> cacheInvalidationPathPatternsAsRegEx;
+    private List<Pattern> cacheInvalidationPathPatternsAsRegEx = Collections.emptyList();
 
     // Cache store
     // @formatter:off
@@ -427,17 +427,17 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
     @Override
     public List<Pattern> getRequestUriPatterns() {
-        return this.requestUriPatternsAsRegEx;
+        return Collections.unmodifiableList(this.requestUriPatternsAsRegEx);
     }
 
     @Override
     public List<Pattern> getBlacklistedRequestUriPatterns() {
-        return this.blacklistedRequestUriPatternsAsRegEx;
+        return Collections.unmodifiableList(this.blacklistedRequestUriPatternsAsRegEx);
     }
 
     @Override
     public List<Pattern> getJCRInvalidationPathPatterns() {
-        return this.cacheInvalidationPathPatternsAsRegEx;
+        return Collections.unmodifiableList(this.cacheInvalidationPathPatternsAsRegEx);
     }
 
     @Override

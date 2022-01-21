@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,16 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.Session;
-
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.cqsearch.QueryUtil;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.Replicator;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.SearchResult;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -45,23 +44,22 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.URLEntity;
 import twitter4j.json.DataObjectFactory;
 
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationException;
-import com.day.cq.replication.Replicator;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.result.SearchResult;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @Component(label = "ACS AEM Commons - Twitter Feed Update Service",
-    metatype = true, description = "Service to update Twitter Feed components.")
+        metatype = true, description = "Service to update Twitter Feed components.")
 @Service
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
@@ -71,7 +69,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     private Replicator replicator;
 
     @Reference
-    private CloseableQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
 
     @Property(value = "acs-commons/components/content/twitter-feed", unbounded = PropertyUnbounded.ARRAY,
             label = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
@@ -162,15 +160,15 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
         predicateMap.put("p.limit", "-1");
 
-        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(predicateMap), resourceResolver)) {
+        Query query = queryBuilder.createQuery(PredicateGroup.create(predicateMap), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
 
-            SearchResult result = query.getResult();
-            Iterator<Resource> resources = result.getResources();
-            while (resources.hasNext()) {
-                twitterResources.add(resourceResolver.getResource(resources.next().getPath()));
-            }
-            return twitterResources;
+        SearchResult result = query.getResult();
+        Iterator<Resource> resources = result.getResources();
+        while (resources.hasNext()) {
+            twitterResources.add(resourceResolver.getResource(resources.next().getPath()));
         }
+        return twitterResources;
     }
 
     private String processTweet(Status status) {

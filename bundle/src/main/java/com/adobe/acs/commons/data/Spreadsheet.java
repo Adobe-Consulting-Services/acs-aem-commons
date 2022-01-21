@@ -65,7 +65,7 @@ public class Spreadsheet {
     private final Map<String, String> delimiters;
     private boolean enableHeaderNameConversion = true;
     private InputStream inputStream;
-    private List<String> caseInsensitiveHeaders;
+    private List<String> caseInsensitiveHeaders = new ArrayList<>();
 
     /**
      * Simple constructor used for unit testing purposes
@@ -78,7 +78,7 @@ public class Spreadsheet {
         headerTypes = Arrays.stream(headerArray)
                 .collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
         headerRow = Arrays.asList(headerArray);
-        requiredColumns = Collections.EMPTY_LIST;
+        requiredColumns = Collections.emptyList();
         dataRows = new ArrayList<>();
         delimiters = new HashMap<>();
     }
@@ -92,19 +92,21 @@ public class Spreadsheet {
      */
     public Spreadsheet(boolean convertHeaderNames, List<String> caseInsensitiveHeaders, String... headerArray) {
         this(convertHeaderNames, headerArray);
-        this.caseInsensitiveHeaders = caseInsensitiveHeaders;
+        Optional.ofNullable(caseInsensitiveHeaders).ifPresent(this.caseInsensitiveHeaders::addAll);
     }
 
     public Spreadsheet(boolean convertHeaderNames, InputStream file, String... required) {
+        dataRows = new ArrayList<>();
         delimiters = new HashMap<>();
         this.enableHeaderNameConversion = convertHeaderNames;
         if (required == null || required.length == 0) {
-            requiredColumns = Collections.EMPTY_LIST;
+            requiredColumns = Collections.emptyList();
         } else {
             requiredColumns = Arrays.stream(required)
                     .map(this::convertHeaderName)
                     .collect(Collectors.toList());
         }
+        this.headerRow = new ArrayList<>();
         this.inputStream = file;
     }
 
@@ -123,7 +125,7 @@ public class Spreadsheet {
 
     public Spreadsheet(RequestParameter file, List<String> caseInsensitiveHeaders, String... required) throws IOException {
         this(true, file, required);
-        this.caseInsensitiveHeaders = caseInsensitiveHeaders;
+        Optional.ofNullable(caseInsensitiveHeaders).ifPresent(this.caseInsensitiveHeaders::addAll);
     }
     
     /**
@@ -245,14 +247,23 @@ public class Spreadsheet {
      * @return the headerRow
      */
     public List<String> getHeaderRow() {
-        return headerRow;
+        return Collections.unmodifiableList(headerRow);
     }
 
     /**
      * @return the dataRows
      */
     public List<Map<String, CompositeVariant>> getDataRowsAsCompositeVariants() {
-        return dataRows;
+        return Collections.unmodifiableList(dataRows);
+    }
+
+    /**
+     * Append data to the sheet.
+     *
+     * @param dataRows the data to append
+     */
+    public void appendData(List<Map<String, CompositeVariant>> dataRows) {
+        Optional.ofNullable(dataRows).ifPresent(newData -> this.dataRows.addAll(newData));
     }
 
     public Long getRowNum(Map<String, CompositeVariant> row) {
@@ -267,7 +278,7 @@ public class Spreadsheet {
      * @return the requiredColumns
      */
     public List<String> getRequiredColumns() {
-        return requiredColumns;
+        return Collections.unmodifiableList(requiredColumns);
     }
 
     public String convertHeaderName(String str) {

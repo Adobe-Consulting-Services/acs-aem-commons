@@ -1,0 +1,30 @@
+{
+  "asset.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:status": "rejected",
+        "predictedTags" : {
+          "jcr:primaryType": "nt:unstructured",
+          "apple" : {
+            "jcr:primaryType": "nt:unstructured",
+            "name": "apple",
+            "confidence": 1.0
+          },
+          "orange" : {
+            "jcr:primaryType": "nt:unstructured",
+            "name": "orange",
+            "confidence": 0.5
+          },
+          "banana" : {
+            "jcr:primaryType": "nt:unstructured",
+            "name": "banana",
+            "confidence": 0.1
+          }
+        }
+      }
+    }
+  }
+}

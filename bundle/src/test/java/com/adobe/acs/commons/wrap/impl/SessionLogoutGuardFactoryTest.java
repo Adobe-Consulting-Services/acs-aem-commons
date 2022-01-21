@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.search.impl;
+package com.adobe.acs.commons.wrap.impl;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.wrap.impl.SessionLogoutGuardFactory;
 import com.adobe.acs.commons.wrap.jackrabbit.JackrabbitSessionIWrap;
 import com.adobe.acs.commons.wrap.jcr.SessionIWrap;
 import org.apache.jackrabbit.api.JackrabbitSession;

@@ -163,7 +163,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      **/
     @Override
     public final Iterable<Resource> getChildren() {
-        return this.orderedCache;
+        return Collections.unmodifiableSet(this.orderedCache);
     }
 
     /**

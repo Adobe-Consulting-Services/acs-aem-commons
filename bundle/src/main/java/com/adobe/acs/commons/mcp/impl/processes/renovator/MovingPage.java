@@ -91,6 +91,8 @@ public class MovingPage extends MovingNode {
                                     replicatorQueue.replicate((Session)args[0], (ReplicationActionType)args[1], (String)args[2], (ReplicationOptions)args[3]);
                                 }
                                 break;
+                            default:
+                                break;
                         }
                         return null;
                     }

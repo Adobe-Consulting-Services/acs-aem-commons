@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -234,7 +235,7 @@ public class SetImageOrientationProcess implements WorkflowProcess {
         }
 
         public List<ConfigRule> getConfig() {
-            return config;
+            return Collections.unmodifiableList(config);
         }
     }
 
