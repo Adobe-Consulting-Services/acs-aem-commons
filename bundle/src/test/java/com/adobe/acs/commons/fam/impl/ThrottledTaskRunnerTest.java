@@ -90,6 +90,7 @@ public class ThrottledTaskRunnerTest {
 
     @Test
     public void testExecutionOrder() throws NotCompliantMBeanException, InterruptedException {
+        assumeFalse("Test unstable on Mac OS, skipping execution on that OS!", SystemUtils.IS_OS_MAC);
         ThrottledTaskRunner ttr = osgiContext.registerService(new ThrottledTaskRunnerImpl());
 
         final List<Long> executions = Collections.synchronizedList(new ArrayList<>());
