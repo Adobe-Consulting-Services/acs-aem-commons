@@ -34,6 +34,16 @@
         <tag>HEAD</tag>
     </scm>
 
+    <!-- Do not remove developers section - this is required to release to maven central -->
+    <developers>
+        <developer>
+            <id>acs-aem-commons</id>
+            <organization>Adobe Community Software</organization>
+            <organizationUrl>https://adobe-consulting-services.github.io/</organizationUrl>
+            <url>https://adobe-consulting-services.github.io/acs-aem-commons/</url>
+        </developer>
+    </developers>
+
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
     <!-- ====================================================================== -->
