@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #2775 - Update Maven plugins
+- #2777 - Fix Twitter service user mapping
 
 ## 5.1.2 - 2022-01-21
 
