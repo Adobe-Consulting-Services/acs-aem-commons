@@ -31,6 +31,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,6 +42,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
@@ -197,19 +199,71 @@ public class AnnotatedFieldDeserializer {
     }
 
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
-        return getAllAnnotatedObjectMembers(source, FormField.class)
-                .collect(Collectors.toMap(AccessibleObjectUtil::getFieldName, f -> {
+        final Map<String, FieldComponent> comps = new LinkedHashMap<>();
+        Map<String, String> globalLangs = loadLanguages(sling);
+        getAllAnnotatedObjectMembers(source, FormField.class)
+            .forEach(
+                f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
-                    FieldComponent component;
-                    try {
-                        component = fieldDefinition.component().getDeclaredConstructor().newInstance();
-                        component.setup(AccessibleObjectUtil.getFieldName(f), f, fieldDefinition, sling);
-                        return component;
-                    } catch (RuntimeException | ReflectiveOperationException ex) {
-                        LOG.error("Unable to instantiate field component for " + f.toString(), ex);
+                    if (fieldDefinition.localize()) {
+                        comps.putAll(createLocalizedComponent(sling, f, fieldDefinition, globalLangs));
+                    } else {
+                        try {
+                            FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
+                            component.setup(AccessibleObjectUtil.getFieldName(f), f, fieldDefinition, sling);
+                            comps.put(AccessibleObjectUtil.getFieldName(f), component);
+                        } catch (RuntimeException | ReflectiveOperationException ex) {
+                            LOG.error("Unable to instantiate field component for " + f.toString(), ex);
+                        }
                     }
-                    return null;
-                }, (a, b) -> a, LinkedHashMap::new));
+                }
+        );
+        return comps;
+    }
+
+    private static Map<String, String> loadLanguages(SlingScriptHelper sling) {
+        Map<String, String> globalLangs = new LinkedHashMap<>();
+        if (sling != null) {
+            // Read languages list
+            final String LANGUAGE_NODE_PATH = "wcm/core/resources/languages";
+            Resource rootRes = sling.getRequest().getResourceResolver().getResource(LANGUAGE_NODE_PATH);
+            if (rootRes != null) {
+                Iterator<Resource> itr = rootRes.listChildren();
+                while (itr.hasNext()) {
+                    Resource langRes = itr.next();
+                    String language = langRes.getValueMap().get("language", "");
+                    String country = langRes.getValueMap().get("country", "");
+                    if (!country.isEmpty() && !country.equals("*")) {
+                        language = language + " - " + country;
+                    }
+                    globalLangs.put(langRes.getName(), language);
+                }
+            }
+        }
+        return globalLangs;
+    }
+
+    private static Map<String, FieldComponent> createLocalizedComponent(SlingScriptHelper sling, AccessibleObject accessibleObject, FormField fieldDefinition, Map<String, String> globalLangs) {
+        Map<String, FieldComponent> comps = new LinkedHashMap<>();
+        String[] langs = fieldDefinition.languages();
+        if (langs == null || langs.length < 2) {
+            langs = globalLangs.keySet().toArray(new String[1]);
+        }
+        for (String lang : langs) {
+            String fieldName = AccessibleObjectUtil.getFieldName(accessibleObject)
+                            + (lang.equalsIgnoreCase("en") ? "" : "." + lang);
+            String title = fieldDefinition.name()
+                            + (lang.equalsIgnoreCase("en") ? "" : " (" + globalLangs.get(lang) + ")");
+            try {
+                FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
+                component.setup(fieldName, accessibleObject, fieldDefinition, sling);
+                component.getComponentMetadata().put("fieldLabel", title);
+                comps.put(fieldName, component);
+            } catch (RuntimeException | ReflectiveOperationException ex) {
+                LOG.error("Unable to instantiate field component for " + accessibleObject.toString(), ex);
+            }
+        }
+        return comps;
     }
 
     private static int superclassFieldsFirst(Field a, Field b) {

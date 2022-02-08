@@ -31,6 +31,7 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ConfigResourceVisitor extends AbstractResourceVisitor {
@@ -41,7 +42,7 @@ public class ConfigResourceVisitor extends AbstractResourceVisitor {
     private List<Resource> configurations = new ArrayList<Resource>();
 
     public final List<Resource> getConfigs() {
-        return this.configurations;
+        return Collections.unmodifiableList(this.configurations);
     }
 
     @Override

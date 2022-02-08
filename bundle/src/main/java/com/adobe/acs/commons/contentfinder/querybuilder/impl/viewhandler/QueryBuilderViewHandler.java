@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,12 +19,12 @@
  */
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.core.contentfinder.ViewHandler;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,11 +59,11 @@ public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 
     @Reference
-    private transient CloseableQueryBuilder queryBuilder;
+    private transient QueryBuilder queryBuilder;
 
     @Override
     protected ViewQuery createQuery(SlingHttpServletRequest slingRequest, Session session,
-            String queryString) throws Exception {
+                                    String queryString) throws Exception {
         Map<String, String> map;
 
         if (GQLToQueryBuilderConverter.convertToQueryBuilder(slingRequest)) {
@@ -75,10 +74,10 @@ public final class QueryBuilderViewHandler extends ViewHandler {
             log.debug("Converted QueryBuilder Parameter Map: {}", map);
         }
 
-        final CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(map), session);
+        final Query query = queryBuilder.createQuery(PredicateGroup.create(map), session);
+        QueryUtil.setResourceResolverOn(slingRequest.getResourceResolver(), query);
         return new QueryBuilderViewQuery(query);
     }
-
 
     /**
      * Assume query should be treated as a QueryBuilder query, rather than a GQL query
@@ -113,7 +112,7 @@ public final class QueryBuilderViewHandler extends ViewHandler {
 
 
     private Map<String, String> convertToQueryBuilderParams(final SlingHttpServletRequest request,
-            final String queryString) {
+                                                            final String queryString) {
         Map<String, String> map = new LinkedHashMap<String, String>();
 
         int userDefinedPropertyCount = 0;

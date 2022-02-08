@@ -19,23 +19,24 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.data.CompositeVariant;
-import com.adobe.acs.commons.data.Spreadsheet;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.AssetManager;
-import com.google.common.base.Function;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+
 import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -45,16 +46,19 @@ import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.data.Spreadsheet;
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
 
 /**
  * Provide code coverage for URL Asset Import
@@ -122,7 +126,7 @@ public class UrlAssetImportTest {
         for (int i = 0; i < cols.length && i < header.size(); i++) {
             row.put(header.get(i), new CompositeVariant(cols[i]));
         }
-        importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
+        importProcess.fileData.appendData(Collections.singletonList(row));
     }
 
     @Test

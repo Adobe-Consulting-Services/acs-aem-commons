@@ -35,6 +35,7 @@ import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -132,7 +133,7 @@ public final class Ace {
 
 
     public List<String> getPrivilegeNames() {
-        return privilegeNames;
+        return Collections.unmodifiableList(privilegeNames);
     }
 
     public List<Privilege> getPrivileges(AccessControlManager accessControlManager) {
@@ -170,7 +171,7 @@ public final class Ace {
     /** rep:ntNames **/
 
     public List<String> getRepNtNames() {
-        return repNtNames;
+        return Collections.unmodifiableList(repNtNames);
     }
 
     public boolean hasRepNtNames() {
@@ -181,7 +182,7 @@ public final class Ace {
     /** rep:itemNames **/
 
     public List<String> getRepItemNames() {
-        return repItemNames;
+        return Collections.unmodifiableList(repItemNames);
     }
 
     public boolean hasRepItemNames() {
@@ -191,7 +192,7 @@ public final class Ace {
     /** rep:prefixes **/
 
     public List<String> getRepPrefixes() {
-        return repPrefixes;
+        return Collections.unmodifiableList(repPrefixes);
     }
 
     public boolean hasRepPrefixes() {

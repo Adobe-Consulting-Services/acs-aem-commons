@@ -20,6 +20,9 @@
 
 package com.adobe.acs.commons.synth.impl;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 import org.apache.commons.lang.StringUtils;
@@ -68,7 +71,9 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
     public SynthesizedSlingHttpServletRequest(final SlingHttpServletRequest request) {
         super(request);
 
-        requestPathInfo = new WrappedRequestPathInfo();
+        WrappedRequestPathInfo wrappedRequestPathInfo = createWrappedRequestPathInfo();
+        RequestPathInfo wrappedRequestInfo = (RequestPathInfo) Proxy.newProxyInstance(RequestPathInfo.class.getClassLoader(), new Class[] { RequestPathInfo.class, com.adobe.acs.commons.synth.WrappedRequestPathInfo.class  }, wrappedRequestPathInfo);
+        requestPathInfo = wrappedRequestInfo;
     }
 
     @Override
@@ -178,24 +183,45 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
         return this;
     }
 
+    public WrappedRequestPathInfo createWrappedRequestPathInfo() {
+        return new WrappedRequestPathInfo();
+    }
 
-    private class WrappedRequestPathInfo implements RequestPathInfo {
+    class WrappedRequestPathInfo implements InvocationHandler {
 
         private RequestPathInfo getOriginal() {
             return getSlingRequest().getRequestPathInfo();
         }
 
         @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            String methodName = method.getName();
+            switch (methodName) {
+                case "getResourcePath":
+                    return getResourcePath();
+                case "getExtension":
+                    return getExtension();
+                case "getSelectorString":
+                    return getSelectorString();
+                case "getSelectors":
+                    return getSelectors();
+                case "getSuffix":
+                    return getSuffix();
+                case "getSuffixResource":
+                    return getSuffixResource();
+                default:
+                    throw new UnsupportedOperationException("REQUESTPATHINFOWRAPPER >> NO IMPLEMENTATION FOR " + methodName);
+            }
+        }
+
         public String getResourcePath() {
             return isResourcePathOverridden ? resourcePath : getOriginal().getResourcePath();
         }
 
-        @Override
         public String getExtension() {
             return isExtensionOverridden ? extension : getOriginal().getExtension();
         }
 
-        @Override
         public String getSelectorString() {
             if (isSelectorOverridden) {
                 return StringUtils.join(selectors, ".");
@@ -204,17 +230,14 @@ public class SynthesizedSlingHttpServletRequest extends SlingHttpServletRequestW
             return getOriginal().getSelectorString();
         }
 
-        @Override
         public String[] getSelectors() {
             return isSelectorOverridden ? selectors : getOriginal().getSelectors();
         }
 
-        @Override
         public String getSuffix() {
             return isSuffixOverridden ? suffix : getOriginal().getSuffix();
         }
 
-        @Override
         public Resource getSuffixResource() {
             if (isSuffixOverridden) {
                 return getSlingRequest().getResourceResolver().getResource(suffix);

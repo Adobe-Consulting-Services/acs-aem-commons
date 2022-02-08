@@ -26,6 +26,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -60,11 +62,11 @@ public final class MultiFieldPanelWCMUseTest {
     @Mock
     private ResourceResolver resourceResolver;
 
-    @Mock
-    private List<Map<String, String>> myFirstList;
+    private List<Map<String, String>> myFirstList =
+            Collections.singletonList(Collections.singletonMap("first", "list"));
 
-    @Mock
-    private List<Map<String, String>> mySecondList;
+    private List<Map<String, String>> mySecondList =
+            Collections.singletonList(Collections.singletonMap("second", "list"));
 
 
     @Before
@@ -112,7 +114,7 @@ public final class MultiFieldPanelWCMUseTest {
 
         multiFieldPanelWCMUse.init(bindings);
 
-        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = new ArrayList<>(multiFieldPanelWCMUse.getValues());
         assertEquals(myFirstList, actual);
         assertNotEquals(mySecondList, actual);
     }
@@ -126,7 +128,7 @@ public final class MultiFieldPanelWCMUseTest {
 
         multiFieldPanelWCMUse.init(bindings);
 
-        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = new ArrayList<>(multiFieldPanelWCMUse.getValues());
         assertEquals(myFirstList, actual);
         assertNotEquals(mySecondList, actual);
     }
@@ -141,7 +143,7 @@ public final class MultiFieldPanelWCMUseTest {
 
         multiFieldPanelWCMUse.init(bindings);
 
-        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = new ArrayList<>(multiFieldPanelWCMUse.getValues());
         assertEquals(myFirstList, actual);
         assertNotEquals(mySecondList, actual);
     }

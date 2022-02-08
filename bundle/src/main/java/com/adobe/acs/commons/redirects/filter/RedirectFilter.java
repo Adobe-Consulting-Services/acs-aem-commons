@@ -167,29 +167,29 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private ConfigurationResourceResolver configResolver;
+    ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private LocationHeaderAdjuster urlAdjuster;
+    LocationHeaderAdjuster urlAdjuster;
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
     private boolean preserveQueryString;
-    private List<Header> onDeliveryHeaders;
+    private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
-    private Collection<String> exts;
-    private Collection<String> paths;
+    private Collection<String> exts = Collections.emptySet();
+    private Collection<String> paths = Collections.emptySet();
     private Configuration config;
     private ExecutorService executor;
-    private Cache<String, RedirectConfiguration> rulesCache;
+    Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
@@ -419,14 +419,15 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
             }
-            if(preserveQueryString) {
-                String queryString = slingRequest.getQueryString();
-                if (queryString != null) {
-                    location = preserveQueryString(location, queryString);
-                }
-            }
             if(urlAdjuster != null){
                 location = urlAdjuster.adjust(slingRequest, location);
+            }
+        }
+        if (preserveQueryString) {
+
+            String queryString = slingRequest.getQueryString();
+            if (queryString != null) {
+                location = preserveQueryString(location, queryString);
             }
         }
         return location;
@@ -467,19 +468,19 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     protected Collection<String> getExtensions() {
-        return exts;
+        return Collections.unmodifiableCollection(exts);
     }
 
     protected Collection<String> getPaths() {
-        return paths;
+        return Collections.unmodifiableCollection(paths);
     }
 
     protected Collection<String> getMethods() {
-        return methods;
+        return Collections.unmodifiableCollection(methods);
     }
 
     protected List<Header> getOnDeliveryHeaders() {
-        return onDeliveryHeaders;
+        return Collections.unmodifiableList(onDeliveryHeaders);
     }
 
     /**

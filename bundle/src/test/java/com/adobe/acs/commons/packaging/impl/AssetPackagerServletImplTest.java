@@ -148,7 +148,7 @@ public class AssetPackagerServletImplTest {
 
         doReturn(packageHelper).when(assetPackagerServlet).getPackageHelper();
         context.registerService(PackageHelper.class, packageHelper);
-        when(packaging.getPackageManager(any(Session.class))).thenReturn(new JcrPackageManagerImpl(context.resourceResolver().adaptTo(Session.class)));
+        when(packaging.getPackageManager(any(Session.class))).thenReturn(new JcrPackageManagerImpl(context.resourceResolver().adaptTo(Session.class), new String[0]));
     }
 
     @Test

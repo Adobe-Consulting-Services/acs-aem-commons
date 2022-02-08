@@ -59,8 +59,8 @@ public class TagReportTest {
 
     tagReporter = new TagReporter();
 
-    ctx.load().json("/com/adobe/acs/commons/mcp/impl/processes/tags.json", "/etc/tags");
-    ctx.load().json("/com/adobe/acs/commons/mcp/impl/processes/content.json", "/content");
+    ctx.load().json("/com/adobe/acs/commons/mcp/impl/processes/tags.json", "/content/cq:tags");
+    ctx.load().json("/com/adobe/acs/commons/mcp/impl/processes/content.json", "/content/root");
     Actions.setCurrentActionManager(actionManager);
 
     doAnswer(new Answer() {
@@ -85,8 +85,8 @@ public class TagReportTest {
   @Test
   public void testTraverseTags() throws Exception {
 
-    tagReporter.tagPath = "/etc/tags/workflow";
-    tagReporter.rootSearchPath = "/content";
+    tagReporter.tagPath = "/content/cq:tags/workflow";
+    tagReporter.rootSearchPath = "/content/root";
     tagReporter.includeReferences = false;
     tagReporter.traverseTags(actionManager);
     tagReporter.recordTags(actionManager);
@@ -106,8 +106,8 @@ public class TagReportTest {
   @Test
   public void testInvalidRoot() throws Exception {
 
-    tagReporter.tagPath = "/etc/tags/totally-a-tag";
-    tagReporter.rootSearchPath = "/content";
+    tagReporter.tagPath = "/content/cq:tags/totally-a-tag";
+    tagReporter.rootSearchPath = "/content/root";
     tagReporter.includeReferences = false;
 
     tagReporter.traverseTags(actionManager);
@@ -121,8 +121,8 @@ public class TagReportTest {
   @Test
   public void testIncludeReferences() throws Exception {
 
-    tagReporter.tagPath = "/etc/tags/workflow";
-    tagReporter.rootSearchPath = "/content";
+    tagReporter.tagPath = "/content/cq:tags/workflow";
+    tagReporter.rootSearchPath = "/content/root";
     tagReporter.includeReferences = true;
     tagReporter.referencesCharacterLimit = "4096";
 
@@ -150,8 +150,8 @@ public class TagReportTest {
 
     ctx.load().json("/com/adobe/acs/commons/mcp/impl/processes/lotsofchildren.json", "/content/lotsofchildren");
 
-    tagReporter.tagPath = "/etc/tags/workflow/wcm/translation";
-    tagReporter.rootSearchPath = "/content";
+    tagReporter.tagPath = "/content/cq:tags/workflow/wcm/translation";
+    tagReporter.rootSearchPath = "/content/lotsofchildren";
     tagReporter.includeReferences = true;
 
     tagReporter.init();

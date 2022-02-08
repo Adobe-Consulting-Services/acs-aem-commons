@@ -25,9 +25,16 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.adobe.acs.commons.wcm.PageRootProvider;
-import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -38,16 +45,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import javax.script.Bindings;
-import javax.script.SimpleBindings;
+import com.adobe.acs.commons.wcm.PageRootProvider;
+import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SharedComponentPropertiesBindingsValuesProviderTest {
@@ -60,7 +60,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   private Resource sharedPropsResource;
   private Resource globalPropsResource;
   private SlingHttpServletRequest request;
-  private Page page;
   private Bindings bindings;
   private ResourceResolver resourceResolver;
   private ValueMap sharedProps;
@@ -70,7 +69,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   public void setUp() throws Exception {
     resource = mock(Resource.class);
     pageRootProvider = mock(PageRootProvider.class);
-    page = mock(Page.class);
     bindings = new SimpleBindings();
     sharedPropsResource = mock(Resource.class);
     globalPropsResource = mock(Resource.class);
@@ -142,14 +140,12 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   @Test
   public void addBindings() {
     final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
-    Whitebox.setInternalState(sharedComponentProperties, "pageRootProvider", pageRootProvider);
+    sharedComponentProperties.pageRootProvider = pageRootProvider;
 
     final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
         = new SharedComponentPropertiesBindingsValuesProvider();
 
-    Whitebox.setInternalState(sharedComponentPropertiesBindingsValuesProvider,
-            "sharedComponentProperties", sharedComponentProperties);
-
+    sharedComponentPropertiesBindingsValuesProvider.sharedComponentProperties = sharedComponentProperties;
     sharedComponentPropertiesBindingsValuesProvider.addBindings(bindings);
 
     assertEquals(sharedPropsResource, bindings.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE));

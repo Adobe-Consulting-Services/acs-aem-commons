@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        jdk: [8, 11]
+        jdk: [8, 11, 17]
         include:
           # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
           - os: ubuntu-latest
@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           cache: 'maven'
-          distribution: 'adopt'
+          distribution: 'zulu'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
@@ -99,7 +99,7 @@ jobs:
       # https://github.com/marketplace/actions/changelog-enforcer
       - name: Enforce a changelog entry
         if: matrix.isMainBuildEnv && github.event_name == 'pull_request_target'
-        uses: dangoslen/changelog-enforcer@v2
+        uses: dangoslen/changelog-enforcer@v3
         with:
           changeLogPath: 'CHANGELOG.md'
           skipLabels: 'Skip-Changelog,skip-changelog'

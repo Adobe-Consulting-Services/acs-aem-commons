@@ -50,13 +50,21 @@ public @interface FormField {
 
     boolean showOnCreate() default true;
 
+    boolean localize() default false;
+
+    String[] languages() default { "en" };
+
     public static class Factory {
         private Factory() {
             // Factory cannot be instantiated
         }
 
-        // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
         public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options) {
+            return create(name, hint, description, category, required, clazz, options, false, new String[]{"en"});
+        }
+
+        // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
+        public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options, boolean localize, String[] languages) {
             return new FormField() {
                 @Override
                 public String name() {
@@ -101,6 +109,16 @@ public @interface FormField {
                 @Override
                 public boolean showOnCreate() {
                     return true;
+                }
+
+                @Override
+                public boolean localize() {
+                    return localize;
+                }
+
+                @Override
+                public String[] languages() {
+                    return languages;
                 }
             };
         }

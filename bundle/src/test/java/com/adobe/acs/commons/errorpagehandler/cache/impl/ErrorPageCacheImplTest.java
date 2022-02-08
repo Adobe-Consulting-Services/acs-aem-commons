@@ -20,18 +20,21 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import junitx.util.PrivateAccessor;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ErrorPageCacheImplTest {
@@ -41,10 +44,22 @@ public class ErrorPageCacheImplTest {
     private ConcurrentHashMap<String, CacheEntry> cache;
 
     private ErrorPageCacheImpl errorPageCache;
+    private Supplier<String> includedStringSupplier;
+
+    private static final int NUM_INITIAL_HITS = 5;
+    private static final int NUM_INITIAL_MISSES = 3;
+    private static final int NUM_INITIAL_CACHE_ENTRIES = 2;
+    private static final int NUM_INITIAL_REQUESTS = NUM_INITIAL_HITS + NUM_INITIAL_MISSES;
 
     @Before
     public void setUp() throws Exception {
-        errorPageCache = new ErrorPageCacheImpl(5, false);
+        errorPageCache = new ErrorPageCacheImpl(1, false) {
+
+            @Override
+            public String getIncludeAsString(String path, SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
+                return includedStringSupplier.get();
+            }
+        };
         PrivateAccessor.setField(errorPageCache, "cache", cache);
 
         // 1 Miss
@@ -71,51 +86,86 @@ public class ErrorPageCacheImplTest {
 
         cache.put("/content/mars", mars);
 
-        MockitoAnnotations.initMocks(this);
     }
 
+    @Test
     public void testGet() throws Exception {
-        /**
-         * Implemented in PowerMockErrorPageCacheImplTest
-         *
-         * Powermock was having problems running with @Spy'ed vars in this Test.
-         */
+        String data = "";
+
+        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
+        SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
+
+        includedStringSupplier = () -> "hello world";
+
+       
+        assertEquals(NUM_INITIAL_REQUESTS, errorPageCache.getTotalCacheRequests());
+
+        // MISS
+        data = errorPageCache.get("/content/world", request, response);
+
+        assertEquals(NUM_INITIAL_HITS, errorPageCache.getTotalHits());
+        assertEquals(NUM_INITIAL_MISSES + 1, errorPageCache.getTotalMisses());
+        assertEquals(NUM_INITIAL_REQUESTS + 1, errorPageCache.getTotalCacheRequests());
+        assertEquals(NUM_INITIAL_CACHE_ENTRIES + 1, errorPageCache.getCacheEntriesCount());
+
+        assertEquals("hello world", data);
+
+        includedStringSupplier = () -> "hello new world";
+
+        // HIT
+        data = errorPageCache.get("/content/world", request, response);
+
+        assertEquals(NUM_INITIAL_HITS + 1, errorPageCache.getTotalHits());
+        assertEquals(NUM_INITIAL_MISSES + 1, errorPageCache.getTotalMisses());
+        assertEquals(NUM_INITIAL_REQUESTS + 2, errorPageCache.getTotalCacheRequests());
+        assertEquals(NUM_INITIAL_CACHE_ENTRIES + 1, errorPageCache.getCacheEntriesCount());
+
+        assertEquals("hello world", data);
+
+        // Sleep for > 1 second (cache ttl)
+        Thread.sleep(1001);
+
+        // MISS
+        data = errorPageCache.get("/content/world", request, response);
+
+        assertEquals(NUM_INITIAL_HITS + 1, errorPageCache.getTotalHits());
+        assertEquals(NUM_INITIAL_MISSES + 2, errorPageCache.getTotalMisses());
+        assertEquals(NUM_INITIAL_REQUESTS + 3, errorPageCache.getTotalCacheRequests());
+        assertEquals(NUM_INITIAL_CACHE_ENTRIES + 1, errorPageCache.getCacheEntriesCount());
+
+        assertEquals("hello new world", data);
+    }
+
+    @Test
+    public void testGet_Null() throws Exception {
+        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
+        SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
+
+        includedStringSupplier = () -> null;
+
+        String data = errorPageCache.get("/content/world", request, response);
+
+        assertEquals("", data);
     }
 
     @Test
     public void testGetTotalHits() throws Exception {
-        final int expResult = 5;
-
-        final int result = errorPageCache.getTotalHits();
-
-        assertEquals(expResult, result);
+        assertEquals(NUM_INITIAL_HITS, errorPageCache.getTotalHits());
     }
 
     @Test
     public void testGetCacheEntriesCount() throws Exception {
-        final int expResult = 2;
-
-        final int result = errorPageCache.getCacheEntriesCount();
-
-        assertEquals(expResult, result);
+        assertEquals(NUM_INITIAL_CACHE_ENTRIES,  errorPageCache.getCacheEntriesCount());
     }
 
     @Test
     public void testGetTotalMisses() throws Exception {
-        final int expResult = 3;
-
-        final int result = errorPageCache.getTotalMisses();
-
-        assertEquals(expResult, result);
+        assertEquals(NUM_INITIAL_MISSES, errorPageCache.getTotalMisses());
     }
 
     @Test
     public void testGetTotalCacheRequests() throws Exception {
-        final int expResult = 8;
-
-        final int result = errorPageCache.getTotalCacheRequests();
-
-        assertEquals(expResult, result);
+        assertEquals(NUM_INITIAL_REQUESTS, errorPageCache.getTotalCacheRequests());
     }
 
     @Test

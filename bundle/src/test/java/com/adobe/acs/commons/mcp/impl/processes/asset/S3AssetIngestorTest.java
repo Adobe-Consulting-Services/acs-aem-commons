@@ -19,19 +19,24 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.ReportColumns;
-import com.amazonaws.auth.AnonymousAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.S3ClientOptions;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.AssetManager;
-import com.google.common.base.Function;
-import io.findify.s3mock.S3Mock;
-import me.alexpanov.net.FreePortFinder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -50,13 +55,19 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import java.util.Collections;
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.ReportColumns;
+import com.amazonaws.auth.AnonymousAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import io.findify.s3mock.S3Mock;
+import me.alexpanov.net.FreePortFinder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class S3AssetIngestorTest {

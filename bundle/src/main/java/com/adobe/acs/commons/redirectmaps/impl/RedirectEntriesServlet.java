@@ -42,7 +42,7 @@ public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
   
   // Disable this feature on AEM as a Cloud Service
   @Reference(target="(distribution=classic)")
-  RequireAem requireAem;
+  transient RequireAem requireAem;
 
     private static final long serialVersionUID = -2825679173210628699L;
     private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);

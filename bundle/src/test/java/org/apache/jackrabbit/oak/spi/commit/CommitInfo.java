@@ -18,17 +18,17 @@
  */
 package org.apache.jackrabbit.oak.spi.commit;
 
-import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import java.util.Map;
 
-import com.google.common.base.Objects;
-
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jackrabbit.oak.api.Root;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.google.common.base.Objects;
 
 /**
  * Commit info instances associate some meta data with a commit.
@@ -181,12 +181,12 @@ public final class CommitInfo {
 
     @Override
     public String toString() {
-        return toStringHelper(this).omitNullValues()
-            .add("sessionId", sessionId)
-            .add("userId", userId)
-            .add("external", external)
-            .add("date", date)
-            .add("info", info)
+        return new ToStringBuilder(this)
+            .append("sessionId", sessionId)
+            .append("userId", userId)
+            .append("external", external)
+            .append("date", date)
+            .append("info", info)
             .toString();
     }
 

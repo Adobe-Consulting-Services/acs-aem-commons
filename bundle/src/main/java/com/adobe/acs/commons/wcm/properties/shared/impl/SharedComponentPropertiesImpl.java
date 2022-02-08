@@ -58,7 +58,7 @@ public class SharedComponentPropertiesImpl implements SharedComponentProperties,
      * Bind if available, check for null when reading.
      */
     @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-    private PageRootProvider pageRootProvider;
+    PageRootProvider pageRootProvider;
 
     /**
      * Construct a canonical resource type relative path for the provided resource type,

@@ -61,7 +61,6 @@ public class ChecksumGeneratorServletTest {
     @InjectMocks
     public ChecksumGeneratorServlet servlet = new ChecksumGeneratorServlet();
 
-    ResourceResolver resourceResolver;
     Session session;
 
     @Before
@@ -71,9 +70,8 @@ public class ChecksumGeneratorServletTest {
 
     @Test
     public void testWithNoPath() throws Exception {
-        ResourceResolver resourceResolver = MockSling.newResourceResolver(context.bundleContext());
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(resourceResolver, context.bundleContext());
-        request.setResource(resourceResolver.getResource(SERVLET_PATH));
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(context.resourceResolver(), context.bundleContext());
+        request.setResource(context.resourceResolver().getResource(SERVLET_PATH));
         MockRequestPathInfo requestPathInfo = (MockRequestPathInfo)request.getRequestPathInfo();
         requestPathInfo.setSelectorString(SERVLET_SELECTORS);
         requestPathInfo.setExtension(SERVLET_EXTENSION);

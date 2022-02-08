@@ -20,8 +20,10 @@
 package com.adobe.acs.commons.reports.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -52,7 +54,9 @@ public class ReferencesModel implements ReportCellCSVExporter {
   }
 
   public List<Reference> getReferences() {
-    return referenceList;
+    return Optional.ofNullable(referenceList)
+            .map(Collections::unmodifiableList)
+            .orElse(Collections.emptyList());
   }
 
   @Override

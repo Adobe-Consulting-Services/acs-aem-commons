@@ -20,8 +20,12 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class WorkflowRemovalConfig {
@@ -44,23 +48,29 @@ public final class WorkflowRemovalConfig {
      * @param olderThanMillis Milliseconds; only delete WF's started after this milliseconds ago
      */
     public WorkflowRemovalConfig(Collection<String> modelIds, Collection<String> statuses, Collection<Pattern> payloads, Calendar olderThan, long olderThanMillis) {
-        this.modelIds = modelIds;
-        this.statuses = statuses;
-        this.payloads = payloads;
+        this.modelIds = Optional.ofNullable(modelIds)
+                .map(coll -> (List<String>) new ArrayList<>(coll))
+                .orElse(Collections.emptyList());
+        this.statuses = Optional.ofNullable(statuses)
+                .map(coll -> (List<String>) new ArrayList<>(coll))
+                .orElse(Collections.emptyList());
+        this.payloads = Optional.ofNullable(payloads)
+                .map(coll -> (List<Pattern>) new ArrayList<>(coll))
+                .orElse(Collections.emptyList());
         this.olderThan = olderThan;
         this.olderThanMillis = olderThanMillis;
     }
 
     public final Collection<String> getModelIds() {
-        return modelIds;
+        return Collections.unmodifiableCollection(modelIds);
     }
 
     public final Collection<String> getStatuses() {
-        return statuses;
+        return Collections.unmodifiableCollection(statuses);
     }
 
     public final Collection<Pattern> getPayloads() {
-        return payloads;
+        return Collections.unmodifiableCollection(payloads);
     }
 
     public final Calendar getOlderThan() {

@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 class PageCompareDataImpl implements PageCompareData {
 
@@ -101,7 +102,9 @@ class PageCompareDataImpl implements PageCompareData {
 
     @Override
     public Date getVersionDate() {
-        return versionDate;
+        return Optional.ofNullable(versionDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     @Override
@@ -111,12 +114,12 @@ class PageCompareDataImpl implements PageCompareData {
 
     @Override
     public List<VersionSelection> getVersions() {
-        return versionSelection;
+        return Collections.unmodifiableList(versionSelection);
     }
 
     @Override
     public List<PageCompareDataLine> getLines() {
-        return lines;
+        return Collections.unmodifiableList(lines);
     }
 
     private void populate(final Resource resource, final String basePath, final int depth) throws RepositoryException {

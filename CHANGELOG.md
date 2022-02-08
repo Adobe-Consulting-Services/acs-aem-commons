@@ -9,9 +9,43 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Changed
+
+- #2775 - Update Maven plugins
+
+## 5.1.2 - 2022-01-21
+
+### Changed
+
+- #1718 - Use bnd-maven-plugin instead of maven-bundle-plugin
+- #2767 - ThrottledTaskRunnerTest.testExecutionOrder unstable on Mac OS
+- #2261 - Update to latest mocking libraries
+- #2753 - Update to AEM 6.4 dependencies
+- #2754 - Support building with Java 17
+- #2760 - Remove CloseableQuery and CloseableQueryBuilder from API
+
 ### Fixed
 
+- #2772 - Resolved Cloud Manager Code Scan reported Blockers, Criticals, and Vulnerabilities
+
+## 5.1.0 - 2021-12-13
+
+### Added
+
+- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is a member of required groups or an admin.
+
+### Fixed
+
+- #2749 and #2488: Manage Controlled Processes does not show any process fixed via #2751
+- #2337 - Marketo form null on publish fixed via #2758
+- #2735 - Redirect Manager: preserve query string in external redirects fixed via #2736
+- #2658 - Fixed issue where implementing RequestPathInfo was being caught by CQRules:CQBP-84
 - #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
+- #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
+
+### Changed
+
+- #2742 - Provided a way to author localized titles for Generic Lists.
 
 ## 5.0.14 - 2021-10-20
 

@@ -72,7 +72,8 @@ public class HttpCacheConfigImplTest {
 
         properties = new HashMap<>();
 
-        context.registerService(CacheKeyFactory.class, extension);
+        // service.pid is only automatically set for DS components
+        context.registerService(CacheKeyFactory.class, extension, Collections.singletonMap("service.pid", "com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension"));
 
         when(request.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getUserID()).thenReturn("anonymous");

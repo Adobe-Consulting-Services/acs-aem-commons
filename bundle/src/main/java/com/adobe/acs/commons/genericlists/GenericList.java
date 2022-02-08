@@ -84,7 +84,7 @@ public interface GenericList {
         @Nonnull
         @Inject
         @Named("jcr:title")
-        @FormField(name = "Title")
+        @FormField(name = "Title", localize = true)
         String getTitle();
 
         /**

@@ -29,6 +29,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -129,28 +130,30 @@ public abstract class MovingNode {
      * @return the children
      */
     public List<MovingNode> getChildren() {
-        return children;
+        return Collections.unmodifiableList(children);
     }
 
     /**
      * @param children the children to set
      */
     public void setChildren(List<MovingNode> children) {
-        this.children = children;
+        this.children = Optional.ofNullable(children)
+                .map(list -> (List<MovingNode>) new ArrayList<>(list))
+                .orElse(Collections.emptyList());
     }
 
     /**
      * @return the references
      */
     public List<String> getAllReferences() {
-        return allReferences;
+        return Collections.unmodifiableList(allReferences);
     }
 
     /**
      * @return the references
      */
     public List<String> getPublishedReferences() {
-        return publishedReferences;
+        return Collections.unmodifiableList(publishedReferences);
     }
 
     /**

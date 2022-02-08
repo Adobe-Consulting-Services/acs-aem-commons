@@ -23,7 +23,6 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.workflow.processes.impl
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
-import com.adobe.aemds.guide.themes.GuideThemeConstants;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
@@ -247,10 +246,10 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
                         return;
                     }
                     String completeHrefValue = null;
-                    if (hrefValue.contains(GuideThemeConstants.CONTENT_DAM_ROOT)) {
+                    if (hrefValue.contains(DamConstants.MOUNTPOINT_ASSETS)) {
                         String hrefEncodedValue = StringUtils.substringAfter(
-                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), GuideThemeConstants.CONTENT_DAM_ROOT);
-                        completeHrefValue = GuideThemeConstants.CONTENT_DAM_ROOT + hrefEncodedValue;
+                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), DamConstants.MOUNTPOINT_ASSETS);
+                        completeHrefValue = DamConstants.MOUNTPOINT_ASSETS + hrefEncodedValue;
                     }
                     if (null == completeHrefValue) {
                         LOGGER.error("Back track root path is not correct {}", hrefValue);

@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic.impl.cq;
 
+import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowData;
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticCompleteWorkflowException;
@@ -47,6 +48,7 @@ import javax.jcr.Session;
 import javax.jcr.version.VersionException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,7 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     @SuppressWarnings("squid:S1192")
     public final void complete(final WorkItem workItem, final Route route) throws WorkflowException {
-        if (workItem instanceof SyntheticWorkItem) {
+        if (workItem instanceof WrappedSyntheticWorkItem && workItem.getWorkflow() != null) {
             throw new SyntheticCompleteWorkflowException("Synthetic workflow [ "
                     + workItem.getWorkflow().getId() + " : " + workItem.getId() + " ] completed");
         } else {
@@ -282,25 +284,25 @@ public class SyntheticWorkflowSession implements WorkflowSession {
     @Override
     public final List<Route> getRoutes(final WorkItem workItem) throws WorkflowException {
         log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
-        return this.routes;
+        return Collections.unmodifiableList(this.routes);
     }
 
     @Override
     public final List<Route> getRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
         log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
-        return this.routes;
+        return Collections.unmodifiableList(this.routes);
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem) throws WorkflowException {
         log.debug("Synthetic Workflow does not support back routes; Defaults to a single Synthetic Route");
-        return this.backRoutes;
+        return Collections.unmodifiableList(this.backRoutes);
     }
 
     @Override
     public final List<Route> getBackRoutes(final WorkItem workItem, final boolean b) throws WorkflowException {
         log.debug("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
-        return this.backRoutes;
+        return Collections.unmodifiableList(this.backRoutes);
     }
 
     @Override
