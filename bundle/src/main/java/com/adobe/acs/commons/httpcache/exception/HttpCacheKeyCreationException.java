@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.exception;
 /**
  * Custom exception representing failure conditions in creating a cache key.
  */
+@SuppressWarnings({"serial", "squid:S2166"})
 public class HttpCacheKeyCreationException extends HttpCacheException {
     public HttpCacheKeyCreationException() {
     }

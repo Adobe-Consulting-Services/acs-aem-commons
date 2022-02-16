@@ -19,8 +19,17 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Collections;
 import java.util.Dictionary;
@@ -42,20 +51,22 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-
-import com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class AbstractDispatcherCacheHeaderFilterTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     AbstractDispatcherCacheHeaderFilter filter;
 
@@ -108,7 +119,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             }
 
             @Override
-            protected String getHeaderValue() {
+            protected String getHeaderValue(HttpServletRequest request) {
                 return headerValue;
             }
 
@@ -122,6 +133,10 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         when(request.getMethod()).thenReturn("GET");
         when(request.getParameterMap()).thenReturn(params);
+
+        final Map<String, Object> attributes = new HashMap<>();
+        doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1))).when(request).setAttribute(any(), any());
+        when(request.getAttribute(any())).thenAnswer(i -> attributes.get(i.getArgument(0)));
     }
 
     @After
@@ -136,7 +151,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
     @Test
     public void testActivateSuccess() throws Exception {
 
-        BaseMatcher<Dictionary<String, Object>> filterPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
+        final BaseMatcher<Dictionary<String, Object>> filterPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
                 // do nothing
@@ -146,7 +161,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
                 return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
-            };
+            }
         };
 
         filter.activate(componentContext);
@@ -161,13 +176,13 @@ public class AbstractDispatcherCacheHeaderFilterTest {
     @Test
     public void testActivateMultipleFilters() throws Exception {
 
-        ServiceRegistration secondRegistration = mock(ServiceRegistration.class);
+        final ServiceRegistration secondRegistration = mock(ServiceRegistration.class);
 
         final String secondPattern = "/content/dam/.*";
         properties.put(AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
                 new String[] { pattern, secondPattern });
 
-        BaseMatcher<Dictionary<String, Object>> firstPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
+        final BaseMatcher<Dictionary<String, Object>> firstPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
                 // do nothing
@@ -177,10 +192,10 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
                 return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
-            };
+            }
         };
 
-        BaseMatcher<Dictionary<String, Object>> secondPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
+        final BaseMatcher<Dictionary<String, Object>> secondPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
                 // do nothing
@@ -190,7 +205,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
                 return StringUtils.equals(secondPattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
-            };
+            }
         };
 
         filter.activate(componentContext);
@@ -283,7 +298,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
         verify(request).getMethod();
-        verify(request).getParameterMap();
+        verify(request, times(2)).getParameterMap(); 
         verifyNoMoreInteractions(request, this.request, response, chain);
     }
 
@@ -336,8 +351,24 @@ public class AbstractDispatcherCacheHeaderFilterTest {
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
         verify(request).getMethod();
         verify(request).getParameterMap();
+        verify(request).getAttribute("com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.header.Header Name");
+        verify(request).setAttribute(eq("com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.header.Header Name"), any());
         verify(response).addHeader(headerName, headerValue);
         verifyNoMoreInteractions(request, this.request, response, chain);
+    }
+
+
+    @Test
+    public void testMultipleFilters() throws Exception {
+        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+                .thenAnswer(i -> Collections.enumeration(agents));
+
+        filter.doFilter(request, response, chain);
+        filter.doFilter(request, response, chain);
+
+        verify(response, times(1)).addHeader(headerName, headerValue);
+
     }
 
 }

@@ -1,0 +1,48 @@
+<!--/*
+ #%L
+ ACS AEM Commons Content Package
+ %%
+ Copyright (C) 2014 Adobe
+ %%
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ #L%
+*/-->
+<sly data-sly-use.location="asset-location-map.js" data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-test="${location.valid}">
+<sly data-sly-call="${clientLib.all @ categories=['acs-commons.leaflet']}"></sly>
+
+    <div id="${location.divId}"></div>
+    <script>
+        (function() {
+            var map = L.map('${location.divId @ context="scriptString"}', {
+                  "center" : [${location.latitude @ context="text"}, ${location.longitude @ context="text"}],
+                  "zoom" : 13
+                });
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+            L.marker([${location.latitude @ context="text"}, ${location.longitude @ context="text"}]).addTo(map);
+
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 1500);
+        }());
+
+    </script>
+    <style type="text/css">
+        #${location.divId @ context="styleToken"} {
+            height: 200px;
+        }
+    </style>
+</sly>

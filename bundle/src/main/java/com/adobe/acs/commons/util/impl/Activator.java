@@ -19,20 +19,24 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-
+import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.settings.SlingSettingsService;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.ModeUtil;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
 
-    BundleContext context;
+    private static ServiceTracker<AdapterManager, AdapterManager> adapterManagerServiceTracker;
 
     /**
      * default logger
@@ -44,16 +48,19 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     @Override
+    @SuppressWarnings("squid:S2696")
     public void start(BundleContext context) throws Exception {
-        LOG.info(context.getBundle().getSymbolicName() + " started");
-        ServiceReference ref  = context.getServiceReference(SlingSettingsService.class.getName());
-        SlingSettingsService service = (SlingSettingsService) context.getService(ref);
+        LOG.info("{} started",context.getBundle().getSymbolicName());
+        ServiceReference<SlingSettingsService> ref  = context.getServiceReference(SlingSettingsService.class);
+        SlingSettingsService service = context.getService(ref);
         try {
             ModeUtil.configure(service);
         } catch (ConfigurationException ex) {
             LOG.error("Unable to configure ModeUtil with Sling Settings.", ex);
         }
         context.ungetService(ref);
+        adapterManagerServiceTracker = new ServiceTracker<>(context, AdapterManager.class, null);
+        adapterManagerServiceTracker.open();
     }
 
     /*
@@ -62,7 +69,12 @@ public class Activator implements BundleActivator {
      */
     @Override
     public void stop(BundleContext context) throws Exception {
-        LOG.info(context.getBundle().getSymbolicName() + " stopped");
+        adapterManagerServiceTracker.close();
+        LOG.info("{} stopped",context.getBundle().getSymbolicName());
+    }
+
+    public static AdapterManager getAdapterManager() {
+        return adapterManagerServiceTracker != null ? adapterManagerServiceTracker.getService() : null;
     }
 
 }

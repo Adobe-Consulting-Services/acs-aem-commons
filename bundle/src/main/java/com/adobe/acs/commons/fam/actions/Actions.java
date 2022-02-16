@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +15,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam.actions;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -31,6 +35,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
  * Various deferred actions to be used with the ActionManager
  */
 @ProviderType
+@SuppressWarnings({"squid:S1181", "squid:S1193"})
 public final class Actions {
     private Actions() {
     }
@@ -38,6 +43,7 @@ public final class Actions {
     private static final Logger LOG = LoggerFactory.getLogger(Actions.class);
 
     private static ThreadLocal<ActionManager> currentActionManager = new ThreadLocal<>();
+
     /**
      * Obtain the current action manager -- this is necessary for additional tracking such as current item
      * @return current action manager
@@ -126,6 +132,7 @@ public final class Actions {
      * @param action Action to attempt
      * @return New retry wrapper around provided action
      */
+    @SuppressWarnings("squid:S3776")
     public static final CheckedConsumer<ResourceResolver> retry(final int retries, final long pausePerRetry, final CheckedConsumer<ResourceResolver> action) {
         return (ResourceResolver r) -> {
             int remaining = retries;
@@ -138,18 +145,19 @@ public final class Actions {
                     r.refresh();
                     LOG.info("Timeout reached, aborting work", e);
                     throw e;
+                } catch (Error e) {
+                    LOG.info("Critical runtime exception " + e.getMessage(), e);
+                    throw e;                    
                 } catch (Throwable e) {
+                    LOG.info("Error commit, retry count is {}. Switch to DEBUG logging to get the full stacktrace",
+                            remaining);
+                    LOG.debug("Error commit, retry count is " + remaining, e);
                     r.revert();
                     r.refresh();
-                    LOG.info("Error commit, retry count is " + remaining, e);
-                    if (e instanceof Exception) {
-                        if (remaining-- <= 0) {
-                            throw e;
-                        } else {
-                            Thread.sleep(pausePerRetry);
-                        }
-                    } else {
+                    if (--remaining <= 0) {
                         throw e;
+                    } else {
+                        Thread.sleep(pausePerRetry);
                     }
                 }
             }

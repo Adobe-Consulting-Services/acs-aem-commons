@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.quickly.operations.impl;
 
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
@@ -46,8 +47,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +58,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 
 /**
  * ACS AEM Commons - Quickly - Last Modified Operation
@@ -130,7 +131,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         for (final Resource resource : pages) {
             final Page page = pageManager.getContainingPage(resource);
 
-            if(page == null) {
+            if (page == null) {
                 continue;
             }
 
@@ -159,10 +160,10 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     private List<Resource> getLastModifiedPages(final ResourceResolver resourceResolver, final Command cmd) {
 
         final String relativeDateRange = this.getRelativeDateRangeLowerBoundParam(cmd);
-        final String userID = this.getUserIDParam(cmd, resourceResolver.getUserID());
+        final String userId = this.getUserIdParam(cmd, resourceResolver.getUserID());
 
         return this.getLastModifiedQuery(resourceResolver,
-                userID,
+                userId,
                 relativeDateRange,
                 "cq:PageContent",
                 "@" + NameConstants.PN_PAGE_LAST_MOD, MAX_QUERY_RESULTS);
@@ -193,18 +194,15 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         map.put("p.limit", String.valueOf(limit));
         map.put("p.guessTotal", "true");
 
-        try {
-            log.debug("Lastmod QueryBuilder Map: {}", new JSONObject(map).toString(2));
-        } catch (JSONException e) {
-        }
+        log.debug("Lastmod QueryBuilder Map: {}", toJsonObject(map, 2));
 
-        final Query query = queryBuilder.createQuery(PredicateGroup.create(map),
-                resourceResolver.adaptTo(Session.class));
+        Query query = queryBuilder.createQuery(PredicateGroup.create(map), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
         final SearchResult result = query.getResult();
 
         for (final Hit hit : result.getHits()) {
             try {
-                resources.add(hit.getResource());
+                resources.add(resourceResolver.getResource(hit.getPath()));
             } catch (RepositoryException e) {
                 log.error("Error resolving Hit to Resource [ {} ]. "
                         + "Likely issue with lucene index being out of sync.", hit.toString());
@@ -222,11 +220,11 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         if (params.length > 0) {
             String param = params[0];
 
-            if(params.length > 1) {
+            if (params.length > 1) {
                 param = params[1];
             }
 
-            if(StringUtils.isNotBlank(param)
+            if (StringUtils.isNotBlank(param)
                     && param.matches("\\d+[s|m|h|d|w|M|y]{1}")) {
                 return "-" + param;
             }
@@ -236,20 +234,20 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     }
 
 
-    private String getUserIDParam(final Command cmd, String currentUserID) {
+    private String getUserIdParam(final Command cmd, String currentUserId) {
         final String[] params = cmd.getParams();
 
         if (params.length > 0) {
             String param = params[0];
 
-            if(StringUtils.isNotBlank(param)
+            if (StringUtils.isNotBlank(param)
                     && !StringUtils.equalsIgnoreCase(param, "me")
                     && !param.matches("\\d+[s|m|h|d|w|M|y]{1}")) {
                 return param;
             }
         }
 
-        return currentUserID;
+        return currentUserId;
     }
 
 }

@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.io.InputStream;
 

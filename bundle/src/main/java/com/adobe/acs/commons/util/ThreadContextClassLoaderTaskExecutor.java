@@ -21,7 +21,7 @@ package com.adobe.acs.commons.util;
 
 import java.util.concurrent.Callable;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Utility class for executing a particular task with a set Thread Context Class Loader.

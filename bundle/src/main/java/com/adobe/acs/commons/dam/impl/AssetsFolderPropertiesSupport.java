@@ -21,7 +21,12 @@
 package com.adobe.acs.commons.dam.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -30,7 +35,7 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.api.wrappers.CompositeValueMap;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.post.AbstractPostResponse;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.servlets.post.PostOperation;
@@ -38,42 +43,41 @@ import org.apache.sling.servlets.post.SlingPostProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 @Component(
-        label = "ACS AEM Commons - Assets Folder Properties Support",
         policy = ConfigurationPolicy.REQUIRE,
         immediate = true
 )
 @Properties({
         @Property(
                 name = "service.ranking",
-                intValue = -2000,
-                propertyPrivate = true
+                intValue = -2000
         ),
         @Property(
                 name = "sling.filter.scope",
-                value = "REQUEST",
-                propertyPrivate = true
+                value = "REQUEST"
         ),
         @Property(
                 name = "sling.filter.pattern",
-                value = "/content/dam/.*",
-                propertyPrivate = true
+                value = "/content/dam/.*"
         ),
         @Property(
                 name = "sling.servlet.methods",
-                value = "GET",
-                propertyPrivate = true
+                value = "GET"
         ),
         @Property(
                 name = "sling.servlet.resourceTypes",
-                value = "acs-commons/touchui-widgets/asset-folder-properties-support",
-                propertyPrivate = true
+                value = "acs-commons/touchui-widgets/asset-folder-properties-support"
         )
 })
 @Service
@@ -90,7 +94,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
      * The is a reference to the OOTB AEM PostOperation that handles updates for Folder Properties; This is used below in process(..) to ensure that all OOTB behaviors are executed.
      */
     @Reference(target="&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST)")
-    private PostOperation folderShareHandler;
+    private transient PostOperation folderShareHandler;
 
     /**
      * This method is responsible for post processing POSTs to the FolderShareHandler PostOperation (:operation = dam.share.folder).
@@ -148,6 +152,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
      * @param request the request
      * @return true if Assets Folder Properties Support should process this request.
      */
+    @SuppressWarnings("squid:S3923")
     protected boolean accepts(SlingHttpServletRequest request) {
         if (!StringUtils.equalsIgnoreCase(POST_METHOD, request.getMethod())) {
             // Only POST methods are processed
@@ -170,7 +175,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
 
     /**
      * This method handles the READING of the properties so that granite UI widgets can display stored data in the form.
-     * This needs to be included AFTER 	/apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties
+     * This needs to be included AFTER /apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties
      * such that it can augment the Property map constructed by that OOTB script.
      *
      * Note that this exposes a value map for the [sling:*Folder] node, and NOT the [sling:*Folder]/jcr:content, so properties must be prefixed with jcr:content/...

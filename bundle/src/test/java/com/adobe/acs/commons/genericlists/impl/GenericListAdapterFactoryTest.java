@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.adobe.acs.commons.genericlists.GenericList;
@@ -60,6 +60,9 @@ public class GenericListAdapterFactoryTest {
 
     @Mock
     private Resource resourceTwo;
+
+    @Mock
+    private Resource resourceThree;
 
     private AdapterFactory adapterFactory;
 
@@ -130,11 +133,6 @@ public class GenericListAdapterFactoryTest {
     @Test
     public void test_that_adapting_page_with_null_template_returns_null() {
         Page wrongPage = mock(Page.class);
-        when(wrongPage.getProperties()).thenAnswer(new Answer<ValueMap>() {
-            public ValueMap answer(InvocationOnMock invocation) throws Throwable {
-                return new ValueMapDecorator(new HashMap<String, Object>());
-            }
-        });
 
         GenericList section = adaptToGenericList(wrongPage);
         assertNull(section);
@@ -142,9 +140,9 @@ public class GenericListAdapterFactoryTest {
 
     @Test
     public void test_i18n_titles() {
-        Locale french = new Locale("fr");
-        Locale swissFrench = new Locale("fr", "ch");
-        Locale franceFrench = new Locale("fr", "fr");
+        final Locale french = new Locale("fr");
+        final Locale swissFrench = new Locale("fr", "ch");
+        final Locale franceFrench = new Locale("fr", "fr");
 
         GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
         assertNotNull(list);
@@ -157,5 +155,33 @@ public class GenericListAdapterFactoryTest {
         assertEquals("french_title", items.get(1).getTitle(french));
         assertEquals("swiss_french_title", items.get(1).getTitle(swissFrench));
         assertEquals("french_title", items.get(1).getTitle(franceFrench));
+    }
+
+    @Test
+    public void test_that_returns_item_with_null_value() {
+        when(listResource.listChildren()).thenReturn(Arrays.asList(resourceOne, resourceTwo, resourceThree).iterator());
+        when(resourceThree.getValueMap()).thenAnswer(new Answer<ValueMap>() {
+            @SuppressWarnings("serial")
+            public ValueMap answer(InvocationOnMock invocation) throws Throwable {
+                return new ValueMapDecorator(new HashMap<String, Object>() {
+                    {
+                        put(NameConstants.PN_TITLE, "titlethree");
+                        put(GenericListImpl.PN_VALUE, null);
+
+                    }
+                });
+            }
+        });
+        GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
+        assertNotNull(list);
+        List<Item> items = list.getItems();
+        assertNotNull(items);
+        assertEquals(3, items.size());
+        assertEquals("titleone", items.get(0).getTitle());
+        assertEquals("valueone", items.get(0).getValue());
+        assertEquals("titletwo", items.get(1).getTitle());
+        assertEquals("valuetwo", items.get(1).getValue());
+        assertEquals("titlethree", items.get(2).getTitle());
+        assertEquals(null, items.get(2).getValue());
     }
 }

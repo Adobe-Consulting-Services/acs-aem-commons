@@ -39,7 +39,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 
@@ -67,10 +66,10 @@ public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
             "/apps/acs-commons/components/utilities/packager/authorizable-packager/definition/package-thumbnail.png";
 
     @Reference
-    private Packaging packaging;
+    private transient Packaging packaging;
 
     @Reference
-    private PackageHelper packageHelper;
+    private transient PackageHelper packageHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -94,24 +93,6 @@ public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
         } catch (IOException ex) {
             log.error("IO error while creating Query Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (JSONException ex) {
-            log.error("JSON error while creating Query Package response", ex);
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        }
-    }
-
-    /**
-     * Gets the properties saved to the Query Packager Page's jcr:content node.
-     *
-     * @param request the request obj
-     * @return a ValueMap representing the properties
-     */
-    private ValueMap getProperties(final SlingHttpServletRequest request) {
-        if (request.getResource().getChild("configuration") == null) {
-            log.warn("Authorizable Packager Configuration node could not be found for: {}", request.getResource());
-            return new ValueMapDecorator(new HashMap<String, Object>());
-        } else {
-            return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
         }
     }
 

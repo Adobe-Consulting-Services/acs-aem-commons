@@ -23,8 +23,7 @@ import javax.annotation.CheckForNull;
 
 import org.apache.sling.api.resource.ValueMap;
 
-import tldgen.Function;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
@@ -46,7 +45,6 @@ public final class TemplateUtil {
      * @param templatePath the path of the template to check
      * @return true if the page is of the defined template
      */
-    @Function
     public static boolean hasTemplate(@CheckForNull final Page page, @CheckForNull final String templatePath) {
         if (page == null) {
             return false;
@@ -54,6 +52,7 @@ public final class TemplateUtil {
         return hasTemplate(page.getProperties(), templatePath);
     }
 
+    @SuppressWarnings("squid:S1144")
     private static boolean hasTemplate(@CheckForNull final ValueMap valueMap, @CheckForNull final String templatePath) {
         if (valueMap != null && templatePath != null) {
             String path = valueMap.get(NameConstants.NN_TEMPLATE, String.class);

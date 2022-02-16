@@ -1,0 +1,13 @@
+<'cq'='http://www.day.com/jcr/cq/1.0'>
+
+[cq:Page] > nt:unstructured
+[dam:Asset] > nt:unstructured
+
+[cq:ReplicationStatus]
+  mixin
+  - cq:lastPublishedBy (string) ignore
+  - cq:lastReplicatedBy (string) ignore
+  - cq:lastReplicationAction (string) ignore
+  - cq:lastReplicationStatus (string) ignore
+  - cq:lastPublished (date) ignore
+  - cq:lastReplicated (date) ignore

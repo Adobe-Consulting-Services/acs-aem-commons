@@ -23,7 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -139,7 +139,7 @@ public final class TextUtil {
     }
 
     /**
-     * Looks for <..> substrings in the parameter string. If any are found it assume Rich text.
+     * Looks for &lt;..&gt; substrings in the parameter string. If any are found it assume Rich text.
      *
      * @param str
      * @return

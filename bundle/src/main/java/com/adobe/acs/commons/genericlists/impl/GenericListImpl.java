@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
+import com.adobe.acs.commons.genericlists.GenericList;
+import com.day.cq.wcm.api.NameConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,9 +32,6 @@ import java.util.Map;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
-import com.adobe.acs.commons.genericlists.GenericList;
-import com.day.cq.wcm.api.NameConstants;
-
 public final class GenericListImpl implements GenericList {
 
     static final String RT_GENERIC_LIST = "acs-commons/components/utilities/genericlist";
@@ -41,22 +40,24 @@ public final class GenericListImpl implements GenericList {
 
     public static final class ItemImpl implements Item {
 
+        // Title and Text are always the exact same value,
+        // text is really only used by json resources, but need to keep title for Backwards Compatability
+        @SuppressWarnings("squid:S1068")
+        private final String text;
         private final String title;
         private final String value;
         private final ValueMap props;
 
         public ItemImpl(String t, String v, ValueMap props) {
             this.title = t;
+            this.text = t;
             this.value = v;
             this.props = props;
         }
 
+        @Override
         public String getTitle() {
             return title;
-        }
-
-        public String getValue() {
-            return value;
         }
 
         @Override
@@ -72,25 +73,30 @@ public final class GenericListImpl implements GenericList {
                 return getTitle();
             }
 
-            String title = null;
+            String localizedTitle = null;
 
-            // try property name like jcr:title.de_ch 
+            // try property name like jcr:title.de_ch
             if (locale.getCountry().length() > 0) {
-                title = getLocalizedTitle(locale);
+                localizedTitle = getLocalizedTitle(locale);
             }
             // then just jcr:title.de
-            if (title == null) {
-                title = getLocalizedTitle(new Locale(language));
+            if (localizedTitle == null) {
+                localizedTitle = getLocalizedTitle(new Locale(language));
             }
-            if (title == null) {
+            if (localizedTitle == null) {
                 return getTitle();
             } else {
-                return title;
+                return localizedTitle;
             }
         }
-        
+
         private String getLocalizedTitle(Locale locale) {
             return props.get(TITLE_PREFIX + locale.toString().toLowerCase(), String.class);
+        }
+
+        @Override
+        public String getValue() {
+            return value;
         }
 
     }
@@ -100,15 +106,15 @@ public final class GenericListImpl implements GenericList {
     private final Map<String, Item> valueMapping;
 
     public GenericListImpl(Resource listParsys) {
-        List<Item> tempItems = new ArrayList<Item>();
-        Map<String, Item> tempValueMapping = new HashMap<String, Item>();
+        List<Item> tempItems = new ArrayList<>();
+        Map<String, Item> tempValueMapping = new HashMap<>();
         Iterator<Resource> children = listParsys.listChildren();
         while (children.hasNext()) {
             Resource res = children.next();
             ValueMap map = res.getValueMap();
             String title = map.get(NameConstants.PN_TITLE, String.class);
             String value = map.get(PN_VALUE, String.class);
-            if (title != null && value != null) {
+            if (title != null) {
                 ItemImpl item = new ItemImpl(title, value, map);
                 tempItems.add(item);
                 tempValueMapping.put(value, item);
@@ -118,10 +124,12 @@ public final class GenericListImpl implements GenericList {
         valueMapping = Collections.unmodifiableMap(tempValueMapping);
     }
 
+    @Override
     public List<Item> getItems() {
         return items;
     }
 
+    @Override
     public String lookupTitle(String value) {
         Item item = valueMapping.get(value);
         if (item != null) {

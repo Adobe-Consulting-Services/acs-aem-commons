@@ -19,6 +19,55 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.auth.Authenticator;
+import org.apache.sling.api.request.RequestProgressTracker;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.auth.core.AuthUtil;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
@@ -29,34 +78,6 @@ import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
-import org.apache.sling.api.SlingConstants;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.*;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.apache.sling.auth.core.AuthUtil;
-import org.apache.sling.commons.auth.Authenticator;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -90,8 +111,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private boolean vanityDispatchCheckEnabled = DEFAULT_VANITY_DISPATCH_ENABLED;
 
     @Property(label = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
-    		+ "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
-    		+ "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
+            + "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
+            + "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
             boolValue = DEFAULT_VANITY_DISPATCH_ENABLED)
     private static final String PROP_VANITY_DISPATCH_ENABLED = "vanity.dispatch.enabled";
 
@@ -227,16 +248,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private QueryBuilder queryBuilder;
-
-    @Reference
     private Authenticator authenticator;
 
     @Reference
     private ComponentHelper componentHelper;
     
     @Reference
-    private VanityURLService vanityURLService;
+    private VanityURLService vanityUrlService;
 
     private ErrorPageCache cache;
 
@@ -251,6 +269,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param errorResource
      * @return
      */
+    @Override
+    @SuppressWarnings("squid:S3776")
     public String findErrorPage(SlingHttpServletRequest request, Resource errorResource) {
         if (!isEnabled()) {
             return null;
@@ -260,12 +280,12 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         Resource errorPage = null;
         if (StringUtils.isNotBlank(errorsPath)) {
-        	final ResourceResolver resourceResolver = errorResource.getResourceResolver();
+            final ResourceResolver resourceResolver = errorResource.getResourceResolver();
             final String errorPath = errorsPath + "/" + getErrorPageName(request);
             errorPage = getResource(resourceResolver, errorPath);
 
             if (errorPage == null && StringUtils.isNotBlank(errorsPath)) {
-            	log.trace("No error-specific errorPage could be found, use the 'default' error errorPage for the Root content path");
+                log.trace("No error-specific errorPage could be found, use the 'default' error errorPage for the Root content path");
                 errorPage = resourceResolver.resolve(errorsPath);
             }
         }
@@ -320,9 +340,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param errorResource
      * @return path to the default error page or "root" error page
      */
-	private String findErrorsPath(SlingHttpServletRequest request, Resource errorResource) {
-		final String errorResourcePath = errorResource.getPath();
-		Resource real = findFirstRealParentOrSelf(request, errorResource);
+    private String findErrorsPath(SlingHttpServletRequest request, Resource errorResource) {
+        final String errorResourcePath = errorResource.getPath();
+        Resource real = findFirstRealParentOrSelf(request, errorResource);
 
         String errorsPath = null;
         if (real != null) {
@@ -333,17 +353,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                     real = tmp;
                 }
             }
-	        final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(real);
-	        errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
+            final InheritanceValueMap pageProperties = new HierarchyNodeInheritanceValueMap(real);
+            errorsPath = pageProperties.getInherited(ERROR_PAGE_PROPERTY, String.class);
         } else {
-        	log.trace("No page found for [ {} ]", errorResource);
+            log.trace("No page found for [ {} ]", errorResource);
         }
 
         if (errorsPath == null) {
-        	log.trace("could not find inherited property for [ {} ]", errorResource);
+            log.trace("could not find inherited property for [ {} ]", errorResource);
             for (final Map.Entry<String, String> mapPage : pathMap.entrySet()) {
                 if (errorResourcePath.startsWith(mapPage.getKey())) {
-                	log.trace("found error path in map [ {} ]", mapPage.getKey());
+                    log.trace("found error path in map [ {} ]", mapPage.getKey());
                     errorsPath = mapPage.getValue();
                     break;
                 }
@@ -351,8 +371,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
 
         log.debug("Best matching errors path for request is: {}", errorsPath);
-		return errorsPath;
-	}
+        return errorsPath;
+    }
 
     /**
      * Gets the resource object for the provided path.
@@ -382,6 +402,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param request
      * @return
      */
+    @Override
     public int getStatusCode(SlingHttpServletRequest request) {
         Integer statusCode = (Integer) request.getAttribute(SlingConstants.ERROR_STATUS);
 
@@ -400,6 +421,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param request
      * @return
      */
+    @Override
     public String getErrorPageName(SlingHttpServletRequest request) {
         // Get status code from request
         // Set the servlet name ot find to statusCode; update later if needed
@@ -407,23 +429,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Only support Status codes as error exception lookup scheme is too complex/expensive at this time.
         // Using the 500 response code/default error page should suffice for all errors pages generated from exceptions.
-
-        /*
-        final Object tmp = request.getAttribute(SlingConstants.ERROR_EXCEPTION_TYPE);
-
-        if(tmp != null && tmp instanceof Class) {
-            final Class clazz = (Class) tmp;
-
-            final String exceptionName = clazz.getSimpleName();
-            log.debug("Servlet path used to derived exception name: {} ", exceptionName);
-
-            if(StringUtils.isNotBlank(exceptionName)) {
-                servletName = exceptionName;
-            }
-        }
-
-        if(StringUtils.isBlank(servletName)) { servletName = this.fallbackErrorName; }
-        */
 
         servletName = StringUtils.lowerCase(servletName);
 
@@ -442,6 +447,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      *
      * @return true is the Service should be considered enabled
      */
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -523,7 +529,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (!StringUtils.equals(path, errorResource.getPath())) {
             // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
             // we know the errorResource and what the path resolves to is the same
-            resource = resourceResolver.resolve(request, path);
+            // #1415 - First try to get the resource at the direct path; this look-up is very fast (compared to rr.resolve and often what's required)
+            resource = resourceResolver.getResource(path);
+
+            if (resource == null) {
+                // #1415 - If the resource is not available at the direct path, then try to resolve (handle sling:alias).
+                // First map the path, as the resolve could duplicate pathing.
+                resource = resourceResolver.resolve(request, resourceResolver.map(request, path));
+            }
         }
 
         // If the resource exists, then use it!
@@ -534,7 +547,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Quick check for the Parent; Handles common case of deactivated pages
         final Resource parent = resource.getParent();
-        if (parent != null) {
+        if (parent != null && !ResourceUtil.isNonExistingResource(resource)) {
             log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
             return parent;
         }
@@ -546,6 +559,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         for (int i = parts.length - 1; i >= 0; i--) {
             String[] tmpArray = (String[]) ArrayUtils.subarray(parts, 0, i);
             String candidatePath = "/".concat(StringUtils.join(tmpArray, '/'));
+
+            // #1415 - First try to get the resource at the direct path; this look-up is
+            // very fast (compared to rr.resolve and often what's required)
+            final Resource candidatePathResource = resourceResolver.getResource(candidatePath);
+            if (candidatePathResource != null) {
+                return candidatePathResource;
+            }
 
             final Resource candidateResource = resourceResolver.resolve(request, candidatePath);
 
@@ -642,7 +662,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             log.debug(iw.toString());
         }
 
-        if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
+        if (this.getStatusCode(request) == HttpServletResponse.SC_NOT_FOUND
                 && this.isAnonymousRequest(request)
                 && AuthUtil.isBrowserRequest(request)
                 && this.isRedirectToLogin(path)) {
@@ -737,6 +757,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param request
      * @return
      */
+    @Override
     public String getRequestProgress(SlingHttpServletRequest request) {
         StringWriter stringWriter = new StringWriter();
         if (request != null) {
@@ -757,18 +778,19 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * @param response
      * @param statusCode
      */
+    @Override
     public void resetRequestAndResponse(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                         int statusCode) {
-        // Clear client libraries
-
-        // Replace with proper API call is HtmlLibraryManager provides one in the future;
-        // Currently this is our only option.
+        // Clear client libraries. Would be better if there was a proper API call for this, but there isn't at present.
         request.setAttribute("com.day.cq.widget.HtmlLibraryManager.included",
                 new HashSet<String>());
 
         // Fixes AEM 6.2 issue (https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/790)
         request.setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
                 new HashSet<String>());
+
+        //Reset the component context attribute to remove inclusion of response from top level components
+        request.removeAttribute("com.day.cq.wcm.componentcontext");
 
         // Clear the response
         response.reset();
@@ -811,6 +833,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
     }
 
+    @SuppressWarnings("squid:S1149")
     private void configure(ComponentContext componentContext) {
         Dictionary<?, ?> config = componentContext.getProperties();
         final String legacyPrefix = "prop.";
@@ -884,10 +907,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver serviceResourceResolver = null;
-            try {
-                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
                 final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
@@ -902,10 +923,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 }
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 
@@ -981,6 +998,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         return sortedMap;
     }
 
+    @Override
     public void includeUsingGET(final SlingHttpServletRequest request, final SlingHttpServletResponse response,
                                 final String path) {
         if (cache == null
@@ -1018,9 +1036,10 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             return "GET";
         }
     }
-    
+
+    @Override
     public boolean isVanityDispatchCheckEnabled(){
-    	return this.vanityDispatchCheckEnabled;
+        return this.vanityDispatchCheckEnabled;
     }
 
 }

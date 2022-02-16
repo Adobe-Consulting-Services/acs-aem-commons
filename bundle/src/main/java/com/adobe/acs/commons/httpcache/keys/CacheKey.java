@@ -19,12 +19,15 @@
  */
 package com.adobe.acs.commons.httpcache.keys;
 
+import java.io.Serializable;
+
 /**
  * Generic CacheKey interface that allows multiple implementations of CacheKey's via CacheKeyFactories. All CacheKeys
- * are scoped to being build off the Request object. Implementations are expected to override <code> hashCode(),
+ * are scoped to being get off the Request object. Implementations are expected to override <code> hashCode(),
  * equals(Object), toString()</code> methods.
  */
-public interface CacheKey {
+public interface CacheKey extends Serializable
+{
     /**
      * Get URI.
      * @return the universal resource id. This can be a RequestURI or a Resource path based on the context of the key.
@@ -37,6 +40,36 @@ public interface CacheKey {
      * @return the hierarchy resource path
      */
     String getHierarchyResourcePath();
+
+    /**
+     * Gets the expiry time for the cache entry creation.
+     * If set, it will override the default TTL for entries to expire on cache creation.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForCreation(){
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry access / read.
+     * If set, it will refresh the expiry time when an entry is read with given value.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForAccess(){
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry updated.
+     * If set, it will refresh the expiry time when an entry is updated with given value.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForUpdate(){
+        return -1L;
+    }
 
     /**
      * Determines if the @{param cacheKey} will invalidate this cache key entry.
@@ -64,6 +97,7 @@ public interface CacheKey {
      * @return true if the objects represent the same cache item, false otherwise.
      */
     boolean equals(Object o);
+
 
 
 }

@@ -23,4 +23,4 @@
 @Version("3.7.0")
 package com.adobe.acs.commons.wcm.comparisons.lines;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

@@ -31,7 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -136,13 +136,13 @@ public class ScaleImageTransformerImplTest {
     public void testTransform_emptyParams() throws Exception {
         transformer.transform(layer, properties);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     @Test
     public void testTransform_nullParams() throws Exception {
         transformer.transform(layer, null);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 }

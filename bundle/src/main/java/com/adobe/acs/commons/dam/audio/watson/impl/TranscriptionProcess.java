@@ -48,6 +48,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.Map;
 
 @Component(metatype = true, label = "ACS AEM Commons - Watson Transcription Workflow Process",
@@ -104,6 +106,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
     }
 
     @Override
+    @SuppressWarnings("squid:S1141")
     public Serializable processAudio(Asset asset, ResourceResolver resourceResolver, File tempFile,
                                      ExecutableLocator locator, File workingDir, MetaDataMap args) throws AudioException {
         final long start = System.currentTimeMillis();
@@ -122,8 +125,10 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 FileInputStream stream = new FileInputStream(transcodedAudio);
                 jobId = transcriptionService.startTranscriptionJob(stream, ffmpegWrapper.getOutputMimetype());
                 IOUtils.closeQuietly(stream);
-                if (!transcodedAudio.delete()) {
-                    log.error("Transcoded audio file @ {} coud not be deleted");
+                try {
+                    Files.delete(transcodedAudio.toPath());
+                } catch (IOException e) {
+                    log.error("Transcoded audio file @ " + transcodedAudio.getAbsolutePath() + " coud not be deleted", e);
                 }
             } catch (IOException e) {
                 log.error("processAudio: failed creating audio from profile [{}]: {}",
@@ -156,7 +161,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 try {
                     asset.addRendition("transcription.txt", new ByteArrayInputStream(result.getContent().getBytes("UTF-8")), "text/plain");
                     log.info("Transcription for {} created.", asset.getPath());
-                } catch (Exception e) {
+                } catch (UnsupportedEncodingException e) {
                     log.error("Unable to save new rendition", e);
                 }
                 return true;

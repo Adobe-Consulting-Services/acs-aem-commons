@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.functions;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
+import java.util.function.Function;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
@@ -26,8 +31,13 @@ import aQute.bnd.annotation.ConsumerType;
  */
 @ConsumerType
 @FunctionalInterface
+@SuppressWarnings("squid:S00112")
 public interface CheckedFunction<T, R> {
 
+    public static <T,R> CheckedFunction<T,R> from(Function<T,R> function) {
+        return function == null ? null : t -> function.apply(t);
+    }
+    
     /**
      * Applies this function to the given argument.
      *
@@ -50,7 +60,6 @@ public interface CheckedFunction<T, R> {
      * function and then applies this function
      * @throws NullPointerException if before is null
      *
-     * @see #andThen(IFunction)
      */
     default <V> CheckedFunction<V, R> compose(final CheckedFunction<? super V, ? extends T> before) {
         if (before == null) {
@@ -72,7 +81,6 @@ public interface CheckedFunction<T, R> {
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      *
-     * @see #compose(IFunction)
      */
     default <V> CheckedFunction<T, V> andThen(final CheckedFunction<? super R, ? extends V> after) {
         if (after == null) {
@@ -90,4 +98,15 @@ public interface CheckedFunction<T, R> {
     public static <T> CheckedFunction<T, T> identity() {
         return (T t) -> t;
     }
+
+    public static <T> CheckedFunction<T, Boolean> or(CheckedFunction<T, Boolean>... functions) {
+        return t -> {
+            for (CheckedFunction<T, Boolean> f : functions) {
+                if (f.apply(t)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }    
 }

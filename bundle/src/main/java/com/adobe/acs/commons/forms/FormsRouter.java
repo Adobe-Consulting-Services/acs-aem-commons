@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.forms;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 
@@ -29,6 +29,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
  * Internal routing used for internal routing of POST form submissions in the Filters.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface FormsRouter {
     String FORM_RESOURCE_INPUT = FormHelper.FORM_RESOURCE_INPUT;
     String FORM_NAME_INPUT = FormHelper.FORM_NAME_INPUT;

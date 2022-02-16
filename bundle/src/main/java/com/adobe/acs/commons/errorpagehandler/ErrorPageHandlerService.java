@@ -19,11 +19,13 @@
  */
 package com.adobe.acs.commons.errorpagehandler;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Error Page Handling Service which facilitates the resolution of errors against authorable pages for discrete content trees.
@@ -31,8 +33,10 @@ import aQute.bnd.annotation.ProviderType;
  * This service is used via the ACS-AEM-Commons error page handler implementation to create author-able error pages.
  */
 @ProviderType
+
+@SuppressWarnings("squid:S1214")
 public interface ErrorPageHandlerService {
-    int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    int DEFAULT_STATUS_CODE = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     /**
      * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists however it should not be used.
@@ -117,6 +121,7 @@ public interface ErrorPageHandlerService {
      * @param response the response
      * @param path the path
      */
+    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     void includeUsingGET(SlingHttpServletRequest request, SlingHttpServletResponse response, String path);
     
     

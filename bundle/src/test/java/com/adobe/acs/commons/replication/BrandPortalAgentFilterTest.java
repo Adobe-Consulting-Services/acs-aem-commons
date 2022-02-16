@@ -32,7 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class BrandPortalAgentFilterTest {
 
     BrandPortalAgentFilter filter;
@@ -64,6 +64,7 @@ public class BrandPortalAgentFilterTest {
     AgentConfig agentRejectConfig;
 
     final String assetsFolderPath = "/content/dam/folder";
+    final String assetsFolderPathWithoutMpConfig = "/content/dam/folder-without-mpConfig";
     final String cloudServiceConfigPath = "/etc/cloudservices/mediaportal/brand-portal";
     final String brandPortalOrigin = "https://acs-aem-commons.brand-portal.adobe.com";
 
@@ -106,6 +107,15 @@ public class BrandPortalAgentFilterTest {
         final List<Resource> actual = filter.getBrandPortalConfigs(slingContext.resourceResolver().getResource(assetsFolderPath));
         assertEquals(expected.size(), actual.size());
         assertEquals(expected.get(0).getPath(), actual.get(0).getPath());
+    }
 
+    @Test // #1349
+    public void mpConfigIsNotConfigured() {
+        slingContext.create().resource(assetsFolderPathWithoutMpConfig,
+                ImmutableMap.<String, Object>builder()
+                        .build());
+
+        final List<Resource> actual = filter.getBrandPortalConfigs(slingContext.resourceResolver().getResource(assetsFolderPathWithoutMpConfig));
+        assertEquals(0, actual.size());
     }
 }

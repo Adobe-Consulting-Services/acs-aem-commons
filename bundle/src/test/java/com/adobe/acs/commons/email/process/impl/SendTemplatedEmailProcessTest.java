@@ -19,8 +19,12 @@
  */
 package com.adobe.acs.commons.email.process.impl;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +40,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowData;
@@ -54,8 +55,7 @@ import com.day.cq.workflow.metadata.SimpleMetaDataMap;
  * Should be called AbstractRenditionModifyingProcessTest, but that name implies
  * an abstract class.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(DamUtil.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SendTemplatedEmailProcessTest {
 
     @Mock
@@ -92,7 +92,7 @@ public class SendTemplatedEmailProcessTest {
     private static final String WCM_PAYLOAD_PATH = "/content/mypage";
     private static final String EMAIL_TEMPLATE = "/apps/acs-commons/content/template.txt";
     private static final String GROUP_PATH = "/home/groups/samplegroup";
-    private String[] GROUP_MEMBERS;
+    private static final String[] GROUP_MEMBERS = new String[] { "user1@adobe.com", "user2@adobe.com" };
 
     @SuppressWarnings("unchecked")
     @Before
@@ -101,11 +101,6 @@ public class SendTemplatedEmailProcessTest {
 
         when(workflowSession.getSession()).thenReturn(session);
         when(resourceResolverFactory.getResourceResolver(any(Map.class))).thenReturn(resourceResolver);
-
-        // Mock DamUtil class
-        PowerMockito.mockStatic(DamUtil.class);
-
-        GROUP_MEMBERS = new String[] { "user1@adobe.com", "user2@adobe.com" };
 
     }
 
@@ -118,7 +113,7 @@ public class SendTemplatedEmailProcessTest {
 
         process.execute(workItem, workflowSession, metaData);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test
@@ -130,7 +125,7 @@ public class SendTemplatedEmailProcessTest {
         metaData.put("PROCESS_ARGS", "");
         process.execute(workItem, workflowSession, metaData);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test
@@ -161,9 +156,7 @@ public class SendTemplatedEmailProcessTest {
         when(resourceResolver.getResource(DAM_PAYLOAD_PATH)).thenReturn(payloadRes);
         when(payloadRes.getPath()).thenReturn(DAM_PAYLOAD_PATH);
         when(payloadRes.getResourceResolver()).thenReturn(resourceResolver);
-
-        // mock DamUtil
-        when(DamUtil.isAsset(payloadRes)).thenReturn(true);
+        when(payloadRes.getResourceType()).thenReturn("dam:Asset");
 
         // mock authorUI and externalizer
         when(authorUIHelper.generateEditAssetLink(DAM_PAYLOAD_PATH, true, resourceResolver)).thenReturn(editAssetUrl);
@@ -207,9 +200,6 @@ public class SendTemplatedEmailProcessTest {
         when(resourceResolver.getResource(WCM_PAYLOAD_PATH)).thenReturn(payloadRes);
         when(payloadRes.getPath()).thenReturn(WCM_PAYLOAD_PATH);
         when(payloadRes.getResourceResolver()).thenReturn(resourceResolver);
-
-        // mock DamUtil
-        when(DamUtil.isAsset(payloadRes)).thenReturn(false);
 
         // mock authorUI and externalizer
         when(authorUIHelper.generateEditPageLink(WCM_PAYLOAD_PATH, true, resourceResolver)).thenReturn(

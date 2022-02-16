@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public final class QueryBuilderViewQuery implements ViewQuery {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewQuery.class);
 
     private final Query query;
+    private List<com.day.cq.wcm.core.contentfinder.Hit> hits = null;
 
     public QueryBuilderViewQuery(final Query query) {
         this.query = query;
@@ -44,24 +46,26 @@ public final class QueryBuilderViewQuery implements ViewQuery {
 
     @Override
     public Collection<com.day.cq.wcm.core.contentfinder.Hit> execute() {
-        final List<com.day.cq.wcm.core.contentfinder.Hit> hits = new ArrayList<com.day.cq.wcm.core.contentfinder.Hit>();
+        if (hits == null) {
+            hits = new ArrayList<>();
 
-        if (this.query == null) {
-            return hits;
-        }
-
-        final SearchResult result = this.query.getResult();
-
-        // iterating over the results
-        for (Hit hit : result.getHits()) {
-            try {
-                hits.add(createHit(hit));
-            } catch (RepositoryException e) {
-                log.error("Could not return required information for Content Finder result: {}", hit.toString());
+            if (this.query == null) {
+                return Collections.unmodifiableList(hits);
             }
-        }
 
-        return hits;
+            final SearchResult result = this.query.getResult();
+
+            // iterating over the results
+            for (Hit hit : result.getHits()) {
+                try {
+                    hits.add(createHit(hit));
+                } catch (RepositoryException e) {
+                    log.error("Could not return required information for Content Finder result: {}", hit);
+                }
+            }
+
+        }
+        return Collections.unmodifiableList(hits);
     }
 
     /**

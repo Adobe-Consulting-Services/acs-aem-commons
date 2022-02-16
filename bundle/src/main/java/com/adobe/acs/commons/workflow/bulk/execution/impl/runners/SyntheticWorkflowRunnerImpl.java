@@ -22,7 +22,11 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.*;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
+import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.workflow.WorkflowException;
@@ -113,15 +117,15 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
             this.scheduler = scheduler;
         }
 
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141"})
         public void run() {
-            ResourceResolver serviceResourceResolver = null;
             Resource configResource;
             long start = System.currentTimeMillis();
             int total = 0;
             boolean stopped = false;
 
-            try {
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
@@ -209,10 +213,6 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                 }
             } catch (Exception e) {
                 log.error("Error processing Bulk Synthetic Workflow execution.", e);
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 

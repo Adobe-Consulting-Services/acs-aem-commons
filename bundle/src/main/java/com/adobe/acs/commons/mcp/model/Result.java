@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,27 +15,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.model;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+
+import java.io.Serializable;
 
 /**
  * This bean captures the commonly-collected report summary details from a controlled process
  */
 @ProviderType
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class Result {
+public class Result implements Serializable {
     @Inject
     private int tasksCompleted;
     @Inject
     private Long runtime;
     @Inject
-    private Resource report;
+    private transient Resource report;
 
     /**
      * @return the runtime

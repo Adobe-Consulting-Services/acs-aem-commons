@@ -185,14 +185,14 @@ public class WCMViewsFilter implements Filter {
      * @param request the request
      * @return true is the filter should attempt to process
      */
+    @SuppressWarnings("squid:S3776")
     private boolean accepts(final SlingHttpServletRequest request) {
         final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         final Resource resource = request.getResource();
 
         // Only process requests that match the include path prefixes if any are provided
-        if (ArrayUtils.isEmpty(this.includePathPrefixes)) {
-            return false;
-        } else if (!StringUtils.startsWithAny(request.getResource().getPath(), this.includePathPrefixes)) {
+        if (ArrayUtils.isEmpty(this.includePathPrefixes)
+                || (!StringUtils.startsWithAny(request.getResource().getPath(), this.includePathPrefixes))) {
             return false;
         }
 
@@ -212,11 +212,8 @@ public class WCMViewsFilter implements Filter {
             try {
                 // Do not process cq:Page or cq:PageContent nodes as this will break all sorts of things,
                 // and they dont have dropzone of their own
-                if (node.isNodeType(NameConstants.NT_PAGE) || node.isNodeType("cq:PageContent")) {
-                    // Do not process Page node inclusions
-                    return false;
-                } else if (JcrConstants.JCR_CONTENT.equals(node.getName())) {
-                    // Do not process Page jcr:content nodes (that may not have the cq:PageContent jcr:primaryType)
+                if (node.isNodeType(NameConstants.NT_PAGE) || node.isNodeType("cq:PageContent")  // Do not process Page node inclusions
+                        || JcrConstants.JCR_CONTENT.equals(node.getName())) { // Do not process Page jcr:content nodes (that may not have the cq:PageContent jcr:primaryType)
                     return false;
                 }
             } catch (RepositoryException e) {

@@ -22,6 +22,7 @@ package com.adobe.acs.commons.dam.impl;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
@@ -59,6 +60,10 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
 
     private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();
 
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+
     @Reference
     private WorkflowHelper workflowHelper;
 
@@ -70,6 +75,7 @@ public final class AddWatermarkToRenditionProcess extends AbstractRenditionModif
             log.warn("Watermark path {} is not found.", path);
         }
     }
+
     private static void logInvalidWatermark(final String path) {
         if (watermarkLogCache.putIfAbsent(path, new Object()) == null) {
             log.warn("Watermark path {} is not valid.", path);

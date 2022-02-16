@@ -20,14 +20,11 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.model;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -35,7 +32,6 @@ import java.util.Calendar;
 
 @Model(adaptables = Resource.class)
 public class Failure {
-    private static final Logger log = LoggerFactory.getLogger(Failure.class);
 
     public static final String PN_PATH = "path";
     public static final String PN_PAYLOAD_PATH = "payloadPath";
@@ -71,13 +67,13 @@ public class Failure {
         return failedAt;
     }
 
-    public JSONObject toJSON() throws JSONException {
+    public JsonObject toJSON() {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy hh:mm:ss aaa");
 
-        JSONObject json = new JSONObject();
-        json.put(PN_PATH, getPath());
-        json.put(PN_PAYLOAD_PATH, getPayloadPath());
-        json.put(PN_FAILED_AT, sdf.format(getFailedAt().getTime()));
+        JsonObject json = new JsonObject();
+        json.addProperty(PN_PATH, getPath());
+        json.addProperty(PN_PAYLOAD_PATH, getPayloadPath());
+        json.addProperty(PN_FAILED_AT, sdf.format(getFailedAt().getTime()));
 
         return json;
     }

@@ -28,6 +28,7 @@ public class SyntheticWorkflowProcess {
     private Type workflowType;
     private WorkflowProcess cqWorkflowProcess = null;
     private com.adobe.granite.workflow.exec.WorkflowProcess graniteWorkflowProcess = null;
+
     public SyntheticWorkflowProcess(WorkflowProcess workflowProcess) {
         this.cqWorkflowProcess = workflowProcess;
         this.workflowType = Type.CQ;

@@ -19,7 +19,8 @@
  */
 package com.adobe.acs.commons.util;
 
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.servlet.http.Cookie;
@@ -44,18 +45,6 @@ public class CookieUtilTest {
 
     private static Cookie[] cookies;
 
-    public CookieUtilTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
     @Before
     public void setUp() {
         request = mock(HttpServletRequest.class);
@@ -71,10 +60,6 @@ public class CookieUtilTest {
 
         when(request.getCookies()).thenReturn(cookies);
 
-    }
-
-    @After
-    public void tearDown() {
     }
 
     /**

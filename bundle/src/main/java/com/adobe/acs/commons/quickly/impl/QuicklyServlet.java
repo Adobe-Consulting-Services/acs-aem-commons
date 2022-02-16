@@ -28,9 +28,9 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ import java.io.IOException;
 public class QuicklyServlet extends SlingSafeMethodsServlet {
 
     @Reference
-    private QuicklyEngine quicklyEngine;
+    private transient QuicklyEngine quicklyEngine;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -54,8 +54,8 @@ public class QuicklyServlet extends SlingSafeMethodsServlet {
 
         try {
             response.getWriter().append(quicklyEngine.execute(request, response, cmd).toString());
-        } catch (JSONException e) {
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().print("{\"status:\": \"error\"}");
         }
     }

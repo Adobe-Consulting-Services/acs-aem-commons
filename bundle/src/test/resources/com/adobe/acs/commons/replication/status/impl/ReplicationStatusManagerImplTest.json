@@ -1,0 +1,26 @@
+{
+  "page" : {
+    "jcr:primaryType" : "cq:Page",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured"
+    }
+  },
+  "asset" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured"
+    }
+  },
+  "unreplicated" : {
+    "jcr:primaryType" : "nt:unstructured"
+  },
+  "replicated" : {
+    "jcr:primaryType" : "nt:unstructured",
+    "jcr:mixinTypes" : [
+      "cq:ReplicationStatus"
+    ],
+    "cq:lastReplicationAction" : "ACTIVATE",
+    "cq:lastReplicatedBy" : "old value",
+    "cq:lastReplicated" : "Thu Aug 07 2014 16:32:59 GMT+0200"
+  }
+}

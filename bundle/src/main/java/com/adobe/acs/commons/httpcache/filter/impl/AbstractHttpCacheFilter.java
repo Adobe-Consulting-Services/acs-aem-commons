@@ -43,6 +43,7 @@ public abstract class AbstractHttpCacheFilter implements Filter {
     public abstract void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException;
 
+    @SuppressWarnings("squid:S3776")
     protected void doFilter(ServletRequest request, ServletResponse response, FilterChain chain,
                             HttpCacheEngine cacheEngine, HttpCacheConfig.FilterScope filterScope) throws IOException, ServletException {
         log.trace("In HttpCache filter.");

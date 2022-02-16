@@ -22,7 +22,6 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.util.QueryHelper;
@@ -72,15 +71,12 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
     @Reference
     private SyntheticWorkflowRunner syntheticWorkflowRunnerRef;
 
-    @Reference
-    private DeferredActions actionsRef;
-
     /**
      * {@inheritDoc}
      */
     @Override
     public final Runnable getRunnable(final Config config) {
-        return new FastActionManagerRunnable(config, resourceResolverFactoryRef, queryHelperRef, actionManagerFactoryRef, actionsRef, syntheticWorkflowRunnerRef);
+        return new FastActionManagerRunnable(config, resourceResolverFactoryRef, queryHelperRef, actionManagerFactoryRef, syntheticWorkflowRunnerRef);
     }
 
     @Override
@@ -146,15 +142,15 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
     }
 
     @Override
+    public void complete(Workspace workspace, Payload payload) throws Exception {
+        throw new UnsupportedOperationException("FAM payloads cannot be completed as they are not tracked");
+    }
+
+    @Override
     public void run(Workspace workspace, Payload payload) {
         if (!throttledTaskRunner.isRunning()) {
             throttledTaskRunner.resumeExecution();
         }
-    }
-
-    @Override
-    public void complete(Workspace workspace, Payload payload) throws Exception {
-        throw new UnsupportedOperationException("FAM payloads cannot be completed as they are not tracked");
     }
 
     @Override
@@ -169,29 +165,27 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
         private final ResourceResolverFactory resourceResolverFactory;
         private final QueryHelper queryHelper;
         private final ActionManagerFactory actionManagerFactory;
-        private final DeferredActions actions;
         private final SyntheticWorkflowRunner syntheticWorkflowRunner;
 
         public FastActionManagerRunnable(Config config,
                                          ResourceResolverFactory resourceResolverFactory,
                                          QueryHelper queryHelper,
                                          ActionManagerFactory actionManagerFactory,
-                                         DeferredActions actions,
                                          SyntheticWorkflowRunner syntheticWorkflowRunner) {
 
             this.configPath = config.getPath();
             this.resourceResolverFactory = resourceResolverFactory;
             this.queryHelper = queryHelper;
             this.actionManagerFactory = actionManagerFactory;
-            this.actions = actions;
             this.syntheticWorkflowRunner = syntheticWorkflowRunner;
         }
+
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141", "squid:S1854"})
         public void run() {
-            ResourceResolver resourceResolver;
             Resource configResource;
 
-            try {
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
                 configResource = resourceResolver.getResource(configPath);
 

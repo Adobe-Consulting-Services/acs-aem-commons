@@ -1,0 +1,83 @@
+.form-row {
+	padding-bottom: 1em;
+	clear: both;
+}
+
+.form-row input {
+	width: 75%;
+}
+
+.form-row label {
+	font-weight: bold;
+	padding: 10px 0;
+	width: 100px;
+	display: inline-block;
+}
+
+.form-row span {
+	margin-left: 75px;
+}
+
+.coral-Heading {
+	padding: 1em 0;
+}
+
+.coral-Dialog-header .coral-Heading {
+	padding: 0;
+}
+
+.entry-invalid {
+	background-color: #fa7d73;
+	color: #323232;
+}
+
+.fixed-height {
+	max-height: 500px;
+	overflow: scroll;
+}
+
+.invalid-entries {
+	background-color: #fad782;
+	border-radius: .25rem;
+	padding: .5em
+}
+
+pre {
+	background-color: white;
+	padding: .5em;
+}
+
+section {
+	padding: .5em;
+}
+
+#entry-table {
+	table-layout: fixed;
+	width: 100%;
+	white-space: nowrap;
+	border-spacing: 0;
+	border-collapse: separate;
+	padding: 10px 0;
+}
+
+#entry-table tbody {
+	margin: .2em;
+	background-color: white;
+}
+
+#entry-table td {
+	padding: .2em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#entry-table thead tr {
+	height: 25px;
+	text-align: left;
+	background-color: silver;
+}
+
+.narrow-cell {
+	width: 50px;
+}

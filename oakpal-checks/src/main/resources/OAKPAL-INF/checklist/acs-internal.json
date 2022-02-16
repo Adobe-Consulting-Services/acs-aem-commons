@@ -1,0 +1,41 @@
+{
+  "name": "acs-internal",
+  "checks": [
+    {
+      "name": "acHandling-merge-or-better",
+      "impl": "net.adamcin.oakpal.core.checks.AcHandling",
+      "config": {
+        "levelSet": "no_unsafe"
+      }
+    },
+    {
+      "name": "enforce-no-libs",
+      "impl": "net.adamcin.oakpal.core.checks.Paths",
+      "config": {
+        "rules": [
+          {
+            "type": "deny",
+            "pattern": "/libs(/.*)?"
+          }
+        ]
+      }
+    },
+    {
+      "name": "enforce-no-deletes",
+      "impl": "net.adamcin.oakpal.core.checks.Paths",
+      "config": {
+        "denyAllDeletes": true
+      }
+    },
+    {
+      "name": "base-version-compatibility",
+      "impl": "com.adobe.acs.commons.oakpal.checks.ImportedPackages",
+      "config": {
+      }
+    },
+    {
+      "name": "apps-composite-store-alignment",
+      "impl": "net.adamcin.oakpal.core.checks.CompositeStoreAlignment"
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,20 +15,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.model;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
+import org.osgi.annotation.versioning.ProviderType;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
@@ -61,29 +66,37 @@ public class ManagedProcess implements Serializable {
     private String status;
     @Inject
     private Result result;
-
-    private Collection<ArchivedProcessFailure> reportedErrors;
+    @Inject
+    private int reportedErrors = 0;
+    
+    private transient Collection<ArchivedProcessFailure> reportedErrorsList;
 
     @Inject
-    transient private Resource resource;
+    private transient Resource resource;
         
     /**
      * @return the reportedErrors
      */
-    public Collection<ArchivedProcessFailure> getReportedErrors() {
-        if (reportedErrors == null) {
-            reportedErrors = new LinkedHashSet<>();
-        }
+    public int getReportedErrors() {
         return reportedErrors;
+    }
+    
+    /**
+     * @return the reportedErrorsList
+     */
+    public Collection<ArchivedProcessFailure> getReportedErrorsList() {
+        return Optional.ofNullable(reportedErrorsList)
+                .map(Collections::unmodifiableCollection)
+                .orElse(Collections.emptyList());
     }
 
     /**
      * @param reportedErrors the reportedErrors to set
      */
     public void setReportedErrors(List<ArchivedProcessFailure> reportedErrors) {
-        this.reportedErrors = reportedErrors;
+        this.reportedErrorsList = Collections.unmodifiableList(reportedErrors);
+        this.reportedErrors = reportedErrorsList.size();
     }
-
 
     /**
      * @return the requester
@@ -241,12 +254,13 @@ public class ManagedProcess implements Serializable {
     private void readErrors() {
         Resource failuresRoot = resource.getChild("failures");
         if (failuresRoot != null && failuresRoot.hasChildren()) {
-            reportedErrors = new ArrayList<>();
+            List<ArchivedProcessFailure> failures = new ArrayList<>();
             failuresRoot.getChildren().forEach(step->
                     step.getChildren().forEach(f -> 
-                            reportedErrors.add(f.adaptTo(ArchivedProcessFailure.class))
+                            failures.add(f.adaptTo(ArchivedProcessFailure.class))
                     )
-            );             
+            );
+            setReportedErrors(failures);
         }
     }
     
@@ -255,13 +269,13 @@ public class ManagedProcess implements Serializable {
         today.clear(Calendar.HOUR_OF_DAY);
         today.clear(Calendar.MINUTE);
         today.clear(Calendar.SECOND);
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(time);
         DateFormat format;
-        if (c.after(today)) {
-            format = SimpleDateFormat.getTimeInstance();        
+        if (cal.after(today)) {
+            format = DateFormat.getTimeInstance();        
         } else {
-            format = SimpleDateFormat.getDateTimeInstance();
+            format = DateFormat.getDateTimeInstance();
         }
         return format.format(new Date(time));
     }

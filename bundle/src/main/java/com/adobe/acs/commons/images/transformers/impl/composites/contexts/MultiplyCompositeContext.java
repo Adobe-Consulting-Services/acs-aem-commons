@@ -121,7 +121,7 @@ public class MultiplyCompositeContext implements CompositeContext {
 
     @Override
     public void dispose() {
-
+        // no-op
     }
 
     public float getAlpha() {

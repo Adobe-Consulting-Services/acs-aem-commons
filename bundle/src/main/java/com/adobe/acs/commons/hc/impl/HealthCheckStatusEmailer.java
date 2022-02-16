@@ -21,6 +21,7 @@ package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.util.ModeUtil;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 import org.apache.commons.lang3.ArrayUtils;
@@ -76,12 +77,16 @@ import java.util.Scanner;
 })
 @Service(value = Runnable.class)
 public class HealthCheckStatusEmailer implements Runnable {
-    private final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
+    private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
 
-    private Calendar nextEmailTime = Calendar.getInstance();
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+    
+    private volatile Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */
 
@@ -196,13 +201,12 @@ public class HealthCheckStatusEmailer implements Runnable {
         final long timeTaken = System.currentTimeMillis() - start;
         log.info("Executed ACS Commons Health Check E-mailer scheduled service in [ {} ms ]", timeTaken);
 
-        if (!sendEmailOnlyOnFailure || (sendEmailOnlyOnFailure && failure.size() > 0)) {
-            if (nextEmailTime == null || Calendar.getInstance().after(nextEmailTime)) {
+        if (!sendEmailOnlyOnFailure || failure.size() > 0) {
+            Calendar now = Calendar.getInstance();
+            if (nextEmailTime == null || now.equals(nextEmailTime) || now.after(nextEmailTime)) {
                 sendEmail(success, failure, timeTaken);
-                synchronized (nextEmailTime) {
-                    nextEmailTime = Calendar.getInstance();
-                    nextEmailTime.add(Calendar.MINUTE, throttleInMins);
-                }
+                now.add(Calendar.MINUTE, throttleInMins);
+                nextEmailTime = now;
             } else {
                 log.info("Did not send e-mail as it did not meet the e-mail throttle configured time of a [ {} ] minute quiet period. Next valid time to e-mail is [ {} ]", throttleInMins, nextEmailTime.getTime());
             }
@@ -218,6 +222,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @param failure the list of unsuccessful Health Check Execution Results
      * @param timeTaken the time taken to execute all Health Checks
      */
+    @SuppressWarnings("squid:S1192")
     protected final void sendEmail(final List<HealthCheckExecutionResult> success, final List<HealthCheckExecutionResult> failure, final long timeTaken) {
         final ProductInfo[] productInfos = productInfoService.getInfos();
         final String hostname = getHostname();
@@ -316,13 +321,14 @@ public class HealthCheckStatusEmailer implements Runnable {
      *
      * @return the AEM Instance's hostname.
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1192"})
     private String getHostname() {
         String hostname = null;
-        final String OS = System.getProperty("os.name").toLowerCase();
+        final String os = System.getProperty("os.name").toLowerCase();
 
         // Unpleasant 'if structure' to avoid making unnecessary Runtime calls; only call Runtime.
 
-        if (OS.indexOf("win") >= 0) {
+        if (os.indexOf("win") >= 0) {
             hostname = System.getenv("COMPUTERNAME");
             if (StringUtils.isBlank(hostname)) {
                 try {
@@ -331,7 +337,7 @@ public class HealthCheckStatusEmailer implements Runnable {
                     log.warn("Unable to collect hostname from Windows via 'hostname' command.", ex);
                 }
             }
-        } else if (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("mac") >= 0) {
+        } else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("mac") >= 0) {
             hostname = System.getenv("HOSTNAME");
 
             if (StringUtils.isBlank(hostname)) {
@@ -350,7 +356,7 @@ public class HealthCheckStatusEmailer implements Runnable {
                 }
             }
         } else {
-            log.warn("Unidentifiable OS [ {} ]. Could not collect hostname.", OS);
+            log.warn("Unidentifiable OS [ {} ]. Could not collect hostname.", os);
         }
 
         hostname = StringUtils.trimToNull(hostname);
@@ -371,6 +377,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @return the result of the command
      * @throws IOException
      */
+    @SuppressWarnings("squid:S2076") // execCommand comes from a trusted source
     private String execReadToString(String execCommand) throws IOException {
         Process proc = Runtime.getRuntime().exec(execCommand);
         try (InputStream stream = proc.getInputStream()) {

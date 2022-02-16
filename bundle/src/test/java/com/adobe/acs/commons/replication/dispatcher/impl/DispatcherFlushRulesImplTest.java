@@ -41,14 +41,14 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class DispatcherFlushRulesImplTest {
@@ -68,8 +68,10 @@ public class DispatcherFlushRulesImplTest {
     private DispatcherFlushRulesImpl dispatcherFlushRules = new DispatcherFlushRulesImpl();
 
     @Before
+    @SuppressWarnings("deprecation")
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        
         when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(mock(ResourceResolver.class));
     }
 
@@ -79,7 +81,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_ACTIVATE() throws Exception {
+    public void testConfigureReplicationActionType_Activate() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.ACTIVATE;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("ACTIVATE");
 
@@ -87,7 +89,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_DELETE() throws Exception {
+    public void testConfigureReplicationActionType_Delete() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.DELETE;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("DELETE");
 
@@ -95,7 +97,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_DEACTIVATE() throws Exception {
+    public void testConfigureReplicationActionType_Deactivate() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.DEACTIVATE;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("DEACTIVATE");
 
@@ -103,7 +105,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_INHERIT() throws Exception {
+    public void testConfigureReplicationActionType_Inherit() throws Exception {
         final ReplicationActionType expected = null;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("INHERIT");
 
@@ -146,7 +148,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(null, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
 
@@ -156,7 +158,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(new ReplicationAction(ReplicationActionType.ACTIVATE, "/content/foo"), null);
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -169,7 +171,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -182,7 +184,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -195,7 +197,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -209,7 +211,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -223,7 +225,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -239,7 +241,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
 
@@ -259,7 +261,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target"));
@@ -268,7 +270,7 @@ public class DispatcherFlushRulesImplTest {
         // Private impl class; no access to test for instanceof
         assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target2"));
@@ -296,7 +298,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target"));
@@ -326,7 +328,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/hierarchical"));
@@ -335,7 +337,7 @@ public class DispatcherFlushRulesImplTest {
         // Private impl class; no access to test for instanceof
         assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/resource-only"));
@@ -363,7 +365,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target/page"));
@@ -391,7 +393,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target/en/acs-aem-commons/page"));
@@ -420,7 +422,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target/en/acs-aem-commons/page"));

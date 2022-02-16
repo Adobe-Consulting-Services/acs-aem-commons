@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service used to identify the latest version of the entire resource tree of the specified resources at the date specified and

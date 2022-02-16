@@ -27,12 +27,22 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("squid:S1214")
 public interface WorkflowInstanceRemover {
 
+    /**
+     * @deprecated please use the multi-value WORKFLOW_INSTANCES_PATHS instead.
+     */
+    @Deprecated
     String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";
 
-    String MODEL_ID = "modelId";
+    @SuppressWarnings("squid:S2386") // cannot be moved for backwards compatibility
+    String[] WORKFLOW_INSTANCES_PATHS = {
+            "/etc/workflow/instances",
+            "/var/workflow/instances"
+    };
 
+    String MODEL_ID = "modelId";
 
     /**
      * Removes workflow instances that match the parameter criteria.
@@ -91,6 +101,17 @@ public interface WorkflowInstanceRemover {
                                 final int maxDurationInMins) throws PersistenceException, WorkflowRemovalException,
             InterruptedException, WorkflowRemovalForceQuitException;
 
+
+    /**
+     * Removes workflow instances that match the parameter criteria.
+     *
+     * @param resourceResolver the resource resolver; must have access to read/delete workflow instances
+     * @param workflowRemovalConfig WF Models to remove
+     * @return the number of WF instances removed
+     */
+    int removeWorkflowInstances(final ResourceResolver resourceResolver,
+        final WorkflowRemovalConfig workflowRemovalConfig) throws PersistenceException, WorkflowRemovalException,
+        InterruptedException, WorkflowRemovalForceQuitException;
 
     /**
      * Gets the Workflow Remover's status.

@@ -37,9 +37,11 @@ public class ReplicationResultListener implements ReplicationListener {
     private final Map<Agent, ReplicationResult> results = new HashMap<Agent, ReplicationResult>();
 
     public final void onStart(final Agent agent, final ReplicationAction action) {
+        // no-op
     }
 
     public final void onMessage(final ReplicationLog.Level level, final String message) {
+        // no-op
     }
 
     public final void onEnd(final Agent agent, final ReplicationAction action, final ReplicationResult result) {
@@ -47,6 +49,7 @@ public class ReplicationResultListener implements ReplicationListener {
     }
 
     public final void onError(final Agent agent, final ReplicationAction action, final Exception error) {
+        // no-op
     }
 
     /**

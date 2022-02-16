@@ -28,10 +28,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.jsp.util.TagUtil;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.designer.Design;
 
@@ -41,7 +38,6 @@ import com.day.cq.wcm.api.designer.Design;
  */
 @ProviderType
 @SuppressWarnings("serial")
-@Tag(bodyContentType = BodyContentType.EMPTY, value = "includeClientLibraries")
 public final class IncludeDesignLibrariesTag extends TagSupport {
 
     private PageRegion region;
@@ -50,7 +46,7 @@ public final class IncludeDesignLibrariesTag extends TagSupport {
 
     private boolean css;
 
-    private Design design;
+    private transient Design design;
 
     /**
      * {@inheritDoc}
@@ -83,22 +79,18 @@ public final class IncludeDesignLibrariesTag extends TagSupport {
         super.release();
     }
 
-    @TagAttribute(runtimeValueAllowed = true)
     public void setCss(boolean css) {
         this.css = css;
     }
 
-    @TagAttribute(runtimeValueAllowed = true)
     public void setDesign(Design design) {
         this.design = design;
     }
 
-    @TagAttribute(runtimeValueAllowed = true)
     public void setJs(boolean js) {
         this.js = js;
     }
 
-    @TagAttribute(required = true, runtimeValueAllowed = true)
     public void setRegion(String region) {
         this.region = PageRegion.valueOf(region.toUpperCase());
     }

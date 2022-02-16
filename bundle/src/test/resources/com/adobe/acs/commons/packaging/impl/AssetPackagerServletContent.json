@@ -1,0 +1,121 @@
+{
+  "jcr:primaryType": "cq:Page",
+  "jcr:content": {
+    "jcr:primaryType": "cq:PageContent",
+    "jcr:title": "Experience",
+    "cq:template": "/conf/we-retail/settings/wcm/templates/hero-page",
+    "sling:resourceType": "weretail/components/structure/page",
+    "root": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "wcm/foundation/components/responsivegrid",
+      "hero_image": {
+        "jcr:primaryType": "nt:unstructured",
+        "fileReference": "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg",
+        "useFullWidth": "true",
+        "title": "Experiences",
+        "heading": "Inspiring stories from around the world",
+        "sling:resourceType": "weretail/components/content/heroimage"
+      }
+    }
+  },
+  "arctic-surfing-in-lofoten": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "Arctic Surfing In Lofoten",
+      "cq:template": "/conf/we-retail/settings/wcm/templates/experience-page",
+      "sling:resourceType": "weretail/components/structure/page",
+      "root": {
+        "jcr:primaryType": "nt:unstructured",
+        "sling:resourceType": "wcm/foundation/components/responsivegrid",
+        "responsivegrid": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "wcm/foundation/components/responsivegrid",
+          "contentfragment": {
+            "jcr:primaryType": "nt:unstructured",
+            "paragraphScope": "all",
+            "elementNames": "main",
+            "text": "Aloha spirits in Northern Norway",
+            "variationName": "master",
+            "sling:resourceType": "weretail/components/content/contentfragment",
+            "displayMode": "singleText",
+            "fragmentPath": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
+            "par3": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "wcm/foundation/components/responsivegrid",
+              "image": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              },
+              "image_898881992": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              },
+              "image_1193665800": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              }
+            },
+            "par6": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "wcm/foundation/components/responsivegrid",
+              "image": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              },
+              "image_884249408": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              },
+              "image_826980434": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              }
+            },
+            "par8": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "wcm/foundation/components/responsivegrid",
+              "image": {
+                "jcr:primaryType": "nt:unstructured",
+                "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
+                "sling:resourceType": "weretail/components/content/image"
+              }
+            }
+          }
+        },
+        "hero_image": {
+          "jcr:primaryType": "nt:unstructured",
+          "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
+          "useFullWidth": "true",
+          "title": "Arctic Surfing In Lofoten",
+          "sling:resourceType": "weretail/components/content/heroimage"
+        }
+      }
+    }
+  },
+  "hours-of-wilderness": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "48 hours of Wilderness",
+      "cq:template": "/conf/we-retail/settings/wcm/templates/experience-page",
+      "sling:resourceType": "weretail/components/structure/page",
+      "root": {
+        "jcr:primaryType": "nt:unstructured",
+        "sling:resourceType": "wcm/foundation/components/responsivegrid",
+        "hero_image": {
+          "jcr:primaryType": "nt:unstructured",
+          "fileReference": "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg",
+          "useFullWidth": "true",
+          "sling:resourceType": "weretail/components/content/heroimage"
+        }
+      }
+    }
+  }
+}

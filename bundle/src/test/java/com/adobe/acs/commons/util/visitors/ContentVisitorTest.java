@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ContentVisitorTest {
     @Mock
     Resource resource;
@@ -110,6 +110,15 @@ public class ContentVisitorTest {
     }
 
     @Test
+    public void accept_ContentCqTag() throws Exception {
+        properties.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Tag");
+
+        ContentVisitor visitor = new ContentVisitor(runnable);
+        visitor.accept(resource);
+        verify(runnable, times(1)).run(resource);
+    }
+
+    @Test
     public void accept_ContentInvalid() throws Exception {
         properties.put(JcrConstants.JCR_PRIMARYTYPE, "oak:Unstructured");
 
@@ -118,7 +127,7 @@ public class ContentVisitorTest {
         verify(runnable, times(0)).run(resource);
     }
 
-    private class TestRunnable implements ResourceRunnable {
+    public static class TestRunnable implements ResourceRunnable {
         @Override
         public void run(Resource resource) throws Exception {
         }

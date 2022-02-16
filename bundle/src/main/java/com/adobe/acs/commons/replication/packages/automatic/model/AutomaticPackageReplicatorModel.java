@@ -30,43 +30,44 @@ import org.apache.sling.api.resource.ValueMap;
  */
 public class AutomaticPackageReplicatorModel {
 
-	private ValueMap properties;
+    private ValueMap properties;
 
-	public AutomaticPackageReplicatorModel(Resource resource) {
-		properties = resource.getValueMap();
-	}
+    public AutomaticPackageReplicatorModel(Resource resource) {
+        properties = resource.getValueMap();
+    }
 
-	public enum TRIGGER {
-		cron, event
-	}
+    @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S00115"})
+    public enum TRIGGER {
+        cron, event
+    }
 
-	public String getTitle() {
-		return properties.get("jcr:content", String.class);
-	}
+    public String getTitle() {
+        return properties.get("jcr:content", String.class);
+    }
 
-	public String getPackagePath() {
-		return properties.get("packagePath", String.class);
-	}
+    public String getPackagePath() {
+        return properties.get("packagePath", String.class);
+    }
 
-	public String getCronTrigger() {
-		return properties.get("cronTrigger", String.class);
-	}
+    public String getCronTrigger() {
+        return properties.get("cronTrigger", String.class);
+    }
 
-	public String getEventTopic() {
-		String topic = properties.get("eventTopic", String.class);
-		if (StringUtils.isEmpty(topic)) {
-			return null;
-		} else {
-			return topic;
-		}
-	}
+    public String getEventTopic() {
+        String topic = properties.get("eventTopic", String.class);
+        if (StringUtils.isEmpty(topic)) {
+            return null;
+        } else {
+            return topic;
+        }
+    }
 
-	public String getEventFilter() {
-		return properties.get("eventFilter", String.class);
-	}
+    public String getEventFilter() {
+        return properties.get("eventFilter", String.class);
+    }
 
-	public TRIGGER getTrigger() {
-		return TRIGGER.valueOf(properties.get("trigger", String.class));
-	}
+    public TRIGGER getTrigger() {
+        return TRIGGER.valueOf(properties.get("trigger", String.class));
+    }
 
 }

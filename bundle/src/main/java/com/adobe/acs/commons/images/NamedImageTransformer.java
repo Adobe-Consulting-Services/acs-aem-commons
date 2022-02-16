@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.images;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.image.Layer;
 import org.apache.sling.api.resource.ValueMap;
@@ -28,6 +28,7 @@ import org.apache.sling.api.resource.ValueMap;
 import java.util.Map;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface NamedImageTransformer {
     /**
      * The OSGi config property used to identify the named transform.

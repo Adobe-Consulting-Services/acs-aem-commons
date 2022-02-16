@@ -76,11 +76,15 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
     static final String PN_REINDEX_COUNT = "reindexCount";
 
+    static final String PN_SEED = "seed";
+
     static final String PN_REINDEX = "reindex";
+
+    static final String NN_FACETS = "facets";
 
     static final String ENSURE_OAK_INDEX_USER_NAME = "Ensure Oak Index";
 
-    static final String[] MANDATORY_IGNORE_PROPERTIES = new String[]{
+    static final String[] MANDATORY_IGNORE_PROPERTIES = {
             // JCR Properties
             JcrConstants.JCR_PRIMARYTYPE,
             JcrConstants.JCR_LASTMODIFIED,
@@ -97,14 +101,27 @@ public class EnsureOakIndexJobHandler implements Runnable {
             // Oak Index Properties
             PN_REINDEX,
             PN_REINDEX_COUNT,
+            PN_SEED
     };
+
+    static final String[] MANDATORY_EXCLUDE_SUB_TREES = {
+            // For the real index definition node
+            "[" + NT_OAK_QUERY_INDEX_DEFINITION + "]/" + NN_FACETS + "/" + JcrConstants.JCR_CONTENT,
+            // For the ensure oak index definition node
+            "[" + NT_OAK_UNSTRUCTURED + "]/" + NN_FACETS + "/" + JcrConstants.JCR_CONTENT
+    };
+
+    static final String[] MANDATORY_EXCLUDE_NODE_NAMES = new String[]{ };
+
     private static final String[] NAME_PROPERTIES = new String[] {"propertyNames", "declaringNodeTypes"} ;
 
     static final String SERVICE_NAME = "ensure-oak-index";
 
     private final EnsureOakIndex ensureOakIndex;
 
-    private final List<String> ignoreProperties = new ArrayList<String>();
+    private final List<String> ignoreProperties = new ArrayList<>();
+    private final List<String> excludeSubTrees = new ArrayList<>();
+    private final List<String> excludeNodeNames = new ArrayList<>();
 
     private String oakIndexesPath;
 
@@ -117,6 +134,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
         this.ensureDefinitionsPath = ensureDefinitionsPath;
 
         this.ignoreProperties.addAll(Arrays.asList(MANDATORY_IGNORE_PROPERTIES));
+        this.excludeSubTrees.addAll(Arrays.asList(MANDATORY_EXCLUDE_SUB_TREES));
+        this.excludeNodeNames.addAll(Arrays.asList(MANDATORY_EXCLUDE_NODE_NAMES));
 
         if (ensureOakIndex != null) {
             this.ignoreProperties.addAll(ensureOakIndex.getIgnoreProperties());
@@ -124,30 +143,23 @@ public class EnsureOakIndexJobHandler implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("squid:S1141")
     public void run() {
-        ResourceResolver resourceResolver = null;
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo)) {
 
-        try {
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo);
-
+            // we should rethink this nested try here ...
             try {
                 this.ensure(resourceResolver, ensureDefinitionsPath, oakIndexesPath);
-            } catch (PersistenceException e) {
-                log.error("Could not ensure management of Oak Index [ {} ]", oakIndexesPath, e);
             } catch (IOException e) {
                 log.error("Could not ensure management of Oak Index [ {} ]", oakIndexesPath, e);
             }
         } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
+            log.error("Could not ensure oak indexes due to illegal arguments.",e);
         } catch (LoginException e) {
             log.error("Could not get an admin resource resolver to ensure Oak Indexes", e);
         } catch (Exception e) {
             log.error("Unknown error occurred while ensuring indexes", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
@@ -184,7 +196,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
             log.info("Ensure Definitions path [ {} ] does NOT have children to process", ensureDefinitions.getPath());
         }
 
-        final List<Resource> delayedProcessing = new ArrayList<Resource>();
+        final List<Resource> delayedProcessing = new ArrayList<>();
 
         // First, handle all things that may not result in a a collective re-indexing
         // Includes: IGNORES, DELETES, DISABLED ensure definitions
@@ -193,8 +205,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
             final Resource ensureDefinition = ensureDefinitionsIterator.next();
             final Resource oakIndex = oakIndexes.getChild(ensureDefinition.getName());
 
-            log.debug("Ensuring Oak Index [ {} ] ~> [ {} ]", ensureDefinition.getPath(),
-                    oakIndexesPath + "/" + ensureDefinition.getName());
+            log.debug("Ensuring Oak Index [ {} ] ~> [ {}/{} ]",
+                    ensureDefinition.getPath(), oakIndexesPath, ensureDefinition.getName());
 
             if (!handleLightWeightIndexOperations(
                     ensureDefinition, oakIndex)) {
@@ -221,7 +233,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
         }
 
         if (resourceResolver.hasChanges()) {
-            log.info("Saving all CREATE, UPDATES, and RE-INDEXES, re-indexing may start now..");
+            log.info("Saving all CREATE, UPDATES, and RE-INDEXES, re-indexing may start now.");
             resourceResolver.commit();
             log.debug("Commit succeeded");
         }
@@ -244,9 +256,9 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
         try {
             Resource ensuredOakIndex = null;
+            validateEnsureDefinition(ensureDefinition);
             if (oakIndex == null) {
                 // CREATE
-                validateEnsureDefinition(ensureDefinition);
                 ensuredOakIndex = this.create(ensureDefinition, oakIndexes);
 
                 // Force re-index
@@ -255,7 +267,6 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 }
             } else {
                 // UPDATE
-                validateEnsureDefinition(ensureDefinition);
                 boolean forceReindex = ensureDefinitionProperties.get(PN_FORCE_REINDEX, false);
 
                 if (ensureDefinitionProperties.get(PN_RECREATE_ON_UPDATE, false)) {
@@ -268,7 +279,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 }
             }
         } catch (OakIndexDefinitionException e) {
-            log.error("Skipping {} : {}", ensureDefinition.getPath(), e.getMessage());
+            log.error("Skipping processing of {}", ensureDefinition.getPath(), e);
         }
     }
 
@@ -296,11 +307,10 @@ public class EnsureOakIndexJobHandler implements Runnable {
             // DELETE
             if (oakIndex != null) {
                 this.delete(oakIndex);
-            } else if (log.isInfoEnabled()) {
+            } else {
                 // Oak index does not exist
-                log.info("Requesting deletion of a non-existent Oak Index at [ {} ].\n"
-                                + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
-                        oakIndexesPath + "/" + ensureDefinition.getName(),
+                log.info("Requesting deletion of a non-existent Oak Index at [ {}/{} ].\nConsider removing the Ensure Definition at [ {} ] if it is no longer needed.",
+                        oakIndexesPath, ensureDefinition.getName(),
                         ensureDefinition.getPath());
             }
         } else if (ensureDefinitionProperties.get(PN_DISABLE, false)) {
@@ -309,10 +319,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 this.disableIndex(oakIndex);
             } else {
                 // Oak index does not exist
-                log.info("Requesting disable of a non-existent Oak Index at [ {} ].\n"
-                                + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
-                        oakIndexesPath + "/" + ensureDefinition.getName(),
-                        ensureDefinition.getPath());
+                log.info("Requesting disable of a non-existent Oak Index at [ {}/{} ].\nConsider removing the Ensure Definition at [ {} ] if it is no longer needed.",
+                        oakIndexesPath, ensureDefinition.getName(), ensureDefinition.getPath());
             }
         } else {
             // handle updates, creates and all reindexing stuff in the second round
@@ -330,6 +338,10 @@ public class EnsureOakIndexJobHandler implements Runnable {
     public void forceRefresh(final @Nonnull Resource oakIndex) throws PersistenceException {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
+        if (mvm == null ) {
+            String msg = String.format("Cannot adapt %s to a ModifiableValueMap (permissions?)", oakIndex.getPath());
+            throw new PersistenceException(msg);
+        }
         mvm.put(PN_REINDEX, true);
 
         log.info("Forcing re-index of [ {} ]", oakIndex.getPath());
@@ -344,7 +356,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    public Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws PersistenceException,
+    public Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws
             RepositoryException {
 
         final Node oakIndex = JcrUtil.copy(
@@ -372,6 +384,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws IOException
      */
+    @SuppressWarnings("squid:S3776")
     public Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 
@@ -488,6 +501,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
         final CustomChecksumGeneratorOptions ensureDefinitionOptions = new CustomChecksumGeneratorOptions();
         ensureDefinitionOptions.addIncludedNodeTypes(new String[]{NT_OAK_UNSTRUCTURED});
         ensureDefinitionOptions.addExcludedProperties(this.ignoreProperties);
+        ensureDefinitionOptions.addExcludedSubTrees(this.excludeSubTrees);
+        ensureDefinitionOptions.addExcludedNodeNames(this.excludeNodeNames);
 
         final Map<String, String> srcChecksum =
                 checksumGenerator.generateChecksums(session, ensureDefinition.getPath(), ensureDefinitionOptions);
@@ -496,6 +511,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
         final CustomChecksumGeneratorOptions oakIndexOptions = new CustomChecksumGeneratorOptions();
         oakIndexOptions.addIncludedNodeTypes(new String[]{NT_OAK_QUERY_INDEX_DEFINITION});
         oakIndexOptions.addExcludedProperties(this.ignoreProperties);
+        oakIndexOptions.addExcludedSubTrees(this.excludeSubTrees);
+        oakIndexOptions.addExcludedNodeNames(this.excludeNodeNames);
 
         final Map<String, String> destChecksum =
                 checksumGenerator.generateChecksums(session, oakIndex.getPath(), oakIndexOptions);
@@ -511,7 +528,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws PersistenceException
      */
-    public void delete(final @Nonnull Resource oakIndex) throws RepositoryException, PersistenceException {
+    public void delete(final @Nonnull Resource oakIndex) throws RepositoryException {
 
         if (oakIndex.adaptTo(Node.class) != null) {
             // Remove the node and its descendants
@@ -522,7 +539,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
     }
 
     /**
-     * Validate is the ensure definition is in a valid format; uses for create and updates.
+     * Validate that the ensure definition is in a valid format; uses for create and updates.
      *
      * @param ensureDefinition the ensure definition ensureDefinition
      * @throws RepositoryException

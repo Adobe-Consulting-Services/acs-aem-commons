@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * Provides CORS functionality required by the server-to-server XHR communication
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
 public class BaseChecksumServlet extends SlingAllMethodsServlet {
     private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
@@ -47,6 +47,7 @@ public class BaseChecksumServlet extends SlingAllMethodsServlet {
         return "anonymous".equals(request.getResourceResolver().getUserID());
     }
 
+    @Override
     protected final void doOptions(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             IOException,
             ServletException {

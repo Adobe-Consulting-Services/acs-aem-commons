@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,40 +15,49 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent;
-
-import java.io.InputStream;
+import com.adobe.acs.commons.mcp.form.FormField;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.sling.api.resource.ValueMap;
-import com.adobe.acs.commons.mcp.form.FormField;
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
-import java.lang.reflect.Array;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
-import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
+import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
  */
 public class AnnotatedFieldDeserializer {
 
-    private static final Logger log = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AnnotatedFieldDeserializer.class);
 
     public static void deserializeFormFields(Object target, ValueMap input) throws DeserializeException {
         List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target.getClass(), FormField.class);
@@ -62,21 +74,20 @@ public class AnnotatedFieldDeserializer {
         }
     }
 
+    @SuppressWarnings("squid:S3776")
     private static void parseInput(Object target, ValueMap input, Field field) throws ReflectiveOperationException, ParseException {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         Object value;
         if (input.get(field.getName()) == null) {
-            if (inputAnnotation != null && inputAnnotation.required()) {
-                if (field.getType() == Boolean.class || field.getType() == Boolean.TYPE) {
-                    value = false;
-                } else {
-                    throw new NullPointerException("Required field missing: " + field.getName());
-                }
+            if (field.getType() == Boolean.class || field.getType() == Boolean.TYPE) {
+                value = false;
+            } else if (inputAnnotation != null && inputAnnotation.required()) {
+                throw new NullPointerException("Required field missing: " + field.getName());
             } else {
                 return;
             }
         } else {
-            value = input.get(field.getName());            
+            value = input.get(field.getName());
         }
 
         if (hasMultipleValues(field.getType())) {
@@ -87,10 +98,21 @@ public class AnnotatedFieldDeserializer {
                 val = ((Object[]) value)[0];
             }
 
-            if (val instanceof InputStream) {
-                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
-                FieldUtils.writeField(field, target, val, true);
-            } else{
+            if (val instanceof RequestParameter) {
+                /**
+                 * Special case handling uploaded files; Method call ~ copied
+                 * from parseInputValue(..)
+                 */
+                if (field.getType() == RequestParameter.class) {
+                    FieldUtils.writeField(field, target, val, true);
+                } else {
+                    try {
+                        FieldUtils.writeField(field, target, ((RequestParameter) val).getInputStream(), true);
+                    } catch (IOException ex) {
+                        LOG.error("Unable to get InputStream for uploaded file [ {} ]", ((RequestParameter) val).getName(), ex);
+                    }
+                }
+            } else {
                 parseInputValue(target, String.valueOf(val), field);
             }
         }
@@ -110,7 +132,7 @@ public class AnnotatedFieldDeserializer {
             }
             FieldUtils.writeField(field, target, array, true);
         } else {
-            Collection c = (Collection) getInstantiatableListType(field.getType()).newInstance();
+            Collection c = (Collection) getInstantiatableListType(field.getType()).getDeclaredConstructor().newInstance();
             c.addAll(convertedValues);
             FieldUtils.writeField(field, target, c, true);
         }
@@ -133,6 +155,7 @@ public class AnnotatedFieldDeserializer {
         return null;
     }
 
+    @SuppressWarnings("squid:S3776")
     private static Object convertPrimitiveValue(String value, Class<?> type) throws ParseException {
         if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
             return value.toLowerCase().trim().equals("true");
@@ -167,21 +190,90 @@ public class AnnotatedFieldDeserializer {
         }
     }
 
+    public static Stream<AccessibleObject> getAllAnnotatedObjectMembers(Class source, Class<? extends Annotation> annotation) {
+        return Stream.concat(
+                FieldUtils.getFieldsListWithAnnotation(source, annotation).stream()
+                        .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst),
+                MethodUtils.getMethodsListWithAnnotation(source, annotation).stream()
+        );
+    }
+
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
-        return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
-                .stream()
-                .collect(Collectors.toMap(Field::getName, f -> {
+        final Map<String, FieldComponent> comps = new LinkedHashMap<>();
+        Map<String, String> globalLangs = loadLanguages(sling);
+        getAllAnnotatedObjectMembers(source, FormField.class)
+            .forEach(
+                f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
-                    FieldComponent component;
-                    try {
-                        component = fieldDefinition.component().newInstance();
-                        component.setup(f.getName(), f, fieldDefinition, sling);
-                        return component;
-                    } catch (InstantiationException | IllegalAccessException ex) {
-                        log.error("Unable to instantiate field component for " + f.getName(), ex);
+                    if (fieldDefinition.localize()) {
+                        comps.putAll(createLocalizedComponent(sling, f, fieldDefinition, globalLangs));
+                    } else {
+                        try {
+                            FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
+                            component.setup(AccessibleObjectUtil.getFieldName(f), f, fieldDefinition, sling);
+                            comps.put(AccessibleObjectUtil.getFieldName(f), component);
+                        } catch (RuntimeException | ReflectiveOperationException ex) {
+                            LOG.error("Unable to instantiate field component for " + f.toString(), ex);
+                        }
                     }
-                    return null;
-                }, (a, b) -> a, LinkedHashMap::new));
+                }
+        );
+        return comps;
+    }
+
+    private static Map<String, String> loadLanguages(SlingScriptHelper sling) {
+        Map<String, String> globalLangs = new LinkedHashMap<>();
+        if (sling != null) {
+            // Read languages list
+            final String LANGUAGE_NODE_PATH = "wcm/core/resources/languages";
+            Resource rootRes = sling.getRequest().getResourceResolver().getResource(LANGUAGE_NODE_PATH);
+            if (rootRes != null) {
+                Iterator<Resource> itr = rootRes.listChildren();
+                while (itr.hasNext()) {
+                    Resource langRes = itr.next();
+                    String language = langRes.getValueMap().get("language", "");
+                    String country = langRes.getValueMap().get("country", "");
+                    if (!country.isEmpty() && !country.equals("*")) {
+                        language = language + " - " + country;
+                    }
+                    globalLangs.put(langRes.getName(), language);
+                }
+            }
+        }
+        return globalLangs;
+    }
+
+    private static Map<String, FieldComponent> createLocalizedComponent(SlingScriptHelper sling, AccessibleObject accessibleObject, FormField fieldDefinition, Map<String, String> globalLangs) {
+        Map<String, FieldComponent> comps = new LinkedHashMap<>();
+        String[] langs = fieldDefinition.languages();
+        if (langs == null || langs.length < 2) {
+            langs = globalLangs.keySet().toArray(new String[1]);
+        }
+        for (String lang : langs) {
+            String fieldName = AccessibleObjectUtil.getFieldName(accessibleObject)
+                            + (lang.equalsIgnoreCase("en") ? "" : "." + lang);
+            String title = fieldDefinition.name()
+                            + (lang.equalsIgnoreCase("en") ? "" : " (" + globalLangs.get(lang) + ")");
+            try {
+                FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
+                component.setup(fieldName, accessibleObject, fieldDefinition, sling);
+                component.getComponentMetadata().put("fieldLabel", title);
+                comps.put(fieldName, component);
+            } catch (RuntimeException | ReflectiveOperationException ex) {
+                LOG.error("Unable to instantiate field component for " + accessibleObject.toString(), ex);
+            }
+        }
+        return comps;
+    }
+
+    private static int superclassFieldsFirst(Field a, Field b) {
+        if (a.getDeclaringClass() == b.getDeclaringClass()) {
+            return 0;
+        } else if (a.getDeclaringClass().isAssignableFrom(b.getDeclaringClass())) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 
     private AnnotatedFieldDeserializer() {

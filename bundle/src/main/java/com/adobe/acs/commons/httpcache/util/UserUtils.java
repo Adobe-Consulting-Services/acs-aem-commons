@@ -28,14 +28,15 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Utilties tied to user groups and authentication.
+ * Utilities tied to user groups and authentication.
  */
 public class UserUtils {
     private UserUtils() {
-        throw new Error(UserUtils.class.getName() + " is not meant to be instantiated.");
     }
 
-    /** User id for anonymous requests */
+    /**
+     * User id for anonymous requests
+     */
     public static final String USER_ID_ANONYMOUS = "anonymous";
 
     /**

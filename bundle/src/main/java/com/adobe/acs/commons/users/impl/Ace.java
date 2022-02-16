@@ -1,3 +1,23 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.users.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
@@ -6,7 +26,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +33,11 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ACE OSGi Config Format
@@ -40,43 +60,47 @@ public final class Ace {
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String LIST_SEPARATOR = ",";
 
-    public static final String TYPE = "type";
-    public static final String PATH = "path";
-    public static final String PRIVILEGES = "privileges";
-    public static final String REP_GLOB = AccessControlConstants.REP_GLOB;
-    public static final String REP_NT_NAMES = AccessControlConstants.REP_NT_NAMES;
-    public static final String REP_ITEM_NAMES = AccessControlConstants.REP_ITEM_NAMES;
-    public static final String REP_PREFIXES = AccessControlConstants.REP_PREFIXES;
+    private static final String PROP_TYPE = "type";
+    private static final String PROP_PATH = "path";
+    private static final String PROP_PRIVILEGES = "privileges";
+    private static final String PROP_REP_GLOB = "rep:glob";
+    private static final String PROP_REP_NT_NAMES = "rep:ntNames";
+    private static final String PROP_REP_ITEM_NAMES = "rep:itemNames";
+    private static final String PROP_REP_PREFIXES = "rep:prefixes";
 
 
     private String type;
     private String path;
     private String repGlob = null;
     private List<String> repNtNames = new ArrayList<String>();
-    private List<String> repItemNames = new ArrayList<String>();;
-    private List<String> repPrefixes = new ArrayList<String>();;
+    private List<String> repItemNames = new ArrayList<String>();
+    private List<String> repPrefixes = new ArrayList<String>();
     private final List<String> privilegeNames = new ArrayList<String>();
     private boolean exists = false;
 
-    public Ace(String raw) throws EnsureServiceUserException {
+    @SuppressWarnings("squid:S3776")
+    public Ace(String raw) throws EnsureAuthorizableException {
         String[] segments = StringUtils.split(raw, PARAM_DELIMITER);
 
         for (String segment : segments) {
-            AbstractMap.SimpleEntry<String, String> entry = ParameterUtil.toSimpleEntry(segment, KEY_VALUE_SEPARATOR);
+            Map.Entry<String, String> entry = ParameterUtil.toMapEntry(segment, KEY_VALUE_SEPARATOR);
 
-            if (StringUtils.equals(TYPE, entry.getKey())) {
+            if (entry == null) {
+                continue;
+            }
+            if (StringUtils.equals(PROP_TYPE, entry.getKey())) {
                 this.type = StringUtils.stripToNull(entry.getValue());
-            } else if (StringUtils.equals(PATH, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_PATH, entry.getKey())) {
                 this.path = StringUtils.stripToNull(entry.getValue());
-            } else if (StringUtils.equals(REP_GLOB, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_GLOB, entry.getKey())) {
                 this.repGlob = StringUtils.stripToEmpty(entry.getValue());
-            } else if (StringUtils.equals(REP_NT_NAMES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_NT_NAMES, entry.getKey())) {
                 this.repNtNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
-            } else if (StringUtils.equals(REP_ITEM_NAMES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_ITEM_NAMES, entry.getKey())) {
                 this.repItemNames.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
-            } else if (StringUtils.equals(REP_PREFIXES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_REP_PREFIXES, entry.getKey())) {
                 this.repPrefixes.addAll(Arrays.asList(StringUtils.split(StringUtils.stripToEmpty(entry.getValue()), LIST_SEPARATOR)));
-            } else if (StringUtils.equals(PRIVILEGES, entry.getKey())) {
+            } else if (StringUtils.equals(PROP_PRIVILEGES, entry.getKey())) {
                 for (String privilege : StringUtils.split(entry.getValue(), LIST_SEPARATOR)) {
                     privilege = StringUtils.stripToNull(privilege);
                     if (privilege != null) {
@@ -89,13 +113,13 @@ public final class Ace {
         validate(this.type, this.path, this.privilegeNames);
     }
 
-    protected void validate(String type, String path, List<String> privilegeNames) throws EnsureServiceUserException {
+    protected void validate(String type, String path, List<String> privilegeNames) throws EnsureAuthorizableException {
         if (!ArrayUtils.contains(new String[] { "allow", "deny"}, type)) {
-            throw new EnsureServiceUserException("Ensure Service User requires valid type. [ " + type + " ] type is invalid");
+            throw new EnsureAuthorizableException("Ensure Service User requires valid type. [ " + type + " ] type is invalid");
         } else if (!StringUtils.startsWith(path , "/")) {
-            throw new EnsureServiceUserException("Ensure Service User requires an absolute path. [ " + path + " ] path is invalid");
+            throw new EnsureAuthorizableException("Ensure Service User requires an absolute path. [ " + path + " ] path is invalid");
         } else if (privilegeNames.size() < 1) {
-            throw new EnsureServiceUserException("Ensure Service User requires at least 1 privilege to apply.");
+            throw new EnsureAuthorizableException("Ensure Service User requires at least 1 privilege to apply.");
         }
     }
 
@@ -109,7 +133,7 @@ public final class Ace {
 
 
     public List<String> getPrivilegeNames() {
-        return privilegeNames;
+        return Collections.unmodifiableList(privilegeNames);
     }
 
     public List<Privilege> getPrivileges(AccessControlManager accessControlManager) {
@@ -147,7 +171,7 @@ public final class Ace {
     /** rep:ntNames **/
 
     public List<String> getRepNtNames() {
-        return repNtNames;
+        return Collections.unmodifiableList(repNtNames);
     }
 
     public boolean hasRepNtNames() {
@@ -158,7 +182,7 @@ public final class Ace {
     /** rep:itemNames **/
 
     public List<String> getRepItemNames() {
-        return repItemNames;
+        return Collections.unmodifiableList(repItemNames);
     }
 
     public boolean hasRepItemNames() {
@@ -168,7 +192,7 @@ public final class Ace {
     /** rep:prefixes **/
 
     public List<String> getRepPrefixes() {
-        return repPrefixes;
+        return Collections.unmodifiableList(repPrefixes);
     }
 
     public boolean hasRepPrefixes() {
@@ -196,29 +220,29 @@ public final class Ace {
         // rep:glob
 
         // We are converting the single value RepGlob into a List for convenience
-        if(!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(AccessControlConstants.REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
+        if(!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(PROP_REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
             return false;
         }
 
         // rep:ntNames
-        if(!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(AccessControlConstants.REP_NT_NAMES), this.getRepNtNames())) {
+        if(!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(PROP_REP_NT_NAMES), this.getRepNtNames())) {
             return false;
         }
 
         // rep:itemNames
-        if(!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(AccessControlConstants.REP_ITEM_NAMES), this.getRepItemNames())) {
+        if(!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(PROP_REP_ITEM_NAMES), this.getRepItemNames())) {
             return false;
         }
 
         // rep:prefixes
-        if(!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(AccessControlConstants.REP_PREFIXES), this.getRepPrefixes())) {
+        if(!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(PROP_REP_PREFIXES), this.getRepPrefixes())) {
             return false;
         }
 
         return true;
     }
 
-
+    @SuppressWarnings("squid:S2589")
     private boolean isRestrictionValid(boolean configExists, Value[] actualValues, List<String> configValues) {
         final ArrayList<String> actualRestrictions = new ArrayList<String>();
 

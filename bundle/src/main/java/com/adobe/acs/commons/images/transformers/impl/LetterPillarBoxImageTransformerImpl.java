@@ -106,7 +106,7 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
      */
     private Layer build(Dimension size, Layer img, Color color) {
 
-        Layer merged = new Layer(size.width, size.height, color);
+        Layer merged = createLayer(size, color);
 
         int startXpos = 0;
         int startYpos = 0;
@@ -122,6 +122,10 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
 
         merged.blit(img, startXpos, startYpos, imgWidth, imgHeight, 0, 0);
         return merged;
+    }
+
+    Layer createLayer(Dimension size, Color color) {
+        return new Layer(size.width, size.height, color);
     }
 
     /*

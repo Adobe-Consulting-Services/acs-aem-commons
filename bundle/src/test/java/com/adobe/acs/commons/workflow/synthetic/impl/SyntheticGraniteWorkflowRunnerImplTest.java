@@ -28,8 +28,8 @@ import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.Restar
 import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.TerminateDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.UpdateWorkflowDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WFArgsWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WFDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WfArgsWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WfDataWorkflowProcess;
 
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Session;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,11 +73,11 @@ public class SyntheticGraniteWorkflowRunnerImplTest {
     }
 
     @Test
-    public void testExecute_WFData() throws Exception {
+    public void testExecute_WfData() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
-        swr.bindGraniteWorkflowProcesses(new WFDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new WfDataWorkflowProcess(), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("test",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
@@ -134,7 +134,7 @@ public class SyntheticGraniteWorkflowRunnerImplTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "wf-args");
-        swr.bindGraniteWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs), map);
+        swr.bindGraniteWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs), map);
 
         /** WF Process Metadata */
         workflowSteps.add(swr.getSyntheticWorkflowStep("wf-args",
@@ -168,7 +168,6 @@ public class SyntheticGraniteWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Terminate() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "terminate");
@@ -213,7 +212,6 @@ public class SyntheticGraniteWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Complete_noSave() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
@@ -244,10 +242,10 @@ public class SyntheticGraniteWorkflowRunnerImplTest {
 
         final Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "multi1");
-        swr.bindGraniteWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs1), map);
+        swr.bindGraniteWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs1), map);
 
         map.put("process.label", "multi2");
-        swr.bindGraniteWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs2), map);
+        swr.bindGraniteWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs2), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("multi1",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,

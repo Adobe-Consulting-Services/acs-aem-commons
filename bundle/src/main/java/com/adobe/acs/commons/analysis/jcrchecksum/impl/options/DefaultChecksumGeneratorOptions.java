@@ -20,14 +20,11 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ProviderType
 public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
-    private static final Logger log = LoggerFactory.getLogger(DefaultChecksumGeneratorOptions.class);
 
     public DefaultChecksumGeneratorOptions() {
 

@@ -20,32 +20,28 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
-import aQute.bnd.annotation.ProviderType;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
-    private static final Logger log = LoggerFactory.getLogger(RequestChecksumGeneratorOptions.class);
 
-    public RequestChecksumGeneratorOptions(SlingHttpServletRequest request) throws IOException {
+    public RequestChecksumGeneratorOptions(SlingHttpServletRequest request)  {
         this.addIncludedNodeTypes(request.getParameterValues(NODES_TYPES));
         this.addExcludedNodeTypes(request.getParameterValues(NODE_TYPE_EXCLUDES));
         this.addExcludedProperties(request.getParameterValues(PROPERTY_EXCLUDES));
@@ -53,7 +49,7 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
     }
 
     public static Set<String> getPaths(SlingHttpServletRequest request) throws IOException {
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
 
         // Add Paths
 
@@ -80,10 +76,10 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
     private static Set<String> getPathsFromQuery(ResourceResolver resourceResolver, String language, String query) {
         if (StringUtils.isBlank(query)) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
         language = StringUtils.defaultIfEmpty(language, "xpath");
         Iterator<Resource> resources = resourceResolver.findResources(query, language);
 
@@ -96,32 +92,19 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
     private static Set<String> getPathsFromInputstream(InputStream is, String encoding) throws IOException {
         if (is == null) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
         encoding = (encoding != null) ?  encoding : Charset.defaultCharset().name();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
 
-        try {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {
             String path;
             while ((path = br.readLine()) != null) {
                 paths.add(path);
             }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
         }
 
         return paths;
-    }
-
-    private static List<String> asList(String[] arr) {
-        if (arr == null) {
-            return Collections.EMPTY_LIST;
-        } else {
-            return Arrays.asList(arr);
-        }
     }
 }

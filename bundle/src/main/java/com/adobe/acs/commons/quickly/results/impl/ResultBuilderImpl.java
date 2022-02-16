@@ -37,9 +37,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public class ResultBuilderImpl implements ResultBuilder {
     private ResultSerializer defaultResultSerialize;
 
     @Override
-    public JSONObject toJSON(final Command cmd, Result result, final ValueMap config) throws JSONException {
+    public JsonObject toJSON(final Command cmd, Result result, final ValueMap config) {
 
         if (!this.acceptsAuthoringUIMode(result,
                 config.get(AuthoringUIMode.class.getName(), AuthoringUIMode.TOUCH))) {
@@ -96,7 +95,7 @@ public class ResultBuilderImpl implements ResultBuilder {
         }
 
         if (serializer != null) {
-            //log.trace("Serializing results using Result Serializer [ {} ] w/ [ {} ]", result.getResultType(), serializer.getClass().getSimpleName());
+            log.trace("Serializing results using Result Serializer [ {} ] w/ [ {} ]", result.getResultType(), serializer.getClass().getSimpleName());
             return serializer.toJSON(result, config);
         } else {
             log.trace("Could not find Quickly Result Serializer for type [ {} ]", result.getResultType());
@@ -113,6 +112,7 @@ public class ResultBuilderImpl implements ResultBuilder {
         return null;
     }
 
+    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     protected final boolean acceptsAuthoringUIMode(Result result, AuthoringUIMode authoringUIMode) {
         if (result.getAuthoringMode() == null) {
             // All Authoring Modes

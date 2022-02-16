@@ -172,6 +172,8 @@ public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
             return saveInterval;
         }
 
-        public boolean isThrottle() { return throttle; }
+        public boolean isThrottle() {
+            return throttle;
+        }
     }
 }

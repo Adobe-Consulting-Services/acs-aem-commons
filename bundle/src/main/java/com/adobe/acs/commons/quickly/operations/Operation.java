@@ -20,16 +20,16 @@
 
 package com.adobe.acs.commons.quickly.operations;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
 
 import java.util.Collection;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface Operation {
 
     final String PROP_CMD = "cmd";
@@ -54,7 +54,7 @@ public interface Operation {
      * @throws JSONException
      */
     Collection<Result> getResults(SlingHttpServletRequest request, SlingHttpServletResponse response,
-                                  Command cmd) throws JSONException;
+                                  Command cmd);
 
     /**
      * Returns the command operation this Operation is registered for.

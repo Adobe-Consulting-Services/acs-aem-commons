@@ -55,9 +55,9 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
             COLORANTS,
             LOCATION
         })
-    public static String PROP_COMPONENTS = "components";
+    public static final String PROP_COMPONENTS = "components";
 
-    private JsonObject json;
+    private transient JsonObject json;
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -70,7 +70,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
             array.add(obj);
         }
         this.json = new JsonObject();
-        json.add("components", array);
+        json.add("components", array); // NOSONAR
     }
 
     @Override

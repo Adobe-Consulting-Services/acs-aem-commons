@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +15,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.form.*;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.form.FileUploadComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.SelectComponent;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
@@ -43,7 +49,12 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Creates cq:Tags based on a well defined Excel document.
@@ -54,7 +65,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     public static final String NAME = "Tag Creator";
 
-    private final Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
+    private final transient Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
 
     public enum TagBuilder {
         TITLE_TO_NODE_NAME,
@@ -62,7 +73,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         LOWERCASE_WITH_DASHES,
         LOCALIZED_TITLE,
         NONE
-    };
+    }
 
     public TagCreator(Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders) {
         this.resourceDefinitionBuilders = resourceDefinitionBuilders;
@@ -74,7 +85,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
             component = FileUploadComponent.class,
             options = {"mimeTypes=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "required"}
     )
-    public InputStream tagDefinitionFile = null;
+    public transient InputStream excelFile = null;
 
     @FormField(
             name = "Primary Converter",
@@ -94,7 +105,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     @Override
     public void init() throws RepositoryException {
-
+        // nothing to do here
     }
 
     @Override
@@ -106,7 +117,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         instance.defineCriticalAction("Create tags", rr, this::importTags);
     }
 
-    volatile HashMap<String, TagDefinition> tagDefinitions = new LinkedHashMap<>();
+    transient volatile HashMap<String, TagDefinition> tagDefinitions = new LinkedHashMap<>();
 
     /**
      * Parses the input Excel file and creates a list of TagDefinition objects to process.
@@ -114,11 +125,19 @@ public class TagCreator extends ProcessDefinition implements Serializable {
      * @param manager the action manager
      * @throws IOException
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public void parseTags(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
-            final XSSFWorkbook workbook = new XSSFWorkbook(tagDefinitionFile);
+            final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
             final XSSFSheet sheet = workbook.getSheetAt(0);
             final Iterator<Row> rows = sheet.rowIterator();
+            final String tagsRootPath = new TagRootResolver(rr).getTagsLocationPath();
+
+            if (tagsRootPath == null) {
+                record(ReportRowSatus.FAILED_TO_PARSE,
+                        "Abandoning Tag parsing. Unable to determine AEM Tags root (/content/cq:tags vs /etc/tags). Please ensure the path exists and is accessible by the user running Tag Creator.", "N/A", "N/A");
+                return;
+            }
 
             while(rows.hasNext()) {
                 final Row row = rows.next();
@@ -138,10 +157,10 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     }
 
                     // Generate a tag definition that will in turn be used to drive the tag creation
-                    TagDefinition tagDefinition = getTagDefinition(primary, cellIndex, cellValue, previousTagId);
+                    TagDefinition tagDefinition = getTagDefinition(primary, cellIndex, cellValue, previousTagId, tagsRootPath);
 
                     if (tagDefinition == null) {
-                        tagDefinition = getTagDefinition(fallback, cellIndex, cellValue, previousTagId);
+                        tagDefinition = getTagDefinition(fallback, cellIndex, cellValue, previousTagId, tagsRootPath);
                     }
 
                     if (tagDefinition == null) {
@@ -160,7 +179,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                         }
                     }
                 }
-            };
+            }
             log.info("Finished Parsing and collected [ {} ] tags for import.", tagDefinitions.size());
         });
     }
@@ -177,30 +196,39 @@ public class TagCreator extends ProcessDefinition implements Serializable {
                     final TagManager tagManager = rr.adaptTo(TagManager.class);
                     ReportRowSatus status;
 
-                    try {
-                        if (tagManager.resolve(tagDefinition.getId()) == null) {
-                            status = ReportRowSatus.CREATED;
-                        } else {
-                            status = ReportRowSatus.UPDATED_EXISTING;
-                        }
-
-                        final Tag tag = tagManager.createTag(
-                                tagDefinition.getId(),
-                                tagDefinition.getTitle(),
-                                tagDefinition.getDescription(),
-                                false);
-                        setTitles(tag, tagDefinition);
-                        record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
-                        log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
-                    } catch (Exception e) {
-                        record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
-                        log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
-                    }
+                    createTag(tagDefinition, tagManager);
                 });
             } catch (Exception e) {
                 log.error("Unable to import tags via ACS Commons MCP - Tag Creator", e);
             }
         });
+    }
+
+    private void createTag(TagDefinition tagDefinition, TagManager tagManager) {
+        ReportRowSatus status;
+        try {
+            if (tagManager.resolve(tagDefinition.getId()) == null) {
+                status = ReportRowSatus.CREATED;
+            } else {
+                status = ReportRowSatus.UPDATED_EXISTING;
+            }
+
+            final Tag tag = tagManager.createTag(
+                    tagDefinition.getId(),
+                    tagDefinition.getTitle(),
+                    tagDefinition.getDescription(),
+                    false);
+            if (tag != null) {
+                setTitles(tag, tagDefinition);
+                record(status, tag.getTagID(), tag.getPath(), tag.getTitle());
+                log.debug("Created tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+            } else {
+                log.error("Tag [ {} ] is null", tagDefinition.getId());
+            }
+        } catch (Exception e) {
+            record(ReportRowSatus.FAILED_TO_CREATE, tagDefinition.getId(), tagDefinition.getPath(), tagDefinition.getTitle());
+            log.error("Unable to create tag [ {} -> {} ]", tagDefinition.getId(), tagDefinition.getTitle());
+        }
     }
 
     /**
@@ -211,11 +239,11 @@ public class TagCreator extends ProcessDefinition implements Serializable {
      * @param previousTagId The previous Tag Id to build up.
      * @return a valid TagDefinition, or null if a valid TagDefinition cannot be generated.
      */
-    private TagDefinition getTagDefinition(final TagBuilder tagBuilder, final int index, final String value, final String previousTagId) {
+    private TagDefinition getTagDefinition(final TagBuilder tagBuilder, final int index, final String value, final String previousTagId, final String tagsRootPath) {
         final ResourceDefinitionBuilder resourceDefinitionBuilder = resourceDefinitionBuilders.get(tagBuilder.name());
 
         if (resourceDefinitionBuilder != null && resourceDefinitionBuilder.accepts(value)) {
-            final TagDefinition tagDefinition = new TagDefinition(resourceDefinitionBuilder.convert(value));
+            final TagDefinition tagDefinition = new TagDefinition(resourceDefinitionBuilder.convert(value), tagsRootPath);
 
             switch (index) {
                 case 0: tagDefinition.setId(tagDefinition.getName() + TagConstants.NAMESPACE_DELIMITER);
@@ -232,11 +260,6 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     }
 
     private void setTitles(final Tag tag, final TagDefinition tagDefinition) throws RepositoryException {
-        if (tag == null) {
-            log.error("Tag [ {} ] is null", tagDefinition.getId());
-            return;
-        }
-
         final Node node = tag.adaptTo(Node.class);
 
         if (node == null) {
@@ -260,9 +283,9 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     /** Reporting **/
 
-    transient private final GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
 
-    private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
+    private final transient ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private enum ReportColumns {
         STATUS,
@@ -275,8 +298,8 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         CREATED,
         UPDATED_EXISTING,
         FAILED_TO_PARSE,
-        FAILED_TO_CREATE,
-    };
+        FAILED_TO_CREATE
+    }
 
     private void record(ReportRowSatus status, String tagId, String path, String title) {
         final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
@@ -298,21 +321,80 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     /** Tag Definition Class **/
 
     private final class TagDefinition extends BasicResourceDefinition {
-        public TagDefinition(ResourceDefinition resourceDefinition) {
+        private final String tagsRootPath;
+
+        public TagDefinition(ResourceDefinition resourceDefinition, String tagsRootPath) {
             super(resourceDefinition.getName());
             super.setId(resourceDefinition.getId());
             super.setDescription(resourceDefinition.getDescription());
             super.setTitle(resourceDefinition.getTitle());
             super.setLocalizedTitles(resourceDefinition.getLocalizedTitles());
+
+            this.tagsRootPath = tagsRootPath;
         }
 
         @Override
         public String getPath() {
             if (getId() != null) {
-                return "/etc/tags/" + StringUtils.replace(getId(), ":", "/");
+                return tagsRootPath + StringUtils.replace(getId(), ":", "/");
             } else {
                 return null;
             }
+        }
+    }
+
+    protected enum TagsLocation {
+        ETC, CONTENT, UNKNOWN;
+    }
+
+    protected static final class TagRootResolver {
+        private static final String CONTENT_LOCATION = "/content/cq:tags";
+        private static final String ETC_LOCATION = "/etc/tags";
+
+        private final String tagsLocationPath;
+
+        public TagRootResolver(final ResourceResolver resourceResolver) {
+            final TagsLocation tagsLocation = resolveTagsLocation(resourceResolver);
+
+            if (tagsLocation == TagsLocation.CONTENT) {
+                tagsLocationPath = CONTENT_LOCATION;
+            } else if (tagsLocation == TagsLocation.ETC) {
+                tagsLocationPath = ETC_LOCATION;
+            } else if (contentLocationExists(resourceResolver)) {
+                tagsLocationPath = CONTENT_LOCATION;
+            } else if (etcLocationExists(resourceResolver)) {
+                tagsLocationPath = ETC_LOCATION;
+            } else {
+                tagsLocationPath = null;
+            }
+        }
+
+        public String getTagsLocationPath() {
+            return tagsLocationPath;
+        }
+
+        private TagsLocation resolveTagsLocation(ResourceResolver resourceResolver) {
+            final TagManager tagManager = resourceResolver.adaptTo(TagManager.class);
+            final Tag[] namespaces = tagManager.getNamespaces();
+
+            if (namespaces.length > 0) {
+                final Tag tag = namespaces[0];
+                if (StringUtils.startsWith(tag.getPath(), CONTENT_LOCATION)) {
+                    return TagsLocation.CONTENT;
+                } else {
+                    return TagsLocation.ETC;
+                }
+            }
+
+            return TagsLocation.UNKNOWN;
+        }
+
+        private boolean contentLocationExists(ResourceResolver resourceResolver) {
+            return resourceResolver.getResource(CONTENT_LOCATION) != null;
+        }
+
+        private boolean etcLocationExists(ResourceResolver resourceResolver) {
+            return resourceResolver.getResource(ETC_LOCATION) != null;
         }
     }
 }

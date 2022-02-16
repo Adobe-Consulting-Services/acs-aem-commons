@@ -1,12 +1,30 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 - Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.synth.children.impl;
 
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,6 +80,25 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T get(String name, T defaultValue) {
+        if (defaultValue == null) {
+            return (T) this.get(name);
+        }
+
+        Class<T> type = (Class<T>) defaultValue.getClass();
+
+        T value = get(name, type);
+        if (value == null) {
+            value = defaultValue;
+        }
+
+        return value;
+    }
+
+    /**
      * Coerces the value at {@param name} to a Calendar object.
      *
      * @param name the property name
@@ -77,14 +114,9 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
             return cal;
         } else {
             String tmp = super.get(name, String.class);
-            final DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(tmp);
-            if (dateTime != null) {
-                final Calendar cal = Calendar.getInstance();
-                cal.setTime(dateTime.toDate());
-                return cal;
-            } else {
-                return null;
-            }
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(OffsetDateTime.parse(tmp).toInstant().toEpochMilli());
+            return cal;
         }
     }
 
@@ -103,12 +135,7 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
             return cal.getTime();
         } else {
             String tmp = super.get(name, String.class);
-            final DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(tmp);
-            if (dateTime != null) {
-                return dateTime.toDate();
-            } else {
-                return null;
-            }
+            return new Date(OffsetDateTime.parse(tmp).toInstant().toEpochMilli());
         }
     }
 
@@ -154,24 +181,5 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
             String tmp = super.get(name, String.class);
             return new BigDecimal(tmp);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get(String name, T defaultValue) {
-        if (defaultValue == null) {
-            return (T) this.get(name);
-        }
-
-        Class<T> type = (Class<T>) defaultValue.getClass();
-
-        T value = get(name, type);
-        if (value == null) {
-            value = defaultValue;
-        }
-
-        return value;
     }
 }

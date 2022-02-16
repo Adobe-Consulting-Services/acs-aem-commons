@@ -34,9 +34,8 @@ public abstract class AbstractAccessibleResults {
         List<Result> results = new ArrayList<Result>();
 
         for(Result result : getResults()) {
-            if(StringUtils.isNotBlank(result.getPath())) {
-                results.add(result);
-            } else if (resourceResolver.resolve(result.getPath()) != null) {
+            if (StringUtils.isNotBlank(result.getPath())
+                    || resourceResolver.resolve(result.getPath()) != null) {
                 results.add(result);
             }
         }

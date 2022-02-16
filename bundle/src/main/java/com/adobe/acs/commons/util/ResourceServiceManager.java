@@ -22,25 +22,28 @@ package com.adobe.acs.commons.util;
 import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import javax.management.NotCompliantMBeanException;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.NotCompliantMBeanException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Base class for services to extend which want to manage other services based
@@ -64,7 +67,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Activate
-    public void activate(ComponentContext context) throws LoginException {
+    public synchronized void activate(ComponentContext context) throws LoginException {
         log.trace("activate");
         bctx = context.getBundleContext();
         refreshCache();
@@ -72,7 +75,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Deactivate
-    public void deactivate(ComponentContext context) throws LoginException {
+    public synchronized void deactivate(ComponentContext context) throws LoginException {
         log.trace("deactivate");
         for (String id : registeredServices.keySet()) {
             unregisterService(id);
@@ -129,15 +132,17 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     protected abstract boolean isServiceUpdated(Resource config, ServiceReference reference);
 
     @Override
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public synchronized void refreshCache() {
         log.trace("refreshCache");
 
-        ResourceResolver resolver = null;
+        try ( ResourceResolver resolver = getResourceResolver()) {
 
-        try {
-
-            resolver = getResourceResolver();
             Resource aprRoot = resolver.getResource(getRootPath());
+            if (aprRoot == null) {
+                log.error("Root path for service resource not found: {}", getRootPath());
+                return;
+            }
             List<String> configuredIds = new ArrayList<String>();
             for (Resource child : aprRoot.getChildren()) {
                 if (!JcrConstants.JCR_CONTENT.equals(child.getName())) {
@@ -171,13 +176,10 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
         } catch (InvalidSyntaxException e) {
             log.warn("Unable to search for invalid references due to invalid filter format", e);
-        } finally {
-            if (resolver != null) {
-                resolver.close();
-            }
         }
     }
 
+    @SuppressWarnings("squid:S1149")
     private ServiceRegistration registerService(String id, Resource config) {
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(SERVICE_OWNER_KEY, getClass().getCanonicalName());
@@ -186,7 +188,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
         registeredServices.put(id, serviceRegistration);
         log.debug("Automatic Package Replication job {} successfully updated with service {}",
-                new Object[] { id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID) });
+                id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID));
 
         return serviceRegistration;
     }
@@ -200,6 +202,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
      *            the default properties
      * @return the ServiceRegistration from registering the service
      */
+    @SuppressWarnings("squid:S1149")
     protected abstract ServiceRegistration registerServiceObject(Resource config, Hashtable<String, Object> props);
 
     private void unregisterService(String id) {

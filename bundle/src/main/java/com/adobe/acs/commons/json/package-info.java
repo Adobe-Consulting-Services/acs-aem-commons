@@ -20,5 +20,5 @@
 /**
  * JSON Utilities
  */
-@aQute.bnd.annotation.Version("1.10.4")
+@org.osgi.annotation.versioning.Version("2.0.0")
 package com.adobe.acs.commons.json;

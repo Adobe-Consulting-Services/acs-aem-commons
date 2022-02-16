@@ -19,62 +19,16 @@
  */
 package com.adobe.acs.commons.wcm;
 
-import javax.servlet.ServletRequest;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
-import com.adobe.acs.commons.util.ModeUtil;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public interface ComponentHelper {
-    /**
-     * Checks if Page equals in WCM Mode DESIGN.
-     * 
-     * @deprecated use {@link ModeUtil#isDesign(SlingHttpServletRequest)} 
-     * @return true if current request equals in Edit mode.
-     */
-    @Deprecated
-    boolean isDesignMode(SlingHttpServletRequest request);
-
-    /**
-     * Checks if Page equals in WCM Mode DISABLED.
-     *
-     * @deprecated use {@link ModeUtil#isDisabled(SlingHttpServletRequest)} 
-     * @return true if current request equals in DISABLED mode.
-     */
-    @Deprecated
-    boolean isDisabledMode(SlingHttpServletRequest request);
-
-    /**
-     * Checks if Page equals in WCM Mode EDIT.
-     *
-     * @deprecated use {@link ModeUtil#isEdit(SlingHttpServletRequest)}
-     * @return true if current request equals in EDIT mode.
-     */
-    @Deprecated
-    boolean isEditMode(SlingHttpServletRequest request);
-
-    /**
-     * Checks if Page equals in WCM Mode PREVIEW.
-     *
-     * @deprecated use {@link ModeUtil#isPreview(SlingHttpServletRequest)}
-     * @return true if current request equals in PREVIEW mode.
-     */
-    @Deprecated
-    boolean isPreviewMode(SlingHttpServletRequest request);
-
-    /**
-     * Checks if Page equals in WCM Mode READ_ONLY.
-     * 
-     * @deprecated use {@link ModeUtil#isReadOnly}
-     * @return true if current request equals in READ_ONLY mode.
-     */
-    @Deprecated
-    boolean isReadOnlyMode(SlingHttpServletRequest request);
-
     /**
      * Checks if the mode equals in an "Authoring" mode; Edit or Design.
      *
@@ -83,16 +37,6 @@ public interface ComponentHelper {
      */
     boolean isAuthoringMode(SlingHttpServletRequest request);
     
-    /**
-     * Checks if touch authoring mode has been selected.
-     * 
-     * @deprecated {@link ModeUtil#isTouch(SlingHttpServletRequest)}
-     * @param request the current request
-     * @return true if touch authoring mode is active
-     */
-    @Deprecated
-    boolean isTouchAuthoringMode(ServletRequest request);
-
     /**
      * Prints the HTML representation of the Component's edit block to the Response.
      * If EditType DropTargets equals specified, Block will created by inspecting the
@@ -114,10 +58,10 @@ public interface ComponentHelper {
      * <p>
      * Normal use: inclusion at top of component JSP before any markup is output:
      * <p>
-     * <% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
+     * &lt;% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
      * StringUtils.isNotBlank(properties.get("foo", ""))) {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
-     * } %>
+     * } %&gt;
      *      *
      * @param request the request
      * @param response the response
@@ -210,6 +154,7 @@ public interface ComponentHelper {
      */
     String getDDEditBlock(SlingHttpServletRequest request, String name,
                                         ComponentEditType.Type editType, boolean... isConfigured);
+
     /**
      * Get the edit icon HTML img tag (&gt;img ...&lt;) for the specified
      * EditType

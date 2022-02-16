@@ -72,6 +72,7 @@ public class FrozenAsset implements InvocationHandler {
         return (Asset) Proxy.newProxyInstance(FrozenAsset.class.getClassLoader(), new Class[] { Asset.class }, handler);
     }
 
+    @SuppressWarnings("squid:S1144")
     private static Asset createFrozenAsset(ResourceResolver resourceResolver, String path) throws RepositoryException {
         InvocationHandler handler = new FrozenAsset(resourceResolver, path);
         return (Asset) Proxy.newProxyInstance(FrozenAsset.class.getClassLoader(), new Class[] { Asset.class }, handler);
@@ -162,7 +163,7 @@ public class FrozenAsset implements InvocationHandler {
                             frozenResource.getResourceResolver(),
                             r.getPath());
                 } catch (RepositoryException ex) {
-                    LOG.error("Error retrieving subasset from "+r.getPath(), ex);
+                    LOG.error("Error retrieving subasset from {}", r.getPath(), ex);
                 }
                 return null;
             }).collect(Collectors.toList());

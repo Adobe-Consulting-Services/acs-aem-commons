@@ -26,7 +26,9 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.commons.WCMUtils;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -38,17 +40,23 @@ import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 @SuppressWarnings("serial")
 @SlingServlet(
@@ -64,6 +72,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
     private static final String[] DEFAULT_VIEWS = new String[]{};
     private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
+
     @Property(label = "WCM Views by Path",
             description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]",
             cardinality = Integer.MAX_VALUE,
@@ -78,7 +87,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         response.setContentType("application/json");
 
         if (WCMMode.DISABLED.equals(WCMMode.fromRequest(request))) {
-            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("");
             return;
         }
@@ -106,22 +115,18 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
         log.debug("Collected WCM Views {} for Page [ {} ]", views, page.getPath());
         
-        final JSONArray jsonArray = new JSONArray();
+        final JsonArray jsonArray = new JsonArray();
 
         for (final String view : views) {
-            final JSONObject json = new JSONObject();
+            final JsonObject json = new JsonObject();
+            json.addProperty("title", StringUtils.capitalize(view) + " View");
+            json.addProperty("value", view);
 
-            try {
-                json.put("title", StringUtils.capitalize(view) + " View");
-                json.put("value", view);
-
-                jsonArray.put(json);
-            } catch (JSONException e) {
-                log.error("Unable to build WCM Views JSON output.", e);
-            }
+            jsonArray.add(json);
         }
 
-        response.getWriter().write(jsonArray.toString());
+        Gson gson = new Gson();
+        gson.toJson(jsonArray, response.getWriter());
     }
 
     private static class WCMViewsResourceVisitor extends AbstractResourceVisitor {

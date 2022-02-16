@@ -69,7 +69,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
             policy = ReferencePolicy.DYNAMIC)
-    private HttpCacheEngine httpCacheEngine;
+    private volatile HttpCacheEngine httpCacheEngine;
 
     @Reference
     private ResourceResolverFactory resolverFactory;
@@ -95,7 +95,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
             invalidateReferences(path);
         }
 
-        log.trace("Invalidation job for the path processed.", path);
+        log.trace("Invalidation job for the path [ {} ] processed.", path);
         return JobResult.OK;
     }
 
@@ -123,10 +123,8 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
      *
      * @param path the path to search for
      */
-    void invalidateReferences(String path){
-        ResourceResolver adminResolver = null;
-        try {
-            adminResolver = resolverFactory.getServiceResourceResolver(null);
+    void invalidateReferences(String path) {
+        try (ResourceResolver adminResolver = resolverFactory.getServiceResourceResolver(null)){
             Collection<ReferenceSearch.Info> refs = new ReferenceSearch()
                     .search(adminResolver, path).values();
             for (ReferenceSearch.Info info : refs) {
@@ -136,8 +134,6 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
             }
         } catch (Exception e){
             log.debug("failed to invalidate references of {}", path);
-        } finally {
-            if(adminResolver != null) adminResolver.close();
         }
     }
 }

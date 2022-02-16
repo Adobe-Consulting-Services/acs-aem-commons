@@ -126,7 +126,7 @@ public class DispatcherFlushFilterTest {
     }
 
     @Test
-    public void testIsIncluded_enabled_invalidHTTPHeaders() throws Exception {
+    public void testIsIncluded_enabled_invalidHttpHeaders() throws Exception {
         final DispatcherFlushFilter filter = new DispatcherFlushFilter();
 
         when(agent.isEnabled()).thenReturn(true);

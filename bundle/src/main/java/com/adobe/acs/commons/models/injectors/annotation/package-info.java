@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.1.0")
+@org.osgi.annotation.versioning.Version("3.6.0")
 package com.adobe.acs.commons.models.injectors.annotation;
 
 

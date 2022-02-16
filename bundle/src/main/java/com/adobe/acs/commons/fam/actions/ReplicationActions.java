@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam.actions;
 
 import static com.adobe.acs.commons.fam.actions.Actions.nameThread;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.RoundRobin;
@@ -35,6 +39,10 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @ProviderType
 public class ReplicationActions {
+
+    private static final String PREFIX_ACTIVATE = "activate-";
+    private static final String PREFIX_DEACTIVATE = "deactivate-";
+
     private ReplicationActions() {
         // Utility class cannot be instantiated directly.
     }
@@ -46,7 +54,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> activateAll(Replicator replicator) {
         return (ResourceResolver r, String path) -> {
-            nameThread("activate-" + path);
+            nameThread(PREFIX_ACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
         };
     }
@@ -61,7 +69,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> activateAllWithOptions(Replicator replicator, final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
-            nameThread("activate-" + path);
+            nameThread(PREFIX_ACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, options);
         };
     }
@@ -78,7 +86,7 @@ public class ReplicationActions {
         final List<ReplicationOptions> allTheOptions = Arrays.asList(options);
         final Iterator<ReplicationOptions> roundRobin = new RoundRobin(allTheOptions).iterator();
         return (ResourceResolver r, String path) -> {
-            nameThread("activate-" + path);
+            nameThread(PREFIX_ACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, roundRobin.next());
         };
     }
@@ -90,7 +98,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> deactivateAll(final Replicator replicator) {
         return (ResourceResolver r, String path) -> {
-            nameThread("deactivate-" + path);
+            nameThread(PREFIX_DEACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.DEACTIVATE, path);
         };
     }
@@ -103,7 +111,7 @@ public class ReplicationActions {
      */
     public static final CheckedBiConsumer<ResourceResolver, String> deactivateAllWithOptions(final Replicator replicator, final ReplicationOptions options) {
         return (ResourceResolver r, String path) -> {
-            nameThread("deactivate-" + path);
+            nameThread(PREFIX_DEACTIVATE + path);
             replicator.replicate(r.adaptTo(Session.class), ReplicationActionType.DEACTIVATE, path, options);
         };
     }

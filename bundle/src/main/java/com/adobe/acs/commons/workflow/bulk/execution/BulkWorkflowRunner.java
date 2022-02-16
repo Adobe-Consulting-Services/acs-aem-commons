@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
@@ -108,6 +108,15 @@ public interface BulkWorkflowRunner {
     void complete(Workspace workspace) throws PersistenceException;
 
     /**
+     * Marks a payload as being completed.
+     * @param workspace the Workspace
+     * @param payload the completed Payload
+     * @throws Exception
+     */
+    @SuppressWarnings("squid:S00112")
+    void complete(Workspace workspace, Payload payload) throws Exception;
+
+    /**
      * Processes a payload under the Workspace.
      * @param workspace the Workspace
      * @param payload the Payload to process
@@ -115,19 +124,12 @@ public interface BulkWorkflowRunner {
     void run(Workspace workspace, Payload payload);
 
     /**
-     * Marks a payload as being completed.
-     * @param workspace the Workspace
-     * @param payload the completed Payload
-     * @throws Exception
-     */
-    void complete(Workspace workspace, Payload payload) throws Exception;
-
-    /**
      * Marks a payload being force terminated.
      * @param workspace the Workspace
      * @param payload the completed Payload
      * @throws Exception
      */
+    @SuppressWarnings("squid:S00112")
     void forceTerminate(Workspace workspace, Payload payload) throws Exception;
 }
 

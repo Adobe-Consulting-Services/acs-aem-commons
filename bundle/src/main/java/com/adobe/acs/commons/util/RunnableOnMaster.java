@@ -19,17 +19,20 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
+import org.apache.sling.discovery.TopologyEvent;
 
-import com.day.cq.jcrclustersupport.ClusterAware;
+import org.apache.sling.discovery.TopologyEventListener;
 
 /**
- * Abstact base class for scheduled job to be run only on the cluster master.
+ * Abstract base class for scheduled job to be run only on the cluster master.
+ * @deprecated Depend on marker interface {@link ClusterLeader} instead.
  */
+@Deprecated
 @ConsumerType
-public abstract class RunnableOnMaster implements ClusterAware, Runnable {
+public abstract class RunnableOnMaster implements TopologyEventListener, Runnable {
 
-    private volatile boolean isMaster;
+    private volatile boolean isLeader;
 
     /**
      * Run the scheduled job.
@@ -40,16 +43,8 @@ public abstract class RunnableOnMaster implements ClusterAware, Runnable {
      * {@inheritDoc}
      */
     @Override
-    public final void bindRepository(String repositoryId, String clusterId, boolean master) {
-        this.isMaster = master;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final void unbindRepository() {
-        isMaster = false;
+    public void handleTopologyEvent(TopologyEvent te) {
+        this.isLeader = te.getNewView().getLocalInstance().isLeader();
     }
 
     /**
@@ -57,7 +52,7 @@ public abstract class RunnableOnMaster implements ClusterAware, Runnable {
      */
     @Override
     public final void run() {
-        if (isMaster) {
+        if (isLeader) {
             runOnMaster();
         }
     }

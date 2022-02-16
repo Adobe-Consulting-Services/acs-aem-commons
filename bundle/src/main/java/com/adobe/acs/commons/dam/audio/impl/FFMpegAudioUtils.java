@@ -19,21 +19,23 @@
  */
 package com.adobe.acs.commons.dam.audio.impl;
 
-import org.apache.felix.scr.annotations.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
-public class FFMpegAudioUtils {
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
+class FFMpegAudioUtils {
 
     private static final Logger log = LoggerFactory.getLogger(FFMpegAudioUtils.class);
 
     private FFMpegAudioUtils() {
     }
 
-    public static File resolveWorkingDir(String slingHome, String path) {
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN") // path sources are trusted
+    static File resolveWorkingDir(String slingHome, String path) {
         if (path == null) {
             path = "";
         }
@@ -64,19 +66,10 @@ public class FFMpegAudioUtils {
         return workingDir;
     }
 
-    public static final File createTempDir(File parentDir) throws IOException {
-        File tempDir = null;
-        try {
-            tempDir = File.createTempFile("cqdam", null, parentDir);
-            if (!tempDir.delete()) {
-                throw new IOException("Unable to delete temp directory.");
-            }
-            if (!tempDir.mkdir()) {
-                throw new IOException("Unable to create temp directory.");
-            }
-        } catch (IOException e) {
-            log.warn("could not create temp directory in the [{}] with the exception", parentDir, e);
+    static File createTempDir(File parentDir) throws IOException {
+        if(parentDir == null) {
+            return Files.createTempDirectory("cqdam").toFile();
         }
-        return tempDir;
+        return Files.createTempDirectory(parentDir.toPath(), "cqdam").toFile();
     }
 }

@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.exception;
 /**
  * Custom exception representing failure conditions in persistence of cached items.
  */
+@SuppressWarnings({"serial", "squid:S2166"})
 public class HttpCachePersistenceException extends HttpCacheException {
     public HttpCachePersistenceException() {
     }

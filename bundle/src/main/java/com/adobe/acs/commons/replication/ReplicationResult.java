@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.replication;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The result of a replication.
@@ -60,6 +60,7 @@ public class ReplicationResult {
         return String.format("ReplicationResult [path=%s, status=%s, version=%s]", path, status, version);
     }
 
+    @SuppressWarnings("squid:S00115")
     public enum Status {
         replicated, not_replicated, error
     }

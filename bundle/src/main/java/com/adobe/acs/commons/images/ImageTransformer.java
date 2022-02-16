@@ -20,13 +20,14 @@
 
 package com.adobe.acs.commons.images;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
 
 @ConsumerType
+@SuppressWarnings("squid:S1214")
 public interface ImageTransformer {
     /**
      * OSGi Property used to identify the ImageTransformer.

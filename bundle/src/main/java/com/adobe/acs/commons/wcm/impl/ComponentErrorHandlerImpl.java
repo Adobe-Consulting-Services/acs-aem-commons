@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
@@ -87,18 +88,17 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     static final String REQ_ATTR_PREVIOUSLY_PROCESSED =
             ComponentErrorHandlerImpl.class.getName() + "_previouslyProcessed";
 
-
     private static final String SERVICE_NAME = "component-error-handler";
     private static final Map<String, Object> AUTH_INFO;
+    private static final String DISABLED = "Disabled";
+    private static final String ENABLED = "Enabled";
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private ComponentHelper componentHelper;
 
     /* Edit Mode */
 
@@ -178,13 +178,14 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // no-op
     }
 
     @Override
     public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                                FilterChain chain) throws IOException, ServletException {
 
-        // We are in a Sling Filter, so these request/response objects are guarenteed to be of type Sling...
+        // We are in a Sling Filter, so these request/response objects are guaranteed to be of type Sling...
         final SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
         final SlingHttpServletResponse response = (SlingHttpServletResponse) servletResponse;
 
@@ -197,18 +198,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
         if (editModeEnabled
-                && (componentHelper.isEditMode(slingRequest)
-                || componentHelper.isDesignMode(slingRequest)
-                || WCMMode.ANALYTICS.equals(WCMMode.fromRequest(slingRequest)))) {
+                && (ModeUtil.isEdit(request)
+                || ModeUtil.isDesign(request)
+                || ModeUtil.isAnalytics(slingRequest))) {
             // Edit Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, editErrorHTMLPath);
         } else if (previewModeEnabled
-                && (componentHelper.isPreviewMode(slingRequest)
-                || componentHelper.isReadOnlyMode(slingRequest))) {
+                && (ModeUtil.isPreview(request)
+                || ModeUtil.isReadOnly(request))) {
             // Preview Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, previewErrorHTMLPath);
         } else if (publishModeEnabled
-                && componentHelper.isDisabledMode(slingRequest)
+                && ModeUtil.isDisabled(request)
                 && !this.isFirstInChain(slingRequest)) {
             // Publish Modes; Requires special handling in Published Modes - do not process first filter chain
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, publishErrorHTMLPath);
@@ -276,25 +277,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     }
 
     private String getHTML(final String path) {
-        ResourceResolver resourceResolver = null;
-
         // Handle blank HTML conditions first; Avoid looking in JCR for them.
         if (StringUtils.isBlank(path) || StringUtils.equals(BLANK_HTML, path)) {
             return "";
         }
 
-        try {
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             // Component error renditions are typically stored under /apps as part of the application; and thus
             // requires elevated ACLs to work on Publish instances.
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             return ResourceDataUtil.getNTFileAsString(path, resourceResolver);
         } catch (final Exception e) {
             log.error("Could not get the component error HTML at [ {} ], using blank.", path);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return "";
@@ -302,21 +296,16 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     protected final boolean accepts(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
 
-        if (!StringUtils.endsWith(request.getRequestURI(), ".html") ||
-                !StringUtils.contains(response.getContentType(), "html")) {
+        if (!StringUtils.endsWith(request.getRequestURI(), ".html")
+                || !StringUtils.contains(response.getContentType(), "html")) {
             // Do not inject around non-HTML requests
             return false;
         }
 
         final ComponentContext componentContext = WCMUtils.getComponentContext(request);
-        if (componentContext == null) {
-            // ComponentContext is null
-            return false;
-        } else if (componentContext.getComponent() == null) {
-            // Component is null
-            return false;
-        } else if (componentContext.isRoot()) {
-            // Suppress on root context
+        if (componentContext == null // ComponentContext is null
+                || componentContext.getComponent() == null // Component is null
+                || componentContext.isRoot()) { // Suppress on root context
             return false;
         }
 
@@ -385,15 +374,15 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
 
         log.info("Component Error Handling for Edit Modes: {} ~> {}",
-                editModeEnabled ? "Enabled" : "Disabled",
+                editModeEnabled ? ENABLED : DISABLED,
                 editErrorHTMLPath);
 
         log.info("Component Error Handling for Preview Modes: {} ~> {}",
-                previewModeEnabled ? "Enabled" : "Disabled",
+                previewModeEnabled ? ENABLED : DISABLED,
                 previewErrorHTMLPath);
 
         log.info("Component Error Handling for Publish Modes: {} ~> {}",
-                publishModeEnabled ? "Enabled" : "Disabled",
+                publishModeEnabled ? ENABLED : DISABLED,
                 publishErrorHTMLPath);
 
         suppressedResourceTypes = PropertiesUtil.toStringArray(config.get(PROP_SUPPRESSED_RESOURCE_TYPES),

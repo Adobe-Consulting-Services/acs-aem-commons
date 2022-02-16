@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractAEMWorkflowRunner extends AbstractWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AbstractAEMWorkflowRunner.class);
 
+    @SuppressWarnings("squid:S3776")
     protected Payload onboardNextPayload(Workspace workspace) {
         long start = System.currentTimeMillis();
 
@@ -117,6 +118,7 @@ public abstract class AbstractAEMWorkflowRunner extends AbstractWorkflowRunner {
         }
     }
 
+    @SuppressWarnings("squid:S2583")
     protected void unscheduleJob(Scheduler scheduler, String jobName, Resource configResource, Workspace workspace) {
         try {
             if (configResource != null) {
@@ -124,8 +126,8 @@ public abstract class AbstractAEMWorkflowRunner extends AbstractWorkflowRunner {
             } else {
                 scheduler.unschedule(jobName);
                 stopWithError(workspace);
-                log.error("Removed scheduled job [ {} ] due to errors content resource [ {} ] could not "
-                        + "be found.", jobName, configResource.getPath());
+                log.error("Removed scheduled job [ {} ] due to errors content resource could not "
+                        + "be found.", jobName);
             }
         } catch (Exception e1) {
             if (scheduler != null) {

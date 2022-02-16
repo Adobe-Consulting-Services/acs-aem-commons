@@ -26,6 +26,7 @@ import com.adobe.acs.commons.quickly.results.Action;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class ACSToolsResults extends AbstractAccessibleResults {
 
     public final List<Result> getResults() {

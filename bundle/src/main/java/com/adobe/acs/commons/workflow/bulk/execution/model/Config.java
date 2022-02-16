@@ -28,14 +28,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
 @Model(adaptables = Resource.class)
 public class Config {
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private final Resource resource;
     private final ModifiableValueMap properties;
@@ -148,7 +145,9 @@ public class Config {
         return resource;
     }
 
-    public int getRetryCount() { return retryCount; }
+    public int getRetryCount() {
+        return retryCount;
+    }
 
     public boolean isAutoThrottle() {
         return autoThrottle;

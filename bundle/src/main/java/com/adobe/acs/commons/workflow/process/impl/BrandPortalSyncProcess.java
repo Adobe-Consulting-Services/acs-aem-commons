@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.adobe.cq.dam.mac.sync.api.DAMSyncService;
@@ -32,7 +33,11 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
@@ -59,6 +64,10 @@ import java.util.List;
 public class BrandPortalSyncProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
 
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;    
+
     @Reference
     private WorkflowHelper workflowHelper;
 
@@ -66,19 +75,14 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
     private WorkflowPackageManager workflowPackageManager;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
     private DAMSyncService damSyncService;
 
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        ResourceResolver resourceResolver = null;
         final List<String> assetPaths = new ArrayList<String>();
 
         final ReplicationActionType replicationActionType = getReplicationActionType(metaDataMap);
 
-        try {
-            resourceResolver = workflowHelper.getResourceResolver(workflowSession);
+        try (ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession)) {
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, (String) workItem.getWorkflowData().getPayload());
 
@@ -105,10 +109,6 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
         } catch (RepositoryException e) {
             log.error("Could not find the payload", e);
             throw new WorkflowException("Could not find the payload");
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

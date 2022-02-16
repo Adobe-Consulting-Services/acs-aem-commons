@@ -29,10 +29,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.scripting.jsp.util.TagUtil;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.util.ModeUtil;
 
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.adobe.acs.commons.wcm.impl.ComponentHelperImpl;
@@ -47,7 +45,6 @@ import com.day.cq.wcm.foundation.Placeholder;
  *
  */
 @ProviderType
-@Tag(bodyContentType = BodyContentType.JSP, value = "placeholder")
 public final class PlaceholderTag extends BodyTagSupport {
 
     private static final long serialVersionUID = -2497240151981056169L;
@@ -57,7 +54,7 @@ public final class PlaceholderTag extends BodyTagSupport {
     // NOTE - not a service lookup because (right now) ComponentHelperImpl is
     // not configured.
     private transient ComponentHelper componentHelper = new ComponentHelperImpl();
-
+    
     private String classNames;
 
     private String ddType;
@@ -85,12 +82,10 @@ public final class PlaceholderTag extends BodyTagSupport {
         }
     }
 
-    @TagAttribute(required = false)
     public void setClassNames(String classNames) {
         this.classNames = classNames;
     }
 
-    @TagAttribute(required = false)
     public void setDdType(String type) {
         this.ddType = type;
     }
@@ -101,7 +96,7 @@ public final class PlaceholderTag extends BodyTagSupport {
     @Override
     public int doStartTag() throws JspException {
         SlingHttpServletRequest request = TagUtil.getRequest(pageContext);
-        if (componentHelper.isEditMode(request)) {
+        if (ModeUtil.isEdit(request)) {
             return EVAL_BODY_BUFFERED;
         } else {
             return SKIP_BODY;
@@ -115,7 +110,7 @@ public final class PlaceholderTag extends BodyTagSupport {
     public int doEndTag() throws JspException {
         SlingHttpServletRequest request = TagUtil.getRequest(pageContext);
         Component component = WCMUtils.getComponent(request.getResource());
-        if (componentHelper.isEditMode(request)) {
+        if (ModeUtil.isEdit(request)) {
             JspWriter writer = pageContext.getOut();
             String placeholder;
 

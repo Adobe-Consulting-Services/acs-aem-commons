@@ -23,15 +23,23 @@ import static org.mockito.Mockito.*;
 
 import java.io.PrintWriter;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class XMLParserGeneratorTest {
@@ -46,16 +54,18 @@ public class XMLParserGeneratorTest {
         
         XMLParserGeneratorFactory factory = new XMLParserGeneratorFactory();
         XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator();
+        // nothing to do, nothing to mock...
+        generator.init(null, null);
         generator.setContentHandler(contentHandler);
-        
         PrintWriter printWriter = generator.getWriter();
         printWriter.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         printWriter.println("<fo:root xmlns:fo=\"http://www.w3.org/1999/XSL/Format\"></fo:root>");
         
         generator.finished();
+        generator.dispose();
         
         verify(contentHandler).startDocument();
-        verify(contentHandler).setDocumentLocator((Locator) anyObject());
+        verify(contentHandler).setDocumentLocator((Locator) any());
         verify(contentHandler).startPrefixMapping("fo", "http://www.w3.org/1999/XSL/Format");
 
         verify(contentHandler).startElement(eq("http://www.w3.org/1999/XSL/Format"), eq("root"), eq("fo:root"), attributesCaptor.capture());
@@ -65,5 +75,37 @@ public class XMLParserGeneratorTest {
         verify(contentHandler).endPrefixMapping("fo");
         verify(contentHandler).endDocument();
         verifyNoMoreInteractions(contentHandler);
+    }
+
+    @Test
+    public void testParserException() {
+        SAXParserFactory fakeParserFactory = new SAXParserFactory() {
+            @Override
+            public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
+                throw new ParserConfigurationException("failers gonna fail.");
+            }
+
+            @Override
+            public void setFeature(final String name, final boolean value)
+                    throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+            }
+
+            @Override
+            public boolean getFeature(final String name)
+                    throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+                return false;
+            }
+        };
+
+        XMLParserGeneratorFactory factory = new XMLParserGeneratorFactory();
+        XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator(fakeParserFactory);
+        Assert.assertNull("generator is null when parser factory throws config exception.", generator);
+    }
+
+    @Test
+    public void testOwnParser() {
+        XMLParserGeneratorFactory factory = new XMLParserGeneratorFactory();
+        XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator(SAXParserFactory.newInstance());
+        Assert.assertNotNull("generator is not null with own default sax parser.", generator);
     }
 }

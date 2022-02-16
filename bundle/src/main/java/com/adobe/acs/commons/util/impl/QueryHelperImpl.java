@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.util.impl;
 
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
@@ -35,8 +36,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.query.*;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.jcr.query.QueryResult;
+import javax.jcr.query.Row;
+import javax.jcr.query.RowIterator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +53,9 @@ public class QueryHelperImpl implements QueryHelper {
     @Reference
     private QueryBuilder queryBuilder;
 
-    private static final String QUERY_BUILDER = "queryBuilder";
+    public static final String QUERY_BUILDER = "queryBuilder";
 
-    private static final String LIST = "list";
+    public static final String LIST = "list";
 
     /**
      * Find all the resources needed for the package definition.
@@ -65,49 +71,72 @@ public class QueryHelperImpl implements QueryHelper {
                                         final String language,
                                         final String statement,
                                         final String relPath) throws RepositoryException {
+        if (StringUtils.isEmpty(statement)) {
+            return Collections.emptyList();
+        }
 
-        final List<Resource> resources = new ArrayList<Resource>();
         final String[] lines = StringUtils.split(statement, '\n');
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
-
-            // ensure all results are returned
-            if (!params.containsKey("p.limit")) {
-                params.put("p.limit", "-1");
-            }
-
-            final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-            final List<Hit> hits = query.getResult().getHits();
-            for (final Hit hit : hits) {
-                resources.add(hit.getResource());
-            }
+            return getResourcesFromQueryBuilder(resourceResolver, lines, relPath);
         } else if (LIST.equalsIgnoreCase(language)) {
-            if (StringUtils.isNotBlank(statement)) {
-                for (String line : lines) {
-                    if (StringUtils.isNotBlank(line)) {
-                        final Resource resource = resourceResolver.getResource(line);
-                        final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+            return getResourcesFromList(resourceResolver, lines, relPath);
+        } else {
+            return getResourcesFromQuery(resourceResolver, language, statement, relPath);
+        }
+    }
 
-                        if (relativeAwareResource != null) {
-                            resources.add(relativeAwareResource);
-                        }
-                    }
+    private List<Resource> getResourcesFromQuery(ResourceResolver resourceResolver, String language, String statement, String relPath) throws RepositoryException {
+        final List<Resource> resources = new ArrayList<>();
+        QueryManager queryManager = resourceResolver.adaptTo(Session.class).getWorkspace().getQueryManager();
+        NodeIterator nodeIter = queryManager.createQuery(statement, language).execute().getNodes();
+
+        while (nodeIter.hasNext()) {
+            Resource resource = resourceResolver.getResource(nodeIter.nextNode().getPath());
+            final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+            if (relativeAwareResource != null) {
+                resources.add(relativeAwareResource);
+            }
+        }
+
+        return resources;
+    }
+
+    private List<Resource> getResourcesFromList(ResourceResolver resourceResolver, String[] lines, String relPath) {
+        final List<Resource> resources = new ArrayList<>();
+        for (String line : lines) {
+            if (StringUtils.isNotBlank(line)) {
+                final Resource resource = resourceResolver.getResource(line);
+                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+                if (relativeAwareResource != null) {
+                    resources.add(relativeAwareResource);
                 }
             }
-        } else {
-            QueryManager queryManager = resourceResolver.adaptTo(Session.class).getWorkspace().getQueryManager();
-            NodeIterator nodeIter = queryManager.createQuery(statement, language).execute().getNodes();
+        }
 
-            while (nodeIter.hasNext()) {
-                Resource resource = resourceResolver.getResource(nodeIter.nextNode().getPath());
-                if (resource != null) {
-                    final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+        return resources;
+    }
 
-                    if (relativeAwareResource != null) {
-                        resources.add(relativeAwareResource);
-                    }
-                }
+    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines, String relPath) throws RepositoryException {
+        final List<Resource> resources = new ArrayList<>();
+        final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
+
+        // ensure all results are returned
+        if (!params.containsKey("p.limit")) {
+            params.put("p.limit", "-1");
+        }
+
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
+        final List<Hit> hits = query.getResult().getHits();
+        for (final Hit hit : hits) {
+            final Resource resource = resourceResolver.getResource(hit.getPath());
+            final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+            if (relativeAwareResource != null) {
+                resources.add(relativeAwareResource);
             }
         }
 
@@ -129,8 +158,10 @@ public class QueryHelperImpl implements QueryHelper {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
         return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
     }
 

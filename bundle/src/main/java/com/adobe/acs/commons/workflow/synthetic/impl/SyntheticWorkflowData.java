@@ -48,8 +48,12 @@ public class SyntheticWorkflowData implements WorkflowData, com.adobe.granite.wo
         return this.payloadType;
     }
 
+    /**
+     * @deprecated deprecated in interface
+     */
     @Override
     @Deprecated
+    @SuppressWarnings("squid:S1149")
     public final Dictionary<String, String> getMetaData() {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
 

@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Tools Bundle
+ * ACS AEM Commons Bundle
  * %%
  * Copyright (C) 2014 Adobe
  * %%
@@ -29,9 +29,6 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -43,6 +40,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import org.apache.sling.xss.XSSAPI;
 import com.day.cq.polling.importer.Importer;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @SlingServlet(paths = "/bin/acs-commons/custom-importers")
 public final class CustomPollingImporterListServlet extends SlingSafeMethodsServlet {
@@ -53,7 +53,7 @@ public final class CustomPollingImporterListServlet extends SlingSafeMethodsServ
 
     @Activate
     protected void activate(ComponentContext ctx) throws InvalidSyntaxException {
-        BundleContext bundleContext = ctx.getBundleContext();
+        final BundleContext bundleContext = ctx.getBundleContext();
         StringBuilder builder = new StringBuilder();
         builder.append("(&(");
         builder.append(Constants.OBJECTCLASS).append("=").append(Importer.SERVICE_NAME).append(")");
@@ -71,36 +71,33 @@ public final class CustomPollingImporterListServlet extends SlingSafeMethodsServ
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException,
             IOException {
-        XSSAPI xssAPI = request.adaptTo(XSSAPI.class);
-        try {
-            JSONObject result = new JSONObject();
-            JSONArray list = new JSONArray();
-            result.put("list", list);
+        XSSAPI xssApi = request.adaptTo(XSSAPI.class);
+        JsonObject result = new JsonObject();
+        JsonArray list = new JsonArray();
+        result.add("list", list);
 
-            ServiceReference[] services = tracker.getServiceReferences();
-            if (services != null) {
-                for (ServiceReference service : services) {
-                    String displayName = PropertiesUtil.toString(service.getProperty("displayName"), null);
-                    String[] schemes = PropertiesUtil.toStringArray(service.getProperty(Importer.SCHEME_PROPERTY));
-                    if (displayName != null && schemes != null) {
-                        for (String scheme : schemes) {
-                            JSONObject obj = new JSONObject();
-                            obj.put("qtip", "");
-                            obj.put("text", displayName);
-                            obj.put("text_xss", xssAPI.encodeForJSString(displayName));
-                            obj.put("value", scheme);
-                            list.put(obj);
-                        }
+        ServiceReference[] services = tracker.getServiceReferences();
+        if (services != null) {
+            for (ServiceReference service : services) {
+                String displayName = PropertiesUtil.toString(service.getProperty("displayName"), null);
+                String[] schemes = PropertiesUtil.toStringArray(service.getProperty(Importer.SCHEME_PROPERTY));
+                if (displayName != null && schemes != null) {
+                    for (String scheme : schemes) {
+                        JsonObject obj = new JsonObject();
+                        obj.addProperty("qtip", "");
+                        obj.addProperty("text", displayName);
+                        obj.addProperty("text_xss", xssApi.encodeForJSString(displayName));
+                        obj.addProperty("value", scheme);
+                        list.add(obj);
                     }
                 }
             }
-
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            result.write(response.getWriter());
-        } catch (JSONException e) {
-            throw new ServletException("Unable to generate importer list", e);
         }
+
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        Gson gson = new Gson();
+        gson.toJson(result, response.getWriter());
     }
 
 }

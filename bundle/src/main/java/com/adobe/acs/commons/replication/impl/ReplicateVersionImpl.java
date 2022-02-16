@@ -67,7 +67,7 @@ public class ReplicateVersionImpl implements
             .getLogger(ReplicateVersionImpl.class);
 
     @Reference
-    private Replicator replicator;
+    private transient Replicator replicator;
 
     @Override
     public final List<ReplicationResult> replicate(
@@ -115,7 +115,6 @@ public class ReplicateVersionImpl implements
         for (Iterator<Resource> iter = resolver.listChildren(res); iter.hasNext();) {
             Resource resChild = iter.next();
             buildResourceList(resolver, resChild, resources);
-            resChild = null;
         }
     }
 
@@ -161,16 +160,14 @@ public class ReplicateVersionImpl implements
 
         String path = resource.getPath();
         List<Version> versions = findAllVersions(path, session);
-        Collections.sort(versions, new Comparator<Version>() {
-            public int compare(Version v1, Version v2) {
-                try {
-                    return v2.getCreated().compareTo(v1.getCreated());
-                } catch (RepositoryException e) {
-                    return 0;
-                }
+        Collections.sort(versions, (v1, v2) -> {
+            try {
+                return v2.getCreated().compareTo(v1.getCreated());
+            } catch (RepositoryException e) {
+                return 0;
             }
         });
-        Calendar cal = GregorianCalendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         for (Version v : versions) {
             try {
@@ -210,11 +207,11 @@ public class ReplicateVersionImpl implements
                 .getAllVersions(); iter.hasNext();) {
             Version v = iter.nextVersion();
             versions.add(v);
-            v = null;
         }
 
         return versions;
     }
+
     private String getNormalizedPath(String path) {
         String root = path;
         if (root == null || "".equals(root)) {

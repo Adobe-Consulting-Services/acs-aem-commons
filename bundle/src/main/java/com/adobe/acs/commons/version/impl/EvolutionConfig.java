@@ -32,7 +32,6 @@ import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class EvolutionConfig {
@@ -66,7 +65,7 @@ public class EvolutionConfig {
 
     public static String printProperty(javax.jcr.Property property) {
         try {
-            return printObject(toJavaObject(property));
+            return printObject(propertyToJavaObject(property));
         } catch (RepositoryException e1) {
             return e1.getMessage();
         }
@@ -100,12 +99,13 @@ public class EvolutionConfig {
         }
     }
 
-    private static Object toJavaObject(Property property)
+    @SuppressWarnings("squid:S3776")
+    private static Object propertyToJavaObject(Property property)
             throws RepositoryException {
         // multi-value property: return an array of values
         if (property.isMultiple()) {
             Value[] values = property.getValues();
-            final Object firstValue = values.length > 0 ? toJavaObject(values[0]) : null;
+            final Object firstValue = values.length > 0 ? valueToJavaObject(values[0]) : null;
             final Object[] result;
             if ( firstValue instanceof Boolean ) {
                 result = new Boolean[values.length];
@@ -125,17 +125,17 @@ public class EvolutionConfig {
             for (int i = 0; i < values.length; i++) {
                 Value value = values[i];
                 if (value != null) {
-                    result[i] = toJavaObject(value);
+                    result[i] = valueToJavaObject(value);
                 }
             }
             return result;
         }
 
         // single value property
-        return toJavaObject(property.getValue());
+        return valueToJavaObject(property.getValue());
     }
 
-    private static Object toJavaObject(Value value) throws RepositoryException {
+    private static Object valueToJavaObject(Value value) throws RepositoryException {
         switch (value.getType()) {
             case PropertyType.DECIMAL:
                 return value.getDecimal();

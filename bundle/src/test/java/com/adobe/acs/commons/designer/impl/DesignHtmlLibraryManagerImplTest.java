@@ -20,14 +20,21 @@
 package com.adobe.acs.commons.designer.impl;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.jcr.RepositoryException;
 
 import junitx.util.PrivateAccessor;
 
@@ -42,7 +49,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
 import com.adobe.acs.commons.designer.PageRegion;
@@ -217,6 +224,12 @@ public class DesignHtmlLibraryManagerImplTest {
         public Map<String, ClientLibrary> getLibraries() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public void invalidateOutputCache() throws RepositoryException {
+            // TODO Auto-generated method stub
+            
         }
     }
 

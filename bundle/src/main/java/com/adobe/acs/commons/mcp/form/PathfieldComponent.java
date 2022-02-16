@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,51 +15,66 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Provisions for path fields Accepts the following options: base=[path] -- Root
  * of tree shown to user multiple -- If added it indicates the user can make
  * multiple selections and values are stored in a multi-value field
  */
-@ProviderType
 public abstract class PathfieldComponent extends FieldComponent {
+
+    private static final String OPTION_PREDICATE = "predicate";
 
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/pathbrowser");
         getComponentMetadata().put("pickerMultiselect", hasOption("multiple"));
-        getOption("base").ifPresent(path->getComponentMetadata().put("rootPath", path));
-        getComponentMetadata().put("predicate", "nosystem");
+        getOption("base").ifPresent(path -> getComponentMetadata().put("rootPath", path));
+        getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
     }
 
-    public static class AssetSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class AssetSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put("predicate", "hierarchy");
+            getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
         }
     }
 
-    public static class PageSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class NodeSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put("predicate", "hierarchyNotFile");
+            getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
         }
     }
 
-    public static class FolderSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class PageSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put("predicate", "folder");
+            getComponentMetadata().put(OPTION_PREDICATE, "hierarchyNotFile");
+        }
+    }
+
+    @ProviderType
+    public static final class FolderSelectComponent extends PathfieldComponent {
+
+        @Override
+        public void init() {
+            super.init();
+            getComponentMetadata().put(OPTION_PREDICATE, "folder");
         }
     }
 }

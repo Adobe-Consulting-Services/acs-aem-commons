@@ -40,6 +40,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -63,15 +64,14 @@ import java.util.regex.Pattern;
                 + "'CQ-Action-Scope: ResourceOnly'."
                 + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
                 + "due to dangerous cyclic conditions.",
-        immediate = false,
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Rule: {prop.replication-action-type}, for Hirearchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
 })
 public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
@@ -124,11 +124,12 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
     private static final String SERVICE_NAME = "dispatcher-flush";
     protected static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @Reference
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private DispatcherFlusher dispatcherFlusher;
 
     @Reference
@@ -145,6 +146,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("squid:S3776")
     public final void preprocess(final ReplicationAction replicationAction,
                                  final ReplicationOptions replicationOptions) throws ReplicationException {
         if (!this.accepts(replicationAction, replicationOptions)) {
@@ -158,10 +160,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         final ReplicationActionType flushActionType =
                 replicationActionType == null ? replicationAction.getType() : replicationActionType;
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             // Flush full content hierarchies
             for (final Map.Entry<Pattern, String[]> entry : this.hierarchicalFlushRules.entrySet()) {
@@ -198,12 +197,11 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 }
             }
 
+        } catch (ReplicationException e) {
+            // ReplicationException must be caught here, as otherwise this will prevent the replication at all
+            log.error("Error issuing dispatcher flush rules, some downstream replication exception occurred: {}", e.getMessage(), e);
         } catch (LoginException e) {
-            log.error("Error issuing  dispatcher flush rules do to repository login exception: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
+            log.error("Error issuing dispatcher flush rules due to a repository login exception: {}", e.getMessage(), e);
         }
     }
 
@@ -256,14 +254,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
                         DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
-        log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
+        log.debug("Hierarchical flush rules: {}", this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
         this.resourceOnlyFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
                         DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 
-        log.debug("ResourceOnly flush rules: " + this.resourceOnlyFlushRules);
+        log.debug("ResourceOnly flush rules: {}", this.resourceOnlyFlushRules);
     }
 
     /**
@@ -277,8 +275,8 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         final Map<Pattern, String[]> rules = new LinkedHashMap<Pattern, String[]>();
 
         for (final Map.Entry<String, String> entry : configuredRules.entrySet()) {
-            final Pattern pattern = Pattern.compile(entry.getKey());
-            rules.put(pattern, entry.getValue().split("&"));
+            final Pattern pattern = Pattern.compile(entry.getKey().trim());
+            rules.put(pattern, entry.getValue().trim().split("&"));
         }
 
         return rules;
@@ -298,7 +296,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             log.debug("Using replication action type: {}", repActionType.name());
             return repActionType;
         } catch (IllegalArgumentException ex) {
-            log.debug("Using replication action type: {}", OPTION_INHERIT);
+            log.warn("Illegal action type configured: {}. Falling back to default: {}", replicationActionTypeName, OPTION_INHERIT);
             return null;
         }
     }
@@ -315,5 +313,5 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         public DispatcherFlushRulesFilter(final FlushType flushType) {
             super(flushType);
         }
-    };
+    }
 }

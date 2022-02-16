@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
@@ -37,6 +37,7 @@ import java.io.IOException;
  * Interface used for working with ACS-AEM-Commons forms.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface ForwardAsGetFormHelper extends FormHelper {
     public final String REQUEST_ATTR_FORM_KEY = ForwardAsGetFormHelper.class.getName() + "__Form_";
 

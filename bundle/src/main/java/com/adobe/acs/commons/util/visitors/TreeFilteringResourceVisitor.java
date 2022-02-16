@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +15,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.util.visitors;
 
 import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Tree visitor which allows special cases such as how to handle child nodes
@@ -30,13 +37,13 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
  */
 public class TreeFilteringResourceVisitor extends SimpleFilteringResourceVisitor {
 
-    public static String[] TREE_TYPES = {
+    protected static final String[] TREE_TYPES = {
         JcrConstants.NT_FOLDER,
         JcrResourceConstants.NT_SLING_FOLDER,
         JcrResourceConstants.NT_SLING_ORDERED_FOLDER
     };
 
-    public String[] treeTypes;
+    private String[] treeTypes;
 
     /**
      * Create a standard visitor for commonly used folder structures.
@@ -53,7 +60,9 @@ public class TreeFilteringResourceVisitor extends SimpleFilteringResourceVisitor
      * containers.
      */
     public TreeFilteringResourceVisitor(String... treeTypes) {
-        this.treeTypes = treeTypes;
+        this.treeTypes = Optional.ofNullable(treeTypes)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(new String[0]);
         setTraversalFilter(this::isFolder);
     }
 

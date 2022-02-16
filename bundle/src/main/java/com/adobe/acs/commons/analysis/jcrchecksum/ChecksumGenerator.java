@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -39,7 +39,7 @@ public interface ChecksumGenerator {
      *
      * @param session the session
      * @param path    the root path to generate checksums for
-     * @return the map of abs path ~> checksums
+     * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
      */
@@ -54,7 +54,7 @@ public interface ChecksumGenerator {
      * @param session the session
      * @param path    the root path to generate checksums for
      * @param options the {@link ChecksumGeneratorOptions} that define the checksum generation
-     * @return the map of abs path ~> checksums
+     * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
      */

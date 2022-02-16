@@ -28,15 +28,20 @@ import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.util.visitors.ContentVisitor;
 import com.adobe.acs.commons.util.visitors.ResourceRunnable;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
-import com.day.cq.replication.*;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationOptions;
+import com.day.cq.replication.Replicator;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -139,14 +144,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
      * ProcessArgs parsed from the WF metadata map
      */
     protected static class ProcessArgs {
-        private ReplicationActionType replicationActionType = null;
+        private ReplicationActionType replicationActionType;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
-        private boolean traverseTree = false;
-        private boolean throttle = false;
-        private List<String> agents = new ArrayList<String>();
+        private boolean traverseTree;
+        private boolean throttle;
+        private List<String> agents;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            final String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
@@ -178,7 +183,10 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
         public boolean isTraverseTree() {
             return traverseTree;
         }
-        public boolean isThrottle() { return throttle; }
+
+        public boolean isThrottle() {
+            return throttle;
+        }
 
     }
 }

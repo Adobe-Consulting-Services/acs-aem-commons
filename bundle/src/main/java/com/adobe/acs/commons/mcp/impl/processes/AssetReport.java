@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -20,10 +24,10 @@ import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.model.FieldFormat;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.adobe.acs.commons.mcp.util.FrozenAsset;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
@@ -55,10 +59,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 public class AssetReport extends ProcessDefinition implements Serializable {
     private static final long serialVersionUID = 7526472295622776160L;
 
-    transient public static final String SHA1 = "dam:sha1";
+    public static final transient String SHA1 = "dam:sha1";
     public static final String NAME = "Asset Report";
 
-    public static enum Column {
+    @SuppressWarnings("squid:S00115")
+    public enum Column {
         level, asset_count, subfolder_count,
         rendition_count, version_count, subasset_count,
         @FieldFormat(ValueFormat.storageSize)
@@ -102,7 +107,7 @@ public class AssetReport extends ProcessDefinition implements Serializable {
             options = {"checked"}
     )
     private boolean includeVersions = false;
-    transient private int depthLimit;
+    private transient int depthLimit;
 
     @Override
     public void init() throws RepositoryException {
@@ -120,16 +125,22 @@ public class AssetReport extends ProcessDefinition implements Serializable {
         instance.defineAction("First pass", rr, this::examineAssets);
         instance.defineAction("Deep scan", rr, this::evaluateDeepStructure);
         instance.defineAction("Final pass", rr, this::examineAssets);
-        String detail = includeSubassets && includeVersions ? "full" 
-                : includeSubassets || includeVersions ? "partial" : "light";
+        String detail;
+        if (includeSubassets && includeVersions) {
+            detail = "full";
+        } else if (includeSubassets || includeVersions) {
+            detail = "partial";
+        } else {
+            detail = "light";
+        }
         instance.getInfo().setDescription(baseFolder + " - " + detail);        
     }
 
-    transient private final GenericReport report = new GenericReport();
-    transient private final Map<String, EnumMap<Column, Long>> reportData = new TreeMap<>();
+    private final transient GenericBlobReport report = new GenericBlobReport();
+    private final transient Map<String, EnumMap<Column, Long>> reportData = new TreeMap<>();
 
-    transient private final Queue<String> assetList = new ConcurrentLinkedQueue<>();
-    transient private final Queue<String> folderList = new ConcurrentLinkedQueue<>();
+    private final transient Queue<String> assetList = new ConcurrentLinkedQueue<>();
+    private final transient Queue<String> folderList = new ConcurrentLinkedQueue<>();
 
     public void evaluateStructure(ActionManager manager) {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
@@ -197,7 +208,7 @@ public class AssetReport extends ProcessDefinition implements Serializable {
         }
     }
 
-    private void tabulate(String path, Column counter, long amount) {
+    private synchronized void tabulate(String path, Column counter, long amount) {
         if (getDepth(path) < depthLimit && path.length() >= baseFolder.length()) {
             synchronized (report) {
                 EnumMap<Column, Long> row = getReportRow(path);
@@ -213,6 +224,7 @@ public class AssetReport extends ProcessDefinition implements Serializable {
         }
     }
 
+    @SuppressWarnings("squid:S00112")
     private void examineAsset(ResourceResolver rr, String assetPath) throws RepositoryException, Exception {
         Actions.setCurrentItem(assetPath);
         String folderPath = getParentPath(assetPath);

@@ -55,6 +55,11 @@ public class SyntheticMetaDataMap implements MetaDataMap, com.adobe.granite.work
     }
 
     @Override
+    public final Object get(final Object o) {
+        return this.metaDataMap.get(o);
+    }
+
+    @Override
     public final int size() {
         return this.metaDataMap.size();
     }
@@ -72,11 +77,6 @@ public class SyntheticMetaDataMap implements MetaDataMap, com.adobe.granite.work
     @Override
     public final boolean containsValue(final Object o) {
         return this.metaDataMap.containsValue(o);
-    }
-
-    @Override
-    public final Object get(final Object o) {
-        return this.metaDataMap.get(o);
     }
 
     @Override

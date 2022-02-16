@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2013-06-03T21:40:35.072-04:00"
+        cq:lastModifiedBy="admin"
+        cq:template="/libs/wcm/core/templates/designpage"
+        jcr:primaryType="cq:PageContent"
+        jcr:title="ACS Commons"
+        sling:resourceType="wcm/core/components/designer">
+        <genericlist jcr:primaryType="nt:unstructured">
+            <list
+                jcr:lastModified="{Date}2013-06-03T21:40:35.070-04:00"
+                jcr:lastModifiedBy="admin"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="foundation/components/parsys"
+                components="/apps/acs-commons/components/utilities/genericlist/item">
+                <section jcr:primaryType="nt:unstructured"/>
+            </list>
+        </genericlist>
+        <report-page jcr:primaryType="nt:unstructured">
+            <config
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="foundation/components/parsys"
+                components="group:ACS Commons - Report Builder Config">
+                <section jcr:primaryType="nt:unstructured"/>
+            </config>
+            <columns
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="foundation/components/parsys"
+                components="group:ACS Commons - Report Builder Column">
+                <section jcr:primaryType="nt:unstructured"/>
+            </columns>
+            <parameters
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="foundation/components/parsys"
+                components="group:ACS Commons - Report Builder Parameter">
+                <section jcr:primaryType="nt:unstructured"/>
+            </parameters>
+        </report-page>
+    </jcr:content>
+</jcr:root>

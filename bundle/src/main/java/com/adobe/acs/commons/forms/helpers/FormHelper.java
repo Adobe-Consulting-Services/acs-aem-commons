@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
@@ -27,13 +27,13 @@ import com.day.cq.wcm.api.Page;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
 
 import javax.servlet.ServletException;
 
 import java.io.IOException;
 
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface FormHelper {
     String EXTENSION = ".html";
 
@@ -164,7 +164,7 @@ public interface FormHelper {
      * @throws JSONException
      */
     void renderForm(Form form, String path, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            throws IOException, ServletException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
@@ -181,7 +181,7 @@ public interface FormHelper {
      * @throws JSONException
      */
     void renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            throws IOException, ServletException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
@@ -197,7 +197,7 @@ public interface FormHelper {
      * @throws JSONException
      */
     void renderForm(Form form, Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            throws IOException, ServletException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
@@ -215,7 +215,7 @@ public interface FormHelper {
      */
     void renderOtherForm(Form form, String path, String selectors, SlingHttpServletRequest request,
                          SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            throws IOException, ServletException;
 
     /**
      * Wrapped method to create a interface from FormHelper to normalize APIs that are commonly used.
@@ -233,7 +233,7 @@ public interface FormHelper {
      */
     void renderOtherForm(Form form, Page page, String selectors, SlingHttpServletRequest request,
                          SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            throws IOException, ServletException;
 
 
     /**
@@ -248,10 +248,9 @@ public interface FormHelper {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @throws JSONException
      */
     void renderOtherForm(Form form, Resource resource, String selectors, SlingHttpServletRequest request,
                          SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException;
+            throws IOException, ServletException;
 
 }

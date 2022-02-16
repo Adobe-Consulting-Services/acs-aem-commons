@@ -29,6 +29,7 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 
 import com.adobe.acs.commons.models.injectors.annotation.AemObject;
+
 /**
  * The annotation processor for the {@link AemObject} annotation
  *
@@ -38,7 +39,7 @@ import com.adobe.acs.commons.models.injectors.annotation.AemObject;
 @Service
 public class AemObjectAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory{
 
-	@Override
+    @Override
     public InjectAnnotationProcessor2 createAnnotationProcessor(final AnnotatedElement element) {
         // check if the element has the expected annotation
         AemObject annotation = element.getAnnotation(AemObject.class);

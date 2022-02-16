@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.replication.dispatcher;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
@@ -40,7 +40,8 @@ public class DispatcherFlushFilter implements AgentFilter {
      * Hierarchical: "Normal" flush invalidation that effects entire content hierarchies.
      * ResourceOnly: Targets agents with a CQ-Action-Scope of "Resource Only" defined.
      */
-    public static enum FlushType {
+    @SuppressWarnings("squid:S00115")
+    public enum FlushType {
         All,
         Hierarchical,
         ResourceOnly
@@ -75,7 +76,7 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
+     * Checks if the @agent is considered an active Flush agent (Serialization Type ~&gt; Flush and is enabled).
      *
      * @param agent the agent to test test
      * @return true is is considered an enabled Flush agent
@@ -129,13 +130,13 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the agent has a "flush" serialization type.
+     * Checks if the agent's serialization type starts with "flush" .
      *
      * @param agent Agent to check
-     * @return true if the Agent's serialization type is "flush"
+     * @return true if the Agent's serialization type starts with "flush"
      */
     private boolean isFlushingAgent(final Agent agent) {
-        return StringUtils.equals(SERIALIZATION_TYPE, agent.getConfiguration().getSerializationType());
+        return StringUtils.startsWith(agent.getConfiguration().getSerializationType(), SERIALIZATION_TYPE);
     }
 
     /**

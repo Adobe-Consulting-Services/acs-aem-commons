@@ -45,44 +45,44 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Service
 public class ReplicatePackageProcess implements WorkflowProcess {
 
-	private static final Logger log = LoggerFactory.getLogger(ReplicatePackageProcess.class);
+    private static final Logger log = LoggerFactory.getLogger(ReplicatePackageProcess.class);
 
-	@Reference
-	private ResourceResolverFactory resourceResolverFactory;
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
-	@Reference
-	private Replicator replicator;
+    @Reference
+    private Replicator replicator;
 
-	@Reference
-	private EventAdmin eventAdmin;
+    @Reference
+    private EventAdmin eventAdmin;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.day.cq.workflow.exec.WorkflowProcess#execute(com.day.cq.workflow.exec
-	 * .WorkItem, com.day.cq.workflow.WorkflowSession,
-	 * com.day.cq.workflow.metadata.MetaDataMap)
-	 */
-	@Override
-	public void execute(WorkItem item, WorkflowSession session, MetaDataMap args) throws WorkflowException {
-		log.trace("execute");
-		String packagePath = args.get(WorkflowHelper.PROCESS_ARGS, String.class);
-		if (StringUtils.isNotEmpty(packagePath)) {
-			log.debug("Executing Automatic Package Replicator Job for package {}", packagePath);
-			AutomaticPackageReplicatorJob aprJob = new AutomaticPackageReplicatorJob(resourceResolverFactory,
-					replicator, eventAdmin, packagePath);
-			try {
-				aprJob.excute();
-			} catch (Exception e) {
-				log.error("Exception executing Automatic Package Replicator Job for package " + packagePath, e);
-				throw new WorkflowException(
-						"Exception executing Automatic Package Replicator Job for package " + packagePath, e);
-			}
-		} else {
-			log.warn("No package path specified");
-			throw new WorkflowException("No package path specified for Automatic Package Replicator Job");
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.day.cq.workflow.exec.WorkflowProcess#execute(com.day.cq.workflow.exec
+     * .WorkItem, com.day.cq.workflow.WorkflowSession,
+     * com.day.cq.workflow.metadata.MetaDataMap)
+     */
+    @Override
+    public void execute(WorkItem item, WorkflowSession session, MetaDataMap args) throws WorkflowException {
+        log.trace("execute");
+        String packagePath = args.get(WorkflowHelper.PROCESS_ARGS, String.class);
+        if (StringUtils.isNotEmpty(packagePath)) {
+            log.debug("Executing Automatic Package Replicator Job for package {}", packagePath);
+            AutomaticPackageReplicatorJob aprJob = new AutomaticPackageReplicatorJob(resourceResolverFactory,
+                    replicator, eventAdmin, packagePath);
+            try {
+                aprJob.excute();
+            } catch (Exception e) {
+                log.error("Exception executing Automatic Package Replicator Job for package " + packagePath, e);
+                throw new WorkflowException(
+                        "Exception executing Automatic Package Replicator Job for package " + packagePath, e);
+            }
+        } else {
+            log.warn("No package path specified");
+            throw new WorkflowException("No package path specified for Automatic Package Replicator Job");
+        }
+    }
 
 }

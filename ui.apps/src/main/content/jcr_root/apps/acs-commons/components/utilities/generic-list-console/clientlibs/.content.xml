@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:ClientLibraryFolder"
+    allowProxy="{Boolean}true"
+    jsProcessor="[default:none,min:gcc]"
+    categories="[acs-commons.genericlist.console]"
+    dependencies="[acs-commons.angularjs]"/>

@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.util.visitors;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.apache.sling.api.resource.Resource;
 
 @ConsumerType
@@ -31,5 +31,6 @@ public interface ResourceRunnable {
      * @param resource the resource
      * @throws Exception
      */
+    @SuppressWarnings("squid:S00112")
     void run(Resource resource) throws Exception;
 }

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -56,7 +57,7 @@ public class PageRootProviderConfig {
 
     @Property(
             label = "Root page path pattern",
-            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
+            description = "Regex(es) used to select the root page root path. Regex must contain at least one group (with index 1) which is used as page root. It is matched against the given path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
             cardinality = Integer.MAX_VALUE,
             value = { DEFAULT_PAGE_ROOT_PATH })
     /* Page root property. */
@@ -72,32 +73,34 @@ public class PageRootProviderConfig {
      * @return list of page root patterns.
      */
     public List<Pattern> getPageRootPatterns() {
-        return this.pageRootPatterns;
+        return Optional.ofNullable(this.pageRootPatterns)
+                .map(Collections::unmodifiableList)
+                .orElse(null);
     }
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        List<Pattern> pageRootPatterns = new ArrayList<Pattern>();
+        List<Pattern> patterns = new ArrayList<Pattern>();
         String[] regexes = PropertiesUtil.toStringArray(props.get(PAGE_ROOT_PATH), new String[] { DEFAULT_PAGE_ROOT_PATH });
 
         for(String regex : regexes) {
             try {
                 Pattern p = Pattern.compile("^(" + regex + ")(|/.*)$");
-                pageRootPatterns.add(p);
-                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
+                patterns.add(p);
+                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p);
             } catch (Exception e) {
                 log.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
             }
         }
 
-        this.pageRootPatterns = Collections.unmodifiableList(pageRootPatterns);
+        this.pageRootPatterns = Collections.unmodifiableList(patterns);
     }
 
     @Deactivate
     protected void deactivate() {
         if (this.pageRootPatterns != null) {
             for (Pattern p : this.pageRootPatterns) {
-                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
+                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p);
             }
 
             this.pageRootPatterns = null;

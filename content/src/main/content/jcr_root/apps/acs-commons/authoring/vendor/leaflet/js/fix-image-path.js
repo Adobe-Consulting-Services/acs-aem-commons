@@ -1,1 +1,0 @@
-L.Icon.Default.imagePath = L.Icon.Default.imagePath.replace("/vendor/images", "/vendor/leaflet/images");

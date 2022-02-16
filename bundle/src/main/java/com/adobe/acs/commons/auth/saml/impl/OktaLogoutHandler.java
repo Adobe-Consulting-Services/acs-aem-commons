@@ -62,7 +62,7 @@ public class OktaLogoutHandler implements AuthenticationHandler {
     private String redirectLocation;
 
     @Activate
-    private void activate(Map<String, Object> props) {
+    protected void activate(Map<String, Object> props) {
         String oktaHostName = PropertiesUtil.toString(props.get(PROP_OKTA_HOST_NAME), null);
         if (oktaHostName == null) {
             throw new IllegalArgumentException("Okta Host Name must be provided");

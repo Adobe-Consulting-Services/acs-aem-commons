@@ -20,8 +20,10 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentContext;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -34,7 +36,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -44,8 +46,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -116,7 +118,7 @@ public class ComponentErrorHandlerImplTest {
 
         when(request.getAttribute(ComponentErrorHandler.SUPPRESS_ATTR)).thenReturn(false, true);
         when(componentContext.isRoot()).thenReturn(false);
-        when(componentHelper.isEditMode(request)).thenReturn(true);
+        when(ModeUtil.isEdit(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
@@ -178,9 +180,9 @@ public class ComponentErrorHandlerImplTest {
     @Test
     public void testEditError() throws Exception {
         when(componentContext.isRoot()).thenReturn(false);
-        when(componentHelper.isEditMode(request)).thenReturn(true);
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
 
-        doThrow(new ServletException()).when(chain).doFilter(request, response);
+        doThrow(new ServletException("Should not delegate to chained filters")).when(chain).doFilter(request, response);
 
         handler.doFilter(request, response, chain);
 
@@ -194,7 +196,7 @@ public class ComponentErrorHandlerImplTest {
     public void testDisabledError_NotPreviouslyProcessedRequest() throws Exception {
         // This should not invoke ComponentErrorHandling
         when(request.getAttribute(ComponentErrorHandlerImpl.REQ_ATTR_PREVIOUSLY_PROCESSED)).thenReturn(null);
-        when(componentHelper.isDisabledMode(request)).thenReturn(true);
+        when(ModeUtil.isDisabled(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
@@ -208,7 +210,7 @@ public class ComponentErrorHandlerImplTest {
     public void testDisabledError_PreviouslyProcessedRequest() throws Exception {
         // This should not invoke ComponentErrorHandling
         when(request.getAttribute(ComponentErrorHandlerImpl.REQ_ATTR_PREVIOUSLY_PROCESSED)).thenReturn(true);
-        when(componentHelper.isDisabledMode(request)).thenReturn(true);
+        when(ModeUtil.isDisabled(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 

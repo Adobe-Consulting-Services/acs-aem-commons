@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 - Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.model.impl;
 
@@ -41,9 +45,10 @@ import org.apache.sling.models.annotations.Via;
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ArchivedProcessInstance implements ProcessInstance, Serializable {
     private static final long serialVersionUID = 7526472295622776155L;
+    private static final String MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS = "Archived processes have no actions";
 
     @Inject
-    transient private Resource resource;
+    private transient Resource resource;
 
     @Inject
     @Via("path")
@@ -55,7 +60,7 @@ public class ArchivedProcessInstance implements ProcessInstance, Serializable {
 
     @Inject
     @Named("jcr:content")
-    ManagedProcess infoBean;
+    public ManagedProcess infoBean;
 
     @Override
     public String getName() {
@@ -93,41 +98,41 @@ public class ArchivedProcessInstance implements ProcessInstance, Serializable {
 
     @Override
     public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public ActionManagerFactory getActionManagerFactory() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public ActionManager defineCriticalAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public ActionManager defineAction(String name, ResourceResolver rr, CheckedConsumer<ActionManager> builder) throws LoginException {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public double updateProgress() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public void run(ResourceResolver rr) {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public void halt() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 
     @Override
     public CompositeData getStatistics() {
-        throw new UnsupportedOperationException("Archived processes have no actions");
+        throw new UnsupportedOperationException(MSG_ARCHIVED_PROCESSES_HAVE_NO_ACTIONS);
     }
 }

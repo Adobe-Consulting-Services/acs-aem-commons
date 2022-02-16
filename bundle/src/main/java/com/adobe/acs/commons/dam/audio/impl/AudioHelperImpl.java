@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 @Component(metatype = true, label = "ACS Commons - Audio Processor", description = "ACS Commons - Audio Processor")
 @Service
@@ -59,20 +60,19 @@ public class AudioHelperImpl implements AudioHelper {
     protected final void activate(ComponentContext ctx) {
         String slingHome = ctx.getBundleContext().getProperty("sling.home");
         workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
-        if (!workingDir.exists()) {
-            if (!workingDir.mkdirs()) {
-                throw new IllegalStateException("Could not create " + workingDir.getPath());
-            }
+        if (!workingDir.exists() && !workingDir.mkdirs()) {
+            throw new IllegalStateException("Could not create " + workingDir.getPath());
         }
     }
 
     @Override
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
     public <A, R> R process(Asset asset, ResourceResolver resourceResolver, A args, AudioProcessor<A, R> audioProcessor)
             throws AudioException {
         File tmpDir = null;
         File tmpWorkingDir = null;
-        FileOutputStream fos = null;
-        InputStream is = null;
+        File tmpFile;
+
         try {
             // creating temp directory
             tmpDir = FFMpegAudioUtils.createTempDir(null);
@@ -81,9 +81,14 @@ public class AudioHelperImpl implements AudioHelper {
             tmpWorkingDir = FFMpegAudioUtils.createTempDir(workingDir);
 
             // streaming file to temp directory
-            final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
-            fos = new FileOutputStream(tmpFile);
-            is = asset.getOriginal().getStream();
+            tmpFile = Files.createTempFile(tmpDir.toPath(), "acs-commons", "audio").toFile();
+        } catch (IOException e) {
+            throw new AudioException(e);
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(tmpFile);
+             InputStream is = asset.getOriginal().getStream();) {
+
             IOUtils.copy(is, fos);
 
             return audioProcessor.processAudio(asset, resourceResolver, tmpFile, locator, tmpWorkingDir, args);
@@ -91,16 +96,12 @@ public class AudioHelperImpl implements AudioHelper {
         } catch (IOException e) {
             throw new AudioException(e);
         } catch (FfmpegNotFoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("Unable to find ffmpeg", e);
             return null;
         } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(fos);
             try {
                 // cleaning up temp directory
-                if (tmpDir != null) {
-                    FileUtils.deleteDirectory(tmpDir);
-                }
+                FileUtils.deleteDirectory(tmpDir);
             } catch (IOException e) {
                 log.warn("Could not delete temp directory: {}", tmpDir.getPath());
             }

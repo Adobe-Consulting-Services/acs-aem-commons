@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.email.process.impl;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Defines additional keys that are available for templates when using the
@@ -68,4 +68,10 @@ public final class SendTemplatedEmailConstants {
      * as: <code>${wfInitiator}</code>
      */
     public static final String WF_INITIATOR = "wfInitiator";
+
+    /**
+     * the most recent comment added to the granite work item
+     * as: <code>${wfStepComment}</code>
+     */
+    public static final String WF_STEP_COMMENT = "wfStepComment";
 }

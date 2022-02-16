@@ -19,14 +19,15 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.apache.jackrabbit.api.security.user.User;
 
 @ConsumerType
 public abstract class ProcessDefinitionFactory<P extends ProcessDefinition> {
 
-    abstract public String getName();
+    public abstract String getName();
 
+    @SuppressWarnings("squid:S1172")
     public boolean isAllowed(User user) {
         return true;
     }
@@ -37,5 +38,5 @@ public abstract class ProcessDefinitionFactory<P extends ProcessDefinition> {
         return processDefinition;
     }
 
-    abstract protected P createProcessDefinitionInstance();
+    protected abstract P createProcessDefinitionInstance();
 }

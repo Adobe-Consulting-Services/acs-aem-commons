@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.designer;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Enum representing the possible target regions for a client library within an HTML page.

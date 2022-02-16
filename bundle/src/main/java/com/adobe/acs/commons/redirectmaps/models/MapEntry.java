@@ -19,50 +19,67 @@
  */
 package com.adobe.acs.commons.redirectmaps.models;
 
-import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Simple POJO for map entry items based on Vanity paths for Redirect Maps.
  */
+@ProviderType
 public class MapEntry {
-	private final Resource resource;
-	private final String source;
-	private final String target;
-	private final boolean valid;
+    private long id;
+    private final String origin;
+    private final String source;
+    private String status;
+    private final String target;
+    private boolean valid = true;
 
-	public MapEntry(Resource resource, String source, String target) {
-		source = source.trim();
-		if (source.matches(".*\\s.*")) {
-			RedirectMapModel.log.warn("Source path {} for content {} contains whitespace", source, resource);
-			valid = false;
-		} else {
-			valid = true;
-		}
-		this.source = source;
-		this.target = target;
-		this.resource = resource;
+    public MapEntry(long id, String source, String target, String origin) {
+        source = source.trim();
+        this.source = source;
+        this.target = target;
+        this.origin = origin;
+        this.id = id;
+    }
 
-	}
+    public long getId() {
+        return id;
+    }
 
-	public Resource getResource() {
-		return resource;
-	}
+    public String getOrigin() {
+        return origin;
+    }
 
-	public String getSource() {
-		return source;
-	}
+    public String getSource() {
+        return source;
+    }
 
-	public String getTarget() {
-		return target;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public boolean isValid() {
-		return valid;
-	}
+    public String getTarget() {
+        return target;
+    }
 
-	@Override
-	public String toString() {
-		return "MapEntry [resource=" + resource + ", source=" + source + ", target=" + target + ", valid=" + valid
-				+ "]";
-	}
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    @Override
+    public String toString() {
+        return "MapEntry [origin=" + origin + ", source=" + source + ", status=" + status + ", target=" + target
+                + ", valid=" + valid + "]";
+    }
 }

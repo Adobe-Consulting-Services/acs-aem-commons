@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:Group"
+          jcr:uuid="a4df472a-9a23-3942-89c4-2c2b09624449"
+          rep:authorizableId="acs-commons-derived"
+          rep:principalName="acs-commons-derived"
+/>

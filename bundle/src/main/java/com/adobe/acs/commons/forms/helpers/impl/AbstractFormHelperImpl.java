@@ -60,6 +60,7 @@ public abstract class AbstractFormHelperImpl {
 
     private static final String SERVICE_NAME = "form-helper";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -75,23 +76,25 @@ public abstract class AbstractFormHelperImpl {
 
     public final String getFormInputsHTML(final Form form, final String... keys) {
         // The form objects data and errors should be xssProtected before being passed into this method
-        StringBuffer html = new StringBuffer();
+        StringBuilder html = new StringBuilder();
 
-        html.append("<input type=\"hidden\" name=\"").append(FormHelper.FORM_NAME_INPUT).append("\" value=\"")
-                .append(xss.encodeForHTMLAttr(form.getName())).append("\"/>\n");
+        appendHiddenTag(html, FormHelper.FORM_NAME_INPUT, form.getName());
 
         final String resourcePath = form.getResourcePath();
-        html.append("<input type=\"hidden\" name=\"").append(FormHelper.FORM_RESOURCE_INPUT).append("\" value=\"")
-                .append(xss.encodeForHTMLAttr(resourcePath)).append("\"/>\n");
+        appendHiddenTag(html, FormHelper.FORM_RESOURCE_INPUT, resourcePath);
 
         for (final String key : keys) {
             if (form.has(key)) {
-                html.append("<input type=\"hidden\" name=\"").append(key).append("\" value=\"")
-                        .append(form.get(key)).append("\"/>\n");
+                appendHiddenTag(html, key, form.get(key));
             }
         }
 
         return html.toString();
+    }
+
+    private void appendHiddenTag(StringBuilder html, String name, String value) {
+        html.append("<input type=\"hidden\" name=\"").append(name).append("\" value=\"")
+                .append(xss.encodeForHTMLAttr(value)).append("\"/>\n");
     }
 
     public final String getAction(final Page page) {
@@ -117,17 +120,11 @@ public abstract class AbstractFormHelperImpl {
     public final String getAction(final String path, final String formSelector) {
         String actionPath = path;
 
-        ResourceResolver serviceResourceResolver = null;
-        try {
-            serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             actionPath = serviceResourceResolver.map(path);
         } catch (LoginException e) {
             log.error("Could not attain an admin ResourceResolver to map the Form's Action URI");
             // Use the unmapped ActionPath
-        } finally {
-            if (serviceResourceResolver != null && serviceResourceResolver.isLive()) {
-                serviceResourceResolver.close();
-            }
         }
 
         actionPath += FormHelper.EXTENSION + this.getSuffix();
@@ -183,7 +180,7 @@ public abstract class AbstractFormHelperImpl {
             if (values == null || values.length == 0) {
                 log.debug("Value did not exist for key: {}", key);
             } else if (values.length == 1) {
-                log.debug("Adding to form data: {} ~> {}", key, values[0].toString());
+                log.debug("Adding to form data: {} ~> {}", key, values[0]);
                 map.put(key, values[0].getString());
             } else {
                 // Requires support for transporting them and re-writing them back into HTML Form on error
@@ -208,6 +205,7 @@ public abstract class AbstractFormHelperImpl {
      * @param formName
      * @return
      */
+    @SuppressWarnings("squid:S1172")
     protected final String getPostLookupKey(final String formName) {
         // This may change; keeping as method call to ease future refactoring
         return FormHelper.FORM_NAME_INPUT;

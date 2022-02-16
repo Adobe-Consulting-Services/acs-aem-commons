@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.designer;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.designer.Design;
 
@@ -32,6 +32,7 @@ import java.io.Writer;
  * A service interface for looking up client libraries based on a Design.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface DesignHtmlLibraryManager {
 
     /**

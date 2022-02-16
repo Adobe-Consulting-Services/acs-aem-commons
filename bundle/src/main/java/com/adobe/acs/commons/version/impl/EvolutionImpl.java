@@ -62,7 +62,7 @@ public final class EvolutionImpl implements Evolution {
 
     @Override
     public List<EvolutionEntry> getVersionEntries() {
-        return versionEntries;
+        return Collections.unmodifiableList(versionEntries);
     }
 
     @Override
@@ -93,6 +93,7 @@ public final class EvolutionImpl implements Evolution {
                 return true;
             }
         } catch (RepositoryException e) {
+            // no-op
         }
         return false;
     }

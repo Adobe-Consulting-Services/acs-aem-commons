@@ -20,24 +20,23 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
+import com.google.gson.JsonObject;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public final class WorkflowRemovalStatus {
 
-    String KEY_CHECKED_COUNT = "checkedCount";
-    String KEY_COMPLETED_AT = "completedAt";
-    String KEY_DURATION = "duration";
-    String KEY_FORCE_QUIT_AT = "forceQuitAt";
-    String KEY_ERRED_AT = "erredAt";
-    String KEY_INITIATED_BY = "initiatedBy";
-    String KEY_REMOVED_COUNT = "removedCount";
-    String KEY_RUNNING = "running";
-    String KEY_STARTED_AT = "startedAt";
+    private static final String KEY_CHECKED_COUNT = "checkedCount";
+    private static final String KEY_COMPLETED_AT = "completedAt";
+    private static final String KEY_DURATION = "duration";
+    private static final String KEY_FORCE_QUIT_AT = "forceQuitAt";
+    private static final String KEY_ERRED_AT = "erredAt";
+    private static final String KEY_INITIATED_BY = "initiatedBy";
+    private static final String KEY_REMOVED_COUNT = "removedCount";
+    private static final String KEY_RUNNING = "running";
+    private static final String KEY_STARTED_AT = "startedAt";
 
     private static final String DATE_FORMAT = "yyyy/MM/dd 'at' hh:mm:ss a z";
     private static final long MS_IN_SECOND = 1000L;
@@ -143,38 +142,36 @@ public final class WorkflowRemovalStatus {
     }
 
     private long getDuration(Calendar start, Calendar end) {
-        if (start == null || end == null) {
-            return 0;
-        } else if (end.before(start)) {
+        if (start == null || end == null || end.before(start)) {
             return 0;
         }
 
         return (end.getTimeInMillis() - start.getTimeInMillis()) / MS_IN_SECOND;
     }
 
-    public JSONObject getJSON() throws JSONException {
-        final JSONObject json = new JSONObject();
+    public JsonObject getJSON() {
+        final JsonObject json = new JsonObject();
 
-        json.put(KEY_RUNNING, this.isRunning());
-        json.put(KEY_INITIATED_BY, this.getInitiatedBy());
-        json.put(KEY_CHECKED_COUNT, this.getChecked());
-        json.put(KEY_REMOVED_COUNT, this.getRemoved());
+        json.addProperty(KEY_RUNNING, this.isRunning());
+        json.addProperty(KEY_INITIATED_BY, this.getInitiatedBy());
+        json.addProperty(KEY_CHECKED_COUNT, this.getChecked());
+        json.addProperty(KEY_REMOVED_COUNT, this.getRemoved());
 
         if (this.getStartedAt() != null) {
-            json.put(KEY_STARTED_AT, this.getStartedAt());
+            json.addProperty(KEY_STARTED_AT, this.getStartedAt());
         }
 
         if (this.getErredAt() != null) {
-            json.put(KEY_ERRED_AT, this.getErredAt());
-            json.put(KEY_DURATION, getDuration(this.startedAt, this.erredAt));
+            json.addProperty(KEY_ERRED_AT, this.getErredAt());
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, this.erredAt));
         } else if (this.getForceQuitAt() != null) {
-            json.put(KEY_FORCE_QUIT_AT, this.getForceQuitAt());
-            json.put(KEY_DURATION, getDuration(this.startedAt, this.forceQuitAt));
+            json.addProperty(KEY_FORCE_QUIT_AT, this.getForceQuitAt());
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, this.forceQuitAt));
         } else if (this.getCompletedAt() != null) {
-            json.put(KEY_COMPLETED_AT, this.getCompletedAt());
-            json.put(KEY_DURATION, getDuration(this.startedAt, this.completedAt));
+            json.addProperty(KEY_COMPLETED_AT, this.getCompletedAt());
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, this.completedAt));
         } else {
-            json.put(KEY_DURATION, getDuration(this.startedAt, Calendar.getInstance()));
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, Calendar.getInstance()));
         }
 
         return json;

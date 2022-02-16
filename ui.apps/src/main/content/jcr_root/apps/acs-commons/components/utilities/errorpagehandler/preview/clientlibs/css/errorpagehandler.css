@@ -1,0 +1,113 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+#error-page-handler {
+    margin: 0 auto;
+    width: 80%;
+}
+
+#error-page-handler .content {
+    padding: 2em;
+    background-color: #fff;
+}
+
+#error-page-handler .message {
+    background-color: #FD6667;
+    border-bottom: solid 5px #C64340;
+    color: #fff;
+    margin: 0;
+    padding: 3em 2em 1em 2em;
+}
+
+#error-page-handler .message h1 {
+    border-bottom-color: #FB515B;
+}
+
+#error-page-handler .message p {
+    margin-bottom: 1em;
+}
+
+#error-page-handler .message a,
+#error-page-handler .message a:hover,
+#error-page-handler .message a:visited {
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+#error-page-handler pre {
+    display: block;
+    font-size: 80%;
+
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+
+#error-page-handler hr {
+    background-color: #000;
+    border: 1px 0 0 0;
+}
+
+#error-page-handler .collapsed {
+    height: 249px;
+    overflow-y: hidden;
+}
+
+#error-page-handler .expanded {
+    height: auto;
+    overflow-y: auto;
+}
+
+#error-page-handler .section {
+    margin-bottom: 2em;
+}
+
+@media print {
+    #error-page-handler .content-header {
+        display: none;
+    }
+
+    #error-page-handler .message,
+    #error-page-handler .message a,
+    #error-page-handler .message a:hover,
+    #error-page-handler .message a:visited {
+        color: #000;
+    }
+
+    #error-page-handler .message {
+        background-color: #fff;
+        border-bottom: solid 1px #000;
+    }
+
+    #error-page-handler .message h1 {
+        border-bottom-width: 0;
+    }
+
+    #error-page-handler .collapsed {
+        height: auto;
+        overflow-y: auto;
+    }
+
+    #error-page-handler .toggle {
+        display: none;
+    }
+}

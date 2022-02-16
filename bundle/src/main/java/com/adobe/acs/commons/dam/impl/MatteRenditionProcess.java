@@ -21,6 +21,7 @@ package com.adobe.acs.commons.dam.impl;
 
 import java.awt.Color;
 
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
@@ -44,6 +45,7 @@ import com.day.image.Layer;
 @Component(metatype = false)
 @Service
 @Property(name = "process.label", value = "Matte Rendition")
+@SuppressWarnings({"squid:S00115", "checkstyle:localvariablename"})
 public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static final int RADIX_HEX = 16;
@@ -61,6 +63,10 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
     }
 
     private static final String SPECIFIER = "matte";
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
     @Reference
     private WorkflowHelper workflowHelper;

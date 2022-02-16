@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.exception;
 /**
  * Custom exception representing failure conditions in accessing data streams.
  */
+@SuppressWarnings({"serial", "squid:S2166"})
 public class HttpCacheDataStreamException extends HttpCacheException {
     public HttpCacheDataStreamException() {
     }

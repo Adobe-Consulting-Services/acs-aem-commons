@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
@@ -104,7 +104,7 @@ public class DispatcherMaxAgeHeaderFilterTest {
         when(componentContext.getProperties()).thenReturn(properties);
 
         filter.doActivate(componentContext);
-        assertEquals("max-age=" + maxage, filter.getHeaderValue());
+        assertEquals("max-age=" + maxage, filter.getHeaderValue(request));
     }
 
     @Test(expected = ConfigurationException.class)
@@ -120,7 +120,7 @@ public class DispatcherMaxAgeHeaderFilterTest {
         when(componentContext.getProperties()).thenReturn(properties);
 
         filter.doActivate(componentContext);
-        assertEquals("max-age=" + maxage, filter.getHeaderValue());
+        assertEquals("max-age=" + maxage, filter.getHeaderValue(request));
         verify(componentContext).getProperties();
         verifyNoMoreInteractions(componentContext);
 

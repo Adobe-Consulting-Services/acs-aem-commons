@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,7 @@ import javax.jcr.Value;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -50,20 +51,23 @@ public class SendTemplatedEmailUtils {
 
     private static final String PN_USER_EMAIL = "profile/email";
 
+    private SendTemplatedEmailUtils() {
+    }
+
     /***
      * Tests whether the payload is a DAM asset or a cq:Page for DAM asset
      * returns all properties at the metadata node for DAM assets for cq:Page
      * returns all properties at the jcr:content node The Map<String, String>
      * that is returned contains string representations of each of the
      * respective properties
-     * 
+     *
      * @param payloadRes
      *            the payload as a resource
      * @param sdf
      *            used by the method to transform Date properties into Strings
      * @return Map<String, String> String representation of jcr properties
      */
-    protected final static Map<String, String> getPayloadProperties(Resource payloadRes, SimpleDateFormat sdf) {
+    protected static final Map<String, String> getPayloadProperties(Resource payloadRes, SimpleDateFormat sdf) {
 
         Map<String, String> emailParams = new HashMap<String, String>();
 
@@ -94,16 +98,41 @@ public class SendTemplatedEmailUtils {
     }
 
     /**
+     * Gets email(s) based on the path to a principal or principle name.
+     * If it points to a user an array with a single email is returned,
+     * else an array of emails for each individual in the group
+     *
+     * @param resourceResolver
+     * @param principleOrPath  name of a user or group or the path to such
+     * @return String[] of email(s) associated with account
+     */
+    protected static final String[] getEmailAddrsFromPathOrName(ResourceResolver resourceResolver, String principleOrPath) {
+        if (StringUtils.startsWith(principleOrPath, "/")) {
+            return getEmailAddrsFromUserPath(resourceResolver, principleOrPath);
+        }
+
+        try {
+            UserManager userManager = resourceResolver.adaptTo(UserManager.class);
+            Authorizable auth = userManager.getAuthorizable(principleOrPath);
+            return getEmailAddrsFromUserPath(resourceResolver, auth.getPath());
+        } catch (RepositoryException e) {
+            log.warn("Could not load repository paths for users. {}", e);
+        }
+        return new String[]{};
+    }
+
+
+    /**
      * Gets email(s) based on the path to a principal If the path is a user it
      * returns an array with a single email if the path is a group returns an
      * array emails for each individual in the group
-     * 
+     *
      * @param resourceResolver
-     * @param principlePath
-     *            path to a CQ user or group
+     * @param principlePath    path to a CQ user or group
      * @return String[] of email(s) associated with account
      */
-    protected final static String[] getEmailAddrsFromUserPath(ResourceResolver resourceResolver, String principlePath) {
+    @SuppressWarnings({"squid:S3776"})
+    protected static final String[] getEmailAddrsFromUserPath(ResourceResolver resourceResolver, String principlePath) {
         List<String> emailList = new LinkedList<String>();
 
         try {
@@ -120,14 +149,16 @@ public class SendTemplatedEmailUtils {
                         Iterator<Authorizable> memberIt = authGroup.getMembers();
                         while (memberIt.hasNext()) {
                             String currEmail = getAuthorizableEmail(memberIt.next());
-                            if (currEmail != null)
+                            if (currEmail != null) {
                                 emailList.add(currEmail);
+                            }
                         }
                     } else {
                         // otherwise is an individual user
                         String authEmail = getAuthorizableEmail(authorizable);
-                        if (authEmail != null)
+                        if (authEmail != null) {
                             emailList.add(authEmail);
+                        }
                     }
                 }
             }
@@ -143,10 +174,10 @@ public class SendTemplatedEmailUtils {
      * only converts dates to string format based on simple date format
      * concatenates String[] into a string of comma separated items all other
      * values uses toString
-     * 
+     *
      * @param resource
      * @return a string map where the key is the jcr property and the value is
-     * 
+     *
      */
     private static Map<String, String> getJcrKeyValuePairs(Resource resource, SimpleDateFormat sdf) {
 
@@ -191,7 +222,7 @@ public class SendTemplatedEmailUtils {
 
     /***
      * Format date as a string using global variable sdf
-     * 
+     *
      * @param calendar
      * @return
      */
