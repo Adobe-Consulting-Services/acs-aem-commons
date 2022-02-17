@@ -33,10 +33,10 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  */
 @ProviderType
-public interface MCPLocalizationService {
+public interface McpLocalizationService {
    
     /**
-     * Determines if Global-Level localization of MCP FormFields is "enabled". By default it will be disabled and can be enabled via OGi configuration changes.
+     * Determines if Global-Level localization of MCP FormFields is "enabled". By default it will be disabled and can be enabled via OSGi configuration changes.
      *
      * @return true to support "Localization"
      */
