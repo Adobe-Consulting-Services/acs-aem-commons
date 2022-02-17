@@ -19,14 +19,15 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
-import com.adobe.acs.commons.mcp.form.FieldComponent;
-import com.adobe.acs.commons.mcp.form.FormField;
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
+import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
+import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -37,8 +38,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.adobe.acs.commons.mcp.MCPLocalizationService;
+import com.adobe.acs.commons.mcp.form.FieldComponent;
+import com.adobe.acs.commons.mcp.form.FormField;
+
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.sling.api.request.RequestParameter;
@@ -47,10 +53,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
-import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
-import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -200,13 +202,13 @@ public class AnnotatedFieldDeserializer {
 
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
         final Map<String, FieldComponent> comps = new LinkedHashMap<>();
-        Map<String, String> globalLangs = loadLanguages(sling);
+        Map<String, String> overlayedLangs = loadOverlayedLanguages(sling);
         getAllAnnotatedObjectMembers(source, FormField.class)
             .forEach(
                 f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
-                    if (fieldDefinition.localize()) {
-                        comps.putAll(createLocalizedComponent(sling, f, fieldDefinition, globalLangs));
+                    if (fieldDefinition.localize() && MapUtils.isNotEmpty(overlayedLangs)) {
+                        comps.putAll(createLocalizedComponent(sling, f, fieldDefinition, overlayedLangs));
                     } else {
                         try {
                             FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
@@ -221,12 +223,14 @@ public class AnnotatedFieldDeserializer {
         return comps;
     }
 
-    private static Map<String, String> loadLanguages(SlingScriptHelper sling) {
-        Map<String, String> globalLangs = new LinkedHashMap<>();
+    private static Map<String, String> loadOverlayedLanguages(SlingScriptHelper sling) {
+        Map<String, String> overlayedLangs = new LinkedHashMap<>();
+        
         if (sling != null) {
-            // Read languages list
-            final String LANGUAGE_NODE_PATH = "wcm/core/resources/languages";
-            Resource rootRes = sling.getRequest().getResourceResolver().getResource(LANGUAGE_NODE_PATH);
+            String overlayedLanguagesResourcePath = getOverlayedLanguagesResourcePath(sling);
+
+            // Read overlayed languages list
+            Resource rootRes = sling.getRequest().getResourceResolver().getResource(overlayedLanguagesResourcePath);
             if (rootRes != null) {
                 Iterator<Resource> itr = rootRes.listChildren();
                 while (itr.hasNext()) {
@@ -236,24 +240,36 @@ public class AnnotatedFieldDeserializer {
                     if (!country.isEmpty() && !country.equals("*")) {
                         language = language + " - " + country;
                     }
-                    globalLangs.put(langRes.getName(), language);
+                    overlayedLangs.put(langRes.getName(), language);
                 }
             }
         }
-        return globalLangs;
+
+        return overlayedLangs;
     }
 
-    private static Map<String, FieldComponent> createLocalizedComponent(SlingScriptHelper sling, AccessibleObject accessibleObject, FormField fieldDefinition, Map<String, String> globalLangs) {
+    private static String getOverlayedLanguagesResourcePath(SlingScriptHelper sling) {
+        String overlayedLanguagesResourcePath = null;
+
+        MCPLocalizationService mcpLocalizationService = sling.getService(MCPLocalizationService.class);
+        if(mcpLocalizationService != null && mcpLocalizationService.isLocalizationEnabled()) {
+            overlayedLanguagesResourcePath = mcpLocalizationService.getOverlayedLanguagesResourcePath();
+        }
+        return overlayedLanguagesResourcePath;
+    }
+
+
+    private static Map<String, FieldComponent> createLocalizedComponent(SlingScriptHelper sling, AccessibleObject accessibleObject, FormField fieldDefinition, Map<String, String> overlayedLangs) {
         Map<String, FieldComponent> comps = new LinkedHashMap<>();
         String[] langs = fieldDefinition.languages();
         if (langs == null || langs.length < 2) {
-            langs = globalLangs.keySet().toArray(new String[1]);
+            langs = overlayedLangs.keySet().toArray(new String[1]);
         }
         for (String lang : langs) {
             String fieldName = AccessibleObjectUtil.getFieldName(accessibleObject)
                             + (lang.equalsIgnoreCase("en") ? "" : "." + lang);
             String title = fieldDefinition.name()
-                            + (lang.equalsIgnoreCase("en") ? "" : " (" + globalLangs.get(lang) + ")");
+                            + (lang.equalsIgnoreCase("en") ? "" : " (" + overlayedLangs.get(lang) + ")");
             try {
                 FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
                 component.setup(fieldName, accessibleObject, fieldDefinition, sling);
