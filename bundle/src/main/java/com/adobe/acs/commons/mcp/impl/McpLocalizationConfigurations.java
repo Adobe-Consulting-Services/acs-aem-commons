@@ -25,7 +25,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @ObjectClassDefinition(name = "ACS AEM Commons - MCP Localization Configuration",
         description = "Configuration of MCP Localization such as enable location and overlayed languages path")
-public @interface McpLocalizationConfiguration {
+public @interface McpLocalizationConfigurations {
 
     @AttributeDefinition(name = "Enable Localization", description = "Indicates whether the Global Level localization of MCP FormFields is enabled or not.", type = AttributeType.BOOLEAN)
     boolean localizationEnabled() default false;

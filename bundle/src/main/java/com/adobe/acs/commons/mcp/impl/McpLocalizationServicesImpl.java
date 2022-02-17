@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.McpLocalizationService;
+import com.adobe.acs.commons.mcp.McpLocalizationServices;
 
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Activate;
@@ -29,18 +29,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@Component(service = {McpLocalizationService.class})
-@Designate(ocd = McpLocalizationConfiguration.class)
-public class McpLocalizationServiceImpl implements McpLocalizationService {
+@Component(service = {McpLocalizationServices.class})
+@Designate(ocd = McpLocalizationConfigurations.class)
+public class McpLocalizationServicesImpl implements McpLocalizationServices {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(McpLocalizationServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(McpLocalizationServicesImpl.class);
 
     private boolean localizationEnabled;
 
     private String overlayedLanguagesResourcePath;
     
     @Activate
-    protected void activate(final McpLocalizationConfiguration config) throws Exception {
+    protected void activate(final McpLocalizationConfigurations config) throws Exception {
        LOGGER.debug("Start ACTIVATE GenericListService");
        
        this.localizationEnabled = config.localizationEnabled();
