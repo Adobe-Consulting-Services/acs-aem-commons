@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.adobe.acs.commons.mcp.McpLocalizationServices;
+import com.adobe.acs.commons.mcp.McpLocalizationService;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 
@@ -251,7 +251,7 @@ public class AnnotatedFieldDeserializer {
     private static String getOverlayedLanguagesResourcePath(SlingScriptHelper sling) {
         String overlayedLanguagesResourcePath = null;
 
-        McpLocalizationServices mcpLocalizationService = sling.getService(McpLocalizationServices.class);
+        McpLocalizationService mcpLocalizationService = sling.getService(McpLocalizationService.class);
         if(mcpLocalizationService != null && mcpLocalizationService.isLocalizationEnabled()) {
             overlayedLanguagesResourcePath = mcpLocalizationService.getOverlayedLanguagesResourcePath();
         }

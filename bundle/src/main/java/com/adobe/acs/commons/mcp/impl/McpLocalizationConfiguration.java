@@ -1,8 +1,8 @@
-/*-
+/*
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2022 AEM developer community
+ * Copyright (C) 2013 - 2018 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @ObjectClassDefinition(name = "ACS AEM Commons - MCP Localization Configuration",
         description = "Configuration of MCP Localization such as enable location and overlayed languages path")
-public @interface McpLocalizationConfigurations {
+public @interface McpLocalizationConfiguration {
 
     @AttributeDefinition(name = "Enable Localization", description = "Indicates whether the Global Level localization of MCP FormFields is enabled or not.", type = AttributeType.BOOLEAN)
     boolean localizationEnabled() default false;

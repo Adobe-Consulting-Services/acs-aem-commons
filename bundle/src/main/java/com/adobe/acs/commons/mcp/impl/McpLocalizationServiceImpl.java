@@ -1,8 +1,8 @@
-/*-
+/*
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2022 AEM developer community
+ * Copyright (C) 2013 - 2018 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.McpLocalizationServices;
+import com.adobe.acs.commons.mcp.McpLocalizationService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Activate;
@@ -29,18 +29,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@Component(service = {McpLocalizationServices.class})
-@Designate(ocd = McpLocalizationConfigurations.class)
-public class McpLocalizationServicesImpl implements McpLocalizationServices {
+@Component(service = {McpLocalizationService.class})
+@Designate(ocd = McpLocalizationConfiguration.class)
+public class McpLocalizationServiceImpl implements McpLocalizationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(McpLocalizationServicesImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(McpLocalizationServiceImpl.class);
 
     private boolean localizationEnabled;
 
     private String overlayedLanguagesResourcePath;
     
     @Activate
-    protected void activate(final McpLocalizationConfigurations config) throws Exception {
+    protected void activate(final McpLocalizationConfiguration config) throws Exception {
        LOGGER.debug("Start ACTIVATE GenericListService");
        
        this.localizationEnabled = config.localizationEnabled();
