@@ -52,7 +52,7 @@ public class McpLocalizationServiceTest {
     }
 
     @Test
-    public void givenLocalizationEnabledIsFalse_WhenGetterCalled_ThenTrueIsReturned() throws Exception {
+    public void givenLocalizationEnabledIsFalse_WhenGetterCalled_ThenFalseIsReturned() throws Exception {
 
         when(config.localizationEnabled()).thenReturn(false);
         impl.activate(config);
