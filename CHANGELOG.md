@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
 ### Fixed
+
+- Fixed xss issue in page compare 
 - #2783 and #2742 - Configurable localization of MCP based FormFields
 
 ### Changed
