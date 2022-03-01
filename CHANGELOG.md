@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #2775 - Update Maven plugins
+- #2742 - Reverting localization to investigate a better solution.
 
 ## 5.1.2 - 2022-01-21
 
