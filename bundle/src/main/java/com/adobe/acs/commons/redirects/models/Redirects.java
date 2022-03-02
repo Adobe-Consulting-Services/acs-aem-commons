@@ -20,8 +20,11 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.google.common.collect.Lists;
+import java.util.Optional;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
@@ -32,10 +35,13 @@ import java.util.List;
 
 /**
  * Model for paginated output on http://localhost:4502/apps/acs-commons/content/redirect-manager.html
- * 
+ *
  */
 @Model(adaptables = SlingHttpServletRequest.class)
 public class Redirects {
+
+    public static final String CFG_PROP_CONTEXT_PREFIX = "contextprefix";
+
     @SlingObject
     private SlingHttpServletRequest request;
 
@@ -43,6 +49,7 @@ public class Redirects {
     int pageSize = 1000;
     List<List<Resource>> pages;
 
+    String contextPrefix;
 
     @PostConstruct
     protected void init() {
@@ -54,6 +61,10 @@ public class Redirects {
         List<Resource> all = new ArrayList<>();
         configResource.listChildren().forEachRemaining(all::add);
         pages = Lists.partition(all, pageSize);
+
+        final ValueMap properties = ResourceUtil.getValueMap(configResource);
+        contextPrefix = Optional.ofNullable(properties.get(CFG_PROP_CONTEXT_PREFIX))
+                .orElse("").toString();
     }
 
     public List<Resource> getItems() {
@@ -86,5 +97,9 @@ public class Redirects {
 
     public int getPreviousPage() {
         return pageNumber - 1;
+    }
+
+    public String getContextPrefix() {
+        return contextPrefix;
     }
 }

@@ -23,12 +23,14 @@ import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
+import com.adobe.acs.commons.redirects.models.Redirects;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.wcm.api.WCMMode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -40,6 +42,8 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
@@ -375,8 +379,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
     boolean handleRedirect(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
         long t0 = System.currentTimeMillis();
         boolean redirected = false;
+
         RedirectMatch match = match(slingRequest);
         if (match != null) {
+
             RedirectRule redirectRule = match.getRule();
             ZonedDateTime untilDateTime = redirectRule.getUntilDate();
             if (untilDateTime != null && untilDateTime.isBefore(ZonedDateTime.now())) {
@@ -409,8 +415,17 @@ public class RedirectFilter extends AnnotatedStandardMBean
      * {@link ResourceResolver#map(HttpServletRequest, String)}
      */
     String evaluate(RedirectMatch match, SlingHttpServletRequest slingRequest){
+        //fetches optional contextPrefix
+        final Resource configResource = configResolver.getResource(slingRequest.getResource(), config.bucketName(), config.configName());
+        final ValueMap properties = ResourceUtil.getValueMap(configResource);
+        final String contextPrefix = Optional.ofNullable(properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX))
+                .orElse("").toString();
+
         RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
         String location = match.getRule().evaluate(match.getMatcher());
+        if(!location.startsWith(contextPrefix)) {
+            location = contextPrefix + location;
+        }
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
             if (ext != null && !location.endsWith(ext)) {
@@ -424,7 +439,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
             }
         }
         if (preserveQueryString) {
-
             String queryString = slingRequest.getQueryString();
             if (queryString != null) {
                 location = preserveQueryString(location, queryString);
@@ -549,6 +563,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 return cfg == null ? RedirectConfiguration.EMPTY : cfg;
             });
             String resourcePath = slingRequest.getRequestPathInfo().getResourcePath(); // /content/mysite/en/page.html
+
+            final ValueMap properties = ResourceUtil.getValueMap(configResource);
+            final String contextPrefix = Optional.ofNullable(properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX))
+                    .orElse("").toString();
+            if(resourcePath.startsWith(contextPrefix)) {
+                resourcePath = resourcePath.replace(contextPrefix, "");
+            }
+
             RedirectMatch m = rules.match(resourcePath);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html

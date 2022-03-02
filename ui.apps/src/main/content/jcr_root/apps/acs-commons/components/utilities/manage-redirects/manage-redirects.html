@@ -67,6 +67,21 @@
                                 data-path="${context.redirectResource.path}/*">
                             + Redirect Configuration</button>
                     </div>
+                    <br />
+                    <div data-sly-test="${!pg.contextPrefix}"
+                            class="coral-Form-fieldwrapper">
+                        <button class="coral-Button coral-Button--secondary context-prefix" id="context-prefix-btn-set" name="context-prefix-btn"
+                                data-path="${context.redirectResource.path}"
+                                data-prefix="">
+                            Set context prefix</button>
+                    </div>
+                    <div data-sly-test="${pg.contextPrefix}"
+                        class="coral-Form-fieldwrapper">
+                        <button class="coral-Button coral-Button--secondary context-prefix" id="context-prefix-btn-update" name="context-prefix-btn"
+                                data-path="${context.redirectResource.path}"
+                                data-prefix="${pg.contextPrefix}">
+                            Edit context prefix</button>&nbsp;&nbsp;<label for="context-prefix-btn-update" id="context-prefix-label">${pg.contextPrefix}</label>
+                    </div>
                     <section class="coral-Form coral-Form--vertical">
                         <div clas="coral-Form-fieldset">
                             <br>
