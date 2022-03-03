@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - Fixed xss issue in page compare 
+- #2783 and #2742 - Configurable localization of MCP based FormFields
 
 ### Changed
 
