@@ -416,10 +416,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     String evaluate(RedirectMatch match, SlingHttpServletRequest slingRequest){
         //fetches optional contextPrefix
-        final Resource configResource = configResolver.getResource(slingRequest.getResource(), config.bucketName(), config.configName());
-        final ValueMap properties = ResourceUtil.getValueMap(configResource);
-        final String contextPrefix = Optional.ofNullable(properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX))
-                .orElse("").toString();
+        Resource configResource = configResolver.getResource(slingRequest.getResource(), config.bucketName(), config.configName());
+        ValueMap properties = configResource.getValueMap();
+        String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
 
         RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
         String location = match.getRule().evaluate(match.getMatcher());
@@ -564,9 +563,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
             });
             String resourcePath = slingRequest.getRequestPathInfo().getResourcePath(); // /content/mysite/en/page.html
 
-            final ValueMap properties = ResourceUtil.getValueMap(configResource);
-            final String contextPrefix = Optional.ofNullable(properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX))
-                    .orElse("").toString();
+            ValueMap properties = configResource.getValueMap();
+            String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
             if(resourcePath.startsWith(contextPrefix)) {
                 resourcePath = resourcePath.replace(contextPrefix, "");
             }

@@ -62,9 +62,8 @@ public class Redirects {
         configResource.listChildren().forEachRemaining(all::add);
         pages = Lists.partition(all, pageSize);
 
-        final ValueMap properties = ResourceUtil.getValueMap(configResource);
-        contextPrefix = Optional.ofNullable(properties.get(CFG_PROP_CONTEXT_PREFIX))
-                .orElse("").toString();
+        ValueMap properties = configResource.getValueMap();
+        contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
     }
 
     public List<Resource> getItems() {
