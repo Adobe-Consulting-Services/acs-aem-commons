@@ -724,4 +724,21 @@ public class RedirectFilterTest {
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
+
+    @Test
+    public void testContextPrefixWithPatternRule() throws Exception {
+        withRules(
+                new RedirectRule("/en/one(.*)", "/en/two",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
 }
