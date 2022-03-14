@@ -729,6 +729,8 @@ public class RedirectFilterTest {
     public void testContextPrefixWithPatternRule() throws Exception {
         withRules(
                 new RedirectRule("/en/one(.*)", "/en/two",
+                        302, null, null),
+                new RedirectRule("/(.*)", "/content/geometrixx/en/four",
                         302, null, null));
 
         Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
@@ -738,6 +740,13 @@ public class RedirectFilterTest {
 
         assertEquals(302, response.getStatus());
         assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        response = navigate("/content/geometrixx/en/three.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/four.html", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }

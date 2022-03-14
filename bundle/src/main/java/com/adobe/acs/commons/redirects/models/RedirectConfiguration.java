@@ -142,10 +142,22 @@ public class RedirectConfiguration {
         return match;
     }
 
+    /**
+     * Utility method that gets the pattern rule taking an optional context prefix into account
+     * @param rulePattern the regex pattern to match the path
+     * @param normalizedPath the normalized path
+     * @param contextPrefix the optional context prefix
+     * @return the matcher associated with the rule
+     */
     private Matcher getRuleMatch(Pattern rulePattern, String normalizedPath, String contextPrefix) {
         if("".equals(contextPrefix)) {
             return rulePattern.matcher(normalizedPath);
         } else {
+            //we add the context prefix to the pattern since a pattern might be too broad otherwise,
+            //i.e. "/(.*)" will match anything
+            if(!rulePattern.toString().startsWith(contextPrefix)) {
+                rulePattern = RedirectRule.toRegex(contextPrefix + rulePattern.toString());
+            }
             Matcher matcher = rulePattern.matcher(normalizedPath);
             if(!matcher.matches()) {
                 if (normalizedPath.startsWith(contextPrefix)) {
