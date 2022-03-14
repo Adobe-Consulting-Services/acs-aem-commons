@@ -565,11 +565,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
             ValueMap properties = configResource.getValueMap();
             String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
-            if(resourcePath.startsWith(contextPrefix)) {
-                resourcePath = resourcePath.replace(contextPrefix, "");
-            }
 
-            RedirectMatch m = rules.match(resourcePath);
+            RedirectMatch m = rules.match(resourcePath, contextPrefix);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
