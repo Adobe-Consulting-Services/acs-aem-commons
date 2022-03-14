@@ -132,7 +132,7 @@ public class RedirectConfiguration {
             match = new RedirectMatch(rule, null);
         } else {
             for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                Matcher m = entry.getKey().matcher(normalizedPath);
+                Matcher m = getRuleMatch(entry.getKey(), normalizedPath, contextPrefix);
                 if (m.matches()) {
                     match = new RedirectMatch(entry.getValue(), m);
                     break;
@@ -140,7 +140,22 @@ public class RedirectConfiguration {
             }
         }
         return match;
+    }
 
+    private Matcher getRuleMatch(Pattern rulePattern, String normalizedPath, String contextPrefix) {
+        if("".equals(contextPrefix)) {
+            return rulePattern.matcher(normalizedPath);
+        } else {
+            Matcher matcher = rulePattern.matcher(normalizedPath);
+            if(!matcher.matches()) {
+                if (normalizedPath.startsWith(contextPrefix)) {
+                    matcher = rulePattern.matcher(normalizedPath.replace(contextPrefix, ""));
+                } else {
+                    matcher = rulePattern.matcher(contextPrefix + normalizedPath);
+                }
+            }
+            return matcher;
+        }
     }
 
     /**
