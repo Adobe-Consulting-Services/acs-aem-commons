@@ -79,6 +79,15 @@
                                 <br>This prefix can be omitted from the redirect rules.
                             </div>
                     </div>
+                    <div data-sly-test="!${pg.contextPrefix}"
+                         class="coral-Form-fieldwrapper">
+                        <div>
+                            No context prefix set.
+                            <a class="coral-Link context-prefix" href="#" target="_blank" data-path="${context.redirectResource.path}" data-prefix="${pg.contextPrefix}">
+                                <coral-icon icon="edit" size="XS"></coral-icon>
+                            </a>
+                        </div>
+                    </div>
                     <section class="coral-Form coral-Form--vertical">
                         <div clas="coral-Form-fieldset">
                             <br>
