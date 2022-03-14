@@ -66,4 +66,21 @@ public class CreateRedirectConfigurationServletTest {
         servlet.doPost(context.request(), context.response());
         assertEquals(HttpServletResponse.SC_CONFLICT, context.response().getStatus());
     }
+
+    @Test
+    public void createConfigWithContextPrefix() throws ServletException, IOException   {
+        context.build().resource("/conf/global");
+        context.request().addRequestParameter("path", "/conf/global");
+        context.request().addRequestParameter("contextPrefix", "/content/mysite");
+        servlet.doPost(context.request(), context.response());
+
+        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
+        Resource cfg = context.resourceResolver().getResource("/conf/global/settings/redirects");
+        assertNotNull(cfg);
+        assertEquals("/content/mysite", cfg.getValueMap().get("contextPrefix"));
+
+        // return 409 if already exists
+        servlet.doPost(context.request(), context.response());
+        assertEquals(HttpServletResponse.SC_CONFLICT, context.response().getStatus());
+    }
 }
