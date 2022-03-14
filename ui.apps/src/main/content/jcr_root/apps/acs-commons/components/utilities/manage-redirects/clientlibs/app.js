@@ -210,7 +210,7 @@
 
         var form = $('#editPrefixDialog').find("form");
         form[0].reset();
-        if(prefix) form.find('foundation-autocomplete[name="./contextprefix"]').val(prefix);
+        if(prefix) form.find('foundation-autocomplete[name="./contextPrefix"]').val(prefix);
 
         form.attr('action', path);
         form.attr('ruleId', name);

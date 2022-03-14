@@ -185,13 +185,13 @@
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="acs-commons/components/utilities/manage-redirects/redirects/prefixsubmithandler"/>
                                     <items jcr:primaryType="nt:unstructured">
-                                        <contentprefix
+                                        <contentPrefix
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
                                                 emptyText="Select/Enter context prefix"
                                                 fieldLabel="Context prefix"
                                                 fieldDescription="This context prefix will be added to all Redirect Rules in this configuration."
-                                                name="./contextprefix"
+                                                name="./contextPrefix"
                                                 required="{Boolean}false"
                                                 rootPath="/content"/>
                                     </items>

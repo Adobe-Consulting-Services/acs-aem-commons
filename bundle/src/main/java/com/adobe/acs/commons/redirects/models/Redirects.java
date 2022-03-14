@@ -37,7 +37,7 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class Redirects {
 
-    public static final String CFG_PROP_CONTEXT_PREFIX = "contextprefix";
+    public static final String CFG_PROP_CONTEXT_PREFIX = "contextPrefix";
 
     @SlingObject
     private SlingHttpServletRequest request;
