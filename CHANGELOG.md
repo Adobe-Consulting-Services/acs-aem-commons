@@ -9,9 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+## 5.2.0 - 2022-03-03
+
 ### Fixed
 
-- Fixed xss issue in page compare 
+- Fixed XSS vulnerability in page compare 
+- #2783 and #2742 - Configurable localization of MCP based FormFields
 
 ### Changed
 
