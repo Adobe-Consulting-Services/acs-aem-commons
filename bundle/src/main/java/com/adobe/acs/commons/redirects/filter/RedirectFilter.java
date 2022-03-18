@@ -46,8 +46,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -133,6 +135,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private static final String SERVICE_NAME = "redirect-manager";
+
+    private static final String ESCAPE_CTX_PREFIX = "!";
 
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
@@ -417,10 +421,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
 
         RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
-        String location = match.getRule().evaluate(match.getMatcher());
-        if(!location.startsWith(contextPrefix)) {
-            location = contextPrefix + location;
-        }
+        String location = createFullPath(match.getRule().evaluate(match.getMatcher()), contextPrefix);
+
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
             if (ext != null && !location.endsWith(ext)) {
@@ -575,6 +577,41 @@ public class RedirectFilter extends AnnotatedStandardMBean
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;
         }
+    }
+
+    /**
+     * Merges the context prefix with the path if needed.<br>
+     * This means
+     * <ul>
+     *     <li>relative paths are joined with the context prefix</li>
+     *     <li>absolute urls are returned unchanged</li>
+     *     <li>escaped paths are returned without the escape character</li>
+     * </ul>
+     * Absolute urls and escaped paths will not be changed
+     * @param path  the path to complete
+     * @param contextPrefix the context prefix
+     * @return the correct path to redirect to
+     * @see #ESCAPE_CTX_PREFIX
+     */
+    private String createFullPath(String path, String contextPrefix) {
+        if(path == null) {
+            return "";
+        } else if(path.startsWith(ESCAPE_CTX_PREFIX)) {
+            return path.substring(1);
+        } else if(isAbsoluteUrl(path)) {
+            return path;
+        } else {
+            if(!path.startsWith(contextPrefix)) {
+                return contextPrefix + path;
+            }
+        }
+        return path;
+    }
+
+    private boolean isAbsoluteUrl(String path) {
+        Pattern httpRegex = Pattern.compile("^(https?:\\/\\/|www\\.|\\/\\/)(.*)");
+        Matcher httpMatcher = httpRegex.matcher(path);
+        return httpMatcher.matches();
     }
 
     /**
