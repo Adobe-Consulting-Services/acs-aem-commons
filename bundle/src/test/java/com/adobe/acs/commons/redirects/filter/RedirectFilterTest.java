@@ -567,7 +567,8 @@ public class RedirectFilterTest {
                     "sling:resourceType", "acs-commons/components/utilities/manage-redirects/redirect-row",
                     "source", rule.getSource(),
                     "target", rule.getTarget(), "statusCode", rule.getStatusCode(),
-                    "untilDate", rule.getUntilDate() == null ? null : GregorianCalendar.from(rule.getUntilDate()));
+                    "untilDate", rule.getUntilDate() == null ? null : GregorianCalendar.from(rule.getUntilDate()),
+                    "contextPrefixIgnored", rule.getContextPrefixIgnored());
             c++;
         }
         doAnswer(invocation -> configResource).when(configResolver).getResource(any(Resource.class), any(String.class), any(String.class));
@@ -743,10 +744,10 @@ public class RedirectFilterTest {
     }
 
     @Test
-    public void testContextPrefixWithEscape() throws Exception {
+    public void testIgnoredContextPrefix() throws Exception {
         withRules(
-                new RedirectRule("/en/one", "!/content/escapedsite/en/one",
-                    302, null, null));
+                new RedirectRule("/en/one", "/content/escapedsite/en/one",
+                    302, null, null, true));
 
         Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
         configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
@@ -764,8 +765,8 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/en/one(.*)", "/en/two",
                         302, null, null),
-                new RedirectRule("/en/three(.*)", "!/content/escaped/en/four",
-                        302, null, null),
+                new RedirectRule("/en/three(.*)", "/content/escaped/en/four",
+                        302, null, null, true),
                 new RedirectRule("/(.*)", "/content/geometrixx/en/six",
                         302, null, null));
 

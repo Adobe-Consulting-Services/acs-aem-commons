@@ -76,7 +76,7 @@
                         </a>
                         has been set for this configuration.<br>
                         This prefix can be omitted from the redirect rules.<br>
-                        To ignore the context prefix, use an absolute url or start the path with "!".
+                        To ignore the context prefix for a rule, check the "Ignore Context Prefix" checkbox or use an absolute url.
 
                     </div>
                     <div data-sly-test="${!pg.contextPrefix}"
@@ -102,6 +102,7 @@
                                 <col is="coral-table-column" fixedwidth>
                                 <col is="coral-table-column">
                                 <col is="coral-table-column">
+                                <col is="coral-table-column">
                             </colgroup>
                             <thead is="coral-table-head" sticky>
                             <tr is="coral-table-row">
@@ -111,6 +112,7 @@
                                 <th is="coral-table-headercell">Status Code</th>
                                 <th is="coral-table-headercell">Until Date</th>
                                 <th is="coral-table-headercell">Notes</th>
+                                <th is="coral-table-headercell">Ignore Context Prefix</th>
                                 <th is="coral-table-headercell"></th>
                             </tr>
                             </thead>

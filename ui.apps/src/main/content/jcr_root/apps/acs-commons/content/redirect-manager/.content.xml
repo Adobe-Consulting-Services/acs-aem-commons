@@ -86,6 +86,13 @@
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                                 fieldLabel="Notes"
                                                 name="./note"/>
+                                        <contextPrefixIgnored
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                                text="Ignore Context Prefix"
+                                                name="./contextPrefixIgnored"
+                                                uncheckedValue="{Boolean}false"
+                                                value="{Boolean}false"/>
                                         <http-equiv-accept
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
@@ -118,6 +125,11 @@
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
                                                 name="./statusCode@TypeHint"
                                                 value="Long"/>
+                                        <contextPrefixIgnoredType
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/foundation/form/hidden"
+                                                name="./contextPrefixIgnored@TypeHint"
+                                                value="Boolean"/>
                                         <primaryType
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/hidden"

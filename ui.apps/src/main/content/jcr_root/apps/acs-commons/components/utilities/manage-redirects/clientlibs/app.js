@@ -189,6 +189,7 @@
         var note = tr.find('.note').data('value');
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
+        var contextPrefixIgnored = tr.find('.contextPrefixIgnored').data('value');
 
         var form = $('#editRuleDialog').find("form");
         form[0].reset();
@@ -198,6 +199,12 @@
         select.value =statusCode;
         form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
         form.find('input[name="./note"]').val(note);
+        var cpi = form.find('input[name="./contextPrefixIgnored"]');
+        cpi.val(contextPrefixIgnored);
+        cpi.prop("checked", contextPrefixIgnored);
+        cpi.click(function() {
+            cpi.val(cpi.is(":checked"));
+        });
 
         form.attr('action', path);
         form.attr('ruleId', name);
@@ -313,6 +320,10 @@
         return false;
     });
 
+    $(document).on("change", 'input[name="./contextPrefixIgnored"]', function(e) {
+        e.preventDefault();
+        $(this).val($(this).is(":checked"));
+    });
 
 })($, $(document));
 

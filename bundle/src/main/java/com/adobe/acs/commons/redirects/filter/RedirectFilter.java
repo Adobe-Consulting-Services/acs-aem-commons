@@ -135,8 +135,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     private static final String SERVICE_NAME = "redirect-manager";
 
-    private static final String ESCAPE_CTX_PREFIX = "!";
-
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
         @AttributeDefinition(name = "Enable Redirect Filter", description = "Indicates whether the redirect filter is enabled or not.", type = AttributeType.BOOLEAN)
@@ -420,7 +418,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
 
         RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
-        String location = createFullPath(match.getRule().evaluate(match.getMatcher()), contextPrefix);
+        String location = createFullPath(match.getRule().evaluate(match.getMatcher()), match.getRule(), contextPrefix);
 
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
@@ -584,27 +582,23 @@ public class RedirectFilter extends AnnotatedStandardMBean
      * <ul>
      *     <li>relative paths are joined with the context prefix</li>
      *     <li>absolute urls are returned unchanged</li>
-     *     <li>escaped paths are returned without the escape character</li>
+     *     <li>rules with an <code>contextPrefixIgnored=true</code> flag are returned unchanged</li>
      * </ul>
      * Absolute urls and escaped paths will not be changed
      * @param path  the path to complete
+     * @param redirectRule the redirect rule that is being handled
      * @param contextPrefix the context prefix
      * @return the correct path to redirect to
-     * @see #ESCAPE_CTX_PREFIX
      */
-    private String createFullPath(String path, String contextPrefix) {
+    private String createFullPath(String path, RedirectRule redirectRule, String contextPrefix) {
         if(path == null) {
             return "";
-        } else if(path.startsWith(ESCAPE_CTX_PREFIX)) {
-            return path.substring(1);
-        } else if(isAbsoluteUrl(path)) {
+        } else if(redirectRule.getContextPrefixIgnored()
+                || isAbsoluteUrl(path)
+                || path.startsWith(contextPrefix)) {
             return path;
-        } else {
-            if(!path.startsWith(contextPrefix)) {
-                return contextPrefix + path;
-            }
         }
-        return path;
+        return contextPrefix + path;
     }
 
     private boolean isAbsoluteUrl(String path) {
