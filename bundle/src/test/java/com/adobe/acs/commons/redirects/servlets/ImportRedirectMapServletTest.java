@@ -62,13 +62,13 @@ public class ImportRedirectMapServletTest {
     private String redirectStoragePath = "/conf/acs-commons/redirects";
     Calendar calendar = new Calendar.Builder().setDate(1974, 01, 16).build();
     private List<RedirectRule> savedRules = Arrays.asList(
-            new RedirectRule("/content/one", "/content/two", 302, calendar, "note-1"),
-            new RedirectRule("/content/three", "/content/four", 301, null, "")
+            new RedirectRule("/content/one", "/content/two", 302, calendar, "note-1", true),
+            new RedirectRule("/content/three", "/content/four", 301, null, "", false)
     );
     private List<RedirectRule> excelRules = Arrays.asList(
-            new RedirectRule("/content/1", "/en/we-retail", 301, calendar, "note-2"),
-            new RedirectRule("/content/2", "/en/we-retail", 301, null, ""),
-            new RedirectRule("/content/three", "/en/we-retail", 301, null, "")
+            new RedirectRule("/content/1", "/en/we-retail", 301, calendar, "note-2", false),
+            new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false),
+            new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false)
     );
     private byte[] excelBytes;
 
@@ -84,7 +84,8 @@ public class ImportRedirectMapServletTest {
                     RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget(),
                     RedirectRule.STATUS_CODE_PROPERTY_NAME, rule.getStatusCode(),
                     RedirectRule.UNTIL_DATE_PROPERTY_NAME, rule.getUntilDate() == null ? null : GregorianCalendar.from(rule.getUntilDate()),
-                    RedirectRule.NOTE_PROPERTY_NAME, rule.getNote()
+                    RedirectRule.NOTE_PROPERTY_NAME, rule.getNote(),
+                    RedirectRule.CONTEXT_PREFIX_IGNORED, rule.getContextPrefixIgnored()
             );
         }
         context.request().addRequestParameter("path", redirectStoragePath);
@@ -120,6 +121,7 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule2 = rules.get("/content/three");
         assertEquals("/en/we-retail", rule2.getTarget());
         assertEquals(301, rule2.getStatusCode());
+        assertFalse(rule2.getContextPrefixIgnored());
 
         RedirectRule rule3 = rules.get("/content/1");
         assertEquals("/en/we-retail", rule3.getTarget());
@@ -152,10 +154,11 @@ public class ImportRedirectMapServletTest {
             assertEquals(excelRules.get(idx).getStatusCode(), rule.getStatusCode());
             assertEquals(excelRules.get(idx).getNote(), rule.getNote());
             ZonedDateTime untilDateTime = excelRules.get(idx).getUntilDate();
-             if (untilDateTime != null) {
+            if (untilDateTime != null) {
                 // importer converts input date to dd MMMM yyyy
                 assertEquals(untilDateTime, rule.getUntilDate());
             }
+            assertEquals(excelRules.get(idx).getContextPrefixIgnored(), rule.getContextPrefixIgnored());
             idx++;
         }
     }
