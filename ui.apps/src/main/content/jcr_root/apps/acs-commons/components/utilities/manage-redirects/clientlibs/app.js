@@ -206,6 +206,14 @@
             cpi.val(cpi.is(":checked"));
         });
 
+        if(isContextPrefixEnabled()) {
+            //show entire coral-checkbox
+            cpi.parent().show();
+        } else {
+            //hide entire coral-checkbox
+            cpi.parent().hide();
+        }
+
         form.attr('action', path);
         form.attr('ruleId', name);
     }
@@ -230,6 +238,10 @@
         showEditDialog();
 
     });
+
+    function isContextPrefixEnabled() {
+        return $(".context-prefix-set")[0];
+    }
 
     $(document).on("click", ".new-redirect-rule", function (e) {
         e.preventDefault();
