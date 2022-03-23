@@ -16,72 +16,24 @@
 
     <artifactId>acs-aem-commons-ui.content</artifactId>
     <name>ACS AEM Commons UI.Content Package</name>
+    <description>ACS AEM Commons content package containing content and context-aware configuration.</description>
     <packaging>content-package</packaging>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/content/jcr_root</directory>
-                <excludes>
-                    <exclude>**/.vlt</exclude>
-                    <exclude>**/.vltignore</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/content/META-INF/vault/definition</directory>
-                <targetPath>../vault-work/META-INF/vault/definition</targetPath>
-            </resource>
-            <resource>
-                <directory>src/main/content/META-INF/vault</directory>
-                <includes>
-                    <include>nodetypes.cnd</include>
-                    <include>privileges.xml</include>
-                </includes>
-                <targetPath>../vault-work/META-INF/vault</targetPath>
-            </resource>
-            <resource>
-                <directory>src/main/resources/META-INF</directory>
-                <targetPath>../vault-work/META-INF</targetPath>
-            </resource>
-        </resources>
-
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <directory>${maven.multiModuleProjectDirectory}/src/test/resources</directory>
-            </testResource>
-        </testResources>
 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
-                    <includeEmptyDirs>true</includeEmptyDirs>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <group>adobe/consulting</group>
-                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <properties>
-                        <description>ACS AEM Commons content package containing content and configuration.</description>
-                        <acHandling>merge</acHandling>
-                    </properties>
+                    <accessControlHandling>merge</accessControlHandling>
                     <dependencies>
                         <dependency>
-                            <group>adobe/consulting</group>
-                            <name>acs-aem-commons-ui.apps</name>
-                            <version>${project.version}</version>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-ui.apps</artifactId>
                         </dependency>
                     </dependencies>
-                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
+                    <packageType>content</packageType>
                 </configuration>
             </plugin>
             <plugin>
@@ -271,6 +223,12 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.apps</artifactId>
+            <version>${project.version}</version>
+            <type>content-package</type>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-oakpal-checks</artifactId>
