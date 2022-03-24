@@ -56,7 +56,8 @@ jobs:
         uses: actions/setup-java@v2
         with:
           cache: 'maven'
-          distribution: 'zulu'
+          # Adobe is moving away from Azul Zulu to Oracle JDK (which is not an option) - Eclipse Temurin is suggested as the "closest thing"
+          distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
