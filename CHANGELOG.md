@@ -11,8 +11,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
-- #2775 - Update Maven plugins
 - #2781 - Remove Adobe repositories from pom.xml
+
+## 5.2.0 - 2022-03-03
+
+### Fixed
+
+- Fixed XSS vulnerability in page compare 
+- #2783 and #2742 - Configurable localization of MCP based FormFields
+
+### Changed
+
+- #2775 - Update Maven plugins
+- #2777 - Fix Twitter service user mapping
 
 ## 5.1.2 - 2022-01-21
 
