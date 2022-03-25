@@ -161,7 +161,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                     note = c5.getStringCellValue();
                 }
                 Cell c6 = row.getCell(5);
-                boolean ignoreContextPrefix = c6.getBooleanCellValue();
+                boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
                 rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix));
             } else {
                 first = false;
