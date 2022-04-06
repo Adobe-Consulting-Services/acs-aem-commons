@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 - #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
 
+### Changed
+
+- #2043 - Switch to filevault-package-maven-plugin
+- #2781 - Remove Adobe repositories from pom.xml
+
 ## 5.2.0 - 2022-03-03
 
 ### Fixed
