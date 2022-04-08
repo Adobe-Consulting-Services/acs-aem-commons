@@ -8,8 +8,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
-- #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
 
+### Fixed
+
+- #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
+- #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
+- 
 ### Changed
 
 - #2043 - Switch to filevault-package-maven-plugin
