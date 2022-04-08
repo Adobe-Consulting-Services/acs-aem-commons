@@ -8,12 +8,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+
+### Fixed
+
+- #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in #2772)
 - #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
 
 ### Changed
 
 - #2043 - Switch to filevault-package-maven-plugin
 - #2781 - Remove Adobe repositories from pom.xml
+
+### Added
+
+- #2818 - Added support for relative property paths in Data Importer
 
 ## 5.2.0 - 2022-03-03
 

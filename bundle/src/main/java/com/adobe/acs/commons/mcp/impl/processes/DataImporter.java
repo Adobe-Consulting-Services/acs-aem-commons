@@ -38,11 +38,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.concurrent.Immutable;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 import com.day.crx.JcrConstants;
+import com.day.text.Text;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -55,6 +60,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.data.Spreadsheet.ROW_NUMBER;
 import static javax.jcr.Property.JCR_PRIMARY_TYPE;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * Read node and metadata from a spreadsheet and update underlying node storage
@@ -125,6 +131,13 @@ public class DataImporter extends ProcessDefinition {
             options = {"default=nt:unstructured"}
     )
     private String defaultJcrContentType = "nt:unstructured";
+
+    @FormField(
+            name = "Relative property path node type",
+            description = "Type assigned to missing nodes that are resolved via relative property paths",
+            options = {"default=nt:unstructured"}
+    )
+    private String defaultRelPropertyPathType = "nt:unstructured";
 
     @FormField(
             name = "Convert header names",
@@ -205,7 +218,7 @@ public class DataImporter extends ProcessDefinition {
             try {
                 data = new Spreadsheet(enableHeaderNameConversion, importFile, PATH).buildSpreadsheet();
                 if (presortData) {
-                    Collections.sort(data.getDataRowsAsCompositeVariants(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
+                    data.sortRows(PATH);
                 }
                 instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
             } catch (IOException ex) {
@@ -282,9 +295,16 @@ public class DataImporter extends ProcessDefinition {
         if (!row.containsKey(JCR_PRIMARY_TYPE) && !row.containsKey(JcrConstants.JCR_PRIMARYTYPE)) {
             row.put(JcrConstants.JCR_PRIMARYTYPE, new CompositeVariant(defaultNodeType));
         }
+
         Map<String, Object> nodeProps = createPropertyMap(row);
+
         rr.refresh();
-        Resource main = rr.create(parent, nodeName, nodeProps);
+        Resource main = rr.create(parent, nodeName, ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, row.get(JcrConstants.JCR_PRIMARYTYPE)));
+        try {
+            populateMetadataFromRow(main, nodeProps);
+        } catch (RepositoryException e) {
+            throw new PersistenceException("Unable to add defined properties to newly created node.", e);
+        }
 
         if (includeJcrContent) {
             if (!row.containsKey(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
@@ -370,23 +390,70 @@ public class DataImporter extends ProcessDefinition {
     private void populateMetadataFromRow(Resource resource, Map<String, Object> nodeInfo) throws RepositoryException {
         LOG.debug("Start of populateMetadataFromRow");
 
-        ModifiableValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
-        Node node = resource.adaptTo(Node.class);
         for (Map.Entry entry : nodeInfo.entrySet()) {
-            String key = (String) entry.getKey();
-            Object value = entry.getValue();
 
-            if (key != null && (mergeMode.overwriteProps || !resourceProperties.containsKey(key))) {
-                if (node.hasProperty(key) && node.getProperty(key).isMultiple() && mergeMode.appendArrays) {
+            final String key = (String) entry.getKey();
+            final Object value = entry.getValue();
+
+            final Resource resourceToUpdate = getOrCreateRelativePropertyResource(resource, key);
+            final String propertyToUpdate = getRelativePropertyName(key);
+
+            if (!mergeMode.create && resourceToUpdate == null) {
+                LOG.info("Existing action set to [ {} ] and resource/property at [ {} ] is null. Skipping.",
+                        mergeMode.name(),
+                        Text.makeCanonicalPath(resource.getPath() + key));
+
+                continue;
+            }
+
+            final ModifiableValueMap resourceProperties = resourceToUpdate.adaptTo(ModifiableValueMap.class);
+            final Node node = resourceToUpdate.adaptTo(Node.class);
+
+            if (propertyToUpdate != null && (mergeMode.overwriteProps || !resourceProperties.containsKey(propertyToUpdate))) {
+                if (node.hasProperty(propertyToUpdate) && node.getProperty(propertyToUpdate).isMultiple() && mergeMode.appendArrays) {
                     appendArray(resourceProperties, entry);
                 } else if (value != null) {
-                    resourceProperties.put(key, value);
+                    resourceProperties.put(propertyToUpdate, value);
                 }
             }
         }
 
         LOG.debug("End of populateMetadataFromRow");
     }
+
+    /**
+     * Derive the property name from a relative property path.
+     * 
+     * @param relativePropertyPath the relative property path to derive the property name from (the last path segment)
+     * @return the property path
+     */
+    private String getRelativePropertyName(String relativePropertyPath) {
+        return StringUtils.defaultIfBlank(StringUtils.substringAfterLast(relativePropertyPath, "/"), relativePropertyPath);
+    }
+
+    /**
+     * Derives the resource the relative property resides on.
+     *
+     * @param resource the resource the relativePropertyPath is relative to
+     * @param relativePropertyPath the relativePropertyPath
+     * @return the resource the relative property resides son.
+     */
+    private Resource getOrCreateRelativePropertyResource(Resource resource, String relativePropertyPath) throws RepositoryException {
+        String relPropertyPathPrefix = StringUtils.contains(relativePropertyPath, "/") ? StringUtils.substringBeforeLast(relativePropertyPath, "/") : null;
+        String canonicalPath = com.day.text.Text.makeCanonicalPath(resource.getPath() + (relPropertyPathPrefix != null ? ("/" + relPropertyPathPrefix) : StringUtils.EMPTY));
+
+        if (mergeMode.create && resource.getResourceResolver().getResource(canonicalPath) == null) {
+            // Create path relative property path
+            JcrUtils.getOrCreateByPath(canonicalPath,
+                    defaultRelPropertyPathType,
+                    defaultRelPropertyPathType,
+                    resource.getResourceResolver().adaptTo(Session.class),
+                    false);
+        }
+
+        return resource.getResourceResolver().getResource(canonicalPath);
+    }
+
 
     /**
      * Create map of properties for node.
@@ -396,7 +463,10 @@ public class DataImporter extends ProcessDefinition {
      */
     private Map<String, Object> createPropertyMap(Map<String, CompositeVariant> row) {
         return row.entrySet().stream()
-                .filter(e -> !e.getKey().equals(ROW_NUMBER) && !e.getKey().equals(PATH) && e.getValue() != null && !e.getKey().contains(SLASH))
+                .filter(e -> !e.getKey().equals(ROW_NUMBER) &&
+                                !e.getKey().equals(PATH) &&
+                                e.getValue() != null &&
+                                (!e.getKey().contains(SLASH)) || e.getKey().startsWith("./") || e.getKey().startsWith("../"))
                 .collect(
                         Collectors.toMap(
                                 e -> e.getKey(),
