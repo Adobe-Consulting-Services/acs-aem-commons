@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 
+- #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
 - #2818 - Added support for relative property paths in Data Importer
 
 ## 5.2.0 - 2022-03-03
