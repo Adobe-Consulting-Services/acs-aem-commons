@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2043 - Switch to filevault-package-maven-plugin
 - #2781 - Remove Adobe repositories from pom.xml
 
+### Added 
+
+- #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
+
 ## 5.2.0 - 2022-03-03
 
 ### Fixed
