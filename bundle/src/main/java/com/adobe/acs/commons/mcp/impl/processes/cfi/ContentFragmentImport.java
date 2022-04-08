@@ -37,6 +37,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -310,8 +311,7 @@ public class ContentFragmentImport extends ProcessDefinition {
     private void setContentElements(ContentFragment cf, Map<String, CompositeVariant> row) throws ContentFragmentException {
         for (Iterator<ContentElement> i = cf.getElements(); i.hasNext();) {
             ContentElement contentElement = i.next();
-            String elementName = contentElement.getName();
-            String value = getString(row, elementName);
+            String value = getString(row, contentElement);
             String currentValue = contentElement.getContent();
 
             if (!String.valueOf(value).equals(String.valueOf(currentValue))) {
@@ -324,6 +324,23 @@ public class ContentFragmentImport extends ProcessDefinition {
         CompositeVariant v = row.get(attr.toLowerCase());  // Workaround issue #1428
         if (v != null) {
             return (String) v.getValueAs(String.class);
+        } else {
+            return null;
+        }
+    }
+
+    private String getString(Map<String, CompositeVariant> row, ContentElement contentElement) {
+        String elementName = contentElement.getName();
+        String dataType = contentElement.getValue().getDataType().getTypeString();
+        CompositeVariant v = row.get(elementName.toLowerCase());  // Workaround issue #1428
+        if (v != null) {
+            Object value = v.getValue();
+            if(value instanceof Calendar && dataType.matches("date|calendar")){
+                long timestamp = ((Calendar)value).getTimeInMillis();
+                return String.valueOf(timestamp);
+            } else {
+                return (String) v.getValueAs(String.class);
+            }
         } else {
             return null;
         }
