@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
 
+### Fixed
+
+- #2822 - Resolved OakPal issue 92 - False positive during build
+
 ## 5.2.0 - 2022-03-03
 
 ### Fixed
