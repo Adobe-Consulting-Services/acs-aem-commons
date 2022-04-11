@@ -27,10 +27,17 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.cq.dam.cfm.ContentFragmentException;
+
+import java.util.Date;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -38,6 +45,8 @@ import javax.jcr.Workspace;
 import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
+
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -90,7 +99,7 @@ public class ContentFragmentImportTest {
     @Test
     public void importOne() {
         importer.dryRunMode = false;
-        addImportRow("/test/path/fragment1", "Fragment 1", "element1", "element1value");
+        addImportRow("/test/path/fragment1", "Fragment 1", Collections.singletonMap("element1", "element1value"));
         mockFragment.elements.put("element1", null);
         instance.run(rr);
         assertEquals("Should finish process", instance.getInfo().getProgress(), 1.0, 0.0001);
@@ -100,7 +109,7 @@ public class ContentFragmentImportTest {
     @Test
     public void assertFolderCreation() {
         importer.dryRunMode = false;
-        addImportRow("/test/path/fragment1", "Fragment 1", "element1", "element1value");
+        addImportRow("/test/path/fragment1", "Fragment 1", Collections.singletonMap("element1", "element1value"));
         mockFragment.elements.put("element1", null);
         instance.run(rr);
         assertTrue("Should have created test folder", createdNodePaths.contains("/test/path"));
@@ -109,16 +118,39 @@ public class ContentFragmentImportTest {
         assertTrue("Should have created fragment1 metadata", createdNodePaths.contains("/test/path/fragment1/jcr:content"));
     }
 
+    @Test
+    public void convertExcelDateToLong() {
+
+        OffsetDateTime ta = OffsetDateTime.parse("2021-12-03T10:15:30+00:00");
+        Date date = Date.from(ta.toInstant());
+        Calendar calendar  = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        String expectedTimeMs = String.valueOf(date.getTime());
+
+        importer.dryRunMode = false;
+        addImportRow("/test/path/fragment1", "Fragment 1",
+                ImmutableMap.of(
+                        "date1value", Date.from(ta.toInstant()),
+                        "date2value", calendar));
+        mockFragment.elements.put("date1value", null);
+        mockFragment.elements.put("date2value", null);
+        instance.run(rr);
+        assertEquals("Should finish process", instance.getInfo().getProgress(), 1.0, 0.0001);
+
+        assertEquals("Date value (date1value) should be converted to Long", expectedTimeMs, mockFragment.getElement("date1value").getContent());
+        assertEquals("Calendar value (date2value) should be converted to Long", expectedTimeMs, mockFragment.getElement("date2value").getContent());
+    }
+
     //------------------------------------------------------------------------------------------------------------------
-    private void addImportRow(String path, String title, String... values) {
+    private void addImportRow(String path, String title, Map<String, Object> values) {
         Map<String, CompositeVariant> row = new HashMap<>();
         row.put(PATH, new CompositeVariant(path));
         row.put(FOLDER_TITLE, new CompositeVariant("test folder"));
         row.put(NAME, new CompositeVariant(StringUtils.substringAfter(path, "/")));
         row.put(TITLE, new CompositeVariant(title));
         row.put(TEMPLATE, new CompositeVariant("/test/template"));
-        for (int i = 0; i < values.length - 1; i += 2) {
-            row.put(values[i], new CompositeVariant(values[i + 1]));
+        for (String fieldName : values.keySet()) {
+            row.put(fieldName, new CompositeVariant(values.get(fieldName)));
         }
         importer.spreadsheet.appendData(Collections.singletonList(row));
     }

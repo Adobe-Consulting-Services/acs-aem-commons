@@ -39,6 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
@@ -335,8 +336,11 @@ public class ContentFragmentImport extends ProcessDefinition {
         CompositeVariant v = row.get(elementName.toLowerCase());  // Workaround issue #1428
         if (v != null) {
             Object value = v.getValue();
-            if(value instanceof Calendar && dataType.matches("date|calendar")){
-                long timestamp = ((Calendar)value).getTimeInMillis();
+            if(value instanceof Calendar && dataType.matches("date|calendar")) {
+                long timestamp = ((Calendar) value).getTimeInMillis();
+                return String.valueOf(timestamp);
+            } else if (value instanceof Date && dataType.matches("date|calendar")) {
+                long timestamp = ((Date) value).getTime();
                 return String.valueOf(timestamp);
             } else {
                 return (String) v.getValueAs(String.class);

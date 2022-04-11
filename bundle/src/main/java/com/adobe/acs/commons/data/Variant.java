@@ -229,7 +229,7 @@ public final class Variant {
         } else if (valueType == Instant.class) {
             setDateVal(new Date(((Instant) val).toEpochMilli()));
             baseType = Calendar.class;
-        } else if (valueType == Calendar.class) {
+        } else if (Calendar.class.isAssignableFrom(valueType)) {
             setDateVal(((Calendar) val).getTime());
             baseType = Calendar.class;
         } else {
@@ -363,7 +363,7 @@ public final class Variant {
             return (T) toDate();
         } else if (type == Instant.class) {
             return (T) toDate().toInstant();
-        } else if (type == Calendar.class) {
+        } else if (Calendar.class.isAssignableFrom(type)) {
             Calendar c = Calendar.getInstance();
             c.setTime(toDate());
             return (T) c;
