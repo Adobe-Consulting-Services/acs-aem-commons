@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2043 - Switch to filevault-package-maven-plugin
 - #2781 - Remove Adobe repositories from pom.xml
+- #2822 - Removed nodetypes-aem640.cnd from oakpal-checks. Superseded by biz.netcentric.aem:aem-nodetypes dependency.
 
 ### Added 
 
