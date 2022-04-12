@@ -353,10 +353,15 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <artifactId>acs-aem-commons-oakpal-checks</artifactId>
                             <version>${project.version}</version>
                         </dependency>
+                        <dependency>
+                            <groupId>biz.netcentric.aem</groupId>
+                            <artifactId>aem-nodetypes</artifactId>
+                            <version>6.5.7.0</version>
+                        </dependency>
                     </dependencies>
                     <configuration>
                         <cndNames>
-                            <cndName>nodetypes-aem640.cnd</cndName>
+                            <name>aem.cnd</name>
                         </cndNames>
                         <jcrNamespaces>
                             <jcrNamespace>
@@ -367,6 +372,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <jcrPrivileges>
                             <jcrPrivilege>crx:replicate</jcrPrivilege>
                         </jcrPrivileges>
+                        <forcedRoots>
+                            <root>
+                                <path>/apps</path>
+                                <primaryType>nt:folder</primaryType>
+                            </root>
+                        </forcedRoots>
                     </configuration>
                 </plugin>
                 <plugin>
