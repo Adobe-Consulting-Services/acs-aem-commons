@@ -14,10 +14,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2043 - Switch to filevault-package-maven-plugin
 - #2781 - Remove Adobe repositories from pom.xml
+- #2822 - Removed nodetypes-aem640.cnd from oakpal-checks. Superseded by biz.netcentric.aem:aem-nodetypes dependency.
 
 ### Added 
 
 - #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
+
+### Fixed
+
+- #2822 - Resolved OakPal issue 92 - False positive during build
 
 ## 5.2.0 - 2022-03-03
 

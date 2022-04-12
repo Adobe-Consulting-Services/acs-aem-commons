@@ -152,7 +152,6 @@
                 </executions>
             </plugin>
 
-<!-- disable oakpal due to false positives: https://github.com/adamcin/oakpal/issues/92 
           <plugin>
                 <groupId>net.adamcin.oakpal</groupId>
                 <artifactId>oakpal-maven-plugin</artifactId>
@@ -161,6 +160,21 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
+                    <checks>
+                        <!-- skip this package when evaluating composite store alignment,
+                        because it is a container type with subpackages that also contains OSGi configs -->
+                        <check>
+                            <name>acs-internal/apps-composite-store-alignment</name>
+                            <config>
+                                <scopePackageIds>
+                                    <scopePackageId>
+                                        <pattern>.*:acs-aem-commons-content:.*</pattern>
+                                        <type>exclude</type>
+                                    </scopePackageId>
+                                </scopePackageIds>
+                            </config>
+                        </check>
+                    </checks>
                 </configuration>
                 <executions>
                     <execution>
@@ -225,7 +239,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin> -->
+            </plugin>
 
             <!-- avoid failing on JS vulnerabilities - TODO to fix -->
             <plugin>
