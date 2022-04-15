@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+## 5.3.0 - 2022-04-15
+
 ### Fixed
 
 - #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in #2772)
