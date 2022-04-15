@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+- #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
+
+### Changed
+
+- #2043 - Switch to filevault-package-maven-plugin
+- #2781 - Remove Adobe repositories from pom.xml
+- #2822 - Removed nodetypes-aem640.cnd from oakpal-checks. Superseded by biz.netcentric.aem:aem-nodetypes dependency.
+
+### Added 
+
+- #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
+
+### Fixed
+
+- #2822 - Resolved OakPal issue 92 - False positive during build
 
 - #2794 - Added context prefix for redirect rules feature
 
