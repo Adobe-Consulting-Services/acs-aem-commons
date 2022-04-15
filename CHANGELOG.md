@@ -13,28 +13,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in #2772)
 - #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
-
-### Fixed
-
-- #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
 - #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
-- 
+- #2822 - Resolved OakPal issue 92 - False positive during build
+- #2794 - Added context prefix for redirect rules feature
+
 ### Changed
 
 - #2043 - Switch to filevault-package-maven-plugin
 - #2781 - Remove Adobe repositories from pom.xml
+- #2805 - Remove "min" packages
 - #2822 - Removed nodetypes-aem640.cnd from oakpal-checks. Superseded by biz.netcentric.aem:aem-nodetypes dependency.
 
 ### Added
 
 - #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
 - #2818 - Added support for relative property paths in Data Importer
-
-### Fixed
-
-- #2822 - Resolved OakPal issue 92 - False positive during build
-
-- #2794 - Added context prefix for redirect rules feature
 
 ## 5.2.0 - 2022-03-03
 

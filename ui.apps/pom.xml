@@ -115,24 +115,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>oakpal-scan-min</id>
-                        <goals>
-                            <goal>scan-many</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            <scanArtifacts>
-                                <artifact>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>min</classifier>
-                                    <type>zip</type>
-                                </artifact>
-                            </scanArtifacts>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>oakpal-verify</id>
                         <goals>
                             <goal>verify</goal>
@@ -141,7 +123,6 @@
                             <summaryFiles>
                                 <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
                                 <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
@@ -184,46 +165,6 @@
                         <exclude>**/*.xml</exclude>
                     </excludes>
                 </configuration>
-            </plugin>
-
-            <!-- configuration to create minimal package -->
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>groovy-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-min-package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>${pom.basedir}/../content/src/main/script/CreateMinPackage.groovy</source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}-min.zip</file>
-                                    <type>zip</type>
-                                    <classifier>min</classifier>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
