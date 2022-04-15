@@ -258,6 +258,18 @@ public class Spreadsheet {
     }
 
     /**
+     * Sort the data rows by the provided column name
+     */
+    public void sortRows(String columnName) {
+        Collections.sort(dataRows, (a, b) -> {
+            String aStr = a.get(columnName) != null ? a.get(columnName).toString() : "";
+            String bStr = b.get(columnName) != null ? b.get(columnName).toString() : "";
+
+            return bStr.compareTo(aStr);
+        });
+    }
+
+    /**
      * Append data to the sheet.
      *
      * @param dataRows the data to append
