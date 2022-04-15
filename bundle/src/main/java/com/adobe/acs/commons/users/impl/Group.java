@@ -22,6 +22,7 @@ package com.adobe.acs.commons.users.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ public class Group extends AbstractAuthorizable {
     }
 
     public List<String> getMemberOf() {
-        return memberOf;
+        return Collections.unmodifiableList(memberOf);
     }
 
     @Override

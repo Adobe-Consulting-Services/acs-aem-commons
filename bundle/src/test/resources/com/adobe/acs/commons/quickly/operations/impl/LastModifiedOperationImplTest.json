@@ -1,0 +1,97 @@
+{
+  "en" : {
+    "jcr:primaryType" : "cq:Page",
+    "jcr:content" : {
+      "jcr:primaryType": "cq:PageContent",
+      "cq:lastModified": "2022-01-16T12:00:00.000Z"
+    },
+    "toolbar" : {
+      "jcr:primaryType" : "cq:Page",
+      "jcr:content" : {
+        "jcr:primaryType": "cq:PageContent"
+      }
+    }
+  },
+  "oneref": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "/content/geometrixx/en"
+    }
+  },
+  "noref": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent"
+    }
+  },
+  "badref": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "/content/other"
+    }
+  },
+  "tworefs": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "/content/geometrixx/en",
+      "path1": "/content/geometrixx/en/toolbar"
+    }
+  },
+  "tworefsSamePage": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "/content/geometrixx/en",
+      "path1": "/content/geometrixx/en"
+    }
+  },
+  "tworefsChild": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "/content/geometrixx/en",
+      "test" : {
+        "path": "/content/geometrixx/en/toolbar"
+      }
+    }
+  },
+  "mvRef": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": [
+        "/content/geometrixx/en",
+        "/content/geometrixx/en/toolbar"
+      ]
+    }
+  },
+  "mvRefSamePage": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": [
+        "/content/geometrixx/en",
+        "/content/geometrixx/en/toolbar"
+      ],
+      "path1": "/content/geometrixx/en/toolbar"
+    }
+  },
+  "commaSeparated": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "\"/content/geometrixx/en\",\"/content/geometrixx/en/toolbar\""
+    }
+  },
+  "reftoself": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "path": "/content/geometrixx/en",
+      "path1": "/content/geometrixx/reftoself"
+    }
+  }
+}

@@ -22,18 +22,23 @@ package com.adobe.acs.commons.replication;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class AgentIdsAgentFilter implements AgentFilter {
 
     private final List<String> agentIds;
 
     public AgentIdsAgentFilter(List<String> agentIds) {
-        this.agentIds = agentIds;
+        this.agentIds = Optional.ofNullable(agentIds)
+                .map(list -> (List<String>) new ArrayList<>(list))
+                .orElse(Collections.emptyList());
     }
 
     public boolean isIncluded(Agent agent) {
-        if (agentIds == null || agentIds.size() == 0) {
+        if (agentIds.isEmpty()) {
             return true;
         } else {
             return agentIds.contains(agent.getId());

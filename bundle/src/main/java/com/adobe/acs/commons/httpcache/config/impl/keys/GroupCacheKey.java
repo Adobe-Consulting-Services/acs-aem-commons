@@ -32,8 +32,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The GroupCacheKey
@@ -49,12 +52,16 @@ class GroupCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
             HttpCacheKeyCreationException {
 
         super(request, cacheConfig);
-        this.cacheKeyUserGroups = userGroups;
+        this.cacheKeyUserGroups = Optional.ofNullable(userGroups)
+                .map(list -> (List<String>) new ArrayList<>(list))
+                .orElse(Collections.emptyList());
     }
 
     public GroupCacheKey(String uri, HttpCacheConfig cacheConfig, List<String> userGroups) throws HttpCacheKeyCreationException {
         super(uri, cacheConfig);
-        this.cacheKeyUserGroups = userGroups;
+        this.cacheKeyUserGroups = Optional.ofNullable(userGroups)
+                .map(list -> (List<String>) new ArrayList<>(list))
+                .orElse(Collections.emptyList());
     }
 
     @Override

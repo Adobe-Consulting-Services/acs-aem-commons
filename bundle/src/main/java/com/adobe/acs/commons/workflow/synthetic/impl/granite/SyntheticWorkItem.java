@@ -32,6 +32,7 @@ import com.adobe.granite.workflow.model.WorkflowNode;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 public class SyntheticWorkItem implements InvocationHandler {
@@ -109,11 +110,11 @@ public class SyntheticWorkItem implements InvocationHandler {
     }
 
     public Date getDueTime() {
-        return dueTime;
+        return this.dueTime == null ? null : (Date) this.dueTime.clone();
     }
 
     public Date getProgressBeginTime() {
-        return progressBeginTime;
+        return this.progressBeginTime == null ? null : (Date) this.progressBeginTime.clone();
     }
 
     public final void setTimeEnded(final Date timeEnded) {
@@ -133,11 +134,11 @@ public class SyntheticWorkItem implements InvocationHandler {
     }
 
     public void setDueTime(Date date) {
-        dueTime = date;
+        dueTime = Optional.ofNullable(date).map(date1 -> (Date) date1.clone()).orElse(null);
     }
 
     public void setProgressBeginTime(Date date) {
-        progressBeginTime = date;
+        progressBeginTime = Optional.ofNullable(date).map(date1 -> (Date) date1.clone()).orElse(null);
     }
 
     public void setPriority(InboxItem.Priority priority) {

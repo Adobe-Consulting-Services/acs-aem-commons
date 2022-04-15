@@ -112,7 +112,7 @@ public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
                     + "set rules."));
         } else {
             // Create JCR Package; Defaults should always be passed in via Request Parameters, but just in case
-            final JcrPackage jcrPackage = getPackageHelper().createPackageFromPathFilterSets(packageResources,
+            try (final JcrPackage jcrPackage = getPackageHelper().createPackageFromPathFilterSets(packageResources,
                     request.getResourceResolver().adaptTo(Session.class),
                     properties.get(PACKAGE_GROUP_NAME, getDefaultPackageGroupName()),
                     properties.get(PACKAGE_NAME, getDefaultPackageName()),
@@ -120,19 +120,19 @@ public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
                     PackageHelper.ConflictResolution.valueOf(properties.get(CONFLICT_RESOLUTION,
                             PackageHelper.ConflictResolution.IncrementVersion.toString())),
                     packageDefinitionProperties
-            );
+            )) {
+                String thumbnailPath = getPackageThumbnailPath();
 
-            String thumbnailPath = getPackageThumbnailPath();
+                if (thumbnailPath != null) {
+                    // Add thumbnail to the package definition
+                    getPackageHelper().addThumbnail(jcrPackage,
+                            request.getResourceResolver().getResource(thumbnailPath));
+                }
 
-            if (thumbnailPath != null) {
-                // Add thumbnail to the package definition
-                getPackageHelper().addThumbnail(jcrPackage,
-                        request.getResourceResolver().getResource(thumbnailPath));
+                log.debug("Successfully created JCR package");
+                response.getWriter().print(
+                        getPackageHelper().getSuccessJSON(jcrPackage));
             }
-
-            log.debug("Successfully created JCR package");
-            response.getWriter().print(
-                    getPackageHelper().getSuccessJSON(jcrPackage));
         }
     }
 

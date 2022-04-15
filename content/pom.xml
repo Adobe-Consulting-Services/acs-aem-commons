@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.1.1-SNAPSHOT</version>
+        <version>5.2.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -16,68 +16,29 @@
 
     <artifactId>acs-aem-commons-content</artifactId>
     <name>ACS AEM Commons Package</name>
+    <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps, acs-aem-commons-ui.content, the OSGi bundle and configuration.</description>
     <packaging>content-package</packaging>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/content/jcr_root</directory>
-                <excludes>
-                    <exclude>**/.vlt</exclude>
-                    <exclude>**/.vltignore</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/content/META-INF/vault/definition</directory>
-                <targetPath>../vault-work/META-INF/vault/definition</targetPath>
-            </resource>
-            <resource>
-                <directory>src/main/content/META-INF/vault</directory>
-                <includes>
-                    <include>nodetypes.cnd</include>
-                    <include>privileges.xml</include>
-                </includes>
-                <targetPath>../vault-work/META-INF/vault</targetPath>
-            </resource>
-            <resource>
-                <directory>src/main/resources/META-INF</directory>
-                <targetPath>../vault-work/META-INF</targetPath>
-            </resource>
-        </resources>
-
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <directory>${maven.multiModuleProjectDirectory}/src/test/resources</directory>
-            </testResource>
-        </testResources>
-
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
-                    <includeEmptyDirs>true</includeEmptyDirs>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <group>adobe/consulting</group>
-                    <properties>
-                        <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps and acs-aem-commons-ui.content.</description>
-                    </properties>
-                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
+                    <packageType>container</packageType>
+                    <embeddeds>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-bundle</artifactId>
+                            <target>/apps/acs-commons/install</target>
+                            <filter>true</filter>
+                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                        </embedded>
+                    </embeddeds>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>default-package</id>
+                        <id>default-generate-metadata</id>
                         <configuration>
                             <subPackages>
                                 <subPackage>
@@ -85,38 +46,50 @@
                                     <artifactId>acs-aem-commons-ui.apps</artifactId>
                                     <scope>runtime</scope> <!-- this is hacky, but seems to be the easiest way to include the min artifacts since there's no way to specify a blank classifier -->
                                     <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
                                 </subPackage>
                                 <subPackage>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
                                     <scope>runtime</scope>
                                     <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
                                 </subPackage>
                             </subPackages>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>build-min-package</id>
-                        <phase>package</phase>
+                        <id>generate-metadata-min-package-</id>
                         <goals>
-                            <goal>package</goal>
+                            <goal>generate-metadata</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.build.finalName}-min</finalName>
+                            <classifier>min</classifier>
                             <subPackages>
                                 <subPackage>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.apps</artifactId>
                                     <classifier>min</classifier>
                                     <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
                                 </subPackage>
                                 <subPackage>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
                                     <classifier>min</classifier>
                                     <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
                                 </subPackage>
                             </subPackages>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build-min-package</id>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>min</classifier>
                         </configuration>
                     </execution>
                 </executions>
@@ -159,7 +132,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>attach-artifacts</id>
@@ -180,7 +152,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
+          <plugin>
                 <groupId>net.adamcin.oakpal</groupId>
                 <artifactId>oakpal-maven-plugin</artifactId>
                 <configuration>
@@ -188,6 +160,21 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
+                    <checks>
+                        <!-- skip this package when evaluating composite store alignment,
+                        because it is a container type with subpackages that also contains OSGi configs -->
+                        <check>
+                            <name>acs-internal/apps-composite-store-alignment</name>
+                            <config>
+                                <scopePackageIds>
+                                    <scopePackageId>
+                                        <pattern>.*:acs-aem-commons-content:.*</pattern>
+                                        <type>exclude</type>
+                                    </scopePackageId>
+                                </scopePackageIds>
+                            </config>
+                        </check>
+                    </checks>
                 </configuration>
                 <executions>
                     <execution>
@@ -267,6 +254,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-bundle</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-ui.apps</artifactId>

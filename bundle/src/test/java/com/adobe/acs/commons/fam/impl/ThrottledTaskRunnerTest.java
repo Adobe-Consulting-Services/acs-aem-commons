@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.management.NotCompliantMBeanException;
+
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class ThrottledTaskRunnerTest {
 
@@ -41,6 +44,7 @@ public class ThrottledTaskRunnerTest {
 
     @Test
     public void testExecutionOrderOverflow() throws NotCompliantMBeanException, InterruptedException {
+        assumeFalse("Test unstable on Mac OS, skipping execution on that OS!", SystemUtils.IS_OS_MAC);
         ThrottledTaskRunner ttr = osgiContext.registerService(new ThrottledTaskRunnerImpl());
 
         List<Long> executions = Collections.synchronizedList(new ArrayList<>());
@@ -86,6 +90,7 @@ public class ThrottledTaskRunnerTest {
 
     @Test
     public void testExecutionOrder() throws NotCompliantMBeanException, InterruptedException {
+        assumeFalse("Test unstable on Mac OS, skipping execution on that OS!", SystemUtils.IS_OS_MAC);
         ThrottledTaskRunner ttr = osgiContext.registerService(new ThrottledTaskRunnerImpl());
 
         final List<Long> executions = Collections.synchronizedList(new ArrayList<>());

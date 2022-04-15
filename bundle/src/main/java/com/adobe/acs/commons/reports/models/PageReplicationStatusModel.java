@@ -23,6 +23,7 @@ import java.util.Calendar;
 
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -53,6 +54,9 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
   @OSGiService
   private Replicator replicator;
 
+  @OSGiService
+  private ReplicationStatusManager replicationStatusManager;
+
   @Self
   private Resource resource;
 
@@ -65,18 +69,12 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
     return lastModified;
   }
 
-  public String getReplicationStatus() {
+  private String getReplicationStatus(Resource targetResource) {
+    final Resource replicationResource = replicationStatusManager.getReplicationStatusResource(targetResource.getPath(), targetResource.getResourceResolver());
 
-    Session session = resource.getResourceResolver().adaptTo(Session.class);
-    String path = resource.getPath();
-    if (path.contains(JcrConstants.JCR_CONTENT)) {
-      path = StringUtils.substringAfter(path, JcrConstants.JCR_CONTENT) + JcrConstants.JCR_CONTENT;
-    } else {
-      path += "/" + JcrConstants.JCR_CONTENT;
-    }
+    log.debug("Getting replication status for {}", replicationResource.getPath());
 
-    log.debug("Getting replication status for {}", path);
-    ReplicationStatus status = replicator.getReplicationStatus(session, path);
+    ReplicationStatus status = replicationResource.adaptTo(ReplicationStatus.class);
 
     Status rStatus = Status.NOT_ACTIVATED;
     if (status != null) {
@@ -85,22 +83,31 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
       } else if (status.isPending()) {
         rStatus = Status.IN_PROGRESS;
       } else if (status.isActivated()) {
-        Calendar lastModified = getLastModified(resource.getResourceResolver(), path);
+        Calendar lastModified = getLastModified(targetResource.getResourceResolver(), replicationResource.getPath());
         if (lastModified != null && status.getLastPublished() != null
-            && lastModified.after(status.getLastPublished())) {
+                && lastModified.after(status.getLastPublished())) {
           rStatus = Status.MODIFIED;
         } else {
           rStatus = Status.ACTIVATED;
         }
       }
     }
-    
+
     log.debug("Retrieved replication status {}", rStatus);
     return rStatus.toString();
+
+  }
+
+  public String getReplicationStatus() {
+    return getReplicationStatus(resource);
   }
 
   @Override
   public String getValue(Object result) {
-    return getReplicationStatus();
+    if (result instanceof Resource) {
+      return getReplicationStatus((Resource) result);
+    } else {
+      return "UNKNOWN";
+    }
   }
 }

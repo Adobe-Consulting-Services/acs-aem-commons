@@ -41,6 +41,7 @@ import javax.jcr.Session;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SyntheticWorkflowSession implements InvocationHandler {
@@ -152,12 +153,12 @@ public class SyntheticWorkflowSession implements InvocationHandler {
 
     public final List<Route> getRoutes() throws WorkflowException {
         log.debug("Synthetic Workflow does not support routes; Defaults to a single Synthetic Route");
-        return this.routes;
+        return Collections.unmodifiableList(this.routes);
     }
 
     public final List<Route> getBackRoutes() throws WorkflowException {
         log.debug("Synthetic Workflow does not back support routes; Defaults to a single Synthetic Route");
-        return this.backRoutes;
+        return Collections.unmodifiableList(this.backRoutes);
     }
 
     public final WorkflowData newWorkflowData(final String payloadType, final Object payload) {

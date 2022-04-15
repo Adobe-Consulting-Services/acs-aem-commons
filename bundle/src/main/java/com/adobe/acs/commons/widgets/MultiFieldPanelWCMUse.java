@@ -45,7 +45,7 @@ public class MultiFieldPanelWCMUse implements Use {
     private List<Map<String, String>> values = Collections.emptyList();
 
     public List<Map<String, String>> getValues() {
-        return values;
+        return Collections.unmodifiableList(values);
     }
 
     @Override

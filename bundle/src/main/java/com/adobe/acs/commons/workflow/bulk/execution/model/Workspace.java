@@ -40,6 +40,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 @Model(adaptables = Resource.class)
@@ -257,7 +258,7 @@ public class Workspace {
     }
 
     public List<Failure> getFailures() {
-        return failures;
+        return Collections.unmodifiableList(failures);
     }
 
 

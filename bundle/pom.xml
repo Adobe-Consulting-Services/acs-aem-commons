@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.1.1-SNAPSHOT</version>
+        <version>5.2.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -15,9 +15,8 @@
     <!-- ====================================================================== -->
 
     <artifactId>acs-aem-commons-bundle</artifactId>
-    <packaging>bundle</packaging>
     <name>ACS AEM Commons Bundle</name>
-    <description>Main ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
+    <description>Core ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
 
     <properties>
         <jjwt.version>0.11.2</jjwt.version>
@@ -30,155 +29,21 @@
 
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>generate-scr-metadata-for-unittests</id>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                        <phase>process-classes</phase>
-                        <configuration>
-                            <exportScr>true</exportScr>
-                            <instructions>
-                                <_dsannotations>*</_dsannotations>
-                                <_metatypeannotations>*</_metatypeannotations>
-                            </instructions>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <supportIncrementalBuild>true</supportIncrementalBuild>
-                    <exportScr>true</exportScr>
-                    <instructions>
-                        <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
-                        <Import-Package>
-                            com.adobe.cq.dialogconversion;resolution:=optional,
-                            com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 
-								Ingestor -->
-                            com.github.jknack.handlebars;resolution:=optional, <!-- only required 
-								for Report Builder -->
-                            com.day.cq.replication;version="[6.4,7)", <!-- using a wider version 
-								range for forward compatibility -->
-                            org.apache.poi.ss.usermodel;version="[3.0,6)",  <!-- using a wider version 
-								range for forward compatibility -->
-                            org.apache.poi.ss.util;version="[3.0,6)",
-                            org.apache.poi.xssf.usermodel;version="[2.0,6)",
-                            twitter4j*;version="[3.0.5,4)";resolution:=optional,
-                            org.apache.sling.xss;version="[1.1,3)", <!-- using a wider version 
-								range for forward compatibility -->
-                            com.github.benmanes.caffeine*;resolution:=optional,
-                            com.fasterxml.jackson.core;version="[2.8,3)";resolution:=optional,
-                            com.fasterxml.jackson.databind;version="[2.8,3)";resolution:=optional,
-                            <!-- wider version range: use 2.1 as AEM 6.4 still uses it, 2.2 is for AEM 6.5 -->
-                            <!-- required for jwt library used by Adobe I/O APIs -->
-                            javax.xml.bind;version="[2.1,3)",
-                            <!-- this explicit import can be removed when we no longer support 
-                            a version of AEM that supports java versions before 11 -->
-                            javax.annotation;version=0.0.0,
-                            !com.google.errorprone.annotations,
-                            !com.google.errorprone.annotations.concurrent,
-                            !org.bouncycastle.jce.*,
-                            !org.checkerframework.checker.nullness.qual,
-                            !android.util.*,
-                            <!-- shaded libraries -->
-                            !com.google.common.*,
-                            !com.google.thirdparty.*,
-                            !com.jcraft.*,
-                            !io.jsonwebtoken.*,
-                            *
-                        </Import-Package>
-                        <Sling-Model-Packages>
-                            com.adobe.acs.commons.cloudconfig,
-                            com.adobe.acs.commons.marketo,
-                            com.adobe.acs.commons.redirectmaps.models,
-                            com.adobe.acs.commons.version.model,
-                            com.adobe.acs.commons.wcm.comparisons.model,
-                            com.adobe.acs.commons.workflow.bulk.execution.model,
-                            com.adobe.acs.commons.mcp.model,
-                            com.adobe.acs.commons.reports.models,
-                            com.adobe.acs.commons.indesign.dynamicdeckdynamo.models,
-                            com.adobe.acs.commons.sorter,
-                            com.adobe.acs.commons.redirects.models
-                        </Sling-Model-Packages>
-                    </instructions>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-jar-plugin</artifactId>
+                 <configuration>
+                     <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                 </configuration>
             </plugin>
-            <!-- This bit of ugliness is because both the OSGi standard annotation 
-            process (in the bundle plugin) and the legacy SCR process (in the scr plugin) 
-            both blow away the current target/classes/OSGI-INF directory. So what happens 
-            here is that first the bundle plugin runs (populating target/classes/OSGI-INF), 
-            then we backup that directory, then run the scr plugin, and then merge the 
-            two directories. -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>backup-scr-files</id>
-                        <phase>process-classes</phase>
-                        <configuration>
-                            <target>
-                                <move todir="${project.build.outputDirectory}/OSGI-INF.bak">
-                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF" />
-                                </move>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>merge-scr-files</id>
-                        <phase>generate-test-sources</phase>
-                        <configuration>
-                            <target>
-                                <move todir="${project.build.outputDirectory}/OSGI-INF" overwrite="false">
-                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF.bak" />
-                                </move>
-                                <delete dir="${project.build.outputDirectory}/OSGI-INF.bak" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>force-l10n-into-bundle</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <jar update="true" destfile="${project.build.directory}/${project.build.finalName}.jar">
-                                    <fileset dir="${project.build.outputDirectory}" includes="OSGI-INF/l10n/**" />
-                                </jar>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-scr-descriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <service.vendor>Adobe Systems Incorporated</service.vendor>
-                            </properties>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-baseline-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
@@ -273,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -668,17 +533,27 @@
         <!-- mockserver-netty pulls in jaxb-api 2.4, which isn't compatible with AEM 6.4 -->
         <dependency>
             <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty</artifactId>
-            <version>5.6.0</version>
+            <artifactId>mockserver-netty-no-dependencies</artifactId>
+            <version>5.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-junit-rule</artifactId>
+            <version>5.13.2</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-netty</artifactId>
                 </exclusion>
                 <exclusion>
-                  <groupId>com.google.code.findbugs</groupId>
-                  <artifactId>jsr305</artifactId>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-client-java</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

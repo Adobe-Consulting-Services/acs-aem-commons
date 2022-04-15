@@ -67,7 +67,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Activate
-    public void activate(ComponentContext context) throws LoginException {
+    public synchronized void activate(ComponentContext context) throws LoginException {
         log.trace("activate");
         bctx = context.getBundleContext();
         refreshCache();
@@ -75,7 +75,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Deactivate
-    public void deactivate(ComponentContext context) throws LoginException {
+    public synchronized void deactivate(ComponentContext context) throws LoginException {
         log.trace("deactivate");
         for (String id : registeredServices.keySet()) {
             unregisterService(id);

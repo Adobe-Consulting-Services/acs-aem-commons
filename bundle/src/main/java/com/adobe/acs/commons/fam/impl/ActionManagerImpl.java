@@ -140,7 +140,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public List<Failure> getFailureList() {
-        return failures;
+        return Collections.unmodifiableList(failures);
     }
 
     @Override
@@ -300,7 +300,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         }
         handlerList.forEach(handler -> {
             try {
-                this.withResolver(res -> handler.accept(getFailureList(), res));
+                this.withResolver(res -> handler.accept(this.failures, res));
             } catch (Exception ex) {
                 LOG.error("Error in error handler for action {}", getName(), ex);
             }

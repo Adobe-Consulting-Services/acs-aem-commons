@@ -68,7 +68,7 @@
 
     <div class="page" role="main"
          ng-controller="MainCtrl"
-         ng-init="app.resource = '${xss:encodeForJSString(xssAPI, model.pathA)}'; app.resourceB = '${xss:encodeForJSString(xssAPI, model.pathB)}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${model.versionA}'; app.b = '${model.versionB}'; init();">
+         ng-init="app.resource = '${xss:encodeForJSString(xssAPI, model.pathA)}'; app.resourceB = '${xss:encodeForJSString(xssAPI, model.pathB)}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${xss:encodeForJSString(xssAPI, model.versionA)}'; app.b = '${xss:encodeForJSString(xssAPI, model.versionB)}'; init();">
 
         <div class="content">
             <div class="content-container">

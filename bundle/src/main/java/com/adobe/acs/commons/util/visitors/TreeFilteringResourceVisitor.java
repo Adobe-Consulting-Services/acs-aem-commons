@@ -23,6 +23,9 @@ import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Tree visitor which allows special cases such as how to handle child nodes
  * which will not be traversed further.
@@ -57,7 +60,9 @@ public class TreeFilteringResourceVisitor extends SimpleFilteringResourceVisitor
      * containers.
      */
     public TreeFilteringResourceVisitor(String... treeTypes) {
-        this.treeTypes = treeTypes;
+        this.treeTypes = Optional.ofNullable(treeTypes)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(new String[0]);
         setTraversalFilter(this::isFolder);
     }
 
