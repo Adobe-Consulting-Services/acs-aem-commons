@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in #2772)
 - #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
 
+### Fixed
+
+- #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
+- #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
+- 
 ### Changed
 
 - #2043 - Switch to filevault-package-maven-plugin
