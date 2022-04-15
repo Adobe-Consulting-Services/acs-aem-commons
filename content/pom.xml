@@ -52,7 +52,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+           plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
@@ -62,7 +62,7 @@
                 </configuration>
             </plugin>
 
-<!-- disable oakpal due to false positives: https://github.com/adamcin/oakpal/issues/92 
+          <!-- disable oakpal due to false positives: https://github.com/adamcin/oakpal/issues/92 
           <plugin>
                 <groupId>net.adamcin.oakpal</groupId>
                 <artifactId>oakpal-maven-plugin</artifactId>
