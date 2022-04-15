@@ -4,12 +4,12 @@ on:
   # for regular master build (after the merge)
   push:
     branches:
-    - master
+      - master
   # for PRs from forked repos and non forked repos
   # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
   pull_request_target:
     branches:
-    - master
+      - master
     types: [opened, synchronize, reopened]
 
 # restrict privileges except for setting commit status, adding PR comments and writing statuses

@@ -43,6 +43,7 @@ public class RedirectRule {
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
     public static final String NOTE_PROPERTY_NAME = "note";
+    public static final String CONTEXT_PREFIX_IGNORED = "contextPrefixIgnored";
 
     @Inject
     private String source;
@@ -56,6 +57,9 @@ public class RedirectRule {
     @Inject
     private String note;
 
+    @Inject
+    private boolean contextPrefixIgnored;
+
     private ZonedDateTime untilDate;
 
     private Pattern ptrn;
@@ -63,10 +67,15 @@ public class RedirectRule {
     private SubstitutionElement[] substitutions;
 
     public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
+        this(source, target, statusCode, calendar, note, false);
+    }
+
+    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note, boolean contextPrefixIgnored) {
         this.source = source.trim();
         this.target = target.trim();
         this.statusCode = statusCode;
         this.note = note;
+        this.contextPrefixIgnored = contextPrefixIgnored;
 
         String regex = this.source;
         if (regex.endsWith("*")) {
@@ -84,6 +93,7 @@ public class RedirectRule {
         String target = resource.get(TARGET_PROPERTY_NAME, "");
         String note = resource.get(NOTE_PROPERTY_NAME, "");
         int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
+        boolean contextPrefixIgnored = resource.get(CONTEXT_PREFIX_IGNORED, false);
         Calendar calendar = null;
         if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
             Object o = resource.get(UNTIL_DATE_PROPERTY_NAME);
@@ -91,7 +101,7 @@ public class RedirectRule {
                 calendar = (Calendar)o;
             }
         }
-        return new RedirectRule(source, target, statusCode, calendar, note);
+        return new RedirectRule(source, target, statusCode, calendar, note, contextPrefixIgnored);
     }
 
     public String getSource() {
@@ -110,6 +120,10 @@ public class RedirectRule {
         return statusCode;
     }
 
+    public boolean getContextPrefixIgnored() {
+        return contextPrefixIgnored;
+    }
+
     public Pattern getRegex() {
         return ptrn;
     }
@@ -120,8 +134,8 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s}",
-                source, target, statusCode, untilDate, note);
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, contextPrefixIgnored=%s}",
+                source, target, statusCode, untilDate, note, contextPrefixIgnored);
     }
 
     @Override
