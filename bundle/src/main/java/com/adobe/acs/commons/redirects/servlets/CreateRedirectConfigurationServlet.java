@@ -58,6 +58,9 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
 
     public static final String REDIRECTS_RESOURCE_PATH = "acs-commons/components/utilities/manage-redirects/redirects";
 
+    private static final String REQ_PARAM_PATH = "path";
+    private static final String REQ_PARAM_CTX_PREFIX = "contextPrefix";
+
     private static final Logger log = LoggerFactory.getLogger(CreateRedirectConfigurationServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
 
@@ -70,7 +73,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
 
         response.setContentType("application/json");
 
-        String rootPath = request.getParameter("path");
+        String rootPath = request.getParameter(REQ_PARAM_PATH);
         if(StringUtils.isEmpty(rootPath) || !rootPath.startsWith("/conf")){
             throw new IllegalArgumentException("root path should be not empty and start with /conf");
         }
@@ -94,12 +97,15 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
 
             Resource config = bucket.getChild(configName);
             if (config == null) {
+                String contextPrefix = StringUtils.defaultString(request.getParameter(REQ_PARAM_CTX_PREFIX));
                 config = resolver.create(bucket, configName,
                         ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED,
-                                ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH));
-                log.info("created {}", config.getPath());
+                                ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH,
+                                REQ_PARAM_CTX_PREFIX, contextPrefix));
+                log.info("created {} with context prefix '{}'", config.getPath(), contextPrefix);
                 resolver.commit();
-                rsp.put("path", config.getPath());
+                rsp.put(REQ_PARAM_PATH, config.getPath());
+                rsp.put(REQ_PARAM_CTX_PREFIX, contextPrefix);
             } else {
                 resolver.revert();
                 String msg = "Configuration already exist: " + (rootPath + "/" + bucketName + "/" + configName);

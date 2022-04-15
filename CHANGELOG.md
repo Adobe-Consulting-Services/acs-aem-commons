@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2822 - Resolved OakPal issue 92 - False positive during build
 
+- #2794 - Added context prefix for redirect rules feature
+
 ## 5.2.0 - 2022-03-03
 
 ### Fixed
