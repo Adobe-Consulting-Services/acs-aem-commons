@@ -121,6 +121,9 @@ public class DataImporterTest {
         process.run(rr);
         assertNotNull("Node1 wasn't created", rr.getResource("/tmp/node1"));
         assertNotNull("Node2 wasn't created", rr.getResource("/tmp/node2"));
+
+        assertNotNull("Relative property path node wasn't created", rr.getResource("/tmp/node1/foo/bar"));
+        assertNotNull("Relative property path node wasn't created", rr.getResource("/tmp/node2/foo/bar"));
     }
 
     @Test
@@ -155,6 +158,9 @@ public class DataImporterTest {
         assertEquals(9, cal.get(Calendar.HOUR_OF_DAY));
         assertEquals(0, cal.get(Calendar.MINUTE));
         assertEquals(0, cal.get(Calendar.SECOND));
+
+        assertEquals("relative property path 1", rr.getResource("/tmp/node1/foo/bar").getValueMap().get("test", String.class));
+        assertEquals("relative property path 2", rr.getResource("/tmp/node2/foo/bar").getValueMap().get("test", String.class));
     }
 
 }

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.2.1-SNAPSHOT</version>
+        <version>5.3.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -533,17 +533,27 @@
         <!-- mockserver-netty pulls in jaxb-api 2.4, which isn't compatible with AEM 6.4 -->
         <dependency>
             <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty</artifactId>
-            <version>5.6.0</version>
+            <artifactId>mockserver-netty-no-dependencies</artifactId>
+            <version>5.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-junit-rule</artifactId>
+            <version>5.13.2</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-netty</artifactId>
                 </exclusion>
                 <exclusion>
-                  <groupId>com.google.code.findbugs</groupId>
-                  <artifactId>jsr305</artifactId>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-client-java</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

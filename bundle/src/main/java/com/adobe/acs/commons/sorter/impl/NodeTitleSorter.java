@@ -29,28 +29,57 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Comparator;
 
 import static com.adobe.acs.commons.sorter.impl.HierarchyNodeComparator.RP_NOT_HIERARCHY_FIRST;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 @Component
 public class NodeTitleSorter implements NodeSorter {
 
     public static final String SORTER_NAME = "byTitle";
     public static final String RP_CASE_SENSITIVE = ":caseSensitive";
+    public static final String RP_RESPECT_NUMBERS = ":respectNumbers";
 
-    public String getName(){
+    public String getName() {
         return SORTER_NAME;
     }
 
-    public String getLabel(){
+    public String getLabel() {
         return "By Node Title";
     }
+
+    private Comparator<Node> numbersFirstComparator = (n1, n2) -> {
+        try {
+            String title1 = new JcrLabeledResource(n1).getTitle();
+            if (title1 == null) {
+                title1 = n1.getName();
+            }
+            String title2 = new JcrLabeledResource(n2).getTitle();
+            if (title2 == null) {
+                title2 = n2.getName();
+            }
+            return Boolean.compare(
+                    isNumeric(title2),
+                    isNumeric(title1)
+            );
+        } catch (RepositoryException e) {
+            return 0;
+        }
+    };
 
     @Override
     public Comparator<Node> createComparator(HttpServletRequest request) {
         boolean caseSensitive = Boolean.parseBoolean(request.getParameter(RP_CASE_SENSITIVE));
+        boolean respectNumbers = Boolean.parseBoolean(request.getParameter(RP_RESPECT_NUMBERS));
         boolean nonHierarchyFirst = request.getParameter(RP_NOT_HIERARCHY_FIRST) == null
                 || Boolean.parseBoolean(request.getParameter(RP_NOT_HIERARCHY_FIRST));
-        Comparator<Node> parentComparator = nonHierarchyFirst ? HierarchyNodeComparator.INSTANCE : (n1, n2) -> 0;
-        return parentComparator.thenComparing((n1, n2) -> {
+        Comparator<Node> comparator = (n1, n2) -> 0;
+        if (nonHierarchyFirst) {
+            comparator = comparator.thenComparing(HierarchyNodeComparator.INSTANCE);
+        }
+        if (respectNumbers) {
+            comparator = comparator.thenComparing(numbersFirstComparator);
+        }
+
+        comparator = comparator.thenComparing((n1, n2) -> {
             try {
                 String title1 = new JcrLabeledResource(n1).getTitle();
                 if (title1 == null) {
@@ -60,11 +89,18 @@ public class NodeTitleSorter implements NodeSorter {
                 if (title2 == null) {
                     title2 = n2.getName();
                 }
-                return caseSensitive ? title1.compareTo(title2) :
-                        title1.compareToIgnoreCase(title2);
+                if (respectNumbers && isNumeric(title1) && isNumeric(title2)) {
+                    Integer number1 = Integer.valueOf(title1);
+                    Integer number2 = Integer.valueOf(title2);
+                    return number1.compareTo(number2);
+                } else {
+                    return caseSensitive ? title1.compareTo(title2) :
+                            title1.compareToIgnoreCase(title2);
+                }
             } catch (RepositoryException e) {
                 return 0;
             }
         });
+        return comparator;
     }
 }

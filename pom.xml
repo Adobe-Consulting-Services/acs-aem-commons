@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>5.2.1-SNAPSHOT</version>
+    <version>5.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -69,7 +69,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1646317635</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1650029823</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -225,9 +225,96 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     <version>2.4.2</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>filevault-package-maven-plugin</artifactId>
+                    <version>1.3.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <group>adobe/consulting</group>
+                        <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                        <thumbnailImage>src/main/resources/thumbnail.png</thumbnailImage>
+                        <validatorsSettings>
+                            <jackrabbit-filter>
+                                <options>
+                                    <validRoots>/,/libs,/libs/core/wcm,/apps,/etc,/etc/clientlibs,/etc/cloudservices,/etc/dam/video,/etc/designs,/etc/notification,/etc/workflow/instances,/etc/workflow/packages,/var,/tmp,/content,/content/dam,/home,/home/users,/home/users/system,/home/groups,/conf,/conf/global</validRoots>
+                                </options>
+                            </jackrabbit-filter>
+                            <jackrabbit-nodetypes>
+                                <options>
+                                    <!-- use the nodetypes and namespaces from the aem-nodetypes.jar provided in the plugin dependencies -->
+                                    <cnds>tccl:aem.cnd</cnds>
+                                </options>
+                            </jackrabbit-nodetypes>
+                            <jackrabbit-packagetype>
+                                <options>
+                                    <allowComplexFilterRulesInApplicationPackages>true</allowComplexFilterRulesInApplicationPackages>
+                                </options>
+                            </jackrabbit-packagetype>
+                            <netcentric-aem-classification>
+                                <!-- only raise to WARN once we start tackling these issues -->
+                                <defaultSeverity>INFO</defaultSeverity>
+                                <options>
+                                    <maps>tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/coral2deprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/graniteuideprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-repo-annotations.map</maps>
+                                </options>
+                            </netcentric-aem-classification>
+                            <netcentric-aem-cloud>
+                                <options>
+                                    <allowReadOnlyMutablePaths>true</allowReadOnlyMutablePaths><!-- default value is true, as it is allowed to have /var nodes inside author-only container -->
+                                </options>
+                            </netcentric-aem-cloud>
+                        </validatorsSettings>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>generate-cnd</id>
+                            <goals>
+                                <goal>generate-cnd</goal>
+                            </goals>
+                            <configuration>
+                                <additionalInputCndUrls>tccl:aem.cnd</additionalInputCndUrls>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <!-- validates against content classifications from AEM (https://github.com/Netcentric/aem-classification/tree/master/aem-classification-validator)  -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator</groupId>
+                            <artifactId>aem-classification-validator</artifactId>
+                            <version>1.0.1</version>
+                        </dependency>
+                        <!-- the dependency containing the actual classification map -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator.maps</groupId>
+                            <artifactId>aem-classification-map-repo-annotations</artifactId>
+                            <version>6.5.3.0</version>
+                        </dependency>
+                        <!-- map containing additional deprecations from release notes -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator.maps</groupId>
+                            <artifactId>aem-classification-map-deprecations</artifactId>
+                            <version>6.5.0.0</version>
+                        </dependency>
+                        <!-- contains all node types and namespaces of AEM 6.5.7, necessary for validator 'jackrabbit-nodetypes' -->
+                        <dependency>
+                            <groupId>biz.netcentric.aem</groupId>
+                            <artifactId>aem-nodetypes</artifactId>
+                            <version>6.5.7.0</version>
+                        </dependency>
+                        <!-- https://github.com/Netcentric/aem-cloud-validator -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator</groupId>
+                            <artifactId>aem-cloud-validator</artifactId>
+                            <version>1.2.2</version>
+                         </dependency>
+                     </dependencies>
+                </plugin>
+                <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-                    <version>0.0.24</version>
+                    <version>1.0.4</version>
+                    <configuration>
+                        <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -266,10 +353,15 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <artifactId>acs-aem-commons-oakpal-checks</artifactId>
                             <version>${project.version}</version>
                         </dependency>
+                        <dependency>
+                            <groupId>biz.netcentric.aem</groupId>
+                            <artifactId>aem-nodetypes</artifactId>
+                            <version>6.5.7.0</version>
+                        </dependency>
                     </dependencies>
                     <configuration>
                         <cndNames>
-                            <cndName>nodetypes-aem640.cnd</cndName>
+                            <name>aem.cnd</name>
                         </cndNames>
                         <jcrNamespaces>
                             <jcrNamespace>
@@ -280,17 +372,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <jcrPrivileges>
                             <jcrPrivilege>crx:replicate</jcrPrivilege>
                         </jcrPrivileges>
+                        <forcedRoots>
+                            <root>
+                                <path>/apps</path>
+                                <primaryType>nt:folder</primaryType>
+                            </root>
+                        </forcedRoots>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.gmaven</groupId>
-                    <artifactId>groovy-maven-plugin</artifactId>
-                    <version>2.1.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
@@ -363,13 +451,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-bundle</artifactId>
-                <version>5.2.1-SNAPSHOT</version>
+                <version>5.3.1-SNAPSHOT</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                <version>5.2.1-SNAPSHOT</version>
+                <version>5.3.1-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <!-- Runtime dependencies should be AEM 6.4 compatible -->
@@ -723,28 +811,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             </build>
         </profile>
     </profiles>
-
-    <!--
-        Inclusion of repositories in POMs is controversial, to say the least.
-        It would be best if you proxied the Adobe repository using a Maven
-        Repository Manager. Once you do that, remove these sections.
-    -->
-    <repositories>
-        <repository>
-            <id>adobe-public-releases</id>
-            <name>Adobe Public Repository</name>
-            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>adobe-public-releases</id>
-            <name>Adobe Public Repository</name>
-            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
-            <layout>default</layout>
-        </pluginRepository>
-    </pluginRepositories>
 
     <distributionManagement>
         <!-- the nexus-staging-maven-plugin only needs a snapshot repository -->

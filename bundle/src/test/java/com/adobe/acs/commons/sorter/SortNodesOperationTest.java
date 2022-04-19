@@ -23,6 +23,7 @@ import com.adobe.acs.commons.sorter.impl.NodeNameSorter;
 import com.adobe.acs.commons.sorter.impl.NodeTitleSorter;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.servlets.post.PostResponse;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -40,7 +41,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.sorter.SortNodesOperation.RP_SORTER_NAME;
@@ -59,18 +62,32 @@ public class SortNodesOperationTest {
 
     @Before
     public void setUp(){
+        Map<String, String> sortableContent = new LinkedHashMap<>();
+        sortableContent.put("aaa", "aaa"); // name -> title
+        sortableContent.put("Bbb", "Bbb");
+        sortableContent.put("Zorro", "Zorro");
+        sortableContent.put("1", "1");
+        sortableContent.put("20", "20");
+        sortableContent.put("1-A", "1-A");
+        sortableContent.put("200", "200");
+        sortableContent.put("2-B", "2-B");
+        sortableContent.put("101", "101");
+        sortableContent.put("11", "11");
+        sortableContent.put("22", "22");
+        sortableContent.put("Two", "Two");
+
         sorter.bindNodeSorter(new NodeNameSorter(), Collections.emptyMap());
         sorter.bindNodeSorter(new NodeTitleSorter(), Collections.emptyMap());
-        context.build()
+        ResourceBuilder bldr = context.build()
                 .resource("/sortable", JCR_PRIMARYTYPE, "cq:Page")
-                .resource("/sortable/page2", JCR_PRIMARYTYPE, "cq:Page")
-                .resource("/sortable/page2/jcr:content", JCR_PRIMARYTYPE, "cq:PageContent", "jcr:title", "A: Page-2")
-                .resource("/sortable/jcr:content", JCR_PRIMARYTYPE, "nt:unstructured")
-                .resource("/sortable/page1", JCR_PRIMARYTYPE, "cq:Page")
-                .resource("/sortable/Page3/jcr:content", JCR_PRIMARYTYPE, "cq:PageContent", "jcr:title", "C: Page-3")
-                .resource("/sortable/Page3", JCR_PRIMARYTYPE, "cq:Page")
-                .resource("/sortable/page1/jcr:content", JCR_PRIMARYTYPE, "cq:PageContent", "jcr:title", "a: Page-1")
-                .resource("/sortable/rep:policy", JCR_PRIMARYTYPE, "rep:ACL");
+                .siblingsMode();
+        for(String nodeName : sortableContent.keySet()){
+            String title = sortableContent.get(nodeName);
+            bldr.resource(nodeName + "/jcr:content", JCR_PRIMARYTYPE, "cq:PageContent", "jcr:title", title)
+                    .resource(nodeName, JCR_PRIMARYTYPE, "cq:Page");
+        }
+         bldr.resource("rep:policy", JCR_PRIMARYTYPE, "rep:ACL")
+             .resource("jcr:content", JCR_PRIMARYTYPE, "nt:unstructured");
     }
 
 
@@ -84,7 +101,7 @@ public class SortNodesOperationTest {
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
-        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page1", "page2", "Page3"), list);
+        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "1", "1-A", "101", "11", "2-B", "20", "200", "22", "aaa", "Bbb", "Two", "Zorro"), list);
 
     }
 
@@ -99,7 +116,8 @@ public class SortNodesOperationTest {
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
-        assertSortOrder(Arrays.asList("jcr:content", "page1", "page2", "Page3", "rep:policy"), list);
+        assertSortOrder(Arrays.asList("1", "1-A", "101", "11", "2-B", "20", "200", "22", "aaa", "Bbb", "jcr:content", "rep:policy", "Two", "Zorro"
+        ), list);
 
     }
 
@@ -114,7 +132,7 @@ public class SortNodesOperationTest {
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
-        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "Page3", "page1", "page2"), list);
+        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "1", "1-A", "101", "11", "2-B", "20", "200", "22", "Bbb", "Two", "Zorro", "aaa"), list);
 
     }
 
@@ -128,7 +146,7 @@ public class SortNodesOperationTest {
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
-        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page1" /*a: Page-1*/, "page2" /*A: Page-2*/, "Page3" /*C: Page-3*/), list);
+        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "1", "1-A", "101", "11", "2-B", "20", "200", "22", "aaa", "Bbb", "Two", "Zorro"), list);
 
     }
 
@@ -144,7 +162,23 @@ public class SortNodesOperationTest {
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
-        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page2" /*A: Page-2*/, "Page3" /*C: Page-3*/, "page1" /*a: Page-1*/), list);
+        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "1", "1-A", "101", "11", "2-B", "20", "200", "22", "Bbb", "Two", "Zorro", "aaa"), list);
+    }
+
+    /**
+     * by name, case insensitive, numbers first followed by strings
+     */
+    @Test
+    public void testSortByNameCaseInsensitiveRespectNumbers() throws RepositoryException {
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter(RP_SORTER_NAME, NodeTitleSorter.SORTER_NAME);
+        request.addRequestParameter(NodeTitleSorter.RP_CASE_SENSITIVE, "true");
+        request.addRequestParameter(NodeTitleSorter.RP_RESPECT_NUMBERS, "true");
+        Comparator<Node> comparator = sorter.getNodeSorter(request);
+        Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
+        List<Node> list = sorter.getSortedNodes(node, comparator);
+
+        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "1", "11", "20", "22", "101", "200", "1-A", "2-B", "Bbb", "Two", "Zorro", "aaa"), list);
     }
 
     @Test
@@ -157,7 +191,7 @@ public class SortNodesOperationTest {
         List<Node> children = new ArrayList<>();
         resource.getChildren().forEach(r -> children.add(r.adaptTo(Node.class)));
 
-        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page1", "page2", "Page3"), children);
+        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "1", "1-A", "101", "11", "2-B", "20", "200", "22", "aaa", "Bbb", "Two", "Zorro"), children);
     }
 
     @Test

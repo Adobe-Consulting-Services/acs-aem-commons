@@ -4,12 +4,12 @@ on:
   # for regular master build (after the merge)
   push:
     branches:
-    - master
+      - master
   # for PRs from forked repos and non forked repos
   # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
   pull_request_target:
     branches:
-    - master
+      - master
     types: [opened, synchronize, reopened]
 
 # restrict privileges except for setting commit status, adding PR comments and writing statuses
@@ -56,7 +56,8 @@ jobs:
         uses: actions/setup-java@v2
         with:
           cache: 'maven'
-          distribution: 'zulu'
+          # Adobe is moving away from Azul Zulu to Oracle JDK (which is not an option) - Eclipse Temurin is suggested as the "closest thing"
+          distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
