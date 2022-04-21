@@ -125,7 +125,7 @@ public class ContentFragmentImportTest {
         Date date = Date.from(ta.toInstant());
         Calendar calendar  = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
-        String expectedTimeMs = String.valueOf(date.getTime());
+        final String expectedTimeMs = String.valueOf(date.getTime());
 
         importer.dryRunMode = false;
         addImportRow("/test/path/fragment1", "Fragment 1",
