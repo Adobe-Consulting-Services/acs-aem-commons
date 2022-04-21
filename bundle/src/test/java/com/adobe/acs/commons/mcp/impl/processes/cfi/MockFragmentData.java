@@ -51,15 +51,16 @@ public class MockFragmentData implements FragmentData {
         return null;
     }
 
-    @Override
-    public boolean isTypeSupported(Class type) {
-        return false;
-    }
 
     @Nullable
     @Override
     public Object getValue() {
         return null;
+    }
+
+    @Override
+    public boolean isTypeSupported(Class type) {
+        return false;
     }
 
     @Override
