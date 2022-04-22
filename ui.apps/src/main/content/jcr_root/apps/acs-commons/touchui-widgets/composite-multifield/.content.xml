@@ -4,7 +4,7 @@
           jsProcessor="[default:none,min:gcc]"
           allowProxy="{Boolean}true"
           categories="[acs-commons.authoring.composite-multifield,acs-commons.granite.ui.coral2.foundation]"
-          dependencies="[underscore]"/>
+          dependencies="[acs-commons.lodash]"/>
 <!--
 
 Wrapper Client Library definition:
