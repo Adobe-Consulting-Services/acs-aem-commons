@@ -233,6 +233,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <group>adobe/consulting</group>
                         <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                         <thumbnailImage>src/main/resources/thumbnail.png</thumbnailImage>
+                        <failOnUncoveredSourceFiles>true</failOnUncoveredSourceFiles>
                         <validatorsSettings>
                             <jackrabbit-filter>
                                 <options>
