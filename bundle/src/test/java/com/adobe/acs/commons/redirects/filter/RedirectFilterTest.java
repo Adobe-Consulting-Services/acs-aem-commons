@@ -22,11 +22,27 @@ package com.adobe.acs.commons.redirects.filter;
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.Redirects;
 import com.day.cq.wcm.api.WCMMode;
 import com.google.common.cache.Cache;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javax.management.openmbean.TabularData;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import org.apache.http.Header;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
@@ -41,21 +57,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import javax.management.openmbean.TabularData;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
@@ -566,7 +567,8 @@ public class RedirectFilterTest {
                     "sling:resourceType", "acs-commons/components/utilities/manage-redirects/redirect-row",
                     "source", rule.getSource(),
                     "target", rule.getTarget(), "statusCode", rule.getStatusCode(),
-                    "untilDate", rule.getUntilDate() == null ? null : GregorianCalendar.from(rule.getUntilDate()));
+                    "untilDate", rule.getUntilDate() == null ? null : GregorianCalendar.from(rule.getUntilDate()),
+                    "contextPrefixIgnored", rule.getContextPrefixIgnored());
             c++;
         }
         doAnswer(invocation -> configResource).when(configResolver).getResource(any(Resource.class), any(String.class), any(String.class));
@@ -637,4 +639,160 @@ public class RedirectFilterTest {
         // #2673 : ensure no NPE in onChange() when filter is disabled
         redirectFilter.onChange(Collections.singletonList(event));
     }
+
+    @Test
+    public void testContextPrefix() throws Exception {
+        withRules(
+                new RedirectRule("/en/one", "/en/two",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testContextPrefixFullPathRedirectRule() throws Exception {
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testContextPrefixMixedRedirectRules() throws Exception {
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
+                        302, null, null),
+                new RedirectRule("/en/three", "/en/four",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        response = navigate("/content/geometrixx/en/three.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/four.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testContextPrefixMixedRedirects() throws Exception {
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/en/two",
+                        302, null, null),
+                new RedirectRule("/en/three", "/content/geometrixx/en/four",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        response = navigate("/content/geometrixx/en/three.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/four.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testContextPrefixWithAbsoluteUrl() throws Exception {
+        withRules(
+                new RedirectRule("/en/one", "https://adobe-consulting-services.github.io/acs-aem-commons/",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("https://adobe-consulting-services.github.io/acs-aem-commons/", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testIgnoredContextPrefix() throws Exception {
+        withRules(
+                new RedirectRule("/en/one", "/content/escapedsite/en/one",
+                    302, null, null, true));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escapedsite/en/one.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testContextPrefixWithPatternRule() throws Exception {
+        withRules(
+                new RedirectRule("/en/one(.*)", "/en/two",
+                        302, null, null),
+                new RedirectRule("/en/three(.*)", "/content/escaped/en/four",
+                        302, null, null, true),
+                new RedirectRule("/(.*)", "/content/geometrixx/en/six",
+                        302, null, null));
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        response = navigate("/content/geometrixx/en/three.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escaped/en/four.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        response = navigate("/content/geometrixx/en/five.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/six.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
 }

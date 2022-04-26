@@ -208,8 +208,15 @@ public class AemEnvironmentIndicatorFilterTest {
         context.request().setHeader("Referer", "/editor.html/content/we-retail.html");
         assertFalse(filter.accepts(context.request()));
     }
-    
-  
+
+    @Test
+    public void testIsEditExperienceFragmentVariation() {
+        context.registerInjectActivateService(filter, props);
+        context.request().setPathInfo("/content/experience-fragments/core-components-examples/library/simple-experience-fragment/simple-experience-fragment-livecopy.html");
+        context.request().setHeader("Referer", "/editor.html/content/experience-fragments/core-components-examples/library/simple-experience-fragment/master.html");
+        assertFalse(filter.accepts(context.request()));
+    }
+
     @Test
     public void testIsImproperlyConfigured() {
         assertFalse(filter.isImproperlyConfigured("not-blank", "not-blank"));

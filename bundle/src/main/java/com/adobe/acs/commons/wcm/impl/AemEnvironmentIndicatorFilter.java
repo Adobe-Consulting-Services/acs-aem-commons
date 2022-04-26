@@ -226,8 +226,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                                 : null;
 
                 if (contents != null) {
-                    final int bodyIndex = contents.indexOf("</body>");
-
+                    final int bodyIndex = StringUtils.lastIndexOf(contents, "</body>");
                     if (bodyIndex != -1) {
                         // prevent the captured response from being given out a 2nd time via the implicit close()
                         capturedResponse.setFlushBufferOnClose(false);
@@ -321,9 +320,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     boolean hasAemEditorReferrer(final String headerValue, final String requestUri) {
         return StringUtils.endsWith(headerValue, "/editor.html" + requestUri)
-                || StringUtils.endsWith(headerValue, "/cf");
+                || StringUtils.endsWith(headerValue, "/cf")
+                || isEditExperienceFragmentVariation(headerValue, requestUri);
     }
-    
+
+    boolean isEditExperienceFragmentVariation(String headerValue, String requestUri) {
+        return StringUtils.contains(headerValue, "/editor.html/content/experience-fragments/") && StringUtils.startsWith(requestUri, "/content/experience-fragments/");
+    }
+
     @Activate
     @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext ctx) {

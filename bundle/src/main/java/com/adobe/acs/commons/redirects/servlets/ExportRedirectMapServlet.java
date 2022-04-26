@@ -105,6 +105,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(2).setCellValue("Status Code");
         headerRow.createCell(3).setCellValue("Until Date");
         headerRow.createCell(4).setCellValue("Notes");
+        headerRow.createCell(5).setCellValue("Ignore Context Prefix");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -120,6 +121,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
                 cell.setCellStyle(dateStyle);
             }
             row.createCell(4).setCellValue(rule.getNote());
+            row.createCell(5).setCellValue(rule.getContextPrefixIgnored());
         }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 2));
         sheet.setColumnWidth(0, 256 * 50);
@@ -127,6 +129,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(2, 256 * 15);
         sheet.setColumnWidth(3, 256 * 12);
         sheet.setColumnWidth(4, 256 * 100);
+        sheet.setColumnWidth(5, 256 * 20);
 
         return wb;
     }

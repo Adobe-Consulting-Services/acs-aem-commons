@@ -41,7 +41,9 @@ import java.util.Collection;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.SPREADSHEETML_SHEET;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Yegor Kozlov
@@ -60,9 +62,9 @@ public class ExportRedirectMapServletTest {
         context.build().resource(redirectStoragePath)
                 .siblingsMode()
                 .resource("redirect-1",                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/one", "target", "/content/two", "statusCode", 302, "note", "note-1")
+                        "source", "/content/one", "target", "/content/two", "statusCode", 302, "note", "note-1", "contextPrefixIgnored", true)
                 .resource("redirect-2",                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/three", "target", "/content/four", "statusCode", 301)
+                        "source", "/content/three", "target", "/content/four", "statusCode", 301, "contextPrefixIgnored", false)
         ;
         context.request().addRequestParameter("path", redirectStoragePath);
     }
@@ -98,9 +100,11 @@ public class ExportRedirectMapServletTest {
         assertEquals("note-1", row1.getCell(4).getStringCellValue());
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
+        assertTrue(row1.getCell(5).getBooleanCellValue());
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
         assertEquals("/content/four", row2.getCell(1).getStringCellValue());
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());
+        assertFalse(row2.getCell(5).getBooleanCellValue());
     }
 }

@@ -45,7 +45,8 @@ public class RedirectRuleTest {
                 "target", "/content/we-retail/en/two",
                 "statusCode", 302,
                 "untilDate", untilDate,
-                "note", "note-1");
+                "note", "note-1",
+                "contextPrefixIgnored", true);
 
         RedirectRule rule = RedirectRule.from(resource.getValueMap());
         assertEquals("/content/we-retail/en/one", rule.getSource());
@@ -53,6 +54,7 @@ public class RedirectRuleTest {
         assertEquals(302, rule.getStatusCode());
         assertDateEquals("11 January 2021", rule.getUntilDate());
         assertEquals("note-1", rule.getNote());
+        assertTrue(rule.getContextPrefixIgnored());
 
     }
 
