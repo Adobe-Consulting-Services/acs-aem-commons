@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
 - #2822 - Resolved OakPal issue 92 - False positive during build
 - #2794 - Added context prefix for redirect rules feature
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
+
 
 ### Changed
 
