@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Fixed
+
+- #2826 - 5.3.1-SNAPSHOT build failing validation locally
+
 ## 5.3.0 - 2022-04-15
 
 ### Fixed
