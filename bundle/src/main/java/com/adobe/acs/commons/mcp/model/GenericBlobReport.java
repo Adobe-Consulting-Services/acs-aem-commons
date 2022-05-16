@@ -43,6 +43,7 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.ChildResource;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public class GenericBlobReport extends AbstractReport {
     @Inject
     String name;
 
-    @Inject
+    @ValueMapValue
     List<String> columns;
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericBlobReport.class);
