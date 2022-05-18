@@ -66,7 +66,7 @@ public class GenericBlobReport extends AbstractReport {
     @ChildResource
     Resource blobreport;
 
-    @Inject
+    @ValueMapValue
     String name;
 
     @ValueMapValue
