@@ -57,10 +57,10 @@ public class GenericReport extends AbstractReport {
     @ValueMapValue
     private List<String> columns;
 
-    @Inject
+    @ValueMapValue
     private List<ValueMap> rows;
 
-    @Inject
+    @ValueMapValue
     private String name = "report";
 
     public String getResourceType() {
