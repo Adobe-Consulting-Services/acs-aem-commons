@@ -38,6 +38,7 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.ChildResource;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -57,7 +58,7 @@ public class GenericReport extends AbstractReport {
     @ValueMapValue
     private List<String> columns;
 
-    @ValueMapValue
+    @ChildResource
     private List<ValueMap> rows;
 
     @ValueMapValue
