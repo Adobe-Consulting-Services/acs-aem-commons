@@ -24,9 +24,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.sling.models.impl.injectors.ChildResourceInjector;
-import org.apache.sling.models.impl.injectors.ValueMapInjector;
-import org.apache.sling.models.spi.Injector;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -46,10 +43,7 @@ public class TestGenericReportExcelServlet {
 
     @Before
     public void setUp(){
-        slingContext.registerService(Injector.class, new ValueMapInjector());
-        slingContext.registerService(Injector.class, new ChildResourceInjector());
         slingContext.addModelsForClasses(GenericReport.class);
-
     }
 
     @Test
