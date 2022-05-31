@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
 
 ## 5.3.0 - 2022-04-15
