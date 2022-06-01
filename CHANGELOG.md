@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2848 - Fixed issue with ClientLib images not being stored under a resources folder
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
 
