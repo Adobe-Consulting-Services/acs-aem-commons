@@ -38,6 +38,8 @@ import javax.jcr.RepositoryException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Component(service = VanityURLService.class)
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
@@ -77,10 +79,11 @@ public class VanityURLServiceImpl implements VanityURLService {
             candidateVanity = request.getResourceResolver().map(request, candidateVanity);
         }
         // else, new PathInfo(..) has already handled the mapping...
-
         log.trace("Generated Candidate Vanity URL from the mapping of [ {} -> {} ]", requestURI, candidateVanity);
 
-        final String pathScope = StringUtils.removeEnd(requestURI, candidateVanity);
+        final String pathScope = getPathScope(requestURI, candidateVanity);
+        
+        log.debug("Path Scope to check for Vanity URL Mapping [ {} ]", pathScope);
 
         log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
 
@@ -103,6 +106,27 @@ public class VanityURLServiceImpl implements VanityURLService {
         }
 
         return false;
+    }
+
+    private String getPathScope(final String requestURI, final String candidateVanity) {
+        try {
+            /**
+             * AEM Cloud includes scheme, host, and port in candidateVanity
+             * While requestURI only includes the path
+             * We must remove that context so that StringUtils.removeEnd resolves correctly
+             */
+            final URI uri = new URI(candidateVanity);
+            final String candidateVanityPath = uri.getPath();
+            
+            log.debug("Creating Path Scope from requestURI: [ {} ] and Candidate Vanity Path: [ {} ]", requestURI, candidateVanityPath);
+            
+            return StringUtils.removeEnd(requestURI, candidateVanityPath);
+            
+        } catch (URISyntaxException e) {
+            log.error("Candidate Vanity [ {} ] is not a valid URI", candidateVanity);
+        }
+        
+        return requestURI;
     }
 
     /**
