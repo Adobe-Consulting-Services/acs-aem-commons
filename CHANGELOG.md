@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
+- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
 
 ## 5.3.0 - 2022-04-15
 
