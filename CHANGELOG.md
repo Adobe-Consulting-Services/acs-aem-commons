@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Fixed
+
+- #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
+- #2826 - 5.3.1-SNAPSHOT build failing validation locally
+
 ## 5.3.0 - 2022-04-15
 
 ### Fixed
@@ -18,6 +23,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
 - #2822 - Resolved OakPal issue 92 - False positive during build
 - #2794 - Added context prefix for redirect rules feature
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
+
 
 ### Changed
 
