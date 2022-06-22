@@ -22,7 +22,9 @@ package com.adobe.acs.commons.reports.internal;
 import org.apache.commons.lang3.StringUtils;
 
 public class ExporterUtil {
-    private ExporterUtil() {}
+    private ExporterUtil() {
+        // Private cstor
+    }
 
     public static String relativizePath(final String path){
         if (StringUtils.startsWith(path,"/")){
