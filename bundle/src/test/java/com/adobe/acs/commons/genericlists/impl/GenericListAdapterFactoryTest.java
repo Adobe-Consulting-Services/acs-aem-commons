@@ -114,6 +114,18 @@ public class GenericListAdapterFactoryTest {
         assertEquals("valueone", items.get(0).getValue());
     }
 
+
+    @Test
+    public void test_that_adapting_page_with_no_list_node_return_empty_generic_list() {
+        when(contentResource.getChild("list")).thenReturn(null);
+
+        GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
+        assertNotNull(list);
+        List<Item> items = list.getItems();
+        assertNotNull(items);
+        assertEquals(0, items.size());
+    }
+
     @Test
     public void test_that_adapting_page_with_wrong_resourceType_returns_null() {
         Page wrongPage = mock(Page.class);
