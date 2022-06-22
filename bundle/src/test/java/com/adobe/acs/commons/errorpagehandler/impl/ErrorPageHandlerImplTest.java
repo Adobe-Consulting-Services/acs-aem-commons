@@ -57,7 +57,7 @@ public class ErrorPageHandlerImplTest {
      */
     @Test
     public void testFindErrorPage_withoutContent() {
-        assertEquals("/content/project/test/error-pages.html", new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-without-content")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-without-content")));
     }
 
     /**
@@ -66,33 +66,33 @@ public class ErrorPageHandlerImplTest {
      */
     @Test
     public void testFindErrorPage_withDirectConfig() {
-        assertEquals("/content/project/test/error-pages2.html", new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
+        assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
     }
     
     @Test
     public void testFindErrorPage_subResource() {
-        assertEquals("/content/project/test/error-pages.html", new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/jcr:content/root/non-existing-resource")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/jcr:content/root/non-existing-resource")));
     }
 
     @Test
     public void testFindErrorPage_nonExistingPage() {
-        assertEquals("/content/project/test/error-pages.html", new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page")));
     }
 
     @Test
     public void testFindErrorPage_nonExistingPageSubResource() {
-        assertEquals("/content/project/test/error-pages.html", new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page/jcr:content/test1/test2")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page/jcr:content/test1/test2")));
     }
 
     @Test
     public void testFindErrorPage_nonExistingPageWithoutExtension() {
-        assertEquals("/content/project/test/error-pages.html", new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/non-existing-page")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/non-existing-page")));
     }
 
     @Test
     public void testFindErrorPage_JcrContent0() {
         assertEquals("/content/project/test/error-pages.html",
-                new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().findErrorPage(request,
+                new ErrorPageHandlerImpl().findErrorPage(request,
                         new NonExistingResource(resourceResolver, "/content/project/jcr:content/non-existing")));
     }
     @Test
@@ -103,7 +103,7 @@ public class ErrorPageHandlerImplTest {
         context.request().setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included", "Some prior clientlibs");
         context.request().setAttribute("com.day.cq.wcm.componentcontext", "some prior component context");
 
-        new com.adobe.acs.commons.errorpagehandler.impl.ErrorPageHandlerImpl().resetRequestAndResponse(context.request(), context.response(), 500);
+        new ErrorPageHandlerImpl().resetRequestAndResponse(context.request(), context.response(), 500);
 
         assertEquals("true", context.response().getHeader("x-aem-error-pass"));
         assertEquals(500, context.response().getStatus());
