@@ -114,7 +114,7 @@ public class MockContentElement implements ContentElement {
 
     @Override
     public FragmentData getValue() {
-        return null;
+        return new MockFragmentData(entry);
     }
 
     @Override
