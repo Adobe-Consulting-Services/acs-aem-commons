@@ -30,7 +30,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.HashSet;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ErrorPageHandlerImplTest {
@@ -91,5 +94,21 @@ public class ErrorPageHandlerImplTest {
         assertEquals("/content/project/test/error-pages.html",
                 new ErrorPageHandlerImpl().findErrorPage(request,
                         new NonExistingResource(resourceResolver, "/content/project/jcr:content/non-existing")));
+    }
+    @Test
+    public void testResetRequestAndResponse() {
+        context.response().setStatus(200);
+
+        context.request().setAttribute("com.day.cq.widget.HtmlLibraryManager.included", "Some prior clientlibs");
+        context.request().setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included", "Some prior clientlibs");
+        context.request().setAttribute("com.day.cq.wcm.componentcontext", "some prior component context");
+
+        new ErrorPageHandlerImpl().resetRequestAndResponse(context.request(), context.response(), 500);
+
+        assertEquals("true", context.response().getHeader("x-aem-error-pass"));
+        assertEquals(500, context.response().getStatus());
+        assertEquals(0, ((HashSet<String>) context.request().getAttribute("com.day.cq.widget.HtmlLibraryManager.included")).size());
+        assertEquals(0, ((HashSet<String>) context.request().getAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included")).size());
+        assertNull(context.request().getAttribute("com.day.cq.wcm.componentcontext"));
     }
 }

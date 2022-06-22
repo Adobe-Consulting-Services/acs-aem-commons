@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
 - #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
 - #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
+- #2869 - Support 500 error pages on AEM CS using x-aem-error-pass = true HTTP response header
 
 ## 5.3.0 - 2022-04-15
 
