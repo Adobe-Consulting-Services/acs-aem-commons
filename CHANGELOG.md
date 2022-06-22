@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
 - #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
