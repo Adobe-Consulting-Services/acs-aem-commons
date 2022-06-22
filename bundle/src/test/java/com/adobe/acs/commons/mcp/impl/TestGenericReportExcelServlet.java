@@ -29,6 +29,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -39,7 +40,12 @@ import static org.junit.Assert.assertEquals;
 public class TestGenericReportExcelServlet {
     @Rule
     public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
-    
+
+    @Before
+    public void setUp(){
+        slingContext.addModelsForClasses(GenericReport.class);
+    }
+
     @Test
     public void testReport() throws Exception {
         int numRows = 10;
@@ -55,11 +61,11 @@ public class TestGenericReportExcelServlet {
             rb.resource("row-" + i,
                     "ColumnA", "abcdef-" + i, "ColumnB", "qwerty-" + i);
         }
+
         MockSlingHttpServletRequest request = slingContext.request();
         request.setResource(slingContext.resourceResolver().getResource(reportPath));
         MockSlingHttpServletResponse response = slingContext.response();
 
-        slingContext.addModelsForClasses(GenericReport.class);
 
         GenericReportExcelServlet servlet = new GenericReportExcelServlet();
 

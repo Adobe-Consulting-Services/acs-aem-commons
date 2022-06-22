@@ -11,7 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-#2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
+- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
+- #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
+- #2826 - 5.3.1-SNAPSHOT build failing validation locally
 
 ## 5.3.0 - 2022-04-15
 
@@ -22,6 +24,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
 - #2822 - Resolved OakPal issue 92 - False positive during build
 - #2794 - Added context prefix for redirect rules feature
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
+
 
 ### Changed
 
