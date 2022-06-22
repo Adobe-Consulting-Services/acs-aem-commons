@@ -22,6 +22,7 @@ package com.adobe.acs.commons.reports.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -48,14 +49,15 @@ public class TagsCellValue {
   private String property;
 
   public List<Tag> getTags() {
+    final String relativePropertyPath = ExporterUtil.relativizePath(property);
 
     TagManager tagMgr = request.getResourceResolver().adaptTo(TagManager.class);
 
     Resource resource = (Resource) request.getAttribute("result");
 
-    log.debug("Loading tags from {}@{}", resource.getPath(), property);
+    log.debug("Loading tags from {}@{}", resource.getPath(), relativePropertyPath);
     List<Tag> tags = new ArrayList<Tag>();
-    String[] values = resource.getValueMap().get(property, String[].class);
+    String[] values = resource.getValueMap().get(relativePropertyPath, String[].class);
     if (values != null) {
       for (String value : values) {
         tags.add(tagMgr.resolve(value));

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2022 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
  * limitations under the License.
  * #L%
  */
+package com.adobe.acs.commons.reports.internal;
 
-.acs-commons-page {
-  .notifications {
-    position: absolute;
-    top: .5em;
-    right: 2em;
-    width: 500px;
-    z-index: 10000000;
-  }
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class ExporterUtilTest {
+
+    @Test
+    public void relativizePath() {
+        assertEquals("foo/bar", ExporterUtil.relativizePath("foo/bar"));
+        assertEquals("./foo/bar", ExporterUtil.relativizePath("./foo/bar"));
+        assertEquals("foo/bar", ExporterUtil.relativizePath("/foo/bar"));
+    }
 }

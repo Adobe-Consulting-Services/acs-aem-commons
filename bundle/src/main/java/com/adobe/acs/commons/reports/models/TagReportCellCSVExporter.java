@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -47,14 +48,15 @@ public class TagReportCellCSVExporter implements ReportCellCSVExporter {
 
   @Override
   public String getValue(Object result) {
+    final String relativePropertyPath = ExporterUtil.relativizePath(property);
 
     Resource resource = (Resource) result;
 
     TagManager tagMgr = resource.getResourceResolver().adaptTo(TagManager.class);
 
-    log.debug("Loading tags from {}@{}", resource.getPath(), property);
+    log.debug("Loading tags from {}@{}", resource.getPath(), relativePropertyPath);
     List<String> tags = new ArrayList<>();
-    String[] values = resource.getValueMap().get(property, String[].class);
+    String[] values = resource.getValueMap().get(relativePropertyPath, String[].class);
     if (values != null) {
       for (String value : values) {
         tags.add(Optional.ofNullable(tagMgr).map(tm -> tm.resolve(value).getTitle()).orElse(value));
