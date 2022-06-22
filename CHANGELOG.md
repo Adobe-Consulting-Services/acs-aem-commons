@@ -13,7 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
-
+- #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
+- 
 ## 5.3.0 - 2022-04-15
 
 ### Fixed
