@@ -24,7 +24,7 @@
         <script src="//${configMgr.configuration.serverInstance @ context='unsafe'}/js/forms2/js/forms2.js"></script>
         <form id="mktoForm_${properties.formId}"></form>
         <script>
-          MktoForms2.loadForm("${configMgr.configuration.serverInstance @ context='unsafe'}", "${configMgr.configuration.munchkinId @ context='unsafe'}", ${marketoForm.formId @ context='scriptString'}, function(form){
+          MktoForms2.loadForm("//${configMgr.configuration.serverInstance @ context='unsafe'}", "${configMgr.configuration.munchkinId @ context='unsafe'}", ${marketoForm.formId @ context='scriptString'}, function(form){
             ${marketoForm.successUrl @ context='unsafe'}
             ${marketoForm.script @ context='unsafe'}
             ${marketoForm.values @ context='unsafe'}
