@@ -8,7 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
- 
 
 ### Changed
 
@@ -18,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
+- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
 - #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
 - #2869 - Support 500 error pages on AEM CS using x-aem-error-pass = true HTTP response header
 
