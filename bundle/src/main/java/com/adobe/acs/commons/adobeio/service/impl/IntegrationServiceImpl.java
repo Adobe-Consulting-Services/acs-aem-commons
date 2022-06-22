@@ -207,11 +207,11 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtClaims;
     }
 
-    private Date getExpirationDate() {
+    private long getExpirationDate() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.SECOND, jwtServiceConfig.expirationTimeInSeconds());
-        return cal.getTime();
+        return cal.getTime().getTime();
     }
 
 }
