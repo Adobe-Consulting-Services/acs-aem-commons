@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+## 5.3.2 - 2022-06-22
+
 ### Changed
 
 - #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if  the attribute rel="stylesheet" is set
