@@ -24,6 +24,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -46,8 +47,10 @@ public class StringReportCellCSVExporter implements ReportCellCSVExporter {
 
   @Override
   public String getValue(Object result) {
+    final String relativePropertyPath = ExporterUtil.relativizePath(property);
+
     Resource resource = (Resource) result;
-    ReportCellValue val = new ReportCellValue(resource, property);
+    ReportCellValue val = new ReportCellValue(resource, relativePropertyPath);
     List<String> values = new ArrayList<>();
     if (val.getValue() != null) {
       if (val.isArray()) {

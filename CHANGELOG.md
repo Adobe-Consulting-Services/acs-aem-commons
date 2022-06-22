@@ -8,13 +8,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+
+### Changed
+
 - #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if  the attribute rel="stylesheet" is set
+- #2865 - Reports - Turn absolute property paths to relative to prevent report breakage when malformed (abs path) data is assed 
+
 ### Fixed
 
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
 - #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
-- 
+ 
 ## 5.3.0 - 2022-04-15
 
 ### Fixed

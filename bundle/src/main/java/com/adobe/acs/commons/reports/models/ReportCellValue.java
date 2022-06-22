@@ -21,6 +21,7 @@ package com.adobe.acs.commons.reports.models;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -66,6 +67,10 @@ public class ReportCellValue {
 
   @PostConstruct
   private void init() {
+    if (StringUtils.startsWith(property, "/")) {
+      property = StringUtils.removeStart(property, "/"); // Make an absolute path, relative - from #2865
+    }
+
     value = result != null && result.getValueMap() != null ? result.getValueMap().get(property) : null;
   }
 

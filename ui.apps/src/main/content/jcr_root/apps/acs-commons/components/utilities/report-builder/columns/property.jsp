@@ -16,21 +16,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   #L%
-  --%>
+--%>
 <%@include file="/libs/foundation/global.jsp" %>
-<%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<sling2:getResource path="${result.path}" var="resultRsrc" />
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<c:choose>
+    <c:when test="${fn:startsWith(properties.property, '/')}">
+        <c:set var="property" value="${fn:substringAfter(properties.property, '/')}"/>
+    </c:when>
+    <c:otherwise>
+        <c:set var="property" value="${properties.property}"/>
+    </c:otherwise>
+</c:choose>
 
-<%-- Sets the property variable that trims leading property slashes --%>
-<%@include file="../property.jsp" %>
-
-<td is="coral-table-cell" value="${result.valueMap[property].time.time}">
-	<c:choose>
-		<c:when test="${not empty properties.format}">
-			<fmt:formatDate value="${result.valueMap[property].time}" pattern="${properties.format}" />
-		</c:when>
-		<c:otherwise>
-			<fmt:formatDate value="${result.valueMap[property].time}" dateStyle="medium" timeStyle="medium" />
-		</c:otherwise>
-	</c:choose>
-</td>
