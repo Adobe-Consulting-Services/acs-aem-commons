@@ -153,7 +153,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
-        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. " +
+                "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
         boolean evaluateSelectors() default false;
 
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
@@ -567,7 +568,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             });
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
-            if(evaluateSelectors && requestPathInfo.getSelectorString() != null){
+            if(evaluateSelectors && requestPathInfo.getSelectorString() != null) {
                 resourcePath += "." + requestPathInfo.getSelectorString();
             }
 

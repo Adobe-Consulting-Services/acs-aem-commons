@@ -815,6 +815,8 @@ public class RedirectFilterTest {
 
         withRules(
                 new RedirectRule("/content/geometrixx/en/one\\.(mobile|desktop)", "/content/geometrixx/en/two",
+                        302, null, null),
+                new RedirectRule("/content/we-retail/en/home.product1/*", "/content/we-retail/en/home.product2",
                         302, null, null)
         );
 
@@ -824,6 +826,10 @@ public class RedirectFilterTest {
                 navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
         // unknown selector, does not match the regex
         assertEquals(null, navigate("/content/geometrixx/en/one.unknown.html").getHeader("Location"));
+
+        assertEquals("/content/we-retail/en/home.product2.html",
+                navigate("/content/we-retail/en/home.product1/feature.html").getHeader("Location"));
+        assertEquals(null, navigate("/content/we-retail/en/home.unknown/feature.html").getHeader("Location"));
     }
 
 
