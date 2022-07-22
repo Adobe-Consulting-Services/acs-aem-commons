@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Removed
 
 - #2885 - Remove deprecated feature: Oak Index Manager
+- #2886 - Remove deprecated feature: Assets Folder Properties Support
 - #2889 - Removed Deprecated Forms feature
 - #2892 - Removed the deprecated WCM views feature
 - #2895 - Remove deprecated feature: Dynamic RTE configuration
