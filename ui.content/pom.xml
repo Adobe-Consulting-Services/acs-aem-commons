@@ -90,9 +90,6 @@
                             <path>/etc/acs-commons/redirect-maps/default</path>
                         </forcedRoot>
                         <forcedRoot>
-                            <path>/etc/cloudservices/dtm/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
                             <path>/etc/cloudservices/sharethis/default</path>
                         </forcedRoot>
                         <forcedRoot>
