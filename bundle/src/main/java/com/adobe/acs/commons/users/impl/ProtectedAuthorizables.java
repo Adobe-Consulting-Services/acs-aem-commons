@@ -148,7 +148,6 @@ public final class ProtectedAuthorizables {
                 "acs-commons-workflow-remover-service",
                 "acs-commons-ensure-oak-index-service",
                 "acs-commons-system-notifications-service",
-                "acs-commons-form-helper-service",
                 "acs-commons-bulk-workflow-service",
                 "acs-commons-error-page-handler-service",
                 "acs-commons-wcm-inbox-cleanup-service",
