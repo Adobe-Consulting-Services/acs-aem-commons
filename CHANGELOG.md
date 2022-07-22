@@ -11,7 +11,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 
+- #2885 - Remove deprecated feature: Oak Index Manager
 - #2889 - Removed Deprecated Forms feature
+- #2892 - Removed the deprecated WCM views feature
+- #2895 - Remove deprecated feature: Dynamic RTE configuration
+- #2898 - Remove deprecated feature: Adobe DTM Cloud Service
+- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
+- #2907 - Remove deprecated feature: Long Form Text component
 
 ## 5.3.2 - 2022-06-22
 
