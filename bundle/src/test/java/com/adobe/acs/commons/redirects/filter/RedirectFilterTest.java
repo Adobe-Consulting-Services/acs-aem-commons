@@ -64,17 +64,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class RedirectFilterTest {
 
@@ -140,7 +130,7 @@ public class RedirectFilterTest {
         context.requestPathInfo().setResourcePath(resourcePath);
         request.setResource(context.create().resource(resourcePath));
 
-        MockSlingHttpServletResponse response = context.response();
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
         filter.doFilter(request, response, filterChain);
 
         return response;
@@ -795,4 +785,71 @@ public class RedirectFilterTest {
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
 
+
+    @Test
+    public void testMatchSelectors() throws Exception {
+        RedirectFilter.Configuration configuration = filter.getConfiguration();
+        when(configuration.evaluateSelectors()).thenReturn(true);
+        filter.activate(configuration, context.bundleContext());
+
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one.mobile", "/content/geometrixx/en/two",
+                        302, null, null)
+        );
+
+        // happy path: selector matched
+        assertEquals("/content/geometrixx/en/two.html",
+                navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
+
+        // no selectors
+        assertEquals(null, navigate("/content/geometrixx/en/one.html").getHeader("Location"));
+        // selector does not match the rule
+        assertEquals(null, navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+    }
+
+    @Test
+    public void testMatchSelectorsRegex() throws Exception {
+        RedirectFilter.Configuration configuration = filter.getConfiguration();
+        when(configuration.evaluateSelectors()).thenReturn(true);
+        filter.activate(configuration, context.bundleContext());
+
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one\\.(mobile|desktop)", "/content/geometrixx/en/two",
+                        302, null, null),
+                new RedirectRule("/content/we-retail/en/home.product1/*", "/content/we-retail/en/home.product2",
+                        302, null, null)
+        );
+
+        assertEquals("/content/geometrixx/en/two.html",
+                navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
+        assertEquals("/content/geometrixx/en/two.html",
+                navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+        // unknown selector, does not match the regex
+        assertEquals(null, navigate("/content/geometrixx/en/one.unknown.html").getHeader("Location"));
+
+        assertEquals("/content/we-retail/en/home.product2.html",
+                navigate("/content/we-retail/en/home.product1/feature.html").getHeader("Location"));
+        assertEquals(null, navigate("/content/we-retail/en/home.unknown/feature.html").getHeader("Location"));
+    }
+
+
+    @Test
+    public void testSelectorsDisabled() throws Exception {
+        RedirectFilter.Configuration configuration = filter.getConfiguration();
+        when(configuration.evaluateSelectors()).thenReturn(false);
+        filter.activate(configuration, context.bundleContext());
+
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/page1",
+                        302, null, null),
+                new RedirectRule("/content/geometrixx/en/one.desktop", "/content/geometrixx/en/page1",
+                        302, null, null),
+                new RedirectRule("/content/geometrixx/en/one.mobile", "/content/geometrixx/en/page1",
+                        302, null, null)
+        );
+
+        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.html").getHeader("Location"));
+        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
+        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+    }
 }
