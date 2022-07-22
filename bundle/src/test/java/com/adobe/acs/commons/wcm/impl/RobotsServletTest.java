@@ -120,20 +120,20 @@ public class RobotsServletTest {
      * Disallow visiting the page, but allow visiting nested paths
      */
     @Test
-    public void testAllowPathDisallowPage() throws ServletException, IOException {
+    public void testAllowFolderDisallowPage() throws ServletException, IOException {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("user.agent.directives", new String[]{
-                "*"
+            "*"
         });
         props.put("disallow.page.property.names", new String[]{
-                "disallowPage",
+            "disallowPage",
         });
         props.put("allow.property.names", new String[]{
-                "allowFolder"
+            "allowFolder"
         });
         props.put("sitemap.property.names", new String[]{
-           "isSiteMap"
+            "isSiteMap"
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
@@ -146,20 +146,20 @@ public class RobotsServletTest {
      * Allow visiting the page, but disallow visiting nested paths
      */
     @Test
-    public void testDisallowPathAndAllowPage() throws ServletException, IOException {
+    public void testDisallowFolderAndAllowPage() throws ServletException, IOException {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("user.agent.directives", new String[]{
-                "*"
+            "*"
         });
         props.put("disallow.property.names", new String[]{
-                "disallowFolder",
+            "disallowFolder",
         });
         props.put("allow.page.property.names", new String[]{
-                "allowPage"
+            "allowPage"
         });
         props.put("sitemap.property.names", new String[]{
-           "isSiteMap"
+            "isSiteMap"
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
