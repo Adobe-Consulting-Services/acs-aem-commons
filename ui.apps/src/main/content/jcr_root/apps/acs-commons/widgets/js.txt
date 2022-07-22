@@ -1,4 +1,0 @@
-#base=source/js
-
-create_namespace.js
-polyfill_composite_field_processParentRecord.js
