@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 
-- #2900 - Remove deprecated feature: Custom widgets and validators
+- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
 
 ## 5.3.2 - 2022-06-22
 
