@@ -45,16 +45,11 @@
         <include pattern="/etc/acs-commons/audit-log-search"/>
         <include pattern="/etc/acs-commons/jcr-compare"/>
         <include pattern="/etc/acs-commons/manage-controlled-processes"/>
-        <include pattern="/etc/acs-commons/oak-index-manager"/>
         <include pattern="/etc/acs-commons/page-compare"/>
         <include pattern="/etc/acs-commons/reports(.*)?" />
         <include pattern="/etc/acs-commons/version-compare"/>
         <include pattern="/etc/acs-commons/version-replicator"/>
         <include pattern="/etc/acs-commons/workflow-remover"/>
-    </filter>
-    <filter root="/etc/cloudservices/dtm">
-        <include pattern="/etc/cloudservices/dtm/jcr:content"/>
-        <include pattern="/etc/cloudservices/dtm/rep:policy(/.*)?"/>
     </filter>
     <filter root="/etc/cloudservices/sharethis">
         <include pattern="/etc/cloudservices/sharethis/jcr:content"/>

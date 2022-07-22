@@ -28,7 +28,7 @@ import org.junit.Test;
 
 public class BundleContainsTldsIT {
 
-    private static final int EXPECTED_TLD_FILES = 8;
+    private static final int EXPECTED_TLD_FILES = 7;
 
     @Test
     public void test() throws Exception {
