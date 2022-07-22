@@ -45,7 +45,6 @@
         <include pattern="/etc/acs-commons/audit-log-search"/>
         <include pattern="/etc/acs-commons/jcr-compare"/>
         <include pattern="/etc/acs-commons/manage-controlled-processes"/>
-        <include pattern="/etc/acs-commons/oak-index-manager"/>
         <include pattern="/etc/acs-commons/page-compare"/>
         <include pattern="/etc/acs-commons/reports(.*)?" />
         <include pattern="/etc/acs-commons/version-compare"/>
