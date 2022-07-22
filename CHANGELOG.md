@@ -11,8 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 
-- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
 - #2885 - Remove deprecated feature: Oak Index Manager
+- #2895 - Remove deprecated feature: Dynamic RTE configuration
+- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
+- #2907 - Remove deprecated feature: Long Form Text component
 
 ## 5.3.2 - 2022-06-22
 
