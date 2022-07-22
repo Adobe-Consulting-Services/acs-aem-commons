@@ -2,4 +2,3 @@
 
 create_namespace.js
 polyfill_composite_field_processParentRecord.js
-add_dynamic_options_to_feed_importer.js
