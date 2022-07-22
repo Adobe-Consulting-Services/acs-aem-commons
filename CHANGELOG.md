@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2891 - Remove deprecated feature: Content Finder - Query Builder
 - #2892 - Removed the deprecated WCM views feature
 - #2895 - Remove deprecated feature: Dynamic RTE configuration
+- #2897 - Remove deprecated feature: ClientLibs Manager
 - #2898 - Remove deprecated feature: Adobe DTM Cloud Service
 - #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
 - #2907 - Remove deprecated feature: Long Form Text component
