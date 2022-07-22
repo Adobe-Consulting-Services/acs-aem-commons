@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 
+- #2883 - Remove Deprecated - WCM Views
 - #2885 - Remove deprecated feature: Oak Index Manager
 - #2886 - Remove deprecated feature: Assets Folder Properties Support
 - #2889 - Removed Deprecated Forms feature
