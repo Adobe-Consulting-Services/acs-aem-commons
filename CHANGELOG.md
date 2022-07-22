@@ -11,7 +11,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 
+- #2885 - Remove deprecated feature: Oak Index Manager
+- #2886 - Remove deprecated feature: Assets Folder Properties Support
+- #2889 - Removed Deprecated Forms feature
+- #2891 - Remove deprecated feature: Content Finder - Query Builder
+- #2892 - Removed the deprecated WCM views feature
+- #2895 - Remove deprecated feature: Dynamic RTE configuration
 - #2897 - Remove deprecated feature: ClientLibs Manager
+- #2898 - Remove deprecated feature: Adobe DTM Cloud Service
+- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
+- #2907 - Remove deprecated feature: Long Form Text component
 
 ## 5.3.2 - 2022-06-22
 
