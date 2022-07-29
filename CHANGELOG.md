@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2898 - Remove deprecated feature: Adobe DTM Cloud Service
 - #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
 - #2907 - Remove deprecated feature: Long Form Text component
+- #2918 - Remove ClassicUI ShareThis
 
 ## 5.3.2 - 2022-06-22
 
