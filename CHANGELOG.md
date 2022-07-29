@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 
+- #2914 - Remove deprecated Java classes/methods and adjust any uses (page-compare and version-compare)
 - #2883 - Remove Deprecated - WCM Views
 - #2885 - Remove deprecated feature: Oak Index Manager
 - #2886 - Remove deprecated feature: Assets Folder Properties Support
