@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2921 - Remove ClassicUI dialogs where Touch dialogs already exist
 - #2920 - Remove ClassicUI Audio component
 - #2918 - Remove ClassicUI ShareThis
+- #2919 - Remove old GenericList implementation files
 
 ## 5.3.2 - 2022-06-22
 
