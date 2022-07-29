@@ -52,24 +52,10 @@ public class XSSFunctionsTest {
     }
 
     @Test
-    public void testEncodeForHTML_granite() {
-        final String test = new String();
-        XSSFunctions.encodeForHTML(graniteXssAPI, test);
-        verify(graniteXssAPI, only()).encodeForHTML(test);
-    }
-
-    @Test
     public void testEncodeForHTMLAttr() {
         final String test = new String();
         XSSFunctions.encodeForHTMLAttr(xssAPI, test);
         verify(xssAPI, only()).encodeForHTMLAttr(test);
-    }
-
-    @Test
-    public void testEncodeForHTMLAttr_granite() {
-        final String test = new String();
-        XSSFunctions.encodeForHTMLAttr(graniteXssAPI, test);
-        verify(graniteXssAPI, only()).encodeForHTMLAttr(test);
     }
 
     @Test
@@ -80,24 +66,10 @@ public class XSSFunctionsTest {
     }
 
     @Test
-    public void testEncodeForJSString_granite() {
-        final String test = new String();
-        XSSFunctions.encodeForJSString(graniteXssAPI, test);
-        verify(graniteXssAPI, only()).encodeForJSString(test);
-    }
-
-    @Test
     public void testFilterHTML() {
         final String test = new String();
         XSSFunctions.filterHTML(xssAPI, test);
         verify(xssAPI, only()).filterHTML(test);
-    }
-
-    @Test
-    public void testFilterHTML_granite() {
-        final String test = new String();
-        XSSFunctions.filterHTML(graniteXssAPI, test);
-        verify(graniteXssAPI, only()).filterHTML(test);
     }
 
     @Test
@@ -109,27 +81,11 @@ public class XSSFunctionsTest {
     }
 
     @Test
-    public void testGetValidHref_granite() {
-        final String test = "/content/foo.html";
-        when(graniteXssAPI.getValidHref(test)).thenReturn(test);
-        XSSFunctions.getValidHref(graniteXssAPI, test);
-        verify(graniteXssAPI, only()).getValidHref(test);
-    }
-
-    @Test
     public void testGetValidDimension() {
         final String dimension = RandomStringUtils.randomAlphanumeric(10);
         final String defaultValue = RandomStringUtils.randomAlphanumeric(10);
         XSSFunctions.getValidDimension(xssAPI, dimension, defaultValue);
         verify(xssAPI, only()).getValidDimension(dimension, defaultValue);
-    }
-
-    @Test
-    public void testGetValidDimension_granite() {
-        final String dimension = RandomStringUtils.randomAlphanumeric(10);
-        final String defaultValue = RandomStringUtils.randomAlphanumeric(10);
-        XSSFunctions.getValidDimension(graniteXssAPI, dimension, defaultValue);
-        verify(graniteXssAPI, only()).getValidDimension(dimension, defaultValue);
     }
 
     @Test
@@ -142,28 +98,10 @@ public class XSSFunctionsTest {
     }
 
     @Test
-    public void testGetValidInteger_granite() {
-        final String integer = RandomStringUtils.randomAlphanumeric(10);
-        final int defaultValue = new Random().nextInt();
-        XSSFunctions.getValidInteger(graniteXssAPI, integer, defaultValue);
-        verify(graniteXssAPI, only()).getValidInteger(integer, defaultValue);
-
-    }
-
-    @Test
     public void testGetValidJSToken() {
         final String token = RandomStringUtils.randomAlphanumeric(10);
         final String defaultValue = RandomStringUtils.randomAlphanumeric(10);
         XSSFunctions.getValidJSToken(xssAPI, token, defaultValue);
         verify(xssAPI, only()).getValidJSToken(token, defaultValue);
     }
-
-    @Test
-    public void testGetValidJSToken_granite() {
-        final String token = RandomStringUtils.randomAlphanumeric(10);
-        final String defaultValue = RandomStringUtils.randomAlphanumeric(10);
-        XSSFunctions.getValidJSToken(graniteXssAPI, token, defaultValue);
-        verify(graniteXssAPI, only()).getValidJSToken(token, defaultValue);
-    }
-
 }

@@ -45,20 +45,6 @@ public final class XSSFunctions {
     }
 
     /**
-     * @deprecated replaced by {@link #encodeForHTML(XSSAPI, String)}
-     *
-     * Encode a string for HTML.
-     *
-     * @param xssAPI the XSSAPI
-     * @param source the source string
-     * @return the encoded string
-     */
-    @Deprecated
-    public static CharSequence encodeForHTML(com.adobe.granite.xss.XSSAPI xssAPI, String source) {
-        return xssAPI.encodeForHTML(source);
-    }
-
-    /**
      * Encode a string for an HTML attribute.
      * 
      * @param xssAPI the XSSAPI
@@ -66,20 +52,6 @@ public final class XSSFunctions {
      * @return the encoded string
      */
     public static CharSequence encodeForHTMLAttr(XSSAPI xssAPI, String source) {
-        return xssAPI.encodeForHTMLAttr(source);
-    }
-
-    /**
-     * @deprecated replaced by {@link #encodeForHTMLAttr(XSSAPI, String)}
-     *
-     * Encode a string for an HTML attribute.
-     *
-     * @param xssAPI the XSSAPI
-     * @param source the source string
-     * @return the encoded string
-     */
-    @Deprecated
-    public static CharSequence encodeForHTMLAttr(com.adobe.granite.xss.XSSAPI xssAPI, String source) {
         return xssAPI.encodeForHTMLAttr(source);
     }
 
@@ -95,20 +67,6 @@ public final class XSSFunctions {
     }
 
     /**
-     * @deprecated replaced by {@link #encodeForJSString(XSSAPI, String)}
-     *
-     * Encode a string for an JavaScript string.
-     *
-     * @param xssAPI the XSSAPI
-     * @param source the source string
-     * @return the encoded string
-     */
-    @Deprecated
-    public static CharSequence encodeForJSString(com.adobe.granite.xss.XSSAPI xssAPI, String source) {
-        return xssAPI.encodeForJSString(source);
-    }
-
-    /**
      * Filter a string for HTML.
      * 
      * @param xssAPI the XSSAPI
@@ -116,20 +74,6 @@ public final class XSSFunctions {
      * @return the encoded string
      */
     public static CharSequence filterHTML(XSSAPI xssAPI, String source) {
-        return xssAPI.filterHTML(source);
-    }
-
-    /**
-     * @deprecated replaced by {@link #filterHTML(XSSAPI, String)}
-     *
-     * Filter a string for HTML.
-     *
-     * @param xssAPI the XSSAPI
-     * @param source the source string
-     * @return the encoded string
-     */
-    @Deprecated
-    public static CharSequence filterHTML(com.adobe.granite.xss.XSSAPI xssAPI, String source) {
         return xssAPI.filterHTML(source);
     }
 
@@ -142,21 +86,6 @@ public final class XSSFunctions {
      * @return the encoded string
      */
     public static CharSequence getValidHref(XSSAPI xssAPI, String source) {
-        return xssAPI.getValidHref(source);
-    }
-
-    /**
-     * @deprecated replaced by {@link #getValidHref(XSSAPI, String)}
-     *
-     * Get a valid href. This does not use the standard XSS API due to a bug
-     * impacting CQ 5.6.1 (and earlier). Internal bug reference: GRANITE-4193
-     *
-     * @param xssAPI the XSSAPI
-     * @param source the source string
-     * @return the encoded string
-     */
-    @Deprecated
-    public static CharSequence getValidHref(com.adobe.granite.xss.XSSAPI xssAPI, String source) {
         return xssAPI.getValidHref(source);
     }
 
@@ -174,22 +103,6 @@ public final class XSSFunctions {
     }
 
     /**
-     * @deprecated replaced by {@link #getValidDimension(XSSAPI, String, String)}
-     *
-     * Validate a string which should contain a dimension, returning a default value if the source is
-     * empty, can't be parsed, or contains XSS risks.  Allows integer dimensions and the keyword "auto".
-     *
-     * @param xssAPI the XSSAPI
-     * @param dimension the source dimension
-     * @param defaultValue a default value if the source can't be used
-     * @return a sanitized dimension
-     */
-    @Deprecated
-    public static String getValidDimension(com.adobe.granite.xss.XSSAPI xssAPI, String dimension, String defaultValue) {
-        return xssAPI.getValidDimension(dimension, defaultValue);
-    }
-
-    /**
      * Validate a string which should contain an integer, returning a default value if the source is
      * empty, can't be parsed, or contains XSS risks.
      *
@@ -199,22 +112,6 @@ public final class XSSFunctions {
      * @return a sanitized integer
      */
     public static Integer getValidInteger(XSSAPI xssAPI, String integer, int defaultValue) {
-        return xssAPI.getValidInteger(integer, defaultValue);
-    }
-
-    /**
-     * @deprecated replaced by {@link #getValidInteger(XSSAPI, String, int)}
-     *
-     * Validate a string which should contain an integer, returning a default value if the source is
-     * empty, can't be parsed, or contains XSS risks.
-     *
-     * @param xssAPI the XSSAPI
-     * @param integer the source integer
-     * @param defaultValue a default value if the source can't be used
-     * @return a sanitized integer
-     */
-    @Deprecated
-    public static Integer getValidInteger(com.adobe.granite.xss.XSSAPI xssAPI, String integer, int defaultValue) {
         return xssAPI.getValidInteger(integer, defaultValue);
     }
 
@@ -230,21 +127,4 @@ public final class XSSFunctions {
     public static String getValidJSToken(XSSAPI xssAPI, String token, String defaultValue) {
         return xssAPI.getValidJSToken(token, defaultValue);
     }
-
-    /**
-     * @deprecated replaced by {@link #getValidJSToken(XSSAPI, String, String)}
-     *
-     * Validate a Javascript token.  The value must be either a single identifier, a literal number,
-     * or a literal string.
-     *
-     * @param xssAPI the XSSAPI
-     * @param token the source token
-     * @param defaultValue a default value to use if the source doesn't meet validity constraints.
-     * @return a string containing a single identifier, a literal number, or a literal string token
-     */
-    @Deprecated
-    public static String getValidJSToken(com.adobe.granite.xss.XSSAPI xssAPI, String token, String defaultValue) {
-        return xssAPI.getValidJSToken(token, defaultValue);
-    }
-
 }

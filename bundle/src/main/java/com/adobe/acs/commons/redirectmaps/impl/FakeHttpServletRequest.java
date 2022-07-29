@@ -215,7 +215,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
     }
 
     /**
-     * @deprecated
+     * @deprecated deprecated in interface
      */
     @Override
     @Deprecated    
@@ -324,7 +324,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
     }
 
     /**
-     * @deprecated
+     * @deprecated deprecated in interface
      */
     @Override
     @Deprecated
