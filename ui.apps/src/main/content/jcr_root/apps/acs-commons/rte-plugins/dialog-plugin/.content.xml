@@ -4,7 +4,7 @@
           jsProcessor="[default:none,min:gcc]"
           allowProxy="{Boolean}true"
           categories="acs-commons.authoring.rte-plugins.dialog-plugin.coralui2"
-          dependencies="[underscore]"/>
+          dependencies="[lodash.underscore]"/>
 <!--
 
 Wrapper Client Library definition:

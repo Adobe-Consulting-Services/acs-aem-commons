@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
+    <filter root="/content/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/conf/global/settings">
         <include pattern="/conf/global/settings/redirects"/>
@@ -12,9 +13,6 @@
         <include pattern="/etc/acs-commons/dispatcher-flush(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/lists(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/lists/dynamic-deck-query-list(/jcr:content)?"/>
-        <include pattern="/etc/acs-commons/lists/sharethis-services(/jcr:content)?"/>
-        <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list"/>
-        <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list/default_\d+"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
@@ -44,20 +42,11 @@
         <include pattern="/etc/acs-commons/audit-log-search"/>
         <include pattern="/etc/acs-commons/jcr-compare"/>
         <include pattern="/etc/acs-commons/manage-controlled-processes"/>
-        <include pattern="/etc/acs-commons/oak-index-manager"/>
         <include pattern="/etc/acs-commons/page-compare"/>
         <include pattern="/etc/acs-commons/reports(.*)?" />
         <include pattern="/etc/acs-commons/version-compare"/>
         <include pattern="/etc/acs-commons/version-replicator"/>
         <include pattern="/etc/acs-commons/workflow-remover"/>
-    </filter>
-    <filter root="/etc/cloudservices/dtm">
-        <include pattern="/etc/cloudservices/dtm/jcr:content"/>
-        <include pattern="/etc/cloudservices/dtm/rep:policy(/.*)?"/>
-    </filter>
-    <filter root="/etc/cloudservices/sharethis">
-        <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
-        <include pattern="/etc/cloudservices/sharethis/rep:policy(/.*)?"/>
     </filter>
     <filter root="/etc/cloudservices/typekit">
         <include pattern="/etc/cloudservices/typekit/jcr:content"/>

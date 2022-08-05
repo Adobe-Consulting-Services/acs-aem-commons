@@ -8,6 +8,45 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+- #2877 - Support for selector-based redirects
+
+### Removed
+
+- #2914 - Remove deprecated Java classes/methods and adjust any uses (page-compare and version-compare)
+- #2883 - Remove Deprecated - WCM Views
+- #2885 - Remove deprecated feature: Oak Index Manager
+- #2886 - Remove deprecated feature: Assets Folder Properties Support
+- #2889 - Removed Deprecated Forms feature
+- #2891 - Remove deprecated feature: Content Finder - Query Builder
+- #2892 - Removed the deprecated WCM views feature
+- #2895 - Remove deprecated feature: Dynamic RTE configuration
+- #2896 - Remove deprecated feature: cqinclude Namespace
+- #2897 - Remove deprecated feature: ClientLibs Manager
+- #2898 - Remove deprecated feature: Adobe DTM Cloud Service
+- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
+- #2907 - Remove deprecated feature: Long Form Text component
+- #2921 - Remove ClassicUI dialogs where Touch dialogs already exist
+- #2920 - Remove ClassicUI Audio component
+- #2918 - Remove ClassicUI ShareThis
+- #2919 - Remove old GenericList implementation files
+
+## 5.3.2 - 2022-06-22
+
+### Changed
+
+- #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if  the attribute rel="stylesheet" is set
+- #2865 - Reports - Turn absolute property paths to relative to prevent report breakage when malformed (abs path) data is assed 
+
+### Fixed
+
+- #2848 - Fixed issue with ClientLib images not being stored under a resources folder
+- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
+- #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
+- #2826 - 5.3.1-SNAPSHOT build failing validation locally
+- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
+- #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
+- #2869 - Support 500 error pages on AEM CS using x-aem-error-pass = true HTTP response header
+- #2857 - Fixed issue with Marketo integration loading marketo form
 
 ## 5.3.0 - 2022-04-15
 
@@ -18,6 +57,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
 - #2822 - Resolved OakPal issue 92 - False positive during build
 - #2794 - Added context prefix for redirect rules feature
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
 
 ### Changed
 

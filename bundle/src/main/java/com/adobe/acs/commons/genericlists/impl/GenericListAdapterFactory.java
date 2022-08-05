@@ -52,8 +52,7 @@ public class GenericListAdapterFactory implements AdapterFactory {
         }
         final Page page = (Page) obj;
         if (page.getContentResource() != null
-                && page.getContentResource().isResourceType(GenericListImpl.RT_GENERIC_LIST)
-                && page.getContentResource().getChild("list") != null) {
+                && page.getContentResource().isResourceType(GenericListImpl.RT_GENERIC_LIST)) {
             return new GenericListImpl(page.getContentResource().getChild("list"));
         }
         return null;

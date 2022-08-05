@@ -47,11 +47,7 @@ The best pull request are small and focused. Don't try to change the world in on
 
 ## Version Compatibility
 
-The _master_ branch of ACS AEM Commons (4.x) is expected to be installable on AEM 6.3 and AEM 6.4. This means that all *required* OSGi dependencies must be available on 6.3. It is acceptable for some features to require AEM 6.4, but contributors are strongly encouraged to be thoughtful about requiring 6.4.
-
-The _compat/6.2_ branch of ACS AEM Commons (3.x) is expected to be installable on AEM 6.2.
-
-The _compat/6.0_ branch (2.x) is expected to be installable on AEM 6.0 and AEM 6.1.
+The _master_ branch of ACS AEM Commons is expected to be installable on AEM 6.4 or newer. This means that all *required* OSGi dependencies must be available on 6.4, 6.5 and AEM as a Cloud Service. For further details refer to [Compatibility](https://adobe-consulting-services.github.io/acs-aem-commons/pages/compatibility.html).
 
 ## Participating in Code Reviews
 
