@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.0.15-SNAPSHOT</version>
+        <version>5.3.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -16,72 +16,19 @@
 
     <artifactId>acs-aem-commons-ui.apps</artifactId>
     <name>ACS AEM Commons UI.Apps Package</name>
+    <description>ACS AEM Commons content package containing code (/apps).</description>
     <packaging>content-package</packaging>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/content/jcr_root</directory>
-                <excludes>
-                    <exclude>**/.vlt</exclude>
-                    <exclude>**/.vltignore</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/content/META-INF/vault/definition</directory>
-                <targetPath>../vault-work/META-INF/vault/definition</targetPath>
-            </resource>
-            <resource>
-                <directory>src/main/content/META-INF/vault</directory>
-                <includes>
-                    <include>nodetypes.cnd</include>
-                    <include>privileges.xml</include>
-                </includes>
-                <targetPath>../vault-work/META-INF/vault</targetPath>
-            </resource>
-            <resource>
-                <directory>src/main/resources/META-INF</directory>
-                <targetPath>../vault-work/META-INF</targetPath>
-            </resource>
-        </resources>
-
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <directory>${maven.multiModuleProjectDirectory}/src/test/resources</directory>
-            </testResource>
-        </testResources>
 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
-                    <includeEmptyDirs>true</includeEmptyDirs>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <group>adobe/consulting</group>
-                    <properties>
-                        <description>ACS AEM Commons content package containing code (/apps).</description>
-                        <!-- overwrite rep:ACE nodes defining policies for acs-aem-commons-owned service principals -->
-                        <acHandling>merge</acHandling>
-                    </properties>
-                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <embeddeds>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-bundle</artifactId>
-                            <target>/apps/acs-commons/install</target>
-                        </embedded>
-                    </embeddeds>
+                    <!-- overwrite rep:ACE nodes defining policies for acs-aem-commons-owned service principals -->
+                    <accessControlHandling>merge</accessControlHandling>
+                    <packageType>application</packageType>
                     <dependencies>
                         <dependency>
                             <group>day/cq60/product</group>
@@ -89,7 +36,6 @@
                             <version>[6.3.64,)</version>
                         </dependency>
                     </dependencies>
-                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
 
@@ -101,9 +47,7 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
-                    nodetypes.cnd and privileges.xml in the package -->
-
+                    
                     <!-- Enforce separation of content and code (CODE ONLY) -->
                     <checks>
                         <check>
@@ -171,24 +115,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>oakpal-scan-min</id>
-                        <goals>
-                            <goal>scan-many</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            <scanArtifacts>
-                                <artifact>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>min</classifier>
-                                    <type>zip</type>
-                                </artifact>
-                            </scanArtifacts>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>oakpal-verify</id>
                         <goals>
                             <goal>verify</goal>
@@ -197,7 +123,6 @@
                             <summaryFiles>
                                 <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
                                 <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
@@ -241,118 +166,46 @@
                     </excludes>
                 </configuration>
             </plugin>
-
-            <!-- configuration to create minimal package -->
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-min-package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>${pom.basedir}/../content/src/main/script/CreateMinPackage.groovy</source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}-min.zip</file>
-                                    <type>zip</type>
-                                    <classifier>min</classifier>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-taglib</artifactId>
-            <version>5.6.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.scripting.jsp.taglib</artifactId>
-            <version>2.1.8</version>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.day.commons</groupId>
-            <artifactId>day-commons-jstl</artifactId>
-            <version>1.1.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
+        <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
+            <groupId>com.adobe.aem</groupId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
     <profiles>
         <profile>

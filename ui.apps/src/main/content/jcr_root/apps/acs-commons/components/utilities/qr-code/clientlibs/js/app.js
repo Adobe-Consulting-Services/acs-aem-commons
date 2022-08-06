@@ -50,7 +50,7 @@ angular.module('acs-commons-qr-code-app', ['acsCoral', 'ACS.Commons.notification
         $http({
             method: 'POST',
             url: $scope.app.uri + '/config',
-            data: 'enabled=' + $scope.form.enabled || 'false',
+            data: 'sling:resourceType=acs-commons/components/utilities/qr-code/config&enabled=' + $scope.form.enabled || 'false',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }

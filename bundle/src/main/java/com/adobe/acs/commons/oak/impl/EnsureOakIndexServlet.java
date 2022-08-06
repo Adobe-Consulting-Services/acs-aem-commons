@@ -56,6 +56,7 @@ public class EnsureOakIndexServlet extends HttpServlet {
     private static final String PARAM_FORCE = "force";
     private static final String PARAM_PATH = "path";
 
+    @SuppressWarnings("squid:S2226")
     @Reference
     private transient EnsureOakIndexManager ensureOakIndexManager;
     //@formatter:on

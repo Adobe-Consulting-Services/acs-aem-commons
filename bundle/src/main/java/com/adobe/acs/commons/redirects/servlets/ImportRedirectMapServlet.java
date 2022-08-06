@@ -124,6 +124,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if(rule.getNote() != null){
                 props.put(RedirectRule.NOTE_PROPERTY_NAME, rule.getNote());
             }
+            props.put(RedirectRule.CONTEXT_PREFIX_IGNORED, rule.getContextPrefixIgnored());
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
             props.put(JCR_CREATED, Calendar.getInstance());
             props.put(JCR_CREATED_BY, resolver.getUserID());
@@ -142,7 +143,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if (!first) {
                 String source = row.getCell(0).getStringCellValue();
                 String target = row.getCell(1).getStringCellValue();
-                 int statusCode = (int) row.getCell(2).getNumericCellValue();
+                int statusCode = (int) row.getCell(2).getNumericCellValue();
                 Cell c4 = row.getCell(3);
                 Calendar untilDate = null;
                 if (DateUtil.isCellDateFormatted(c4)) {
@@ -159,7 +160,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 if(c5 != null){
                     note = c5.getStringCellValue();
                 }
-                rules.add(new RedirectRule(source, target, statusCode, untilDate, note));
+                Cell c6 = row.getCell(5);
+                boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
+                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix));
             } else {
                 first = false;
             }

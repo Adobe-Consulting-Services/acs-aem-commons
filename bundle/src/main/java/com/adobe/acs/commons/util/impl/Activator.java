@@ -19,11 +19,12 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.settings.SlingSettingsService;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.util.tracker.ServiceTracker;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.ModeUtil;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
 
     private static ServiceTracker<AdapterManager, AdapterManager> adapterManagerServiceTracker;

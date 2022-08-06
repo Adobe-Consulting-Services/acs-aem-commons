@@ -4,12 +4,12 @@ on:
   # for regular master build (after the merge)
   push:
     branches:
-    - master
+      - master
   # for PRs from forked repos and non forked repos
   # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
   pull_request_target:
     branches:
-    - master
+      - master
     types: [opened, synchronize, reopened]
 
 # restrict privileges except for setting commit status, adding PR comments and writing statuses
@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        jdk: [8, 11]
+        jdk: [8, 11, 17]
         include:
           # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
           - os: ubuntu-latest
@@ -56,7 +56,8 @@ jobs:
         uses: actions/setup-java@v2
         with:
           cache: 'maven'
-          distribution: 'adopt'
+          # Adobe is moving away from Azul Zulu to Oracle JDK (which is not an option) - Eclipse Temurin is suggested as the "closest thing"
+          distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
@@ -91,14 +92,15 @@ jobs:
         with:
           check_name: Test report (${{ matrix.os }}, JDK ${{ matrix.jdk }})
 
+      # https://about.codecov.io/blog/javascript-code-coverage-using-github-actions-and-codecov/
       - name: Upload code coverage to CodeCov (Main build)
         if: matrix.isMainBuildEnv
-        run: bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v2
 
       # https://github.com/marketplace/actions/changelog-enforcer
       - name: Enforce a changelog entry
         if: matrix.isMainBuildEnv && github.event_name == 'pull_request_target'
-        uses: dangoslen/changelog-enforcer@v2
+        uses: dangoslen/changelog-enforcer@v3
         with:
           changeLogPath: 'CHANGELOG.md'
           skipLabels: 'Skip-Changelog,skip-changelog'

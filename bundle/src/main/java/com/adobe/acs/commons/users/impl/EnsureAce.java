@@ -19,24 +19,10 @@
  */
 package com.adobe.acs.commons.users.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
-import javax.jcr.ValueFactory;
-import javax.jcr.ValueFormatException;
-import javax.jcr.security.AccessControlPolicy;
-import javax.jcr.security.Privilege;
-
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.cqsearch.QueryUtil;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -52,7 +38,20 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.day.cq.search.PredicateGroup;
+import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Value;
+import javax.jcr.ValueFactory;
+import javax.jcr.ValueFormatException;
+import javax.jcr.security.AccessControlPolicy;
+import javax.jcr.security.Privilege;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 @Service(EnsureAce.class)
@@ -68,23 +67,20 @@ public class EnsureAce {
     private static final String PROP_REP_PRINCIPAL_NAME = "rep:principalName";
 
     @Reference
-    private CloseableQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
 
     /**
      * Ensures the ACEs for the Service User exists. Any extra ACEs for the Service User will be removed.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user management
-     * @param jcrAuthorizable
-     *            the Jackrabbit Authorizable Object (User or Group) the Authorizable represents
-     * @param authorizable
-     *            the Authorizable to ensure
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param jcrAuthorizable  the Jackrabbit Authorizable Object (User or Group) the Authorizable represents
+     * @param authorizable     the Authorizable to ensure
      * @return The number of ace entries that could not be processed
      * @throws RepositoryException
      */
     @SuppressWarnings("squid:S3776")
     public int ensureAces(ResourceResolver resourceResolver, Authorizable jcrAuthorizable,
-            AbstractAuthorizable authorizable) throws RepositoryException {
+                          AbstractAuthorizable authorizable) throws RepositoryException {
         int failures = 0;
         final Session session = resourceResolver.adaptTo(Session.class);
 
@@ -177,7 +173,7 @@ public class EnsureAce {
 
             // Add ACE to the ACL
             acl.addEntry(jcrAuthorizable.getPrincipal(),
-                    ace.getPrivileges(accessControlManager).toArray(new Privilege[] {}), ace.isAllow(), restrictions,
+                    ace.getPrivileges(accessControlManager).toArray(new Privilege[]{}), ace.isAllow(), restrictions,
                     multiRestrictions);
 
             // Update the ACL on the content
@@ -193,16 +189,13 @@ public class EnsureAce {
     /**
      * Removes all ACEs for the Service User principal (except those that live beneath the System User's rep:User node)
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user management
-     * @param jcrAuthorizable
-     *            the Jackrabbit Authorizable Object (User or Group) the Authorizable represents
-     * @param authorizable
-     *            the Authorizable to remove
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param jcrAuthorizable  the Jackrabbit Authorizable Object (User or Group) the Authorizable represents
+     * @param authorizable     the Authorizable to remove
      * @throws RepositoryException
      */
     public void removeAces(ResourceResolver resourceResolver, Authorizable jcrAuthorizable,
-            AbstractAuthorizable authorizable) throws RepositoryException {
+                           AbstractAuthorizable authorizable) throws RepositoryException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         final JackrabbitAccessControlManager accessControlManager =
@@ -232,16 +225,13 @@ public class EnsureAce {
     /**
      * Locates by query all the ACLs that the principal participates in.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user management
-     * @param principalName
-     *            the principal name
-     * @param accessControlManager
-     *            Jackrabbit access control manager
+     * @param resourceResolver     the resource resolver to perform the user management
+     * @param principalName        the principal name
+     * @param accessControlManager Jackrabbit access control manager
      * @return a list of ACLs that principal participates in.
      */
     private List<JackrabbitAccessControlList> findAcls(ResourceResolver resourceResolver, String principalName,
-            JackrabbitAccessControlManager accessControlManager) {
+                                                       JackrabbitAccessControlManager accessControlManager) {
         final Set<String> paths = new HashSet<String>();
         final List<JackrabbitAccessControlList> acls = new ArrayList<JackrabbitAccessControlList>();
 
@@ -252,28 +242,28 @@ public class EnsureAce {
         params.put("property.value", principalName);
         params.put("p.limit", "-1");
 
-        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
-            for (final Hit hit : query.getResult().getHits()) {
-                try {
-                    final Resource aceResource = resourceResolver.getResource(hit.getPath());
+        Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
+        for (final Hit hit : query.getResult().getHits()) {
+            try {
+                final Resource aceResource = resourceResolver.getResource(hit.getPath());
 
-                    // first parent is the rep:policy node
-                    // second parent (grand-parent) is the content node this ACE controls
-                    // that is the node we need to use the JackrabbitAccessControlManager api
-                    final Resource contentResource = aceResource.getParent().getParent();
+                // first parent is the rep:policy node
+                // second parent (grand-parent) is the content node this ACE controls
+                // that is the node we need to use the JackrabbitAccessControlManager api
+                final Resource contentResource = aceResource.getParent().getParent();
 
-                    if (!paths.contains(contentResource.getPath())) {
-                        paths.add(contentResource.getPath());
-                        for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
-                            if (policy instanceof JackrabbitAccessControlList) {
-                                acls.add((JackrabbitAccessControlList) policy);
-                                break;
-                            }
+                if (!paths.contains(contentResource.getPath())) {
+                    paths.add(contentResource.getPath());
+                    for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
+                        if (policy instanceof JackrabbitAccessControlList) {
+                            acls.add((JackrabbitAccessControlList) policy);
+                            break;
                         }
                     }
-                } catch (RepositoryException e) {
-                    log.error("Failed to get resource for query result.", e);
                 }
+            } catch (RepositoryException e) {
+                log.error("Failed to get resource for query result.", e);
             }
         }
 
@@ -282,11 +272,9 @@ public class EnsureAce {
 
     /**
      * Helper function that returns a list of Strings into an Array of Value's
-     * 
-     * @param valueFactory
-     *            the valueFactory to create the Value
-     * @param valueStrs
-     *            the string values to convert
+     *
+     * @param valueFactory the valueFactory to create the Value
+     * @param valueStrs    the string values to convert
      * @return the array of Values derives from the valueStrs
      */
     private Value[] getMultiValues(ValueFactory valueFactory, List<String> valueStrs, int propertyType)

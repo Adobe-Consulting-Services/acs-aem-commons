@@ -20,11 +20,11 @@
 
 package com.adobe.acs.commons.util.impl;
 
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -51,7 +51,7 @@ import java.util.Map;
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference
-    private CloseableQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
 
     public static final String QUERY_BUILDER = "queryBuilder";
 
@@ -128,15 +128,15 @@ public class QueryHelperImpl implements QueryHelper {
             params.put("p.limit", "-1");
         }
 
-        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
-            final List<Hit> hits = query.getResult().getHits();
-            for (final Hit hit : hits) {
-                final Resource resource = resourceResolver.getResource(hit.getPath());
-                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
+        final List<Hit> hits = query.getResult().getHits();
+        for (final Hit hit : hits) {
+            final Resource resource = resourceResolver.getResource(hit.getPath());
+            final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
 
-                if (relativeAwareResource != null) {
-                    resources.add(relativeAwareResource);
-                }
+            if (relativeAwareResource != null) {
+                resources.add(relativeAwareResource);
             }
         }
 
@@ -160,9 +160,9 @@ public class QueryHelperImpl implements QueryHelper {
     @Override
     @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
-        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver)) {
-            return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
-        }
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
+        return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
     }
 
     /**

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -131,11 +132,11 @@ public class ReferenceFinder {
   }
 
   public List<Pair<String, String>> getAllReferences() {
-    return allReferences;
+    return Collections.unmodifiableList(allReferences);
   }
 
   public List<String> getPublishedReferences() {
-    return publishedReferences;
+    return Collections.unmodifiableList(publishedReferences);
   }
 
 }

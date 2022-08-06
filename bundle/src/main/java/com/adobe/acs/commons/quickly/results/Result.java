@@ -25,7 +25,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a Quickly Result
@@ -105,18 +107,16 @@ public class Result {
     /* Quickly Modes */
 
     public List<Mode> getModes() {
-        return this.modes;
+        return Optional.ofNullable(this.modes)
+                .map(Collections::unmodifiableList)
+                .orElse(Collections.emptyList());
     }
 
     public void setModes(final List<Mode> modes) {
-        if (this.modes == null) {
-            this.modes = new ArrayList<Mode>();
-        }
-
-        if (modes == null || CollectionUtils.isEmpty(modes)) {
-            this.modes.add(Mode.ANY);
+        if (CollectionUtils.isEmpty(modes)) {
+            this.modes = Collections.singletonList(Mode.ANY);
         } else {
-            this.modes = modes;
+            this.modes = new ArrayList<>(modes);
         }
     }
 

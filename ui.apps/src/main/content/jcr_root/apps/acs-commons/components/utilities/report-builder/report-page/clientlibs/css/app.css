@@ -9,7 +9,6 @@ dd {
 	padding-bottom: 1em;
 }
 
-
 .acs-commons-page .coral-Form-fieldlabel {
 	padding: 10px 0;
 	width: 150px;
@@ -42,11 +41,14 @@ dd {
 
 .report__result tbody {
 	background-color: white;
+    overflow: scroll;
+        border: solid 1px #cccc;
+        height: 100%;
 }
 
-.report__result-container {
-	max-height: 500px;
-	overflow: scroll;
+.report__result-container,
+ .report__result-container table {
+        height: calc(100vh - 500px);
 }
 
 .report__result thead, .report__result tbody tr:hover {

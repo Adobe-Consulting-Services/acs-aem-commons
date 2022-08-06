@@ -23,6 +23,7 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
 
 import java.util.Date;
+import java.util.Optional;
 
 class VersionSelectionImpl implements VersionSelection {
     private final String name;
@@ -30,7 +31,9 @@ class VersionSelectionImpl implements VersionSelection {
 
     VersionSelectionImpl(String name, Date date) {
         this.name = name;
-        this.date = date;
+        this.date = Optional.ofNullable(date)
+                .map(date1 -> (Date) date1.clone())
+                .orElse(null);
     }
 
     public Date getDate() {

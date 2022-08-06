@@ -77,21 +77,22 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
             PackageId packageId = new PackageId(packagePath);
 
             // check if the package exists
-            JcrPackage jcrPackage = pkgMgr.open(packageId);
-            if (jcrPackage == null || jcrPackage.getNode() == null) {
-                log.warn("Package at path '{}' does not exist", packagePath);
-                throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
+            try (final JcrPackage jcrPackage = pkgMgr.open(packageId)) {
+                if (jcrPackage == null || jcrPackage.getNode() == null) {
+                    log.warn("Package at path '{}' does not exist", packagePath);
+                    throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
+                }
+
+                log.debug("Assembling package {}", packagePath);
+                pkgMgr.assemble(jcrPackage, null);
+
+                log.debug("Replicating package {}", packagePath);
+                replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
+
+                log.debug("Package {} replicated successfully!", packagePath);
+                fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
+                succeeded = true;
             }
-
-            log.debug("Assembling package {}", packagePath);
-            pkgMgr.assemble(jcrPackage, null);
-
-            log.debug("Replicating package {}", packagePath);
-            replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
-
-            log.debug("Package {} replicated successfully!", packagePath);
-            fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
-            succeeded = true;
         } finally {
             if(!succeeded){
                 fireEvent(OSGI_EVENT_FAILED_TOPIC);

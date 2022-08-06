@@ -19,16 +19,28 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -56,27 +68,16 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -795,6 +796,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         response.reset();
         response.setContentType("text/html");
         response.setStatus(statusCode);
+        // Header required for AEM CS; this will noop on 6.x installs
+        response.setHeader("x-aem-error-pass", "true");
     }
 
     /**

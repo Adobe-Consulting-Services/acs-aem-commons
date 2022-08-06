@@ -32,13 +32,15 @@ public class SaxElementUtils {
     public static final String CSS_TYPE = "text/css";
     public static final String JS_TYPE = "text/javascript";
     public static final String JS_MODULE_TYPE = "module";
+    public static final String STYLESHEET_REL="stylesheet";
 
     public static boolean isCss(final String elementName, final Attributes attrs) {
         final String type = attrs.getValue("", "type");
         final String href = attrs.getValue("", "href");
+        final String rel = attrs.getValue("","rel");
 
         return StringUtils.equals("link", elementName)
-                && StringUtils.equals(type, CSS_TYPE)
+                && (StringUtils.equals(type, CSS_TYPE) || StringUtils.equals(rel,STYLESHEET_REL))
                 && StringUtils.startsWith(href, "/")
                 && !StringUtils.startsWith(href, "//")
                 && StringUtils.endsWith(href, LibraryType.CSS.extension);

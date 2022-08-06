@@ -23,6 +23,7 @@ package com.adobe.acs.commons.packaging.impl;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JcrPackageCoverageProgressListener implements ProgressTrackerListener {
@@ -39,6 +40,6 @@ public class JcrPackageCoverageProgressListener implements ProgressTrackerListen
     }
 
     public final List<String> getCoverage() {
-        return coverage;
+        return Collections.unmodifiableList(coverage);
     }
 }

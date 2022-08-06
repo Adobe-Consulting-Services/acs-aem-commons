@@ -19,34 +19,15 @@
  */
 package com.adobe.acs.commons.users.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
@@ -58,6 +39,23 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class EnsureAceTest {
     private static final Logger LOG = LoggerFactory.getLogger(EnsureAceTest.class);
@@ -68,22 +66,21 @@ public class EnsureAceTest {
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Mock
-    CloseableQueryBuilder queryBuilder;
+    QueryBuilder queryBuilder;
 
     @Mock
-    CloseableQuery query;
+    Query query;
 
     @Mock
     SearchResult result;
 
     @Before
     public void setUp() throws Exception {
-        context.registerService(CloseableQueryBuilder.class, queryBuilder);
+        context.registerService(QueryBuilder.class, queryBuilder);
 
         when(result.getHits()).thenReturn(Collections.emptyList());
         when(query.getResult()).thenReturn(result);
-        doNothing().when(query).close();
-        when(queryBuilder.createQuery(any(PredicateGroup.class), any(ResourceResolver.class))).thenReturn(query);
+        when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).thenReturn(query);
     }
 
     @Test

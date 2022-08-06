@@ -24,6 +24,7 @@ import java.util.Calendar;
 
 import javax.inject.Inject;
 
+import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -48,7 +49,9 @@ public class DateReportCellCSVExporter implements ReportCellCSVExporter {
   public String getValue(Object result) {
     Resource resource = (Resource) result;
 
-    Calendar cal = resource.getValueMap().get(property, Calendar.class);
+    final String relativePropertyPath = ExporterUtil.relativizePath(property);
+
+    Calendar cal = resource.getValueMap().get(relativePropertyPath, Calendar.class);
 
     if (cal != null) {
       if (StringUtils.isNotBlank(format)) {

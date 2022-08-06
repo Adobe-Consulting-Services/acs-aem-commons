@@ -7,13 +7,100 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.6...HEAD
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+- #2877 - Support for selector-based redirects
+
+## 5.3.2 - 2022-06-22
+
+### Changed
+
+- #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if  the attribute rel="stylesheet" is set
+- #2865 - Reports - Turn absolute property paths to relative to prevent report breakage when malformed (abs path) data is assed 
+
+### Fixed
+
+- #2848 - Fixed issue with ClientLib images not being stored under a resources folder
+- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
+- #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
+- #2826 - 5.3.1-SNAPSHOT build failing validation locally
+- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
+- #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
+- #2869 - Support 500 error pages on AEM CS using x-aem-error-pass = true HTTP response header
+- #2857 - Fixed issue with Marketo integration loading marketo form
+
+## 5.3.0 - 2022-04-15
+
+### Fixed
+
+- #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in #2772)
+- #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
+- #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
+- #2822 - Resolved OakPal issue 92 - False positive during build
+- #2794 - Added context prefix for redirect rules feature
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
+
+### Changed
+
+- #2043 - Switch to filevault-package-maven-plugin
+- #2781 - Remove Adobe repositories from pom.xml
+- #2805 - Remove "min" packages
+- #2822 - Removed nodetypes-aem640.cnd from oakpal-checks. Superseded by biz.netcentric.aem:aem-nodetypes dependency.
+
+### Added
+
+- #2808 - Sorting numerical or Integer tags in ascending order in AEM (#2814)
+- #2818 - Added support for relative property paths in Data Importer
+
+## 5.2.0 - 2022-03-03
+
+### Fixed
+
+- Fixed XSS vulnerability in page compare 
+- #2783 and #2742 - Configurable localization of MCP based FormFields
+
+### Changed
+
+- #2775 - Update Maven plugins
+- #2777 - Fix Twitter service user mapping
+
+## 5.1.2 - 2022-01-21
+
+### Changed
+
+- #1718 - Use bnd-maven-plugin instead of maven-bundle-plugin
+- #2767 - ThrottledTaskRunnerTest.testExecutionOrder unstable on Mac OS
+- #2261 - Update to latest mocking libraries
+- #2753 - Update to AEM 6.4 dependencies
+- #2754 - Support building with Java 17
+- #2760 - Remove CloseableQuery and CloseableQueryBuilder from API
+
+### Fixed
+
+- #2772 - Resolved Cloud Manager Code Scan reported Blockers, Criticals, and Vulnerabilities
+
+## 5.1.0 - 2021-12-13
+
+### Added
+
+- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is a member of required groups or an admin.
+
+### Fixed
+
+- #2749 and #2488: Manage Controlled Processes does not show any process fixed via #2751
+- #2337 - Marketo form null on publish fixed via #2758
+- #2735 - Redirect Manager: preserve query string in external redirects fixed via #2736
+- #2658 - Fixed issue where implementing RequestPathInfo was being caught by CQRules:CQBP-84
+- #2730 - Optimized Shared Component Properties feature with request attribute caching and injector reliance on BVP
+- #2733 - Fixed implementation of WorkItem and WorkflowSession to not trigger CQBP-84
+
+### Changed
+
+- #2742 - Provided a way to author localized titles for Generic Lists.
 
 ## 5.0.14 - 2021-10-20
 
 ### Fixed
 
-- #2742 - Provided a way to author localized titles for Generic Lists.
 - #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
 - #2716 - Fixed issue with Shared Component Properties Bindings Values Provider facing lock contention
 - #2715 - Fixed issue with Shared Component Properties working with Experience Fragments

@@ -20,19 +20,54 @@
 package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
+import com.adobe.acs.commons.redirects.models.Redirects;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.wcm.api.WCMMode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.net.URI;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -40,14 +75,15 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.engine.EngineConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
@@ -65,45 +101,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.net.URI;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Hashtable;
-import java.util.Dictionary;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
-import static org.osgi.framework.Constants.SERVICE_RANKING;
 import static org.osgi.framework.Constants.SERVICE_ID;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 /**
  * A request filter that implements support for virtual redirects.
@@ -152,6 +153,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
+        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. " +
+                "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
+        boolean evaluateSelectors() default false;
+
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
         String[] additionalHeaders() default {};
@@ -167,29 +172,30 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private ConfigurationResourceResolver configResolver;
+    ConfigurationResourceResolver configResolver;
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private LocationHeaderAdjuster urlAdjuster;
+    LocationHeaderAdjuster urlAdjuster;
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
+    private boolean evaluateSelectors;
     private boolean preserveQueryString;
-    private List<Header> onDeliveryHeaders;
+    private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
-    private Collection<String> exts;
-    private Collection<String> paths;
+    private Collection<String> exts = Collections.emptySet();
+    private Collection<String> paths = Collections.emptySet();
     private Configuration config;
     private ExecutorService executor;
-    private Cache<String, RedirectConfiguration> rulesCache;
+    Cache<String, RedirectConfiguration> rulesCache;
 
     public RedirectFilter() throws NotCompliantMBeanException {
         super(RedirectFilterMBean.class);
@@ -205,6 +211,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     protected final void activate(Configuration config, BundleContext context) {
         this.config = config;
         enabled = config.enabled();
+        evaluateSelectors = config.evaluateSelectors();
 
         if (enabled) {
             Dictionary<String, Object> properties = new Hashtable<>();
@@ -254,6 +261,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
             listenerRegistration.unregister();
             listenerRegistration = null;
         }
+    }
+
+    Configuration getConfiguration(){
+        return config; // for testing
     }
 
     @Override
@@ -375,8 +386,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
     boolean handleRedirect(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) {
         long t0 = System.currentTimeMillis();
         boolean redirected = false;
+
         RedirectMatch match = match(slingRequest);
         if (match != null) {
+
             RedirectRule redirectRule = match.getRule();
             ZonedDateTime untilDateTime = redirectRule.getUntilDate();
             if (untilDateTime != null && untilDateTime.isBefore(ZonedDateTime.now())) {
@@ -409,8 +422,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
      * {@link ResourceResolver#map(HttpServletRequest, String)}
      */
     String evaluate(RedirectMatch match, SlingHttpServletRequest slingRequest){
+        //fetches optional contextPrefix
+        Resource configResource = configResolver.getResource(slingRequest.getResource(), config.bucketName(), config.configName());
+        ValueMap properties = configResource.getValueMap();
+        String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
+
         RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
-        String location = match.getRule().evaluate(match.getMatcher());
+        String location = createFullPath(match.getRule().evaluate(match.getMatcher()), match.getRule(), contextPrefix);
+
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
             if (ext != null && !location.endsWith(ext)) {
@@ -419,14 +438,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
             }
-            if(preserveQueryString) {
-                String queryString = slingRequest.getQueryString();
-                if (queryString != null) {
-                    location = preserveQueryString(location, queryString);
-                }
-            }
             if(urlAdjuster != null){
                 location = urlAdjuster.adjust(slingRequest, location);
+            }
+        }
+        if (preserveQueryString) {
+            String queryString = slingRequest.getQueryString();
+            if (queryString != null) {
+                location = preserveQueryString(location, queryString);
             }
         }
         return location;
@@ -467,19 +486,19 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     protected Collection<String> getExtensions() {
-        return exts;
+        return Collections.unmodifiableCollection(exts);
     }
 
     protected Collection<String> getPaths() {
-        return paths;
+        return Collections.unmodifiableCollection(paths);
     }
 
     protected Collection<String> getMethods() {
-        return methods;
+        return Collections.unmodifiableCollection(methods);
     }
 
     protected List<Header> getOnDeliveryHeaders() {
-        return onDeliveryHeaders;
+        return Collections.unmodifiableList(onDeliveryHeaders);
     }
 
     /**
@@ -547,8 +566,16 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 RedirectConfiguration cfg = loadRules(configPath);
                 return cfg == null ? RedirectConfiguration.EMPTY : cfg;
             });
-            String resourcePath = slingRequest.getRequestPathInfo().getResourcePath(); // /content/mysite/en/page.html
-            RedirectMatch m = rules.match(resourcePath);
+            RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
+            String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
+            if(evaluateSelectors && requestPathInfo.getSelectorString() != null) {
+                resourcePath += "." + requestPathInfo.getSelectorString();
+            }
+
+            ValueMap properties = configResource.getValueMap();
+            String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
+
+            RedirectMatch m = rules.match(resourcePath, contextPrefix);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
@@ -561,6 +588,37 @@ public class RedirectFilter extends AnnotatedStandardMBean
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;
         }
+    }
+
+    /**
+     * Merges the context prefix with the path if needed.<br>
+     * This means
+     * <ul>
+     *     <li>relative paths are joined with the context prefix</li>
+     *     <li>absolute urls are returned unchanged</li>
+     *     <li>rules with an <code>contextPrefixIgnored=true</code> flag are returned unchanged</li>
+     * </ul>
+     * Absolute urls and escaped paths will not be changed
+     * @param path  the path to complete
+     * @param redirectRule the redirect rule that is being handled
+     * @param contextPrefix the context prefix
+     * @return the correct path to redirect to
+     */
+    private String createFullPath(String path, RedirectRule redirectRule, String contextPrefix) {
+        if(path == null) {
+            return "";
+        } else if(redirectRule.getContextPrefixIgnored()
+                || isAbsoluteUrl(path)
+                || path.startsWith(contextPrefix)) {
+            return path;
+        }
+        return contextPrefix + path;
+    }
+
+    private boolean isAbsoluteUrl(String path) {
+        Pattern httpRegex = Pattern.compile("^(https?:\\/\\/|www\\.|\\/\\/)(.*)");
+        Matcher httpMatcher = httpRegex.matcher(path);
+        return httpMatcher.matches();
     }
 
     /**

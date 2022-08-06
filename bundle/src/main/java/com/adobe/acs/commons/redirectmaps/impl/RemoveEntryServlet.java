@@ -47,7 +47,7 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
     
     // Disable this feature on AEM as a Cloud Service
     @Reference(target="(distribution=classic)")
-    RequireAem requireAem;
+    transient RequireAem requireAem;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)

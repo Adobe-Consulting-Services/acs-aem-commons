@@ -45,10 +45,10 @@ public class MultiplyBlendCompositeTest {
     @Mock
     ColorModel notDirect;
 
-    @Spy
+    
     DirectColorModel srcColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
 
-    @Spy
+    
     DirectColorModel destColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
 
     @Mock
@@ -68,23 +68,19 @@ public class MultiplyBlendCompositeTest {
 
     @Test
     public void testCreateContext() throws Exception {
-
         CompositeContext ctx = composite.createContext(srcColorModel, destColorModel, hints);
         assertNotNull(ctx);
-        verifyNoInteractions(srcColorModel, destColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrc() throws Exception {
         composite.createContext(notDirect, destColorModel, hints);
-        verifyNoInteractions(notDirect, destColorModel, hints);
 
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDest() throws Exception {
         composite.createContext(srcColorModel, notDirect, hints);
-        verifyNoInteractions(notDirect, srcColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -93,8 +89,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(),
                 srcColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -103,8 +97,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, 0, srcColorModel.getGreenMask(),
                 srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -113,8 +105,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), 0, srcColorModel.getBlueMask(),
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -123,8 +113,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(), 0,
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -133,8 +121,6 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
                 destColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -143,8 +129,6 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, 0, destColorModel.getGreenMask(),
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -153,8 +137,6 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), 0,
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -163,7 +145,5 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
                 0, destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyNoInteractions(hints);
     }
 }

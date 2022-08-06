@@ -20,13 +20,21 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.replication.ReplicationStatus;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
-import com.google.common.base.Function;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+import javax.jcr.Node;
+import javax.jcr.Session;
+
 import org.apache.jackrabbit.commons.cnd.CndImporter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -40,18 +48,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nullable;
-import javax.jcr.Node;
-import javax.jcr.Session;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Calendar;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicationStatusManagerImplTest {

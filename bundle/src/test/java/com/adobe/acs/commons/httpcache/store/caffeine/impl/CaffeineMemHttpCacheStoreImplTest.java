@@ -72,8 +72,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
     public void test_put() throws HttpCacheDataStreamException, IOException {
         CacheKey key = mock(CacheKey.class);
         CacheContent content = mock(CacheContent.class);
-        InputStream inputStream = getClass().getResourceAsStream("cachecontent.html");
-        when(content.getInputDataStream()).thenReturn(inputStream);
+        when(content.getInputDataStream()).thenReturn(IOUtils.toInputStream("Hello world!", StandardCharsets.UTF_8));
         caffeine.put(key, content);
         assertTrue("contains entry we just put in", caffeine.contains(key));
 
@@ -81,8 +80,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
 
         CacheContent retrievedContent = caffeine.getIfPresent(key);
         String retrievedContentString = IOUtils.toString(retrievedContent.getInputDataStream(), StandardCharsets.UTF_8);
-        String expectedContentString = IOUtils.toString(getClass().getResourceAsStream("cachecontent.html"), StandardCharsets.UTF_8);
-
+        String expectedContentString = "Hello world!";
         assertEquals(expectedContentString, retrievedContentString);
     }
 

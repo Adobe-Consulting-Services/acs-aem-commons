@@ -159,7 +159,7 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
         for (int i = 0; i <= lastColumnIndex; i++) {
             try {
                 sheet.autoSizeColumn(i);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 // autosize depends on AWT stuff and can fail, but it should not be fatal
                 LOG.warn("autoSizeColumn({}) failed: {}",i, e.getMessage());
             }

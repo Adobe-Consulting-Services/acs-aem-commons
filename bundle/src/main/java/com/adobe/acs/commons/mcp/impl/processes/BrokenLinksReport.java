@@ -37,6 +37,8 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlParser;
 import org.apache.tika.sax.Link;
 import org.apache.tika.sax.LinkContentHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.io.ByteArrayInputStream;
@@ -44,6 +46,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.List;
 import java.util.EnumMap;
@@ -95,6 +98,8 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     private transient Set<String> excludeList;
     private transient Set<String> deepCheckList;
     private transient Pattern regex;
+
+    private static final Logger log = LoggerFactory.getLogger(BrokenLinksReport.class);
 
     @Override
     public void init() throws RepositoryException {
@@ -187,6 +192,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                     parser.parse(new ByteArrayInputStream(val.getBytes("utf-8")), linkHandler, new Metadata(), new ParseContext());
                     return linkHandler.getLinks().stream().map(Link::getUri);
                 } catch (Exception e) {
+                    log.warn("Could not parse links from property value of {}", property.getKey(), e);
                     return Stream.empty();
                 }
             });
@@ -217,7 +223,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                                     .collect(Collectors.toList());
                             return brokenPaths;
                         })).entrySet().stream().filter(e -> !e.getValue().isEmpty())
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
      }
 
     // access from unit tests
