@@ -24,31 +24,36 @@
             <plugin>
                 <groupId>org.apache.jackrabbit</groupId>
                 <artifactId>filevault-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
+                    <group>${project.groupId}</group>
                     <packageType>container</packageType>
+                    <properties>
+                        <cloudManagerTarget>all</cloudManagerTarget>
+                    </properties>
                     <embeddeds>
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>acs-aem-commons-bundle</artifactId>
-                            <target>/apps/acs-commons/install</target>
+                            <target>/apps/acs-commons-packages/application/install</target>
+                            <filter>true</filter>
+                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                        </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-ui.apps</artifactId>
+                            <target>/apps/acs-commons-packages/application/install</target>
+                            <filter>true</filter>
+                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                        </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-ui.content</artifactId>
+                            <target>/apps/acs-commons-packages/content/install</target>
                             <filter>true</filter>
                             <isAllVersionsFilter>true</isAllVersionsFilter>
                         </embedded>
                     </embeddeds>
-                    <subPackages>
-                        <subPackage>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-ui.apps</artifactId>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                        </subPackage>
-                        <subPackage>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-ui.content</artifactId>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                        </subPackage>
-                    </subPackages>
                 </configuration>
             </plugin>
 
