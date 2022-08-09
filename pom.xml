@@ -184,7 +184,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 -plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
 # support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
 # paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
--plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
+-plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=debug
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.3.0
