@@ -85,6 +85,7 @@
                     <version>3.9.0</version>
                     <configuration>
                         <showDeprecation>true</showDeprecation>
+                        <failOnError>false</failOnError>
                         <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     </configuration>
                 </plugin>
@@ -332,6 +333,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     <artifactId>animal-sniffer-maven-plugin</artifactId>
                     <version>1.20</version>
                     <configuration>
+                        <failOnError>false</failOnError>
                         <signature>
                             <groupId>org.codehaus.mojo.signature</groupId>
                             <artifactId>java18</artifactId>
