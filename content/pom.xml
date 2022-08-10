@@ -26,7 +26,6 @@
                 <artifactId>filevault-package-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <group>${project.groupId}</group>
                     <packageType>container</packageType>
                     <properties>
                         <cloudManagerTarget>all</cloudManagerTarget>
@@ -35,23 +34,20 @@
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>acs-aem-commons-bundle</artifactId>
+                            <type>zip</type>
                             <target>/apps/acs-commons-packages/application/install</target>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
                         </embedded>
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>acs-aem-commons-ui.apps</artifactId>
+                            <type>zip</type>
                             <target>/apps/acs-commons-packages/application/install</target>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
                         </embedded>
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>acs-aem-commons-ui.content</artifactId>
+                            <type>zip</type>
                             <target>/apps/acs-commons-packages/content/install</target>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
                         </embedded>
                     </embeddeds>
                 </configuration>

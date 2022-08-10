@@ -234,6 +234,9 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                         <thumbnailImage>src/main/resources/thumbnail.png</thumbnailImage>
                         <failOnUncoveredSourceFiles>true</failOnUncoveredSourceFiles>
+                        <properties>
+                            <cloudManagerTarget>none</cloudManagerTarget>
+                        </properties>
                         <validatorsSettings>
                             <jackrabbit-filter>
                                 <options>
