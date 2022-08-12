@@ -131,7 +131,7 @@ public final class GenericListImpl implements GenericList {
 
     @Override
     public List<Item> getItems() {
-        return items;
+        return new ArrayList<>(items);
     }
 
     @Override
