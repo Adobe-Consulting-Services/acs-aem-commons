@@ -62,9 +62,8 @@
         <oakpal.version>2.2.2</oakpal.version>
         <bnd.version>6.1.0</bnd.version>
 
-
         <!-- Suppress some SonarQube rules -->
-        <sonar.issue.ignore.multicriteria>e1,e2,e3</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
         <!-- e1: Suppress CQRules:CQBP-84-\-dependencies -->
         <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
         <!-- e2: Suppress Null checks, as most of these are coming from OSGi service references that should be provided by AEM -->
@@ -73,6 +72,9 @@
         <!-- e3: Suppress check around catching specific exceptions -->
         <sonar.issue.ignore.multicriteria.e3.ruleKey>squid:S2221</sonar.issue.ignore.multicriteria.e3.ruleKey>
         <sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+        <!-- e4: Suppress avoid checking NPE -->
+        <sonar.issue.ignore.multicriteria.e4.ruleKey>squid:S1696</sonar.issue.ignore.multicriteria.e4.ruleKey>
+        <sonar.issue.ignore.multicriteria.e4.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
 
         <jacoco.version>0.8.7</jacoco.version>
         <!-- affects both m-compiler-p and m-javadoc-p-->
