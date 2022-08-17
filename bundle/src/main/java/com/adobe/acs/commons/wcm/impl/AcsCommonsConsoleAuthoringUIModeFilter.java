@@ -2,11 +2,13 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.AuthoringUIModeService;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
@@ -18,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component(
@@ -30,7 +33,7 @@ import java.io.IOException;
         },
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-public class AuthoringUIModeFilter implements Filter {
+public class AcsCommonsConsoleAuthoringUIModeFilter implements Filter {
 
     @Reference
     private AuthoringUIModeService authoringUIModeService;
@@ -51,11 +54,9 @@ public class AuthoringUIModeFilter implements Filter {
         if (request instanceof SlingHttpServletRequest) {
             final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
             final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
-            final Resource resource = slingRequest.getResource();
 
             // This filter only accepts GET requests to /etc/acs-commons that end with a html extension
-            if (!WCMMode.DISABLED.equals(WCMMode.fromRequest(slingRequest)) && resource.adaptTo(Page.class) != null) {
-
+            if (!WCMMode.DISABLED.equals(WCMMode.fromRequest(slingRequest)) && slingRequest.getResource().adaptTo(Page.class) != null) {
                 Cookie authoringModeCookie = slingRequest.getCookie(WCM_AUTHORING_MODE_COOKIE);
 
                 // Add cookie if not existing (or forced) for performance reason,
