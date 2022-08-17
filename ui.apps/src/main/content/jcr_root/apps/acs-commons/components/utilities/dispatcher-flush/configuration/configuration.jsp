@@ -41,12 +41,12 @@
 %>
 
 <% if(hasActionType && hasPaths && hasAgents) { %>
-<form action="<%= slingRequest.getContextPath() %><%= resource.getPath() %>.flush.html" method="post">
-    <input class="button" type="submit" value="Flush Paths on Dispatchers"/>
-</form>
+    <form action="<%= slingRequest.getContextPath() %><%= resource.getPath() %>.flush.html" method="post">
+        <sp-button size="l" type="submit">Flush paths on Dispatchers</sp-button>
+    </form>
 <% } %>
 
-<h3>Flush Action</h3>
+<h2>Flush Action</h2>
 <ul>
     <% if(StringUtils.equals("ACTIVATE", actionType)) { %>
     <li>Invalidate Cache</li>

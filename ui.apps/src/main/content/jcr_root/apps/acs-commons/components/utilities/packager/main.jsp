@@ -29,48 +29,63 @@
             currentPage.getName());
 %>
 
-<h1>AEM Packager</h1>
-
-<h2><%= xssAPI.encodeForHTML(pageTitle) %></h2>
-
 <div class="notifications">
-    <div class="notification preview hidden">
-        <h2>Preview</h2>
 
-        <p>The following filter paths will be used in the package definition:</p>
 
-        <ul class="filters"></ul>
 
-        <p>If the above filter paths appear satisfactory, press the &quot;Create Package&quot; button below to
-            create the actual package definition in <a target="_blank" x-cq-linkchecker="skip" href="/crx/packmgr/index.jsp">CRX Package
-                Manager</a>.</p>
-    </div>
+    <sp-banner size="l" type="info">
+        <div slot="header">Preview</div>
+        <div slot="content">
 
-    <div class="notification success hidden">
-        <h2>Success</h2>
+            <p>The following filter paths will be used in the package definition:</p>
 
-        <p>A new package has been created at: <a class="package-manager-link" target="_blank" x-cq-linkchecker="skip" href=""><span
-                class="package-path"></span></a></p>
+            <ul class="filters"></ul>
 
-        <ul class="filters"></ul>
+            <p>If the above filter paths appear satisfactory, press the &quot;Create Package&quot; button below to
+                create the actual package definition in <a target="_blank" x-cq-linkchecker="skip" href="/crx/packmgr/index.jsp">CRX Package
+                    Manager</a>.
+            </p>
 
-        <p>Go to the <a class="package-manager-link" target="_blank" x-cq-linkchecker="skip" href="">CRX Package manager</a> to build and
-            download this package.</p>
-    </div>
+        </div>
+    </sp-banner>
 
-    <div class="notification error hidden">
-        <h2>Error</h2>
 
-        <p>An error occurred while building the ACL Package.</p>
+    <sp-banner type="info">
+        <div slot="header">Success</div>
+        <div slot="content">
 
-        <p class="msg"></p>
+            <p>A new package has been created at: <a class="package-manager-link" target="_blank" x-cq-linkchecker="skip" href=""><span
+                    class="package-path"></span></a></p>
 
-        <p>Please check the following</p>
-        <ul>
-            <li>Review your packaging settings on this page (especially Conflict Resolution)</li>
-            <li>Verify you have read and write access to /etc/packages</li>
-        </ul>
-    </div>
+            <ul class="filters"></ul>
+
+            <p>Go to the <a class="package-manager-link" target="_blank" x-cq-linkchecker="skip" href="">CRX Package manager</a> to build and
+                download this package.</p>
+
+        </div>
+    </sp-banner>
+
+
+
+    <sp-banner type="error">
+        <div slot="header">Error</div>
+        <div slot="content">
+
+
+            <p>An error occurred while building the ACL Package.</p>
+
+            <p class="msg"></p>
+
+            <p>Please check the following</p>
+            <ul>
+                <li>Review your packaging settings on this page (especially Conflict Resolution)</li>
+                <li>Verify you have read and write access to /etc/packages</li>
+            </ul>
+
+        </div>
+    </sp-banner>
+
+
 </div>
 
 <%-- Custom impl of the packager configuration --%>

@@ -3,10 +3,10 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
           xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
           jcr:primaryType="nt:unstructured"
-          jcr:title="Image"
+          jcr:title="ACL Packager Configuration"
           sling:resourceType="cq/gui/components/authoring/dialog"
           extraClientlibs="[]"
-          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/dispatcher-flush-ui/index.html">
+          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/acl-packager/index.html">
     <content
             jcr:primaryType="nt:unstructured"
             sling:resourceType="granite/ui/components/coral/foundation/container">
@@ -28,54 +28,125 @@
                                 <items jcr:primaryType="nt:unstructured">
 
 
+                                    <package-name
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package name"
+                                            fieldDescription="Name of the package to created. [ Default: acls ]"
+                                            value="acls"
+                                            naem="./packageName"/>
+
+
+                                    <package-group-name
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package group name"
+                                            fieldDescription="Package group to assign this package to. [ Default: ACLs ]"
+                                            value="ACLs"
+                                            naem="./packageGroupName"/>
+
+                                    <package-version
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package version"
+                                            fieldDescription="Package version to assign this package. This value is ignored is Conflict Resolution is set to IncrementValue. [ Default: 1.0.0 ]"
+                                            value="1.0.0"
+                                            naem="./packageVersion"/>
+
+                                    <package-description
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            fieldLabel="Package description"
+                                            fieldDescription="Package description. Enter the purpose and scope of this package for future reference."
+                                            value="ACL Package initially defined by a ACS AEM Commons - ACL Packager configuration."
+                                            naem="./packageDescription"/>
+
+
                                     <replication-action-type
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                            fieldLabel="Flush method"
-                                            fieldDescription="Dispatcher flush method. This effects how cached files are effected (invalidate or delete)."
-                                            name="./replicationActionType">
-                                        <granite:data
-                                                jcr:primaryType="nt:unstructured"/>
+                                            fieldLabel="Package ACL handling"
+                                            fieldDescription="Dictates how package's ACLs will be installed on target systems. [ Default: Overwrite ]"
+                                            name="./packageACLHandling">
                                         <items jcr:primaryType="nt:unstructured">
-                                            <activate
+                                            <overwrite
                                                     jcr:primaryType="nt:unstructured"
-                                                    text="Invalidate Cache"
-                                                    value="ACTIVATE"/>
-                                            <delete
+                                                    text="Overwrite"
+                                                    value="Overwrite"
+                                                    selected="true"/>
+                                            <merge
                                                     jcr:primaryType="nt:unstructured"
-                                                    text="Delete Cache"
-                                                    value="DELETE"/>                                        
+                                                    text="Merge"
+                                                    value="Merge"/>
+                                            <mergePreserve
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="MergePreserve"
+                                                    value="MergePreserve"/>
                                         </items>
                                     </replication-action-type>
 
-                                    <asset-rendition
+                                    <conflict-resolution
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                            emptyText="Select an asset rendition to display"
-                                            fieldDescription="Select the rendition to use."
-                                            fieldLabel="Rendition"
-                                            allowedAssetRenditionTypes="[image]"
-                                            name="./renditionName">
-                                        <datasource
-                                                jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="asset-share-commons/data-sources/asset-renditions"/>
-                                    </asset-rendition>
+                                            fieldLabel="Conflict resolution"
+                                            fieldDescription="Determines how package creation will be handled in the event of an existing package of the same Package group, name and version. [ Default: IncrementVersion ]"
+                                            name="./conflictResolution">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <replace
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Replace"
+                                                    value="Replace"/>
+                                            <increment-version
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Increment Version"
+                                                    value="IncrementVersion"
+                                                    selected="true"/>
+                                            <none
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="None"
+                                                    value="None"/>
+                                        </items>
+                                    </conflict-resolution>
 
-                                    <paths
-                                        jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
-                                        fieldLabel="Paths to flush"
-                                        fieldDescription="Click the '+' to add a new paths to flush"
-                                        composite="{Boolean}false">
-                                    
+
+                                    <principal-names
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                            fieldLabel="Principal names"
+                                            fieldDescription="Click the '+' to add a new principals (users or groups)"
+                                            composite="{Boolean}false">
                                         <field
                                                 jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
-                                                multiple="{Boolean}false"
-                                                rootPath="/"
-                                                filter="hierarchy"
-                                                name="./paths"/>
-                                    </paths>
+                                                sling:resourceType="/libs/granite/ui/components/coral/foundation/authorizable/autocomplete"
+                                                selector="selector"
+                                                valueType="principalname"
+                                                multiple="false"
+                                                name="./principalNames"/>
+                                    </principal-names>
+
+                                    <include-path-patterns
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                            fieldLabel="Include paths patterns"
+                                            fieldDescription="Click the '+' to add a new include pattern. Only paths that match an include pattern will be included. Remove all entries for all paths."
+                                            composite="{Boolean}false">
+
+                                        <field
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                name="./includePatterns"/>
+                                    </include-path-patterns>
+
+
+                                    <include-principals
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                            text="Include ACL Packager"
+                                            fieldDescription="Include this page as part of the package. [ Default: false ]"
+                                            value="true"
+                                            uncheckedValue="false"
+                                            name="./includePrincipals"/>
+
                                 </items>
                             </column>
                         </items>

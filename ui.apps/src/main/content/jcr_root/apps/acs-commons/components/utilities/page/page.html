@@ -10,10 +10,48 @@
             'cq.foundation-main'
         ]
     }"></sly>
+
+    <!--link rel="stylesheet" href="https://unpkg.com/@adobe/spectrum-css@2.15.1/dist/standalone/spectrum-light.css" -->
+    <script
+            src="https://jspm.dev/@spectrum-web-components/bundle/elements.js"
+            type="module"
+    ></script>
+    <style>
+        .main {
+            padding: 2rem;
+         }
+    </style>
 </head>
-<body class="${componentContext.cssClassNames}">
-    <sly data-sly-resource="${'./configuration' @ resourceType='acs-commons/components/utilities/dispatcher-flush/configuration'}"/>
+<body class="${componentContext.cssClassNames}" style="display: none;" id="body">
+
+    <sp-theme
+            scale="medium"
+            color="lightest"
+            style="
+            background: var(--spectrum-global-color-gray-75);
+            display: block;
+            margin: 1rem auto;
+            max-width: 1200px;
+        ">
+
+        <sly data-sly-include="header.html"/>
+
+        <div class="main">
+            <sly data-sly-include="${component.properties.mainScript || 'main.html' }"/>
+        </div>
+
+        <sly data-sly-include="footer.html"/>
+    </sp-theme>
+
+    <script>
+        setTimeout(function() {
+            document.getElementById("body").style.display = "block";
+        }, 500);
+    </script>
 </body>
 </html>
+
+
+
 
 

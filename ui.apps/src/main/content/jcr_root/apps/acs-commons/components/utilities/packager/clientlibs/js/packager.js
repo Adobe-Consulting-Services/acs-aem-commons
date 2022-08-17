@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-
+console.log("OK!")
 $(function() {
-    $('body').on('click', '#packager-form input[type=submit]', function(e) {
+    $('body').on('click', '#packager-form [type=submit]', function(e) {
 
         var $this = $(this),
             $form = $this.closest('form'),
@@ -27,6 +27,7 @@ $(function() {
             i;
 
         $('.notification').fadeOut();
+
 
         $.post($form.attr('action'), {'preview': $this.attr('name') === 'preview' }, function(data) {
             $('.notification').hide();
@@ -76,3 +77,39 @@ $(function() {
         //return false;
     });
 });
+
+(function() {
+
+    var actionUrl = document.getElementById('packager-form').getAttribute('action');
+
+    function previewPackage() {
+
+        fetch(actionUrl, {
+          method: 'POST', // or 'PUT'
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify( {preview: true}),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('Success:', data);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+
+    }
+
+
+
+
+    document.getElementById("preview").addEventListener("click", previewPackage);
+    document.getElementById("create").addEventListener("click", createPackage);
+})();
+
+
+
+
+
+
