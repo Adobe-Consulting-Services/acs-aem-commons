@@ -1,18 +1,1 @@
-<!DOCTYPE html>
-<html lang="en">
-<head data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html">
-    <meta charset="utf-8">
-    <title>${currentPage.title || properties['jcr:title']}</title>
-    <sly data-sly-test="${!wcmmode.disabled}"
-         data-sly-call="${clientlib.all @ categories = [
-            'cq.authoring.page',
-            'cq.shared',
-            'cq.foundation-main'
-        ]
-    }"></sly>
-</head>
-<body class="${componentContext.cssClassNames}">
-    <sly data-sly-resource="${'./configuration' @ resourceType='acs-commons/components/utilities/dispatcher-flush/configuration'}"/>
-</body>
-</html>
-
+<sly data-sly-resource="${'./configuration' @ resourceType='acs-commons/components/utilities/dispatcher-flush/configuration'}"/>

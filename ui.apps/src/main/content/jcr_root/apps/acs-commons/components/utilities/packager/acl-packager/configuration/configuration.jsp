@@ -68,6 +68,14 @@
     <% } %>
 </ul>
 
-<%-- Common Form (Preview / Create Package) used for submittins Packager requests --%>
-<%-- Requires this configuration component have a sling:resourceSuperType of the ACS AEM Commons Packager --%>
-<cq:include script="partials/form.jsp"/>
+<%
+    final String actionURI = resourceResolver.map(slingRequest, currentPage.getContentResource().getPath() + ".package.json");
+%>
+
+<sp-divider size="m"></sp-divider>
+
+
+<form id="packager-form" method="post" action="<%= xssAPI.getValidHref(actionURI) %>">
+     <sp-button size="l" variant="primary" type="submit" name="preview" id="preview">Preview</sp-button>
+     <sp-button size="l" type="submit" name="create" id="create">Create package</sp-button>
+</form>
