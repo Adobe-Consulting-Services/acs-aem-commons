@@ -796,6 +796,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         response.reset();
         response.setContentType("text/html");
         response.setStatus(statusCode);
+        // Header required for AEM CS; this will noop on 6.x installs
+        response.setHeader("x-aem-error-pass", "true");
     }
 
     /**

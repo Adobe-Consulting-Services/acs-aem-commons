@@ -39,6 +39,12 @@ public class SaxElementUtilsTest {
                                 "href", "/css.css",
                                 "type", "text/css")));
 
+        assertTrue("CSS with Rel attribute ",
+                SaxElementUtils.isCss("link",
+                        makeAtts(
+                                "href", "/css.css",
+                                "rel", "stylesheet")));
+
         assertFalse("CSS - not a link",
                 SaxElementUtils.isCss("notlink",
                         makeAtts(
@@ -70,6 +76,7 @@ public class SaxElementUtilsTest {
                                 "href", "/css.css",
                                 "type", "text/notcss")));
     }
+
 
     @Test
     public void testIsJavascript() throws Exception {

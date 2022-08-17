@@ -21,6 +21,8 @@ package com.adobe.acs.commons.reports.models;
 
 import javax.annotation.PostConstruct;
 
+import com.adobe.acs.commons.reports.internal.ExporterUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -66,6 +68,8 @@ public class ReportCellValue {
 
   @PostConstruct
   private void init() {
+    property = ExporterUtil.relativizePath(property);
+
     value = result != null && result.getValueMap() != null ? result.getValueMap().get(property) : null;
   }
 

@@ -48,6 +48,8 @@ public final class GenericListImpl implements GenericList {
         private final String value;
         private final ValueMap props;
 
+        
+
         public ItemImpl(String t, String v, ValueMap props) {
             this.title = t;
             this.text = t;
@@ -106,27 +108,32 @@ public final class GenericListImpl implements GenericList {
     private final Map<String, Item> valueMapping;
 
     public GenericListImpl(Resource listParsys) {
-        List<Item> tempItems = new ArrayList<>();
-        Map<String, Item> tempValueMapping = new HashMap<>();
-        Iterator<Resource> children = listParsys.listChildren();
-        while (children.hasNext()) {
-            Resource res = children.next();
-            ValueMap map = res.getValueMap();
-            String title = map.get(NameConstants.PN_TITLE, String.class);
-            String value = map.get(PN_VALUE, String.class);
-            if (title != null) {
-                ItemImpl item = new ItemImpl(title, value, map);
-                tempItems.add(item);
-                tempValueMapping.put(value, item);
+        if (listParsys == null) {
+            items = Collections.emptyList();
+            valueMapping = Collections.emptyMap();
+        } else {
+            List<Item> tempItems = new ArrayList<>();
+            Map<String, Item> tempValueMapping = new HashMap<>();
+            Iterator<Resource> children = listParsys.listChildren();
+            while (children.hasNext()) {
+                Resource res = children.next();
+                ValueMap map = res.getValueMap();
+                String title = map.get(NameConstants.PN_TITLE, String.class);
+                String value = map.get(PN_VALUE, String.class);
+                if (title != null) {
+                    ItemImpl item = new ItemImpl(title, value, map);
+                    tempItems.add(item);
+                    tempValueMapping.put(value, item);
+                }
             }
+            items = Collections.unmodifiableList(tempItems);
+            valueMapping = Collections.unmodifiableMap(tempValueMapping);
         }
-        items = Collections.unmodifiableList(tempItems);
-        valueMapping = Collections.unmodifiableMap(tempValueMapping);
     }
 
     @Override
     public List<Item> getItems() {
-        return items;
+        return new ArrayList<>(items);
     }
 
     @Override

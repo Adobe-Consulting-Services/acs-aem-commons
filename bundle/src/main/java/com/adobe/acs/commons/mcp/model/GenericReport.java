@@ -38,6 +38,8 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.ChildResource;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -53,13 +55,13 @@ import com.day.cq.commons.jcr.JcrUtil;
 public class GenericReport extends AbstractReport {
     public static final String GENERIC_REPORT_RESOURCE_TYPE = ProcessInstance.RESOURCE_TYPE + "/process-generic-report";
 
-    @Inject
+    @ValueMapValue
     private List<String> columns;
 
-    @Inject
+    @ChildResource
     private List<ValueMap> rows;
 
-    @Inject
+    @ValueMapValue
     private String name = "report";
 
     public String getResourceType() {

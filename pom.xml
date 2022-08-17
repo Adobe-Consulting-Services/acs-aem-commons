@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>5.2.1-SNAPSHOT</version>
+    <version>5.3.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -69,7 +69,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1646317635</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1655933173</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -233,6 +233,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <group>adobe/consulting</group>
                         <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                         <thumbnailImage>src/main/resources/thumbnail.png</thumbnailImage>
+                        <failOnUncoveredSourceFiles>true</failOnUncoveredSourceFiles>
                         <validatorsSettings>
                             <jackrabbit-filter>
                                 <options>
@@ -381,16 +382,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.gmaven</groupId>
-                    <artifactId>groovy-maven-plugin</artifactId>
-                    <version>2.1.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.3.0</version>
-                </plugin>
-                <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
                     <version>6.5.3</version>
@@ -461,13 +452,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-bundle</artifactId>
-                <version>5.2.1-SNAPSHOT</version>
+                <version>5.3.3-SNAPSHOT</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                <version>5.2.1-SNAPSHOT</version>
+                <version>5.3.3-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <!-- Runtime dependencies should be AEM 6.4 compatible -->
