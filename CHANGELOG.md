@@ -10,9 +10,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
 ### Changed
+ 
 - #2931 - Cloud Manager SonarQube report - 2022.08.10 @ v5.3.2 #2931
 - #2877 - Support for selector-based redirects
 
+### Fixed
+
+- #2927 - Fix location of legacy clientlib resources to pass Cloud Manager builds
+ 
 ## 5.3.2 - 2022-06-22
 
 ### Changed
