@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
+
+import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.AbstractResource;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -35,6 +37,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.annotation.versioning.ProviderType;
 
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
@@ -60,9 +63,9 @@ public class AbstractResourceImpl extends AbstractResource {
         this.superType = resourceSuperType;
         this.meta = metadata == null ? new ResourceMetadata() : metadata;
         if (resourceType != null) {
-            meta.put("sling:resourceType", resourceType);
+            meta.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
         }
-        meta.put(JCR_PRIMARYTYPE, "nt:unstructured");
+        meta.put(JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
         // Required property; Set this to the resource's path
         meta.put(ResourceMetadata.RESOLUTION_PATH, this.path);
         
@@ -192,7 +195,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getResourceType() {
-        Object t = meta.get("sling:resourceType");
+        Object t = meta.get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY);
         return t == null ? null : String.valueOf(t);
     }
 
