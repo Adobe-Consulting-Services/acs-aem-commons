@@ -11,7 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
-- #2874 - Make Marketo Forms Easy to Configure  
+- #2874 - Make Marketo Forms Easy to configure  
+- #2931 - Cloud Manager SonarQube report - 2022.08.10 @ v5.3.2 #2931
+- #2877 - Support for selector-based redirects
 
 ## 5.3.2 - 2022-06-22
 
