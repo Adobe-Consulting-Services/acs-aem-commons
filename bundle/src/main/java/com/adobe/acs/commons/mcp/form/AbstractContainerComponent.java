@@ -68,9 +68,9 @@ public class AbstractContainerComponent extends FieldComponent {
             } else {
                 extractFieldComponents(fieldType);
                 fieldComponents.values().forEach(comp -> {
-                    Map<String, Object> meta = comp.getProperties();
-                    String currentName = String.valueOf(meta.get("name"));
-                    meta.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
+                    Map<String, Object> properties = comp.getProperties();
+                    String currentName = String.valueOf(properties.get("name"));
+                    properties.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
                 });
             }
         }
