@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -56,24 +57,31 @@ public class AbstractResourceImpl extends AbstractResource {
     String type;
     String superType;
 
-    public AbstractResourceImpl(String path, String resourceType, String resourceSuperType, ResourceMetadata metadata) {
+    ValueMap properties;
+
+    public AbstractResourceImpl(String path, String resourceType, String resourceSuperType, Map<String, Object> properties) {
         children = new ArrayList<>();
         this.path = path;
         this.type = resourceType;
         this.superType = resourceSuperType;
-        this.meta = metadata == null ? new ResourceMetadata() : metadata;
+        this.meta = new ResourceMetadata();
         if (resourceType != null) {
             meta.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
         }
-        meta.put(JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-        // Required property; Set this to the resource's path
-        meta.put(ResourceMetadata.RESOLUTION_PATH, this.path);
-        
-        if (meta.get(ResourceMetadata.RESOLUTION_PATH_INFO) == null) {
-           // Required property; This information does not exist in this context so set to blank
-          meta.put(ResourceMetadata.RESOLUTION_PATH_INFO, "");
+        // Required property; Setting to path breaks functionality
+        meta.setResolutionPath(path);
+        meta.setCreationTime((new Date()).getTime());
+        meta.setResolutionPathInfo("");
+
+
+        if (properties == null) {
+            properties = new HashMap<>();
         }
 
+        properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
+        properties.put(JcrResourceConstants.SLING_RESOURCE_SUPER_TYPE_PROPERTY, resourceSuperType);
+
+        this.properties = new ValueMapDecorator(properties);
     }
 
     @Override
@@ -185,7 +193,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     public void setPath(String path) {
         this.path = path;
-        meta.put(ResourceMetadata.RESOLUTION_PATH, this.path);
+        meta.setResolutionPath(this.path);
     }
 
     @Override
@@ -195,7 +203,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getResourceType() {
-        Object t = meta.get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY);
+        Object t = properties.get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY);
         return t == null ? null : String.valueOf(t);
     }
 
@@ -211,7 +219,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public ValueMap getValueMap() {
-        return new ValueMapDecorator(meta);
+        return new ValueMapDecorator(properties);
     }
 
     @Override
@@ -220,23 +228,23 @@ public class AbstractResourceImpl extends AbstractResource {
     }
 
     public AbstractResourceImpl cloneResource() {
-        ResourceMetadata clonedMetadata = new ResourceMetadata();
-        if (meta != null) {
-            clonedMetadata.putAll(meta);
+        ValueMap clonedProperties = new ValueMapDecorator(new HashMap<>());
+        if (properties != null) {
+            clonedProperties.putAll(properties);
         }
-        AbstractResourceImpl clone = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), clonedMetadata);
+        AbstractResourceImpl clone = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), properties);
         getChildren().forEach(child -> clone.addChild(((AbstractResourceImpl) child).cloneResource()));
         return clone;
     }
 
     public void disableMergeResourceProvider() {
-        getResourceMetadata().put("sling:hideChildren", "*");
+        properties.put("sling:hideChildren", "*");
         children.forEach(c -> ((AbstractResourceImpl) c).disableMergeResourceProvider());
     }
 
     public Map<String, Object> convertTreeToMap() {
         HashMap<String, Object> out = new HashMap<>();
-        out.putAll(meta);
+        out.putAll(properties);
         children.forEach(c -> out.put(c.getName(), ((AbstractResourceImpl) c).convertTreeToMap()));
         return out;
     }

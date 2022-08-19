@@ -78,20 +78,20 @@ public class BrokenLinksTest {
     public void reportBrokenReferences() throws Exception {
         final ResourceResolver rr = getEnhancedMockResolver();
 
-        AbstractResourceImpl content = new AbstractResourceImpl("/content", "cq:Page", "cq:Page", new ResourceMetadata());
+        AbstractResourceImpl content = new AbstractResourceImpl("/content", "cq:Page", "cq:Page", new HashMap<>());
 
-        AbstractResourceImpl pageA = new AbstractResourceImpl("/content/pageA", "cq:Page", "cq:Page", new ResourceMetadata());
+        AbstractResourceImpl pageA = new AbstractResourceImpl("/content/pageA", "cq:Page", "cq:Page", new HashMap());
         content.addChild(pageA);
-        AbstractResourceImpl pageAcontent = new AbstractResourceImpl("/content/pageA/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata() {{
+        AbstractResourceImpl pageAcontent = new AbstractResourceImpl("/content/pageA/jcr:content", "cq:PageContent", "cq:PageContent", new HashMap() {{
                 put("ref1", "/content/pageA");
                 put("ref2", "/content/pageB");
                 put("ref3", "/content/pageC");
             }
         });
         pageA.addChild(pageAcontent);
-        AbstractResourceImpl pageB = new AbstractResourceImpl("/content/pageB", "cq:Page", "cq:Page", new ResourceMetadata());
+        AbstractResourceImpl pageB = new AbstractResourceImpl("/content/pageB", "cq:Page", "cq:Page", new HashMap());
         content.addChild(pageB);
-        AbstractResourceImpl pageBcontent = new AbstractResourceImpl("/content/pageB/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata() {{
+        AbstractResourceImpl pageBcontent = new AbstractResourceImpl("/content/pageB/jcr:content", "cq:PageContent", "cq:PageContent", new HashMap() {{
                 put("ignoredRef", "/content/pageC");
                 put("ref2", "/content/pageD");
                 put("ref3", "/content/pageE");

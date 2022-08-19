@@ -273,7 +273,7 @@ public class AnnotatedFieldDeserializer {
             try {
                 FieldComponent component = fieldDefinition.component().getDeclaredConstructor().newInstance();
                 component.setup(fieldName, accessibleObject, fieldDefinition, sling);
-                component.getComponentMetadata().put("fieldLabel", title);
+                component.getProperties().put("fieldLabel", title);
                 comps.put(fieldName, component);
             } catch (RuntimeException | ReflectiveOperationException ex) {
                 LOG.error("Unable to instantiate field component for " + accessibleObject.toString(), ex);

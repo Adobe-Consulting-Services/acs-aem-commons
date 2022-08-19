@@ -33,9 +33,9 @@ public abstract class PathfieldComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/pathbrowser");
-        getComponentMetadata().put("pickerMultiselect", hasOption("multiple"));
-        getOption("base").ifPresent(path -> getComponentMetadata().put("rootPath", path));
-        getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
+        getProperties().put("pickerMultiselect", hasOption("multiple"));
+        getOption("base").ifPresent(path -> getProperties().put("rootPath", path));
+        getProperties().put(OPTION_PREDICATE, "nosystem");
     }
 
     @ProviderType
@@ -44,7 +44,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
+            getProperties().put(OPTION_PREDICATE, "hierarchy");
         }
     }
 
@@ -54,7 +54,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
+            getProperties().put(OPTION_PREDICATE, "nosystem");
         }
     }
 
@@ -64,7 +64,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put(OPTION_PREDICATE, "hierarchyNotFile");
+            getProperties().put(OPTION_PREDICATE, "hierarchyNotFile");
         }
     }
 
@@ -74,7 +74,7 @@ public abstract class PathfieldComponent extends FieldComponent {
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put(OPTION_PREDICATE, "folder");
+            getProperties().put(OPTION_PREDICATE, "folder");
         }
     }
 }

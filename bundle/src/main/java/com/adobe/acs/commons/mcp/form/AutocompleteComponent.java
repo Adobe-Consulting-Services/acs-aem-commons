@@ -80,7 +80,7 @@ public class AutocompleteComponent extends FieldComponent {
     @Override
     public Resource buildComponentResource() {
         SyntheticResourceBuilder builder = new SyntheticResourceBuilder(getName(), getResourceType());
-        builder.withAttributes(getComponentMetadata())
+        builder.withAttributes(getProperties())
                 .withAttributes(
                         "multiple", isMultiple(),
                         "disabled", isDisabled(),

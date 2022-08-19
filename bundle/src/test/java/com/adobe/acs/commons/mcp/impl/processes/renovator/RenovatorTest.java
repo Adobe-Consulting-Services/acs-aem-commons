@@ -65,13 +65,14 @@ import com.day.cq.audit.AuditLogEntry;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.apache.sling.testing.mock.sling.builder.ImmutableValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -252,6 +253,8 @@ public class RenovatorTest {
         instance.init(rr, values);
 
         instance.run(rr);
+
+
         // Make sure that target folders were created
         assertNotNull(rr.getResource("/content/dam/folderC"));
         assertNotNull(rr.getResource("/content/dam/folderC/subfolder"));
@@ -295,8 +298,12 @@ public class RenovatorTest {
         for (Map.Entry<String, String> entry : testNodes.entrySet()) {
             String path = entry.getKey();
             String type = entry.getValue();
-            AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "", new ResourceMetadata());
-            mockFolder.getResourceMetadata().put(JCR_PRIMARYTYPE, type);
+
+            Map<String, Object> mockProperties = new HashMap<>();
+            mockProperties.put(JCR_PRIMARYTYPE, type);
+
+            AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "",
+                    mockProperties);
 
             when(rr.resolve(path)).thenReturn(mockFolder);
             when(rr.getResource(path)).thenReturn(mockFolder);
