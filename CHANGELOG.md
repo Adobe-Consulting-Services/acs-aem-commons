@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2876 - RobotsServlet: Added configuration options to ALLOW / DISALLOW single pages (.html)
 
+### Changed
+- #2931 - Cloud Manager SonarQube report - 2022.08.10 @ v5.3.2 #2931
+- #2877 - Support for selector-based redirects
+
 ## 5.3.2 - 2022-06-22
 
 ### Changed

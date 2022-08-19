@@ -74,8 +74,8 @@ public class RedirectConfiguration {
     public static String normalizePath(String resourcePath) {
         int sep = resourcePath.lastIndexOf('.');
         if (sep != -1 && !resourcePath.startsWith("/content/dam/")) {
-            // strip off extension if present
-            resourcePath = resourcePath.substring(0, sep);
+            // strip off .html extension and query string if present
+            resourcePath = resourcePath.replaceAll("\\.html(\\?.*)?$", "");
         }
         return resourcePath;
     }
