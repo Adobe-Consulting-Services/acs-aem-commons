@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Added
+
+- #2876 - RobotsServlet: Added configuration options to ALLOW / DISALLOW single pages (.html)
+
 ### Changed
 
 - #2874 - Make Marketo Forms Easy to configure  
