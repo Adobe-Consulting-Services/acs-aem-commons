@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+### Added
+
+- #2876 - RobotsServlet: Added configuration options to ALLOW / DISALLOW single pages (.html)
+
 ### Changed
 
 - #2874 - Make Marketo Forms Easy to configure  
@@ -18,6 +22,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2617 - Fixed issue with NPE in Generic Lists
+- #2927 - Fix location of legacy clientlib resources to pass Cloud Manager builds
 
 ## 5.3.2 - 2022-06-22
 
