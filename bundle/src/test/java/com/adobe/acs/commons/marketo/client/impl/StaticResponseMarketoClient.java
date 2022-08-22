@@ -19,36 +19,66 @@
  */
 package com.adobe.acs.commons.marketo.client.impl;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.function.BiFunction;
 
-import org.apache.commons.io.IOUtils;
+import javax.annotation.Nonnull;
 
-import com.drew.lang.annotations.NotNull;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.message.BasicRequestLine;
+
+import org.apache.http.ProtocolVersion;
+
+import com.adobe.acs.commons.marketo.client.MarketoApiException;
 
 public class StaticResponseMarketoClient extends MarketoClientImpl {
 
-  private String resourcePath;
-  private Iterator<String> resourcePaths;
+    private String resourcePath;
+    private Iterator<String> resourcePaths;
 
-  public StaticResponseMarketoClient(String resourcePath) {
-    this.resourcePath = resourcePath;
-  }
-
-  public StaticResponseMarketoClient(String[] resourcePaths) {
-    this.resourcePaths = Arrays.asList(resourcePaths).iterator();
-    if (this.resourcePaths.hasNext()) {
-      resourcePath = this.resourcePaths.next();
+    public StaticResponseMarketoClient(String resourcePath) {
+        this.resourcePath = resourcePath;
     }
-  }
 
-  protected @NotNull String getApiResponse(@NotNull String url, String bearerToken) throws IOException {
-    String resp = IOUtils.toString(StaticResponseMarketoClient.class.getResourceAsStream(resourcePath), StandardCharsets.UTF_8);
-    if (resourcePaths != null && resourcePaths.hasNext()) {
-      resourcePath = resourcePaths.next();
+    public StaticResponseMarketoClient(String[] resourcePaths) {
+        this.resourcePaths = Arrays.asList(resourcePaths).iterator();
+        if (this.resourcePaths.hasNext()) {
+            resourcePath = this.resourcePaths.next();
+        }
     }
-    return resp;
-  }
+
+    @Override
+    protected <T> @Nonnull T getApiResponse(@Nonnull String url, String bearerToken,
+            BiFunction<HttpGet, HttpResponse, ParsedResponse<T>> callback)
+            throws MarketoApiException {
+        InputStream is = StaticResponseMarketoClient.class.getResourceAsStream(resourcePath);
+        if (resourcePaths != null && resourcePaths.hasNext()) {
+            resourcePath = resourcePaths.next();
+        }
+        HttpGet req = mock(HttpGet.class);
+        when(req.getRequestLine()).thenReturn(new BasicRequestLine("GET", url, new ProtocolVersion("http", 0, 0)));
+        HttpResponse res = mock(HttpResponse.class);
+
+        StatusLine status = mock(StatusLine.class);
+        when(status.getStatusCode()).thenReturn(200);
+
+        when(res.getStatusLine()).thenReturn(status);
+        when(res.getEntity())
+                .thenReturn(new InputStreamEntity(is));
+
+        ParsedResponse<T> resp = callback.apply(req, res);
+        if (resp.isSuccess()) {
+            return resp.getResult();
+        } else {
+            throw resp.getException();
+        }
+    }
 }

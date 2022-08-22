@@ -100,6 +100,7 @@ public class MarketoFieldDataSource extends SlingSafeMethodsServlet {
                 throw new RepositoryException(msg);
       }
 
+
       options = formCache.get(config).stream()
           .sorted((MarketoField f1, MarketoField f2) -> f1.getId().compareTo(f2.getId())).map(f -> {
             Map<String, Object> data = new HashMap<>();
