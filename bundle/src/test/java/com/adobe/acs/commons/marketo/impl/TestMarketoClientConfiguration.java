@@ -83,7 +83,7 @@ public class TestMarketoClientConfiguration {
     assertEquals("456", mcc.getClientSecret());
     assertEquals("test.mktorest.com", mcc.getEndpointHost());
     assertEquals("123-456-789", mcc.getMunchkinId());
-    assertEquals("//test.marketo.com", mcc.getServerInstance());
+    assertEquals("test.marketo.com", mcc.getServerInstance());
     assertEquals(48721, mcc.hashCode());
 
     MarketoClientConfiguration mcc2 = Optional
