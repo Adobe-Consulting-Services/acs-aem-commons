@@ -1,0 +1,45 @@
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2022 AEM developer community
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.packagegarbagecollector;
+
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+@ObjectClassDefinition(name = "ACS Commons - Package Garbage Collection Configuration", description = "Used to config a package garbage collection job")
+public @interface PackageGarbageCollectionConfig {
+
+    @AttributeDefinition(name = "Schedule", description = "Cron expression detailing when the garbage collection is run. Default runs at 02:30 every day")
+    String scheduler() default "0 30 2 ? * * *";
+
+    @AttributeDefinition(name = "Enabled", description = "Enables or disable this garbage collection job")
+    boolean enabled() default false;
+
+    @AttributeDefinition(name = "Service User", description = "The service user that has the permission to remove packages")
+    String serviceUser() default "";
+
+    @AttributeDefinition(name = "Package Group Name", description = "The group name of the packages to remove")
+    String groupName() default "";
+
+    @AttributeDefinition(name = "Max age of package", description = "Packages older than this will be removed. Default is 60")
+    int maxAgeInDays() default 60;
+
+    @AttributeDefinition(name = "webconsole.configurationFactory.nameHint")
+    String webconsole_configurationFactory_nameHint() default "Package Garbage Collection - Clear packages in {groupName} older than {maxAgeInDays} days using the schedule [{scheduler}]";
+}
