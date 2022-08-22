@@ -4,6 +4,7 @@
     jcr:description="Marketo's powerful marketing automation software helps marketers master the art and science of digital marketing to engage customers and prospects."
     jcr:title="Marketo"
     allowedPaths="[/conf(/.*)?]"
+    check="/bin/acs-commons/mkto-cfg-test"
     ranking="{Long}100">
     <jcr:content
         jcr:primaryType="cq:PageContent"

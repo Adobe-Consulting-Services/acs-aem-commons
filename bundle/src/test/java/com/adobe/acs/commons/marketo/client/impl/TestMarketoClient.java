@@ -22,6 +22,7 @@ package com.adobe.acs.commons.marketo.client.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
+import com.adobe.acs.commons.marketo.client.MarketoApiException;
 import com.adobe.acs.commons.marketo.client.MarketoClient;
 import com.adobe.acs.commons.marketo.client.MarketoField;
 import com.adobe.acs.commons.marketo.client.MarketoForm;
@@ -76,7 +78,7 @@ public class TestMarketoClient {
       client.getForms(config);
       fail();
     } catch (IOException e) {
-      assertEquals("Retrieved errors in response: Access token invalid", e.getMessage());
+      assertTrue(e instanceof MarketoApiException);
     }
   }
 
