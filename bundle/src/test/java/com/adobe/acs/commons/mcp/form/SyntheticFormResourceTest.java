@@ -127,9 +127,9 @@ public class SyntheticFormResourceTest {
         Resource fieldResource = form.get("textComponentTest").buildComponentResource();
         assertEquals("granite/ui/components/coral/foundation/form/textfield", fieldResource.getResourceType());
         assertEquals("granite/ui/components/coral/foundation/form/field", fieldResource.getResourceSuperType());
-        assertEquals("textComponentTest", fieldResource.getResourceMetadata().get("name"));
-        assertEquals("Text component", fieldResource.getResourceMetadata().get("fieldLabel"));
-        assertEquals(true, fieldResource.getResourceMetadata().get("required"));
+        assertEquals("textComponentTest", fieldResource.getValueMap().get("name"));
+        assertEquals("Text component", fieldResource.getValueMap().get("fieldLabel"));
+        assertEquals(true, fieldResource.getValueMap().get("required"));
     }
 
     @Test

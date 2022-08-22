@@ -23,13 +23,13 @@ import com.adobe.acs.commons.mcp.util.AccessibleObjectUtil;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,36 +71,36 @@ public abstract class RadioComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/radiogroup");
-        getComponentMetadata().put("vertical", hasOption("vertical"));
-        getComponentMetadata().put("text", getFieldDefinition().name());
-        getComponentMetadata().remove("fieldLabel");
-        getComponentMetadata().remove("fieldDescription");
+        getProperties().put("vertical", hasOption("vertical"));
+        getProperties().put("text", getFieldDefinition().name());
+        getProperties().remove("fieldLabel");
+        getProperties().remove("fieldDescription");
     }
 
     @Override
     public Resource buildComponentResource() {
         AbstractResourceImpl component = (AbstractResourceImpl) super.buildComponentResource();
-        AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new ResourceMetadata());
+        AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new HashMap<>());
         component.addChild(options);
 
         String defaultValue = getOption("default").orElse(null);
 
         getOptions().forEach((value, name) -> {
-            final ResourceMetadata meta = new ResourceMetadata();
+            final HashMap<String, Object> properties = new HashMap<>();
             final String nodeName = JcrUtil.escapeIllegalJcrChars(value);
 
             if (value.equals(defaultValue)) {
-                meta.put("checked", true);
+                properties.put("checked", true);
             }
-            meta.put("name", getName());
-            meta.put("value", value);
+            properties.put("name", getName());
+            properties.put("value", value);
             if (name.contains("::")) {
                 String description = StringUtils.substringAfter(name, DESCRIPTION_DELIMITER);
-                meta.put("title", description);
+                properties.put("title", description);
                 name = StringUtils.substringBefore(name, DESCRIPTION_DELIMITER);
             }
-            meta.put("text", name);
-            AbstractResourceImpl option = new AbstractResourceImpl("option_" + nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", meta);
+            properties.put("text", name);
+            AbstractResourceImpl option = new AbstractResourceImpl("option_" + nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", properties);
             options.addChild(option);
         });
         return component;

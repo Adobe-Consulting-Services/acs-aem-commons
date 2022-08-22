@@ -26,6 +26,22 @@
         "jcr:primaryType": "cq:PageContent",
         "denyGoogle": true
       }
+    },
+    "allow-page-but-disallow-folder": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "allowPage": true,
+        "disallowFolder": true
+      }
+    },
+    "allow-folder-but-disallow-page": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "allowFolder": true,
+        "disallowPage": true
+      }
     }
   }
 }

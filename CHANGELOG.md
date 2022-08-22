@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
-- #2877 - Support for selector-based redirects
+
+## 6.0.0
 
 ### Removed
 
@@ -29,6 +30,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2920 - Remove ClassicUI Audio component
 - #2918 - Remove ClassicUI ShareThis
 - #2919 - Remove old GenericList implementation files
+
+## 5.3.4 - 2022-08-22
+
+### Added
+
+- #2876 - RobotsServlet: Added configuration options to ALLOW / DISALLOW single pages (.html)
+
+### Changed
+
+- #2874 - Make Marketo Forms Easy to configure  
+- #2931 - Cloud Manager SonarQube report - 2022.08.10 @ v5.3.2 #2931
+- #2877 - Support for selector-based redirects
+
+### Fixed
+
+- #2617 - Fixed issue with NPE in Generic Lists
+- #2927 - Fix location of legacy clientlib resources to pass Cloud Manager builds
 
 ## 5.3.2 - 2022-06-22
 
@@ -170,7 +188,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2581 - Versioned ClientLibs no longer works with proxied clientlibs
 - #2562 - Fixed cache refresh on versioned clientlibs request when enforceMd5 is false (default).
-- #2590- Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
+- #2590 - Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
+- #2617 - Fixed issue with NPE in Generic Lists 
 
 ### Added
 - #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.

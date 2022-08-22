@@ -160,13 +160,13 @@ public class GeneratedDialog {
                 form.applyDialogProviderSettings(providerAnnotation);
             }
             if (formTitle != null) {
-                form.getComponentMetadata().put("jcr:title", formTitle);
+                form.getProperties().put("jcr:title", formTitle);
             }
             if (sling != null) {
                 form.setHelper(sling);
                 form.setPath(sling.getRequest().getResource().getPath());
                 form.setAsync(true);
-                form.getComponentMetadata().put("granite:id", "mcp-generated-form");
+                form.getProperties().put("granite:id", "mcp-generated-form");
             } else {
                 form.setPath("/form");
             }

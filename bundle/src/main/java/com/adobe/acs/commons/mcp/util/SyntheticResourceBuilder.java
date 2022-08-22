@@ -75,13 +75,13 @@ public class SyntheticResourceBuilder {
 
     public SyntheticResourceBuilder withAttributes(Object... attrs) {
         for (int i = 0; i < attrs.length - 1; i += 2) {
-            currentResource.getResourceMetadata().put(String.valueOf(attrs[i]), attrs[i + 1]);
+            currentResource.getValueMap().put(String.valueOf(attrs[i]), attrs[i + 1]);
         }
         return this;
     }
 
     public SyntheticResourceBuilder withAttributes(Map<String, Object> attrs) {
-        currentResource.getResourceMetadata().putAll(attrs);
+        currentResource.getValueMap().putAll(attrs);
         return this;
     }
 
