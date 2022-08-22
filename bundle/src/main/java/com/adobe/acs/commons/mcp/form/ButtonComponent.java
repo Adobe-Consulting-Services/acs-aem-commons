@@ -20,8 +20,9 @@
 package com.adobe.acs.commons.mcp.form;
 
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
+
+import java.util.Map;
 
 /**
  * Represent a button on a form
@@ -88,23 +89,23 @@ public final class ButtonComponent extends FieldComponent {
 
     @Override
     public Resource buildComponentResource() {
-        ResourceMetadata meta = getComponentMetadata();
-        meta.put(ACTION_CONFIG_NAME_OPT, getActionConfigName());
-        meta.put(ACTIVE_OPT, isActive());
-        meta.put(AUTOCOMPLETE_OPT, getAutocomplete());
-        meta.put(BLOCK_OPT, isBlock());
-        meta.put(COMMAND_OPT, getCommand());
-        meta.put(COMMENT_OPT, getComment());
-        meta.put(DISABLED_OPT, isDisabled());
-        meta.put(FORM_ID_OPT, getFormId());
-        meta.put(HIDE_TEXT_OPT, isHideText());
-        meta.put(ICON_OPT, getIcon());
-        meta.put(ICON_SIZE_OPT, getIconSize());
-        meta.put(TEXT_OPT, getText());
-        meta.put(TRACKING_ELEMENT_OPT, getTrackingElement());
-        meta.put(TRACKING_FEATURE_OPT, getTrackingFeature());
-        meta.put(TYPE_OPT, getType());
-        meta.put(VARIANT_OPT, getVariant());
+        Map<String, Object> properties = getProperties();
+        properties.put(ACTION_CONFIG_NAME_OPT, getActionConfigName());
+        properties.put(ACTIVE_OPT, isActive());
+        properties.put(AUTOCOMPLETE_OPT, getAutocomplete());
+        properties.put(BLOCK_OPT, isBlock());
+        properties.put(COMMAND_OPT, getCommand());
+        properties.put(COMMENT_OPT, getComment());
+        properties.put(DISABLED_OPT, isDisabled());
+        properties.put(FORM_ID_OPT, getFormId());
+        properties.put(HIDE_TEXT_OPT, isHideText());
+        properties.put(ICON_OPT, getIcon());
+        properties.put(ICON_SIZE_OPT, getIconSize());
+        properties.put(TEXT_OPT, getText());
+        properties.put(TRACKING_ELEMENT_OPT, getTrackingElement());
+        properties.put(TRACKING_FEATURE_OPT, getTrackingFeature());
+        properties.put(TYPE_OPT, getType());
+        properties.put(VARIANT_OPT, getVariant());
         return super.buildComponentResource();
     }
 

@@ -21,8 +21,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2617 - Fixed issue with NPE in Generic Lists
 - #2927 - Fix location of legacy clientlib resources to pass Cloud Manager builds
- 
+
 ## 5.3.2 - 2022-06-22
 
 ### Changed
@@ -163,7 +164,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2581 - Versioned ClientLibs no longer works with proxied clientlibs
 - #2562 - Fixed cache refresh on versioned clientlibs request when enforceMd5 is false (default).
-- #2590- Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
+- #2590 - Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
+- #2617 - Fixed issue with NPE in Generic Lists 
 
 ### Added
 - #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.
