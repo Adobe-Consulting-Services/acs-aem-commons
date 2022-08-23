@@ -126,7 +126,6 @@ public class PackageGarbageCollectionJobTest {
         Job job = mock(Job.class);
         when(job.getProperty(GROUP_NAME, String.class)).thenReturn("com.adobe.acs");
         when(job.getProperty(MAX_AGE_IN_DAYS, Integer.class)).thenReturn(60);
-        when(job.getProperty(SERVICE_USER, String.class)).thenReturn("writeService");
         return job;
     }
 }

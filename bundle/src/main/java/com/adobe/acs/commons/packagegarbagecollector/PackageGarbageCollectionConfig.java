@@ -24,15 +24,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @ObjectClassDefinition(name = "ACS Commons - Package Garbage Collection Configuration", description = "Used to config a package garbage collection job")
 public @interface PackageGarbageCollectionConfig {
-
     @AttributeDefinition(name = "Schedule", description = "Cron expression detailing when the garbage collection is run. Default runs at 02:30 every day")
     String scheduler() default "0 30 2 ? * * *";
-
-    @AttributeDefinition(name = "Enabled", description = "Enables or disable this garbage collection job")
-    boolean enabled() default false;
-
-    @AttributeDefinition(name = "Service User", description = "The service user that has the permission to remove packages")
-    String serviceUser() default "";
 
     @AttributeDefinition(name = "Package Group Name", description = "The group name of the packages to remove")
     String groupName() default "";

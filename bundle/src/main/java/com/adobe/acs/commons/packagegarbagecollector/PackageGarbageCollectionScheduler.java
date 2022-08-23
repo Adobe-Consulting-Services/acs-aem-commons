@@ -40,7 +40,6 @@ public class PackageGarbageCollectionScheduler {
     public static final String JOB_TOPIC = "com/adobe/acs/commons/PackageGarbageCollectionJob";
     public static final String GROUP_NAME = "groupName";
     public static final String MAX_AGE_IN_DAYS = "maxAgeInDays";
-    public static final String SERVICE_USER = "serviceUser";
 
     @Reference
     JobManager jobManager;
@@ -77,7 +76,6 @@ public class PackageGarbageCollectionScheduler {
         Map<String, Object> properties = new HashMap<>();
         properties.put(GROUP_NAME, config.groupName());
         properties.put(MAX_AGE_IN_DAYS, config.maxAgeInDays());
-        properties.put(SERVICE_USER, config.serviceUser());
         return properties;
     }
 }

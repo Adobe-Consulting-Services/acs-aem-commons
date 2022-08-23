@@ -54,6 +54,8 @@ import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollec
 public class PackageGarbageCollectionJob implements JobConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(PackageGarbageCollectionJob.class);
 
+    private static final String SERVICE_USER = "package-garbage-collection";
+
     @Reference
     Packaging packaging;
 
@@ -64,15 +66,14 @@ public class PackageGarbageCollectionJob implements JobConsumer {
     public JobResult process(Job job) {
         Session session = null;
         String groupName = job.getProperty(GROUP_NAME, String.class);
-        String serviceUser = job.getProperty(SERVICE_USER, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
         LOG.debug("Job Configuration: [" +
             "Group Name: {}, " +
             "Service User: {}, " +
-            "Age of Package {} days,]", groupName, serviceUser, maxAgeInDays);
+            "Age of Package {} days,]", groupName, SERVICE_USER, maxAgeInDays);
 
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(
-            Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, serviceUser))) {
+            Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER))) {
             session = resourceResolver.adaptTo(Session.class);
             JcrPackageManager packageManager = packaging.getPackageManager(session);
             List<JcrPackage> packages = packageManager.listPackages(groupName, false);

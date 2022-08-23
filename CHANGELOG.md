@@ -7,7 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.3.4...HEAD
+### Added
+
+- #1234 - Package Garbage Collector - used to clear up old packages installed on Managed Services instances by Cloud Manager
 
 ## 5.3.4 - 2022-08-22
 
