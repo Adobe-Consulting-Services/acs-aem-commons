@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2022 AEM developer community
+ * Copyright (C) 2013 - 2022 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,10 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         Session session = null;
         String groupName = job.getProperty(GROUP_NAME, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
-        LOG.debug("Job Configuration: [" +
-            "Group Name: {}, " +
-            "Service User: {}, " +
-            "Age of Package {} days,]", groupName, SERVICE_USER, maxAgeInDays);
+        LOG.debug("Job Configuration: ["
+                + "Group Name: {}, "
+                + "Service User: {}, "
+                + "Age of Package {} days,]", groupName, SERVICE_USER, maxAgeInDays);
 
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(
             Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER))) {
