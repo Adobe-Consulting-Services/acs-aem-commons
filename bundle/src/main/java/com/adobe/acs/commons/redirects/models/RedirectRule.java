@@ -19,13 +19,17 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
+import com.adobe.granite.security.user.util.AuthorizableUtil;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Optional;
+import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
@@ -44,21 +48,31 @@ public class RedirectRule {
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
     public static final String NOTE_PROPERTY_NAME = "note";
     public static final String CONTEXT_PREFIX_IGNORED = "contextPrefixIgnored";
+    public static final String CREATED_BY = "jcr:createdBy";
 
-    @Inject
+    @ValueMapValue
     private String source;
 
-    @Inject
+    @ValueMapValue
     private String target;
 
-    @Inject
+    @ValueMapValue
     private int statusCode;
 
-    @Inject
+    @ValueMapValue
+    @Optional
     private String note;
 
-    @Inject
+    @ValueMapValue(name = CREATED_BY)
+    @Optional
+    private String createdBy;
+
+    @ValueMapValue
+    @Optional
     private boolean contextPrefixIgnored;
+
+    @Self
+    private Resource resource;
 
     private ZonedDateTime untilDate;
 
@@ -66,16 +80,24 @@ public class RedirectRule {
 
     private SubstitutionElement[] substitutions;
 
+    public RedirectRule() {
+    }
+
     public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
         this(source, target, statusCode, calendar, note, false);
     }
 
     public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note, boolean contextPrefixIgnored) {
+        this(source, target, statusCode, calendar, note, contextPrefixIgnored, null);
+    }
+
+    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note, boolean contextPrefixIgnored, String createdBy) {
         this.source = source.trim();
         this.target = target.trim();
         this.statusCode = statusCode;
         this.note = note;
         this.contextPrefixIgnored = contextPrefixIgnored;
+        this.createdBy = createdBy;
 
         String regex = this.source;
         if (regex.endsWith("*")) {
@@ -88,20 +110,27 @@ public class RedirectRule {
         }
     }
 
-    public static RedirectRule from(ValueMap resource) {
-        String source = resource.get(SOURCE_PROPERTY_NAME, "");
-        String target = resource.get(TARGET_PROPERTY_NAME, "");
-        String note = resource.get(NOTE_PROPERTY_NAME, "");
-        int statusCode = resource.get(STATUS_CODE_PROPERTY_NAME, 0);
-        boolean contextPrefixIgnored = resource.get(CONTEXT_PREFIX_IGNORED, false);
+    @PostConstruct
+    protected void init() {
+        createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
+    }
+
+    public static RedirectRule from(Resource resource) {
+        ValueMap valueMap = resource.getValueMap();
+        String source = valueMap.get(SOURCE_PROPERTY_NAME, "");
+        String target = valueMap.get(TARGET_PROPERTY_NAME, "");
+        String note = valueMap.get(NOTE_PROPERTY_NAME, "");
+        String createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), valueMap.get(CREATED_BY, ""));
+        int statusCode = valueMap.get(STATUS_CODE_PROPERTY_NAME, 0);
+        boolean contextPrefixIgnored = valueMap.get(CONTEXT_PREFIX_IGNORED, false);
         Calendar calendar = null;
-        if(resource.containsKey(UNTIL_DATE_PROPERTY_NAME)){
-            Object o = resource.get(UNTIL_DATE_PROPERTY_NAME);
+        if(valueMap.containsKey(UNTIL_DATE_PROPERTY_NAME)){
+            Object o = valueMap.get(UNTIL_DATE_PROPERTY_NAME);
             if(o instanceof Calendar) {
                 calendar = (Calendar)o;
             }
         }
-        return new RedirectRule(source, target, statusCode, calendar, note, contextPrefixIgnored);
+        return new RedirectRule(source, target, statusCode, calendar, note, contextPrefixIgnored, createdBy);
     }
 
     public String getSource() {
@@ -118,6 +147,10 @@ public class RedirectRule {
 
     public int getStatusCode() {
         return statusCode;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
     }
 
     public boolean getContextPrefixIgnored() {

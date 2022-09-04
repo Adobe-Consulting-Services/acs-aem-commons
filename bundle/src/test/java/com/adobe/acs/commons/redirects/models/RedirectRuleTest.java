@@ -48,7 +48,7 @@ public class RedirectRuleTest {
                 "note", "note-1",
                 "contextPrefixIgnored", true);
 
-        RedirectRule rule = RedirectRule.from(resource.getValueMap());
+        RedirectRule rule = RedirectRule.from(resource);
         assertEquals("/content/we-retail/en/one", rule.getSource());
         assertEquals("/content/we-retail/en/two", rule.getTarget());
         assertEquals(302, rule.getStatusCode());
@@ -71,7 +71,7 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", "11 January 2021");
 
-        RedirectRule rule = RedirectRule.from(resource.getValueMap());
+        RedirectRule rule = RedirectRule.from(resource);
         assertEquals("/content/we-retail/en/one", rule.getSource());
         assertEquals("/content/we-retail/en/two", rule.getTarget());
         assertEquals(302, rule.getStatusCode());
@@ -87,7 +87,7 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", "11 xxx 2021");
 
-        RedirectRule rule = RedirectRule.from(resource.getValueMap());
+        RedirectRule rule = RedirectRule.from(resource);
         assertEquals(null, rule.getUntilDate());
 
     }
@@ -103,8 +103,8 @@ public class RedirectRuleTest {
 
         Resource resource2 = context.create().resource("/var/acs-commons/redirects/rule2", props);
 
-        RedirectRule rule1 = RedirectRule.from(resource1.getValueMap());
-        RedirectRule rule2 = RedirectRule.from(resource2.getValueMap());
+        RedirectRule rule1 = RedirectRule.from(resource1);
+        RedirectRule rule2 = RedirectRule.from(resource2);
 
         assertTrue(rule1.equals(rule2));
         assertTrue(rule1.hashCode() == rule2.hashCode());

@@ -29,9 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -44,21 +42,12 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.ACS_REDIRECTS_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
-import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
-import static com.adobe.granite.comments.AbstractCommentingProvider.JCR_CREATED_BY;
-import static org.apache.jackrabbit.JcrConstants.JCR_CREATED;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.SOURCE_PROPERTY_NAME;
+import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
 import static org.apache.sling.api.resource.ResourceResolver.PROPERTY_RESOURCE_TYPE;
 
 /**
@@ -75,6 +64,8 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(ImportRedirectMapServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
+    private static final String MIX_CREATED = "mix:created";
+    private static final String MIX_LASTMODIFIED = "mix:lastModified";
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -83,39 +74,35 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         String path = request.getParameter("path");
         Resource storageRoot = request.getResourceResolver().getResource(path);
         log.debug("Updating redirect maps at {}", storageRoot.getPath());
-        Map<String, RedirectRule> jcrRules = getRules(storageRoot)
-                .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules stored in crx
-        Map<String, RedirectRule> xlsRules;
+        Map<String, Resource> jcrRules = getRules(storageRoot); // rules stored in crx
+        Collection<RedirectRule> xlsRules;
         try (InputStream is = getFile(request)) {
-            xlsRules = readEntries(is)
-                    .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
-                            (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules read from excel
+            xlsRules = readEntries(is); // rules read from excel
         }
-        ArrayList<RedirectRule> rules = new ArrayList<>();
-        for (RedirectRule jcrRule : jcrRules.values()) {
-            if (xlsRules.containsKey(jcrRule.getSource())) {
-                jcrRule = xlsRules.remove(jcrRule.getSource());
-            }
-            rules.add(jcrRule);
-        }
-        rules.addAll(xlsRules.values());
-        if (!rules.isEmpty()) {
-            update(storageRoot, rules);
+        if (!xlsRules.isEmpty()) {
+            update(storageRoot, xlsRules, jcrRules);
         }
     }
 
-    void update(Resource root, Collection<RedirectRule> rules) throws PersistenceException {
-        ResourceResolver resolver = root.getResourceResolver();
-        for (Resource res : root.getChildren()) {
-            if(REDIRECT_RULE_RESOURCE_TYPE.equals(res.getResourceType())) {
-                resolver.delete(res);
+    /**
+     * @return redirects keyed by source path
+     */
+    Map<String, Resource> getRules(Resource resource) {
+        Map<String, Resource> rules = new LinkedHashMap<>();
+        for (Resource res : resource.getChildren()) {
+            if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
+                String src = res.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
+                rules.put(src, res);
             }
         }
-        int idx = 0;
+        return rules;
+    }
+
+    void update(Resource root, Collection<RedirectRule> rules, Map<String, Resource> jcrRedirects) throws PersistenceException {
+        ResourceResolver resolver = root.getResourceResolver();
         for (RedirectRule rule : rules) {
             Map<String, Object> props = new HashMap<>();
-            props.put(RedirectRule.SOURCE_PROPERTY_NAME, rule.getSource());
+            props.put(SOURCE_PROPERTY_NAME, rule.getSource());
             props.put(RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget());
             props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(rule.getStatusCode()));
             if (rule.getUntilDate() != null) {
@@ -126,10 +113,22 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             }
             props.put(RedirectRule.CONTEXT_PREFIX_IGNORED, rule.getContextPrefixIgnored());
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
-            props.put(JCR_CREATED, Calendar.getInstance());
-            props.put(JCR_CREATED_BY, resolver.getUserID());
-            resolver.create(root, "redirect-rule-" + (++idx), props);
-        }
+
+            Resource redirect = jcrRedirects.get(rule.getSource());
+            if(redirect == null){
+                props.put(JCR_MIXINTYPES, MIX_CREATED);
+                String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
+                resolver.create(root, nodeName, props);
+            } else {
+                ValueMap valueMap = redirect.adaptTo(ModifiableValueMap.class);
+                String[] mixins = valueMap.get(JCR_MIXINTYPES, String[].class);
+                Collection<String> mset = mixins == null ? new HashSet<>() : new HashSet<>(Arrays.asList(mixins));
+                mset.add(MIX_LASTMODIFIED);
+                props.put(JCR_MIXINTYPES, mset.toArray(new String[0]));
+                valueMap.putAll(props);
+            }
+
+         }
         resolver.commit();
     }
 
@@ -163,6 +162,8 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 Cell c6 = row.getCell(5);
                 boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
                 rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix));
+
+                // cell 6 holds jcr:createdBy
             } else {
                 first = false;
             }

@@ -96,6 +96,9 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         dateStyle.setDataFormat(
                 wb.createDataFormat().getFormat("mmm d, yyyy"));
 
+        CellStyle lockedCellStyle = wb.createCellStyle();
+        lockedCellStyle.setLocked(true); // readonly cell
+
         Row headerRow;
         int rownum = 0;
         Sheet sheet = wb.createSheet("Redirects");
@@ -106,6 +109,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(3).setCellValue("Until Date");
         headerRow.createCell(4).setCellValue("Notes");
         headerRow.createCell(5).setCellValue("Ignore Context Prefix");
+        headerRow.createCell(6).setCellValue("Created By");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -122,6 +126,9 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             }
             row.createCell(4).setCellValue(rule.getNote());
             row.createCell(5).setCellValue(rule.getContextPrefixIgnored());
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(rule.getCreatedBy());
+            cell6.setCellStyle(lockedCellStyle);
         }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 2));
         sheet.setColumnWidth(0, 256 * 50);
@@ -130,6 +137,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(3, 256 * 12);
         sheet.setColumnWidth(4, 256 * 100);
         sheet.setColumnWidth(5, 256 * 20);
+        sheet.setColumnWidth(6, 256 * 25);
 
         return wb;
     }

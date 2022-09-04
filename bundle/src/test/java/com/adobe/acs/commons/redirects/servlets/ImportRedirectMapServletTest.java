@@ -37,14 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
@@ -78,7 +71,7 @@ public class ImportRedirectMapServletTest {
         ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
         int idx = 0;
         for (RedirectRule rule : savedRules) {
-            rb.resource("redirect-" + (++idx),
+            rb.resource("redirect-saved-" + (++idx),
                     "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
                     RedirectRule.SOURCE_PROPERTY_NAME, rule.getSource(),
                     RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget(),
@@ -169,15 +162,16 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule1 = new RedirectRule("/a1", "/b1", 301, null, null);
         RedirectRule rule2 = new RedirectRule("/a2", "/b2", 302, Calendar.getInstance(), "note");
         Collection<RedirectRule> rules = Arrays.asList(rule1, rule2);
-        servlet.update(root, rules);
+        servlet.update(root, rules, Collections.emptyMap());
 
-        ValueMap vm1 = root.getChild("redirect-rule-1").getValueMap();
+        Map<String, Resource> redirects = servlet.getRules(root);
+        ValueMap vm1 = redirects.get(rule1.getSource()).getValueMap();
         assertEquals(vm1.get(RedirectRule.SOURCE_PROPERTY_NAME), rule1.getSource());
         assertEquals(vm1.get(RedirectRule.TARGET_PROPERTY_NAME), rule1.getTarget());
         assertFalse(vm1.containsKey(RedirectRule.UNTIL_DATE_PROPERTY_NAME));
         assertFalse(vm1.containsKey(RedirectRule.NOTE_PROPERTY_NAME));
 
-        ValueMap vm2 = root.getChild("redirect-rule-2").getValueMap();
+        ValueMap vm2 = redirects.get(rule2.getSource()).getValueMap();
         assertEquals(vm2.get(RedirectRule.SOURCE_PROPERTY_NAME), rule2.getSource());
         assertEquals(vm2.get(RedirectRule.TARGET_PROPERTY_NAME), rule2.getTarget());
         assertEquals(vm2.get(RedirectRule.NOTE_PROPERTY_NAME), rule2.getNote());

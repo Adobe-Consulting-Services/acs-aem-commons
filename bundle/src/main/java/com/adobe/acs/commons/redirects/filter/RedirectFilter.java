@@ -356,7 +356,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                rules.add(RedirectRule.from(res.getValueMap()));
+                rules.add(RedirectRule.from(res));
             }
         }
         return rules;
