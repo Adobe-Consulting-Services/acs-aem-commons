@@ -33,16 +33,12 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
-import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -53,45 +49,53 @@ public class ImportRedirectMapServletTest {
 
     private ImportRedirectMapServlet servlet;
     private String redirectStoragePath = "/conf/acs-commons/redirects";
-    Calendar calendar = new Calendar.Builder().setDate(1974, 01, 16).build();
-    private List<RedirectRule> savedRules = Arrays.asList(
-            new RedirectRule("/content/one", "/content/two", 302, calendar, "note-1", true),
-            new RedirectRule("/content/three", "/content/four", 301, null, "", false)
-    );
-    private List<RedirectRule> excelRules = Arrays.asList(
-            new RedirectRule("/content/1", "/en/we-retail", 301, calendar, "note-2", false),
-            new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false),
-            new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false)
-    );
-    private byte[] excelBytes;
 
     @Before
     public void setUp() {
         servlet = new ImportRedirectMapServlet();
-        ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
-        int idx = 0;
-        for (RedirectRule rule : savedRules) {
-            rb.resource("redirect-saved-" + (++idx),
-                    "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                    RedirectRule.SOURCE_PROPERTY_NAME, rule.getSource(),
-                    RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget(),
-                    RedirectRule.STATUS_CODE_PROPERTY_NAME, rule.getStatusCode(),
-                    RedirectRule.UNTIL_DATE_PROPERTY_NAME, rule.getUntilDate() == null ? null : GregorianCalendar.from(rule.getUntilDate()),
-                    RedirectRule.NOTE_PROPERTY_NAME, rule.getNote(),
-                    RedirectRule.CONTEXT_PREFIX_IGNORED, rule.getContextPrefixIgnored()
-            );
-        }
         context.request().addRequestParameter("path", redirectStoragePath);
-
+        context.addModelsForClasses(RedirectRule.class);
     }
 
     @Test
-    public void testPost() throws ServletException, IOException {
+    public void testImport() throws ServletException, IOException {
+        List<RedirectRule> excelRules = Arrays.asList(
+                new RedirectRule("/content/1", "/en/we-retail", 301,
+                        new Calendar.Builder().setDate(1974, 01, 16).build(), "note-abc", false),
+                new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false),
+                // this one will overlay the existing rule in the repository
+                new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false)
+        );
+
+        ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
+        rb.resource("redirect-saved-1",
+                "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
+                RedirectRule.SOURCE_PROPERTY_NAME, "/content/one",
+                RedirectRule.TARGET_PROPERTY_NAME, "/content/two",
+                RedirectRule.STATUS_CODE_PROPERTY_NAME, 302,
+                RedirectRule.UNTIL_DATE_PROPERTY_NAME, new Calendar.Builder().setDate(2022, 9, 9).build(),
+                RedirectRule.NOTE_PROPERTY_NAME, "note-1",
+                RedirectRule.CONTEXT_PREFIX_IGNORED, true,
+                "jcr:created", "john.doe",
+                "custom-1", "123"
+        );
+        rb.resource("redirect-saved-2",
+                "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
+                RedirectRule.SOURCE_PROPERTY_NAME, "/content/three",
+                RedirectRule.TARGET_PROPERTY_NAME, "/content/four",
+                RedirectRule.STATUS_CODE_PROPERTY_NAME, 301,
+                RedirectRule.UNTIL_DATE_PROPERTY_NAME, null,
+                RedirectRule.NOTE_PROPERTY_NAME, "note-2",
+                RedirectRule.CONTEXT_PREFIX_IGNORED, false,
+                "jcr:created", "xyz",
+                "custom-2", "345"
+        );
+
         XSSFWorkbook wb = ExportRedirectMapServlet.export(excelRules);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         wb.write(out);
         out.close();
-        excelBytes = out.toByteArray();
+        byte[] excelBytes = out.toByteArray();
 
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
@@ -100,61 +104,39 @@ public class ImportRedirectMapServletTest {
 
         servlet.doPost(request, response);
 
-        Resource storage = context.resourceResolver().getResource(redirectStoragePath);
-        Map<String, RedirectRule> rules = getRules(storage)
-                .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules keyed by source
-        assertEquals("number of redirects after import ",4, rules.size());
+        Resource storageRoot = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
+        assertEquals("number of redirects after import ", 4, rules.size());
 
-        RedirectRule rule1 = rules.get("/content/one");
+        Resource res1 = rules.get("/content/one");
+        assertEquals("redirect-saved-1", res1.getName()); // node name is preserved
+        RedirectRule rule1 = res1.adaptTo(RedirectRule.class);
         assertEquals("/content/two", rule1.getTarget());
-        assertDateEquals("16 February 1974", rule1.getUntilDate());
+        assertDateEquals("09 October 2022", rule1.getUntilDate());
         assertEquals("note-1", rule1.getNote());
+        assertEquals("john.doe", res1.getValueMap().get("jcr:created"));
+        assertEquals("123", res1.getValueMap().get("custom-1"));
 
-        RedirectRule rule2 = rules.get("/content/three");
+        Resource res2 = rules.get("/content/three");
+        assertEquals("redirect-saved-2", res2.getName()); // node name is preserved
+        RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule2.getTarget());
         assertEquals(301, rule2.getStatusCode());
         assertFalse(rule2.getContextPrefixIgnored());
+        assertEquals("xyz", res2.getValueMap().get("jcr:created"));
+        assertEquals("345", res2.getValueMap().get("custom-2"));
 
-        RedirectRule rule3 = rules.get("/content/1");
+        RedirectRule rule3 = rules.get("/content/1").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule3.getTarget());
         assertDateEquals("16 February 1974", rule3.getUntilDate());
-        assertEquals("note-2", rule3.getNote());
+        assertEquals("note-abc", rule3.getNote());
 
-        RedirectRule rule4 = rules.get("/content/2");
+        RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());
         assertEquals(null, rule4.getUntilDate());
 
     }
 
-    @Test
-    public void testReadEntries() throws IOException {
-        XSSFWorkbook wb = ExportRedirectMapServlet.export(excelRules);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        out.close();
-        excelBytes = out.toByteArray();
-
-        Collection<RedirectRule> entries = servlet.readEntries(new ByteArrayInputStream(excelBytes));
-        assertEquals(excelRules.size(), entries.size());
-
-        Iterator<RedirectRule> it = entries.iterator();
-        int idx = 0;
-        while (it.hasNext()) {
-            RedirectRule rule = it.next();
-            assertEquals(excelRules.get(idx).getSource(), rule.getSource());
-            assertEquals(excelRules.get(idx).getTarget(), rule.getTarget());
-            assertEquals(excelRules.get(idx).getStatusCode(), rule.getStatusCode());
-            assertEquals(excelRules.get(idx).getNote(), rule.getNote());
-            ZonedDateTime untilDateTime = excelRules.get(idx).getUntilDate();
-            if (untilDateTime != null) {
-                // importer converts input date to dd MMMM yyyy
-                assertEquals(untilDateTime, rule.getUntilDate());
-            }
-            assertEquals(excelRules.get(idx).getContextPrefixIgnored(), rule.getContextPrefixIgnored());
-            idx++;
-        }
-    }
 
     @Test
     public void testUpdate() throws IOException {

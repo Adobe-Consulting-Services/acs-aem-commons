@@ -71,10 +71,14 @@ public class RedirectRule {
     @Optional
     private boolean contextPrefixIgnored;
 
+    @ValueMapValue
+    @Optional
+    private Calendar untilDate;
+
     @Self
     private Resource resource;
 
-    private ZonedDateTime untilDate;
+    private ZonedDateTime zonedUntilDate;
 
     private Pattern ptrn;
 
@@ -105,14 +109,18 @@ public class RedirectRule {
         }
         ptrn = toRegex(regex);
         substitutions = SubstitutionElement.parse(this.target);
-        if (calendar != null) {
-            untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
+        untilDate = calendar;
+        if (untilDate != null) {
+            zonedUntilDate = ZonedDateTime.ofInstant( untilDate.toInstant(), untilDate.getTimeZone().toZoneId());
         }
     }
 
     @PostConstruct
     protected void init() {
         createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
+        if (untilDate != null) {
+            zonedUntilDate = ZonedDateTime.ofInstant( untilDate.toInstant(), untilDate.getTimeZone().toZoneId());
+        }
     }
 
     public static RedirectRule from(Resource resource) {
@@ -162,13 +170,13 @@ public class RedirectRule {
     }
 
     public ZonedDateTime getUntilDate() {
-        return untilDate;
+        return zonedUntilDate;
     }
 
     @Override
     public String toString() {
         return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, contextPrefixIgnored=%s}",
-                source, target, statusCode, untilDate, note, contextPrefixIgnored);
+                source, target, statusCode, zonedUntilDate, note, contextPrefixIgnored);
     }
 
     @Override

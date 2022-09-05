@@ -65,7 +65,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(ImportRedirectMapServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
     private static final String MIX_CREATED = "mix:created";
-    private static final String MIX_LASTMODIFIED = "mix:lastModified";
+    private static final String MIX_LAST_MODIFIED = "mix:lastModified";
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -98,9 +98,16 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return rules;
     }
 
-    void update(Resource root, Collection<RedirectRule> rules, Map<String, Resource> jcrRedirects) throws PersistenceException {
+    /**
+     *
+     * @param root          root resource, e.g. /conf/global/settings/redirects
+     * @param xlsRules      redirects read from an Excel spreadhseet
+     * @param jcrRedirects  existing redirect nodes keyed by the source path.
+     *                      We assume that the source path is unique.
+     */
+    void update(Resource root, Collection<RedirectRule> xlsRules, Map<String, Resource> jcrRedirects) throws PersistenceException {
         ResourceResolver resolver = root.getResourceResolver();
-        for (RedirectRule rule : rules) {
+        for (RedirectRule rule : xlsRules) {
             Map<String, Object> props = new HashMap<>();
             props.put(SOURCE_PROPERTY_NAME, rule.getSource());
             props.put(RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget());
@@ -116,19 +123,21 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
 
             Resource redirect = jcrRedirects.get(rule.getSource());
             if(redirect == null){
+                // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
                 props.put(JCR_MIXINTYPES, MIX_CREATED);
                 String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
                 resolver.create(root, nodeName, props);
             } else {
+                // add mix:lastModified so that AEM updates jcr:lastModified and jcr:lastModifiedBy
                 ValueMap valueMap = redirect.adaptTo(ModifiableValueMap.class);
                 String[] mixins = valueMap.get(JCR_MIXINTYPES, String[].class);
                 Collection<String> mset = mixins == null ? new HashSet<>() : new HashSet<>(Arrays.asList(mixins));
-                mset.add(MIX_LASTMODIFIED);
+                mset.add(MIX_LAST_MODIFIED);
                 props.put(JCR_MIXINTYPES, mset.toArray(new String[0]));
                 valueMap.putAll(props);
             }
 
-         }
+        }
         resolver.commit();
     }
 
