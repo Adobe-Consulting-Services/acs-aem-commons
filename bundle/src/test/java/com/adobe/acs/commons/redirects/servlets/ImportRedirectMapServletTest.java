@@ -55,6 +55,7 @@ public class ImportRedirectMapServletTest {
         servlet = new ImportRedirectMapServlet();
         context.request().addRequestParameter("path", redirectStoragePath);
         context.addModelsForClasses(RedirectRule.class);
+        context.build().resource(redirectStoragePath);
     }
 
     @Test
