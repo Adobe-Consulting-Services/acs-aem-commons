@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.reports.models;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
@@ -48,6 +52,7 @@ import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ResultsPage;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -88,12 +93,21 @@ public class QueryReportExecutorTest {
 
         queryBuilder = mock(QueryBuilder.class);
 
-        SearchResult result = mock(SearchResult.class);
-        
         List<Resource> resources = new ArrayList<>();
         resources.add(context.resourceResolver().getResource("/test/item1"));
         resources.add(context.resourceResolver().getResource("/test/item2"));
-        when(result.getResources()).thenReturn(resources.iterator());
+        SearchResult result = mock(SearchResult.class);
+        when(result.getHits()).then(inv -> {
+            return resources.stream().map(r -> {
+                Hit hit = mock(Hit.class);
+                try {
+                    when(hit.getPath()).thenReturn(r.getPath());
+                } catch (RepositoryException e) {
+                    throw new RuntimeException(e);
+                }
+                return hit;
+            }).collect(Collectors.toList());
+        });
 
         Query query = mock(Query.class);
         when(query.getResult()).thenReturn(result);
@@ -121,6 +135,7 @@ public class QueryReportExecutorTest {
 
         ResultsPage results = executor.getResults();
         assertNotNull(results);
+        assertEquals(2, results.getResultSize());
     }
 
     @Test
