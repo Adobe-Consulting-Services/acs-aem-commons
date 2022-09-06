@@ -3,10 +3,20 @@
     jcr:description="Utility page for defining packages of ACL nodes."
     jcr:primaryType="cq:Template"
     jcr:title="ACL Packager"
-    allowedPaths="[/etc/acs-commons/packagers(/.*)?,/etc/packagers(/.*)?,/etc/packages(/.*)?]"
+    allowedPaths="[/etc/acs-commons/packagers(/.*)?]"
     ranking="{Long}120">
     <jcr:content
-        cq:designPath="/etc/designs/acs-commons"
         jcr:primaryType="cq:PageContent"
-        sling:resourceType="acs-commons/components/utilities/packager/acl-packager"/>
+        sling:resourceType="acs-commons/components/utilities/packager/acl-packager">
+            <configuration
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/packager/acl-packager/configuration"
+                packageName="acls"
+                packageGroupName="ACLs"
+                packageVersion="1.0.0"
+                packageDescription="ACL Package initially defined by a ACS AEM Commons - ACL Packager configuration."
+                packageACLHandling="Overwrite"
+                conflictResolution="IncrementVersion">
+            </configuration>
+    </jcr:content>
 </jcr:root>
