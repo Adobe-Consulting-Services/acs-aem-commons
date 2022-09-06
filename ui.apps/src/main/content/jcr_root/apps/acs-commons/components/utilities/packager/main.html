@@ -1,0 +1,23 @@
+<div class="spectrum-Tabs spectrum-Tabs--sizeM spectrum-Tabs--horizontal">
+  <div class="spectrum-Tabs-item is-selected" tabindex="0">
+    <span data-tab="package-definition" data-tab-indicator="5px" class="spectrum-Tabs-itemLabel">Package definition</span>
+  </div>
+  <div class="spectrum-Tabs-item" tabindex="0">
+    <span data-tab="results" data-tab-indicator="150px" class="spectrum-Tabs-itemLabel">Results</span>
+  </div>
+  <div data-tab-selection-indicator class="spectrum-Tabs-selectionIndicator" style="width: 120px; left: 5px;"></div>
+</div>
+
+<div data-tab-content="package-definition">
+    <div data-sly-resource="./configuration"></div>
+    <br/>
+    <div data-sly-include="buttons.html"></div>
+</div>
+
+<div data-tab-content="results"
+     style="display: none;"
+     data-sly-include="results.html">
+</div>
+
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-call="${clientlib.all @ categories=['acs-commons.utilities.packager']}"/>

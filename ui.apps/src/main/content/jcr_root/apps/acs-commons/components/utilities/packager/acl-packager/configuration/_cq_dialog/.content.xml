@@ -3,7 +3,7 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
           xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
           jcr:primaryType="nt:unstructured"
-          jcr:title="ACL Packager Configuration"
+          jcr:title="ACL Packager configuration"
           sling:resourceType="cq/gui/components/authoring/dialog"
           extraClientlibs="[]"
           helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/acl-packager/index.html">
@@ -27,15 +27,13 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/container">
                                 <items jcr:primaryType="nt:unstructured">
 
-
                                     <package-name
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                             fieldLabel="Package name"
                                             fieldDescription="Name of the package to created. [ Default: acls ]"
                                             value="acls"
-                                            naem="./packageName"/>
-
+                                            name="./packageName"/>
 
                                     <package-group-name
                                             jcr:primaryType="nt:unstructured"
@@ -43,7 +41,7 @@
                                             fieldLabel="Package group name"
                                             fieldDescription="Package group to assign this package to. [ Default: ACLs ]"
                                             value="ACLs"
-                                            naem="./packageGroupName"/>
+                                            name="./packageGroupName"/>
 
                                     <package-version
                                             jcr:primaryType="nt:unstructured"
@@ -51,7 +49,7 @@
                                             fieldLabel="Package version"
                                             fieldDescription="Package version to assign this package. This value is ignored is Conflict Resolution is set to IncrementValue. [ Default: 1.0.0 ]"
                                             value="1.0.0"
-                                            naem="./packageVersion"/>
+                                            name="./packageVersion"/>
 
                                     <package-description
                                             jcr:primaryType="nt:unstructured"
@@ -59,8 +57,7 @@
                                             fieldLabel="Package description"
                                             fieldDescription="Package description. Enter the purpose and scope of this package for future reference."
                                             value="ACL Package initially defined by a ACS AEM Commons - ACL Packager configuration."
-                                            naem="./packageDescription"/>
-
+                                            name="./packageDescription"/>
 
                                     <replication-action-type
                                             jcr:primaryType="nt:unstructured"
@@ -108,7 +105,6 @@
                                         </items>
                                     </conflict-resolution>
 
-
                                     <principal-names
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
@@ -137,7 +133,6 @@
                                                 name="./includePatterns"/>
                                     </include-path-patterns>
 
-
                                     <include-principals
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
@@ -146,7 +141,6 @@
                                             value="true"
                                             uncheckedValue="false"
                                             name="./includePrincipals"/>
-
                                 </items>
                             </column>
                         </items>
