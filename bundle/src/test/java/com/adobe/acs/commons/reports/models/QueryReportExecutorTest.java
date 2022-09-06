@@ -87,14 +87,15 @@ public class QueryReportExecutorTest {
                 Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED));
 
         queryBuilder = mock(QueryBuilder.class);
-        Query query = mock(Query.class);
-        SearchResult result = mock(SearchResult.class);
 
+        SearchResult result = mock(SearchResult.class);
+        
         List<Resource> resources = new ArrayList<>();
         resources.add(context.resourceResolver().getResource("/test/item1"));
         resources.add(context.resourceResolver().getResource("/test/item2"));
         when(result.getResources()).thenReturn(resources.iterator());
 
+        Query query = mock(Query.class);
         when(query.getResult()).thenReturn(result);
         when(queryBuilder.createQuery(any(), any())).thenReturn(query);
 
