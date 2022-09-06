@@ -138,13 +138,19 @@ public class QueryReportExecutor implements ReportExecutor {
         }
 
         SearchResult result = query.getResult();
-        Spliterator<Resource> spliterator = Spliterators.spliteratorUnknownSize(result.getResources(),
-                Spliterator.ORDERED | Spliterator.NONNULL);
         long count = -1;
         if (limit <= 100) {
             count = result.getHits().size();
         }
-        return ImmutablePair.of(StreamSupport.stream(spliterator, false), count);
+        ResourceResolver resolver = this.request.getResourceResolver();
+        return ImmutablePair.of(result.getHits().stream().map(h -> {
+            try {
+                return resolver.getResource(h.getPath());
+            } catch (RepositoryException e) {
+                log.warn("Could not get node behind search result hit", e);
+                return null;
+            }
+        }), count);
 
     }
 
