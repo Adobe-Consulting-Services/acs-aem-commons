@@ -21,14 +21,14 @@ package com.adobe.acs.commons.reports.models;
 
 import javax.annotation.PostConstruct;
 
-import com.adobe.acs.commons.reports.internal.ExporterUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.RequestAttribute;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
+
+import com.adobe.acs.commons.reports.internal.ExporterUtil;
 
 /**
  * Represents a single cell within the report. Allows for detecting if the value
