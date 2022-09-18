@@ -67,10 +67,10 @@ public class ImportRedirectMapServletTest {
     public void testImport() throws ServletException, IOException {
         List<RedirectRule> excelRules = Arrays.asList(
                 new RedirectRule("/content/1", "/en/we-retail", 301,
-                        new Calendar.Builder().setDate(1974, 01, 16).build(), "note-abc", false),
-                new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false),
+                        new Calendar.Builder().setDate(1974, 01, 16).build(), "note-abc", false, null),
+                new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false, null),
                 // this one will overlay the existing rule in the repository
-                new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false)
+                new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false, null)
         );
 
         ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();

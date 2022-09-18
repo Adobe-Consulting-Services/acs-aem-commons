@@ -130,7 +130,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             cell6.setCellValue(rule.getCreatedBy());
             cell6.setCellStyle(lockedCellStyle);
         }
-        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 2));
+        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 6));
         sheet.setColumnWidth(0, 256 * 50);
         sheet.setColumnWidth(1, 256 * 50);
         sheet.setColumnWidth(2, 256 * 15);

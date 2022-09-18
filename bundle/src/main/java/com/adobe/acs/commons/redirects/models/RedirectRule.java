@@ -21,9 +21,8 @@ package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.granite.security.user.util.AuthorizableUtil;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.Optional;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
@@ -33,12 +32,13 @@ import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-@Model(adaptables = Resource.class)
+@Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class RedirectRule {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -60,25 +60,18 @@ public class RedirectRule {
     private int statusCode;
 
     @ValueMapValue
-    @Optional
     private String note;
 
     @ValueMapValue(name = CREATED_BY)
-    @Optional
     private String createdBy;
 
     @ValueMapValue
-    @Optional
     private boolean contextPrefixIgnored;
-
-    @ValueMapValue
-    @Optional
-    private Calendar untilDate;
 
     @Self
     private Resource resource;
 
-    private ZonedDateTime zonedUntilDate;
+    private ZonedDateTime untilDate;
 
     private Pattern ptrn;
 
@@ -88,11 +81,7 @@ public class RedirectRule {
     }
 
     public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
-        this(source, target, statusCode, calendar, note, false);
-    }
-
-    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note, boolean contextPrefixIgnored) {
-        this(source, target, statusCode, calendar, note, contextPrefixIgnored, null);
+        this(source, target, statusCode, calendar, note, false, null);
     }
 
     public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note, boolean contextPrefixIgnored, String createdBy) {
@@ -102,43 +91,33 @@ public class RedirectRule {
         this.note = note;
         this.contextPrefixIgnored = contextPrefixIgnored;
         this.createdBy = createdBy;
+        if (calendar != null) {
+            untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
+        }
 
+        initRegexSubstitutions();
+    }
+
+    @PostConstruct
+    protected void init() {
+        createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
+        if(resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)){
+            Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
+            if(o instanceof Calendar) {
+                Calendar calendar = (Calendar)o;
+                untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
+            }
+        }
+        initRegexSubstitutions();
+    }
+
+    private void initRegexSubstitutions(){
         String regex = this.source;
         if (regex.endsWith("*")) {
             regex = regex.replaceAll("\\*$", "(.*)");
         }
         ptrn = toRegex(regex);
         substitutions = SubstitutionElement.parse(this.target);
-        untilDate = calendar;
-        if (untilDate != null) {
-            zonedUntilDate = ZonedDateTime.ofInstant( untilDate.toInstant(), untilDate.getTimeZone().toZoneId());
-        }
-    }
-
-    @PostConstruct
-    protected void init() {
-        createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
-        if (untilDate != null) {
-            zonedUntilDate = ZonedDateTime.ofInstant( untilDate.toInstant(), untilDate.getTimeZone().toZoneId());
-        }
-    }
-
-    public static RedirectRule from(Resource resource) {
-        ValueMap valueMap = resource.getValueMap();
-        String source = valueMap.get(SOURCE_PROPERTY_NAME, "");
-        String target = valueMap.get(TARGET_PROPERTY_NAME, "");
-        String note = valueMap.get(NOTE_PROPERTY_NAME, "");
-        String createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), valueMap.get(CREATED_BY, ""));
-        int statusCode = valueMap.get(STATUS_CODE_PROPERTY_NAME, 0);
-        boolean contextPrefixIgnored = valueMap.get(CONTEXT_PREFIX_IGNORED, false);
-        Calendar calendar = null;
-        if(valueMap.containsKey(UNTIL_DATE_PROPERTY_NAME)){
-            Object o = valueMap.get(UNTIL_DATE_PROPERTY_NAME);
-            if(o instanceof Calendar) {
-                calendar = (Calendar)o;
-            }
-        }
-        return new RedirectRule(source, target, statusCode, calendar, note, contextPrefixIgnored, createdBy);
     }
 
     public String getSource() {
@@ -170,13 +149,25 @@ public class RedirectRule {
     }
 
     public ZonedDateTime getUntilDate() {
-        return zonedUntilDate;
+        return untilDate;
+    }
+
+    /**
+     * This is ugly, but needed to format untilDate in HTL in the redirect-row component.
+     *
+     * AEM as a Cloud Service supports formatting java.time.Instant (SLING-10651), but
+     * classic AEMs 6.4 and 6.5 only support formatting java.util.Date and java.util.Calendar
+     *
+     * @return java.util.Calendar representation of untilDate
+     */
+    public Calendar getUntilDateCalendar() {
+        return untilDate == null ? null : GregorianCalendar.from(untilDate);
     }
 
     @Override
     public String toString() {
         return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, contextPrefixIgnored=%s}",
-                source, target, statusCode, zonedUntilDate, note, contextPrefixIgnored);
+                source, target, statusCode, untilDate, note, contextPrefixIgnored);
     }
 
     @Override

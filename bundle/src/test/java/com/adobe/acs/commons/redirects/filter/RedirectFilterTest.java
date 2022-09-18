@@ -81,7 +81,7 @@ public class RedirectFilterTest {
 
     @Before
     public void setUp() throws Exception {
-
+        context.addModelsForClasses(RedirectRule.class);
         filter = spy(new RedirectFilter());
         ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
         when(resourceResolverFactory.getServiceResourceResolver(any(Map.class)))
@@ -737,7 +737,7 @@ public class RedirectFilterTest {
     public void testIgnoredContextPrefix() throws Exception {
         withRules(
                 new RedirectRule("/en/one", "/content/escapedsite/en/one",
-                    302, null, null, true));
+                    302, null, null, true, null));
 
         Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
         configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
@@ -756,7 +756,7 @@ public class RedirectFilterTest {
                 new RedirectRule("/en/one(.*)", "/en/two",
                         302, null, null),
                 new RedirectRule("/en/three(.*)", "/content/escaped/en/four",
-                        302, null, null, true),
+                        302, null, null, true, null),
                 new RedirectRule("/(.*)", "/content/geometrixx/en/six",
                         302, null, null));
 

@@ -143,6 +143,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             } else {
                 // add mix:lastModified so that AEM updates jcr:lastModified and jcr:lastModifiedBy
                 ValueMap valueMap = redirect.adaptTo(ModifiableValueMap.class);
+                if (valueMap == null) {
+                    throw new PersistenceException("Cannot modify properties of " + redirect.getPath());
+                }
                 String[] mixins = valueMap.get(JCR_MIXINTYPES, String[].class);
                 Collection<String> mset = mixins == null ? new HashSet<>() : new HashSet<>(Arrays.asList(mixins));
                 mset.add(MIX_LAST_MODIFIED);
@@ -183,9 +186,11 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 }
                 Cell c6 = row.getCell(5);
                 boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
-                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix));
 
-                // cell 6 holds jcr:createdBy
+                Cell c7 = row.getCell(6);
+                String createdBy = c7 == null ? null : c7.getStringCellValue();
+                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy));
+
             } else {
                 first = false;
             }
