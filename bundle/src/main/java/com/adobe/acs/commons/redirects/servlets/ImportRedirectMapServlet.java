@@ -44,9 +44,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
@@ -171,26 +168,17 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 Cell c4 = row.getCell(3);
                 Calendar untilDate = null;
                 if (DateUtil.isCellDateFormatted(c4)) {
-                    try {
-                        Instant instant = DateUtil.getJavaDate(c4.getNumericCellValue()).toInstant();
-                        ZonedDateTime zdate = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-                        untilDate = GregorianCalendar.from(zdate);
-                    } catch (Exception e) {
-                        log.error("cannot set data from {}", c4.toString(), e);
-                    }
+                    untilDate = Calendar.getInstance();
+                    untilDate.setTime(c4.getDateCellValue());
                 }
                 Cell c5 = row.getCell(4);
-                String note = null;
-                if(c5 != null){
-                    note = c5.getStringCellValue();
-                }
+                String note = c5 == null ? null : c5.getStringCellValue();
                 Cell c6 = row.getCell(5);
                 boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
-
                 Cell c7 = row.getCell(6);
                 String createdBy = c7 == null ? null : c7.getStringCellValue();
-                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy));
 
+                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy));
             } else {
                 first = false;
             }
