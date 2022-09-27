@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.granite.security.user.util.AuthorizableUtil;
+import com.day.cq.tagging.Tag;
+import com.day.cq.tagging.TagManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
@@ -31,9 +33,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -49,6 +49,7 @@ public class RedirectRule {
     public static final String NOTE_PROPERTY_NAME = "note";
     public static final String CONTEXT_PREFIX_IGNORED = "contextPrefixIgnored";
     public static final String CREATED_BY = "jcr:createdBy";
+    public static final String TAGS = "cq:tags";
 
     @ValueMapValue
     private String source;
@@ -73,6 +74,9 @@ public class RedirectRule {
 
     private ZonedDateTime untilDate;
 
+    @ValueMapValue(name = TAGS)
+    private String[] tagIds;
+
     private Pattern ptrn;
 
     private SubstitutionElement[] substitutions;
@@ -81,18 +85,20 @@ public class RedirectRule {
     }
 
     public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
-        this(source, target, statusCode, calendar, note, false, null);
+        this(source, target, statusCode, calendar, note, false, null, null);
     }
 
-    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note, boolean contextPrefixIgnored, String createdBy) {
+    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note,
+                        boolean contextPrefixIgnored, String createdBy, String[] tagIds) {
         this.source = source.trim();
         this.target = target.trim();
         this.statusCode = statusCode;
         this.note = note;
         this.contextPrefixIgnored = contextPrefixIgnored;
         this.createdBy = createdBy;
+        this.tagIds = tagIds;
         if (calendar != null) {
-            untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
+            untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
         }
 
         initRegexSubstitutions();
@@ -101,17 +107,17 @@ public class RedirectRule {
     @PostConstruct
     protected void init() {
         createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
-        if(resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)){
+        if (resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)) {
             Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
-            if(o instanceof Calendar) {
-                Calendar calendar = (Calendar)o;
-                untilDate = ZonedDateTime.ofInstant( calendar.toInstant(), calendar.getTimeZone().toZoneId());
+            if (o instanceof Calendar) {
+                Calendar calendar = (Calendar) o;
+                untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
             }
         }
         initRegexSubstitutions();
     }
 
-    private void initRegexSubstitutions(){
+    private void initRegexSubstitutions() {
         String regex = this.source;
         if (regex.endsWith("*")) {
             regex = regex.replaceAll("\\*$", "(.*)");
@@ -154,7 +160,7 @@ public class RedirectRule {
 
     /**
      * This is ugly, but needed to format untilDate in HTL in the redirect-row component.
-     *
+     * <p>
      * AEM as a Cloud Service supports formatting java.time.Instant (SLING-10651), but
      * classic AEMs 6.4 and 6.5 only support formatting java.util.Date and java.util.Calendar
      *
@@ -164,10 +170,32 @@ public class RedirectRule {
         return untilDate == null ? null : GregorianCalendar.from(untilDate);
     }
 
+    public String[] getTagIds() {
+        return tagIds;
+    }
+
+    /**
+     * used in the redirect-row component to print tags in HTL
+     */
+    public List<Tag> getTags() {
+        TagManager tagMgr = resource.getResourceResolver().adaptTo(TagManager.class);
+        if(tagIds == null || tagMgr == null){
+            return Collections.emptyList();
+        }
+        List<Tag> tags = new ArrayList<>();
+        for(String tagId : tagIds){
+            Tag tag = tagMgr.resolve(tagId);
+            if(tag != null) {
+                tags.add(tag);
+            }
+        }
+        return tags;
+    }
+
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, contextPrefixIgnored=%s}",
-                source, target, statusCode, untilDate, note, contextPrefixIgnored);
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, contextPrefixIgnored=%s, tags=%s}",
+                source, target, statusCode, untilDate, note, contextPrefixIgnored, Arrays.toString(tagIds));
     }
 
     @Override

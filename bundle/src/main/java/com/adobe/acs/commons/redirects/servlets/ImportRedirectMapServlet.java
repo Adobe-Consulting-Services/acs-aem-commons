@@ -130,7 +130,10 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             }
             props.put(RedirectRule.CONTEXT_PREFIX_IGNORED, rule.getContextPrefixIgnored());
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
-
+            String[] tagIds = rule.getTagIds();
+            if(tagIds != null) {
+                props.put(RedirectRule.TAGS, tagIds);
+            }
             Resource redirect = jcrRedirects.get(rule.getSource());
             if(redirect == null){
                 // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
@@ -165,20 +168,22 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 String source = row.getCell(0).getStringCellValue();
                 String target = row.getCell(1).getStringCellValue();
                 int statusCode = (int) row.getCell(2).getNumericCellValue();
-                Cell c4 = row.getCell(3);
+                Cell c3 = row.getCell(3);
                 Calendar untilDate = null;
-                if (DateUtil.isCellDateFormatted(c4)) {
+                if (DateUtil.isCellDateFormatted(c3)) {
                     untilDate = Calendar.getInstance();
-                    untilDate.setTime(c4.getDateCellValue());
+                    untilDate.setTime(c3.getDateCellValue());
                 }
-                Cell c5 = row.getCell(4);
-                String note = c5 == null ? null : c5.getStringCellValue();
-                Cell c6 = row.getCell(5);
-                boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
-                Cell c7 = row.getCell(6);
+                Cell c4 = row.getCell(4);
+                String note = c4 == null ? null : c4.getStringCellValue();
+                Cell c5 = row.getCell(5);
+                boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
+                Cell c6 = row.getCell(6);
+                String[] tags = c6 == null ? new String[]{} : c6.getStringCellValue().split("\n");
+                Cell c7 = row.getCell(7);
                 String createdBy = c7 == null ? null : c7.getStringCellValue();
 
-                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy));
+                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy, tags));
             } else {
                 first = false;
             }

@@ -79,6 +79,15 @@
                                                 minDate="today"
                                                 name="./untilDate"
                                                 type="datetime"/>
+                                        <tags
+                                                granite:class="tags"
+                                                granite:id="redirect-tags"
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="cq/gui/components/coral/common/form/tagfield"
+                                                multiple="{Boolean}true"
+                                                cq:showOnCreate="{Boolean}true"
+                                                fieldLabel="Tags"
+                                                name="./cq:tags"/>
                                         <note
                                                 granite:class="note"
                                                 granite:id="redirect-note"

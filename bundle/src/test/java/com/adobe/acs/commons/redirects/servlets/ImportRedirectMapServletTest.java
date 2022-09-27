@@ -44,8 +44,7 @@ import java.util.Arrays;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class ImportRedirectMapServletTest {
     @Rule
@@ -67,10 +66,11 @@ public class ImportRedirectMapServletTest {
     public void testImport() throws ServletException, IOException {
         List<RedirectRule> excelRules = Arrays.asList(
                 new RedirectRule("/content/1", "/en/we-retail", 301,
-                        new Calendar.Builder().setDate(1974, 01, 16).build(), "note-abc", false, null),
-                new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false, null),
+                        new Calendar.Builder().setDate(1974, 01, 16).build(), "note-abc",
+                        false, null, new String[]{"redirects:tag1", "redirects:tag2"}),
+                new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false, null, null),
                 // this one will overlay the existing rule in the repository
-                new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false, null)
+                new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false, null, null)
         );
 
         ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
@@ -83,7 +83,8 @@ public class ImportRedirectMapServletTest {
                 RedirectRule.NOTE_PROPERTY_NAME, "note-1",
                 RedirectRule.CONTEXT_PREFIX_IGNORED, true,
                 "jcr:created", "john.doe",
-                "custom-1", "123"
+                "custom-1", "123",
+                "cq:tags", "redirects:tag3"
         );
         rb.resource("redirect-saved-2",
                 "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
@@ -122,6 +123,7 @@ public class ImportRedirectMapServletTest {
         assertEquals("note-1", rule1.getNote());
         assertEquals("john.doe", res1.getValueMap().get("jcr:created"));
         assertEquals("123", res1.getValueMap().get("custom-1"));
+        assertArrayEquals(new String[]{"redirects:tag3"}, rule1.getTagIds());
 
         Resource res2 = rules.get("/content/three");
         assertEquals("redirect-saved-2", res2.getName()); // node name is preserved
@@ -136,6 +138,7 @@ public class ImportRedirectMapServletTest {
         assertEquals("/en/we-retail", rule3.getTarget());
         assertDateEquals("16 February 1974", rule3.getUntilDate());
         assertEquals("note-abc", rule3.getNote());
+        assertArrayEquals(new String[]{"redirects:tag1", "redirects:tag2"}, rule3.getTagIds());
 
         RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());

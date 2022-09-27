@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
@@ -99,6 +100,9 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         CellStyle lockedCellStyle = wb.createCellStyle();
         lockedCellStyle.setLocked(true); // readonly cell
 
+        CellStyle cellWrapStyle = wb.createCellStyle();
+        cellWrapStyle.setWrapText(true);
+
         Row headerRow;
         int rownum = 0;
         Sheet sheet = wb.createSheet("Redirects");
@@ -109,7 +113,8 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(3).setCellValue("Until Date");
         headerRow.createCell(4).setCellValue("Notes");
         headerRow.createCell(5).setCellValue("Ignore Context Prefix");
-        headerRow.createCell(6).setCellValue("Created By");
+        headerRow.createCell(6).setCellValue("Tags");
+        headerRow.createCell(7).setCellValue("Created By");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -126,11 +131,19 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             }
             row.createCell(4).setCellValue(rule.getNote());
             row.createCell(5).setCellValue(rule.getContextPrefixIgnored());
+
             Cell cell6 = row.createCell(6);
-            cell6.setCellValue(rule.getCreatedBy());
-            cell6.setCellStyle(lockedCellStyle);
+            String[] tagIds = rule.getTagIds();
+            if(tagIds != null) {
+                cell6.setCellValue(String.join("\n", tagIds));
+            }
+            cell6.setCellStyle(cellWrapStyle);
+
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(rule.getCreatedBy());
+            cell7.setCellStyle(lockedCellStyle);
         }
-        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 6));
+        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 7));
         sheet.setColumnWidth(0, 256 * 50);
         sheet.setColumnWidth(1, 256 * 50);
         sheet.setColumnWidth(2, 256 * 15);
@@ -138,6 +151,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(4, 256 * 100);
         sheet.setColumnWidth(5, 256 * 20);
         sheet.setColumnWidth(6, 256 * 25);
+        sheet.setColumnWidth(7, 256 * 30);
 
         return wb;
     }

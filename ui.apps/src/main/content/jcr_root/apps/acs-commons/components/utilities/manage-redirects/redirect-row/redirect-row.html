@@ -13,7 +13,12 @@
    <td is="coral-table-cell" class="createdBy">${redirect.createdBy}</td>
    <td is="coral-table-cell" class="untilDate" data-value="${'yyyy-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=redirect.untilDateCalendar, locale='en'}"
        style="width:120px;">${'MMMM dd, yyyy hh:mm a' @ format=redirect.untilDateCalendar, locale='en'}</td>
-   <td is="coral-table-cell" class="note" data-value="${redirect.note}" style="width:150px;">${redirect.note}</td>
+   <td is="coral-table-cell" class="tags" data-value="${resource.cq:tags}">
+      <sly data-sly-list.tag=${redirect.tags}>
+         <coral-tag value="${tag.id}" size="S" color="blue">${tag.title}</coral-tag>
+      </sly>
+   </td>
+   <td is="coral-table-cell" class="note" data-value="${redirect.note}" >${redirect.note}</td>
    <td is="coral-table-cell" class="contextPrefixIgnored" data-value="${redirect.contextPrefixIgnored ? 'true' : 'false'}" style="text-align: center;width:50px;">
       <input data-sly-test="${redirect.contextPrefixIgnored}" type="checkbox" checked disabled/>
    </td>
