@@ -134,27 +134,32 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if(tagIds != null) {
                 props.put(RedirectRule.TAGS, tagIds);
             }
-            Resource redirect = jcrRedirects.get(rule.getSource());
-            if(redirect == null){
-                // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
-                props.put(JCR_MIXINTYPES, MIX_CREATED);
-                String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
-                resolver.create(root, nodeName, props);
-            } else {
-                // add mix:lastModified so that AEM updates jcr:lastModified and jcr:lastModifiedBy
-                ValueMap valueMap = redirect.adaptTo(ModifiableValueMap.class);
-                if (valueMap == null) {
-                    throw new PersistenceException("Cannot modify properties of " + redirect.getPath());
-                }
-                String[] mixins = valueMap.get(JCR_MIXINTYPES, String[].class);
-                Collection<String> mset = mixins == null ? new HashSet<>() : new HashSet<>(Arrays.asList(mixins));
-                mset.add(MIX_LAST_MODIFIED);
-                props.put(JCR_MIXINTYPES, mset.toArray(new String[0]));
-                valueMap.putAll(props);
-            }
-
-        }
+            Resource redirect = getOrCreateRedirect(root, rule.getSource(), props, jcrRedirects);
+            log.debug("rule: {}", redirect.getPath());
+         }
         resolver.commit();
+    }
+
+    private Resource getOrCreateRedirect(Resource root, String sourcePath, Map<String, Object> props, Map<String, Resource> jcrRedirects) throws PersistenceException {
+        Resource redirect = jcrRedirects.get(sourcePath);
+        if(redirect == null){
+            // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
+            props.put(JCR_MIXINTYPES, MIX_CREATED);
+            String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
+            redirect = root.getResourceResolver().create(root, nodeName, props);
+        } else {
+            // add mix:lastModified so that AEM updates jcr:lastModified and jcr:lastModifiedBy
+            ValueMap valueMap = redirect.adaptTo(ModifiableValueMap.class);
+            if (valueMap == null) {
+                throw new PersistenceException("Cannot modify properties of " + redirect.getPath());
+            }
+            String[] mixins = valueMap.get(JCR_MIXINTYPES, String[].class);
+            Collection<String> mset = mixins == null ? new HashSet<>() : new HashSet<>(Arrays.asList(mixins));
+            mset.add(MIX_LAST_MODIFIED);
+            props.put(JCR_MIXINTYPES, mset.toArray(new String[0]));
+            valueMap.putAll(props);
+        }
+        return redirect;
     }
 
     Collection<RedirectRule> readEntries(InputStream is)
@@ -165,25 +170,8 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         boolean first = true;
         for (Row row : sheet) {
             if (!first) {
-                String source = row.getCell(0).getStringCellValue();
-                String target = row.getCell(1).getStringCellValue();
-                int statusCode = (int) row.getCell(2).getNumericCellValue();
-                Cell c3 = row.getCell(3);
-                Calendar untilDate = null;
-                if (DateUtil.isCellDateFormatted(c3)) {
-                    untilDate = Calendar.getInstance();
-                    untilDate.setTime(c3.getDateCellValue());
-                }
-                Cell c4 = row.getCell(4);
-                String note = c4 == null ? null : c4.getStringCellValue();
-                Cell c5 = row.getCell(5);
-                boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
-                Cell c6 = row.getCell(6);
-                String[] tags = c6 == null ? new String[]{} : c6.getStringCellValue().split("\n");
-                Cell c7 = row.getCell(7);
-                String createdBy = c7 == null ? null : c7.getStringCellValue();
-
-                rules.add(new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy, tags));
+                RedirectRule rule = readRedirect(row);
+                rules.add(rule);
             } else {
                 first = false;
             }
@@ -191,6 +179,28 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         log.debug("{} rules read from spreadsheet", rules.size());
         return rules;
     }
+
+    private RedirectRule readRedirect(Row row){
+        String source = row.getCell(0).getStringCellValue();
+        String target = row.getCell(1).getStringCellValue();
+        int statusCode = (int) row.getCell(2).getNumericCellValue();
+        Cell c3 = row.getCell(3);
+        Calendar untilDate = null;
+        if (DateUtil.isCellDateFormatted(c3)) {
+            untilDate = Calendar.getInstance();
+            untilDate.setTime(c3.getDateCellValue());
+        }
+        Cell c4 = row.getCell(4);
+        String note = c4 == null ? null : c4.getStringCellValue();
+        Cell c5 = row.getCell(5);
+        boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
+        Cell c6 = row.getCell(6);
+        String[] tags = c6 == null ? null : c6.getStringCellValue().split("\n");
+        Cell c7 = row.getCell(7);
+        String createdBy = c7 == null ? null : c7.getStringCellValue();
+        return new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy, tags);
+    }
+
 
     public static InputStream getFile(SlingHttpServletRequest request) throws IOException {
         InputStream stream = null;
