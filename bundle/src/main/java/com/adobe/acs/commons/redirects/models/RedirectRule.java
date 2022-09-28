@@ -244,38 +244,47 @@ public class RedirectRule {
             inst.source = source.trim();
             return this;
         }
+        
         public Builder setTarget(String target){
             inst.target = target.trim();
             return this;
         }
+
         public Builder setStatusCode(int statusCode){
             inst.statusCode = statusCode;
             return this;
         }
+
         public Builder setNotes(String note){
             inst.note = note;
             return this;
         }
+
         public Builder setUntilDate(ZonedDateTime untilDate){
             inst.untilDate = untilDate;
             return this;
         }
+
         public Builder setUntilDate(Calendar calendar){
             inst.untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
             return this;
         }
+
         public Builder setCreatedBy(String createdBy){
             inst.createdBy = createdBy;
             return this;
         }
+
         public Builder setTagIds(String[] tagIds){
             inst.tagIds = tagIds;
             return this;
         }
+
         public Builder setContextPrefixIgnored(boolean contextPrefixIgnored){
             inst.contextPrefixIgnored = contextPrefixIgnored;
             return this;
         }
+
         public RedirectRule build(){
             inst.initRegexSubstitutions();
             return inst;
