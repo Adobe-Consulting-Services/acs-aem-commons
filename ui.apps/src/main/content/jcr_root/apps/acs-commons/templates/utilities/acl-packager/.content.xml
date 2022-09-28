@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    jcr:description="Utility page for defining packages of ACL nodes."
-    jcr:primaryType="cq:Template"
-    jcr:title="ACL Packager"
-    allowedPaths="[/etc/acs-commons/packagers(/.*)?]"
-    ranking="{Long}120">
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:description="Utility page for defining packages of ACL nodes."
+          jcr:primaryType="cq:Template"
+          jcr:title="ACL packager"
+          allowedPaths="[/etc/acs-commons/packagers(/.*)?]"
+          ranking="{Long}120">
     <jcr:content
-        jcr:primaryType="cq:PageContent"
-        sling:resourceType="acs-commons/components/utilities/packager/acl-packager">
-            <configuration
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="acs-commons/components/utilities/packager/acl-packager">
+        <configuration
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="acs-commons/components/utilities/packager/acl-packager/configuration"
                 packageName="acls"
@@ -17,6 +18,6 @@
                 packageDescription="ACL Package initially defined by a ACS AEM Commons - ACL Packager configuration."
                 packageACLHandling="Overwrite"
                 conflictResolution="IncrementVersion">
-            </configuration>
+        </configuration>
     </jcr:content>
 </jcr:root>
