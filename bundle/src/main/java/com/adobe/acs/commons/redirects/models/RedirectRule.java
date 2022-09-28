@@ -87,37 +87,22 @@ public class RedirectRule {
 
     private SubstitutionElement[] substitutions;
 
-    public RedirectRule() {
-    }
-
-    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note) {
-        this(source, target, statusCode, calendar, note, false, null, null);
-    }
-
-    public RedirectRule(String source, String target, int statusCode, Calendar calendar, String note,
-                        boolean contextPrefixIgnored, String createdBy, String[] tagIds) {
-        this.source = source.trim();
-        this.target = target.trim();
-        this.statusCode = statusCode;
-        this.note = note;
-        this.contextPrefixIgnored = contextPrefixIgnored;
-        this.createdBy = createdBy;
-        this.tagIds = tagIds;
-        if (calendar != null) {
-            untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
-        }
-
-        initRegexSubstitutions();
-    }
-
     @PostConstruct
     protected void init() {
-        createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
-        if (resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)) {
-            Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
-            if (o instanceof Calendar) {
-                Calendar calendar = (Calendar) o;
-                untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
+        if(source != null) {
+            source = source.trim();
+        }
+        if(target != null) {
+            target = target.trim();
+        }
+        if(resource != null) {
+            createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
+            if (resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)) {
+                Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
+                if (o instanceof Calendar) {
+                    Calendar calendar = (Calendar) o;
+                    untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
+                }
             }
         }
         initRegexSubstitutions();
@@ -245,4 +230,55 @@ public class RedirectRule {
         return ptrn;
     }
 
+    /**
+     * used in junit tests to construct redirects
+     */
+    public static class Builder {
+        private RedirectRule inst;
+
+        public Builder(){
+            inst = new RedirectRule();
+        }
+
+        public Builder setSource(String source){
+            inst.source = source.trim();
+            return this;
+        }
+        public Builder setTarget(String target){
+            inst.target = target.trim();
+            return this;
+        }
+        public Builder setStatusCode(int statusCode){
+            inst.statusCode = statusCode;
+            return this;
+        }
+        public Builder setNotes(String note){
+            inst.note = note;
+            return this;
+        }
+        public Builder setUntilDate(ZonedDateTime untilDate){
+            inst.untilDate = untilDate;
+            return this;
+        }
+        public Builder setUntilDate(Calendar calendar){
+            inst.untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
+            return this;
+        }
+        public Builder setCreatedBy(String createdBy){
+            inst.createdBy = createdBy;
+            return this;
+        }
+        public Builder setTagIds(String[] tagIds){
+            inst.tagIds = tagIds;
+            return this;
+        }
+        public Builder setContextPrefixIgnored(boolean contextPrefixIgnored){
+            inst.contextPrefixIgnored = contextPrefixIgnored;
+            return this;
+        }
+        public RedirectRule build(){
+            inst.initRegexSubstitutions();
+            return inst;
+        }
+    }
 }

@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Arrays;
 
@@ -85,7 +84,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         Resource storageRoot = request.getResourceResolver().getResource(path);
         log.debug("Updating redirect maps at {}", storageRoot.getPath());
         Map<String, Resource> jcrRules = getRules(storageRoot); // rules stored in crx
-        Collection<RedirectRule> xlsRules;
+        Collection<Map<String, Object>> xlsRules;
         try (InputStream is = getFile(request)) {
             xlsRules = readEntries(is); // rules read from excel
         }
@@ -115,26 +114,11 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
      * @param jcrRedirects  existing redirect nodes keyed by the source path.
      *                      We assume that the source path is unique.
      */
-    void update(Resource root, Collection<RedirectRule> xlsRules, Map<String, Resource> jcrRedirects) throws PersistenceException {
+    void update(Resource root, Collection<Map<String, Object>> xlsRules, Map<String, Resource> jcrRedirects) throws PersistenceException {
         ResourceResolver resolver = root.getResourceResolver();
-        for (RedirectRule rule : xlsRules) {
-            Map<String, Object> props = new HashMap<>();
-            props.put(SOURCE_PROPERTY_NAME, rule.getSource());
-            props.put(RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget());
-            props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(rule.getStatusCode()));
-            if (rule.getUntilDate() != null) {
-                props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, GregorianCalendar.from(rule.getUntilDate()) );
-            }
-            if(rule.getNote() != null){
-                props.put(RedirectRule.NOTE_PROPERTY_NAME, rule.getNote());
-            }
-            props.put(RedirectRule.CONTEXT_PREFIX_IGNORED, rule.getContextPrefixIgnored());
-            props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
-            String[] tagIds = rule.getTagIds();
-            if(tagIds != null) {
-                props.put(RedirectRule.TAGS, tagIds);
-            }
-            Resource redirect = getOrCreateRedirect(root, rule.getSource(), props, jcrRedirects);
+        for (Map<String, Object> props : xlsRules) {
+            String sourcePath = (String)props.get(SOURCE_PROPERTY_NAME);
+            Resource redirect = getOrCreateRedirect(root, sourcePath, props, jcrRedirects);
             log.debug("rule: {}", redirect.getPath());
          }
         resolver.commit();
@@ -162,16 +146,16 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return redirect;
     }
 
-    Collection<RedirectRule> readEntries(InputStream is)
+    Collection<Map<String, Object>> readEntries(InputStream is)
             throws IOException {
-        Collection<RedirectRule> rules = new LinkedHashSet<>();
+        Collection<Map<String, Object>> rules = new LinkedHashSet<>();
         Workbook wb = new XSSFWorkbook(is);
         Sheet sheet = wb.getSheetAt(0);
         boolean first = true;
         for (Row row : sheet) {
             if (!first) {
-                RedirectRule rule = readRedirect(row);
-                rules.add(rule);
+                Map<String, Object> props = readRedirect(row);
+                rules.add(props);
             } else {
                 first = false;
             }
@@ -180,25 +164,34 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return rules;
     }
 
-    private RedirectRule readRedirect(Row row){
+    private Map<String, Object> readRedirect(Row row){
+        Map<String, Object> props = new HashMap<>();
+        props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
         String source = row.getCell(0).getStringCellValue();
+        props.put(SOURCE_PROPERTY_NAME, source);
         String target = row.getCell(1).getStringCellValue();
+        props.put(RedirectRule.TARGET_PROPERTY_NAME, target);
         int statusCode = (int) row.getCell(2).getNumericCellValue();
+        props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(statusCode));
         Cell c3 = row.getCell(3);
-        Calendar untilDate = null;
         if (DateUtil.isCellDateFormatted(c3)) {
-            untilDate = Calendar.getInstance();
+            Calendar untilDate = Calendar.getInstance();
             untilDate.setTime(c3.getDateCellValue());
+            props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, untilDate);
         }
         Cell c4 = row.getCell(4);
         String note = c4 == null ? null : c4.getStringCellValue();
+        props.put(RedirectRule.NOTE_PROPERTY_NAME, note);
         Cell c5 = row.getCell(5);
         boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
+        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED, ignoreContextPrefix);
         Cell c6 = row.getCell(6);
-        String[] tags = c6 == null ? null : c6.getStringCellValue().split("\n");
+        String[] tagIds = c6 == null ? null : c6.getStringCellValue().split("\n");
+        props.put(RedirectRule.TAGS, tagIds);
         Cell c7 = row.getCell(7);
         String createdBy = c7 == null ? null : c7.getStringCellValue();
-        return new RedirectRule(source, target, statusCode, untilDate, note, ignoreContextPrefix, createdBy, tags);
+        props.put(RedirectRule.CREATED_BY, createdBy);
+        return props;
     }
 
 

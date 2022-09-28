@@ -35,12 +35,7 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.List;
-import java.util.Collections;
-import java.util.Calendar;
-import java.util.Arrays;
+import java.util.*;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
@@ -65,12 +60,25 @@ public class ImportRedirectMapServletTest {
     @Test
     public void testImport() throws ServletException, IOException {
         List<RedirectRule> excelRules = Arrays.asList(
-                new RedirectRule("/content/1", "/en/we-retail", 301,
-                        new Calendar.Builder().setDate(1974, 01, 16).build(), "note-abc",
-                        false, null, new String[]{"redirects:tag1", "redirects:tag2"}),
-                new RedirectRule("/content/2", "/en/we-retail", 301, null, "", false, null, null),
+                new RedirectRule.Builder()
+                        .setSource("/content/1")
+                        .setTarget("/en/we-retail")
+                        .setStatusCode(301)
+                        .setUntilDate(new Calendar.Builder().setDate(1974, 01, 16).build())
+                        .setNotes("note-abc")
+                        .setTagIds(new String[]{"redirects:tag1", "redirects:tag2"})
+                        .build(),
+                new RedirectRule.Builder()
+                        .setSource("/content/2")
+                        .setTarget("/en/we-retail")
+                        .setStatusCode(301)
+                        .build(),
                 // this one will overlay the existing rule in the repository
-                new RedirectRule("/content/three", "/en/we-retail", 301, null, "", false, null, null)
+                new RedirectRule.Builder()
+                        .setSource("/content/three")
+                        .setTarget("/en/we-retail")
+                        .setStatusCode(301)
+                        .build()
         );
 
         ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
@@ -149,23 +157,36 @@ public class ImportRedirectMapServletTest {
 
     @Test
     public void testUpdate() throws IOException {
+        Map<String, Object> rule1 = new HashMap<>();
+        rule1.put("sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE);
+        rule1.put(RedirectRule.SOURCE_PROPERTY_NAME, "/a1");
+        rule1.put(RedirectRule.TARGET_PROPERTY_NAME, "/b1");
+        rule1.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, 301);
+
+        Map<String, Object> rule2 = new HashMap<>();
+        rule2.put("sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE);
+        rule2.put(RedirectRule.SOURCE_PROPERTY_NAME, "/a2");
+        rule2.put(RedirectRule.TARGET_PROPERTY_NAME, "/b2");
+        rule2.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, 302);
+        rule2.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, Calendar.getInstance());
+        rule2.put(RedirectRule.NOTE_PROPERTY_NAME, "note");
+        Collection<Map<String, Object>> rules = Arrays.asList(rule1, rule2);
+
         Resource root = context.resourceResolver().getResource(redirectStoragePath);
-        RedirectRule rule1 = new RedirectRule("/a1", "/b1", 301, null, null);
-        RedirectRule rule2 = new RedirectRule("/a2", "/b2", 302, Calendar.getInstance(), "note");
-        Collection<RedirectRule> rules = Arrays.asList(rule1, rule2);
         servlet.update(root, rules, Collections.emptyMap());
 
         Map<String, Resource> redirects = servlet.getRules(root);
-        ValueMap vm1 = redirects.get(rule1.getSource()).getValueMap();
-        assertEquals(vm1.get(RedirectRule.SOURCE_PROPERTY_NAME), rule1.getSource());
-        assertEquals(vm1.get(RedirectRule.TARGET_PROPERTY_NAME), rule1.getTarget());
+        ValueMap vm1 = redirects.get(rule1.get(RedirectRule.SOURCE_PROPERTY_NAME)).getValueMap();
+
+        assertEquals(vm1.get(RedirectRule.SOURCE_PROPERTY_NAME), rule1.get(RedirectRule.SOURCE_PROPERTY_NAME));
+        assertEquals(vm1.get(RedirectRule.TARGET_PROPERTY_NAME), rule1.get(RedirectRule.TARGET_PROPERTY_NAME));
         assertFalse(vm1.containsKey(RedirectRule.UNTIL_DATE_PROPERTY_NAME));
         assertFalse(vm1.containsKey(RedirectRule.NOTE_PROPERTY_NAME));
 
-        ValueMap vm2 = redirects.get(rule2.getSource()).getValueMap();
-        assertEquals(vm2.get(RedirectRule.SOURCE_PROPERTY_NAME), rule2.getSource());
-        assertEquals(vm2.get(RedirectRule.TARGET_PROPERTY_NAME), rule2.getTarget());
-        assertEquals(vm2.get(RedirectRule.NOTE_PROPERTY_NAME), rule2.getNote());
+        ValueMap vm2 = redirects.get(rule2.get(RedirectRule.SOURCE_PROPERTY_NAME)).getValueMap();
+        assertEquals(vm2.get(RedirectRule.SOURCE_PROPERTY_NAME), rule2.get(RedirectRule.SOURCE_PROPERTY_NAME));
+        assertEquals(vm2.get(RedirectRule.TARGET_PROPERTY_NAME), rule2.get(RedirectRule.TARGET_PROPERTY_NAME));
+        assertEquals(vm2.get(RedirectRule.NOTE_PROPERTY_NAME), rule2.get(RedirectRule.NOTE_PROPERTY_NAME));
     }
 
 }
