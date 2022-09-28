@@ -244,7 +244,7 @@ public class RedirectRule {
             inst.source = source.trim();
             return this;
         }
-        
+
         public Builder setTarget(String target){
             inst.target = target.trim();
             return this;
