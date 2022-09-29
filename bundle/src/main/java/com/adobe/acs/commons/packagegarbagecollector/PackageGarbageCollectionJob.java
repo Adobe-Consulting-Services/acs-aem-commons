@@ -84,7 +84,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                     packageManager.remove(jcrPackage);
                     LOG.info("Deleted package {}", packageDescription);
                 } else {
-                    LOG.info("Not removing package because it's not old enough {}", packageDescription);
+                    LOG.debug("Not removing package because it's not old enough {}", packageDescription);
                 }
             }
         } catch (LoginException | RepositoryException | IOException e) {
