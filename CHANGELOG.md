@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2937 - Package Garbage Collector - used to clear up old packages installed on Managed Services instances by Cloud Manager
 
+- #2941 - Add Query Builder support in Report Builder
+
 ## 5.3.4 - 2022-08-22
 
 ### Added
