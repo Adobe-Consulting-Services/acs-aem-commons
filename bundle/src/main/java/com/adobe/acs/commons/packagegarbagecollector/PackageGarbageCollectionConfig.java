@@ -30,7 +30,7 @@ public @interface PackageGarbageCollectionConfig {
     @AttributeDefinition(name = "Package Group Name", description = "The group name of the packages to remove")
     String groupName() default "";
 
-    @AttributeDefinition(name = "Max age of package", description = "Packages older than this will be removed. Default is 60")
+    @AttributeDefinition(name = "Max age of package", description = "Packages older than this (in days) will be removed. Default is 60 days")
     int maxAgeInDays() default 60;
 
     @AttributeDefinition(name = "webconsole.configurationFactory.nameHint")
