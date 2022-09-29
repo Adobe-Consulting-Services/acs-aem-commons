@@ -113,7 +113,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
             LOG.debug("Checking if package is old enough: Name: {}, Created At: {}, Oldest Age: {}",
                 packageDescription, packageCreatedAt.format(formatter), oldestAge.format(formatter));
         }
-        return packageCreatedAt.isBefore(oldestAge) || packageCreatedAt.isEqual(oldestAge);
+        return !packageCreatedAt.isAfter(oldestAge);
     }
 
     private String getPackageDescription(JcrPackage jcrPackage) throws RepositoryException {
