@@ -94,7 +94,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     * @return redirects keyed by source path
+     * read redirects stored in AEM
+     *
+     * @return redirect nodes keyed by source path
      */
     Map<String, Resource> getRules(Resource resource) {
         Map<String, Resource> rules = new LinkedHashMap<>();
@@ -146,7 +148,13 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return redirect;
     }
 
-    Collection<Map<String, Object>> readEntries(InputStream is)
+    /**
+     * read redirects from an Excel spreadsheet
+     *
+     * @param is  input spreadsheet
+     * @return  collection of redirect properties
+     */
+    private Collection<Map<String, Object>> readEntries(InputStream is)
             throws IOException {
         Collection<Map<String, Object>> rules = new LinkedHashSet<>();
         Workbook wb = new XSSFWorkbook(is);
@@ -164,6 +172,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return rules;
     }
 
+    /**
+     * read redirect properties from a spreadsheet row
+     */
     private Map<String, Object> readRedirect(Row row){
         Map<String, Object> props = new HashMap<>();
         props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
@@ -188,9 +199,6 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         Cell c6 = row.getCell(6);
         String[] tagIds = c6 == null ? null : c6.getStringCellValue().split("\n");
         props.put(RedirectRule.TAGS, tagIds);
-        Cell c7 = row.getCell(7);
-        String createdBy = c7 == null ? null : c7.getStringCellValue();
-        props.put(RedirectRule.CREATED_BY, createdBy);
         return props;
     }
 

@@ -20,10 +20,12 @@
 package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
+import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -36,9 +38,9 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collection;
 
-import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.SPREADSHEETML_SHEET;
 import static org.junit.Assert.*;
 
@@ -47,26 +49,33 @@ import static org.junit.Assert.*;
  */
 public class ExportRedirectMapServletTest {
     @Rule
-    public SlingContext context = new SlingContext(
-            ResourceResolverType.RESOURCERESOLVER_MOCK);
+    public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private ExportRedirectMapServlet servlet;
     private String redirectStoragePath = "/conf/acs-commons/redirects";
 
     @Before
-    public void setUp() {
-        servlet = new ExportRedirectMapServlet();
-        context.build().resource(redirectStoragePath)
-                .siblingsMode()
-                .resource("redirect-1", "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/one", "target", "/content/two", "statusCode", 302, "note", "note-1",
-                        "contextPrefixIgnored", true, "cq:tags", "redirects:tag1",
-                        "jcr:createdBy", "john.dow")
-                .resource("redirect-2", "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/three", "target", "/content/four", "statusCode", 301,
-                        "contextPrefixIgnored", false, "cq:tags", "redirects:tag2")
-        ;
+    public void setUp() throws PersistenceException {
+        new RedirectResourceBuilder(context, redirectStoragePath)
+                .setSource("/content/one")
+                .setTarget("/content/two")
+                .setStatusCode(302)
+                .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
+                .setNotes("note-1")
+                .setContextPrefixIgnored(true)
+                .setTagIds(new String[]{"redirects:tag1"})
+                .setCreatedBy("john.dow")
+                .build();
+        new RedirectResourceBuilder(context, redirectStoragePath)
+                .setSource("/content/three")
+                .setTarget("/content/four")
+                .setStatusCode(301)
+                .setTagIds(new String[]{"redirects:tag2"})
+                .setModifiedBy("john.dow")
+                .build();
+
         context.request().addRequestParameter("path", redirectStoragePath);
+        servlet = new ExportRedirectMapServlet();
     }
 
 
@@ -103,6 +112,7 @@ public class ExportRedirectMapServletTest {
         assertTrue(row1.getCell(5).getBooleanCellValue());
         assertEquals("redirects:tag1", row1.getCell(6).getStringCellValue());
         assertEquals("john.dow", row1.getCell(7).getStringCellValue());
+        assertEquals("", row1.getCell(8).getStringCellValue());
 
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
@@ -110,5 +120,7 @@ public class ExportRedirectMapServletTest {
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());
         assertFalse(row2.getCell(5).getBooleanCellValue());
         assertEquals("redirects:tag2", row2.getCell(6).getStringCellValue());
+        assertEquals("", row2.getCell(7).getStringCellValue());
+        assertEquals("john.dow", row2.getCell(8).getStringCellValue());
     }
 }

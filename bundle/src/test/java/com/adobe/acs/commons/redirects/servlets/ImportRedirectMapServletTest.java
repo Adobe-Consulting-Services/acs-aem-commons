@@ -19,11 +19,14 @@
  */
 package com.adobe.acs.commons.redirects.servlets;
 
+import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
@@ -35,7 +38,6 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Calendar;
@@ -65,54 +67,56 @@ public class ImportRedirectMapServletTest {
 
     @Test
     public void testImport() throws ServletException, IOException {
-        List<RedirectRule> excelRules = Arrays.asList(
-                new RedirectRule.Builder()
-                        .setSource("/content/1")
-                        .setTarget("/en/we-retail")
-                        .setStatusCode(301)
-                        .setUntilDate(new Calendar.Builder().setDate(1974, 01, 16).build())
-                        .setNotes("note-abc")
-                        .setTagIds(new String[]{"redirects:tag1", "redirects:tag2"})
-                        .build(),
-                new RedirectRule.Builder()
-                        .setSource("/content/2")
-                        .setTarget("/en/we-retail")
-                        .setStatusCode(301)
-                        .build(),
-                // this one will overlay the existing rule in the repository
-                new RedirectRule.Builder()
-                        .setSource("/content/three")
-                        .setTarget("/en/we-retail")
-                        .setStatusCode(301)
-                        .build()
-        );
+        // existing rules
+        new RedirectResourceBuilder(context, redirectStoragePath)
+                .setSource("/content/one")
+                .setTarget("/content/two")
+                .setStatusCode(302)
+                .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
+                .setNotes("note-1")
+                .setContextPrefixIgnored(true)
+                .setCreatedBy("john.doe")
+                .setTagIds(new String[]{"redirects:tag3"})
+                .setProperty("custom-1", "123")
+                .setNodeName("redirect-saved-1")
+                .build();
+        new RedirectResourceBuilder(context, redirectStoragePath)
+                .setSource("/content/three")
+                .setTarget("/content/four")
+                .setStatusCode(301)
+                .setNotes("note-2")
+                .setModifiedBy("xyz")
+                .setTagIds(new String[]{"redirects:tag3"})
+                .setProperty("custom-2", "345")
+                .setNodeName("redirect-saved-2")
+                .build();
 
-        ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
-        rb.resource("redirect-saved-1",
-                "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                RedirectRule.SOURCE_PROPERTY_NAME, "/content/one",
-                RedirectRule.TARGET_PROPERTY_NAME, "/content/two",
-                RedirectRule.STATUS_CODE_PROPERTY_NAME, 302,
-                RedirectRule.UNTIL_DATE_PROPERTY_NAME, new Calendar.Builder().setDate(2022, 9, 9).build(),
-                RedirectRule.NOTE_PROPERTY_NAME, "note-1",
-                RedirectRule.CONTEXT_PREFIX_IGNORED, true,
-                "jcr:created", "john.doe",
-                "custom-1", "123",
-                "cq:tags", "redirects:tag3"
-        );
-        rb.resource("redirect-saved-2",
-                "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                RedirectRule.SOURCE_PROPERTY_NAME, "/content/three",
-                RedirectRule.TARGET_PROPERTY_NAME, "/content/four",
-                RedirectRule.STATUS_CODE_PROPERTY_NAME, 301,
-                RedirectRule.UNTIL_DATE_PROPERTY_NAME, null,
-                RedirectRule.NOTE_PROPERTY_NAME, "note-2",
-                RedirectRule.CONTEXT_PREFIX_IGNORED, false,
-                "jcr:created", "xyz",
-                "custom-2", "345"
-        );
+        // new rules in a spreadsheet. will be merged with the existing rules
+        XSSFWorkbook wb = new XSSFWorkbook();
+        CellStyle dateStyle = wb.createCellStyle();
+        dateStyle.setDataFormat(
+                wb.createDataFormat().getFormat("mmm d, yyyy"));
+        Sheet sheet = wb.createSheet();
+        sheet.createRow(0); //header.not used in import, can be all blank
+        Row row1 = sheet.createRow(1);
+        row1.createCell(0).setCellValue("/content/1");
+        row1.createCell(1).setCellValue("/en/we-retail");
+        row1.createCell(2).setCellValue(301);
+        row1.createCell(3).setCellValue(new Calendar.Builder().setDate(1974, 01, 16).build());
+        row1.getCell(3).setCellStyle(dateStyle);
+        row1.createCell(4).setCellValue("note-abc");
+        row1.createCell(6).setCellValue("redirects:tag1\nredirects:tag2");
 
-        XSSFWorkbook wb = ExportRedirectMapServlet.export(excelRules);
+        Row row2 = sheet.createRow(2);
+        row2.createCell(0).setCellValue("/content/2");
+        row2.createCell(1).setCellValue("/en/we-retail");
+        row2.createCell(2).setCellValue(301);
+
+        Row row3 = sheet.createRow(3);
+        row3.createCell(0).setCellValue("/content/three");
+        row3.createCell(1).setCellValue("/en/we-retail");
+        row3.createCell(2).setCellValue(301);
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         wb.write(out);
         out.close();
@@ -135,7 +139,7 @@ public class ImportRedirectMapServletTest {
         assertEquals("/content/two", rule1.getTarget());
         assertDateEquals("09 October 2022", rule1.getUntilDate());
         assertEquals("note-1", rule1.getNote());
-        assertEquals("john.doe", res1.getValueMap().get("jcr:created"));
+        assertEquals("john.doe", rule1.getCreatedBy());
         assertEquals("123", res1.getValueMap().get("custom-1"));
         assertArrayEquals(new String[]{"redirects:tag3"}, rule1.getTagIds());
 
@@ -145,7 +149,7 @@ public class ImportRedirectMapServletTest {
         assertEquals("/en/we-retail", rule2.getTarget());
         assertEquals(301, rule2.getStatusCode());
         assertFalse(rule2.getContextPrefixIgnored());
-        assertEquals("xyz", res2.getValueMap().get("jcr:created"));
+        assertEquals("xyz", rule2.getModifiedBy());
         assertEquals("345", res2.getValueMap().get("custom-2"));
 
         RedirectRule rule3 = rules.get("/content/1").adaptTo(RedirectRule.class);

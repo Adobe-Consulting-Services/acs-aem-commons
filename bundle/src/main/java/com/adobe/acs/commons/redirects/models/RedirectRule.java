@@ -25,6 +25,7 @@ import com.day.cq.tagging.TagManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
@@ -55,15 +56,16 @@ public class RedirectRule {
     public static final String NOTE_PROPERTY_NAME = "note";
     public static final String CONTEXT_PREFIX_IGNORED = "contextPrefixIgnored";
     public static final String CREATED_BY = "jcr:createdBy";
+    public static final String MODIFIED_BY = "jcr:lastModifiedBy";
     public static final String TAGS = "cq:tags";
 
-    @ValueMapValue
+    @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private String source;
 
-    @ValueMapValue
+    @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private String target;
 
-    @ValueMapValue
+    @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private int statusCode;
 
     @ValueMapValue
@@ -72,16 +74,19 @@ public class RedirectRule {
     @ValueMapValue(name = CREATED_BY)
     private String createdBy;
 
+    @ValueMapValue(name = MODIFIED_BY)
+    private String modifiedBy;
+
     @ValueMapValue
     private boolean contextPrefixIgnored;
+
+    @ValueMapValue(name = TAGS)
+    private String[] tagIds;
 
     @Self
     private Resource resource;
 
     private ZonedDateTime untilDate;
-
-    @ValueMapValue(name = TAGS)
-    private String[] tagIds;
 
     private Pattern ptrn;
 
@@ -89,20 +94,15 @@ public class RedirectRule {
 
     @PostConstruct
     protected void init() {
-        if(source != null) {
-            source = source.trim();
-        }
-        if(target != null) {
-            target = target.trim();
-        }
-        if(resource != null) {
-            createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
-            if (resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)) {
-                Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
-                if (o instanceof Calendar) {
-                    Calendar calendar = (Calendar) o;
-                    untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
-                }
+        source = source.trim();
+        target = target.trim();
+        createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
+        modifiedBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), modifiedBy);
+        if (resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)) {
+            Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
+            if (o instanceof Calendar) {
+                Calendar calendar = (Calendar) o;
+                untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
             }
         }
         initRegexSubstitutions();
@@ -135,6 +135,10 @@ public class RedirectRule {
 
     public String getCreatedBy() {
         return createdBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 
     public boolean getContextPrefixIgnored() {
@@ -185,8 +189,10 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, contextPrefixIgnored=%s, tags=%s}",
-                source, target, statusCode, untilDate, note, contextPrefixIgnored, Arrays.toString(tagIds));
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, " +
+                        "contextPrefixIgnored=%s, tags=%s, createdBy=%s, modifiedBy=%s}",
+                source, target, statusCode, untilDate, note, contextPrefixIgnored,
+                Arrays.toString(tagIds), createdBy, modifiedBy);
     }
 
     @Override
@@ -228,66 +234,5 @@ public class RedirectRule {
             ptrn = null;
         }
         return ptrn;
-    }
-
-    /**
-     * used in junit tests to construct redirects
-     */
-    public static class Builder {
-        private RedirectRule inst;
-
-        public Builder(){
-            inst = new RedirectRule();
-        }
-
-        public Builder setSource(String source){
-            inst.source = source.trim();
-            return this;
-        }
-
-        public Builder setTarget(String target){
-            inst.target = target.trim();
-            return this;
-        }
-
-        public Builder setStatusCode(int statusCode){
-            inst.statusCode = statusCode;
-            return this;
-        }
-
-        public Builder setNotes(String note){
-            inst.note = note;
-            return this;
-        }
-
-        public Builder setUntilDate(ZonedDateTime untilDate){
-            inst.untilDate = untilDate;
-            return this;
-        }
-
-        public Builder setUntilDate(Calendar calendar){
-            inst.untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
-            return this;
-        }
-
-        public Builder setCreatedBy(String createdBy){
-            inst.createdBy = createdBy;
-            return this;
-        }
-
-        public Builder setTagIds(String[] tagIds){
-            inst.tagIds = tagIds;
-            return this;
-        }
-
-        public Builder setContextPrefixIgnored(boolean contextPrefixIgnored){
-            inst.contextPrefixIgnored = contextPrefixIgnored;
-            return this;
-        }
-
-        public RedirectRule build(){
-            inst.initRegexSubstitutions();
-            return inst;
-        }
     }
 }

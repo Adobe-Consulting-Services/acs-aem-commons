@@ -115,6 +115,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(5).setCellValue("Ignore Context Prefix");
         headerRow.createCell(6).setCellValue("Tags");
         headerRow.createCell(7).setCellValue("Created By");
+        headerRow.createCell(8).setCellValue("Modified By");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -142,8 +143,13 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             Cell cell7 = row.createCell(7);
             cell7.setCellValue(rule.getCreatedBy());
             cell7.setCellStyle(lockedCellStyle);
+
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(rule.getModifiedBy());
+            cell8.setCellStyle(lockedCellStyle);
+
         }
-        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 7));
+        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 8));
         sheet.setColumnWidth(0, 256 * 50);
         sheet.setColumnWidth(1, 256 * 50);
         sheet.setColumnWidth(2, 256 * 15);
@@ -152,6 +158,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(5, 256 * 20);
         sheet.setColumnWidth(6, 256 * 25);
         sheet.setColumnWidth(7, 256 * 30);
+        sheet.setColumnWidth(8, 256 * 30);
 
         return wb;
     }
