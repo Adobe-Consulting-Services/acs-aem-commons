@@ -33,14 +33,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -55,7 +53,9 @@ public class RedirectRule {
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
     public static final String NOTE_PROPERTY_NAME = "note";
     public static final String CONTEXT_PREFIX_IGNORED = "contextPrefixIgnored";
+    public static final String CREATED = "jcr:created";
     public static final String CREATED_BY = "jcr:createdBy";
+    public static final String MODIFIED = "jcr:lastModified";
     public static final String MODIFIED_BY = "jcr:lastModifiedBy";
     public static final String TAGS = "cq:tags";
 
@@ -69,13 +69,10 @@ public class RedirectRule {
     private int statusCode;
 
     @ValueMapValue
+    private Calendar untilDate;
+
+    @ValueMapValue
     private String note;
-
-    @ValueMapValue(name = CREATED_BY)
-    private String createdBy;
-
-    @ValueMapValue(name = MODIFIED_BY)
-    private String modifiedBy;
 
     @ValueMapValue
     private boolean contextPrefixIgnored;
@@ -83,10 +80,20 @@ public class RedirectRule {
     @ValueMapValue(name = TAGS)
     private String[] tagIds;
 
+    @ValueMapValue(name = CREATED_BY)
+    private String createdBy;
+
+    @ValueMapValue(name = MODIFIED_BY)
+    private String modifiedBy;
+
+    @ValueMapValue(name = MODIFIED)
+    private Calendar modified;
+
+    @ValueMapValue(name = CREATED)
+    private Calendar created;
+
     @Self
     private Resource resource;
-
-    private ZonedDateTime untilDate;
 
     private Pattern ptrn;
 
@@ -98,23 +105,13 @@ public class RedirectRule {
         target = target.trim();
         createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
         modifiedBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), modifiedBy);
-        if (resource.getValueMap().containsKey(UNTIL_DATE_PROPERTY_NAME)) {
-            Object o = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME);
-            if (o instanceof Calendar) {
-                Calendar calendar = (Calendar) o;
-                untilDate = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
-            }
-        }
-        initRegexSubstitutions();
-    }
 
-    private void initRegexSubstitutions() {
-        String regex = this.source;
+        String regex = source;
         if (regex.endsWith("*")) {
             regex = regex.replaceAll("\\*$", "(.*)");
         }
         ptrn = toRegex(regex);
-        substitutions = SubstitutionElement.parse(this.target);
+        substitutions = SubstitutionElement.parse(target);
     }
 
     public String getSource() {
@@ -149,8 +146,12 @@ public class RedirectRule {
         return ptrn;
     }
 
-    public ZonedDateTime getUntilDate() {
-        return untilDate;
+    public Calendar getCreated() {
+        return created;
+    }
+
+    public Calendar getModified() {
+        return modified;
     }
 
     /**
@@ -161,8 +162,8 @@ public class RedirectRule {
      *
      * @return java.util.Calendar representation of untilDate
      */
-    public Calendar getUntilDateCalendar() {
-        return untilDate == null ? null : GregorianCalendar.from(untilDate);
+    public Calendar getUntilDate() {
+        return untilDate;
     }
 
     public String[] getTagIds() {
@@ -189,10 +190,10 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, " +
-                        "contextPrefixIgnored=%s, tags=%s, createdBy=%s, modifiedBy=%s}",
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, "
+                        + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s}",
                 source, target, statusCode, untilDate, note, contextPrefixIgnored,
-                Arrays.toString(tagIds), createdBy, modifiedBy);
+                Arrays.toString(tagIds), created, createdBy, modified, modifiedBy);
     }
 
     @Override

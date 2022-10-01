@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
 
+import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.SPREADSHEETML_SHEET;
 import static org.junit.Assert.*;
 
@@ -64,14 +65,17 @@ public class ExportRedirectMapServletTest {
                 .setNotes("note-1")
                 .setContextPrefixIgnored(true)
                 .setTagIds(new String[]{"redirects:tag1"})
-                .setCreatedBy("john.dow")
+                .setCreatedBy("john.doe")
+                .setModifiedBy("jane.doe")
+                .setCreated(new Calendar.Builder().setDate(1974, 1, 16).build())
+                .setModified(new Calendar.Builder().setDate(1976, 10, 22).build())
                 .build();
         new RedirectResourceBuilder(context, redirectStoragePath)
                 .setSource("/content/three")
                 .setTarget("/content/four")
                 .setStatusCode(301)
                 .setTagIds(new String[]{"redirects:tag2"})
-                .setModifiedBy("john.dow")
+                .setModifiedBy("john.doe")
                 .build();
 
         context.request().addRequestParameter("path", redirectStoragePath);
@@ -111,8 +115,10 @@ public class ExportRedirectMapServletTest {
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
         assertTrue(row1.getCell(5).getBooleanCellValue());
         assertEquals("redirects:tag1", row1.getCell(6).getStringCellValue());
-        assertEquals("john.dow", row1.getCell(7).getStringCellValue());
-        assertEquals("", row1.getCell(8).getStringCellValue());
+        assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(7).getDateCellValue()).build());
+        assertEquals("john.doe", row1.getCell(8).getStringCellValue());
+        assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(9).getDateCellValue()).build());
+        assertEquals("jane.doe", row1.getCell(10).getStringCellValue());
 
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
@@ -120,7 +126,7 @@ public class ExportRedirectMapServletTest {
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());
         assertFalse(row2.getCell(5).getBooleanCellValue());
         assertEquals("redirects:tag2", row2.getCell(6).getStringCellValue());
-        assertEquals("", row2.getCell(7).getStringCellValue());
-        assertEquals("john.dow", row2.getCell(8).getStringCellValue());
+        assertEquals("", row2.getCell(8).getStringCellValue());
+        assertEquals("john.doe", row2.getCell(10).getStringCellValue());
     }
 }
