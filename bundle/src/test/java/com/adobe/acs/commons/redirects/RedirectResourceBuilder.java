@@ -77,32 +77,32 @@ public class RedirectResourceBuilder {
     }
 
     public RedirectResourceBuilder setCreatedBy(String createdBy) {
-        props.put(CREATED_BY, createdBy);
+        props.put(CREATED_BY_PROPERTY_NAME, createdBy);
         return this;
     }
 
     public RedirectResourceBuilder setModifiedBy(String modifiedBy) {
-        props.put(MODIFIED_BY, modifiedBy);
+        props.put(MODIFIED_BY_PROPERTY_NAME, modifiedBy);
         return this;
     }
 
     public RedirectResourceBuilder setModified(Calendar modified) {
-        props.put(MODIFIED, modified);
+        props.put(MODIFIED_PROPERTY_NAME, modified);
         return this;
     }
 
     public RedirectResourceBuilder setCreated(Calendar created) {
-        props.put(CREATED, created);
+        props.put(CREATED_PROPERTY_NAME, created);
         return this;
     }
 
     public RedirectResourceBuilder setTagIds(String[] tagIds) {
-        props.put(TAGS, tagIds);
+        props.put(TAGS_PROPERTY_NAME, tagIds);
         return this;
     }
 
     public RedirectResourceBuilder setContextPrefixIgnored(boolean contextPrefixIgnored) {
-        props.put(CONTEXT_PREFIX_IGNORED, contextPrefixIgnored);
+        props.put(CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, contextPrefixIgnored);
         return this;
     }
 

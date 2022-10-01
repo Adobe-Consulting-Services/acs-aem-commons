@@ -52,12 +52,12 @@ public class RedirectRule {
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
     public static final String NOTE_PROPERTY_NAME = "note";
-    public static final String CONTEXT_PREFIX_IGNORED = "contextPrefixIgnored";
-    public static final String CREATED = "jcr:created";
-    public static final String CREATED_BY = "jcr:createdBy";
-    public static final String MODIFIED = "jcr:lastModified";
-    public static final String MODIFIED_BY = "jcr:lastModifiedBy";
-    public static final String TAGS = "cq:tags";
+    public static final String CONTEXT_PREFIX_IGNORED_PROPERTY_NAME = "contextPrefixIgnored";
+    public static final String CREATED_PROPERTY_NAME = "jcr:created";
+    public static final String CREATED_BY_PROPERTY_NAME = "jcr:createdBy";
+    public static final String MODIFIED_PROPERTY_NAME = "jcr:lastModified";
+    public static final String MODIFIED_BY_PROPERTY_NAME = "jcr:lastModifiedBy";
+    public static final String TAGS_PROPERTY_NAME = "cq:tags";
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private String source;
@@ -77,19 +77,19 @@ public class RedirectRule {
     @ValueMapValue
     private boolean contextPrefixIgnored;
 
-    @ValueMapValue(name = TAGS)
+    @ValueMapValue(name = TAGS_PROPERTY_NAME)
     private String[] tagIds;
 
-    @ValueMapValue(name = CREATED_BY)
+    @ValueMapValue(name = CREATED_BY_PROPERTY_NAME)
     private String createdBy;
 
-    @ValueMapValue(name = MODIFIED_BY)
+    @ValueMapValue(name = MODIFIED_BY_PROPERTY_NAME)
     private String modifiedBy;
 
-    @ValueMapValue(name = MODIFIED)
+    @ValueMapValue(name = MODIFIED_PROPERTY_NAME)
     private Calendar modified;
 
-    @ValueMapValue(name = CREATED)
+    @ValueMapValue(name = CREATED_PROPERTY_NAME)
     private Calendar created;
 
     @Self

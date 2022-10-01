@@ -195,10 +195,10 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         props.put(RedirectRule.NOTE_PROPERTY_NAME, note);
         Cell c5 = row.getCell(5);
         boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
-        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED, ignoreContextPrefix);
+        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, ignoreContextPrefix);
         Cell c6 = row.getCell(6);
         String[] tagIds = c6 == null ? null : c6.getStringCellValue().split("\n");
-        props.put(RedirectRule.TAGS, tagIds);
+        props.put(RedirectRule.TAGS_PROPERTY_NAME, tagIds);
         return props;
     }
 
