@@ -56,12 +56,12 @@ public class AcsCommonsConsoleAuthoringUIModeFilter implements Filter {
             final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
             // This filter only accepts GET requests to /etc/acs-commons that end with a html extension
-            if (!WCMMode.DISABLED.equals(WCMMode.fromRequest(slingRequest)) && slingRequest.getResource().adaptTo(Page.class) != null) {
+            if (!WCMMode.DISABLED.equals(WCMMode.fromRequest(slingRequest))) {
                 Cookie authoringModeCookie = slingRequest.getCookie(WCM_AUTHORING_MODE_COOKIE);
 
                 // Add cookie if not existing (or forced) for performance reason,
                 // as it will avoid to look for user preferences next time
-                if ((authoringModeCookie == null || !authoringModeCookie.getValue().equals(AuthoringUIMode.TOUCH.name())) && !slingResponse.isCommitted()) {
+                if (!authoringModeCookie.getValue().equals(AuthoringUIMode.TOUCH.name()) && !slingResponse.isCommitted()) {
                     authoringModeCookie = new Cookie(WCM_AUTHORING_MODE_COOKIE, AuthoringUIMode.TOUCH.name());
                     authoringModeCookie.setPath(slingRequest.getContextPath() + "/etc/acs-commons");
                     authoringModeCookie.setMaxAge(60 * 60 * 24 * 7); // 7 days

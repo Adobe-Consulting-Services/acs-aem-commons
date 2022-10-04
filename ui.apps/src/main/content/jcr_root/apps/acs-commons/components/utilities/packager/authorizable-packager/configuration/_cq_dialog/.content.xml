@@ -3,10 +3,10 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
           xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
           jcr:primaryType="nt:unstructured"
-          jcr:title="Asset packager configuration"
+          jcr:title="Authorizable packager configuration"
           sling:resourceType="cq/gui/components/authoring/dialog"
           extraClientlibs="[]"
-          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/asset-packager/index.html">
+          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/authorizable-packager/index.html">
     <content
             jcr:primaryType="nt:unstructured"
             sling:resourceType="granite/ui/components/coral/foundation/container">
@@ -26,13 +26,14 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container">
                                 <items jcr:primaryType="nt:unstructured">
+
                                     <package-name
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                             fieldLabel="Package name"
                                             fieldDescription="Name of the package to created."
                                             required="true"
-                                            value="assets"
+                                            value="acls"
                                             name="./packageName"/>
 
                                     <package-group-name
@@ -41,7 +42,7 @@
                                             fieldLabel="Package group name"
                                             fieldDescription="Package group to assign this package to."
                                             required="true"
-                                            value="Assets"
+                                            value="ACLs"
                                             name="./packageGroupName"/>
 
                                     <package-version
@@ -109,79 +110,33 @@
                                         </items>
                                     </conflict-resolution>
 
-                                    <page-path
+                                    <authorizable-ids
                                             jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
-                                            fieldLabel="Page root path"
-                                            fieldDescription="The path that the asset reference has to start with."
-                                            required="true"
-                                            rootPath="/content"
-                                            value="/content"
-                                            name="./pagePath"/>
-                                    <!--
-                                    This does not make much sense. It will only include the root page, and not the actual pages asset references are found on.
-                                    Defaulting to "true" in the template
-                                    <exclude-pages
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                            fieldLabel="Authorizable IDs"
+                                            fieldDescription="Click the '+' to add a new authorizable."
+                                            composite="{Boolean}false">
+                                        <field
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="/libs/granite/ui/components/coral/foundation/authorizable/autocomplete"
+                                                selector="selector"
+                                                valueType="principalname"
+                                                multiple="false"
+                                                name="./authorizableIds"/>
+                                    </authorizable-ids>
+
+                                    <include-configuration
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                            text="Exclude Pages"
-                                            fieldDescription="Exclude the pages from the package definition. Creates a packages with just assets."
+                                            text="Include Authorizable packager"
+                                            fieldDescription="Include this page as part of the package."
                                             value="true"
                                             uncheckedValue="false"
-                                            name="./excludePages"/>
-                                    -->
+                                            name="./includeConfiguration"/>
                                 </items>
                             </column>
                         </items>
                     </general>
-                    <advanced
-                            jcr:primaryType="nt:unstructured"
-                            jcr:title="Advanced"
-                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
-                            margin="{Boolean}true">
-                        <items jcr:primaryType="nt:unstructured">
-                            <column
-                                    jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/container">
-                                <items jcr:primaryType="nt:unstructured">
-                                    <asset-path
-                                            jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
-                                            fieldLabel="Allowed assets root path"
-                                            fieldDescription="The path that the asset reference has to start with."
-                                            required="true"
-                                            rootPath="/content/dam"
-                                            value="/content/dam"
-                                            name="./assetPrefix"/>
-
-                                    <page-exclusions
-                                            jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
-                                            fieldLabel="Exclude page regex patterns"
-                                            fieldDescription="Click the '+' to add a new exclude pattern. The pattern will exclude both the pages and their assets from the package.&lt;br/>By default all pages are searched and included in the package."
-                                            composite="{Boolean}false">
-                                        <field
-                                                jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                name="./pageExclusions"/>
-                                    </page-exclusions>
-
-                                    <asset-exclusions
-                                            jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
-                                            fieldLabel="Exclude asset regex patterns"
-                                            fieldDescription="Click the '+' to add a new exclude pattern. The pattern will exclude the assets from the package.&lt;br/>By default all assets are included."
-                                            composite="{Boolean}false">
-                                        <field
-                                                jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                name="./assetExclusions"/>
-                                    </asset-exclusions>
-
-                                </items>
-                            </column>
-                        </items>
-                    </advanced>
                 </items>
             </tabs>
         </items>
