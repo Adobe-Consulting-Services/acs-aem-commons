@@ -19,8 +19,9 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
+
+import java.util.Map;
 
 /**
  * Text field component
@@ -31,7 +32,7 @@ public class TextfieldComponent extends FieldComponent {
 
     @Override
     public void init() {
-        ResourceMetadata meta = getComponentMetadata();
-        getOption(MAX_LENGTH_OPT).ifPresent(val->meta.put(MAX_LENGTH_OPT, val));
+        Map<String, Object> properties= getProperties();
+        getOption(MAX_LENGTH_OPT).ifPresent(val->properties.put(MAX_LENGTH_OPT, val));
     }
 }
