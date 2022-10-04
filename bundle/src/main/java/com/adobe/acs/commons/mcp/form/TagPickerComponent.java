@@ -31,7 +31,7 @@ public final class TagPickerComponent extends FieldComponent {
     public void init() {
         setResourceType("cq/gui/components/coral/common/form/tagfield");
         if (!getOption("multiple").isPresent()) {
-            getComponentMetadata().put("multiple", true);
+            getProperties().put("multiple", true);
         }
     }
 }

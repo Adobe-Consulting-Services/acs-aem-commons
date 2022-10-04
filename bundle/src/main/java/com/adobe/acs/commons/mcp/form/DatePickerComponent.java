@@ -38,9 +38,9 @@ public class DatePickerComponent extends FieldComponent {
     @Override
     public void init() {
        if(hasOption(TYPE_OPT_DATETIME)) {
-           getComponentMetadata().put(TYPE, TYPE_OPT_DATETIME);
+           getProperties().put(TYPE, TYPE_OPT_DATETIME);
        } else if(hasOption(TYPE_OPT_TIME)) {
-           getComponentMetadata().put(TYPE, TYPE_OPT_TIME);
+           getProperties().put(TYPE, TYPE_OPT_TIME);
        }
     }
 }

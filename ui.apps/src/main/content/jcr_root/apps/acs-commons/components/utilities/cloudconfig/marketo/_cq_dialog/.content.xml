@@ -41,7 +41,7 @@
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                 fieldLabel="Marketo Server Instance"
-                                fieldDescription="URL Used to access marketo, e.g. //app-ab3123.marketo.com"
+                                fieldDescription="Host for the Marketo Forms script. Can be retrieved from the embed code on a Marketo form, e.g. //app-ab3123.marketo.com"
                                 name="./serverInstance"
                                 required="{Boolean}true" />
                             <munchkinId

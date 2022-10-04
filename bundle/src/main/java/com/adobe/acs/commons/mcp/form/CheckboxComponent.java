@@ -30,13 +30,13 @@ public final class CheckboxComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/checkbox");
-        getComponentMetadata().put("text", getFieldDefinition().name());
-        getComponentMetadata().put("value", "true");
-        getComponentMetadata().put("uncheckedValue", "false");
-        getComponentMetadata().put("required", false);
+        getProperties().put("text", getFieldDefinition().name());
+        getProperties().put("value", "true");
+        getProperties().put("uncheckedValue", "false");
+        getProperties().put("required", false);
         boolean trueByDefault = IntrospectionUtil.getDeclaredValue(getAccessibleObject()).map(Boolean.TRUE::equals).orElse(false);
         if (hasOption("checked") || trueByDefault) {
-            getComponentMetadata().put("checked", "true");
+            getProperties().put("checked", "true");
         }
     }
 }
