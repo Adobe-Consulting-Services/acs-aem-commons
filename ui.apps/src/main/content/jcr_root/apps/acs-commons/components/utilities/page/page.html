@@ -21,26 +21,32 @@
         .main {
             padding: 2rem;
          }
+
+
     </style>
 </head>
 <body class="${componentContext.cssClassNames}" id="body"
       data-sly-use.requireAem="com.adobe.acs.commons.util.RequireAemModel">
 
-    <sly data-sly-include="header.html"/>
+<sly data-sly-include="header.html"/>
 
-    <div class="main">
-        <!--/*
-            If there are no requirements on the component
-            OR
-            If the runtime distribution is in the list of requirements
-        */-->
-        <sly data-sly-test="${!(component.properties.requireAem.length) || (requireAem.distribution.value in component.properties.requireAem)}"
-                data-sly-include="${component.properties.mainScript || 'main.html' }"/>
+<div class="main">
 
-        <sly data-sly-test="${(component.properties.requireAem.length) && !(requireAem.distribution.value in component.properties.requireAem)}"
-             data-sly-include="incompatible.html"/>
+    <div class="instructions"
+        data-sly-resource="${'.' @ addSelectors='instructions'}"></div>
     </div>
+    <!--/*
+        If there are no requirements on the component
+        OR
+        If the runtime distribution is in the list of requirements
+    */-->
+    <sly data-sly-test="${!(component.properties.requireAem.length) || (requireAem.distribution.value in component.properties.requireAem)}"
+         data-sly-include="${component.properties.mainScript || 'main.html' }"/>
 
-    <sly data-sly-include="footer.html"/>
+    <sly data-sly-test="${(component.properties.requireAem.length) && !(requireAem.distribution.value in component.properties.requireAem)}"
+         data-sly-include="incompatible.html"/>
+</div>
+
+<sly data-sly-include="footer.html"/>
 </body>
 </html>
