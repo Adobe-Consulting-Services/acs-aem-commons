@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2920 - Remove ClassicUI Audio component
 - #2918 - Remove ClassicUI ShareThis
 - #2919 - Remove old GenericList implementation files
+- #2950 - Rewriter Packagers (x4) to use TouchUI instead of ClassicUI
 
 ## 5.3.4 - 2022-08-22
 
