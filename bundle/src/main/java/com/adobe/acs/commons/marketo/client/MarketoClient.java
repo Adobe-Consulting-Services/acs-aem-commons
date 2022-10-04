@@ -24,6 +24,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
 
 /**
@@ -31,31 +33,38 @@ import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
  */
 public interface MarketoClient {
 
-  /**
-   * Retrieve an API token used for interacting with the Marketo API.
-   * 
-   * @param config the configuration to use to retrieve the token
-   * @return a valid Marketo API Token
-   * @throws IOException an error occurs retrieving the token
-   */
-  public @Nonnull String getApiToken(@Nonnull MarketoClientConfiguration config) throws IOException;
+    /**
+     * Retrieve an API token used for interacting with the Marketo API.
+     * 
+     * @param config the configuration to use to retrieve the token
+     * @return a valid Marketo API Token
+     * @throws IOException an error occurs retrieving the token
+     */
+    public @Nonnull String getApiToken(@Nonnull MarketoClientConfiguration config) throws MarketoApiException;
 
-  /**
-   * Retrieve all of the available forms from the current organization in Marketo.
-   * 
-   * @param config the configuration for this request
-   * @return the full list of available forms
-   * @throws IOException an exception occurs interacting with the API
-   */
-  public @Nonnull List<MarketoForm> getForms(@Nonnull MarketoClientConfiguration config) throws IOException;
+    /**
+     * Retrieve a HttpClient for interacting with the Marketo API
+     * 
+     * @return the httpclient
+     */
+    public @Nonnull CloseableHttpClient getHttpClient();
 
-  /**
-   * Retrieve all of the available forms from the current organization in Marketo.
-   * 
-   * @param config the configuration for this request
-   * @return the full list of available forms
-   * @throws IOException an exception occurs interacting with the API
-   */
-  public @Nonnull List<MarketoField> getFields(@Nonnull MarketoClientConfiguration config) throws IOException;
+    /**
+     * Retrieve all of the available forms from the current organization in Marketo.
+     * 
+     * @param config the configuration for this request
+     * @return the full list of available forms
+     * @throws IOException an exception occurs interacting with the API
+     */
+    public @Nonnull List<MarketoForm> getForms(@Nonnull MarketoClientConfiguration config) throws MarketoApiException;
+
+    /**
+     * Retrieve all of the available forms from the current organization in Marketo.
+     * 
+     * @param config the configuration for this request
+     * @return the full list of available forms
+     * @throws IOException an exception occurs interacting with the API
+     */
+    public @Nonnull List<MarketoField> getFields(@Nonnull MarketoClientConfiguration config) throws MarketoApiException;
 
 }

@@ -64,7 +64,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
     @Override
     public Resource buildComponentResource() {
-        getComponentMetadata().put(MARGIN_PROPERTY, isMargin());
+        getProperties().put(MARGIN_PROPERTY, isMargin());
         AbstractResourceImpl res = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl layoutResource = new AbstractResourceImpl(res.getPath() + "/layout", getLayout(), null, null);
         res.addChild(layoutResource);
@@ -85,10 +85,10 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
         public Resource buildComponentResource() {
             if (getDialogStyle() == DialogStyle.COMPONENT) {
                 setResourceType("granite/ui/components/coral/foundation/tabs");
-                getComponentMetadata().put("maximized", true);
+                getProperties().put("maximized", true);
             }
-            getComponentMetadata().put("orientation", getOrientation());
-            getComponentMetadata().put("size", getSize());
+            getProperties().put("orientation", getOrientation());
+            getProperties().put("size", getSize());
             return super.buildComponentResource();
         }
 
@@ -99,7 +99,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
                 SyntheticResourceBuilder rb = new SyntheticResourceBuilder(ITEMS, null);
                 items.children.forEach(tab -> {
                     rb.createChild(tab.getName(), tab.getResourceType())
-                            .withAttributes(tab.getResourceMetadata())
+                            .withAttributes(tab.getValueMap())
                             .withAttributes(MARGIN_PROPERTY, true);
                     rb.createChild(ITEMS)
                             .createChild("columns", "granite/ui/components/coral/foundation/fixedcolumns")
@@ -156,8 +156,8 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
         @Override
         public Resource buildComponentResource() {
-            getComponentMetadata().put("variant", getVariant());
-            getComponentMetadata().put("multiple", isMultiple());
+            getProperties().put("variant", getVariant());
+            getProperties().put("multiple", isMultiple());
             return super.buildComponentResource();
         }
 

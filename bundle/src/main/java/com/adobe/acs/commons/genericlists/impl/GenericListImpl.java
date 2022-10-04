@@ -48,6 +48,8 @@ public final class GenericListImpl implements GenericList {
         private final String value;
         private final ValueMap props;
 
+        
+
         public ItemImpl(String t, String v, ValueMap props) {
             this.title = t;
             this.text = t;
@@ -131,7 +133,7 @@ public final class GenericListImpl implements GenericList {
 
     @Override
     public List<Item> getItems() {
-        return items;
+        return new ArrayList<>(items);
     }
 
     @Override
