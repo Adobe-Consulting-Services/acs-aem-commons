@@ -4,5 +4,6 @@
           jcr:primaryType="cq:Component"
           jcr:title="ACS Commons - Abstract packager"
           jcr:description="Abstract utility page for defining packages."
+          docsUrl="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/index.html"
           sling:resourceSuperType="acs-commons/components/utilities/page"
           componentGroup=".hidden"/>

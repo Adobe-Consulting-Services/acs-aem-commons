@@ -5,10 +5,10 @@
     <p>
         If you have questions about or problems with
 
-        <a data-sly-test="${component.docsUrl}"
-           href="${component.docsUrl}" target="_blank" rel="noreferrer">${component.title}</a>
+        <a data-sly-test="${component.properties.docsUrl}"
+           href="${component.properties.docsUrl}" target="_blank" rel="noreferrer">${component.title}</a>
 
-        <sly data-sly-test="${!component.docsUrl}">${component.title}</sly>
+        <sly data-sly-test="${!component.properties.docsUrl}">${component.title}</sly>
 
         please create an issue on the
 
