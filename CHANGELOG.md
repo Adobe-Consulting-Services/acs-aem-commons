@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2920 - Remove ClassicUI Audio component
 - #2918 - Remove ClassicUI ShareThis
 - #2919 - Remove old GenericList implementation files
+- #2888 - Removed deprecated ComponentHelper
 
 ## 5.3.4 - 2022-08-22
 
