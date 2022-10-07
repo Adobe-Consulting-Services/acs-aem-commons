@@ -8,7 +8,9 @@
                  org.apache.sling.xss.XSSAPI" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 %><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
+%><%
+
+    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
 
     Image image = new Image(resource);
 
@@ -39,11 +41,18 @@
         image = null;
     }
 
-    pageContext.setAttribute("image", image);
+    
+    linkURL = slingXssAPI.getValidHref(linkURL);
     pageContext.setAttribute("linkURL", linkURL);
 
-    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
-    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+    imageSrc = image.getSrc();
+    imageSrc = slingXssAPI.getValidHref(imageSrc);
+    pageContext.setAttribute("imageSrc", imageSrc);
+
+    imageAlt = image.getAlt();
+    imageAlt = slingXssAPI.getValidHref(imageAlt);
+    pageContext.setAttribute("imageAlt", imageAlt);
+
 
 %><c:choose>
     <c:when test="${wcmmode:isEdit(pageContext) && empty image}">
@@ -53,14 +62,14 @@
         <%-- Component has not been configured on Publish; Hide the component --%>
     </c:when>
     <c:when test="${not empty linkURL}">
-        <a href="${xss:getValidHref(slingXssAPI, linkURL)}"><img
-                src="${xss:getValidHref(slingXssAPI, image.src)}"
+        <a href="${linkURL}"><img
+                src="${imageSrc}"
                 class="cq-dd-image"
-                alt="${xss:encodeForHTMLAttr(slingXssAPI, image.alt)}"/></a>
+                alt="${imageAlt}"/></a>
     </c:when>
     <c:otherwise>
-        <img src="${xss:getValidHref(slingXssAPI, image.src)}"
+        <img src="${imageSrc}"
              class="cq-dd-image"
-             alt="${xss:encodeForHTMLAttr(slingXssAPI, image.alt)}"/>
+             alt="${imageAlt}"/>
     </c:otherwise>
 </c:choose>
