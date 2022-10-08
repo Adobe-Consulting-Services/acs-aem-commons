@@ -40,7 +40,7 @@
 %>
 <c:choose>
     <c:when test="${empty properties.username}">
-        <wcm:placeholder>Please provide a Twitter username.</wcm:placeholder>
+        <div>Please provide a Twitter username.</div>
     </c:when>
     <c:otherwise>
         <c:choose>
@@ -49,7 +49,7 @@
                 <c:forEach var="tweet" items="${tweets}">
                     <li>
                     <%
-                        String tweet = pageContext.getAttribute("tweet");
+                        String tweet = (String)pageContext.getAttribute("tweet");
                         tweet = slingXssAPI.filterHTML(tweet);
                     %>
                     <%=tweet%>
