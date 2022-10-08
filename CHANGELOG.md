@@ -33,6 +33,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2919 - Remove old GenericList implementation files
 - #2888 - Removed deprecated ComponentHelper
 
+### Fixed
+
+- #2960 - SharedComponentPropertiesBindingsValuesProvider should support LazyBindings
+
 ## 5.3.4 - 2022-08-22
 
 ### Added
