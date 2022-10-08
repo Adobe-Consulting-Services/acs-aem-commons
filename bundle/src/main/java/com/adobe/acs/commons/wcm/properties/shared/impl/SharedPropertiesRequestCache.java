@@ -20,12 +20,14 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 
-import javax.script.Bindings;
-import javax.script.SimpleBindings;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+
 import javax.servlet.ServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Simple cache for global and shared properties bindings keyed by path and persisted in a request attribute.
@@ -33,7 +35,8 @@ import java.util.function.Consumer;
 public final class SharedPropertiesRequestCache {
     private static final String REQUEST_ATTRIBUTE_NAME = SharedPropertiesRequestCache.class.getName();
 
-    private final Map<String, Bindings> cache = new HashMap<>();
+    private final Map<String, Optional<Resource>> resourceCache = new HashMap<>();
+    private final Map<String, ValueMap> mergedCache = new HashMap<>();
 
     /**
      * Constructor.
@@ -42,13 +45,14 @@ public final class SharedPropertiesRequestCache {
         /* only me */
     }
 
-    public Bindings getBindings(final String propertiesPath,
-                                final Consumer<Bindings> computeIfNotFound) {
-        return cache.computeIfAbsent(propertiesPath, key -> {
-            final Bindings bindings = new SimpleBindings();
-            computeIfNotFound.accept(bindings);
-            return bindings;
-        });
+    public Optional<Resource> getResource(final String path, final Function<String, Resource> computeIfNotFound) {
+        return resourceCache.computeIfAbsent(path,
+                key -> Optional.ofNullable(computeIfNotFound.apply(key)));
+    }
+
+    public ValueMap getMergedProperties(final String path, final Function<String, ValueMap> computeIfNotFound) {
+        return mergedCache.computeIfAbsent(path,
+                        key -> Optional.ofNullable(computeIfNotFound.apply(key)).orElse(ValueMap.EMPTY));
     }
 
     public static SharedPropertiesRequestCache fromRequest(ServletRequest req) {
