@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2918 - Remove ClassicUI ShareThis
 - #2919 - Remove old GenericList implementation files
 - #2888 - Removed deprecated ComponentHelper
+- #2899 - Remove deprecated - XSS JSP Functions
 
 ## 5.3.4 - 2022-08-22
 
