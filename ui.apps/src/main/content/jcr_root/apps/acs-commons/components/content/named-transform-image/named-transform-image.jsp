@@ -17,7 +17,9 @@
     final String transform = properties.get("transform", String.class);
     final String linkURL = properties.get("linkURL", String.class);
 
+
     if (image.hasContent()) {
+
 
         if (StringUtils.isNotBlank(transform)) {
             final long imageTimestamp = image.getLastModified().getTimeInMillis();
@@ -34,29 +36,33 @@
         image.setDoctype(Doctype.fromRequest(request));
 
         if (StringUtils.isNotBlank(properties.get("alt", String.class))) {
+
             image.setAlt(properties.get("alt", String.class));
         }
+
+        if (StringUtils.isNotBlank(linkURL)){
+
+			String xssLinkURL = slingXssAPI.getValidHref(linkURL);
+	        pageContext.setAttribute("linkURL", xssLinkURL);
+
+        }
+
+        String xssImageSrc = image.getSrc();
+        xssImageSrc = slingXssAPI.getValidHref(xssImageSrc);
+        pageContext.setAttribute("imageSrc", xssImageSrc);
+
+        String xssImageAlt = image.getAlt();
+        xssImageAlt = slingXssAPI.getValidHref(xssImageAlt);
+        pageContext.setAttribute("imageAlt", xssImageAlt); 
 
     } else {
         image = null;
     }
 
-    
-    linkURL = slingXssAPI.getValidHref(linkURL);
-    pageContext.setAttribute("linkURL", linkURL);
-
-    imageSrc = image.getSrc();
-    imageSrc = slingXssAPI.getValidHref(imageSrc);
-    pageContext.setAttribute("imageSrc", imageSrc);
-
-    imageAlt = image.getAlt();
-    imageAlt = slingXssAPI.getValidHref(imageAlt);
-    pageContext.setAttribute("imageAlt", imageAlt);
-
 
 %><c:choose>
     <c:when test="${wcmmode:isEdit(pageContext) && empty image}">
-        <wcm:placeholder classNames="cq-image-placeholder cq-block-placeholder" ddType="image"/>
+        <div classNames="cq-image-placeholder cq-block-placeholder" ddType="image"> Named Transform Image placeholder </div>
     </c:when>
     <c:when test="${!wcmmode:isEdit(pageContext) && empty image}">
         <%-- Component has not been configured on Publish; Hide the component --%>
