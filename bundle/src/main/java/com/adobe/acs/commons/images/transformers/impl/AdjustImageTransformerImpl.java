@@ -56,10 +56,10 @@ public class AdjustImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        int brightness = properties.get(KEY_BRIGHTNESS, properties.get(KEY_BRIGHTNESS_ALIAS, 0));
-        float contrast = properties.get(KEY_CONTRAST, properties.get(KEY_CONTRAST_ALIAS, 1.0)).floatValue();
+        Long brightness = properties.get(KEY_BRIGHTNESS, properties.get(KEY_BRIGHTNESS_ALIAS, 0L));
+        Double contrast = properties.get(KEY_CONTRAST, properties.get(KEY_CONTRAST_ALIAS, 1.0D));
 
-        layer.adjust(brightness, contrast);
+        layer.adjust(brightness.intValue(), contrast.floatValue());
 
         return layer;
     }

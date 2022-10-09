@@ -75,7 +75,7 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        Double scale = properties.get(KEY_SCALE, 1D);
+        Double scale = properties.get(KEY_SCALE, Double.class);
         String round = StringUtils.trim(properties.get(KEY_ROUND, String.class));
 
         if (scale == null) {
@@ -89,27 +89,28 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
             int currentWidth = layer.getWidth();
             int currentHeight = layer.getHeight();
 
-            double newWidth = scale * currentWidth;
-            double newHeight = scale * currentHeight;
+            double scaledWidth = scale * currentWidth;
+            double scaledHeight = scale * currentHeight;
 
+            long newWidth, newHeight;
             if (StringUtils.equals(ROUND_UP, round)) {
-                newWidth = (int) Math.ceil(newWidth);
-                newHeight = (int) Math.ceil(newHeight);
+                newWidth = (long) Math.ceil(scaledWidth);
+                newHeight = (long) Math.ceil(scaledHeight);
             } else if (StringUtils.equals(ROUND_DOWN, round)) {
-                newWidth = (int) Math.floor(newWidth);
-                newHeight = (int) Math.floor(newHeight);
+                newWidth = (long) Math.floor(scaledWidth);
+                newHeight = (long) Math.floor(scaledHeight);
             } else {
                 // "round"
-                newWidth = (int) Math.round(newWidth);
-                newHeight = (int) Math.round(newHeight);
+                newWidth = Math.round(scaledWidth);
+                newHeight = Math.round(scaledHeight);
             }
 
 
             // Invoke the ResizeImageTransformer with the new values
 
             final ValueMap params = new ValueMapDecorator(new HashMap<String, Object>());
-            params.put(ResizeImageTransformerImpl.KEY_WIDTH, (int)newWidth);
-            params.put(ResizeImageTransformerImpl.KEY_HEIGHT, (int)newHeight);
+            params.put(ResizeImageTransformerImpl.KEY_WIDTH, newWidth);
+            params.put(ResizeImageTransformerImpl.KEY_HEIGHT, newHeight);
 
             layer = resizeImageTransformer.transform(layer, params);
         }

@@ -20,9 +20,9 @@
 
 package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.AdjustImageTransformerImpl;
 import com.day.image.Layer;
 
+import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
@@ -49,37 +49,35 @@ public class AdjustImageTransformerImplTest {
     @Mock
     Layer layer;
 
-    Map<String, Object> map = null;
 
     @Before
     public void setUp() throws Exception {
-        map = new HashMap<String, Object>();
         transformer = new AdjustImageTransformerImpl();
     }
 
     @After
     public void tearDown() throws Exception {
         reset(layer);
-        map = null;
     }
 
     @Test
     public void testTransform() throws Exception {
-        final Integer brightness = 100;
-        final Float contrast = 0.05F;
-
-        map.put("brightness", brightness.toString());
-        map.put("contrast", contrast.toString());
+        final Long brightness = 100L;
+        final Double contrast = 0.05D;
+        Map<String, Object> map = new HashMap<>();
+        map.put("brightness", ValueFactoryImpl.getInstance().createValue(brightness.toString()));
+        map.put("contrast", ValueFactoryImpl.getInstance().createValue(contrast.toString()));
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).adjust(brightness, contrast);
+        verify(layer, times(1)).adjust(brightness.intValue(), contrast.floatValue());
         verifyNoMoreInteractions(layer);
     }
 
     @Test
     public void testTransform_noParams() throws Exception {
+        Map<String, Object> map = new HashMap<>();
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
@@ -89,27 +87,27 @@ public class AdjustImageTransformerImplTest {
 
     @Test
     public void testTransform_onlyBrightness() throws Exception {
-        final Integer brightness = 100;
-
-        map.put("brightness", brightness.toString());
+        final Long brightness = 100L;
+        Map<String, Object> map = new HashMap<>();
+        map.put("brightness", ValueFactoryImpl.getInstance().createValue(brightness.toString()));
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).adjust(brightness, 1F);
+        verify(layer, times(1)).adjust(brightness.intValue(), 1F);
         verifyNoMoreInteractions(layer);
     }
 
     @Test
     public void testTransform_onlyContrast() throws Exception {
-        final Float contrast = 0.05F;
-
-        map.put("contrast", contrast.toString());
+        final Double contrast = 0.05D;
+        Map<String, Object> map = new HashMap<>();
+        map.put("contrast", ValueFactoryImpl.getInstance().createValue(contrast.toString()));
         ValueMap properties = new ValueMapDecorator(map);
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).adjust(0, contrast);
+        verify(layer, times(1)).adjust(0, contrast.floatValue());
         verifyNoMoreInteractions(layer);
     }
 }

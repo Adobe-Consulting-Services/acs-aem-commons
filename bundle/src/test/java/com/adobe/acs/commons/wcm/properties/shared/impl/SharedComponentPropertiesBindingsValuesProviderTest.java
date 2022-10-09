@@ -19,31 +19,13 @@
  */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
-
-import javax.script.Bindings;
-import javax.script.SimpleBindings;
-
+import com.adobe.acs.commons.wcm.PageRootProvider;
+import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.LazyBindings;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
@@ -51,20 +33,28 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.wcm.PageRootProvider;
-import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import org.osgi.annotation.versioning.ConsumerType;
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SharedComponentPropertiesBindingsValuesProviderTest {
 
     public static final String SITE_ROOT = "/content/acs-commons";
     public static final String RESOURCE_TYPE = "acs-commons/components/content/generic-text";
-
-    /**
-     * Pre-6.5.7 LazyBindings support.
-     */
-    private static final String REL_PATH_SLING_API_2_22_0 = "org.apache.sling.api-2.22.0.jar";
 
     private PageRootProvider pageRootProvider;
     private Resource resource;
@@ -78,20 +68,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     private ValueMap globalProps;
 
     private ValueMap localProps;
-
-    /**
-     * Pre-6.5.7 LazyBindings support. This class simulates the LazyBindings and LazyBindings.Supplier class hierarchy
-     * until this project upgrades to a dependency list that includes org.apache.sling.api version 2.22.0+.
-     *
-     * @see <a href="https://sling.apache.org/apidocs/sling12/org/apache/sling/api/scripting/LazyBindings.html">LazyBindings</a>
-     */
-    @ConsumerType
-    private static class LazyLikeBindings extends SimpleBindings {
-        @ConsumerType
-        @FunctionalInterface
-        interface Supplier extends java.util.function.Supplier {
-        }
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -177,7 +153,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
                 = new SharedComponentPropertiesBindingsValuesProvider();
 
         sharedComponentPropertiesBindingsValuesProvider.sharedComponentProperties = sharedComponentProperties;
-        sharedComponentPropertiesBindingsValuesProvider.activate();
         sharedComponentPropertiesBindingsValuesProvider.addBindings(bindings);
 
         assertEquals(sharedPropsResource, bindings.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE));
@@ -199,179 +174,49 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
 
         final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
                 = new SharedComponentPropertiesBindingsValuesProvider();
-
         sharedComponentPropertiesBindingsValuesProvider.sharedComponentProperties = sharedComponentProperties;
-        sharedComponentPropertiesBindingsValuesProvider.activate();
-        sharedComponentPropertiesBindingsValuesProvider.checkAndSetLazyBindingsType(LazyLikeBindings.class);
 
-        LazyLikeBindings lazyBindings = new LazyLikeBindings();
+        // inject our own suppliers map for a side-channel to the suppliers
+        final Map<String, LazyBindings.Supplier> suppliers = new HashMap<>();
+        LazyBindings lazyBindings = new LazyBindings(suppliers);
         lazyBindings.putAll(bindings);
         sharedComponentPropertiesBindingsValuesProvider.addBindings(lazyBindings);
 
         // confirm that the bindings is storing a marked Supplier, rather than a resource
-        Object sharedPropsObject = lazyBindings.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE);
-        assertTrue(sharedPropsObject instanceof LazyLikeBindings.Supplier);
-        assertEquals(SharedComponentPropertiesBindingsValuesProvider.SUPPLIER_PROXY_LABEL, sharedPropsObject.toString());
+        LazyBindings.Supplier sharedPropsObject = suppliers.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE);
+        assertNotNull(sharedPropsObject);
         // compare that the value returned by the supplier with the expected resource
-        assertEquals(sharedPropsResource, ((LazyLikeBindings.Supplier) sharedPropsObject).get());
+        assertEquals(sharedPropsResource, sharedPropsObject.get());
 
         // confirm that the bindings is storing a marked Supplier, rather than a resource
-        Object globalPropsObject = lazyBindings.get(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE);
-        assertTrue(globalPropsObject instanceof LazyLikeBindings.Supplier);
+        LazyBindings.Supplier globalPropsObject = suppliers.get(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE);
+        assertNotNull(globalPropsObject);
         // compare that the value returned by the supplier with the expected resource
-        assertEquals(globalPropsResource, ((LazyLikeBindings.Supplier) globalPropsObject).get());
+        assertEquals(globalPropsResource, globalPropsObject.get());
 
         // confirm that the bindings is storing a marked Supplier, rather than a ValueMap
-        Object sharedPropsVmObject = lazyBindings.get(SharedComponentProperties.SHARED_PROPERTIES);
-        assertTrue(sharedPropsVmObject instanceof LazyLikeBindings.Supplier);
+        LazyBindings.Supplier sharedPropsVmObject = suppliers.get(SharedComponentProperties.SHARED_PROPERTIES);
+        assertNotNull(sharedPropsVmObject);
         // compare that the value returned by the supplier with the expected ValueMap
-        assertEquals(sharedProps, ((LazyLikeBindings.Supplier) sharedPropsVmObject).get());
+        assertEquals(sharedProps, sharedPropsVmObject.get());
 
         // confirm that the bindings is storing a marked Supplier, rather than a ValueMap
-        Object globalPropsVmObject = lazyBindings.get(SharedComponentProperties.GLOBAL_PROPERTIES);
-        assertTrue(globalPropsVmObject instanceof LazyLikeBindings.Supplier);
+        LazyBindings.Supplier globalPropsVmObject = suppliers.get(SharedComponentProperties.GLOBAL_PROPERTIES);
+        assertNotNull(globalPropsVmObject);
         // compare that the value returned by the supplier with the expected ValueMap
-        assertEquals(globalProps, ((LazyLikeBindings.Supplier) globalPropsVmObject).get());
+        assertEquals(globalProps, globalPropsVmObject.get());
 
         // confirm that the bindings is storing a marked Supplier, rather than a resource. Acquire this Supplier BEFORE
         // resetting the Global and Shared properties bindings to demonstrate that the same bindings instance
         // is also accessed lazily by the Merged props supplier.
-        Object mergedPropsVmObject = lazyBindings.get(SharedComponentProperties.MERGED_PROPERTIES);
-        assertTrue(mergedPropsVmObject instanceof LazyLikeBindings.Supplier);
-
-        // reset the Global and Shared properties bindings to contain the supplied values that will be consumed by
-        // the Merged properties supplier binding.
-        lazyBindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, globalProps);
-        lazyBindings.put(SharedComponentProperties.SHARED_PROPERTIES, sharedProps);
-        // NOW call the merged properties supplier function.
-        ValueMap mergedProps = (ValueMap) ((LazyLikeBindings.Supplier) mergedPropsVmObject).get();
+        LazyBindings.Supplier mergedPropsVmObject = suppliers.get(SharedComponentProperties.MERGED_PROPERTIES);
+        assertNotNull(mergedPropsVmObject);
+        // compare that the value returned by the supplier with the expected ValueMap
+        ValueMap mergedProps = (ValueMap) mergedPropsVmObject.get();
 
         // compare the contents of the ValueMap returned by the supplier with the expected key/values from the separate maps
         assertEquals("value", mergedProps.get("global", String.class));
         assertEquals("value", mergedProps.get("shared", String.class));
         assertEquals("value", mergedProps.get("local", String.class));
-    }
-
-    @Test
-    public void addToLazyBindings_NonConformant() {
-        final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
-        sharedComponentProperties.pageRootProvider = pageRootProvider;
-
-        final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
-                = new SharedComponentPropertiesBindingsValuesProvider();
-
-
-        sharedComponentPropertiesBindingsValuesProvider.sharedComponentProperties = sharedComponentProperties;
-        sharedComponentPropertiesBindingsValuesProvider.activate();
-        sharedComponentPropertiesBindingsValuesProvider.checkAndSetLazyBindingsType(SimpleBindings.class);
-
-        // test that the wrapSupplier() method returns the value from the supplier, rather than a supplier itself
-        assertEquals("immediate", sharedComponentPropertiesBindingsValuesProvider
-                .wrapSupplier(() -> "immediate").toString());
-
-        SimpleBindings lazyBindings = new SimpleBindings();
-        lazyBindings.putAll(bindings);
-
-        sharedComponentPropertiesBindingsValuesProvider.addBindings(lazyBindings);
-
-        // confirm that the non-conformant bindings is storing the resource
-        Object sharedPropsObject = lazyBindings.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE);
-        // compare that the value returned by the supplier with the expected resource
-        assertEquals(sharedPropsResource, sharedPropsObject);
-
-        // confirm that the non-conformant bindings is storing the resource
-        Object globalPropsObject = lazyBindings.get(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE);
-        // compare that the value returned by the supplier with the expected resource
-        assertEquals(globalPropsResource, globalPropsObject);
-
-        // confirm that the non-conformant bindings is storing the ValueMap
-        Object sharedPropsVmObject = lazyBindings.get(SharedComponentProperties.SHARED_PROPERTIES);
-        // compare that the value returned by the supplier with the expected ValueMap
-        assertEquals(sharedProps, sharedPropsVmObject);
-
-        // confirm that the non-conformant bindings is storing the ValueMap
-        Object globalPropsVmObject = lazyBindings.get(SharedComponentProperties.GLOBAL_PROPERTIES);
-        // compare that the value returned by the supplier with the expected ValueMap
-        assertEquals(globalProps, globalPropsVmObject);
-
-        // confirm that the bindings is storing a marked Supplier, rather than a resource. Acquire this Supplier BEFORE
-        // resetting the Global and Shared properties bindings to demonstrate that the same bindings instance
-        // is also accessed lazily by the Merged props supplier.
-        Object mergedPropsVmObject = lazyBindings.get(SharedComponentProperties.MERGED_PROPERTIES);
-        ValueMap mergedProps = (ValueMap) mergedPropsVmObject;
-
-        // compare the contents of the ValueMap returned by the supplier with the expected key/values from the separate maps
-        assertEquals("value", mergedProps.get("global", String.class));
-        assertEquals("value", mergedProps.get("shared", String.class));
-        assertEquals("value", mergedProps.get("local", String.class));
-    }
-
-    @Test
-    public void addToLazyBindings_SlingApiJar() throws Exception {
-        try (final URLClassLoader slingApiClassLoader = new URLClassLoader(
-                new URL[]{getClass().getClassLoader().getResource(REL_PATH_SLING_API_2_22_0)},
-                getClass().getClassLoader())) {
-
-            final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
-            sharedComponentProperties.pageRootProvider = pageRootProvider;
-
-            final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
-                    = new SharedComponentPropertiesBindingsValuesProvider();
-            // swap classloader
-            sharedComponentPropertiesBindingsValuesProvider.swapLazyBindingsClassLoaderForTesting(slingApiClassLoader);
-            sharedComponentPropertiesBindingsValuesProvider.sharedComponentProperties = sharedComponentProperties;
-            // activate service to load classes
-            sharedComponentPropertiesBindingsValuesProvider.activate();
-
-            // test that the wrapSupplier() method returns the proxy supplier, rather than the supplied value
-            assertEquals(SharedComponentPropertiesBindingsValuesProvider.SUPPLIER_PROXY_LABEL,
-                    sharedComponentPropertiesBindingsValuesProvider.wrapSupplier(() -> "immediate").toString());
-
-            // inject our own suppliers map for a side-channel to the suppliers
-            final Map<String, Object> suppliers = new HashMap<>();
-            Bindings lazyBindings = sharedComponentPropertiesBindingsValuesProvider
-                    .getLazyBindingsType().getConstructor(Map.class).newInstance(suppliers);
-            lazyBindings.putAll(bindings);
-            final Class<? extends Supplier> supplierType = sharedComponentPropertiesBindingsValuesProvider.getSupplierType();
-
-            sharedComponentPropertiesBindingsValuesProvider.addBindings(lazyBindings);
-
-            // confirm that the bindings is storing a marked Supplier, rather than a resource
-            Object sharedPropsObject = suppliers.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE);
-            assertTrue(supplierType.isInstance(sharedPropsObject));
-            // compare that the value returned by the supplier with the expected resource
-            assertEquals(sharedPropsResource, ((Supplier<?>) sharedPropsObject).get());
-
-            // confirm that the bindings is storing a marked Supplier, rather than a resource
-            Object globalPropsObject = suppliers.get(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE);
-            assertTrue(supplierType.isInstance(globalPropsObject));
-            // compare that the value returned by the supplier with the expected resource
-            assertEquals(globalPropsResource, ((Supplier<?>) globalPropsObject).get());
-
-            // confirm that the bindings is storing a marked Supplier, rather than a ValueMap
-            Object sharedPropsVmObject = suppliers.get(SharedComponentProperties.SHARED_PROPERTIES);
-            assertTrue(supplierType.isInstance(sharedPropsVmObject));
-            // compare that the value returned by the supplier with the expected ValueMap
-            assertEquals(sharedProps, ((Supplier<?>) sharedPropsVmObject).get());
-
-            // confirm that the bindings is storing a marked Supplier, rather than a ValueMap
-            Object globalPropsVmObject = suppliers.get(SharedComponentProperties.GLOBAL_PROPERTIES);
-            assertTrue(supplierType.isInstance(globalPropsVmObject));
-            // compare that the value returned by the supplier with the expected ValueMap
-            assertEquals(globalProps, ((Supplier<?>) globalPropsVmObject).get());
-
-            // confirm that the bindings is storing a marked Supplier, rather than a resource. Acquire this Supplier BEFORE
-            // resetting the Global and Shared properties bindings to demonstrate that the same bindings instance
-            // is also accessed lazily by the Merged props supplier.
-            Object mergedPropsVmObject = suppliers.get(SharedComponentProperties.MERGED_PROPERTIES);
-            assertTrue(supplierType.isInstance(mergedPropsVmObject));
-            // compare that the value returned by the supplier with the expected ValueMap
-            ValueMap mergedProps = (ValueMap) ((Supplier<?>) mergedPropsVmObject).get();
-
-            // compare the contents of the ValueMap returned by the supplier with the expected key/values from the separate maps
-            assertEquals("value", mergedProps.get("global", String.class));
-            assertEquals("value", mergedProps.get("shared", String.class));
-            assertEquals("value", mergedProps.get("local", String.class));
-        }
     }
 }

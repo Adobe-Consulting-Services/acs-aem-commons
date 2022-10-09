@@ -22,6 +22,8 @@ package com.adobe.acs.commons.wcm.impl;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import java.util.ArrayList;
+
+import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -40,10 +42,14 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
+
+import javax.jcr.Value;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
@@ -112,9 +118,9 @@ public class PropertyMergePostProcessorTest {
     @Test
     public void testMerge_NoDuplicates_Double() throws Exception {
 
-        properties.put("tenths", new Double[]{1.1D, 1.2D});
-        properties.put("hundredths", 3.01D);
-        properties.put("duplicates", new Double[]{1.1D});
+        properties.put("tenths", Stream.of(new Double[]{1.1D, 1.2D}).map(ValueFactoryImpl.getInstance()::createValue).toArray());
+        properties.put("hundredths", new Value[]{ValueFactoryImpl.getInstance().createValue(3.01D)});
+        properties.put("duplicates", Stream.of(new Double[]{1.1D}).map(ValueFactoryImpl.getInstance()::createValue).toArray());
 
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(properties);
 

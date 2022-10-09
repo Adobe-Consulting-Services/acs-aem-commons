@@ -75,8 +75,8 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
         log.debug("Transforming with [ {} ]", TYPE);
 
-        int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0));
-        int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0));
+        int width = properties.get(KEY_WIDTH, properties.get(KEY_WIDTH_ALIAS, 0L)).intValue();
+        int height = properties.get(KEY_HEIGHT, properties.get(KEY_HEIGHT_ALIAS, 0L)).intValue();
 
         if (width > maxDimension) {
             width = maxDimension;

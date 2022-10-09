@@ -29,6 +29,7 @@ import com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertie
 import com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesImpl;
 import com.day.cq.wcm.api.NameConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.jackrabbit.vault.util.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -42,6 +43,7 @@ import org.junit.Test;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Value;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -79,6 +81,7 @@ public class SharedValueMapValueInjectorTest {
         this.context.registerInjectActivateService(new SharedComponentPropertiesImpl());
         this.context.registerInjectActivateService(new SharedValueMapValueAnnotationProcessorFactory());
         this.context.registerInjectActivateService(new SharedValueMapValueInjector());
+        this.context.registerInjectActivateService(new SharedComponentPropertiesBindingsValuesProvider());
         this.context.addModelsForClasses(TestSharedValueMapValueModelImpl.class);
 
         this.resourceResolver = this.context.resourceResolver();
@@ -97,7 +100,7 @@ public class SharedValueMapValueInjectorTest {
         globalPropertiesNode.setProperty(STRING_PROP, "globalValue");
         globalPropertiesNode.setProperty(STRING_PROP_2, "globalValue2");
         globalPropertiesNode.setProperty(STRING_PROP_3, "globalValue3");
-        globalPropertiesNode.setProperty(LONG_PROP, 123L);
+        globalPropertiesNode.setProperty(LONG_PROP, new Value[]{ValueFactoryImpl.getInstance().createValue(123L)});
         globalPropertiesNode.setProperty(LONG_PROP_STR, "234");
         globalPropertiesNode.setProperty(STRING_ARRAY_PROP, new String[] {"abc", "def"});
 

@@ -465,7 +465,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>io.wcm.maven</groupId>
                 <artifactId>io.wcm.maven.aem-dependencies</artifactId>
-                <version>6.4.0.0004</version>
+                <version>6.5.7.0002</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

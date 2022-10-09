@@ -31,7 +31,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -187,6 +189,11 @@ public final class WorkflowPackageManagerImplTest {
             }
 
             return nodes;
+        }
+
+        @Override
+        public boolean hasNode(String path) {
+            return Arrays.asList(paths).contains(path);
         }
 
         @Override

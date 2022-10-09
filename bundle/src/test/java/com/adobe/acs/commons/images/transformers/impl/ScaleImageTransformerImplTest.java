@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.images.transformers.impl;
 
 import com.day.image.Layer;
+import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
@@ -77,7 +78,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_withMalformedScale() throws Exception {
-        properties.put("scale", "50%");
+        properties.put("scale", ValueFactoryImpl.getInstance().createValue("50%"));
 
         transformer.transform(layer, properties);
 
@@ -86,7 +87,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_scaleAsDouble() throws Exception {
-        properties.put("scale", ".50");
+        properties.put("scale", ValueFactoryImpl.getInstance().createValue(".50"));
 
         transformer.transform(layer, properties);
 
@@ -95,7 +96,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_scaleAsDouble2() throws Exception {
-        properties.put("scale", "1.50");
+        properties.put("scale", ValueFactoryImpl.getInstance().createValue("1.50"));
 
         transformer.transform(layer, properties);
 
@@ -105,7 +106,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_roundDefault() throws Exception {
-        properties.put("scale", ".3333");
+        properties.put("scale", ValueFactoryImpl.getInstance().createValue(".3333"));
 
         transformer.transform(layer, properties);
 
@@ -114,7 +115,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_roundUp() throws Exception {
-        properties.put("scale", ".3333");
+        properties.put("scale", ValueFactoryImpl.getInstance().createValue(".3333"));
         properties.put("round", "up");
 
         transformer.transform(layer, properties);
@@ -124,7 +125,7 @@ public class ScaleImageTransformerImplTest {
 
     @Test
     public void testTransform_roundDown() throws Exception {
-        properties.put("scale", ".3333");
+        properties.put("scale", ValueFactoryImpl.getInstance().createValue(".3333"));
         properties.put("round", "down");
 
         transformer.transform(layer, properties);
