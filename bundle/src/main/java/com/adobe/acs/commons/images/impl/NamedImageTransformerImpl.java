@@ -24,7 +24,6 @@ import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.TypeUtil;
-import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.image.Layer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -62,18 +61,15 @@ import java.util.Map;
 )
 @Service
 @Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Transformer: {name}")
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Transformer: {name}")
 })
 public class NamedImageTransformerImpl implements NamedImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
 
     private Map<String, ImageTransformer> imageTransformers = new HashMap<String, ImageTransformer>();
-
-    @Reference
-    private ComponentHelper componentHelper;
-
+    
     /* Transformer Configuration Name */
     private static final String DEFAULT_TRANSFORM_NAME = "";
 
@@ -89,7 +85,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
             description = "Transform in the format [ image-transformer-type:key1=val1&key2=val2 ]"
                     + " Order of transform rules dictates order of application.",
             cardinality = Integer.MAX_VALUE,
-            value = { })
+            value = {})
     private static final String PROP_TRANSFORMS = "transforms";
 
     private Map<String, ValueMap> transforms =
