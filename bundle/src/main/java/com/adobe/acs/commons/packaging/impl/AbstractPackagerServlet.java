@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +109,7 @@ public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
             response.getWriter().print(getPackageHelper().getPathFilterSetPreviewJSON(packageResources));
         } else if (packageResources == null || packageResources.isEmpty()) {
             // Do not create empty packages; This will only clutter up CRX Package Manager
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().print(getPackageHelper().getErrorJSON("Refusing to create a package with no filter "
                     + "set rules."));
         } else {

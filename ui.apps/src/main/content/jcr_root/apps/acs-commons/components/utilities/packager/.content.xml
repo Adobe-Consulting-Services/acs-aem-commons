@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    cq:defaultView="html"
-    jcr:description="Abstract utility page for defining packages."
-    jcr:primaryType="cq:Component"
-    jcr:title="ACS Commons - Abstract Packager"
-    sling:resourceSuperType="acs-commons/components/utilities/page"
-    componentGroup=".hidden"/>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="cq:Component"
+          jcr:title="ACS Commons - Abstract packager"
+          jcr:description="Abstract utility page for defining packages."
+          docsUrl="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/index.html"
+          sling:resourceSuperType="acs-commons/components/utilities/page"
+          componentGroup=".hidden"/>
