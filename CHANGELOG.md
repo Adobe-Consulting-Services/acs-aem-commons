@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
 - #2941 - Add Query Builder support in Report Builder
+- #2969 - Add append html extension support for the custom editor field in Report Builder
 
 ## 5.3.4 - 2022-08-22
 
