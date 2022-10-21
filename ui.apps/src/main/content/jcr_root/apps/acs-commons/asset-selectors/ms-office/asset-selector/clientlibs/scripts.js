@@ -4,8 +4,8 @@
     $(document).ready(window.setTimeout(addStylesToIframe, 500));
 
     function addStylesToIframe() {
-        var iFrame = document?.getElementById("acs-commons__asset-selectors__ms-office--iframe");
-        var iFrameHead = iFrame?.contentWindow?.document?.head;
+        var iFrame = document.getElementById("acs-commons__asset-selectors__ms-office--iframe");
+        var iFrameHead = iFrame.contentWindow.document.head;
 
         // hide 'More Details' button. This would allow the author to break out of the asset picker.
         addCssToElement(iFrameHead, "#asset-details-link-wrapper {display: none;}");
@@ -14,9 +14,7 @@
     function addCssToElement(element, css) {
         var style = document.createElement('style');
         style.innerText = css;
-        if (element) {
-            element.appendChild(style);
-        }
+        element.appendChild(style);
     }
 
     // Handle AEM Asset to PowerPoint
