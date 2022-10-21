@@ -8,15 +8,15 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <cq:defineObjects />
 
-<sling:adaptTo var="adaptToModel" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.version.model.EvolutionModel"/>
+<sling:adaptTo var="model" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.version.model.EvolutionModel"/>
 
 <%
     XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
 
-    EvolutionModel model = (EvolutionModel)pageContext.getAttribute("adaptToModel");
-    String path = model.getResourcePath();
-    path = slingXssAPI.encodeForJSString(path);
-    pageContext.setAttribute("path", path);
+    EvolutionModel evolutionModel = (EvolutionModel)pageContext.getAttribute("model");
+    String currentResourcePath = evolutionModel.getResourcePath();
+    currentResourcePath = slingXssAPI.encodeForJSString(currentResourcePath);
+    pageContext.setAttribute("currentResourcePath", currentResourcePath);
 %>
 
 <!doctype html>
@@ -40,7 +40,7 @@
 
         <div class="page" role="main"
                  ng-controller="MainCtrl"
-                 ng-init="app.resource = '${path}'; app.home = '${request.contextPath}${currentPage.path}.html'; init();">
+                 ng-init="app.resource = '${currentResourcePath}'; app.home = '${request.contextPath}${currentPage.path}.html'; init();">
 
             <div ng-show="notifications.length > 0"
                  class="notifications">
