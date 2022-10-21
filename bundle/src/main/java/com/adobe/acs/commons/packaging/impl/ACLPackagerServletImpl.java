@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +45,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 
@@ -151,7 +149,6 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
                 if (hit.getParent() != null) {
                     repPolicy = hit.getParent();
                 }
-
 
                 if (this.isIncluded(repPolicy, includePatterns)) {
                     log.debug("Included by pattern [ {} ]", repPolicy.getPath());

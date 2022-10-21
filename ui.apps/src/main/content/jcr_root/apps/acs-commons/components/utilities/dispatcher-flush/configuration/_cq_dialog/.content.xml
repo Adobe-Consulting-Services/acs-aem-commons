@@ -34,8 +34,6 @@
                                             fieldLabel="Flush method"
                                             fieldDescription="Dispatcher flush method. This effects how cached files are effected (invalidate or delete)."
                                             name="./replicationActionType">
-                                        <granite:data
-                                                jcr:primaryType="nt:unstructured"/>
                                         <items jcr:primaryType="nt:unstructured">
                                             <activate
                                                     jcr:primaryType="nt:unstructured"
