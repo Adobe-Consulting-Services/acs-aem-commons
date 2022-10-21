@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2936 - Redirect Manager: Expose the "Redirect Creator" property in Touch UI and Excel Export 
 - #2938 - Redirect Manager: Redirect rules imported from Excel file do not store jcr:created and jcr:createdBy properties
 
+- #2973 - EndpointService does not set UTF-8 charset for content-type and payload
 - #2941 - Add Query Builder support in Report Builder
 
 ## 5.3.4 - 2022-08-22
