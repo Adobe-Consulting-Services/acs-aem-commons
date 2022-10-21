@@ -19,17 +19,39 @@
   --%>
 <%@page session="false" contentType="text/html; charset=utf-8" pageEncoding="UTF-8"%>
 <%@ page import="org.apache.sling.xss.XSSAPI" %>
+<%@ page import="com.adobe.acs.commons.wcm.comparisons.model.PageCompareModel" %>
 <%@taglib prefix="sling" uri="http://sling.apache.org/taglibs/sling" %>
 <%@taglib prefix="cq" uri="http://www.day.com/taglibs/cq/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <cq:defineObjects />
-<%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
+
+<sling:adaptTo var="adaptToModel" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.wcm.comparisons.model.PageCompareModel"/>
+
+<%
     XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
-    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+    PageCompareModel model = (PageCompareModel)pageContext.getAttribute("adaptToModel");
+
+    String pathA = model.getPathA();
+    pathA = slingXssAPI.encodeForJSString(pathA);
+    pageContext.setAttribute("pathA", pathA);
+
+    
+    String pathB = model.getPathB();
+    pathB = slingXssAPI.encodeForJSString(pathB);
+    pageContext.setAttribute("pathB", pathB);
+
+    String versionA = model.getVersionA();
+    versionA = slingXssAPI.encodeForJSString(versionA);
+    pageContext.setAttribute("versionA", versionA);
+
+    String versionB = model.getVersionB();
+    versionB = slingXssAPI.encodeForJSString(versionB);
+    pageContext.setAttribute("versionB", versionB);
+
 %>
-<sling:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.wcm.comparisons.model.PageCompareModel" var="model"/>
+
 
 <!doctype html>
 <html class="coral-App">
@@ -72,7 +94,7 @@
 
     <div class="page" role="main"
          ng-controller="MainCtrl"
-         ng-init="app.resource = '${xss:encodeForJSString(slingXssAPI, model.pathA)}'; app.resourceB = '${xss:encodeForJSString(slingXssAPI, model.pathB)}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${xss:encodeForJSString(slingXssAPI, model.versionA)}'; app.b = '${xss:encodeForJSString(slingXssAPI, model.versionB)}'; init();">
+         ng-init="app.resource = '${pathA}'; app.resourceB = '${pathB}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${versionA}'; app.b = '${versionB}'; init();">
 
         <div class="content">
             <div class="content-container">
