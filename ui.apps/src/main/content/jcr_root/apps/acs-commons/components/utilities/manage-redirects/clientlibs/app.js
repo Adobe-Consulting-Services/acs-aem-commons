@@ -190,11 +190,13 @@
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
         var contextPrefixIgnored = tr.find('.contextPrefixIgnored').data('value');
+        var tags = tr.find('.tags').data('value');
 
         var form = $('#editRuleDialog').find("form");
         form[0].reset();
         if(source) form.find('foundation-autocomplete[name="./source"]').val(source);
         if(target) form.find('foundation-autocomplete[name="./target"]').val(target);
+        if(tags) form.find('foundation-autocomplete[name="./cq:tags"]').adaptTo('foundation-field').setValues(tags.split(","));
         var select = $('#status-code-select-box').get(0);
         select.value =statusCode;
         form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
