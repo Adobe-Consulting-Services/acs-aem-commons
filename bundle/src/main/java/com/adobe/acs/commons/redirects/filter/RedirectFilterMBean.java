@@ -20,8 +20,6 @@
 package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.granite.jmx.annotation.Description;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
