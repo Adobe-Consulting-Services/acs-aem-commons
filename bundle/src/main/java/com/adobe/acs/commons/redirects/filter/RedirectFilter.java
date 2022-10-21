@@ -33,9 +33,9 @@ import com.google.common.cache.CacheBuilder;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -356,7 +356,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                rules.add(RedirectRule.from(res.getValueMap()));
+                rules.add(res.adaptTo(RedirectRule.class));
             }
         }
         return rules;
@@ -391,9 +391,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (match != null) {
 
             RedirectRule redirectRule = match.getRule();
-            ZonedDateTime untilDateTime = redirectRule.getUntilDate();
-            if (untilDateTime != null && untilDateTime.isBefore(ZonedDateTime.now())) {
-                log.debug("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
+            Calendar untilDateTime = redirectRule.getUntilDate();
+            if (untilDateTime != null && untilDateTime.before(Calendar.getInstance())) {
+                log.debug("redirect rule matched, but expired: {}", untilDateTime);
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
                 String resourcePath = pathInfo.getResourcePath();
