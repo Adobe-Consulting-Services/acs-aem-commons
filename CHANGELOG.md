@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2973 - EndpointService does not set UTF-8 charset for content-type and payload
 - #2941 - Add Query Builder support in Report Builder
+- #2969 - Add append html extension support for the custom editor field in Report Builder
 
 ## 5.3.4 - 2022-08-22
 
