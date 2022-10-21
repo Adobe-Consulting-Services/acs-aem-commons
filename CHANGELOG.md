@@ -33,7 +33,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2919 - Remove old GenericList implementation files
 - #2950 - Rewriter Packagers (x4) to use TouchUI instead of ClassicUI
 - #2888 - Removed deprecated ComponentHelper
-- #2899 - Remove deprecated - XSS JSP Functions
+- #2899 - Remove deprecated - XSS JSP Functions (fixed version/page compare)
 
 
 ## 5.3.4 - 2022-08-22
