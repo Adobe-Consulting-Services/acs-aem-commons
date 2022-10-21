@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    jcr:description="Utility page for defining packages of Assets referenced on a page tree."
-    jcr:primaryType="cq:Template"
-    jcr:title="Asset Packager"
-    allowedPaths="[/etc/acs-commons/packagers(/.*)?,/etc/packagers(/.*)?,/etc/packages(/.*)?]"
-    ranking="{Long}120">
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:description="Utility page for defining packages of ACL nodes."
+          jcr:primaryType="cq:Template"
+          jcr:title="Asset packager"
+          allowedPaths="[/etc/acs-commons/packagers(/.*)?]"
+          ranking="{Long}120">
     <jcr:content
-        cq:designPath="/etc/designs/acs-commons"
-        jcr:primaryType="cq:PageContent"
-        sling:resourceType="acs-commons/components/utilities/packager/asset-packager"/>
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="acs-commons/components/utilities/packager/asset-packager">
+        <configuration
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/packager/asset-packager/configuration"
+                packageName="assets"
+                packageGroupName="Assets"
+                packageVersion="1.0.0"
+                packageDescription="Asset Package initially defined by a ACS AEM Commons - Assets Packager configuration."
+                packageACLHandling="Overwrite"
+                conflictResolution="IncrementVersion"
+                pagePath="/content"
+                excludePages="true"
+                assetPrefix="/content/dam">
+        </configuration>
+    </jcr:content>
 </jcr:root>
