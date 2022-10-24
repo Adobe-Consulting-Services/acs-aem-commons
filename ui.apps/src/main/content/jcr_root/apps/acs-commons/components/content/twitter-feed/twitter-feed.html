@@ -1,0 +1,8 @@
+<sly data-sly-use.model="com.adobe.acs.commons.wcm.components.TwitterFeedModel"
+     data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html"
+     data-sly-test.ready="${model.ready}">
+    <ul data-sly-list.tweet="${model.tweets}">
+        <li>${tweet}</li>
+    </ul>
+</sly>
+<sly data-sly-call="${placeholderTemplate.placeholder @ isEmpty=!ready}"></sly>
