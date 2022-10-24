@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>5.3.5-SNAPSHOT</version>
+    <version>5.4.0</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -31,7 +31,7 @@
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
         <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
         <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
-        <tag>HEAD</tag>
+        <tag>acs-aem-commons-5.4.0</tag>
     </scm>
 
     <!-- Do not remove developers section - this is required to release to maven central -->
@@ -69,7 +69,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1661190251</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1666617318</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -452,13 +452,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-bundle</artifactId>
-                <version>5.3.5-SNAPSHOT</version>
+                <version>5.4.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                <version>5.3.5-SNAPSHOT</version>
+                <version>5.4.0</version>
                 <scope>test</scope>
             </dependency>
             <!-- Runtime dependencies should be AEM 6.4 compatible -->
