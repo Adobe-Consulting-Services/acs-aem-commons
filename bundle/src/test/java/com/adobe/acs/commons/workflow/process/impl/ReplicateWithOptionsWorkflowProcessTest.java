@@ -105,7 +105,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
     @Test
     public void testExecuteDeactivateWithoutTraversal() throws Exception {
         when(workflowPackageManager.getPaths(context.resourceResolver(), "/content/payload"))
-                .thenReturn(Arrays.asList("/content/page", "/content/asset"));
+                .thenReturn(Arrays.asList("/content/page", "/content/page/child3", "/content/asset"));
 
         StringBuilder args = new StringBuilder();
         args.append("replicationActionType=Deactivate");
@@ -118,9 +118,41 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         ReplicationOptionsMatcher optionsMatcher = new ReplicationOptionsMatcher().withAgentIdFilter("agent1");
 
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page"), argThat(optionsMatcher));
+        verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page/child3"), argThat(optionsMatcher));
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
         verifyNoMoreInteractions(replicator);
         verifyNoInteractions(throttledTaskRunner);
+    }
+
+    @Test
+    public void itExecuteActivateWithoutTraversalWithDispatcherFlush()
+      throws Exception {
+      when(workflowPackageManager.getPaths(context.resourceResolver(),"/content/payload"))
+                .thenReturn(Arrays.asList("/content/page/child3/jcr:content"));
+  
+      StringBuilder args = new StringBuilder();
+      args.append("replicationActionType=Activate");
+      args.append(System.lineSeparator());
+      args.append("agents=agent1");
+      args.append(System.lineSeparator());
+      args.append("flushDispatcher=true");
+      args.append(System.lineSeparator());
+      args.append("agentsDispatcher=flush");
+      args.append(System.lineSeparator());
+      args.append("flushParentResourceType=cq:Page");
+      args.append(System.lineSeparator());
+      args.append("replicateChildPath=seo");
+  
+      when(metaDataMap.get(WorkflowHelper.PROCESS_ARGS, "")).thenReturn(args.toString());
+      process.execute(workItem, workflowSession, metaDataMap);
+  
+      ReplicationOptionsMatcher optionsMatcher = new ReplicationOptionsMatcher().withAgentIdFilter("agent1");
+      ReplicationOptionsMatcher optionsMatcherDispatcher = new ReplicationOptionsMatcher().withAgentIdFilter("flush");
+  
+      verify(replicator).replicate(any(),eq(ReplicationActionType.ACTIVATE),eq("/content/page/child3/jcr:content/seo"),argThat(optionsMatcher));
+      verify(replicator).replicate(any(),eq(ReplicationActionType.ACTIVATE),eq("/content/page/child3"),argThat(optionsMatcherDispatcher));
+      verifyNoMoreInteractions(replicator);
+      verifyNoInteractions(throttledTaskRunner);
     }
 
     @Test
@@ -166,6 +198,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page"), argThat(optionsMatcher));
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page/child1"), argThat(optionsMatcher));
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page/child2"), argThat(optionsMatcher));
+        verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page/child3"), argThat(optionsMatcher));
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
         verifyNoMoreInteractions(replicator);
         verifyNoInteractions(throttledTaskRunner);
