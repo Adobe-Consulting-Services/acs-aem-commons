@@ -12,7 +12,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2937 - Package Garbage Collector - used to clear up old packages installed on Managed Services instances by Cloud Manager
 
+
+## 5.4.0 - 2022-10-24
+
+### Changed 
+
+- #2936 - Redirect Manager: Expose the "Redirect Creator" property in Touch UI and Excel Export 
+- #2938 - Redirect Manager: Redirect rules imported from Excel file do not store jcr:created and jcr:createdBy properties
+- #2972 - Make the MS Office Add-In Feature Cloud compatible
 - #2941 - Add Query Builder support in Report Builder
+- #2969 - Add append html extension support for the custom editor field in Report Builder
+
+### Fixed
+
+- #2973 - EndpointService does not set UTF-8 charset for content-type and payload
+
 
 ## 5.3.4 - 2022-08-22
 
