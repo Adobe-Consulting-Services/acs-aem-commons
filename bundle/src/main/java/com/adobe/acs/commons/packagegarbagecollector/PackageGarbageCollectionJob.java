@@ -19,9 +19,7 @@
  */
 package com.adobe.acs.commons.packagegarbagecollector;
 
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -32,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -41,9 +40,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.*;
 
@@ -81,14 +78,18 @@ public class PackageGarbageCollectionJob implements JobConsumer {
             for (JcrPackage jcrPackage : packages) {
                 String packageDescription = getPackageDescription(jcrPackage);
                 if (isPackageOldEnough(jcrPackage, maxAgeInDays)) {
-                    packageManager.remove(jcrPackage);
-                    LOG.info("Deleted package {}", packageDescription);
+                    if (!isLatestInstalled(jcrPackage, packages)) {
+                        packageManager.remove(jcrPackage);
+                        LOG.info("Deleted package {}", packageDescription);
+                    } else {
+                        LOG.info("Not removing package because it's the current installed one {}", packageDescription);
+                    }
                 } else {
                     LOG.debug("Not removing package because it's not old enough {}", packageDescription);
                 }
             }
         } catch (LoginException | RepositoryException | IOException e) {
-            LOG.error("Unable to clear packages due to {}", e.toString());
+            LOG.error("Unable to clear packages", e);
             return JobResult.FAILED;
         } finally {
             if (session != null) {
@@ -97,6 +98,86 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         }
         LOG.info("Package Garbage Collector job finished");
         return JobResult.OK;
+    }
+
+    private boolean isLatestInstalled(JcrPackage jcrPackage, List<JcrPackage> installedPackages) {
+        Optional<JcrPackage> lastInstalledPackageOptional = installedPackages.stream().filter(installedPackage -> {
+            PackageDefinition definition = new PackageDefinition(installedPackage);
+            return definition.isSameNameAndGroup(jcrPackage);
+        }).max(Comparator.comparing(pkg -> new PackageDefinition(pkg).getLastUnpacked()));
+
+        if (lastInstalledPackageOptional.isPresent()) {
+            JcrPackage lastInstalledPackage = lastInstalledPackageOptional.get();
+            PackageDefinition lastInstalledPackageDefinition = new PackageDefinition(lastInstalledPackage);
+            PackageDefinition thisPackageDefinition = new PackageDefinition(jcrPackage);
+
+            // If it's not actually installed yet.
+            if (lastInstalledPackageDefinition.getLastUnpacked() == null) {
+                return false;
+            }
+
+            return lastInstalledPackageDefinition.hasSamePid(thisPackageDefinition);
+        }
+
+        return false;
+    }
+
+    static class PackageDefinition {
+        JcrPackage jcrPackage;
+        public PackageDefinition(@Nonnull JcrPackage jcrPackage) {
+            this.jcrPackage = jcrPackage;
+        }
+
+        public Calendar getLastUnpacked() {
+            try {
+                JcrPackageDefinition definition = jcrPackage.getDefinition();
+                if (definition != null) {
+                    return definition.getLastUnpacked();
+                }
+                return null;
+            } catch (RepositoryException ex) {
+                return null;
+            }
+        }
+
+        public boolean isSameNameAndGroup(JcrPackage otherPackage) {
+            Optional<PackageId> otherPackageId = getPid(otherPackage);
+            Optional<PackageId> thisPackageId = getPid(jcrPackage);
+            if (otherPackageId.isPresent() && thisPackageId.isPresent()) {
+                return otherPackageId.get().getGroup().equals(thisPackageId.get().getGroup()) &&
+                        otherPackageId.get().getName().equals(thisPackageId.get().getName());
+            }
+            return false;
+        }
+
+        public PackageId getId() {
+            try {
+                JcrPackageDefinition definition = jcrPackage.getDefinition();
+                if (definition != null) {
+                    return definition.getId();
+                }
+                return null;
+            } catch (RepositoryException ex) {
+                return null;
+            }
+        }
+
+        private Optional<PackageId> getPid(JcrPackage jcrPkg) {
+            try {
+                return Optional.ofNullable(jcrPkg.getDefinition()).map(JcrPackageDefinition::getId);
+            } catch (RepositoryException ex) {
+                return Optional.empty();
+            }
+        }
+
+        public boolean hasSamePid(PackageDefinition jcrPkg) {
+            try {
+                Optional<PackageId> pkgId = Optional.ofNullable(jcrPkg.getId());
+                return pkgId.map(packageId -> packageId.equals(getId())).orElse(false);
+            } catch (NullPointerException ex) {
+                return false;
+            }
+        }
     }
 
     private boolean isPackageOldEnough(JcrPackage jcrPackage, Integer maxAgeInDays) throws RepositoryException, IOException {
@@ -117,9 +198,10 @@ public class PackageGarbageCollectionJob implements JobConsumer {
     }
 
     private String getPackageDescription(JcrPackage jcrPackage) throws RepositoryException {
+        JcrPackageDefinition definition = jcrPackage.getDefinition();
         Node packageNode = jcrPackage.getNode();
-        if (packageNode != null) {
-            return packageNode.getPath();
+        if (definition != null && packageNode != null) {
+            return String.format("%s:%s:v%s [%s]", definition.getId().getName(), definition.getId().getGroup(), definition.getId().getVersionString(), packageNode.getPath());
         }
         return "Unknown package";
     }

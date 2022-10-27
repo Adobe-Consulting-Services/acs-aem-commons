@@ -57,7 +57,7 @@ public class PackageGarbageCollectionScheduler {
     protected void activate(PackageGarbageCollectionConfig config) {
         job = scheduleJob(config);
         if (LOG.isInfoEnabled()) {
-            LOG.info("Next scheduled run at {}", job.getNextScheduledExecution());
+            LOG.info("Next scheduled run for job with group name {} at {}",  config.groupName(), job.getNextScheduledExecution());
         }
     }
 

@@ -20,10 +20,7 @@
 package com.adobe.acs.commons.packagegarbagecollector;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.Packaging;
-import org.apache.jackrabbit.vault.packaging.VaultPackage;
+import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -37,10 +34,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
+import java.util.stream.Collectors;
 
+import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,60 +65,84 @@ public class PackageGarbageCollectionJobTest {
     }
 
     @Test
-    public void testPackageJustOldEnough() {
-        mockPackaging(60, false);
+    public void testPackageJustOldEnough() throws RepositoryException, IOException {
+        mockPackageManager(
+                mockPackage(60, 60, "acs.ui.apps-6.0.0.zip", "acs.ui.apps", "6.0.0"),
+                mockPackage(30, 30, "acs.ui.apps-7.0.0.zip", "acs.ui.apps", "7.0.0")
+        );
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
+        assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
     }
 
     @Test
-    public void testPackageOldEnough() {
-        mockPackaging(70, false);
+    public void testPackageOldEnough() throws RepositoryException, IOException {
+        mockPackageManager(
+                mockPackage(70, 70, "acs.ui.apps-6.0.0.zip", "acs.ui.apps", "6.0.0"),
+                mockPackage(30, 30, "acs.ui.apps-7.0.0.zip", "acs.ui.apps", "7.0.0")
+        );
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
+        assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
     }
 
     @Test
-    public void testPackageTooYoung() {
-        mockPackaging(10, false);
+    public void testPackageTooYoung() throws RepositoryException, IOException {
+        mockPackageManager(mockPackage(10, 10, "acs.ui.apps-6.0.0.zip", "acs.ui.apps", "6.0.0"));
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
+        assertLogText("Not removing package because it's not old enough acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
     }
 
     @Test
-    public void testFailingToRemovePackages() {
-        mockPackaging(61, true);
+    public void testMultiplePackagesOfSameName() throws RepositoryException, IOException {
+        mockPackageManager(
+                mockPackage(30, 30, "acs.ui.apps-5.0.0.zip", "acs.ui.apps", "5.0.0"),
+                mockPackage(60, 60, "acs.ui.apps-6.0.0.zip", "acs.ui.apps", "6.0.0"),
+                mockPackage(70, 10, "acs.ui.apps-7.0.0.zip", "acs.ui.apps", "7.0.0"),
+                mockPackage(80, 80, "acs.ui.apps-8.0.0.zip", "acs.ui.apps", "8.0.0"),
+                mockPackage(80, 80, "acs.ui.config-7.0.0.zip", "acs.ui.config", "7.0.0")
+        );
         Job job = mockJob();
-        assertEquals(JobConsumer.JobResult.FAILED, consumer.process(job));
+        assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
+        assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
+        assertLogText("Deleted package acs.ui.apps:com.acs:v8.0.0 [/etc/packages/acs.ui.apps-8.0.0.zip]");
+        assertLogText("Not removing package because it's not old enough acs.ui.apps:com.acs:v5.0.0 [/etc/packages/acs.ui.apps-5.0.0.zip]");
+        assertLogText("Not removing package because it's the current installed one acs.ui.apps:com.acs:v7.0.0 [/etc/packages/acs.ui.apps-7.0.0.zip]");
+        assertLogText("Not removing package because it's the current installed one acs.ui.config:com.acs:v7.0.0 [/etc/packages/acs.ui.config-7.0.0.zip]");
     }
 
-    void mockPackaging(Integer daysAgo, boolean fail) {
-        try {
-            JcrPackageManager packageManager = mock(JcrPackageManager.class);
-            when(packaging.getPackageManager(any())).thenReturn(packageManager);
-            JcrPackage mockPackage = mockPackage(daysAgo);
-            when(packageManager.listPackages(anyString(), anyBoolean())).thenReturn(Collections.singletonList(mockPackage));
-            if (fail) {
-                doThrow(new RepositoryException()).when(packageManager).remove(any());
-            }
-        } catch (RepositoryException | IOException e) {
-            fail();
-        }
+    void mockPackageManager(JcrPackage... jcrPackage) throws RepositoryException {
+        JcrPackageManager packageManager = mock(JcrPackageManager.class);
+        when(packageManager.listPackages(anyString(), anyBoolean())).thenReturn(Arrays.stream(jcrPackage).collect(Collectors.toList()));
+        when(packaging.getPackageManager(any())).thenReturn(packageManager);
     }
 
-    JcrPackage mockPackage(Integer daysAgo) throws RepositoryException, IOException {
+    JcrPackage mockPackage(Integer daysAgo, Integer lastUnpackedDaysAgo, String packageName, String name, String version) throws RepositoryException, IOException {
         JcrPackage jcrPackage = mock(JcrPackage.class);
         VaultPackage vaultPackage = mock(VaultPackage.class);
         when(jcrPackage.getPackage()).thenReturn(vaultPackage);
+        when(vaultPackage.getCreated()).thenReturn(getDate(daysAgo));
+        Node packageNode = mock(Node.class);
+        when(packageNode.getPath()).thenReturn("/etc/packages/" + packageName);
+        when(jcrPackage.getNode()).thenReturn(packageNode);
+        JcrPackageDefinition definition = mock(JcrPackageDefinition.class);
+        when(definition.getLastUnpacked()).thenReturn(getDate(lastUnpackedDaysAgo));
+        PackageId pid = mock(PackageId.class);
+        when(pid.getName()).thenReturn(name);
+        when(pid.getGroup()).thenReturn("com.acs");
+        when(pid.getVersionString()).thenReturn(version);
+        when(definition.getId()).thenReturn(pid);
+        when(jcrPackage.getDefinition()).thenReturn(definition);
+        return jcrPackage;
+    }
+
+    Calendar getDate(Integer daysAgo) {
         Calendar packageDate = Calendar.getInstance();
         Date today = new Date();
         packageDate.setTime(today);
-        packageDate.add(Calendar.DAY_OF_MONTH, daysAgo*-1);
-        when(vaultPackage.getCreated()).thenReturn(packageDate);
-        Node packageNode = mock(Node.class);
-        when(packageNode.getPath()).thenReturn("/etc/packages/test-package.zip");
-        when(jcrPackage.getNode()).thenReturn(packageNode);
-        return jcrPackage;
+        packageDate.add(Calendar.DAY_OF_MONTH, daysAgo * -1);
+        return packageDate;
     }
 
     Job mockJob() {
