@@ -124,6 +124,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
     static class PackageDefinition {
         JcrPackage jcrPackage;
+
         public PackageDefinition(@Nonnull JcrPackage jcrPackage) {
             this.jcrPackage = jcrPackage;
         }
@@ -144,8 +145,8 @@ public class PackageGarbageCollectionJob implements JobConsumer {
             Optional<PackageId> otherPackageId = getPid(otherPackage);
             Optional<PackageId> thisPackageId = getPid(jcrPackage);
             if (otherPackageId.isPresent() && thisPackageId.isPresent()) {
-                return otherPackageId.get().getGroup().equals(thisPackageId.get().getGroup()) &&
-                        otherPackageId.get().getName().equals(thisPackageId.get().getName());
+                return otherPackageId.get().getGroup().equals(thisPackageId.get().getGroup())
+                        && otherPackageId.get().getName().equals(thisPackageId.get().getName());
             }
             return false;
         }

@@ -20,7 +20,12 @@
 package com.adobe.acs.commons.packagegarbagecollector;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.jackrabbit.vault.packaging.*;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.VaultPackage;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -39,13 +44,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.GROUP_NAME;
+import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.MAX_AGE_IN_DAYS;
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PackageGarbageCollectionJobTest {
