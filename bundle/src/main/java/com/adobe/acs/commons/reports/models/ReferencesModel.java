@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.reports.models;
 
+import com.adobe.acs.commons.reports.internal.DelimiterConfiguration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -45,12 +46,24 @@ public class ReferencesModel implements ReportCellCSVExporter {
   @OSGiService
   private ReferenceAggregator aggregator;
 
+  @OSGiService
+  private DelimiterConfiguration delimiterConfiguration;
+
   private ReferenceList referenceList;
 
   private Resource resource;
 
   public ReferencesModel(Resource resource) {
     this.resource = resource;
+  }
+
+  /**
+   * Used only for testing.
+   * @param delimiterConfiguration the delimiter configuration to use for this exporter
+   */
+  ReferencesModel(Resource resource, DelimiterConfiguration delimiterConfiguration) {
+    this.resource = resource;
+    this.delimiterConfiguration = delimiterConfiguration;
   }
 
   public List<Reference> getReferences() {
@@ -67,7 +80,7 @@ public class ReferencesModel implements ReportCellCSVExporter {
     for (Reference reference : referenceList) {
       refStrings.add(reference.getType() + " - " + reference.getTarget().getPath());
     }
-    return StringUtils.join(refStrings, ";");
+    return StringUtils.join(refStrings, delimiterConfiguration.getMultiValueDelimiter());
   }
 
   @PostConstruct
