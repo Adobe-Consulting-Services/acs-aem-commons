@@ -70,7 +70,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
     @Override
     public JobResult process(Job job) {
-        Session session = null;
+        Session session;
         String groupName = job.getProperty(GROUP_NAME, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
         LOG.debug("Job Configuration: ["
@@ -100,10 +100,6 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         } catch (LoginException | RepositoryException | IOException e) {
             LOG.error("Unable to clear packages", e);
             return JobResult.FAILED;
-        } finally {
-            if (session != null) {
-                session.logout();
-            }
         }
         LOG.info("Package Garbage Collector job finished");
         return JobResult.OK;
