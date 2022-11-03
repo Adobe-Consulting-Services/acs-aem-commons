@@ -78,6 +78,7 @@ public class PackageGarbageCollectionJobTest {
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
         assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
+        assertLogText("Package Garbage Collector job finished - Removed 1 packages");
     }
 
     @Test
@@ -89,6 +90,7 @@ public class PackageGarbageCollectionJobTest {
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
         assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
+        assertLogText("Package Garbage Collector job finished - Removed 1 packages");
     }
 
     @Test
@@ -97,6 +99,7 @@ public class PackageGarbageCollectionJobTest {
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
         assertLogText("Not removing package because it's not old enough acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
+        assertLogText("Package Garbage Collector job finished - Removed 0 packages");
     }
 
     @Test
@@ -115,6 +118,7 @@ public class PackageGarbageCollectionJobTest {
         assertLogText("Not removing package because it's not old enough acs.ui.apps:com.acs:v5.0.0 [/etc/packages/acs.ui.apps-5.0.0.zip]");
         assertLogText("Not removing package because it's the current installed one acs.ui.apps:com.acs:v7.0.0 [/etc/packages/acs.ui.apps-7.0.0.zip]");
         assertLogText("Not removing package because it's the current installed one acs.ui.config:com.acs:v7.0.0 [/etc/packages/acs.ui.config-7.0.0.zip]");
+        assertLogText("Package Garbage Collector job finished - Removed 2 packages");
     }
 
     void mockPackageManager(JcrPackage... jcrPackage) throws RepositoryException {

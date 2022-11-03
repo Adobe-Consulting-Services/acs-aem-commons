@@ -58,6 +58,7 @@ import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollec
     immediate = true,
     property = { JobConsumer.PROPERTY_TOPICS + "=" + PackageGarbageCollectionScheduler.JOB_TOPIC })
 public class PackageGarbageCollectionJob implements JobConsumer {
+    public static final DateTimeFormatter LOCALIZED_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
     private static final Logger LOG = LoggerFactory.getLogger(PackageGarbageCollectionJob.class);
 
     private static final String SERVICE_USER = "package-garbage-collection";
@@ -73,6 +74,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         Session session;
         String groupName = job.getProperty(GROUP_NAME, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
+        int packagesRemoved = 0;
         LOG.debug("Job Configuration: ["
                 + "Group Name: {}, "
                 + "Service User: {}, "
@@ -89,6 +91,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                 if (isPackageOldEnough(jcrPackage, maxAgeInDays)) {
                     if (!isLatestInstalled(jcrPackage, packages)) {
                         packageManager.remove(jcrPackage);
+                        packagesRemoved++;
                         LOG.info("Deleted package {}", packageDescription);
                     } else {
                         LOG.info("Not removing package because it's the current installed one {}", packageDescription);
@@ -101,7 +104,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
             LOG.error("Unable to clear packages", e);
             return JobResult.FAILED;
         }
-        LOG.info("Package Garbage Collector job finished");
+        LOG.info("Package Garbage Collector job finished - Removed {} packages", packagesRemoved);
         return JobResult.OK;
     }
 
@@ -187,7 +190,6 @@ public class PackageGarbageCollectionJob implements JobConsumer {
     }
 
     private boolean isPackageOldEnough(JcrPackage jcrPackage, Integer maxAgeInDays) throws RepositoryException, IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
         Period maxAge = Period.ofDays(maxAgeInDays);
         LocalDate oldestAge = LocalDate.now().minus(maxAge);
         Calendar packageCreatedAtCalendar = jcrPackage.getPackage().getCreated();
@@ -198,7 +200,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checking if package is old enough: Name: {}, Created At: {}, Oldest Age: {}",
-                packageDescription, packageCreatedAt.format(formatter), oldestAge.format(formatter));
+                packageDescription, packageCreatedAt.format(LOCALIZED_DATE_FORMATTER), oldestAge.format(LOCALIZED_DATE_FORMATTER));
         }
         return !packageCreatedAt.isAfter(oldestAge);
     }
