@@ -53,6 +53,7 @@ public class RedirectRule {
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
     public static final String NOTE_PROPERTY_NAME = "note";
     public static final String CONTEXT_PREFIX_IGNORED_PROPERTY_NAME = "contextPrefixIgnored";
+    public static final String EVALUATE_URI_PROPERTY_NAME = "evaluateURI";
     public static final String CREATED_PROPERTY_NAME = "jcr:created";
     public static final String CREATED_BY_PROPERTY_NAME = "jcr:createdBy";
     public static final String MODIFIED_PROPERTY_NAME = "jcr:lastModified";
@@ -67,6 +68,9 @@ public class RedirectRule {
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private int statusCode;
+
+    @ValueMapValue
+    private boolean evaluateURI;
 
     @ValueMapValue
     private Calendar untilDate;
@@ -130,6 +134,10 @@ public class RedirectRule {
         return statusCode;
     }
 
+    public boolean getEvaluateURI() {
+        return evaluateURI;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -190,9 +198,9 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, "
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, evaluateURI=%s, "
                         + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s}",
-                source, target, statusCode, untilDate, note, contextPrefixIgnored,
+                source, target, statusCode, untilDate, note, evaluateURI, contextPrefixIgnored,
                 Arrays.toString(tagIds), created, createdBy, modified, modifiedBy);
     }
 

@@ -74,6 +74,7 @@ public class ImportRedirectMapServletTest {
                 .setStatusCode(302)
                 .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
                 .setNotes("note-1")
+                .setEvaluateURI(true)
                 .setContextPrefixIgnored(true)
                 .setCreatedBy("john.doe")
                 .setTagIds(new String[]{"redirects:tag3"})
@@ -105,7 +106,7 @@ public class ImportRedirectMapServletTest {
         row1.createCell(3).setCellValue(new Calendar.Builder().setDate(1974, 01, 16).build());
         row1.getCell(3).setCellStyle(dateStyle);
         row1.createCell(4).setCellValue("note-abc");
-        row1.createCell(6).setCellValue("redirects:tag1\nredirects:tag2");
+        row1.createCell(7).setCellValue("redirects:tag1\nredirects:tag2");
 
         Row row2 = sheet.createRow(2);
         row2.createCell(0).setCellValue("/content/2");
@@ -141,6 +142,8 @@ public class ImportRedirectMapServletTest {
         assertEquals("note-1", rule1.getNote());
         assertEquals("john.doe", rule1.getCreatedBy());
         assertEquals("123", res1.getValueMap().get("custom-1"));
+        assertTrue(rule1.getEvaluateURI());
+        assertTrue(rule1.getContextPrefixIgnored());
         assertArrayEquals(new String[]{"redirects:tag3"}, rule1.getTagIds());
 
         Resource res2 = rules.get("/content/three");
@@ -148,6 +151,7 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule2.getTarget());
         assertEquals(301, rule2.getStatusCode());
+        assertFalse(rule2.getEvaluateURI());
         assertFalse(rule2.getContextPrefixIgnored());
         assertEquals("xyz", rule2.getModifiedBy());
         assertEquals("345", res2.getValueMap().get("custom-2"));
@@ -156,12 +160,13 @@ public class ImportRedirectMapServletTest {
         assertEquals("/en/we-retail", rule3.getTarget());
         assertDateEquals("16 February 1974", rule3.getUntilDate());
         assertEquals("note-abc", rule3.getNote());
+        assertFalse(rule3.getEvaluateURI());
+        assertFalse(rule3.getContextPrefixIgnored());
         assertArrayEquals(new String[]{"redirects:tag1", "redirects:tag2"}, rule3.getTagIds());
 
         RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());
         assertEquals(null, rule4.getUntilDate());
-
     }
 
 
@@ -180,6 +185,9 @@ public class ImportRedirectMapServletTest {
         rule2.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, 302);
         rule2.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, Calendar.getInstance());
         rule2.put(RedirectRule.NOTE_PROPERTY_NAME, "note");
+        rule2.put(RedirectRule.EVALUATE_URI_PROPERTY_NAME, true);
+        rule2.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, true);
+
         Collection<Map<String, Object>> rules = Arrays.asList(rule1, rule2);
 
         Resource root = context.resourceResolver().getResource(redirectStoragePath);
@@ -192,11 +200,15 @@ public class ImportRedirectMapServletTest {
         assertEquals(vm1.get(RedirectRule.TARGET_PROPERTY_NAME), rule1.get(RedirectRule.TARGET_PROPERTY_NAME));
         assertFalse(vm1.containsKey(RedirectRule.UNTIL_DATE_PROPERTY_NAME));
         assertFalse(vm1.containsKey(RedirectRule.NOTE_PROPERTY_NAME));
+        assertFalse(vm1.containsKey(RedirectRule.EVALUATE_URI_PROPERTY_NAME));
+        assertFalse(vm1.containsKey(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME));
 
         ValueMap vm2 = redirects.get(rule2.get(RedirectRule.SOURCE_PROPERTY_NAME)).getValueMap();
         assertEquals(vm2.get(RedirectRule.SOURCE_PROPERTY_NAME), rule2.get(RedirectRule.SOURCE_PROPERTY_NAME));
         assertEquals(vm2.get(RedirectRule.TARGET_PROPERTY_NAME), rule2.get(RedirectRule.TARGET_PROPERTY_NAME));
         assertEquals(vm2.get(RedirectRule.NOTE_PROPERTY_NAME), rule2.get(RedirectRule.NOTE_PROPERTY_NAME));
+        assertEquals(vm2.get(RedirectRule.EVALUATE_URI_PROPERTY_NAME), rule2.get(RedirectRule.EVALUATE_URI_PROPERTY_NAME));
+        assertEquals(vm2.get(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME), rule2.get(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME));
     }
 
 }

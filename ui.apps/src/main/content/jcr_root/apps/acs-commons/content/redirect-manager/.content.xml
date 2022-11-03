@@ -40,6 +40,15 @@
                                                 name="./source"
                                                 required="{Boolean}true"
                                                 rootPath="/content"/>
+                                        <evaluateURI
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                                name="./evaluateURI"
+                                                value="{Boolean}true"
+                                                uncheckedValue="{Boolean}false"
+                                                text="Evaluate request URI"
+                                                fieldLabel="Evaluate request URI"
+                                                fieldDescription="Checking this box will allow the Redirect Manager to evaluate the request URI instead of the resource path, and take into account other URI parts (like suffix, ...)"/>
                                         <target
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
@@ -142,6 +151,11 @@
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/foundation/form/hidden"
                                                 name="./contextPrefixIgnored@TypeHint"
+                                                value="Boolean"/>
+                                        <evaluateURI_x0040_TypeHint
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                                name="./evaluateURI@TypeHint"
                                                 value="Boolean"/>
                                         <primaryType
                                                 jcr:primaryType="nt:unstructured"

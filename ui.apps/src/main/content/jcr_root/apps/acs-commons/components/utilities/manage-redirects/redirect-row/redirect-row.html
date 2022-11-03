@@ -19,6 +19,9 @@
       </sly>
    </td>
    <td is="coral-table-cell" class="note" data-value="${redirect.note}" >${redirect.note}</td>
+   <td is="coral-table-cell" class="evaluateURI" data-value="${redirect.evaluateURI ? 'true' : 'false'}" style="text-align: center;width:50px;">
+      <input data-sly-test="${redirect.evaluateURI}" type="checkbox" checked disabled/>
+   </td>
    <td is="coral-table-cell" class="contextPrefixIgnored" data-value="${redirect.contextPrefixIgnored ? 'true' : 'false'}" style="text-align: center;width:50px;">
       <input data-sly-test="${redirect.contextPrefixIgnored}" type="checkbox" checked disabled/>
    </td>

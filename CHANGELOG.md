@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+## 5.4.1
+
+### Changed
+
+- #2980 - Redirect Manager: Allow evaluating of redirect rules based on request URI
+
 
 ## 5.4.0 - 2022-10-24
 

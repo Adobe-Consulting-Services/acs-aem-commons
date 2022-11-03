@@ -194,10 +194,13 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         String note = c4 == null ? null : c4.getStringCellValue();
         props.put(RedirectRule.NOTE_PROPERTY_NAME, note);
         Cell c5 = row.getCell(5);
-        boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
-        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, ignoreContextPrefix);
+        boolean evaluateURI = (c5 != null && c5.getBooleanCellValue());
+        props.put(RedirectRule.EVALUATE_URI_PROPERTY_NAME, evaluateURI);
         Cell c6 = row.getCell(6);
-        String[] tagIds = c6 == null ? null : c6.getStringCellValue().split("\n");
+        boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
+        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, ignoreContextPrefix);
+        Cell c7 = row.getCell(7);
+        String[] tagIds = c7 == null ? null : c7.getStringCellValue().split("\n");
         props.put(RedirectRule.TAGS_PROPERTY_NAME, tagIds);
         return props;
     }
