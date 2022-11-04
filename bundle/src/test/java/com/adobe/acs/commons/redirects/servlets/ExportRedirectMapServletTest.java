@@ -62,6 +62,7 @@ public class ExportRedirectMapServletTest {
                 .setTarget("/content/two")
                 .setStatusCode(302)
                 .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
+                .setEffectiveFrom(new Calendar.Builder().setDate(2025, 2, 2).build())
                 .setNotes("note-1")
                 .setContextPrefixIgnored(true)
                 .setTagIds(new String[]{"redirects:tag1"})
@@ -113,12 +114,14 @@ public class ExportRedirectMapServletTest {
         assertEquals("note-1", row1.getCell(4).getStringCellValue());
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
+        assertDateEquals("09 October 2022", new Calendar.Builder().setInstant(row1.getCell(3).getDateCellValue()).build());
         assertTrue(row1.getCell(5).getBooleanCellValue());
         assertEquals("redirects:tag1", row1.getCell(6).getStringCellValue());
         assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(7).getDateCellValue()).build());
         assertEquals("john.doe", row1.getCell(8).getStringCellValue());
         assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(9).getDateCellValue()).build());
         assertEquals("jane.doe", row1.getCell(10).getStringCellValue());
+        assertDateEquals("02 March 2025", new Calendar.Builder().setInstant(row1.getCell(11).getDateCellValue()).build());
 
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());

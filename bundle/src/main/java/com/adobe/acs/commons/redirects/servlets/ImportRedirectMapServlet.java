@@ -190,6 +190,12 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             untilDate.setTime(c3.getDateCellValue());
             props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, untilDate);
         }
+        Cell c11 = row.getCell(11);
+        if (DateUtil.isCellDateFormatted(c11)) {
+            Calendar effectiveFrom = Calendar.getInstance();
+            effectiveFrom.setTime(c11.getDateCellValue());
+            props.put(RedirectRule.EFFECTIVE_FROM_PROPERTY_NAME, effectiveFrom);
+        }
         Cell c4 = row.getCell(4);
         String note = c4 == null ? null : c4.getStringCellValue();
         props.put(RedirectRule.NOTE_PROPERTY_NAME, note);

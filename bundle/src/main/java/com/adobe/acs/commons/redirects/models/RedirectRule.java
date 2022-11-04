@@ -51,6 +51,7 @@ public class RedirectRule {
     public static final String TARGET_PROPERTY_NAME = "target";
     public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
     public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
+    public static final String EFFECTIVE_FROM_PROPERTY_NAME = "effectiveFrom";
     public static final String NOTE_PROPERTY_NAME = "note";
     public static final String CONTEXT_PREFIX_IGNORED_PROPERTY_NAME = "contextPrefixIgnored";
     public static final String CREATED_PROPERTY_NAME = "jcr:created";
@@ -70,6 +71,9 @@ public class RedirectRule {
 
     @ValueMapValue
     private Calendar untilDate;
+
+    @ValueMapValue
+    private Calendar effectiveFrom;
 
     @ValueMapValue
     private String note;
@@ -154,16 +158,12 @@ public class RedirectRule {
         return modified;
     }
 
-    /**
-     * This is ugly, but needed to format untilDate in HTL in the redirect-row component.
-     * <p>
-     * AEM as a Cloud Service supports formatting java.time.Instant (SLING-10651), but
-     * classic AEMs 6.4 and 6.5 only support formatting java.util.Date and java.util.Calendar
-     *
-     * @return java.util.Calendar representation of untilDate
-     */
     public Calendar getUntilDate() {
         return untilDate;
+    }
+
+    public Calendar getEffectiveFrom() {
+        return effectiveFrom;
     }
 
     public String[] getTagIds() {
@@ -190,9 +190,9 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, note=%s, "
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, effectiveFrom=%s, note=%s, "
                         + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s}",
-                source, target, statusCode, untilDate, note, contextPrefixIgnored,
+                source, target, statusCode, untilDate, effectiveFrom, note, contextPrefixIgnored,
                 Arrays.toString(tagIds), created, createdBy, modified, modifiedBy);
     }
 
@@ -235,5 +235,19 @@ public class RedirectRule {
             ptrn = null;
         }
         return ptrn;
+    }
+
+    /**
+     * @return whether the rule has expired, i.e. the 'untileDate' property is before the current time
+     */
+    public boolean isExpired(){
+        return untilDate != null && untilDate.before(Calendar.getInstance());
+    }
+
+    /**
+     * @return whether the rule is active, i.e. the 'effectiveFrom' property is empty or after the current time
+     */
+    public boolean isActive() {
+        return effectiveFrom == null || Calendar.getInstance().after(effectiveFrom);
     }
 }
