@@ -71,7 +71,6 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
     @Override
     public JobResult process(Job job) {
-        Session session;
         String groupName = job.getProperty(GROUP_NAME, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
         int packagesRemoved = 0;
@@ -82,12 +81,13 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(
             Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER))) {
-            session = resourceResolver.adaptTo(Session.class);
+            Session session = resourceResolver.adaptTo(Session.class);
             JcrPackageManager packageManager = packaging.getPackageManager(session);
             List<JcrPackage> packages = packageManager.listPackages(groupName, false);
 
             for (JcrPackage jcrPackage : packages) {
                 String packageDescription = getPackageDescription(jcrPackage);
+                LOG.info("Processing package {}", packageDescription);
                 if (isPackageOldEnough(jcrPackage, maxAgeInDays)) {
                     if (!isLatestInstalled(jcrPackage, packages)) {
                         packageManager.remove(jcrPackage);
@@ -101,7 +101,10 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                 }
             }
         } catch (LoginException | RepositoryException | IOException e) {
-            LOG.error("Unable to clear packages", e);
+            if (packagesRemoved > 0) {
+                LOG.error("Package Garbage Collector job partially failed - Removed {} packages", packagesRemoved);
+            }
+            LOG.error("Unable to finish clearing packages", e);
             return JobResult.FAILED;
         }
         LOG.info("Package Garbage Collector job finished - Removed {} packages", packagesRemoved);

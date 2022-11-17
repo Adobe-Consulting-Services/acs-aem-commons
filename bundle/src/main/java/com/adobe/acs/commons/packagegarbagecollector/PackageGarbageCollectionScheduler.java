@@ -31,6 +31,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +58,7 @@ public class PackageGarbageCollectionScheduler {
     @Activate
     protected void activate(PackageGarbageCollectionConfig config) {
         job = scheduleJob(config);
-        if (LOG.isInfoEnabled()) {
+        if (LOG.isInfoEnabled() && job != null) {
             LOG.info("Next scheduled run for job with group name {} at {}",  config.groupName(), job.getNextScheduledExecution());
         }
     }
@@ -69,11 +71,17 @@ public class PackageGarbageCollectionScheduler {
     }
 
     private ScheduledJobInfo scheduleJob(PackageGarbageCollectionConfig config) {
-        return jobManager.createJob(JOB_TOPIC)
-            .properties(getProperties(config))
-            .schedule()
-            .cron(config.scheduler())
-            .add();
+        Map<String, Object> filter = Collections.singletonMap("="+GROUP_NAME, config.groupName());
+        Collection<ScheduledJobInfo> existingJob = jobManager.getScheduledJobs(JOB_TOPIC, 1, filter);
+        if (existingJob.isEmpty()) {
+            return jobManager.createJob(JOB_TOPIC)
+                    .properties(getProperties(config))
+                    .schedule()
+                    .cron(config.scheduler())
+                    .add();
+        }
+        LOG.info("Job for {} at {} already scheduled - just returning the existing one", config.groupName(), config.scheduler());
+        return existingJob.stream().findFirst().orElse(null);
     }
 
     private Map<String, Object> getProperties(PackageGarbageCollectionConfig config) {

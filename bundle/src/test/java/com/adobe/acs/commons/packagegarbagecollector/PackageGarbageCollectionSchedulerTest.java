@@ -31,14 +31,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mozilla.javascript.commonjs.module.Require;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
+import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,6 +64,21 @@ public class PackageGarbageCollectionSchedulerTest {
         mockJobManager();
         scheduler = context.registerInjectActivateService(PackageGarbageCollectionScheduler.class, Collections.singletonMap("enabled", true));
         assertNotNull(scheduler);
+        scheduler.deactivate();
+    }
+
+    @Test
+    public void testAlreadyScheduled() {
+        mockJobManager();
+        ScheduledJobInfo existingJob = mock(ScheduledJobInfo.class);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("groupName", "com.uxp");
+        properties.put("enabled", true);
+        properties.put("scheduler", "0 30 2 ? * * *");
+        when(jobManager.getScheduledJobs(anyString(), anyLong(), anyMap())).thenReturn(Collections.singletonList(existingJob));
+        scheduler = context.registerInjectActivateService(PackageGarbageCollectionScheduler.class, properties);
+        assertNotNull(scheduler);
+        assertLogText("Job for com.uxp at 0 30 2 ? * * * already scheduled - just returning the existing one");
         scheduler.deactivate();
     }
 
