@@ -71,11 +71,11 @@ public class PackageGarbageCollectionSchedulerTest {
     public void testAlreadyScheduled() {
         mockJobManager();
         ScheduledJobInfo existingJob = mock(ScheduledJobInfo.class);
+        when(jobManager.getScheduledJobs(anyString(), anyLong(), anyMap())).thenReturn(Collections.singletonList(existingJob));
         Map<String, Object> properties = new HashMap<>();
         properties.put("groupName", "com.uxp");
         properties.put("enabled", true);
         properties.put("scheduler", "0 30 2 ? * * *");
-        when(jobManager.getScheduledJobs(anyString(), anyLong(), anyMap())).thenReturn(Collections.singletonList(existingJob));
         scheduler = context.registerInjectActivateService(PackageGarbageCollectionScheduler.class, properties);
         assertNotNull(scheduler);
         assertLogText("Job for com.uxp at 0 30 2 ? * * * already scheduled - just returning the existing one");
