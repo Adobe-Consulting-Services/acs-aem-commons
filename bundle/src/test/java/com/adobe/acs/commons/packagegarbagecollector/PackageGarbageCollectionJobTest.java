@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.packagegarbagecollector;
 
+import com.adobe.acs.commons.testutil.LogTester;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -67,6 +68,7 @@ public class PackageGarbageCollectionJobTest {
     public void setup() {
         context.registerService(Packaging.class, packaging);
         consumer = context.registerInjectActivateService(PackageGarbageCollectionJob.class);
+        LogTester.reset();
     }
 
     @Test

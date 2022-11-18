@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.packagegarbagecollector;
 
+import com.adobe.acs.commons.testutil.LogTester;
 import com.adobe.acs.commons.util.RequireAem;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.event.jobs.JobBuilder;
@@ -57,6 +58,7 @@ public class PackageGarbageCollectionSchedulerTest {
     public void setup() {
         context.registerService(RequireAem.class,mock(RequireAem.class),"distribution","classic");
         context.registerService(JobManager.class, jobManager);
+        LogTester.reset();
     }
 
     @Test
