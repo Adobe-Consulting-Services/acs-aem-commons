@@ -41,9 +41,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2888 - Removed deprecated ComponentHelper
 - #2899 - Remove deprecated - XSS JSP Functions
 
-<<<<<<< HEAD
-=======
-
 ## 5.4.0 - 2022-10-24
 
 ### Changed
