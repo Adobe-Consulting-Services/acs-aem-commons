@@ -6,6 +6,7 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
+import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -67,7 +68,8 @@ public class AcsCommonsConsoleEditorFilter implements Filter {
                 final PageManager pageManager = slingRequest.getResourceResolver().adaptTo(PageManager.class);
                 final Page page = pageManager.getContainingPage(pagePath);
 
-                final String view = page.getContentResource().getValueMap().get(NameConstants.PN_DEFAULT_VIEW, String.class);
+                final com.day.cq.wcm.api.components.Component component = WCMUtils.getComponent(page.getContentResource());
+                final String view = component.getProperties().get(NameConstants.PN_DEFAULT_VIEW, page.getContentResource().getValueMap().get(NameConstants.PN_DEFAULT_VIEW, String.class));
 
                 if (!StringUtils.equals(view, "html")) {
                     // ACS Commons /etc/acs-commons pages should always open in TouchUI Editor
