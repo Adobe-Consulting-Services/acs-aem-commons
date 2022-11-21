@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -33,10 +34,10 @@
                 <artifactId>bnd-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-jar-plugin</artifactId>
-                 <configuration>
-                     <archive>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
@@ -48,14 +49,14 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>sling-maven-plugin</artifactId>
-		<configuration>
-		    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
-		    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
-		    <deploymentMethod>SlingPostServlet</deploymentMethod>
-		    <user>${crx.user}</user>
-		    <password>${crx.password}</password>
-		    <failOnError>true</failOnError>
-		</configuration>
+                <configuration>
+                    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+                    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+                    <deploymentMethod>SlingPostServlet</deploymentMethod>
+                    <user>${crx.user}</user>
+                    <password>${crx.password}</password>
+                    <failOnError>true</failOnError>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -237,7 +238,7 @@
                             <reuseForks>true</reuseForks>
                             <parallel>classes</parallel>
                             <threadCount>1</threadCount>
-                            <perCoreThreadCount />
+                            <perCoreThreadCount/>
                         </configuration>
                     </execution>
                 </executions>
@@ -415,7 +416,7 @@
             <scope>provided</scope>
         </dependency>
         <!-- END: optional dependencies which are neither part of AEM nor ACS AEM Commons but need separate installation -->
-         <!-- ======================== -->
+        <!-- ======================== -->
         <!-- START: shaded and relocated dependencies -->
         <!-- Http Cache Dependencies -->
         <dependency>
@@ -423,22 +424,22 @@
             <artifactId>guava</artifactId>
             <scope>compile</scope>
             <exclusions>
-              <exclusion>
-                <groupId>com.google.j2objc</groupId>
-                <artifactId>j2objc-annotations</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_annotations</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.checkerframework</groupId>
-                <artifactId>checker-qual</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>com.google.j2objc</groupId>
+                    <artifactId>j2objc-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.errorprone</groupId>
+                    <artifactId>error_prone_annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -476,10 +477,10 @@
             <version>${jjwt.version}</version>
             <scope>compile</scope>
             <exclusions>
-              <exclusion>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- END: shaded and relocated dependencies -->
@@ -517,10 +518,10 @@
             <version>0.18</version>
             <scope>test</scope>
             <exclusions>
-              <exclusion>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_annotations</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>com.google.errorprone</groupId>
+                    <artifactId>error_prone_annotations</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- Downgrade from 2.4 to 2.1 for AEM 6.4 support -->
@@ -628,8 +629,8 @@
                     <artifactId>metadata-extractor</artifactId>
                 </exclusion>
                 <exclusion>
-                  <groupId>com.google.code.gson</groupId>
-                  <artifactId>gson</artifactId>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -653,14 +654,14 @@
             <version>2.1.2</version>
             <scope>test</scope>
             <exclusions>
-              <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.apache.tika</groupId>
-                <artifactId>tika-core</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tika</groupId>
+                    <artifactId>tika-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+## 6.0.0
+
 ### Removed
 
 - #2914 - Remove deprecated Java classes/methods and adjust any uses (page-compare and version-compare)
@@ -31,9 +33,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2920 - Remove ClassicUI Audio component
 - #2918 - Remove ClassicUI ShareThis
 - #2919 - Remove old GenericList implementation files
+
+## 5.4.0
+
+- #2941 - Add Query Builder support in Report Builder
 - #2950 - Rewriter Packagers (x4) to use TouchUI instead of ClassicUI
 - #2888 - Removed deprecated ComponentHelper
 - #2899 - Remove deprecated - XSS JSP Functions
+
+<<<<<<< HEAD
+=======
 
 ## 5.4.0 - 2022-10-24
 
@@ -49,6 +58,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2973 - EndpointService does not set UTF-8 charset for content-type and payload
+
+> > > > > > > acs-aem-commons-6.0.0
 
 ## 5.3.4 - 2022-08-22
 

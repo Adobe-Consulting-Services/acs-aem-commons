@@ -25,7 +25,7 @@
 
     </style>
 </head>
-<body class="${componentContext.cssClassNames}" id="body"
+<body class="${componentContext.cssClassNames @ join=' '}" id="body"
       data-sly-use.requireAem="com.adobe.acs.commons.util.RequireAemModel">
 
 <sly data-sly-include="header.html"/>
@@ -40,11 +40,13 @@
         OR
         If the runtime distribution is in the list of requirements
     */-->
-    <sly data-sly-test="${!(component.properties.requireAem.length) || (requireAem.distribution.value in component.properties.requireAem)}"
-         data-sly-include="${component.properties.mainScript || 'main.html' }"/>
+    <div>
+        <sly data-sly-test="${!(component.properties.requireAem.length) || (requireAem.distribution.value in component.properties.requireAem)}"
+             data-sly-include="${component.properties.mainScript || 'main.html' }"/>
 
-    <sly data-sly-test="${(component.properties.requireAem.length) && !(requireAem.distribution.value in component.properties.requireAem)}"
-         data-sly-include="incompatible.html"/>
+        <sly data-sly-test="${(component.properties.requireAem.length) && !(requireAem.distribution.value in component.properties.requireAem)}"
+             data-sly-include="incompatible.html"/>
+    </div>
 </div>
 
 <sly data-sly-include="footer.html"/>
