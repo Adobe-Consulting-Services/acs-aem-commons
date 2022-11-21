@@ -8,14 +8,18 @@
                  org.apache.sling.xss.XSSAPI" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 %><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
+%><%
+
+    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
 
     Image image = new Image(resource);
 
     final String transform = properties.get("transform", String.class);
     final String linkURL = properties.get("linkURL", String.class);
 
+
     if (image.hasContent()) {
+
 
         if (StringUtils.isNotBlank(transform)) {
             final long imageTimestamp = image.getLastModified().getTimeInMillis();
@@ -32,35 +36,46 @@
         image.setDoctype(Doctype.fromRequest(request));
 
         if (StringUtils.isNotBlank(properties.get("alt", String.class))) {
+
             image.setAlt(properties.get("alt", String.class));
         }
+
+        if (StringUtils.isNotBlank(linkURL)){
+
+			String xssLinkURL = slingXssAPI.getValidHref(linkURL);
+	        pageContext.setAttribute("linkURL", xssLinkURL);
+
+        }
+
+        String xssImageSrc = image.getSrc();
+        xssImageSrc = slingXssAPI.getValidHref(xssImageSrc);
+        pageContext.setAttribute("imageSrc", xssImageSrc);
+
+        String xssImageAlt = image.getAlt();
+        xssImageAlt = slingXssAPI.getValidHref(xssImageAlt);
+        pageContext.setAttribute("imageAlt", xssImageAlt); 
 
     } else {
         image = null;
     }
 
-    pageContext.setAttribute("image", image);
-    pageContext.setAttribute("linkURL", linkURL);
-
-    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
-    pageContext.setAttribute("slingXssAPI", slingXssAPI);
 
 %><c:choose>
     <c:when test="${wcmmode:isEdit(pageContext) && empty image}">
-        <wcm:placeholder classNames="cq-image-placeholder cq-block-placeholder" ddType="image"/>
+        <div classNames="cq-image-placeholder cq-block-placeholder" ddType="image"> Named Transform Image placeholder </div>
     </c:when>
     <c:when test="${!wcmmode:isEdit(pageContext) && empty image}">
         <%-- Component has not been configured on Publish; Hide the component --%>
     </c:when>
     <c:when test="${not empty linkURL}">
-        <a href="${xss:getValidHref(slingXssAPI, linkURL)}"><img
-                src="${xss:getValidHref(slingXssAPI, image.src)}"
+        <a href="${linkURL}"><img
+                src="${imageSrc}"
                 class="cq-dd-image"
-                alt="${xss:encodeForHTMLAttr(slingXssAPI, image.alt)}"/></a>
+                alt="${imageAlt}"/></a>
     </c:when>
     <c:otherwise>
-        <img src="${xss:getValidHref(slingXssAPI, image.src)}"
+        <img src="${imageSrc}"
              class="cq-dd-image"
-             alt="${xss:encodeForHTMLAttr(slingXssAPI, image.alt)}"/>
+             alt="${imageAlt}"/>
     </c:otherwise>
 </c:choose>

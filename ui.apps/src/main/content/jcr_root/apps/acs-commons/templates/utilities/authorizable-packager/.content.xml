@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    jcr:description="Utility page for defining packages of Authorizable nodes (Users and Groups)."
-    jcr:primaryType="cq:Template"
-    jcr:title="Authorizable Packager"
-    allowedPaths="[/etc/acs-commons/packagers(/.*)?,/etc/packagers(/.*)?,/etc/packages(/.*)?]"
-    ranking="{Long}120">
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:description="Utility page for defining packages of Authorizable nodes."
+          jcr:primaryType="cq:Template"
+          jcr:title="Authorizable packager"
+          allowedPaths="[/etc/acs-commons/packagers(/.*)?]"
+          ranking="{Long}150">
     <jcr:content
-        cq:designPath="/etc/designs/acs-commons"
-        jcr:primaryType="cq:PageContent"
-        sling:resourceType="acs-commons/components/utilities/packager/authorizable-packager"/>
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="acs-commons/components/utilities/packager/authorizable-packager">
+        <configuration
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/packager/authorizable-packager/configuration"
+                packageName="authorizables"
+                packageGroupName="Authorizables"
+                packageVersion="1.0.0"
+                packageDescription="Asset Package initially defined by a ACS AEM Commons - Authorizables packager configuration."
+                packageACLHandling="Overwrite"
+                conflictResolution="IncrementVersion"
+        >
+        </configuration>
+    </jcr:content>
 </jcr:root>

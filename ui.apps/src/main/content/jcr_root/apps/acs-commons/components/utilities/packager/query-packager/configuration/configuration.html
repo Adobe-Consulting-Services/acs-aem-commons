@@ -1,0 +1,27 @@
+<h3>Package definition</h3>
+<ul>
+    <li>Package name: ${properties.packageName || 'acls' }</li>
+    <li>Package group: ${properties.packageGroupName || 'ACLs' }</li>
+    <li>Package version: ${properties.packageVersion}</li>
+    <li>Package description: ${properties.packageDescription }</li>
+    <li>Package ACL handling: ${properties.packageACLHandling}</li>
+    <li>Conflict resolution: ${properties.conflictResolution}</li>
+</ul>
+
+<h3>Query definition</h3>
+
+<p>
+    Query language: ${properties.queryLanguage}
+</p>
+<p>
+    Query:
+    <span data-sly-test="${!properties.query}">Please provide a query</span>
+    <code data-sly-test="${properties.query}">
+        ${properties.query}
+    </code>
+</p>
+<p>
+    Relative path:
+    <span data-sly-test="${!properties.relPath}">None</span>
+    <span data-sly-test="${properties.relPath}">${properties.relPath}</span>
+</p>

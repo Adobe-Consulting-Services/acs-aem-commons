@@ -28,6 +28,7 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,6 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -296,8 +296,8 @@ public class EndpointServiceImpl implements EndpointService {
         addHeaders(base, convertServiceSpecificHeaders(headers));
       }
 
-      StringEntity input = new StringEntity(payload.toString());
-      input.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+      Charset contentTypeCharset = charsetFrom(base.getLastHeader(CONTENT_TYPE));
+      StringEntity input = new StringEntity(payload.toString(), contentTypeCharset);
 
       if (!base.getClass().isInstance(HttpGet.class)) {
          base.setEntity(input);
@@ -345,7 +345,27 @@ public class EndpointServiceImpl implements EndpointService {
    private void addHeaders(HttpRequest request, List<Map.Entry<String, String>> headers) {
       headers.forEach(e -> request.addHeader(e.getKey(), e.getValue()));
    }
-   
+
+   protected Charset charsetFrom(Header header) {
+      if (header == null) {
+        return null;
+      }
+
+      try {
+        String value = header.getValue();
+        String[] split = value.split(";");
+        if (split.length > 1) {
+          String[] charset = split[1].split("=");
+          if (charset.length > 1) {
+            return Charset.forName(charset[1].trim());
+          }
+        }
+      } catch (Exception e) {
+        LOGGER.error("Unable to get charset from content type", e);
+      }
+      return null;
+   }
+
    protected List<Map.Entry<String, String>> convertServiceSpecificHeaders(String[] specificServiceHeaders) {
          if (specificServiceHeaders == null) {
             return Collections.emptyList();

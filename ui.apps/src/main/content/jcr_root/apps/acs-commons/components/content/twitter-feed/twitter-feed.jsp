@@ -20,9 +20,10 @@
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@ page import="java.util.Arrays,java.util.List,org.apache.sling.xss.XSSAPI" %><%
 %><%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
 %><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
+
+    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
 
     String[] tweets = properties.get("tweets", new String[0]);
     int limit = properties.get("limit", 0);
@@ -33,24 +34,31 @@
 
     pageContext.setAttribute("tweets", tweetList);
 
-    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
-    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+    String username = properties.get("username", String.class);
+    username = slingXssAPI.encodeForHTML(username);
+    pageContext.setAttribute("username", username);
 %>
 <c:choose>
     <c:when test="${empty properties.username}">
-        <wcm:placeholder>Please provide a Twitter username.</wcm:placeholder>
+        <div>Please provide a Twitter username.</div>
     </c:when>
     <c:otherwise>
         <c:choose>
             <c:when test="${fn:length(tweets) gt 0}">
                 <ul>
                 <c:forEach var="tweet" items="${tweets}">
-                    <li>${xss:filterHTML(slingXssAPI, tweet)}</li>
+                    <li>
+                    <%
+                        String tweet = (String)pageContext.getAttribute("tweet");
+                        tweet = slingXssAPI.filterHTML(tweet);
+                    %>
+                    <%=tweet%>
+                    </li>
                 </c:forEach>
                 </ul>
             </c:when>
             <c:when test="${wcmmode:isEdit(pageContext)}">
-                The Twitter timeline for user: '${xss:encodeForHTML(slingXssAPI, properties.username)}' hasn't been fetched yet.
+                The Twitter timeline for user: '${username}' hasn't been fetched yet.
             </c:when>
         </c:choose>
     </c:otherwise>

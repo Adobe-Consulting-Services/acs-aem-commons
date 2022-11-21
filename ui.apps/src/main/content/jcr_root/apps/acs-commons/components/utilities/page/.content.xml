@@ -4,5 +4,5 @@
     jcr:description="Abstract base page implementation used for ACS Commons Utility Pages"
     jcr:primaryType="cq:Component"
     jcr:title="ACS Commons Abstract Utility Base Page"
-    sling:resourceSuperType="foundation/components/page"
+    sling:resourceSuperType="/libs/wcm/foundation/components/basicpage/v1/basicpage"
     componentGroup=".hidden"/>

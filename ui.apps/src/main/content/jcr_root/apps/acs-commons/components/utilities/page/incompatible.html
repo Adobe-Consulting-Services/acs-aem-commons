@@ -1,0 +1,19 @@
+<div class="spectrum-Toast spectrum-Toast--negative" style="display: block; margin: 0 auto; width: 100%;">
+    <div class="spectrum-Toast-body">
+        <div class="spectrum-Toast-content">
+            ${component.title} is not compatible with your version of Adobe Experience Manager.
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom: 4rem;"></div>
+
+<p>
+    <span data-sly-test="${component.properties.docsUrl}">
+        For more details see <a href="${component.properties.docsUrl}" target="_blank" rel="noreferrer">${component.title} documentation</a>.
+    </span>
+</p>
+
+<p>
+    Review the <a href="https://adobe-consulting-services.github.io/acs-aem-commons/pages/compatibility.html" target="_blank" rel="noreferrer">ACS AEM Commons compatibility</a> matrix for more details.
+</p>

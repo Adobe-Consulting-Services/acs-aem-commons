@@ -17,62 +17,121 @@
  * limitations under the License.
  * #L%
  */
+(function() {
+    function getCSRFToken() {
+        return fetch('/libs/granite/csrf/token.json').then(function(r) { return r.json().then(function(j) { return j.token; }); });
+    }
 
-$(function() {
-    $('body').on('click', '#packager-form input[type=submit]', function(e) {
+    function execute(event) {
+        event.preventDefault();
 
-        var $this = $(this),
-            $form = $this.closest('form'),
-            json,
-            i;
+        var el = event.target;
+        var action = el.getAttribute('name');
+        var actionUrl = el.dataset.url;
 
-        $('.notification').fadeOut();
-
-        $.post($form.attr('action'), {'preview': $this.attr('name') === 'preview' }, function(data) {
-            $('.notification').hide();
-
-            if(data.status === 'preview') {
-                /* Preview */
-
-                $('.notification.preview .filters').html('');
-                if(!data.filterSets) {
-                    $('.notification.preview .filters').append('<li>No matching resources found.</li>');
+        getCSRFToken().then(function(token) {
+            fetch(actionUrl, {
+              method: 'POST',
+              headers: { 'CSRF-Token': token, 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams( { 'preview': action === 'preview' }),
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.status === 'success') {
+                    displayCreateSuccess(data);
+                } else if (data.status === 'preview') {
+                    displayPreview(data);
                 } else {
-                    for(i = 0; i < data.filterSets.length; i++) {
-                        $('.notification.preview .filters').append('<li>' + data.filterSets[i].rootPath + '</li>');
-                    }
+                    displayError(data.msg);
                 }
+            })
+            .catch(function(error) {
+            console.log(error);
+                displayError(error);
+            });
+        });
+    }
 
-                $('.notification.preview').fadeIn();
-            } else if(data.status === 'success') {
-                /* Success */
+    function displayPreview(data) {
+       var results = document.getElementById('results');
+       var template = document.getElementById('preview-results').content.cloneNode(true);
 
-                $('.notification.success .package-path').text(data.path);
-                $('.notification.success .package-manager-link').attr('href', '/crx/packmgr/index.jsp#' + data.path);
+       var filters = '';
+       if (data.filterSets && data.filterSets.length > 0) {
+           data.filterSets.forEach(function(filterSet) {
+                filters += '<tr class="spectrum-Table-row"><td class="spectrum-Table-cell">' + filterSet.rootPath + '</td><td class="spectrum-Table-cell">' + filterSet.importMode + '</td></tr>';
+            });
+        } else {
+                filters += '<tr class="spectrum-Table-row"><td class="spectrum-Table-cell">No paths found</td><td class="spectrum-Table-cell"></td></tr>';
+        }
 
-                $('.notification.success .filters').html('');
+        template.querySelector('[slot="filters"]').innerHTML = filters;
+        removeAllChildNodes(results);
+        results.appendChild(template);
+        document.querySelector('[data-tab="results"]').click();
+    }
 
-                if(!data.filterSets) {
-                    $('.notification.preview .filters').append('<li>No matching resources found.</li>');
-                } else {
-                    for(i = 0; i < data.filterSets.length; i++) {
-                        $('.notification.success .filters').append('<li>' + data.filterSets[i].rootPath + '</li>');
-                    }
-                }
+    function displayCreateSuccess(data) {
+       var results = document.getElementById('results');
 
-                $('.notification.success').fadeIn();
-            } else {
-                /* Error */
-                $('.notification.error .msg').text(data.msg || '');
-                $('.notification.error').fadeIn();
-            }
+       var template = document.getElementById('success-results').content.cloneNode(true);
 
-            $('html, body').animate({
-                scrollTop: $('.notifications').offset().top - 20
-            }, 500);
-        }, 'json');
+       var filters = '';
+       if (data.filterSets && data.filterSets.length > 0) {
+           data.filterSets.forEach(function(filterSet) {
+                filters += '<tr class="spectrum-Table-row"><td class="spectrum-Table-cell">' + filterSet.rootPath + '</td><td class="spectrum-Table-cell">' + filterSet.importMode + '</td></tr>';
+           });
+        } else {
+                filters += '<tr class="spectrum-Table-row"><td class="spectrum-Table-cell">No paths found</td><td class="spectrum-Table-cell"></td></tr>';
+        }
 
-        e.preventDefault();
-        //return false;
+        template.querySelector('[slot="filters"]').innerHTML = filters;
+        template.querySelector('[slot="package-manager-link"]').innerHTML = data.path;
+        template.querySelector('[slot="package-manager-link"]').setAttribute('href', '/crx/packmgr/index.jsp#' + data.path);
+
+        removeAllChildNodes(results);
+        results.appendChild(template);
+        document.querySelector('[data-tab="results"]').click();
+    }
+
+    function displayError(message) {
+       var results = document.getElementById('results');
+       var template = document.getElementById('error-results').content.cloneNode(true);
+
+        template.querySelector('[slot="message"]').innerHTML = message;
+        removeAllChildNodes(results);
+        results.appendChild(template);
+        document.querySelector('[data-tab="results"]').click();
+    }
+
+    /* Handle action button clicks */
+    document.getElementById('preview').addEventListener('click', execute);
+    document.getElementById('create').addEventListener('click', execute);
+
+    /* Handle tabs clicks */
+    document.querySelectorAll('[data-tab]').forEach(function(tab) {
+        tab.addEventListener('click', function(e) {
+            var activeTab = e.target;
+            document.querySelectorAll('[data-tab]').forEach(function(tabToDeselect) { tabToDeselect.parentElement.classList.remove('is-selected'); });
+            document.querySelectorAll('[data-tab-content]').forEach(function(tabContentToHide) { tabContentToHide.style.display = 'none'; });
+
+            activeTab.parentElement.classList.add('is-selected');
+            document.querySelector('[data-tab-content="' + activeTab.dataset.tab + '"]').style.display = 'block';
+
+            document.querySelector('[data-tab-selection-indicator]').style.left = activeTab.dataset.tabIndicator;
+        });
     });
-});
+
+
+    function removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
+})();
+
+
+
+
+
+
