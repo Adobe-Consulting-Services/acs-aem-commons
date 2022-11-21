@@ -22,7 +22,6 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
-import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentContext;
@@ -77,8 +76,6 @@ public class ComponentErrorHandlerImplTest {
     @Mock
     Resource resource;
 
-    @Mock
-    ComponentHelper componentHelper;
 
     @Spy
     @InjectMocks
@@ -95,14 +92,14 @@ public class ComponentErrorHandlerImplTest {
         when(resource.isResourceType("acs-commons/test/demo")).thenReturn(true);
 
         when(response.getWriter()).thenReturn(responseWriter);
-        
+
         when(request.getRequestURI()).thenReturn("/content/page.html");
         when(response.getContentType()).thenReturn("text/html");
     }
 
     @After
     public void tearDown() throws Exception {
-        reset(request, response, responseWriter, chain, resource, componentContext, componentHelper);
+        reset(request, response, responseWriter, chain, resource, componentContext);
     }
 
     @Test
@@ -127,12 +124,12 @@ public class ComponentErrorHandlerImplTest {
 
         try {
             handler.doFilter(request, response, chain);
-        } catch(ServletException ex) {
+        } catch (ServletException ex) {
             result = true;
         }
 
         assertEquals(expectedResult, result);
-        verify(responseWriter,never()).print(any(String.class));
+        verify(responseWriter, never()).print(any(String.class));
         verifyNoMoreInteractions(responseWriter);
     }
 
@@ -189,7 +186,6 @@ public class ComponentErrorHandlerImplTest {
         verify(responseWriter, times(1)).print(any(String.class));
         verifyNoMoreInteractions(responseWriter);
     }
-
 
 
     @Test(expected = ServletException.class)

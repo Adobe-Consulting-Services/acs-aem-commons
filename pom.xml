@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -7,7 +8,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>5.3.5-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -53,7 +54,7 @@
         <crx.user>admin</crx.user>
         <crx.password>admin</crx.password>
         <crx.protocol>http</crx.protocol>
-        <crx.contextRoot />
+        <crx.contextRoot/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
@@ -62,14 +63,15 @@
         <oakpal.version>2.2.2</oakpal.version>
         <bnd.version>6.1.0</bnd.version>
         <!-- Supress CQRules:CQBP-84-\-dependencies -->
-        <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml
+        </sonar.issue.ignore.multicriteria.e1.resourceKey>
 
         <jacoco.version>0.8.7</jacoco.version>
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1661190251</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1665329325</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -194,26 +196,26 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         </execution>
                     </executions>
                     <dependencies>
-                          <!-- enable generating the manifest header for Sling Models, https://sling.apache.org/documentation/bundles/models.html#registration-of-sling-models-classes-via-bnd-plugin -->
-                          <dependency>
-                              <groupId>org.apache.sling</groupId>
-                              <artifactId>org.apache.sling.bnd.models</artifactId>
-                              <version>1.0.0</version>
-                          </dependency>
-                          <!-- enable generating the 'Sling-ContextAware-Configuration-Classes' bundle header, https://sling.apache.org/documentation/bundles/context-aware-configuration/context-aware-configuration.html#context-aware-configuration-bnd-plugin -->
-                          <dependency>
-                              <groupId>org.apache.sling</groupId>
-                              <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
-                              <version>1.0.2</version>
-                          </dependency>
-                          <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
-                              with the Bnd process -->
-                          <dependency>
-                              <groupId>org.apache.felix</groupId>
-                              <artifactId>org.apache.felix.scr.bnd</artifactId>
-                              <version>1.9.6</version>
-                          </dependency>
-                      </dependencies>
+                        <!-- enable generating the manifest header for Sling Models, https://sling.apache.org/documentation/bundles/models.html#registration-of-sling-models-classes-via-bnd-plugin -->
+                        <dependency>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.bnd.models</artifactId>
+                            <version>1.0.0</version>
+                        </dependency>
+                        <!-- enable generating the 'Sling-ContextAware-Configuration-Classes' bundle header, https://sling.apache.org/documentation/bundles/context-aware-configuration/context-aware-configuration.html#context-aware-configuration-bnd-plugin -->
+                        <dependency>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
+                            <version>1.0.2</version>
+                        </dependency>
+                        <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
+                            with the Bnd process -->
+                        <dependency>
+                            <groupId>org.apache.felix</groupId>
+                            <artifactId>org.apache.felix.scr.bnd</artifactId>
+                            <version>1.9.6</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
@@ -238,7 +240,9 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <validatorsSettings>
                             <jackrabbit-filter>
                                 <options>
-                                    <validRoots>/,/libs,/libs/core/wcm,/apps,/etc,/etc/clientlibs,/etc/cloudservices,/etc/dam/video,/etc/designs,/etc/notification,/etc/workflow/instances,/etc/workflow/packages,/var,/tmp,/content,/content/dam,/home,/home/users,/home/users/system,/home/groups,/conf,/conf/global</validRoots>
+                                    <validRoots>
+                                        /,/libs,/libs/core/wcm,/apps,/etc,/etc/clientlibs,/etc/cloudservices,/etc/dam/video,/etc/designs,/etc/notification,/etc/workflow/instances,/etc/workflow/packages,/var,/tmp,/content,/content/dam,/home,/home/users,/home/users/system,/home/groups,/conf,/conf/global
+                                    </validRoots>
                                 </options>
                             </jackrabbit-filter>
                             <jackrabbit-nodetypes>
@@ -249,19 +253,23 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             </jackrabbit-nodetypes>
                             <jackrabbit-packagetype>
                                 <options>
-                                    <allowComplexFilterRulesInApplicationPackages>true</allowComplexFilterRulesInApplicationPackages>
+                                    <allowComplexFilterRulesInApplicationPackages>true
+                                    </allowComplexFilterRulesInApplicationPackages>
                                 </options>
                             </jackrabbit-packagetype>
                             <netcentric-aem-classification>
                                 <!-- only raise to WARN once we start tackling these issues -->
                                 <defaultSeverity>INFO</defaultSeverity>
                                 <options>
-                                    <maps>tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/coral2deprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/graniteuideprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-repo-annotations.map</maps>
+                                    <maps>
+                                        tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/coral2deprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/graniteuideprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-repo-annotations.map
+                                    </maps>
                                 </options>
                             </netcentric-aem-classification>
                             <netcentric-aem-cloud>
                                 <options>
-                                    <allowReadOnlyMutablePaths>true</allowReadOnlyMutablePaths><!-- default value is true, as it is allowed to have /var nodes inside author-only container -->
+                                    <allowReadOnlyMutablePaths>true
+                                    </allowReadOnlyMutablePaths><!-- default value is true, as it is allowed to have /var nodes inside author-only container -->
                                 </options>
                             </netcentric-aem-cloud>
                         </validatorsSettings>
@@ -307,8 +315,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-cloud-validator</artifactId>
                             <version>1.2.2</version>
-                         </dependency>
-                     </dependencies>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
@@ -454,13 +462,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-bundle</artifactId>
-                <version>5.3.5-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.adobe.acs</groupId>
                 <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                <version>5.3.5-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
             <!-- Runtime dependencies should be AEM 6.4 compatible -->
@@ -475,7 +483,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>com.day.cq</groupId>
                 <artifactId>cq-commons</artifactId>
-                <version>5.8.32</version><!-- 5.11.12 is shipped with AEM 6.4, but this is the newest version provided in any public Maven repo -->
+                <version>5.8.32
+                </version><!-- 5.11.12 is shipped with AEM 6.4, but this is the newest version provided in any public Maven repo -->
             </dependency>
             <!-- https://wcm-io.atlassian.net/browse/WTOOL-83 -->
             <dependency>
@@ -683,7 +692,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
         </profile>
         <profile>
             <id>coverage</id>
-            <build>               
+            <build>
                 <plugins>
                     <plugin>
                         <groupId>org.jacoco</groupId>

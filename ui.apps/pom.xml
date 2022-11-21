@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -7,7 +8,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.3.5-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -47,7 +48,7 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
-                    
+
                     <!-- Enforce separation of content and code (CODE ONLY) -->
                     <checks>
                         <check>
@@ -79,8 +80,8 @@
                     </checks>
 
                     <websterTargets>
-                        <nodetypes />
-                        <privileges />
+                        <nodetypes/>
+                        <privileges/>
                     </websterTargets>
                 </configuration>
                 <executions>
@@ -96,7 +97,8 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
+                            </summaryFile>
                             <checklists>
                                 <checklist>content-class-aem65</checklist>
                             </checklists>
@@ -108,7 +110,8 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
+                            </summaryFile>
                             <checklists>
                                 <checklist>content-class-aem64</checklist>
                             </checklists>
@@ -121,8 +124,10 @@
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
+                                </summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
+                                </summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
@@ -148,8 +153,12 @@
                     <globals>jQuery,window,$</globals>
                     <excludes>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/js/vendor</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
+                        <exclude>
+                            /src/main/content/jcr_root/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/js/vendor
+                        </exclude>
+                        <exclude>
+                            /src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js
+                        </exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/clientlibs/vendor</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor</exclude>
                     </excludes>
