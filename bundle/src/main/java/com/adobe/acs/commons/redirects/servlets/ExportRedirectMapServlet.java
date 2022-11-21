@@ -41,11 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.ACS_REDIRECTS_RESOURCE_TYPE;
 
@@ -96,6 +93,12 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         dateStyle.setDataFormat(
                 wb.createDataFormat().getFormat("mmm d, yyyy"));
 
+        CellStyle lockedCellStyle = wb.createCellStyle();
+        lockedCellStyle.setLocked(true); // readonly cell
+
+        CellStyle cellWrapStyle = wb.createCellStyle();
+        cellWrapStyle.setWrapText(true);
+
         Row headerRow;
         int rownum = 0;
         Sheet sheet = wb.createSheet("Redirects");
@@ -106,6 +109,11 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(3).setCellValue("Until Date");
         headerRow.createCell(4).setCellValue("Notes");
         headerRow.createCell(5).setCellValue("Ignore Context Prefix");
+        headerRow.createCell(6).setCellValue("Tags");
+        headerRow.createCell(7).setCellValue("Created");
+        headerRow.createCell(8).setCellValue("Created By");
+        headerRow.createCell(9).setCellValue("Modified");
+        headerRow.createCell(10).setCellValue("Modified By");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -114,22 +122,50 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             row.createCell(0).setCellValue(rule.getSource());
             row.createCell(1).setCellValue(rule.getTarget());
             row.createCell(2).setCellValue(rule.getStatusCode());
-            ZonedDateTime untilDateTime = rule.getUntilDate();
+            Calendar untilDateTime = rule.getUntilDate();
             if (untilDateTime != null) {
                 Cell cell = row.createCell(3);
-                cell.setCellValue(Date.from(untilDateTime.toInstant()));
+                cell.setCellValue(untilDateTime);
                 cell.setCellStyle(dateStyle);
             }
             row.createCell(4).setCellValue(rule.getNote());
             row.createCell(5).setCellValue(rule.getContextPrefixIgnored());
+
+            Cell cell6 = row.createCell(6);
+            String[] tagIds = rule.getTagIds();
+            if(tagIds != null) {
+                cell6.setCellValue(String.join("\n", tagIds));
+            }
+            cell6.setCellStyle(cellWrapStyle);
+
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(rule.getCreated());
+            cell7.setCellStyle(dateStyle);
+
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(rule.getCreatedBy());
+            cell8.setCellStyle(lockedCellStyle);
+
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(rule.getModified());
+            cell9.setCellStyle(dateStyle);
+
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(rule.getModifiedBy());
+            cell10.setCellStyle(lockedCellStyle);
         }
-        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 2));
+        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 10));
         sheet.setColumnWidth(0, 256 * 50);
         sheet.setColumnWidth(1, 256 * 50);
         sheet.setColumnWidth(2, 256 * 15);
         sheet.setColumnWidth(3, 256 * 12);
         sheet.setColumnWidth(4, 256 * 100);
         sheet.setColumnWidth(5, 256 * 20);
+        sheet.setColumnWidth(6, 256 * 25);
+        sheet.setColumnWidth(7, 256 * 12);
+        sheet.setColumnWidth(8, 256 * 30);
+        sheet.setColumnWidth(9, 256 * 12);
+        sheet.setColumnWidth(10, 256 * 30);
 
         return wb;
     }
