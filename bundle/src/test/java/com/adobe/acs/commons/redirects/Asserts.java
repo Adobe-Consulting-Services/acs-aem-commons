@@ -19,7 +19,8 @@
  */
 package com.adobe.acs.commons.redirects;
 
-import java.time.temporal.TemporalAccessor;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
 
 import static com.adobe.acs.commons.redirects.models.UpgradeLegacyRedirects.DATE_FORMATTER;
 import static org.junit.Assert.assertEquals;
@@ -30,9 +31,10 @@ public class Asserts {
      * assert date truncated to days
      *
      * @param expected  date in the 'dd MMMM yyyy' format, e.g. 16 February 2022
-     * @param zdt   the time to assert
+     * @param calendar   the time to assert
      */
-    public static void assertDateEquals(String expected, TemporalAccessor zdt) {
+    public static void assertDateEquals(String expected, Calendar calendar) {
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
         assertEquals(expected, DATE_FORMATTER.format(zdt));
 
     }
