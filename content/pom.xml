@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -16,7 +17,9 @@
 
     <artifactId>acs-aem-commons-content</artifactId>
     <name>ACS AEM Commons Package</name>
-    <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps, acs-aem-commons-ui.content, the OSGi bundle and configuration.</description>
+    <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps,
+        acs-aem-commons-ui.content, the OSGi bundle and configuration.
+    </description>
     <packaging>content-package</packaging>
 
     <build>
@@ -52,7 +55,7 @@
                 </configuration>
             </plugin>
 
-           <plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
@@ -62,80 +65,80 @@
                 </configuration>
             </plugin>
 
-          <!-- disable oakpal due to false positives: https://github.com/adamcin/oakpal/issues/92 
-          <plugin>
-                <groupId>net.adamcin.oakpal</groupId>
-                <artifactId>oakpal-maven-plugin</artifactId>
-                <configuration>
-                    <deferBuildFailure>true</deferBuildFailure>
-                    <checklists>
-                        <checklist>acs-internal</checklist>
-                    </checklists>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>oakpal-scan</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>oakpal-scan-content-class-aem65</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                            <checklists>
-                                <checklist>content-class-aem65</checklist>
-                            </checklists>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>oakpal-scan-content-class-aem64</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                            <checklists>
-                                <checklist>content-class-aem64</checklist>
-                            </checklists>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>oakpal-scan-min</id>
-                        <goals>
-                            <goal>scan-many</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            <scanArtifacts>
-                                <artifact>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>min</classifier>
-                                    <type>zip</type>
-                                </artifact>
-                            </scanArtifacts>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>oakpal-verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            </summaryFiles>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin> -->
+            <!-- disable oakpal due to false positives: https://github.com/adamcin/oakpal/issues/92
+            <plugin>
+                  <groupId>net.adamcin.oakpal</groupId>
+                  <artifactId>oakpal-maven-plugin</artifactId>
+                  <configuration>
+                      <deferBuildFailure>true</deferBuildFailure>
+                      <checklists>
+                          <checklist>acs-internal</checklist>
+                      </checklists>
+                  </configuration>
+                  <executions>
+                      <execution>
+                          <id>oakpal-scan</id>
+                          <goals>
+                              <goal>scan</goal>
+                          </goals>
+                      </execution>
+                      <execution>
+                          <id>oakpal-scan-content-class-aem65</id>
+                          <goals>
+                              <goal>scan</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                              <checklists>
+                                  <checklist>content-class-aem65</checklist>
+                              </checklists>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>oakpal-scan-content-class-aem64</id>
+                          <goals>
+                              <goal>scan</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                              <checklists>
+                                  <checklist>content-class-aem64</checklist>
+                              </checklists>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>oakpal-scan-min</id>
+                          <goals>
+                              <goal>scan-many</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+                              <scanArtifacts>
+                                  <artifact>
+                                      <groupId>${project.groupId}</groupId>
+                                      <artifactId>${project.artifactId}</artifactId>
+                                      <version>${project.version}</version>
+                                      <classifier>min</classifier>
+                                      <type>zip</type>
+                                  </artifact>
+                              </scanArtifacts>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>oakpal-verify</id>
+                          <goals>
+                              <goal>verify</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFiles>
+                                  <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                                  <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                                  <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+                              </summaryFiles>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin> -->
 
             <!-- avoid failing on JS vulnerabilities - TODO to fix -->
             <plugin>

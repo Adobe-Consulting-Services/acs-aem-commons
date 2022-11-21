@@ -1,1 +1,31 @@
-<sly data-sly-resource="${'./configuration' @ resourceType='acs-commons/components/utilities/dispatcher-flush/configuration'}"/>
+<div data-sly-use.model="com.adobe.acs.commons.replication.dispatcher.DispatcherFlusherModel"
+     data-sly-test="${model.results}"
+     style="margin: 1rem 0 3rem 0">
+
+    <div data-sly-test="${model.failure}"
+         class="spectrum-Toast spectrum-Toast--negative"
+         style="width: 100%;">
+
+        <div class="spectrum-Toast-body">
+            <div class="spectrum-Toast-content">An error occurred while trying to flush Dispatcher.
+                <br>
+                <br>
+                Please review that your agents are set up correctly on AEM Author, and they can communicate with
+                Dispatcher.
+            </div>
+        </div>
+    </div>
+
+    <div data-sly-test="${!model.failure && model.results}"
+         class="spectrum-Toast spectrum-Toast--positive"
+         style="width: 100%;">
+
+        <div class="spectrum-Toast-body">
+            <div class="spectrum-Toast-content">
+                The flush request was sent to the active Dispatcher flush agents.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div data-sly-resource="${'./configuration' @ resourceType='acs-commons/components/utilities/dispatcher-flush/configuration'}"/>
