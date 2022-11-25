@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2920 - Remove ClassicUI Audio component
 - #2918 - Remove ClassicUI ShareThis
 - #2919 - Remove old GenericList implementation files
+- #2954 - Remove Classic Dialog from the WF (Generate Audio Transcription with IBM Watson)
 
 ## 5.4.0
 
