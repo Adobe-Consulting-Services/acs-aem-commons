@@ -62,11 +62,6 @@ public class ChildResourceFromRequestAnnotationProcessorFactory implements Stati
         public InjectionStrategy getInjectionStrategy() {
             return this.annotation.injectionStrategy();
         }
-
-        @SuppressWarnings("deprecation")
-        public Boolean isOptional() {
-            return this.annotation.optional();
-        }
     }
 
 }
