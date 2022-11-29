@@ -82,7 +82,7 @@ public class VanityURLServiceImpl implements VanityURLService {
         log.trace("Generated Candidate Vanity URL from the mapping of [ {} -> {} ]", requestURI, candidateVanity);
 
         final String pathScope = getPathScope(requestURI, candidateVanity);
-        
+
         log.debug("Path Scope to check for Vanity URL Mapping [ {} ]", pathScope);
 
         log.debug("Candidate vanity URL to check and dispatch: [ {} ]", candidateVanity);
@@ -108,24 +108,24 @@ public class VanityURLServiceImpl implements VanityURLService {
         return false;
     }
 
-    private String getPathScope(final String requestURI, final String candidateVanity) {
+    protected String getPathScope(final String requestURI, final String candidateVanity) {
         try {
             /**
-             * AEM Cloud includes scheme, host, and port in candidateVanity
+             * AEM as a Cloud Service includes scheme, host, and port in candidateVanity
              * While requestURI only includes the path
-             * We must remove that context so that StringUtils.removeEnd resolves correctly
+             *
+             * We must remove the scheme/host/port from the candidateVanity so that StringUtils.removeEnd(..) resolves correctly
              */
             final URI uri = new URI(candidateVanity);
             final String candidateVanityPath = uri.getPath();
-            
+
             log.debug("Creating Path Scope from requestURI: [ {} ] and Candidate Vanity Path: [ {} ]", requestURI, candidateVanityPath);
-            
+
             return StringUtils.removeEnd(requestURI, candidateVanityPath);
-            
         } catch (URISyntaxException e) {
             log.error("Candidate Vanity [ {} ] is not a valid URI", candidateVanity);
         }
-        
+
         return requestURI;
     }
 
