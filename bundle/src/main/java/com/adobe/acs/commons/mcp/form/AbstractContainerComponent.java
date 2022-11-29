@@ -27,7 +27,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,9 +68,9 @@ public class AbstractContainerComponent extends FieldComponent {
             } else {
                 extractFieldComponents(fieldType);
                 fieldComponents.values().forEach(comp -> {
-                    ResourceMetadata meta = comp.getComponentMetadata();
-                    String currentName = String.valueOf(meta.get("name"));
-                    meta.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
+                    Map<String, Object> properties = comp.getProperties();
+                    String currentName = String.valueOf(properties.get("name"));
+                    properties.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
                 });
             }
         }
@@ -109,7 +108,7 @@ public class AbstractContainerComponent extends FieldComponent {
             FieldComponent comp = generateDefaultChildComponent();
             FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null, false, null);
             comp.setup(getName(), null, fieldDef, getHelper());
-            comp.getComponentMetadata().put("title", getName());
+            comp.getProperties().put("title", getName());
             // TODO: Provide a proper mechanism for setting path when creating components
             addComponent(getName(), comp);
             composite = false;

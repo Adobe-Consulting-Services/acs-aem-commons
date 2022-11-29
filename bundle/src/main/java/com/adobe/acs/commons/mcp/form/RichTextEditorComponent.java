@@ -36,14 +36,14 @@ public class RichTextEditorComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("cq/gui/components/authoring/dialog/richtext");
-        getComponentMetadata().put("useFixedInlineToolbar", useFixedInlineToolbar);
+        getProperties().put("useFixedInlineToolbar", useFixedInlineToolbar);
     }
 
     @Override
     @SuppressWarnings("squid:S1192")
     public Resource buildComponentResource() {
         return new SyntheticResourceBuilder(getName(), getResourceType())
-                .withAttributes(getComponentMetadata())
+                .withAttributes(getProperties())
                 .createChild("rtePlugins")
                 .createChild("format")
                 .withAttributes("features", "bold,italic,underline")

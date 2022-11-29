@@ -24,10 +24,11 @@ import com.adobe.acs.commons.mcp.form.PathfieldComponent.FolderSelectComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent.NodeSelectComponent;
 
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
 
 /**
  * Represent multifield with sub-fields based on referenced class. Depending on
@@ -71,24 +72,24 @@ public final class MultifieldComponent extends AbstractContainerComponent {
 
     @Override
     public Resource buildComponentResource() {
-        getComponentMetadata().put("composite", isComposite());
-        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getComponentMetadata());
+        getProperties().put("composite", isComposite());
+        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getProperties());
         if (getHelper() != null) {
             res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
         if (isComposite()) {
-            AbstractResourceImpl field = new AbstractResourceImpl(getPath() + FIELD_PATH, "granite/ui/components/coral/foundation/container", getResourceSuperType(), new ResourceMetadata());
+            AbstractResourceImpl field = new AbstractResourceImpl(getPath() + FIELD_PATH, "granite/ui/components/coral/foundation/container", getResourceSuperType(), new HashMap<>());
             // The container component is what sets the name, not the base component
-            field.getResourceMetadata().put("name", getName());
+            field.getValueMap().put("name", getName());
             res.addChild(field);
             AbstractResourceImpl items = generateItemsResource(getPath() + FIELD_PATH, true);
             field.addChild(items);
         } else {
             for (FieldComponent component : fieldComponents.values()) {
                 component.setPath(getPath() + FIELD_PATH);
-                component.getComponentMetadata().putAll(getComponentMetadata());
+                component.getProperties().putAll(getProperties());
                 Resource comp = component.buildComponentResource();
-                comp.getResourceMetadata().put("name", getName());
+                comp.getValueMap().put("name", getName());
                 res.addChild(comp);
             }
         }

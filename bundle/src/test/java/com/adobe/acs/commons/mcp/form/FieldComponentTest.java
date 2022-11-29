@@ -106,9 +106,9 @@ public class FieldComponentTest {
     @Test
     public void testDefaultFormValuesMatchCodeDefaults() {
         Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(AnnotationTestClass.class, null);
-        assertEquals("Should have default string value", TEST_VALUE_1, form.get("test1").getComponentMetadata().get("value"));
-        assertEquals("1st Checkbox should be checked", "true", form.get("isChecked").getComponentMetadata().get("checked"));
-        assertEquals("2nd Checkbox not should be checked", null, form.get("isNotChecked").getComponentMetadata().get("checked"));
+        assertEquals("Should have default string value", TEST_VALUE_1, form.get("test1").getProperties().get("value"));
+        assertEquals("1st Checkbox should be checked", "true", form.get("isChecked").getProperties().get("checked"));
+        assertEquals("2nd Checkbox not should be checked", null, form.get("isNotChecked").getProperties().get("checked"));
     }
 
     public static class AnnotationTestClass {

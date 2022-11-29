@@ -20,10 +20,12 @@
 package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
+import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -36,37 +38,48 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collection;
 
-import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
+import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.SPREADSHEETML_SHEET;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Yegor Kozlov
  */
 public class ExportRedirectMapServletTest {
     @Rule
-    public SlingContext context = new SlingContext(
-            ResourceResolverType.RESOURCERESOLVER_MOCK);
+    public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private ExportRedirectMapServlet servlet;
     private String redirectStoragePath = "/conf/acs-commons/redirects";
 
     @Before
-    public void setUp() {
-        servlet = new ExportRedirectMapServlet();
-        context.build().resource(redirectStoragePath)
-                .siblingsMode()
-                .resource("redirect-1",                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/one", "target", "/content/two", "statusCode", 302, "note", "note-1", "contextPrefixIgnored", true)
-                .resource("redirect-2",                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                        "source", "/content/three", "target", "/content/four", "statusCode", 301, "contextPrefixIgnored", false)
-        ;
+    public void setUp() throws PersistenceException {
+        new RedirectResourceBuilder(context, redirectStoragePath)
+                .setSource("/content/one")
+                .setTarget("/content/two")
+                .setStatusCode(302)
+                .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
+                .setNotes("note-1")
+                .setContextPrefixIgnored(true)
+                .setTagIds(new String[]{"redirects:tag1"})
+                .setCreatedBy("john.doe")
+                .setModifiedBy("jane.doe")
+                .setCreated(new Calendar.Builder().setDate(1974, 1, 16).build())
+                .setModified(new Calendar.Builder().setDate(1976, 10, 22).build())
+                .build();
+        new RedirectResourceBuilder(context, redirectStoragePath)
+                .setSource("/content/three")
+                .setTarget("/content/four")
+                .setStatusCode(301)
+                .setTagIds(new String[]{"redirects:tag2"})
+                .setModifiedBy("john.doe")
+                .build();
+
         context.request().addRequestParameter("path", redirectStoragePath);
+        servlet = new ExportRedirectMapServlet();
     }
 
 
@@ -101,10 +114,19 @@ public class ExportRedirectMapServletTest {
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
         assertTrue(row1.getCell(5).getBooleanCellValue());
+        assertEquals("redirects:tag1", row1.getCell(6).getStringCellValue());
+        assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(7).getDateCellValue()).build());
+        assertEquals("john.doe", row1.getCell(8).getStringCellValue());
+        assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(9).getDateCellValue()).build());
+        assertEquals("jane.doe", row1.getCell(10).getStringCellValue());
+
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
         assertEquals("/content/four", row2.getCell(1).getStringCellValue());
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());
         assertFalse(row2.getCell(5).getBooleanCellValue());
+        assertEquals("redirects:tag2", row2.getCell(6).getStringCellValue());
+        assertEquals("", row2.getCell(8).getStringCellValue());
+        assertEquals("john.doe", row2.getCell(10).getStringCellValue());
     }
 }

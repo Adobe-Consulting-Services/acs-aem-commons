@@ -9,6 +9,57 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+
+## 5.4.0 - 2022-10-24
+
+### Changed 
+
+- #2936 - Redirect Manager: Expose the "Redirect Creator" property in Touch UI and Excel Export 
+- #2938 - Redirect Manager: Redirect rules imported from Excel file do not store jcr:created and jcr:createdBy properties
+- #2972 - Make the MS Office Add-In Feature Cloud compatible
+- #2941 - Add Query Builder support in Report Builder
+- #2969 - Add append html extension support for the custom editor field in Report Builder
+
+### Fixed
+
+- #2973 - EndpointService does not set UTF-8 charset for content-type and payload
+
+
+## 5.3.4 - 2022-08-22
+
+### Added
+
+- #2876 - RobotsServlet: Added configuration options to ALLOW / DISALLOW single pages (.html)
+
+### Changed
+
+- #2874 - Make Marketo Forms Easy to configure  
+- #2931 - Cloud Manager SonarQube report - 2022.08.10 @ v5.3.2 #2931
+- #2877 - Support for selector-based redirects
+
+### Fixed
+
+- #2617 - Fixed issue with NPE in Generic Lists
+- #2927 - Fix location of legacy clientlib resources to pass Cloud Manager builds
+
+## 5.3.2 - 2022-06-22
+
+### Changed
+
+- #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if  the attribute rel="stylesheet" is set
+- #2865 - Reports - Turn absolute property paths to relative to prevent report breakage when malformed (abs path) data is assed 
+
+### Fixed
+
+- #2848 - Fixed issue with ClientLib images not being stored under a resources folder
+- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
+- #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
+- #2826 - 5.3.1-SNAPSHOT build failing validation locally
+- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
+- #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
+- #2869 - Support 500 error pages on AEM CS using x-aem-error-pass = true HTTP response header
+- #2857 - Fixed issue with Marketo integration loading marketo form
+
 ## 5.3.0 - 2022-04-15
 
 ### Fixed
@@ -18,6 +69,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
 - #2822 - Resolved OakPal issue 92 - False positive during build
 - #2794 - Added context prefix for redirect rules feature
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
 
 ### Changed
 
@@ -130,7 +182,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2581 - Versioned ClientLibs no longer works with proxied clientlibs
 - #2562 - Fixed cache refresh on versioned clientlibs request when enforceMd5 is false (default).
-- #2590- Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
+- #2590 - Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
+- #2617 - Fixed issue with NPE in Generic Lists 
 
 ### Added
 - #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.

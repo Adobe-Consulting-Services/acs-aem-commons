@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
+    <filter root="/content/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/conf/global/settings">
         <include pattern="/conf/global/settings/redirects"/>

@@ -33,9 +33,9 @@ import com.google.common.cache.CacheBuilder;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -153,6 +153,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
+        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. " +
+                "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
+        boolean evaluateSelectors() default false;
+
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
         String[] additionalHeaders() default {};
@@ -183,6 +187,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
+    private boolean evaluateSelectors;
     private boolean preserveQueryString;
     private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
@@ -206,6 +211,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     protected final void activate(Configuration config, BundleContext context) {
         this.config = config;
         enabled = config.enabled();
+        evaluateSelectors = config.evaluateSelectors();
 
         if (enabled) {
             Dictionary<String, Object> properties = new Hashtable<>();
@@ -255,6 +261,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
             listenerRegistration.unregister();
             listenerRegistration = null;
         }
+    }
+
+    Configuration getConfiguration(){
+        return config; // for testing
     }
 
     @Override
@@ -346,7 +356,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                rules.add(RedirectRule.from(res.getValueMap()));
+                rules.add(res.adaptTo(RedirectRule.class));
             }
         }
         return rules;
@@ -381,9 +391,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (match != null) {
 
             RedirectRule redirectRule = match.getRule();
-            ZonedDateTime untilDateTime = redirectRule.getUntilDate();
-            if (untilDateTime != null && untilDateTime.isBefore(ZonedDateTime.now())) {
-                log.debug("redirect rule matched, but expired: {}", redirectRule.getUntilDate());
+            Calendar untilDateTime = redirectRule.getUntilDate();
+            if (untilDateTime != null && untilDateTime.before(Calendar.getInstance())) {
+                log.debug("redirect rule matched, but expired: {}", untilDateTime);
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
                 String resourcePath = pathInfo.getResourcePath();
@@ -556,7 +566,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 RedirectConfiguration cfg = loadRules(configPath);
                 return cfg == null ? RedirectConfiguration.EMPTY : cfg;
             });
-            String resourcePath = slingRequest.getRequestPathInfo().getResourcePath(); // /content/mysite/en/page.html
+            RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
+            String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
+            if(evaluateSelectors && requestPathInfo.getSelectorString() != null) {
+                resourcePath += "." + requestPathInfo.getSelectorString();
+            }
 
             ValueMap properties = configResource.getValueMap();
             String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");

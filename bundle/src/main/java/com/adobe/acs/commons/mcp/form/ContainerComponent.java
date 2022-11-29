@@ -44,9 +44,9 @@ public class ContainerComponent extends AbstractContainerComponent {
     @Override
     public Resource buildComponentResource() {
         if (getTitle() != null) {
-            getComponentMetadata().put(JCR_TITLE, getTitle());
+            getProperties().put(JCR_TITLE, getTitle());
         }
-        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getComponentMetadata());
+        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getProperties());
         if (getHelper() != null) {
             res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
