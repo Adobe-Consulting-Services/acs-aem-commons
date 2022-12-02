@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2941 - Add Query Builder support in Report Builder
 - #2950 - Rewriter Packagers (x4) to use TouchUI instead of ClassicUI
 - #2888 - Removed deprecated ComponentHelper
-- #2899 - Remove deprecated - XSS JSP Functions
+- #2899 - Remove deprecated - XSS JSP Functions (fixed version/page compare)
 
 ## 5.4.0 - 2022-10-24
 

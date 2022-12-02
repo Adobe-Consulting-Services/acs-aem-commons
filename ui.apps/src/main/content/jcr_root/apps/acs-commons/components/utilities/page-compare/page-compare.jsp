@@ -27,26 +27,26 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <cq:defineObjects />
 
-<sling:adaptTo var="adaptToModel" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.wcm.comparisons.model.PageCompareModel"/>
+<sling:adaptTo var="model" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.wcm.comparisons.model.PageCompareModel"/>
 
 <%
     XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
-    PageCompareModel model = (PageCompareModel)pageContext.getAttribute("adaptToModel");
+    PageCompareModel pageCompareModel = (PageCompareModel)pageContext.getAttribute("model");
 
-    String pathA = model.getPathA();
+    String pathA = pageCompareModel.getPathA();
     pathA = slingXssAPI.encodeForJSString(pathA);
     pageContext.setAttribute("pathA", pathA);
 
     
-    String pathB = model.getPathB();
+    String pathB = pageCompareModel.getPathB();
     pathB = slingXssAPI.encodeForJSString(pathB);
     pageContext.setAttribute("pathB", pathB);
 
-    String versionA = model.getVersionA();
+    String versionA = pageCompareModel.getVersionA();
     versionA = slingXssAPI.encodeForJSString(versionA);
     pageContext.setAttribute("versionA", versionA);
 
-    String versionB = model.getVersionB();
+    String versionB = pageCompareModel.getVersionB();
     versionB = slingXssAPI.encodeForJSString(versionB);
     pageContext.setAttribute("versionB", versionB);
 
