@@ -46,10 +46,6 @@ import java.lang.annotation.Target;
 public @interface ChildResourceFromRequest {
     String name() default "";
 
-    /** @deprecated */
-    @Deprecated
-    boolean optional() default false;
-
     InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
 
     String via() default "";
