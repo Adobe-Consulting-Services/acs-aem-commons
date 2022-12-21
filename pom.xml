@@ -314,6 +314,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     <artifactId>content-package-maven-plugin</artifactId>
                     <version>1.0.4</version>
                     <configuration>
+                        <userId>${crx.user}</userId>
+                        <password>${crx.password}</password>
                         <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                     </configuration>
                 </plugin>
