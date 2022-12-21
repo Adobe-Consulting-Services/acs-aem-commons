@@ -11,6 +11,8 @@
    </td>
    <td is="coral-table-cell" class="statusCode" data-value="${redirect.statusCode}" style="width:50px;">${redirect.statusCode}</td>
    <td is="coral-table-cell" class="createdBy">${redirect.createdBy}</td>
+   <td is="coral-table-cell" class="effectiveFrom" data-value="${'yyyy-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=redirect.effectiveFrom, locale='en'}"
+       style="width:120px;">${'MMMM dd, yyyy hh:mm a' @ format=redirect.effectiveFrom, locale='en'}</td>
    <td is="coral-table-cell" class="untilDate" data-value="${'yyyy-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=redirect.untilDate, locale='en'}"
        style="width:120px;">${'MMMM dd, yyyy hh:mm a' @ format=redirect.untilDate, locale='en'}</td>
    <td is="coral-table-cell" class="tags" data-value="${redirect.tagIds}">

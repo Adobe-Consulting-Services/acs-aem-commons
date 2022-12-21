@@ -35,7 +35,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -153,8 +152,13 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
-        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. " +
-                "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions"
+                + "When this flag is checked (default), redirect filter will preserve the extension from the request, "
+                + "e.g. append .html to the Location header. ", type = AttributeType.BOOLEAN)
+        boolean preserveExtension() default true;
+
+        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. "
+                + "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
         boolean evaluateSelectors() default false;
 
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
@@ -391,9 +395,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (match != null) {
 
             RedirectRule redirectRule = match.getRule();
-            Calendar untilDateTime = redirectRule.getUntilDate();
-            if (untilDateTime != null && untilDateTime.before(Calendar.getInstance())) {
-                log.debug("redirect rule matched, but expired: {}", untilDateTime);
+
+            if (redirectRule.isExpired() || !redirectRule.isActive()) {
+                log.debug("redirect rule matched, but didn't meet on/off time criteria: untilDate: {}, effectiveFrom: {}",
+                        redirectRule.getUntilDate(), redirectRule.getEffectiveFrom());
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
                 String resourcePath = pathInfo.getResourcePath();
@@ -432,7 +437,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
-            if (ext != null && !location.endsWith(ext)) {
+            if (ext != null && config.preserveExtension() && !location.endsWith(ext)) {
                 location += "." + ext;
             }
             if (mapUrls()) {

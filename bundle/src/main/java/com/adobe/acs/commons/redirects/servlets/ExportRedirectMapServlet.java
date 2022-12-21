@@ -106,7 +106,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(0).setCellValue("Source Url");
         headerRow.createCell(1).setCellValue("Target Url");
         headerRow.createCell(2).setCellValue("Status Code");
-        headerRow.createCell(3).setCellValue("Until Date");
+        headerRow.createCell(3).setCellValue("Off Time");
         headerRow.createCell(4).setCellValue("Notes");
         headerRow.createCell(5).setCellValue("Ignore Context Prefix");
         headerRow.createCell(6).setCellValue("Tags");
@@ -114,6 +114,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(8).setCellValue("Created By");
         headerRow.createCell(9).setCellValue("Modified");
         headerRow.createCell(10).setCellValue("Modified By");
+        headerRow.createCell(11).setCellValue("On Time");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -153,7 +154,14 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             Cell cell10 = row.createCell(10);
             cell10.setCellValue(rule.getModifiedBy());
             cell10.setCellStyle(lockedCellStyle);
-        }
+
+            Calendar effectiveFrom = rule.getEffectiveFrom();
+            if (effectiveFrom != null) {
+                Cell cell = row.createCell(11);
+                cell.setCellValue(effectiveFrom);
+                cell.setCellStyle(dateStyle);
+            }
+       }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 10));
         sheet.setColumnWidth(0, 256 * 50);
         sheet.setColumnWidth(1, 256 * 50);
@@ -166,6 +174,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(8, 256 * 30);
         sheet.setColumnWidth(9, 256 * 12);
         sheet.setColumnWidth(10, 256 * 30);
+        sheet.setColumnWidth(11, 256 * 12);
 
         return wb;
     }

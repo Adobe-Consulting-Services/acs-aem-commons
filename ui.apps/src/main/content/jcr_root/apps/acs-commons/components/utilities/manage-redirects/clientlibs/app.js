@@ -189,6 +189,7 @@
         var note = tr.find('.note').data('value');
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
+        var effectiveFrom = tr.find('.effectiveFrom').data('value');
         var contextPrefixIgnored = tr.find('.contextPrefixIgnored').data('value');
         var tags = tr.find('.tags').data('value');
 
@@ -200,6 +201,7 @@
         var select = $('#status-code-select-box').get(0);
         select.value =statusCode;
         form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
+        form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
         form.find('input[name="./note"]').val(note);
         var cpi = form.find('input[name="./contextPrefixIgnored"]');
         cpi.val(contextPrefixIgnored);

@@ -104,10 +104,17 @@ public class VanityURLServiceImplTest {
     }
 
     @Test
+    public void getPathScope() throws Exception {
+        assertEquals("/content/us/en", vanityURLService.getPathScope("/content/us/en/my-vanity", "/my-vanity"));
+        assertEquals("/content/us/en", vanityURLService.getPathScope("/content/us/en/my-vanity/path", "https://test.com:443/my-vanity/path"));
+        assertEquals("/content/us/en/my-vanity", vanityURLService.getPathScope("/content/us/en/my-vanity", "::::"));
+    }
+
+    @Test
     public void isVanityPath() throws Exception {
         ctx.build().resource("/foo",
                 "jcr:primaryType", "sling:redirect",
-                            "sling:target", "/content/bar");
+                "sling:target", "/content/bar");
 
         assertTrue(vanityURLService.isVanityPath("/content", "/foo", ctx.request()));
     }

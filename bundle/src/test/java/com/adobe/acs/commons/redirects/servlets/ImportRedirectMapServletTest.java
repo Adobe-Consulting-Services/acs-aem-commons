@@ -106,6 +106,8 @@ public class ImportRedirectMapServletTest {
         row1.getCell(3).setCellStyle(dateStyle);
         row1.createCell(4).setCellValue("note-abc");
         row1.createCell(6).setCellValue("redirects:tag1\nredirects:tag2");
+        row1.createCell(11).setCellValue(new Calendar.Builder().setDate(2025, 02, 02).build());
+        row1.getCell(11).setCellStyle(dateStyle);
 
         Row row2 = sheet.createRow(2);
         row2.createCell(0).setCellValue("/content/2");
@@ -157,6 +159,7 @@ public class ImportRedirectMapServletTest {
         assertDateEquals("16 February 1974", rule3.getUntilDate());
         assertEquals("note-abc", rule3.getNote());
         assertArrayEquals(new String[]{"redirects:tag1", "redirects:tag2"}, rule3.getTagIds());
+        assertDateEquals("02 March 2025", rule3.getEffectiveFrom());
 
         RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());

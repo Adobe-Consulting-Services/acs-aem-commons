@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 import javax.imageio.IIOException;
 
@@ -129,7 +130,7 @@ public abstract class AbstractRenditionModifyingProcess {
     @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
     void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, WorkflowHelper workflowHelper)
             throws IOException {
-        File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + workflowHelper.getExtension(mimetype));
+        File tmpFile = Files.createTempFile(getTempFileSpecifier(), "." + workflowHelper.getExtension(mimetype)).toFile();
         OutputStream out = FileUtils.openOutputStream(tmpFile);
         InputStream is = null;
         try {

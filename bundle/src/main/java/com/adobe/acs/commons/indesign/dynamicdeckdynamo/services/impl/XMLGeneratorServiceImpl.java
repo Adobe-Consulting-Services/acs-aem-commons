@@ -95,7 +95,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             }
 
             // create a temp file 
-            processedXmlTempFile = File.createTempFile("targetFile-" + Calendar.getInstance().getTimeInMillis() + ".tmp", null);
+            processedXmlTempFile = Files.createTempFile("targetFile-" + Calendar.getInstance().getTimeInMillis() + ".tmp", null).toFile();
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
