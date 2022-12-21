@@ -9,7 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+
+### Added 
+
 - #2977 - Redirect Manager: Add "Effective From" field
+
+### Fixed 
+
+- #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
 
 ## 5.4.0 - 2022-10-24
 
