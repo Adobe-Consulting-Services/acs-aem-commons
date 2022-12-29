@@ -106,7 +106,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(0).setCellValue("Source Url");
         headerRow.createCell(1).setCellValue("Target Url");
         headerRow.createCell(2).setCellValue("Status Code");
-        headerRow.createCell(3).setCellValue("Until Date");
+        headerRow.createCell(3).setCellValue("Off Time");
         headerRow.createCell(4).setCellValue("Notes");
         headerRow.createCell(5).setCellValue("Evaluate URI");
         headerRow.createCell(6).setCellValue("Ignore Context Prefix");
@@ -115,6 +115,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(9).setCellValue("Created By");
         headerRow.createCell(10).setCellValue("Modified");
         headerRow.createCell(11).setCellValue("Modified By");
+        headerRow.createCell(12).setCellValue("On Time");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -133,28 +134,35 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
             row.createCell(5).setCellValue(rule.getEvaluateURI());
             row.createCell(6).setCellValue(rule.getContextPrefixIgnored());
 
-            Cell cell7 = row.createCell(7);
+            Cell cell6 = row.createCell(7);
             String[] tagIds = rule.getTagIds();
             if(tagIds != null) {
-                cell7.setCellValue(String.join("\n", tagIds));
+                cell6.setCellValue(String.join("\n", tagIds));
             }
-            cell7.setCellStyle(cellWrapStyle);
+            cell6.setCellStyle(cellWrapStyle);
 
-            Cell cell8 = row.createCell(8);
-            cell8.setCellValue(rule.getCreated());
-            cell8.setCellStyle(dateStyle);
+            Cell cell7 = row.createCell(8);
+            cell7.setCellValue(rule.getCreated());
+            cell7.setCellStyle(dateStyle);
 
-            Cell cell9 = row.createCell(9);
-            cell9.setCellValue(rule.getCreatedBy());
-            cell9.setCellStyle(lockedCellStyle);
+            Cell cell8 = row.createCell(9);
+            cell8.setCellValue(rule.getCreatedBy());
+            cell8.setCellStyle(lockedCellStyle);
 
-            Cell cell10 = row.createCell(10);
-            cell10.setCellValue(rule.getModified());
-            cell10.setCellStyle(dateStyle);
+            Cell cell9 = row.createCell(10);
+            cell9.setCellValue(rule.getModified());
+            cell9.setCellStyle(dateStyle);
 
-            Cell cell11 = row.createCell(11);
-            cell11.setCellValue(rule.getModifiedBy());
-            cell11.setCellStyle(lockedCellStyle);
+            Cell cell10 = row.createCell(11);
+            cell10.setCellValue(rule.getModifiedBy());
+            cell10.setCellStyle(lockedCellStyle);
+
+            Calendar effectiveFrom = rule.getEffectiveFrom();
+            if (effectiveFrom != null) {
+                Cell cell = row.createCell(12);
+                cell.setCellValue(effectiveFrom);
+                cell.setCellStyle(dateStyle);
+            }
         }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 10));
         sheet.setColumnWidth(0, 256 * 50);
@@ -169,6 +177,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(9, 256 * 30);
         sheet.setColumnWidth(10, 256 * 12);
         sheet.setColumnWidth(11, 256 * 30);
+        sheet.setColumnWidth(12, 256 * 12);
 
         return wb;
     }

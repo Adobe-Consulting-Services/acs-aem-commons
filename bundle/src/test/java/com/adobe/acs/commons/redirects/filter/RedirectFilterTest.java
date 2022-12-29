@@ -76,6 +76,7 @@ public class RedirectFilterTest {
 
     private RedirectFilter filter;
     private FilterChain filterChain;
+    private RedirectFilter.Configuration configuration;
     private String redirectStoragePath = RedirectResourceBuilder.DEFAULT_CONF_PATH;
 
     private String[] contentRoots = new String[]{
@@ -90,13 +91,14 @@ public class RedirectFilterTest {
                 .thenReturn(context.resourceResolver());
         filter.resourceResolverFactory = resourceResolverFactory;
 
-        RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
+        configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
         when(configuration.additionalHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
         when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
+        when(configuration.preserveExtension()).thenReturn(true);
         filter.activate(configuration, context.bundleContext());
 
         filterChain = mock(FilterChain.class);
@@ -358,6 +360,40 @@ public class RedirectFilterTest {
         assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testPreserveExtension() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(true); // append .html extension to the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/events/test")
+                        .setTarget("/content/we-retail/en")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/events/test.html");
+
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        assertEquals("/content/we-retail/en.html", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testNotPreserveExtension() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/events/test")
+                        .setTarget("/content/we-retail/en")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/events/test.html");
+
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        assertEquals("/content/we-retail/en", response.getHeader("Location"));
     }
 
     @Test
@@ -668,31 +704,81 @@ public class RedirectFilterTest {
     }
 
     @Test
-    public void testUntilDateRedirectExpired() throws Exception {
-        ZonedDateTime dateInPast = ZonedDateTime.now().minusDays(1);
+    public void testUntilDateExpired() throws Exception {
+        ZonedDateTime offTime = ZonedDateTime.now().minusDays(1);
         withRules(
             new RedirectResourceBuilder(context)
                     .setSource("/content/we-retail/en/contact-us")
                     .setTarget("/content/we-retail/en/contact-them")
                     .setStatusCode(302)
-                    .setUntilDate(GregorianCalendar.from(dateInPast))
+                    .setUntilDate(GregorianCalendar.from(offTime))
                     .build()
         );
-        doReturn(false).when(filter).mapUrls();
         assertEquals(null, navigate("/content/we-retail/en/contact-us").getHeader("Location"));
     }
 
     @Test
     public void testUntilDateInFuture() throws Exception {
-        ZonedDateTime dateInFuture = ZonedDateTime.now().plusDays(1);
+        ZonedDateTime offTime = ZonedDateTime.now().plusDays(1);
         withRules(
             new RedirectResourceBuilder(context)
                     .setSource("/content/geometrixx/en/contact-us")
                     .setTarget("/content/geometrixx/en/contact-them")
                     .setStatusCode(302)
-                    .setUntilDate(GregorianCalendar.from(dateInFuture)).build());
-        doReturn(false).when(filter).mapUrls();
+                    .setUntilDate(GregorianCalendar.from(offTime)).build());
         assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateInPast() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().minusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateInFuture() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().plusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals(null, navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateLessThanUntilDate() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().minusDays(1);
+        ZonedDateTime offTime = ZonedDateTime.now().plusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setUntilDate(GregorianCalendar.from(offTime))
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateGreaterThanUntilDate() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().plusDays(1);
+        ZonedDateTime offTime = ZonedDateTime.now().minusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setUntilDate(GregorianCalendar.from(offTime))
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals(null, navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
     }
 
     private void withRules(Resource... rules) {

@@ -53,7 +53,7 @@ public class ExportRedirectMapServletTest {
     public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private ExportRedirectMapServlet servlet;
-    private String redirectStoragePath = "/conf/acs-commons/redirects";
+    private final String redirectStoragePath = "/conf/acs-commons/redirects";
 
     @Before
     public void setUp() throws PersistenceException {
@@ -62,6 +62,7 @@ public class ExportRedirectMapServletTest {
                 .setTarget("/content/two")
                 .setStatusCode(302)
                 .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
+                .setEffectiveFrom(new Calendar.Builder().setDate(2025, 2, 2).build())
                 .setNotes("note-1")
                 .setEvaluateURI(true)
                 .setContextPrefixIgnored(true)
@@ -113,6 +114,7 @@ public class ExportRedirectMapServletTest {
         assertEquals("/content/one", row1.getCell(0).getStringCellValue());
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
+        assertDateEquals("09 October 2022", new Calendar.Builder().setInstant(row1.getCell(3).getDateCellValue()).build());
         assertEquals("note-1", row1.getCell(4).getStringCellValue());
         assertTrue(row1.getCell(5).getBooleanCellValue());
         assertTrue(row1.getCell(6).getBooleanCellValue());
@@ -121,6 +123,7 @@ public class ExportRedirectMapServletTest {
         assertEquals("john.doe", row1.getCell(9).getStringCellValue());
         assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(10).getDateCellValue()).build());
         assertEquals("jane.doe", row1.getCell(11).getStringCellValue());
+        assertDateEquals("02 March 2025", new Calendar.Builder().setInstant(row1.getCell(12).getDateCellValue()).build());
 
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());

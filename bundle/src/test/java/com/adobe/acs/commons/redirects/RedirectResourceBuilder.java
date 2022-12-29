@@ -81,6 +81,11 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setEffectiveFrom(Calendar calendar) {
+        props.put(EFFECTIVE_FROM_PROPERTY_NAME, calendar);
+        return this;
+    }
+
     public RedirectResourceBuilder setCreatedBy(String createdBy) {
         props.put(CREATED_BY_PROPERTY_NAME, createdBy);
         return this;

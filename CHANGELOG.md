@@ -16,6 +16,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2980 - Redirect Manager: Allow evaluating of redirect rules based on request URI
 
 
+### Added 
+
+- #2977 - Redirect Manager: Add "Effective From" field
+
+### Fixed 
+
+- #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
+
 ## 5.4.0 - 2022-10-24
 
 ### Changed 
