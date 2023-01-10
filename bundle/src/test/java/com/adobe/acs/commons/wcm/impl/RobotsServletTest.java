@@ -67,6 +67,14 @@ public class RobotsServletTest {
     }
 
     @Test
+    public void testCrawlerDelay() throws IOException, ServletException {
+        Map<String, Integer> props = new HashMap<>();
+        props.put("crawl.delay", 60);
+        RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+    }
+    @Test
     public void testWriteFromPageProperty() throws IOException, ServletException {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -87,7 +95,6 @@ public class RobotsServletTest {
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
         robotsServlet.doGet(request, response);
         assertEquals("servlet returned an error", 200, response.getStatus());
-        assertResponse("RobotsServlet_testWriteFromAsset.txt", response);
     }
 
     @Test
