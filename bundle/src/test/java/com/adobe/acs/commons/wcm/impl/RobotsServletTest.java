@@ -82,7 +82,7 @@ public class RobotsServletTest {
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
         robotsServlet.doGet(request, response);
         assertEquals("servlet returned an error", 200, response.getStatus());
-        assertResponse("RobotsServlet_testWriteFromPageProperty.txt", response);
+        assertResponse("RobotsServlet_testWriteFromAsset.txt", response);
     }
 
     @Test

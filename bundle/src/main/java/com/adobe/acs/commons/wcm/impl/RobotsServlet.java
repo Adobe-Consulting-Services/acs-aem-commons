@@ -369,7 +369,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Print Grouping Comments", description = "When enabled, comments are printed to the file for start and end of each rule group. This is primarily for debugging purposes.")
         boolean print_grouping_comments() default false;
 
-        @AttributeDefinition(name = "Crawl Delay", description = "Specify the crawl delay in seconds")
+        @AttributeDefinition(name = "Crawl Delay", description = "Specify the crawl delay in seconds, the crawler will wait for the amount of seconds before crawling")
         int crawl_delay() default 0;
     }
 
