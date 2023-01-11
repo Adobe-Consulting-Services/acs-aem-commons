@@ -73,10 +73,10 @@ public class RobotsServletTest {
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
         robotsServlet.doGet(request, response);
         assertEquals("servlet returned an error", 200, response.getStatus());
-
         String outputString = response.getOutputAsString().replaceAll("\n", "");
         assertEquals("Crawl-delay: 60", outputString);
     }
+
     @Test
     public void testWriteFromPageProperty() throws IOException, ServletException {
         Map<String, Object> props = new HashMap<>();

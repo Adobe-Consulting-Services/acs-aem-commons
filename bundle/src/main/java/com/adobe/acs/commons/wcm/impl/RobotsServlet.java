@@ -266,9 +266,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     }
 
     private void addCrawlDelay(PrintWriter writer) {
-        String crawlDelay = buildCrawlerDelay();
-        if (StringUtils.isNotBlank(crawlDelay)) {
-            writer.println(crawlDelay);
+        String crawlDelayString = buildCrawlerDelay();
+        if (StringUtils.isNotBlank(crawlDelayString)) {
+            writer.println(crawlDelayString);
         }
     }
 
