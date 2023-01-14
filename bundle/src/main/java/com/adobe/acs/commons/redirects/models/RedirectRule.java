@@ -238,16 +238,34 @@ public class RedirectRule {
     }
 
     /**
-     * @return whether the rule has expired, i.e. the 'untileDate' property is before the current time
+     * ----[effectiveFrom]---[now]---[intilDate]--->
+     *
+     * @return
      */
-    public boolean isExpired(){
-        return untilDate != null && untilDate.before(Calendar.getInstance());
+    public RedirectState getState(){
+        boolean expired = untilDate != null && untilDate.before(Calendar.getInstance());
+        boolean pending = effectiveFrom != null && Calendar.getInstance().before(effectiveFrom);;
+        boolean invalid = effectiveFrom != null && untilDate != null && effectiveFrom.after(untilDate);
+
+        if (invalid){
+            return RedirectState.Invalid;
+        } else if (expired){
+            return RedirectState.Expired;
+        } else if (pending){
+            return RedirectState.Pending;
+        } else {
+            return RedirectState.Active;
+        }
     }
 
     /**
-     * @return whether the rule is active, i.e. the 'effectiveFrom' property is empty or after the current time
+     * @return whether the redirect is published
      */
-    public boolean isActive() {
-        return effectiveFrom == null || Calendar.getInstance().after(effectiveFrom);
+    public boolean isPublished(){
+        Calendar lastReplicated = resource.getParent().getValueMap().get("cq:lastReplicated", Calendar.class);
+        boolean isPublished = lastReplicated != null;
+        boolean modifiedAfterPublication = isPublished &&
+                ((modified != null && modified.after(lastReplicated)) || (created != null && created.after(lastReplicated)));
+        return isPublished && !modifiedAfterPublication;
     }
 }

@@ -10,3 +10,18 @@
     font-family: 'Courier New', Courier, monospace
 }
 
+.Active {
+    color: #82c387;
+}
+
+.Expired {
+    color: #dcdcdc;
+}
+
+.Pending {
+    color: #f5b95a;
+}
+
+.Invalid {
+    color: #fa7369;
+}
