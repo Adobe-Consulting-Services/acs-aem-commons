@@ -24,19 +24,19 @@ public enum RedirectState {
      * Active: redirect rule meets the on-time/off-time criteria, i.e.
      * activation date is previous or equal to current date and previous to the expiration date.
      */
-    Active("Redirect is active"),
+    ACTIVE("Redirect is active"),
     /**
      * Expired: expiration date is previous or equals to current date.
      */
-    Expired("Redirect has expired (off Time is less than current time)"),
+    EXPIRED("Redirect has expired (off Time is less than current time)"),
     /**
      * Pending: current date is previous to activation date
      */
-    Pending("Redirect is scheduled in the future"),
+    PENDING("Redirect is scheduled in the future"),
     /**
      * if there is an error with the configuration of a redirect (for instance, activation date is previous to expiration date)
      */
-    Invalid("Invalid On/Off time");
+    INVALID("Invalid On/Off time");
 
     String description;
 
@@ -46,5 +46,9 @@ public enum RedirectState {
 
     public String getDescription(){
         return description;
+    }
+
+    public String getName(){
+        return toString().toLowerCase();
     }
 }

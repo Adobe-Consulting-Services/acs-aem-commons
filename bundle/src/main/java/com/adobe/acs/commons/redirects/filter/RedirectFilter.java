@@ -20,7 +20,11 @@
 package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
-import com.adobe.acs.commons.redirects.models.*;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
+import com.adobe.acs.commons.redirects.models.RedirectMatch;
+import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.RedirectState;
+import com.adobe.acs.commons.redirects.models.Redirects;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
@@ -393,7 +397,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
             RedirectRule redirectRule = match.getRule();
 
-            if (redirectRule.getState() != RedirectState.Active) {
+            if (redirectRule.getState() != RedirectState.ACTIVE) {
                 log.debug("redirect rule matched, but didn't meet on/off time criteria: untilDate: {}, effectiveFrom: {}",
                         redirectRule.getUntilDate(), redirectRule.getEffectiveFrom());
             } else {

@@ -35,7 +35,6 @@ import java.util.GregorianCalendar;
 import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
-import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
 import static junit.framework.TestCase.assertTrue;
 import static junitx.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -126,7 +125,7 @@ public class RedirectRuleTest {
                 .setStatusCode(302).build();
 
         RedirectRule rule1 = res1.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Active, rule1.getState());
+        assertEquals(RedirectState.ACTIVE, rule1.getState());
 
         Calendar dateInFuture = GregorianCalendar.from(ZonedDateTime.now().plusDays(1));
         Resource res2 = new RedirectResourceBuilder(context)
@@ -137,7 +136,7 @@ public class RedirectRuleTest {
                 .build();
 
         RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Pending, rule2.getState());
+        assertEquals(RedirectState.PENDING, rule2.getState());
 
         Calendar dateInPast = GregorianCalendar.from(ZonedDateTime.now().minusDays(1));
         Resource res3 = new RedirectResourceBuilder(context)
@@ -148,7 +147,7 @@ public class RedirectRuleTest {
                 .build();
 
         RedirectRule rule3 = res3.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Active, rule3.getState());
+        assertEquals(RedirectState.ACTIVE, rule3.getState());
 
         Resource res4 = new RedirectResourceBuilder(context)
                 .setSource("/content/geometrixx/en/contact-us")
@@ -158,7 +157,7 @@ public class RedirectRuleTest {
                 .build();
 
         RedirectRule rule4 = res4.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Expired, rule4.getState());
+        assertEquals(RedirectState.EXPIRED, rule4.getState());
 
         Resource res5 = new RedirectResourceBuilder(context)
                 .setSource("/content/geometrixx/en/contact-us")
@@ -168,7 +167,7 @@ public class RedirectRuleTest {
                 .build();
 
         RedirectRule rule5 = res5.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Active, rule5.getState());
+        assertEquals(RedirectState.ACTIVE, rule5.getState());
 
         Resource res6 = new RedirectResourceBuilder(context)
                 .setSource("/content/geometrixx/en/contact-us")
@@ -179,7 +178,7 @@ public class RedirectRuleTest {
                 .build();
 
         RedirectRule rule6 = res6.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Active, rule6.getState());
+        assertEquals(RedirectState.ACTIVE, rule6.getState());
 
         Resource res7 = new RedirectResourceBuilder(context)
                 .setSource("/content/geometrixx/en/contact-us")
@@ -190,7 +189,7 @@ public class RedirectRuleTest {
                 .build();
 
         RedirectRule rule7 = res7.adaptTo(RedirectRule.class);
-        assertEquals(RedirectState.Invalid, rule7.getState());
+        assertEquals(RedirectState.INVALID, rule7.getState());
     }
 
     @Test

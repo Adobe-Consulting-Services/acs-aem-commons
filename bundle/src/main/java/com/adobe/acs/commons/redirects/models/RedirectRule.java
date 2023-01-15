@@ -248,13 +248,13 @@ public class RedirectRule {
         boolean invalid = effectiveFrom != null && untilDate != null && effectiveFrom.after(untilDate);
 
         if (invalid){
-            return RedirectState.Invalid;
+            return RedirectState.INVALID;
         } else if (expired){
-            return RedirectState.Expired;
+            return RedirectState.EXPIRED;
         } else if (pending){
-            return RedirectState.Pending;
+            return RedirectState.PENDING;
         } else {
-            return RedirectState.Active;
+            return RedirectState.ACTIVE;
         }
     }
 
@@ -264,8 +264,8 @@ public class RedirectRule {
     public boolean isPublished(){
         Calendar lastReplicated = resource.getParent().getValueMap().get("cq:lastReplicated", Calendar.class);
         boolean isPublished = lastReplicated != null;
-        boolean modifiedAfterPublication = isPublished &&
-                ((modified != null && modified.after(lastReplicated)) || (created != null && created.after(lastReplicated)));
+        boolean modifiedAfterPublication = isPublished
+                && ((modified != null && modified.after(lastReplicated)) || (created != null && created.after(lastReplicated)));
         return isPublished && !modifiedAfterPublication;
     }
 }

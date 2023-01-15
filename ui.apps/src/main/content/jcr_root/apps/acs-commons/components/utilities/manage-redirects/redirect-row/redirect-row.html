@@ -13,7 +13,7 @@
    <td is="coral-table-cell" class="createdBy">${redirect.createdBy}</td>
    <td is="coral-table-cell" align="center" style="text-align: center;">
       <sly data-sly-test=${redirect.published}>
-         <coral-icon icon="circle" size="XS" id="s-${redirect.hashCode}" class="${redirect.state}">
+         <coral-icon icon="circle" size="XS" id="s-${redirect.hashCode}" class="${redirect.state.name}">
          </coral-icon>
          <coral-tooltip placement="right" target="#s-${redirect.hashCode}">${redirect.state.description}</coral-tooltip>
       </sly>
