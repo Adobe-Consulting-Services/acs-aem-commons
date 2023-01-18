@@ -238,7 +238,8 @@ public class RedirectRule {
     }
 
     /**
-     * ----[effectiveFrom]---[now]---[intilDate]--->
+     * ----[effectiveFrom]---[now]---[untilDate]--->
+
      *
      * @return
      */
