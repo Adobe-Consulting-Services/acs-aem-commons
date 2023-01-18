@@ -73,7 +73,7 @@ public class RobotsServletTest {
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
         robotsServlet.doGet(request, response);
         assertEquals("servlet returned an error", 200, response.getStatus());
-        String outputString = response.getOutputAsString().replaceAll("\n", "");
+        String outputString = response.getOutputAsString().trim();
         assertEquals("Crawl-delay: 60", outputString);
     }
 
