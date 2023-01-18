@@ -28,7 +28,7 @@ public enum RedirectState {
     /**
      * Expired: expiration date is previous or equals to current date.
      */
-    EXPIRED("Redirect has expired (off Time is less than current time)"),
+    EXPIRED("Redirect has expired (off time is less than current time)"),
     /**
      * Pending: current date is previous to activation date
      */
