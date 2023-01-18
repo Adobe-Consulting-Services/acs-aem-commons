@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed 
 
 - #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
+- #3021 - Updated AbstractHtmlRequestInjector to not inject on login screen or target exports 
 
 ## 5.4.0 - 2022-10-24
 
