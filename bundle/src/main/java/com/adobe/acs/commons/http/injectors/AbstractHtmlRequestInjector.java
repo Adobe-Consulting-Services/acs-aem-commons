@@ -36,7 +36,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -121,14 +123,14 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         }
 
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
-        
+
         if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests
             return false;
         } else if (StringUtils.equals(request.getHeader("X-Requested-With"), "XMLHttpRequest")) {
             // Do not inject into XHR requests
             return false;
-        } else if (StringUtils.contains(request.getPathInfo(), ".") 
+        } else if (StringUtils.contains(request.getPathInfo(), ".")
                 && !StringUtils.contains(request.getPathInfo(), ".html")) {
             // If extension is provided it must be .html
             return false;
@@ -138,8 +140,19 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         } else if (StringUtils.endsWith(request.getHeader("Referer"), "/cf")) {
             // Do not apply to pages loaded in the Classic Content Finder
             return false;
+        } else if (StringUtils.startsWith(request.getPathInfo(), "/libs/granite/core/content/login.html")) {
+            // Do not apply on login screen
+            return false;
         }
-        
+
+        // Do not apply when exporting Target Offers
+        if (request instanceof SlingHttpServletRequest) {
+            final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+            if (ArrayUtils.contains(slingRequest.getRequestPathInfo().getSelectors(), "atoffer")) {
+                return false;
+            }
+        }
+
         // Add HTML check
         if (log.isTraceEnabled()) {
             log.trace("Injecting HTML via AbstractHTMLRequestInjector");
