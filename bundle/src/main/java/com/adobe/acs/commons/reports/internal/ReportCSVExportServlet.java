@@ -65,6 +65,9 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
   @Reference
   private transient DynamicClassLoaderManager dynamicClassLoaderManager;
 
+  @Reference
+  private DelimiterConfiguration delimiterConfiguration;
+
   @Override
   protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
       throws ServletException, IOException {
@@ -86,6 +89,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
       // initialize the csv
       final Csv csv = new Csv();
+      csv.setFieldSeparatorWrite(delimiterConfiguration.getFieldDelimiter());
       csv.writeInit(writer);
 
       // write the headers
