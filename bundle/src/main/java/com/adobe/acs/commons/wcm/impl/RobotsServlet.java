@@ -75,12 +75,15 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     private static final String USER_AGENT = "User-agent: ";
     private static final String SITEMAP = "Sitemap: ";
     private static final String DISALLOW = "Disallow: ";
+    private static final String CRAWL_DELAY = "Crawl-delay: ";
 
     private String externalizerDomain;
 
     private String robotsContentsPropertyPath;
 
     private boolean printGroupingComments;
+
+    private int crawlDelay;
 
     private transient RobotsRuleSet rules;
 
@@ -95,6 +98,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         externalizerDomain = config.externalizer_domain();
         robotsContentsPropertyPath = config.robots_content_property_path();
         printGroupingComments = config.print_grouping_comments();
+        crawlDelay = config.crawl_delay();
 
         rules = new RobotsRuleSet(config);
     }
@@ -122,6 +126,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         PageManager pageManager = pageManagerFactory.getPageManager(request.getResourceResolver());
         Page page = pageManager.getContainingPage(request.getResource());
         if (page != null) {
+
+            addCrawlDelay(writer);
+
             rules.getGroups().forEach(group -> writeGroup(group, request.getResourceResolver(), page, writer));
 
             rules.getSitemaps().stream().map(sitemap -> buildSitemapDirective(sitemap, request, pageManager, request.getResourceResolver())).forEach(writer::println);
@@ -132,7 +139,6 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
-
     }
 
     private void writeGroup(RobotsRuleGroup group, ResourceResolver resourceResolver, Page page, PrintWriter writer) {
@@ -252,6 +258,20 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         return USER_AGENT + agent;
     }
 
+    private String buildCrawlerDelay() {
+        if (crawlDelay > 0) {
+            return CRAWL_DELAY + String.valueOf(crawlDelay);
+        }
+        return StringUtils.EMPTY;
+    }
+
+    private void addCrawlDelay(PrintWriter writer) {
+        String crawlDelayString = buildCrawlerDelay();
+        if (StringUtils.isNotBlank(crawlDelayString)) {
+            writer.println(crawlDelayString);
+        }
+    }
+
     private String buildSitemapDirective(String sitemap, SlingHttpServletRequest request, PageManager pageManager, ResourceResolver resourceResolver) {
         String sitemapPagePath = sitemap;
         if (!sitemapPagePath.startsWith("/")) {
@@ -348,6 +368,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
         @AttributeDefinition(name = "Print Grouping Comments", description = "When enabled, comments are printed to the file for start and end of each rule group. This is primarily for debugging purposes.")
         boolean print_grouping_comments() default false;
+
+        @AttributeDefinition(name = "Crawl Delay", description = "Specify the crawl delay in seconds, the crawler will wait for the amount of seconds before crawling")
+        int crawl_delay() default 0;
     }
 
     private class RobotsRuleSet {

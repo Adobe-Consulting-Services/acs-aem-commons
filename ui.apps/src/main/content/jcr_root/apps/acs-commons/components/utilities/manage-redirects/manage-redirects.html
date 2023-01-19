@@ -43,7 +43,7 @@
             </betty-titlebar-secondary>
         </betty-titlebar>
     </div>
-    <div class="content-container-inner" style="width:90%; margin:0 auto;">
+    <div class="content-container-inner" style="width:95%; margin:0 auto;">
         <coral-alert size="L" variant="warning" data-sly-test=${context.disabled}>
             <coral-alert-header>OSGi CONFIGURATION MISSING</coral-alert-header>
             <coral-alert-content>RedirectFilter is disabled and requires an OSGi configuration to start.
@@ -100,6 +100,8 @@
                                 <col is="coral-table-column">
                                 <col is="coral-table-column">
                                 <col is="coral-table-column" fixedwidth>
+                                <col is="coral-table-column" fixedwidth>
+                                <col is="coral-table-column">
                                 <col is="coral-table-column">
                                 <col is="coral-table-column">
                                 <col is="coral-table-column">
@@ -113,7 +115,9 @@
                                 <th is="coral-table-headercell">Redirect To</th>
                                 <th is="coral-table-headercell">Status Code</th>
                                 <th is="coral-table-headercell">Created By</th>
-                                <th is="coral-table-headercell">Until Date</th>
+                                <th is="coral-table-headercell">State</th>
+                                <th is="coral-table-headercell">On Time</th>
+                                <th is="coral-table-headercell">Off Time</th>
                                 <th is="coral-table-headercell">Tags</th>
                                 <th is="coral-table-headercell">Notes</th>
                                 <th is="coral-table-headercell">Ignore Context Prefix</th>

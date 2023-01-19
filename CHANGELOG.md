@@ -9,11 +9,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
-## 5.4.1
-
 ### Changed
 
 - #2982 - Add OSGi configuration option for CSV delimiters in reports
+### Added 
+- #3016 - Added crawl delay
+
+### Added 
+
+- #3008 - Redirect Manager: Add "State" column
+- #2977 - Redirect Manager: Add "Effective From" field
+
+### Fixed 
+
+- #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
+- #3021 - Updated AbstractHtmlRequestInjector to not inject on login screen or target exports 
 
 ## 5.4.0 - 2022-10-24
 
