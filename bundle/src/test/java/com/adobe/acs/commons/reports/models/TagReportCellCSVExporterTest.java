@@ -22,6 +22,7 @@ package com.adobe.acs.commons.reports.models;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+import com.adobe.acs.commons.reports.internal.DelimiterConfiguration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +47,14 @@ public class TagReportCellCSVExporterTest {
   private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
   private static final String[] TAGS_VALUE = new String[] { "val1", "val2" };
+
+  private static final Map<String, String> CONFIG = new HashMap<String, String>() {{
+    put("field.delimiter", ",");
+    put("multi.value.delimiter", ";");
+  }};
+
+  @Mock
+  private DelimiterConfiguration delimiterConfiguration;
 
   @Mock
   private Resource mockResource;
@@ -80,12 +89,14 @@ public class TagReportCellCSVExporterTest {
 
     when(tag1.getTitle()).thenReturn(TAGS_VALUE[0]);
     when(tag2.getTitle()).thenReturn(TAGS_VALUE[1]);
+
+    when(delimiterConfiguration.getMultiValueDelimiter()).thenReturn(CONFIG.get("multi.value.delimiter"));
   }
 
   @Test
   public void testEmpty() throws IllegalAccessException {
     log.info("testEmpty");
-    TagReportCellCSVExporter exporter = new TagReportCellCSVExporter();
+    TagReportCellCSVExporter exporter = new TagReportCellCSVExporter(delimiterConfiguration);
     FieldUtils.writeField(exporter, "property", "tags2", true);
     assertEquals("", exporter.getValue(mockResource));
     log.info("Test successful!");
@@ -94,9 +105,9 @@ public class TagReportCellCSVExporterTest {
   @Test
   public void testExporter() throws IllegalAccessException {
     log.info("testExporter");
-    TagReportCellCSVExporter exporter = new TagReportCellCSVExporter();
+    TagReportCellCSVExporter exporter = new TagReportCellCSVExporter(delimiterConfiguration);
     FieldUtils.writeField(exporter, "property", "tags", true);
-    assertEquals(StringUtils.join(TAGS_VALUE, ";"), exporter.getValue(mockResource));
+    assertEquals(StringUtils.join(TAGS_VALUE, delimiterConfiguration.getMultiValueDelimiter()), exporter.getValue(mockResource));
     log.info("Test successful!");
   }
 

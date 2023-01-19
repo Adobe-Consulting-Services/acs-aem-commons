@@ -15,10 +15,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added 
 
+- #2982 - Add OSGi configuration option for CSV delimiters in reports
 - #3016 - Added crawl delay
-
-### Added 
-
 - #3008 - Redirect Manager: Add "State" column
 - #2977 - Redirect Manager: Add "Effective From" field
 
