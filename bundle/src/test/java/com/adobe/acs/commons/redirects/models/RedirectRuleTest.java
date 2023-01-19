@@ -40,6 +40,7 @@ import static junitx.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 
 public class RedirectRuleTest {
+
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
@@ -52,7 +53,8 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", untilDate,
                 "note", "note-1",
-                "contextPrefixIgnored", true);
+                "contextPrefixIgnored", true,
+                "evaluateURI", true);
 
         RedirectRule rule = resource.adaptTo(RedirectRule.class);
         assertEquals("/content/we-retail/en/one", rule.getSource());
@@ -61,7 +63,7 @@ public class RedirectRuleTest {
         assertDateEquals("11 January 2021", rule.getUntilDate());
         assertEquals("note-1", rule.getNote());
         assertTrue(rule.getContextPrefixIgnored());
-
+        assertTrue(rule.getEvaluateURI());
     }
 
     /**

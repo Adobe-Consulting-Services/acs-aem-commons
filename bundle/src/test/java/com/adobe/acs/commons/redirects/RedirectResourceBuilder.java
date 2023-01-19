@@ -66,6 +66,11 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setEvaluateURI(boolean evaluateURI) {
+        props.put(EVALUATE_URI_PROPERTY_NAME, evaluateURI);
+        return this;
+    }
+
     public RedirectResourceBuilder setNotes(String note) {
         props.put(NOTE_PROPERTY_NAME, note);
         return this;

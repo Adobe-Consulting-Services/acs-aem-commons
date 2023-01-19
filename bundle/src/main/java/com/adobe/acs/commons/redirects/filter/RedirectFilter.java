@@ -153,13 +153,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
-        @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions"
+        @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions. "
                 + "When this flag is checked (default), redirect filter will preserve the extension from the request, "
                 + "e.g. append .html to the Location header. ", type = AttributeType.BOOLEAN)
         boolean preserveExtension() default true;
 
-        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. "
-                + "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Evaluate Selectors", description = "(Deprecated) Use the Evaluate URI mode in redirect rule to capture selectors,", type = AttributeType.BOOLEAN)
         boolean evaluateSelectors() default false;
 
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
@@ -581,12 +580,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
             ValueMap properties = configResource.getValueMap();
             String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
 
-            RedirectMatch m = rules.match(resourcePath, contextPrefix);
+            RedirectMatch m = rules.match(resourcePath, contextPrefix, slingRequest);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
                     String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
-                    m = rules.match(mappedPath);
+                    m = rules.match(mappedPath, "", slingRequest);
                 }
             }
             return m;

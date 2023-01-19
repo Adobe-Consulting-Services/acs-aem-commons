@@ -11,12 +11,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- #2980 - Redirect Manager: Allow evaluating of redirect rules based on request URI
+
+### Added 
+
 - #2982 - Add OSGi configuration option for CSV delimiters in reports
-### Added 
 - #3016 - Added crawl delay
-
-### Added 
-
 - #3008 - Redirect Manager: Add "State" column
 - #2977 - Redirect Manager: Add "Effective From" field
 

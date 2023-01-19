@@ -108,13 +108,14 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(2).setCellValue("Status Code");
         headerRow.createCell(3).setCellValue("Off Time");
         headerRow.createCell(4).setCellValue("Notes");
-        headerRow.createCell(5).setCellValue("Ignore Context Prefix");
-        headerRow.createCell(6).setCellValue("Tags");
-        headerRow.createCell(7).setCellValue("Created");
-        headerRow.createCell(8).setCellValue("Created By");
-        headerRow.createCell(9).setCellValue("Modified");
-        headerRow.createCell(10).setCellValue("Modified By");
-        headerRow.createCell(11).setCellValue("On Time");
+        headerRow.createCell(5).setCellValue("Evaluate URI");
+        headerRow.createCell(6).setCellValue("Ignore Context Prefix");
+        headerRow.createCell(7).setCellValue("Tags");
+        headerRow.createCell(8).setCellValue("Created");
+        headerRow.createCell(9).setCellValue("Created By");
+        headerRow.createCell(10).setCellValue("Modified");
+        headerRow.createCell(11).setCellValue("Modified By");
+        headerRow.createCell(12).setCellValue("On Time");
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
@@ -130,38 +131,39 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
                 cell.setCellStyle(dateStyle);
             }
             row.createCell(4).setCellValue(rule.getNote());
-            row.createCell(5).setCellValue(rule.getContextPrefixIgnored());
+            row.createCell(5).setCellValue(rule.getEvaluateURI());
+            row.createCell(6).setCellValue(rule.getContextPrefixIgnored());
 
-            Cell cell6 = row.createCell(6);
+            Cell cell6 = row.createCell(7);
             String[] tagIds = rule.getTagIds();
             if(tagIds != null) {
                 cell6.setCellValue(String.join("\n", tagIds));
             }
             cell6.setCellStyle(cellWrapStyle);
 
-            Cell cell7 = row.createCell(7);
+            Cell cell7 = row.createCell(8);
             cell7.setCellValue(rule.getCreated());
             cell7.setCellStyle(dateStyle);
 
-            Cell cell8 = row.createCell(8);
+            Cell cell8 = row.createCell(9);
             cell8.setCellValue(rule.getCreatedBy());
             cell8.setCellStyle(lockedCellStyle);
 
-            Cell cell9 = row.createCell(9);
+            Cell cell9 = row.createCell(10);
             cell9.setCellValue(rule.getModified());
             cell9.setCellStyle(dateStyle);
 
-            Cell cell10 = row.createCell(10);
+            Cell cell10 = row.createCell(11);
             cell10.setCellValue(rule.getModifiedBy());
             cell10.setCellStyle(lockedCellStyle);
 
             Calendar effectiveFrom = rule.getEffectiveFrom();
             if (effectiveFrom != null) {
-                Cell cell = row.createCell(11);
+                Cell cell = row.createCell(12);
                 cell.setCellValue(effectiveFrom);
                 cell.setCellStyle(dateStyle);
             }
-       }
+        }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 10));
         sheet.setColumnWidth(0, 256 * 50);
         sheet.setColumnWidth(1, 256 * 50);
@@ -169,12 +171,13 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(3, 256 * 12);
         sheet.setColumnWidth(4, 256 * 100);
         sheet.setColumnWidth(5, 256 * 20);
-        sheet.setColumnWidth(6, 256 * 25);
-        sheet.setColumnWidth(7, 256 * 12);
-        sheet.setColumnWidth(8, 256 * 30);
-        sheet.setColumnWidth(9, 256 * 12);
-        sheet.setColumnWidth(10, 256 * 30);
-        sheet.setColumnWidth(11, 256 * 12);
+        sheet.setColumnWidth(6, 256 * 20);
+        sheet.setColumnWidth(7, 256 * 25);
+        sheet.setColumnWidth(8, 256 * 12);
+        sheet.setColumnWidth(9, 256 * 30);
+        sheet.setColumnWidth(10, 256 * 12);
+        sheet.setColumnWidth(11, 256 * 30);
+        sheet.setColumnWidth(12, 256 * 12);
 
         return wb;
     }

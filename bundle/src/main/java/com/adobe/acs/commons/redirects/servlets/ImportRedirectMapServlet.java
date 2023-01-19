@@ -190,10 +190,10 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             untilDate.setTime(c3.getDateCellValue());
             props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, untilDate);
         }
-        Cell c11 = row.getCell(11);
-        if (DateUtil.isCellDateFormatted(c11)) {
+        Cell c12 = row.getCell(12);
+        if (DateUtil.isCellDateFormatted(c12)) {
             Calendar effectiveFrom = Calendar.getInstance();
-            effectiveFrom.setTime(c11.getDateCellValue());
+            effectiveFrom.setTime(c12.getDateCellValue());
             props.put(RedirectRule.EFFECTIVE_FROM_PROPERTY_NAME, effectiveFrom);
         }
         Cell c4 = row.getCell(4);
@@ -201,10 +201,13 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             props.put(RedirectRule.NOTE_PROPERTY_NAME, c4.getStringCellValue());
         }
         Cell c5 = row.getCell(5);
-        boolean ignoreContextPrefix = (c5 != null && c5.getBooleanCellValue());
-        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, ignoreContextPrefix);
+        boolean evaluateURI = (c5 != null && c5.getBooleanCellValue());
+        props.put(RedirectRule.EVALUATE_URI_PROPERTY_NAME, evaluateURI);
         Cell c6 = row.getCell(6);
-        String[] tagIds = c6 == null ? null : c6.getStringCellValue().split("\n");
+        boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
+        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, ignoreContextPrefix);
+        Cell c7 = row.getCell(7);
+        String[] tagIds = c7 == null ? null : c7.getStringCellValue().split("\n");
         props.put(RedirectRule.TAGS_PROPERTY_NAME, tagIds);
         return props;
     }

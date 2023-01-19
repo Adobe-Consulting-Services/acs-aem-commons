@@ -53,7 +53,7 @@ public class ExportRedirectMapServletTest {
     public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private ExportRedirectMapServlet servlet;
-    private String redirectStoragePath = "/conf/acs-commons/redirects";
+    private final String redirectStoragePath = "/conf/acs-commons/redirects";
 
     @Before
     public void setUp() throws PersistenceException {
@@ -64,6 +64,7 @@ public class ExportRedirectMapServletTest {
                 .setUntilDate(new Calendar.Builder().setDate(2022, 9, 9).build())
                 .setEffectiveFrom(new Calendar.Builder().setDate(2025, 2, 2).build())
                 .setNotes("note-1")
+                .setEvaluateURI(true)
                 .setContextPrefixIgnored(true)
                 .setTagIds(new String[]{"redirects:tag1"})
                 .setCreatedBy("john.doe")
@@ -111,25 +112,27 @@ public class ExportRedirectMapServletTest {
         assertNotNull(sheet);
         XSSFRow row1 = sheet.getRow(1);
         assertEquals("/content/one", row1.getCell(0).getStringCellValue());
-        assertEquals("note-1", row1.getCell(4).getStringCellValue());
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
         assertDateEquals("09 October 2022", new Calendar.Builder().setInstant(row1.getCell(3).getDateCellValue()).build());
+        assertEquals("note-1", row1.getCell(4).getStringCellValue());
         assertTrue(row1.getCell(5).getBooleanCellValue());
-        assertEquals("redirects:tag1", row1.getCell(6).getStringCellValue());
-        assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(7).getDateCellValue()).build());
-        assertEquals("john.doe", row1.getCell(8).getStringCellValue());
-        assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(9).getDateCellValue()).build());
-        assertEquals("jane.doe", row1.getCell(10).getStringCellValue());
-        assertDateEquals("02 March 2025", new Calendar.Builder().setInstant(row1.getCell(11).getDateCellValue()).build());
+        assertTrue(row1.getCell(6).getBooleanCellValue());
+        assertEquals("redirects:tag1", row1.getCell(7).getStringCellValue());
+        assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(8).getDateCellValue()).build());
+        assertEquals("john.doe", row1.getCell(9).getStringCellValue());
+        assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(10).getDateCellValue()).build());
+        assertEquals("jane.doe", row1.getCell(11).getStringCellValue());
+        assertDateEquals("02 March 2025", new Calendar.Builder().setInstant(row1.getCell(12).getDateCellValue()).build());
 
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
         assertEquals("/content/four", row2.getCell(1).getStringCellValue());
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());
         assertFalse(row2.getCell(5).getBooleanCellValue());
-        assertEquals("redirects:tag2", row2.getCell(6).getStringCellValue());
-        assertEquals("", row2.getCell(8).getStringCellValue());
-        assertEquals("john.doe", row2.getCell(10).getStringCellValue());
+        assertFalse(row2.getCell(6).getBooleanCellValue());
+        assertEquals("redirects:tag2", row2.getCell(7).getStringCellValue());
+        assertEquals("", row2.getCell(9).getStringCellValue());
+        assertEquals("john.doe", row2.getCell(11).getStringCellValue());
     }
 }
