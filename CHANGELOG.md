@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
+## 5.5.2 - 2023-01-19
+
 ### Fixed
 
 - #3029 - Fixed dropdowns in MCP process forms
