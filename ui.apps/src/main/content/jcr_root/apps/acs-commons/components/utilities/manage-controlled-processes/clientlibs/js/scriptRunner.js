@@ -348,20 +348,15 @@ var ScriptRunner = {
         });
     },
     fixTooltipIcons: function (inputForm) {
-        [...inputForm[0].querySelectorAll('coral-icon.coral-Form-fieldinfo')].forEach(function(iconEl) {
+        inputForm[0].querySelectorAll('coral-icon.coral-Form-fieldinfo').forEach(function(iconEl) {
           var parentEl = iconEl.parentNode;
           var tooltipEl = parentEl.querySelector('coral-tooltip[id="' + iconEl.getAttribute('aria-describedby') + '"]');
           if (!tooltipEl) { return; }
-          var tooltipText = tooltipEl.innerText?.trim();
+          var tooltipText = tooltipEl.innerText.trim();
           if (!tooltipText) { return; }
           var newTooltipEl = document.createElement("span");
 
-          newTooltipEl.innerHTML = `<span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS"
-                            style="margin-top: -.25rem;"
-                            data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="left"
-                            data-quicktip-content="${tooltipText}"
-                            aria-label="${tooltipText}" tabindex="0">
-                        </span>`;
+          newTooltipEl.innerHTML = '<span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" style="margin-top: -.25rem;" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="left" data-quicktip-content="' + tooltipText + '" aria-label="' + tooltipText + '" tabindex="0"></span>';
 
           parentEl.appendChild(newTooltipEl);
           iconEl.remove();
