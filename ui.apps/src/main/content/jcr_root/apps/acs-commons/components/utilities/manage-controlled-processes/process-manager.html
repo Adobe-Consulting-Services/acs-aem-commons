@@ -1,9 +1,9 @@
- <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
      data-sly-call="${clientlib.css @ categories='acs-commons.manage-controlled-processes.app'}"
-     />
- <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
-      data-sly-call="${clientlib.all @ categories='coralui3,granite.ui.coral.foundation'}"
-      />
+/>
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-call="${clientlib.all @ categories='coralui3,granite.ui.coral.foundation'}"
+/>
 <div id="processListing" class="coral--light">
     <table is="coral-table" selectable>
         <colgroup>
@@ -24,12 +24,17 @@
             <th is="coral-table-headercell">Errors</th>
         </tr>
         </thead>
-         <tbody is="coral-table-body">
+        <tbody is="coral-table-body">
         </tbody>
     </table>
 </div>
-<div id="right-action-bar-contents"><button id="startProcess" is="coral-Button" variant="primary" title="Start Process">Start Process</button></div>
+<div id="right-action-bar-contents">
+    <button id="startProcess" is="coral-button" class="coral3-Button coral3-Button coral3-Button--cta" size="L"
+            variant="cta" title="Start Process" aria-label="Start Process">
+        <coral-button-label>Start Process</coral-button-label>
+    </button>
+</div>
 
 <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
      data-sly-call="${clientlib.js @ categories='acs-commons.manage-controlled-processes.app'}"
-     />
+/>
