@@ -1,13 +1,20 @@
 # Change Log
 
 All notable changes to this project will be documented in this file. This format was adapted
-after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
+after the 3.9.0 release. All changes up until the 3.9.0 release can be found
+in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
+
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
+
+### Fixed
+
+- #3029 - Fixed dropdowns in MCP process forms
 
 ## 5.5.0 - 2023-01-19
 
@@ -15,24 +22,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2980 - Redirect Manager: Allow evaluating of redirect rules based on request URI
 
-### Added 
+### Added
 
 - #2982 - Add OSGi configuration option for CSV delimiters in reports
 - #3016 - Added crawl delay
 - #3008 - Redirect Manager: Add "State" column
 - #2977 - Redirect Manager: Add "Effective From" field
 
-### Fixed 
+### Fixed
 
 - #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
-- #3021 - Updated AbstractHtmlRequestInjector to not inject on login screen or target exports 
+- #3021 - Updated AbstractHtmlRequestInjector to not inject on login screen or target exports
 
 ## 5.4.0 - 2022-10-24
 
-### Changed 
+### Changed
 
-- #2936 - Redirect Manager: Expose the "Redirect Creator" property in Touch UI and Excel Export 
-- #2938 - Redirect Manager: Redirect rules imported from Excel file do not store jcr:created and jcr:createdBy properties
+- #2936 - Redirect Manager: Expose the "Redirect Creator" property in Touch UI and Excel Export
+- #2938 - Redirect Manager: Redirect rules imported from Excel file do not store jcr:created and jcr:createdBy
+  properties
 - #2972 - Make the MS Office Add-In Feature Cloud compatible
 - #2941 - Add Query Builder support in Report Builder
 - #2969 - Add append html extension support for the custom editor field in Report Builder
@@ -40,7 +48,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2973 - EndpointService does not set UTF-8 charset for content-type and payload
-
 
 ## 5.3.4 - 2022-08-22
 
@@ -50,7 +57,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
-- #2874 - Make Marketo Forms Easy to configure  
+- #2874 - Make Marketo Forms Easy to configure
 - #2931 - Cloud Manager SonarQube report - 2022.08.10 @ v5.3.2 #2931
 - #2877 - Support for selector-based redirects
 
@@ -63,16 +70,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
-- #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if  the attribute rel="stylesheet" is set
-- #2865 - Reports - Turn absolute property paths to relative to prevent report breakage when malformed (abs path) data is assed 
+- #2867 - Make the Versioned Clientlibs transformer pick up css link tags without a type attribute if the attribute
+  rel="stylesheet" is set
+- #2865 - Reports - Turn absolute property paths to relative to prevent report breakage when malformed (abs path) data
+  is assed
 
 ### Fixed
 
 - #2848 - Fixed issue with ClientLib images not being stored under a resources folder
-- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list page
+- #2830 - Fixed issue with Dynamic Deck Dynamo breaking when the Dynamic Deck Dynamo has no items in its generic list
+  page
 - #2837 - Fixed blank MCP reports when running on AEM as a Cloud Service with Forms SDK
 - #2826 - 5.3.1-SNAPSHOT build failing validation locally
-- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a long value. 
+- #2860 - Changed expiration time from Date object to long value. Expiration time in Adobe I/O JWT token needs to be a
+  long value.
 - #2712 - MCP Content Fragment Import: Improve import of Date and DateTime fields
 - #2869 - Support 500 error pages on AEM CS using x-aem-error-pass = true HTTP response header
 - #2857 - Fixed issue with Marketo integration loading marketo form
@@ -81,12 +92,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in #2772)
+- #2817 - Data Importer failed with per-sort was selected due to attempting to sort an immutable list (introduced in
+  #2772)
 - #2806 - AEM Environment Indicator rendered two times when opening a Experience Fragment variation
-- #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded 
+- #2812 - Fixed issue with Reports not reporting accurate Replication status when report is downloaded
 - #2822 - Resolved OakPal issue 92 - False positive during build
 - #2794 - Added context prefix for redirect rules feature
-- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin, search-based-path-browser
+- #2821 - Replace Undescore.js dependency to Lodash.underscore (AEM version) in multifield, dialog-plugin,
+  search-based-path-browser
 
 ### Changed
 
@@ -104,7 +117,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- Fixed XSS vulnerability in page compare 
+- Fixed XSS vulnerability in page compare
 - #2783 and #2742 - Configurable localization of MCP based FormFields
 
 ### Changed
@@ -131,7 +144,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 
-- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is a member of required groups or an admin.
+- #2741 - Add a new render condition iscurrentusermemberof - A condition that evaluates to true, if the current user is
+  a member of required groups or an admin.
 
 ### Fixed
 
@@ -150,7 +164,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added BG color)
+- #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added
+  BG color)
 - #2716 - Fixed issue with Shared Component Properties Bindings Values Provider facing lock contention
 - #2718 - Fixes CM Code Quality Pipeline failure caused by TestMarketoInterfaces and Jacoco instrumentation
 - #2713 - Marketo form/cloud config root missing
@@ -164,7 +179,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2701 - Fixed UI issues on MCP UI on AEM as a Cloud Service
 - #2690 - Require an OSGi configuration to be present for AEM Environment Indicator to display
-- #2691 - Fixed support for type module scripts for versioned clientlibs 
+- #2691 - Fixed support for type module scripts for versioned clientlibs
 - #2694 - Fixed parsys-limiter counting clipboard items also when the action is not paste
 
 ## 5.0.10 - 2021-08-31
@@ -175,68 +190,85 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- #2687 - Fixes regression introduced in #2660 MCP Tools, and properly fixes setting so threads never terminate, using an "infinitely far-future" timeout.  
+- #2687 - Fixes regression introduced in #2660 MCP Tools, and properly fixes setting so threads never terminate, using
+  an "infinitely far-future" timeout.
 
 ## 5.0.8 - 2021-08-25
 
 ### Fixed
 
 - #2612 - Fix build on Windows
-- #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest 
+- #2648 - Don't implement Provider type SlingHttpServletRequest in FakeSlingHttpServletRequest
 - #2650 - Rely on TopologyEvent only instead of refering to DiscoveryService which causes circular reference errors
-- #2660 - Remove Halt button from MCP as it's use can result in repository corruption. Also removed ability to set task.timeout on ThrottledTaskRunnerImpl, forcing the timeout to be disabled (-1).
+- #2660 - Remove Halt button from MCP as it's use can result in repository corruption. Also removed ability to set
+  task.timeout on ThrottledTaskRunnerImpl, forcing the timeout to be disabled (-1).
 - #2670 - Remove AEM 6.3 support (oak-pal)
 
 ## 5.0.6 - 2021-06-12
 
 ### Changed
+
 - #2593 - Etag log level changed from error to warn for already committed response
-- #2587 - Added default HTML extensions filtering for AEM Environment Indicator filter (since it only works for HTML request/responses) 
+- #2587 - Added default HTML extensions filtering for AEM Environment Indicator filter (since it only works for HTML
+  request/responses)
 
 ### Added
+
 - #2585 - Added option in workflow-remover to define a millisecond delta for the workflows to be cleared.
 
 ### Fixed
+
 - #2581 - Versioned ClientLibs no longer works with proxied clientlibs
 - #2562 - Fixed cache refresh on versioned clientlibs request when enforceMd5 is false (default).
-- #2590 - Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of OSGi config. 
-- #2617 - Fixed issue with NPE in Generic Lists 
+- #2590 - Fixed issue on 6.4.x with Service User mappings not being registered due to unsupported filename format of
+  OSGi config.
+- #2617 - Fixed issue with NPE in Generic Lists
 
 ### Added
+
 - #2536 - Extended renovator MCP Process to handle audit trail entries of moved assets and pages.
 - #2512 - Added Contextual Content Variables feature
 
 ## 5.0.4 - 2021-03-14
 
 ### Fixed
-- #2542 - Declaring VanityUrlAdjuster dynamic reference volatile 
-- #2548 - RedirectFilter#urlAdjuster dynamic reference volatile, and requires OSGi configurations to enable Redirect Manager Filter
+
+- #2542 - Declaring VanityUrlAdjuster dynamic reference volatile
+- #2548 - RedirectFilter#urlAdjuster dynamic reference volatile, and requires OSGi configurations to enable Redirect
+  Manager Filter
 
 ## 5.0.2 - 2021-03-14
 
 ### Fixed
-- #2546 - org.apache.sling.jcr.repoinit.RepositoryInitializer-aem-cs.config prevents repository startup of AEM Cloud Quickstart due to usage of /etc/tags
+
+- #2546 - org.apache.sling.jcr.repoinit.RepositoryInitializer-aem-cs.config prevents repository startup of AEM Cloud
+  Quickstart due to usage of /etc/tags
 
 ## 5.0.0 - 2021-03-13
 
 ### Changed
+
 - #2341 - ACS Commons fails to deploy to AEM as a Cloud Service due to inclusion of /var nodes
 
 ## 4.12.0 - 2021-03-13
 
 ### Added
-- #2518 - Extended the I18N provider / injector mechanism with more options 
+
+- #2518 - Extended the I18N provider / injector mechanism with more options
 - #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
 - #2535 - Add option to append new data to arrays using the data importer tool in MCP
 
 ### Fixed
-- #2529 - Unable to find an implementation for interface acscommons.io.jsonwebtoken.io.Serializer using java.util.ServiceLoader
+
+- #2529 - Unable to find an implementation for interface acscommons.io.jsonwebtoken.io.Serializer using
+  java.util.ServiceLoader
 - #2535 - Fix issue where when using dry-run functionality in the data importer would still commit the changes
 - #2542 - Fixed issue where VanityUrlAdjuster as in an internal package (and thus could never be implemented)
 
 ## 4.11.2 - 2021-01-05
 
 ### Fixed
+
 - #2496 - Upgrade shaded Guava dependency to 30.1
 - #2498 - Potential NPE in RunnableOnMaster
 - #2492 - NPE in JcrPackageReplicationStatusEventHandler
@@ -245,36 +277,44 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 4.11.0 - 2020-12-11
 
 ### Fixed
+
 - #2475 - Content rendered twice on publisher when environment indicator is enabled
 
 ### Changed
-- #2479 - Modified JSON output format for the generic list items to use text/value instead of title/value to conform to requirement of the asset metadata schema forms.
+
+- #2479 - Modified JSON output format for the generic list items to use text/value instead of title/value to conform to
+  requirement of the asset metadata schema forms.
 
 ### Added
-- #2478 - Choice of performing Dispatcher Flush using Re-Fetch technique. 
+
+- #2478 - Choice of performing Dispatcher Flush using Re-Fetch technique.
 
 ## 4.10.0 - 2020-11-19
 
 ### Added
+
 - Add possibility to do page property based dispatcher ttl cache headers
 
 ## 4.9.2 - 2020-11-10
 
 ### Fixed
+
 - #2425 - AEM start page is not rendering with AemEnvironmentIndicatorFilter
 - #2466 - Fixing issues reported by CodeClimate. No functional changes.
 
 ## 4.9.0 - 2020-11-03
 
 ### Added
+
 - #2442 - @ParentResourceValueMapValue injector and annotation
 - #2434 - New workflow process step "Set Image Orientation"
 
 ### Fixed
+
 - #2425 - Call to setContentLength truncates UTF-8 encoded responses
 - #2441 - Memory Exhaustion with Large Report Download
 - #2450 - Non-Latin letters shown as "?" in the downloaded report
-- #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
+- #2446 - One page is displayed in multiple lines in Report Builder export CSV file
 - #2457 - Allow pass through params, block params and allow all params to be defined for serving dispatcher ttl files
 - #2392 - Fixed bug with Audio Encode process that would throw a null pointer exception
 - #2459 - BufferedServletResponse should only defer flushing if the output is really buffered
@@ -282,6 +322,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 4.8.6 - 2020-10-13
 
 ### Fixed
+
 - #2316 - @ChildResourceFromRequest uses incomplete request wrapper
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
@@ -289,8 +330,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
 - ##2429 - Add ability to use attribute names that contain a colon for the StaticReferenceRewriteTransformerFactory
 
-
 ### Added
+
 - #1060 - New tree activation MCP utility
 
 ### Changed
@@ -307,9 +348,11 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## 4.8.2 - 2020-07-23
 
 ### Fixed
+
 - #2372 - EnvironmentFilter breaks HTTP Assets API (#2371)
 
 ### Changed
+
 - #2369 - Fixed a bunch of SCR warnings
 
 ## 4.8.0 - 2020-07-16
@@ -326,9 +369,11 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## 4.7.2 - 2020-07-08
 
 ### Added
+
 - #2339 - Microsoft Office Add-in for AEM Assets
 
 ### Fixed
+
 - #2267 - Redirect Map Edit Wrong Entry
 - #2298 - Removed dependency on com.day.cq.dam.api.collection
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
@@ -340,29 +385,36 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2350 - Fixed null check in VanityServiceUrlImpl
 
 ### Changed
+
 - #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
 - #2317 - New annotation processor for dialog generation, OSGi manager service no longer needed
 - #2324 - On-Deploy-Scripts are not supported on AEMaaCS
 - #2357 - Added safeguards to SMTPMailServiceHealthCheck to help avoid run-way email pings
 - #2350 - Added hook for VanityUrlAdjuster in VanityServiceUrlImpl
-- #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
-- #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.
+- #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending
+  AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
+- #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/
+  AEM CS deployments.
 
 ## [4.7.0] - 2020-05-12
 
 ### Added
+
 - #2293 - Added Copy Properties Workflow Process
 - #2243 - Added a servlet for serving robots.txt files
 
 ### Changed
+
 - #2282 - Certain services which are not compatible to AEM as a CloudService, should not be available there
 
 ## [4.6.0] - 2020-05-01
 
 ### Added
+
 - #2266 - InDesign "Dynamic Deck Dynamo"
 
 ### Fixed
+
 - #2265 - Review ResourceChangeListener configuration
 - #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
 - #2287 - Report Builder pagination buttons not working when report has no Search Parameters configured.
@@ -370,9 +422,11 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [4.5.2] - 2020-04-18
 
 ### Added
+
 - #2199 - Add read permission for acs-commons-email-service user in conf folder using rep policy
 
 ### Fixed
+
 - #2241 - Automatic Package Replicator - Missing Service User
 - #2245 - Marketo Endpoint Protocol Documentation Issue
 - #2254 - Fixed unwanted versioned client library cache reload for static CSS/JS resources of a proxied clientlib
@@ -381,36 +435,44 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [4.5.0] - 2020-03-25
 
 ### Added
+
 - #2215 - Added Parameterized granite include to support generic dialog snippets
 - #2252 - Make comment available as email template variable
 
 ### Fixed
+
 - #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
 - #2220 NPE in Audio component due to XSSApi adapter no longer available
 - #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
 - #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
-- #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
+- #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute
+  was null
 
 ### Changed
+
 - #2208 - Remove the WCMInbox webconsole plugin (#2205)
 
 ## [4.4.2] - 2020-02-28
 
 ### Added
+
 - #2202 - Added dynamic script resolution modular support to MCP
 - #2194 - Add actions of Quickpublish an Managepublication to Generic list console
 - #2174 - Added more granular control of the environment indicator css
 - #2164 - Content model framework now supports page create dialogs
 - #2160 - provide EL support for contextual root
-- #2190 - Added RequireAem OSGi Service that allows for enablement/disablement based on AEM as a Cloud Service or Classic (AMS/OnPrem)
+- #2190 - Added RequireAem OSGi Service that allows for enablement/disablement based on AEM as a Cloud Service or
+  Classic (AMS/OnPrem)
 
 ### Fixed
+
 - #2195 - Removed direct references to Oak API
 - #2185 - fix empty iconpicker and fontawesome files
 - #2182 - SMTPMailServiceHealthCheck does not dynamically bind MessageGateway Open
-- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI
+  v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
 - #2169 - Fixed build warnings regarding baseline versions
 - #2146 - POI exception generating Excel file with too many references
 - #2145 - Added null value test to spreadsheet tests
@@ -420,6 +482,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2082 - ETag filter never sends 304
 
 ### Changed
+
 - #2181 - Only run dependency-check-maven-plugin in dedicated profile
 - #2172 - Updated maven central URL to HTTPS
 - #2170 - Changed human readable byte count method to private to minimize API surface
@@ -427,17 +490,19 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2138 - Removed Joda-time library in favor of using standard Java Instant library
 - #2133 - Update test library dependencies
 
-
 ## [4.4.0] - 2019-12-17
 
 ### Added
+
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
 - #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
-- #2084 - MCP Forms now extract default value/checkbox state from field value as well as from annotation options (both ways work now)
+- #2084 - MCP Forms now extract default value/checkbox state from field value as well as from annotation options (both
+  ways work now)
 - #2064 - Adding Marketo Form Component
 - #1919 - Report Builder | Path List Executor Implementation
 
 ### Fixed
+
 - #2090 - A failing on-deploy script could still have some of its pending changes persisted by the framework.
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
 - #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
@@ -445,24 +510,31 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2124 - cleanup build logs for unittests
 
 ### Changed
+
 - #2101 - Cleanup public API of the remote Assets feature (#2094)
 
 ## [4.3.4] - 2019-10-16
 
 ### Added
+
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
 - #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
 - #2085 - Made dry run mode default for all MCP processes that have it
 
 ### Added
+
 - #2071 - Added Tag Export as CSV functionality, as new option in Exports
 
 ### Changed
+
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
-- #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
-- #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
+- #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that
+  existing config pages are not deleted
+- #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of
+  inlineScript
 
 ### Fixed
+
 - #2092 - Tag Export - IndexOutOfBoundsException issue
 - #2004 - Bugfix/httpcache combined cache key different entries
 - #2032 - Fixed filter.xml on /var/acs-commons
@@ -477,17 +549,22 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [4.3.2] - 2019-08-29
 
 ### Added
+
 - #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
-- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
+- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download
+  Report)
 
 ### Fixed
+
 - #1975 - Split application content from mutable content
-- #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
+- #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location
+  changed in AEM.
 - #986 - Rewrote Generic Lists to use Touch UI
 
 ## [4.3.0] - 2019-07-31
 
 ### Fixed
+
 - #1644 - Asset Ingestor | Add include section
 - #1914 - java.lang.ClassNotFoundException: com.fasterxml.jackson.core.JsonProcessingException
 - #1942 - Renovator issues moving folder in AEM 6.3.3.3
@@ -501,6 +578,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2011 - Setting Travis platform to Trusty so that Oracle JDK 8 build will continue to work.
 
 ### Added
+
 - #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 - #1993 - New components for autocomplete and rich text editor
 - #2012 - Added support for query autocomplete widget
@@ -508,33 +586,41 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [4.2.2] - 2019-07-15
 
 ### Added
+
 - #1967 - Expose On-Deploy Script Executor for external script triggering
 - #1967 - Write On-Deploy Script exception statement to the result node
 - #1927 - HTTP cache: added cookie exclusion
 - #1905 - HTTP cache: added response header exclusion
 
 ### Changed
+
 - #1945 - Added support for jcr:content creation and update to the Data Importer
 - #1644 - Asset Ingestor | Add include section
 - #1989 - Updated maven dependency org.owasp:dependency-check-maven to 5.1.1
 
 ### Fixed
+
 - #1547 - Updated Report Runner's ReportCSVExportServlet to support extra-ACS Commons ReportCellCSVExporter
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
-- #1982 - Fixed the Shared and Global icons that are not appearing in edit bar when the dialog is edited and saved and page refreshes due to Edit Config Listener ( Shared Component Properties )
+- #1982 - Fixed the Shared and Global icons that are not appearing in edit bar when the dialog is edited and saved and
+  page refreshes due to Edit Config Listener ( Shared Component Properties )
 
 ## [4.2.0] - 2019-06-18
 
 ### Added
+
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
 - #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
-- #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
+- #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a
+  SlingHttpServletRequest to adapt from.
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
 
 ### Fixed
-- #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
+
+- #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on
+  ModeUtil
 - #1868 - Added support for @Named annotation in MCP Form Field processor
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
@@ -548,6 +634,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [4.1.0] - 2019-05-07
 
 ### Added
+
 - #1294 - New Remote Assets feature
 - #1713 - Added Servlet Filter to generate an ETag header based on a message digest
 - #1778 - Added folder support to system notifications
@@ -560,15 +647,21 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1973 - Added Vanity URL support to SiteMap and the ability to specify URL rewrites so the output matches dispatcher
 
 ### Changed
+
 - #1539 - Removed unused references to the QueryBuilder API.
-- #1765 - Strings in spreadsheet input are no longer automatically assumed to be strings -- Fixes to spreadsheet and variant for handling data types, especially dates, as well as unit test coverage for data importer.
+- #1765 - Strings in spreadsheet input are no longer automatically assumed to be strings -- Fixes to spreadsheet and
+  variant for handling data types, especially dates, as well as unit test coverage for data importer.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
-- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded
+  dependencies.
 - #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
-- #1856 - It's now possible to change the locale used for number, date and time handling for Spreadsheet instances, allowing consistent behavior independent of OS defaults.
-- #1852 - Switched from event-based resource observation to the ResourceChangeListener API wherever possible. In the case of the JCRNodeChangeEventHandler component, reconfiguration is necessary to be able to use the new API.
+- #1856 - It's now possible to change the locale used for number, date and time handling for Spreadsheet instances,
+  allowing consistent behavior independent of OS defaults.
+- #1852 - Switched from event-based resource observation to the ResourceChangeListener API wherever possible. In the
+  case of the JCRNodeChangeEventHandler component, reconfiguration is necessary to be able to use the new API.
 
 ### Fixed
+
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
 - #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
@@ -596,11 +689,14 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [4.0.0] - 2019-02-20
 
 ### Added
+
 - #1743 - Added support for v2.1 of org.apache.sling.xss bundle
 - Created log and error output for Asset Ingestor when asset is null
-- Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
+- Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content
+  acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
-- #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
+- #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine
+  cache store
 - #1612 - Retries count and retry pause is configurable for all Asset Ingestors
 - #1637 - Add support for bounce address setting in EmailService
 - #1654 - Added I18nProvider service to support injectors
@@ -612,6 +708,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+
 - #1796 - HttpCache: Added back in CombinedCacheKeyFactory
 - #1733 - Do not throw ReplicationExceptions from Dispatcher Flush Rules Preprocessor
 - #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
@@ -628,34 +725,42 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1572 - Update JSCH version used for SFTP support
 - #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
 - #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
-- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
+- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive)
+  values
 - #1563 - Limiting the parsys does not work when pasting multiple paragraphs
 - #1593 - Sftp Asset Injector throws URISyntaxException if item contains special characters
 - #1598 - Asset Ingestor | If user provides invalid info, nothing is happens. Erorr in report is expected
-- #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
-- #1604 - File asset import and url asset imports saves source path as migratedFrom property into assets jcr:content node. If asset is skipped the message in the format "source -> destination" is written into report
+- #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits,
+  hyphens, underscores, another chars will be replaced with hyphens
+- #1604 - File asset import and url asset imports saves source path as migratedFrom property into assets jcr:content
+  node. If asset is skipped the message in the format "source -> destination" is written into report
 - #1606 - Url Asset Import saves correct path into migratedFrom property of assets's jcr:content node
 - #1610 - Bulk Workflow Manager doing nothing
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
-- #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support
+  only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 - #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
 - #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
 - #1682 - Enable secure XML processing
 - #1684 - Useing Autocloseable when closing resourceresolvers
-- #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on MockSession.refresh().
+- #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on
+  MockSession.refresh().
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
 - #1716 - Added short-name to all TLD files.
 - #1730 - MCP Forms Multifield class now handles arrays correctly
 - #1723 - Fix unclosed channel when non exising path provided
 
 ### Changed
+
 - #1726 - Deploy the bundle via the dedicated DAV url
-- #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
+- #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is
+  available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
-- #1609 - EnsureOakIndex excludes property seed, and sub-tree [oak:QueryIndexDefinition]/facets/jcr:content, by way up an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
+- #1609 - EnsureOakIndex excludes property seed, and sub-tree [oak:QueryIndexDefinition]/facets/jcr:content, by way up
+  an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
 - #1614 - (Breaking change) Disables all auto-on clientlibs by default, requiring proxy clientlibs.
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
@@ -666,24 +771,30 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1753 - Remove Dynamic*ClientLibraryServlet and breaks out TouchUI widgets into discrete Client Libraries
 
 ### Removed
+
 - #1635 - Removed WCM Inbox Web Console Plugin
 - #1716 - TLD files are no longer automatically generated
 
 ## [3.19.0] - 2018-11-03
 
 ### Added
+
 - #1410 - Show/Hide fields and tabs based on dropdown and/or checkbox selections
 - #1446 - Renovator combines and replaces previous relocator tools in MCP
-- #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
+- #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of
+  priority.
 - #1529 - Instant Package Utility
-- #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
+- #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models
+  with very little coding.
 - #1531 - Content Fragment Importer tool added
 - #1532 - Request Throttler tool added
 
 ### Changed
+
 - #1523 - Added check to EnsureACEs to avoid duplicate path processing.
 
 ### Fixed
+
 - #1464 - ResourceResolverMapTransformer decodes URI-encoded values correctly now
 - #1495 - Error page handler resets component context attribute correctly now
 - #1497 - Javadoc improvement in EndpointService
@@ -703,22 +814,27 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [3.18.2] - 2018-09-26
 
 ### Fixed
+
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
 - #1486 - By default include policy mapping nodes for the replication status handler
 - #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1457 - Forward ported fixed from ACS Commons 2.x line for Parsys Placeholder feature
-- #1498 - Inadventantly included ServletResovler configs causing incorrect servlet resolution behaviour in AEM (default JSON servlet not working)
+- #1498 - Inadventantly included ServletResovler configs causing incorrect servlet resolution behaviour in AEM (default
+  JSON servlet not working)
 
 ### Changed
+
 - #1462 - Updated ACS Commons multifield to support Colorfields
 - #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
 
 ## [3.18.0] - 2018-09-24
 
 ### Added
+
 - #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
 
 ### Fixed
+
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
 - #1428 - URL Asset Import retain case sensitivity in column names
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
@@ -733,6 +849,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
 
 ### Changed
+
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
 - #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
 - #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes
@@ -741,21 +858,27 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ## [3.17.4] - 2018-08-15
 
 ### Fixed
+
 - #1413 - Added ACL to make the redirect maps globally readable
 
 ## [3.17.2] - 2018-08-13
 
 ### Fixed
+
 - #1438 - Ensured Groups do not honor intermediate paths
 - #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
-- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
-- #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create
+  nodes.
+- #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested
+  structures).
 - #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
-- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
+- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable
+  templates
 - #1417 - Fixed xss vulnerabilities in generic lists
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
 - #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
-- #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
+- #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (
+  like file uploads).
 - #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
 - #1441 - Fixed issue with the Report Runner loading custom Report Executors
@@ -768,16 +891,19 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ### Changed
+
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1420 - MCP page component no longer extends "final" GraniteUI shell component
 - #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
 
 ### Added
+
 - #1410 - Added support to hide/show dialog fields and tabs based on values selected for dropdown and or checkbox.
 
 ## [3.17.0] - 2018-05-22
 
 ### Fixed
+
 - #1370 - Fixed Invalid Entries display in FireFox for Redirect Map
 - #1371 - Fixed Incorrect Entry Deletion when Filtering for Redirect Map
 - #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
@@ -787,44 +913,55 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1376 - Spreadsheet API data handling improvements
 
 ### Added
+
 - #1365 - Sling model injector for Shared Component Property values.
 
 ## [3.16.0] - 2018-05-10
 
 ### Fixed
+
 - #1278 - EvolutionContext refactored to contain a method returning version history
 - #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
 - #1363 - Corrects permissions allowing HTTP Cache to write to the JCR Cache space under /var/acs-commons/httpcache
 
 ### Added
+
 - #1292 - New MCP Tool to refresh asset folder thumbnails
-- #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which improves URL Asset Import and Data Importer as well.
+- #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper
+  data type conversion, which improves URL Asset Import and Data Importer as well.
 - #1347 - Redirect Map Entry editor
 - #1357 - Asset ingestion now uses hypen in folder names by default and offers option controlling asset naming behavior.
 
 ### Changed
+
 - #1343 - CodeClimate now checks for license header
 - #1354 - Added JMX Bean for monitoring and executing on-dploy scripts
 
 ## [3.15.2] - 2018-04-25
 
 ### Changed
+
 - #1338 - Asset ingestion now visible to the groups: administrators, asset-ingest, dam-administrators
 
 ### Added
-- #1338 - Authorized Group process definition factory for MCP abstracts the basic authentication check, easier to customize now
+
+- #1338 - Authorized Group process definition factory for MCP abstracts the basic authentication check, easier to
+  customize now
 
 ### Fixed
+
 - #1335 - MCP Error handling and user experience are overhauled and the overall experience is improved
 
 ## [3.15.0] - 2018-04-13
 
 ### Changed
+
 - #1284 - Expose the shared and global properties resources via bindings.
 - #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration
 - #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
 
 ### Added
+
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
 - #1237 - Reporting feature: Adding a report column for finding references to a resource
 - #1279 - New import tools for node metadata and file/url-based asset ingestion
@@ -833,11 +970,15 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1245 - On-Deploy Scripts Framework
 
 ### Fixed
+
 - #1262 - MCP race condition affects showing completion status for processes that finish very quickly
-- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
+- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out
+  anymore)
 - #1303 - Updated HTTP Cache test to handle all platforms more agnostically
-- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
-- #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model editor)
+- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in
+  ReplicationStatusManagerImpl to prevent NPEs.
+- #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model
+  editor)
 - #1283 - Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
 - #1319 - Ensuring that PageRootProviderConfig references are sorted consistently.
 
@@ -861,7 +1002,8 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1242 - New ResourceUtil utility class.
 - #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
 - #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
-- #1274 - MCP now supports RequestParameter in process definitions.  This gives access to file binary and other metadata such as name and size.
+- #1274 - MCP now supports RequestParameter in process definitions. This gives access to file binary and other metadata
+  such as name and size.
 
 ### Fixed
 
@@ -909,8 +1051,10 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 
 - #1213 - Fixing Redirect Manager Action Load Issues
 - #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
-- #1205 - Calculate MD5 based on minified clientlib (in case minification is enabled). This is a workaround around the AEM limitation to only correctly invalidate either the minified or unminified clientlib).
-- #1217 - Make compile-scope dependencies provided-scope and add enforcer rule to ensure no compile scope dependencies are added in the future.
+- #1205 - Calculate MD5 based on minified clientlib (in case minification is enabled). This is a workaround around the
+  AEM limitation to only correctly invalidate either the minified or unminified clientlib).
+- #1217 - Make compile-scope dependencies provided-scope and add enforcer rule to ensure no compile scope dependencies
+  are added in the future.
 - #1201 - Improved error handling and logging in EnsureOakIndex
 
 ## [3.13.0] - 2017-12-04
@@ -970,7 +1114,8 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 
 ### Fixed
 
-- #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.
+- #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client
+  lib category.
 - #1119: Fixed issue with timezone of on/off times on System Notifications
 - #1110: Added package dependency on AEM 6.2 to ensure proper installation order.
 - #1128: Changed to SecureRandom for string generation in LinkedIn integration.
@@ -987,22 +1132,27 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1041: QR Code to Publish in Page Editor
 - #1067: Vanity Path Web server re-writer mapping
 - #2212: Exclude Pages (by Template name or by page properties of boolean values) from Sitemap
-- Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
-- `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
-- Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled work
+- Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space
+  usage), Deep Prune, Asset Ingestor (aka AntEater v2)
+- `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be
+  retried if any of them fail and break the commit.
+- Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled
+  work
 
 ### Changed
 
 - #1033: Allow Resource Resolver Map Factory's re-write attributes to be passed in as an array
 - Updated Fast Action Manager retry logic to support more failure cases properly.
-- Updated Fast Action Manager retry logic to be savvy about interrupted exceptions thrown by the watchdog trying to kill the thread.
+- Updated Fast Action Manager retry logic to be savvy about interrupted exceptions thrown by the watchdog trying to kill
+  the thread.
 - Updated PageRootProvider (Shared Component Properties) to support multiple/independent configurations.
 
 ### Fixed
 
 - #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa'
 - #1008: E-mail subject mangled for non-latin chars
-- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat)
+- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual
+  user that requested the replication of the package (with configurable override via OSGi config for backwards compat)
 - #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened
 - #1051: Emails sent via EmailService do not have connection/socket timeouts
 - #1064: Fixed NPE in ResourceServiceManager when no serviceReferences exist
@@ -1011,10 +1161,13 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - Fast Action Manager is much more efficient in how it gauges CPU usage, which makes it even faster than before.
 
 ### Security
+
 - #1059: ResourceServiceManager no longer users admin resource resolver
 
 ### Deprecated
-- com.adobe.acs.commons.wcm.impl.PageRootProviderImpl has been deprecated. com.adobe.acs.commons.wcm.impl.PageRootProviderConfig should be used instead.
+
+- com.adobe.acs.commons.wcm.impl.PageRootProviderImpl has been deprecated.
+  com.adobe.acs.commons.wcm.impl.PageRootProviderConfig should be used instead.
 
 <!---
 
