@@ -61,7 +61,9 @@ import org.mockito.Mockito;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -74,6 +76,7 @@ public class RedirectFilterTest {
 
     private RedirectFilter filter;
     private FilterChain filterChain;
+    private RedirectFilter.Configuration configuration;
     private String redirectStoragePath = RedirectResourceBuilder.DEFAULT_CONF_PATH;
 
     private String[] contentRoots = new String[]{
@@ -88,13 +91,14 @@ public class RedirectFilterTest {
                 .thenReturn(context.resourceResolver());
         filter.resourceResolverFactory = resourceResolverFactory;
 
-        RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
+        configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
         when(configuration.additionalHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
         when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
+        when(configuration.preserveExtension()).thenReturn(true);
         filter.activate(configuration, context.bundleContext());
 
         filterChain = mock(FilterChain.class);
@@ -136,6 +140,38 @@ public class RedirectFilterTest {
         return response;
     }
 
+    private MockSlingHttpServletResponse navigateToURI(String requestPath) throws IOException, ServletException {
+        MockSlingHttpServletRequest request = spy(context.request());
+        doReturn(requestPath).when(request).getRequestURI();
+
+        String resourcePath = requestPath;
+        int idx = resourcePath.indexOf('.');
+        if (idx > -1) {
+            resourcePath = resourcePath.substring(0, idx);
+        }
+
+        int qs = requestPath.lastIndexOf('?');
+        if (qs > 0) {
+            request.setQueryString(requestPath.substring(qs + 1));
+        }
+        context.requestPathInfo().setResourcePath(resourcePath);
+        request.setResource(getOrCreateResource(resourcePath));
+
+
+        MockSlingHttpServletResponse response = context.response();
+        filter.doFilter(request, response, filterChain);
+
+        return response;
+    }
+
+    private Resource getOrCreateResource(String resourcePath) {
+        Resource resource = context.resourceResolver().getResource(resourcePath);
+        if (resource == null) {
+            resource = context.create().resource(resourcePath);
+        }
+        return resource;
+    }
+
     @Test
     public void testActivate() {
         assertTrue(filter.isEnabled());
@@ -163,8 +199,10 @@ public class RedirectFilterTest {
             new RedirectResourceBuilder(context)
                     .setSource("/content/we-retail/en/events/*")
                     .setTarget("/content/we-retail/en/four")
+                    .setEvaluateURI(true)
                     .setStatusCode(301).build()
         );
+
         ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
         rb.resource("redirect-invalid-1","sling:resourceType", "cq:Page");
 
@@ -176,17 +214,20 @@ public class RedirectFilterTest {
         assertEquals("/content/we-retail/en/one", rule1.getSource());
         assertEquals("/content/we-retail/en/two", rule1.getTarget());
         assertEquals(302, rule1.getStatusCode());
+        assertFalse(rule1.getEvaluateURI());
 
         RedirectRule rule2 = it.next();
         assertEquals("/content/we-retail/en/three", rule2.getSource());
         assertEquals("/content/we-retail/en/four", rule2.getTarget());
         assertEquals(301, rule2.getStatusCode());
+        assertFalse(rule2.getEvaluateURI());
 
         RedirectRule rule3 = it.next();
         assertEquals("/content/we-retail/en/events/*", rule3.getSource());
         assertEquals("/content/we-retail/en/four", rule3.getTarget());
         assertEquals(301, rule3.getStatusCode());
         assertNotNull(rule3.getRegex());
+        assertTrue(rule3.getEvaluateURI());
     }
 
     @Test
@@ -319,6 +360,40 @@ public class RedirectFilterTest {
         assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testPreserveExtension() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(true); // append .html extension to the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/events/test")
+                        .setTarget("/content/we-retail/en")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/events/test.html");
+
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        assertEquals("/content/we-retail/en.html", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testNotPreserveExtension() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/events/test")
+                        .setTarget("/content/we-retail/en")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/en/events/test.html");
+
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        assertEquals("/content/we-retail/en", response.getHeader("Location"));
     }
 
     @Test
@@ -629,31 +704,81 @@ public class RedirectFilterTest {
     }
 
     @Test
-    public void testUntilDateRedirectExpired() throws Exception {
-        ZonedDateTime dateInPast = ZonedDateTime.now().minusDays(1);
+    public void testUntilDateExpired() throws Exception {
+        ZonedDateTime offTime = ZonedDateTime.now().minusDays(1);
         withRules(
             new RedirectResourceBuilder(context)
                     .setSource("/content/we-retail/en/contact-us")
                     .setTarget("/content/we-retail/en/contact-them")
                     .setStatusCode(302)
-                    .setUntilDate(GregorianCalendar.from(dateInPast))
+                    .setUntilDate(GregorianCalendar.from(offTime))
                     .build()
         );
-        doReturn(false).when(filter).mapUrls();
         assertEquals(null, navigate("/content/we-retail/en/contact-us").getHeader("Location"));
     }
 
     @Test
     public void testUntilDateInFuture() throws Exception {
-        ZonedDateTime dateInFuture = ZonedDateTime.now().plusDays(1);
+        ZonedDateTime offTime = ZonedDateTime.now().plusDays(1);
         withRules(
             new RedirectResourceBuilder(context)
                     .setSource("/content/geometrixx/en/contact-us")
                     .setTarget("/content/geometrixx/en/contact-them")
                     .setStatusCode(302)
-                    .setUntilDate(GregorianCalendar.from(dateInFuture)).build());
-        doReturn(false).when(filter).mapUrls();
+                    .setUntilDate(GregorianCalendar.from(offTime)).build());
         assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateInPast() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().minusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateInFuture() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().plusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals(null, navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateLessThanUntilDate() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().minusDays(1);
+        ZonedDateTime offTime = ZonedDateTime.now().plusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setUntilDate(GregorianCalendar.from(offTime))
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
+    }
+
+    @Test
+    public void testEffectiveDateGreaterThanUntilDate() throws Exception {
+        ZonedDateTime onTime = ZonedDateTime.now().plusDays(1);
+        ZonedDateTime offTime = ZonedDateTime.now().minusDays(1);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/contact-us")
+                        .setTarget("/content/geometrixx/en/contact-them")
+                        .setStatusCode(302)
+                        .setUntilDate(GregorianCalendar.from(offTime))
+                        .setEffectiveFrom(GregorianCalendar.from(onTime)).build());
+        assertEquals(null, navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
     }
 
     private void withRules(Resource... rules) {
@@ -1005,5 +1130,80 @@ public class RedirectFilterTest {
         assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.html").getHeader("Location"));
         assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
         assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+    }
+
+    @Test
+    public void testEvaluateURI() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/one.html/suffix.html")
+                        .setTarget("/content/geometrixx/en/redirected-page")
+                        .setStatusCode(302)
+                        .setEvaluateURI(true)
+                        .build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/two.mobile.html/suffix.html")
+                        .setTarget("/content/geometrixx/en/redirected-page-selector")
+                        .setStatusCode(302)
+                        .setEvaluateURI(true)
+                        .build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("(.*)/geometrixx/en/three.html/suffix.html")
+                        .setTarget("/content/geometrixx/en/redirected-page-regex")
+                        .setStatusCode(302)
+                        .setEvaluateURI(true)
+                        .build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/(\\w+).(mobile|desktop).html/suffix-(\\d+).html")
+                        .setTarget("/content/geometrixx/en/redirected-page-multi-regex")
+                        .setStatusCode(302)
+                        .setEvaluateURI(true)
+                        .build()
+        );
+
+        MockSlingHttpServletResponse responseNoMatch = navigateToURI("/content/geometrixx/en/zero.html");
+        assertNull(responseNoMatch.getHeader("Location")); //not redirected
+
+        MockSlingHttpServletResponse responseURI = navigateToURI("/content/geometrixx/en/one.html/suffix.html");
+        assertEquals("/content/geometrixx/en/redirected-page", responseURI.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseSelector = navigateToURI("/content/geometrixx/en/two.mobile.html/suffix.html");
+        assertEquals("/content/geometrixx/en/redirected-page-selector", responseSelector.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseRegex = navigateToURI("/content/geometrixx/en/three.html/suffix.html");
+        assertEquals("/content/geometrixx/en/redirected-page-regex", responseRegex.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseMultiRegex1 = navigateToURI("/content/geometrixx/en/four.mobile.html/suffix-1.html");
+        assertEquals("/content/geometrixx/en/redirected-page-multi-regex", responseMultiRegex1.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseMultiRegex2 = navigateToURI("/content/geometrixx/en/four.desktop.html/suffix-2.html");
+        assertEquals("/content/geometrixx/en/redirected-page-multi-regex", responseMultiRegex2.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseMultiRegex3 = navigateToURI("/content/geometrixx/en/five.mobile.html/suffix-3.html");
+        assertEquals("/content/geometrixx/en/redirected-page-multi-regex", responseMultiRegex3.getHeader("Location"));
+    }
+
+    @Test
+    public void testEvaluateURIWithQueryString() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/page.html/suffix.html")
+                        .setTarget("/content/geometrixx/en/redirected")
+                        .setStatusCode(302)
+                        .setEvaluateURI(true)
+                        .build()
+        );
+
+        MockSlingHttpServletResponse responseNoQueryString = navigateToURI("/content/geometrixx/en/page.html/suffix.html");
+        assertEquals("/content/geometrixx/en/redirected", responseNoQueryString.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseQueryString = navigateToURI("/content/geometrixx/en/page.html/suffix.html?a=1&b=2");
+        assertEquals("/content/geometrixx/en/redirected", responseQueryString.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseAnchor = navigateToURI("/content/geometrixx/en/page.html/suffix.html#anchor");
+        assertEquals("/content/geometrixx/en/redirected", responseAnchor.getHeader("Location"));
+
+        MockSlingHttpServletResponse responseQueryStringAndAnchor = navigateToURI("/content/geometrixx/en/page.html/suffix.html?a=3&b=4#anchorAndQueryString");
+        assertEquals("/content/geometrixx/en/redirected", responseQueryStringAndAnchor.getHeader("Location"));
     }
 }

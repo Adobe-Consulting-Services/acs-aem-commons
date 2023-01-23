@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.reports.models;
 
+import com.adobe.acs.commons.reports.internal.DelimiterConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
 
 import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 
 /**
  * An exporter for exporting formatted string values
@@ -44,6 +46,19 @@ public class StringReportCellCSVExporter implements ReportCellCSVExporter {
   @Inject
   @Optional
   private String format;
+
+  @OSGiService
+  private DelimiterConfiguration delimiterConfiguration;
+
+  public StringReportCellCSVExporter() {}
+
+  /**
+   * Used only for testing.
+   * @param delimiterConfiguration the delimiter configuration to use for this exporter
+   */
+  StringReportCellCSVExporter(DelimiterConfiguration delimiterConfiguration) {
+    this.delimiterConfiguration = delimiterConfiguration;
+  }
 
   @Override
   public String getValue(Object result) {
@@ -66,6 +81,6 @@ public class StringReportCellCSVExporter implements ReportCellCSVExporter {
         values.set(i, String.format(format, values.get(i)));
       }
     }
-    return StringUtils.join(values, ";");
+    return StringUtils.join(values, delimiterConfiguration.getMultiValueDelimiter());
   }
 }

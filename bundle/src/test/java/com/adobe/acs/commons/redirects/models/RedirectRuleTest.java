@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
+import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -26,14 +29,18 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static junit.framework.TestCase.assertTrue;
+import static junitx.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 
 public class RedirectRuleTest {
+
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
@@ -46,7 +53,8 @@ public class RedirectRuleTest {
                 "statusCode", 302,
                 "untilDate", untilDate,
                 "note", "note-1",
-                "contextPrefixIgnored", true);
+                "contextPrefixIgnored", true,
+                "evaluateURI", true);
 
         RedirectRule rule = resource.adaptTo(RedirectRule.class);
         assertEquals("/content/we-retail/en/one", rule.getSource());
@@ -55,7 +63,7 @@ public class RedirectRuleTest {
         assertDateEquals("11 January 2021", rule.getUntilDate());
         assertEquals("note-1", rule.getNote());
         assertTrue(rule.getContextPrefixIgnored());
-
+        assertTrue(rule.getEvaluateURI());
     }
 
     /**
@@ -109,5 +117,120 @@ public class RedirectRuleTest {
         assertTrue(rule1.equals(rule2));
         assertTrue(rule1.hashCode() == rule2.hashCode());
 
+    }
+
+    @Test
+    public void testState() throws PersistenceException {
+        Resource res1 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302).build();
+
+        RedirectRule rule1 = res1.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.ACTIVE, rule1.getState());
+
+        Calendar dateInFuture = GregorianCalendar.from(ZonedDateTime.now().plusDays(1));
+        Resource res2 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302)
+                .setEffectiveFrom(dateInFuture)
+                .build();
+
+        RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.PENDING, rule2.getState());
+
+        Calendar dateInPast = GregorianCalendar.from(ZonedDateTime.now().minusDays(1));
+        Resource res3 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302)
+                .setEffectiveFrom(dateInPast)
+                .build();
+
+        RedirectRule rule3 = res3.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.ACTIVE, rule3.getState());
+
+        Resource res4 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302)
+                .setUntilDate(dateInPast)
+                .build();
+
+        RedirectRule rule4 = res4.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.EXPIRED, rule4.getState());
+
+        Resource res5 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302)
+                .setUntilDate(dateInFuture)
+                .build();
+
+        RedirectRule rule5 = res5.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.ACTIVE, rule5.getState());
+
+        Resource res6 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302)
+                .setEffectiveFrom(dateInPast)
+                .setUntilDate(dateInFuture)
+                .build();
+
+        RedirectRule rule6 = res6.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.ACTIVE, rule6.getState());
+
+        Resource res7 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302)
+                .setEffectiveFrom(dateInFuture)
+                .setUntilDate(dateInPast)
+                .build();
+
+        RedirectRule rule7 = res7.adaptTo(RedirectRule.class);
+        assertEquals(RedirectState.INVALID, rule7.getState());
+    }
+
+    @Test
+    public void testIsPublished() throws PersistenceException {
+        Resource res1 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302).build();
+
+        RedirectRule rule1 = res1.adaptTo(RedirectRule.class);
+        assertFalse(rule1.isPublished()); // never published
+
+        Calendar dateInPast = GregorianCalendar.from(ZonedDateTime.now().minusDays(1));
+        res1.getParent().adaptTo(ModifiableValueMap.class).put("cq:lastReplicated", dateInPast);
+        assertTrue(rule1.isPublished());
+
+        Resource res2 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/1")
+                .setTarget("/content/geometrixx/en/2")
+                .setStatusCode(302)
+                .setCreated(GregorianCalendar.from(ZonedDateTime.now().minusMinutes(60)))
+                .build();
+        RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
+        assertFalse(rule2.isPublished()); // jcr:created after lastReplicated
+
+        Resource res3 = new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/1")
+                .setTarget("/content/geometrixx/en/2")
+                .setStatusCode(302)
+                .setCreated(GregorianCalendar.from(ZonedDateTime.now().minusMinutes(120)))
+                .setModified(GregorianCalendar.from(ZonedDateTime.now().minusMinutes(60)))
+                .build();
+        RedirectRule rule3 = res3.adaptTo(RedirectRule.class);
+        assertFalse(rule3.isPublished()); // jcr:lastModified after lastReplicated
+
+        // update cq:lastReplicated, all child redirects should become active
+        res1.getParent().adaptTo(ModifiableValueMap.class).put("cq:lastReplicated", Calendar.getInstance());
+        assertTrue(rule1.isPublished());
+        assertTrue(rule2.isPublished());
+        assertTrue(rule3.isPublished());
     }
 }

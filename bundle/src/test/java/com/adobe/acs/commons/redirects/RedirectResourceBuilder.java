@@ -66,6 +66,11 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setEvaluateURI(boolean evaluateURI) {
+        props.put(EVALUATE_URI_PROPERTY_NAME, evaluateURI);
+        return this;
+    }
+
     public RedirectResourceBuilder setNotes(String note) {
         props.put(NOTE_PROPERTY_NAME, note);
         return this;
@@ -73,6 +78,11 @@ public class RedirectResourceBuilder {
 
     public RedirectResourceBuilder setUntilDate(Calendar calendar) {
         props.put(UNTIL_DATE_PROPERTY_NAME, calendar);
+        return this;
+    }
+
+    public RedirectResourceBuilder setEffectiveFrom(Calendar calendar) {
+        props.put(EFFECTIVE_FROM_PROPERTY_NAME, calendar);
         return this;
     }
 
