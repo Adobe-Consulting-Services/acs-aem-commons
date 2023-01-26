@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+- #3031 - Redirect Manager: support for 307 and 308 redirects
 
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
 
