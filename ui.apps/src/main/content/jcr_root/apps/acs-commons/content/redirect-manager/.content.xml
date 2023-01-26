@@ -202,6 +202,14 @@
                                                                 jcr:primaryType="nt:unstructured"
                                                                 text="301 (Permanently Moved)"
                                                                 value="301"/>
+                                                        <_x0033_07
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="307 (Temporary Redirect)"
+                                                                value="307"/>
+                                                        <_x0033_08
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="308 (Permanent Redirect)"
+                                                                value="308"/>
                                                     </items>
                                                 </statusCode>
                                                 <effectiveFrom
