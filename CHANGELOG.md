@@ -9,8 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+
 ### Added
+
 - #2937 - Package Garbage Collector - used to clear up old packages installed on Managed Services instances by Cloud Manager
+- #3031 - Redirect Manager: support for 307 and 308 redirects
 
 ## 5.5.2 - 2023-01-19
 
