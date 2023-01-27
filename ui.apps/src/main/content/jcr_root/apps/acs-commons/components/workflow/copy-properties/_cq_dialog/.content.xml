@@ -3,7 +3,6 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
           jcr:primaryType="nt:unstructured"
           jcr:title="Copy Properties - Step Properties"
-          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/workflow-processes/copy-properties/index.html"
           sling:resourceType="cq/gui/components/authoring/dialog">
     <content
             jcr:primaryType="nt:unstructured"

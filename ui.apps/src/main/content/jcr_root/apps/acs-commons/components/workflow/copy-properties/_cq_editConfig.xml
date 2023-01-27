@@ -24,4 +24,11 @@
           cq:dialogMode="floating"
           cq:inherit="{Boolean}true"
           jcr:primaryType="cq:EditConfig">
+    <cq:formParameters
+            jcr:description="Copy properties on a payload from one property to another."
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Copy properties"
+            advanceOnTimeout="true"
+            EXTERNAL_PROCESS="com.adobe.acs.commons.workflow.process.impl.CopyPropertiesProcess"
+            PROCESS_AUTO_ADVANCE="true"/>
 </jcr:root>
