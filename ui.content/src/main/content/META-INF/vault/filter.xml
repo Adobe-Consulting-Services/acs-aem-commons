@@ -48,10 +48,6 @@
         <include pattern="/etc/acs-commons/version-replicator"/>
         <include pattern="/etc/acs-commons/workflow-remover"/>
     </filter>
-    <filter root="/etc/cloudservices/typekit">
-        <include pattern="/etc/cloudservices/typekit/jcr:content"/>
-        <include pattern="/etc/cloudservices/typekit/rep:policy(/.*)?"/>
-    </filter>
     <filter root="/etc/dam/video/flacmono"/>
     <filter root="/etc/dam/video/mp3hq"/>
     <filter root="/etc/dam/video/ogghq"/>
