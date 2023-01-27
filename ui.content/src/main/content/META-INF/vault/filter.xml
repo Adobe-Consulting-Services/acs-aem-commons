@@ -6,6 +6,7 @@
         <include pattern="/conf/global/settings/redirects"/>
     </filter>
     <filter root="/etc/acs-commons">
+        <include pattern="/etc/acs-commons/jcr:content"/>
         <include pattern="/etc/acs-commons/automatic-package-replication(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager/rep:policy(/.*)?"/>
@@ -31,7 +32,7 @@
         <include pattern="/etc/acs-commons/qr-code/jcr:content"/>
         <include pattern="/etc/acs-commons/qr-code/jcr:content/clientlib-authoring(/.*)?"/>
         <include pattern="/etc/acs-commons/qr-code/jcr:content/qr-code-image.png(/.*)?"/>
-        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config" />
+        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config"/>
         <include pattern="/etc/acs-commons/instant-package(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/clientlib-authoring(/.*)?"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/instant-package-image.png(/.*)?"/>
@@ -43,7 +44,7 @@
         <include pattern="/etc/acs-commons/jcr-compare"/>
         <include pattern="/etc/acs-commons/manage-controlled-processes"/>
         <include pattern="/etc/acs-commons/page-compare"/>
-        <include pattern="/etc/acs-commons/reports(.*)?" />
+        <include pattern="/etc/acs-commons/reports(.*)?"/>
         <include pattern="/etc/acs-commons/version-compare"/>
         <include pattern="/etc/acs-commons/version-replicator"/>
         <include pattern="/etc/acs-commons/workflow-remover"/>

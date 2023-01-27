@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="sling:OrderedFolder"
+          jcr:title="ACS AEM Commons">
+    <lists/>
+    <bulk-workflow-manager/>
+    <dispatcher-flush/>
+    <packagers/>
+    <instant-package/>
+    <automatic-package-replication/>
+    <notifications/>
+    <redirect-maps/>
+    <exporters/>
+    <qr-code/>
+    <twitter-rate-limit-checker/>
+</jcr:root>

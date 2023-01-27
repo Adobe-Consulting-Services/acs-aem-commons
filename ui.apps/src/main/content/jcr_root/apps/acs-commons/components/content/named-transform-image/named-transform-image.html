@@ -1,7 +1,7 @@
 <sly data-sly-use.model="com.adobe.acs.commons.wcm.components.NamedTransformImageModel"
      data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html"
      data-sly-test.ready="${model.ready}">
-    
+
     <a data-sly-test="${model.linkURL}"
        href="${model.linkURL}"><img
             src="${model.image.src}"
@@ -11,6 +11,7 @@
     <img data-sly-test="${!model.linkURL}"
          src="${model.image.src}"
          class="cq-dd-image"
+         style="width: 100%"
          alt="${model.image.alt}"/>
 
 </sly>

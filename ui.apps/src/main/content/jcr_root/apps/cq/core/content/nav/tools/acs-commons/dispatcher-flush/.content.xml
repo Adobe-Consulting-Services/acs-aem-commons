@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:primaryType="nt:unstructured"
-    jcr:title="Dispatcher Flush"
-    jcr:description="Manually flush the AEM Dispatcher cache."
-    icon="dataRefresh"
-    href="/acs-commons.html/etc/acs-commons/dispatcher-flush"
-    id="acs-commons__dispatcher-flush"
-    target="_blank"/>
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Dispatcher Flush"
+          jcr:description="Manually flush the AEM Dispatcher cache."
+          icon="dataRefresh"
+          href="/acs-commons.html/etc/acs-commons/dispatcher-flush"
+          id="acs-commons__dispatcher-flush"
+          target="_blank">
+    <granite:rendercondition
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="acs-commons/console/renderconditions/require-aem"
+            distribution="classic"/>
+</jcr:root>
