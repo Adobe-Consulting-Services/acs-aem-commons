@@ -1,0 +1,31 @@
+<h3>Package definition</h3>
+<ul>
+    <li>Package name: ${properties.packageName || 'acls' }</li>
+    <li>Package group: ${properties.packageGroupName || 'ACLs' }</li>
+    <li>Package version: ${properties.packageVersion || '' }</li>
+    <li>Package description: ${properties.packageDescription || '' }</li>
+    <li>Package ACL handling: ${properties.packageACLHandling || '' }</li>
+    <li>Conflict resolution: ${properties.conflictResolution || '' }</li>
+    <li>Include principals: ${properties.includePrincipals}</li>
+    <li>Include ACL packager page: ${properties.includeConfiguration}</li>
+</ul>
+
+<h3>Targeted principals</h3>
+<ul data-sly-test="${!properties.principalNames}">
+    <li class="not-set">All principals</li>
+</ul>
+<ul data-sly-test="${properties.principalNames}"
+    data-sly-list="${properties.principalNames}">
+    <li>${item}</li>
+</ul>
+
+<h3>Include patterns</h3>
+<ul data-sly-test="${!properties.includePatterns}">
+    <li class="not-set">All paths</li>
+</ul>
+<ul data-sly-test="${properties.includePatterns}"
+    data-sly-list="${properties.includePatterns}">
+    <li>${item}</li>
+</ul>
+
+

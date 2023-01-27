@@ -1,0 +1,35 @@
+<h3>Package definition</h3>
+<ul>
+    <li>Package name: ${properties.packageName || 'assets' }</li>
+    <li>Package group: ${properties.packageGroupName || 'Assets' }</li>
+    <li>Package version: ${properties.packageVersion}</li>
+    <li>Package description: ${properties.packageDescription }</li>
+    <li>Package ACL handling: ${properties.packageACLHandling }</li>
+    <li>Conflict resolution: ${properties.conflictResolution}</li>
+    <li>Include ACL packager page: ${properties.includeConfiguration ? "Yes" : "No" }</li>
+</ul>
+
+<h3>Configuration</h3>
+<ul>
+    <li>Pages path: ${properties.pagePath}</li>
+</ul>
+
+<h3>Advanced configuration</h3>
+
+<ul>
+    <li>Allowed assets root path: ${properties.assetPrefix}</li>
+    <li>Page exclusion patterns:
+        <ul data-sly-test="${properties.pageExclusions && properties.pageExclusions.length >0}"
+            data-sly-list="${properties.pageExclusions}">
+            <li>${item}</li>
+        </ul>
+        <span data-sly-test="${!properties.pageExclusions || properties.pageExclusions.length == 0}">None</span>
+    </li>
+    <li>Asset exclusion patterns:
+        <ul data-sly-test="${properties.assetExclusions && properties.assetExclusions.length > 0}"
+            data-sly-list="${properties.assetExclusions}">
+            <li>${item}</li>
+        </ul>
+        <span data-sly-test="${!properties.assetExclusions || properties.assetExclusions.length == 0}">None</span>
+    </li>
+</ul>

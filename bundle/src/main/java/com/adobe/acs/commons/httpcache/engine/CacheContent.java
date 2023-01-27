@@ -128,26 +128,7 @@ public class CacheContent {
      */
     public CacheContent() {
     }
-
-    /**
-     * Construct from the custom servlet response wrapper..
-     *
-     * @param responseWrapper
-     * @deprecated Use build(HttpCacheServletResponseWrapper responseWrapper,int status, String charEncoding, String contentType, Map&lt;String, List&lt;String&gt; headers) throws HttpCacheDataStreamException
-     * @return
-     */
-    @Deprecated
-    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
-          // Extracting HTTP Response Header Names and Values
-        Map<String, List<String>> extractedHeaders = responseWrapper.getHeaderNames().stream().collect(
-                        Collectors.toMap(headerName -> headerName, headerName ->
-                            new ArrayList<>(responseWrapper.getHeaders(headerName)
-                        )
-        ));
-
-        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), extractedHeaders);
-    }
-
+    
     /**
      * Construct from the custom servlet response wrapper..
      *

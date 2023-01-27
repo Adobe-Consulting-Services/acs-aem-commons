@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" class="spectrum spectrum--light spectrum--medium">
+<head data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html">
+    <meta charset="utf-8">
+    <title>${currentPage.title || properties['jcr:title']}</title>
+    <sly data-sly-test="${!wcmmode.disabled}"
+         data-sly-call="${clientlib.all @ categories = [
+            'cq.authoring.page',
+            'cq.shared',
+            'cq.foundation-main'
+        ]
+    }"></sly>
+
+    <link rel="stylesheet" href="https://unpkg.com/@adobe/spectrum-css@2.15.1/dist/standalone/spectrum-light.css"/>
+    <style>
+        body {
+            max-width: 1000px;
+            margin: 1rem auto;
+        }
+
+        .main {
+            padding: 2rem;
+         }
+
+
+    </style>
+</head>
+<body class="${componentContext.cssClassNames @ join=' '}" id="body"
+      data-sly-use.requireAem="com.adobe.acs.commons.util.RequireAemModel">
+
+<sly data-sly-include="header.html"/>
+
+<div class="main">
+
+    <div class="instructions"
+        data-sly-resource="${'.' @ addSelectors='instructions'}"></div>
+    </div>
+    <!--/*
+        If there are no requirements on the component
+        OR
+        If the runtime distribution is in the list of requirements
+    */-->
+    <div>
+        <sly data-sly-test="${!(component.properties.requireAem.length) || (requireAem.distribution.value in component.properties.requireAem)}"
+             data-sly-include="${component.properties.mainScript || 'main.html' }"/>
+
+        <sly data-sly-test="${(component.properties.requireAem.length) && !(requireAem.distribution.value in component.properties.requireAem)}"
+             data-sly-include="incompatible.html"/>
+    </div>
+</div>
+
+<sly data-sly-include="footer.html"/>
+</body>
+</html>

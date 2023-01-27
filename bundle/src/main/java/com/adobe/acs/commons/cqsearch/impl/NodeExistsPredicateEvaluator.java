@@ -80,16 +80,6 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
                 && predicate.getParameters().get(OR) != null));
     }
 
-    /**
-     * @deprecated
-     */
-    @Override
-    @Deprecated
-    public final boolean isFiltering(final Predicate predicate, final EvaluationContext context) {
-        // .canFilter(..) has replaced isFiltering(..)
-        return this.canFilter(predicate, context);
-    }
-
     @Override
     @SuppressWarnings("squid:S3776")
     public final boolean includes(final Predicate predicate, final Row row, final EvaluationContext context) {

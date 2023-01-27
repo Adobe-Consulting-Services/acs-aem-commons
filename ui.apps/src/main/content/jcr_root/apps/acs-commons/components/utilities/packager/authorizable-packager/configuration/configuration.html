@@ -1,0 +1,21 @@
+<h3>Package definition</h3>
+<ul>
+    <li>Package name: ${properties.packageName || 'authorizables' }</li>
+    <li>Package group: ${properties.packageGroupName || 'Authorizables' }</li>
+    <li>Package version: ${properties.packageVersion}</li>
+    <li>Package description: ${properties.packageDescription}</li>
+    <li>Package ACL handling: ${properties.packageACLHandling}</li>
+    <li>Conflict resolution: ${properties.conflictResolution }</li>
+    <li>Include packager page: ${properties.includeConfiguration}</li>
+</ul>
+
+<h3>Authorizable Ids</h3>
+<ul data-sly-test="${!properties.authorizableIds}">
+    <li class="not-set">None</li>
+</ul>
+<ul data-sly-test="${properties.authorizableIds}"
+    data-sly-list="${properties.authorizableIds}">
+    <li>${item}</li>
+</ul>
+
+

@@ -105,20 +105,6 @@ public abstract class FieldComponent {
         return path;
     }
 
-    /**
-     * Get form field if possible
-     * @return Form field if a safe cast is possible otherwise null
-     * @deprecated Use getAccessibleObject and AccessibleObjectUtils to handle both Method (getter) or Fields
-     */
-    @Deprecated
-    public final Field getField() {
-        if (accessibleObject instanceof Field) {
-            return (Field) accessibleObject;
-        } else {
-            return null;
-        }
-    }
-
     public final AccessibleObject getAccessibleObject() {
         return accessibleObject;
     }

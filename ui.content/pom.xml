@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -7,7 +8,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>5.5.3-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -90,19 +91,13 @@
                             <path>/etc/acs-commons/redirect-maps/default</path>
                         </forcedRoot>
                         <forcedRoot>
-                            <path>/etc/cloudservices/dtm/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/cloudservices/sharethis/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
                             <path>/etc/cloudservices/typekit/default</path>
                         </forcedRoot>
                     </forcedRoots>
 
                     <websterTargets>
-                        <nodetypes />
-                        <privileges />
+                        <nodetypes/>
+                        <privileges/>
                     </websterTargets>
                 </configuration>
                 <executions>
@@ -118,7 +113,8 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
+                            </summaryFile>
                             <checklists>
                                 <checklist>content-class-aem65</checklist>
                             </checklists>
@@ -130,7 +126,8 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
+                            </summaryFile>
                             <checklists>
                                 <checklist>content-class-aem64</checklist>
                             </checklists>
@@ -143,8 +140,10 @@
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
+                                </summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
+                                </summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
