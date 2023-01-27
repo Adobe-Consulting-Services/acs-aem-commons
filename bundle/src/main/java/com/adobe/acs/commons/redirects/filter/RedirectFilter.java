@@ -23,6 +23,7 @@ import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.RedirectState;
 import com.adobe.acs.commons.redirects.models.Redirects;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
@@ -35,7 +36,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -153,8 +153,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
-        @AttributeDefinition(name = "Evaluate Selectors", description = "Take into account selectors when evaluating redirects. " +
-                "When this flag is unchecked (default), selectors are ignored and don't participate in rule matching", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions. "
+                + "When this flag is checked (default), redirect filter will preserve the extension from the request, "
+                + "e.g. append .html to the Location header. ", type = AttributeType.BOOLEAN)
+        boolean preserveExtension() default true;
+
+        @AttributeDefinition(name = "Evaluate Selectors", description = "(Deprecated) Use the Evaluate URI mode in redirect rule to capture selectors,", type = AttributeType.BOOLEAN)
         boolean evaluateSelectors() default false;
 
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
@@ -391,9 +395,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (match != null) {
 
             RedirectRule redirectRule = match.getRule();
-            Calendar untilDateTime = redirectRule.getUntilDate();
-            if (untilDateTime != null && untilDateTime.before(Calendar.getInstance())) {
-                log.debug("redirect rule matched, but expired: {}", untilDateTime);
+
+            if (redirectRule.getState() != RedirectState.ACTIVE) {
+                log.debug("redirect rule matched, but didn't meet on/off time criteria: untilDate: {}, effectiveFrom: {}",
+                        redirectRule.getUntilDate(), redirectRule.getEffectiveFrom());
             } else {
                 RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
                 String resourcePath = pathInfo.getResourcePath();
@@ -432,7 +437,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
-            if (ext != null && !location.endsWith(ext)) {
+            if (ext != null && config.preserveExtension() && !location.endsWith(ext)) {
                 location += "." + ext;
             }
             if (mapUrls()) {
@@ -575,12 +580,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
             ValueMap properties = configResource.getValueMap();
             String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
 
-            RedirectMatch m = rules.match(resourcePath, contextPrefix);
+            RedirectMatch m = rules.match(resourcePath, contextPrefix, slingRequest);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
                     String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
-                    m = rules.match(mappedPath);
+                    m = rules.match(mappedPath, "", slingRequest);
                 }
             }
             return m;

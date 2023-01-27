@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.Collection;
@@ -32,6 +33,8 @@ import java.util.regex.Pattern;
  * A collection of redirect rules
  */
 public class RedirectConfiguration {
+
+    private boolean nonRegexRequestURIRules = false;
     /**
      * path rules keyed by source, e.g. path1 -> path2.
      * This makes lookup by path a O(1) operation
@@ -61,10 +64,15 @@ public class RedirectConfiguration {
             if (rule.getRegex() != null) {
                 patternRules.put(rule.getRegex(), rule);
             } else {
-                pathRules.put(normalizePath(rule.getSource()), rule);
+                // request URI rules are keyed without normalizing
+                if(rule.getEvaluateURI()){
+                    nonRegexRequestURIRules = true;
+                    pathRules.put(rule.getSource(), rule);
+                } else {
+                    pathRules.put(normalizePath(rule.getSource()), rule);
+                }
             }
         }
-
     }
 
     /**
@@ -78,6 +86,10 @@ public class RedirectConfiguration {
             resourcePath = resourcePath.replaceAll("\\.html(\\?.*)?$", "");
         }
         return resourcePath;
+    }
+
+    static String determinePathToEvaluate(String path, boolean evaluateURI, SlingHttpServletRequest request) {
+        return (evaluateURI && request != null) ? request.getRequestURI() : path;
     }
 
     public Map<String, RedirectRule> getPathRules() {
@@ -106,10 +118,10 @@ public class RedirectConfiguration {
      *
      * @param requestPath   the request to match
      * @return  match or null
-     * @see #match(String, String)
+     * @see #match(String, String, SlingHttpServletRequest)
      */
     public RedirectMatch match(String requestPath) {
-        return match(requestPath, "");
+        return match(requestPath, "", null);
     }
 
     /**
@@ -120,19 +132,27 @@ public class RedirectConfiguration {
      *     <li>Match by a regular expression. This is O(N) linear lookup in a list of rules keyed by their regex patterns</li>
      * </ol>
      *
-     * @param requestPath   the request to match
+     * @param resourcePath   the request to match
      * @param contextPrefix the optional context prefix to take into account
+     * @param request the current sling request
      * @return  match or null
      */
-    public RedirectMatch match(String requestPath, String contextPrefix) {
-        String normalizedPath = normalizePath(requestPath);
+    public RedirectMatch match(String resourcePath, String contextPrefix, SlingHttpServletRequest request) {
+        String normalizedPath = normalizePath(resourcePath);
         RedirectMatch match = null;
         RedirectRule rule = getPathRule(normalizedPath, contextPrefix);
+        if(rule == null && hasNonRegexRequestURIRules()){
+            // there are request URI rules. Check is any mathes
+            String pathToEvaluate = determinePathToEvaluate(normalizedPath, true, request);
+            rule = getPathRule(pathToEvaluate, contextPrefix);
+        }
         if (rule != null) {
             match = new RedirectMatch(rule, null);
         } else {
             for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                Matcher m = getRuleMatch(entry.getKey(), normalizedPath, contextPrefix);
+                boolean evaluateURI = entry.getValue().getEvaluateURI();
+                String pathToEvaluate = determinePathToEvaluate(normalizedPath, evaluateURI, request);
+                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefix);
                 if (m.matches()) {
                     match = new RedirectMatch(entry.getValue(), m);
                     break;
@@ -145,25 +165,25 @@ public class RedirectConfiguration {
     /**
      * Utility method that gets the pattern rule taking an optional context prefix into account
      * @param rulePattern the regex pattern to match the path
-     * @param normalizedPath the normalized path
+     * @param pathToEvaluate the path to evaluate for redirects
      * @param contextPrefix the optional context prefix
      * @return the matcher associated with the rule
      */
-    private Matcher getRuleMatch(Pattern rulePattern, String normalizedPath, String contextPrefix) {
+    private Matcher getRuleMatch(Pattern rulePattern, String pathToEvaluate, String contextPrefix) {
         if("".equals(contextPrefix)) {
-            return rulePattern.matcher(normalizedPath);
+            return rulePattern.matcher(pathToEvaluate);
         } else {
             //we add the context prefix to the pattern since a pattern might be too broad otherwise,
             //i.e. "/(.*)" will match anything
             if(!rulePattern.toString().startsWith(contextPrefix)) {
                 rulePattern = RedirectRule.toRegex(contextPrefix + rulePattern.toString());
             }
-            Matcher matcher = rulePattern.matcher(normalizedPath);
+            Matcher matcher = rulePattern.matcher(pathToEvaluate);
             if(!matcher.matches()) {
-                if (normalizedPath.startsWith(contextPrefix)) {
-                    matcher = rulePattern.matcher(normalizedPath.replace(contextPrefix, ""));
+                if (pathToEvaluate.startsWith(contextPrefix)) {
+                    matcher = rulePattern.matcher(pathToEvaluate.replace(contextPrefix, ""));
                 } else {
-                    matcher = rulePattern.matcher(contextPrefix + normalizedPath);
+                    matcher = rulePattern.matcher(contextPrefix + pathToEvaluate);
                 }
             }
             return matcher;
@@ -190,6 +210,10 @@ public class RedirectConfiguration {
             }
             return rule;
         }
+    }
+
+    private boolean hasNonRegexRequestURIRules() {
+        return this.nonRegexRequestURIRules;
     }
 
 }

@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.reports.models;
 
+import com.adobe.acs.commons.reports.internal.DelimiterConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +45,21 @@ public class TagReportCellCSVExporter implements ReportCellCSVExporter {
 
   private static final Logger log = LoggerFactory.getLogger(TagReportCellCSVExporter.class);
 
+  @OSGiService
+  private DelimiterConfiguration delimiterConfiguration;
+
   @Inject
   private String property;
+
+  public TagReportCellCSVExporter() {}
+
+  /**
+   * Used only for testing.
+   * @param delimiterConfiguration the delimiter configuration to use for this exporter
+   */
+  TagReportCellCSVExporter(DelimiterConfiguration delimiterConfiguration) {
+    this.delimiterConfiguration = delimiterConfiguration;
+  }
 
   @Override
   public String getValue(Object result) {
@@ -64,7 +79,7 @@ public class TagReportCellCSVExporter implements ReportCellCSVExporter {
     }
     log.debug("Loaded {} tags", tags);
 
-    return StringUtils.join(tags, ";");
+    return StringUtils.join(tags, delimiterConfiguration.getMultiValueDelimiter());
   }
 
 }

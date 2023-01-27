@@ -189,7 +189,9 @@
         var note = tr.find('.note').data('value');
         var statusCode = tr.find('.statusCode').data('value');
         var untilDate = tr.find('.untilDate').data('value');
+        var effectiveFrom = tr.find('.effectiveFrom').data('value');
         var contextPrefixIgnored = tr.find('.contextPrefixIgnored').data('value');
+        var evaluateURI = tr.find('.evaluateURI').data('value');
         var tags = tr.find('.tags').data('value');
 
         var form = $('#editRuleDialog').find("form");
@@ -200,10 +202,19 @@
         var select = $('#status-code-select-box').get(0);
         select.value =statusCode;
         form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
+        form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
         form.find('input[name="./note"]').val(note);
         var cpi = form.find('input[name="./contextPrefixIgnored"]');
         cpi.val(contextPrefixIgnored);
         cpi.prop("checked", contextPrefixIgnored);
+        var evalURI = form.find('input[name="./evaluateURI"]');
+        evalURI.val(evaluateURI);
+        evalURI.prop("checked", evaluateURI);
+
+        evalURI.click(function() {
+            evalURI.val(evalURI.is(":checked"));
+        });
+
         cpi.click(function() {
             cpi.val(cpi.is(":checked"));
         });
@@ -334,7 +345,7 @@
         return false;
     });
 
-    $(document).on("change", 'input[name="./contextPrefixIgnored"]', function(e) {
+    $(document).on("change", 'input[name="./contextPrefixIgnored"],input[name="./evaluateURI"]', function(e) {
         e.preventDefault();
         $(this).val($(this).is(":checked"));
     });

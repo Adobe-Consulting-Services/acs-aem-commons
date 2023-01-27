@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-5.0.14...HEAD
-
 ## 6.0.0
 
 ### Removed
@@ -40,6 +38,34 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2992 - Updated Named Transform Image and Twitter Feed components to use HTML/Sling Models (from JSPs). No change in
   functionality.
 
+## 5.6.0
+
+- #3031 - Redirect Manager: support for 307 and 308 redirects
+
+## 5.5.2 - 2023-01-19
+
+### Fixed
+
+- #3029 - Fixed dropdowns in MCP process forms
+
+## 5.5.0 - 2023-01-19
+
+### Changed
+
+- #2980 - Redirect Manager: Allow evaluating of redirect rules based on request URI
+
+### Added
+
+- #2982 - Add OSGi configuration option for CSV delimiters in reports
+- #3016 - Added crawl delay
+- #3008 - Redirect Manager: Add "State" column
+- #2977 - Redirect Manager: Add "Effective From" field
+
+### Fixed
+
+- #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
+- #3021 - Updated AbstractHtmlRequestInjector to not inject on login screen or target exports
+
 ## 5.4.0
 
 - #2941 - Add Query Builder support in Report Builder
@@ -61,8 +87,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2973 - EndpointService does not set UTF-8 charset for content-type and payload
-
-> > > > > > > acs-aem-commons-6.0.0
 
 ## 5.3.4 - 2022-08-22
 

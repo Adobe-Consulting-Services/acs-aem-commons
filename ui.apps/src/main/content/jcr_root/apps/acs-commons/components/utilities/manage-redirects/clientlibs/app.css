@@ -10,3 +10,18 @@
     font-family: 'Courier New', Courier, monospace
 }
 
+.active {
+    color: #82c387;
+}
+
+.expired {
+    color: #dcdcdc;
+}
+
+.pending {
+    color: #f5b95a;
+}
+
+.invalid {
+    color: #fa7369;
+}

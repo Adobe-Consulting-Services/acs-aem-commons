@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -60,7 +61,7 @@ public class CacheUtils {
     public static File createTemporaryCacheFile(CacheKey cacheKey) throws IOException {
         // Create a file in Java temp directory with cacheKey.toSting() as file name.
 
-        File file = File.createTempFile(cacheKey.toString(), ".tmp");
+        File file = Files.createTempFile(cacheKey.toString(), ".tmp").toFile();
         if (null != file) {
             log.debug("Temp file created with the name - {}", cacheKey);
         }
