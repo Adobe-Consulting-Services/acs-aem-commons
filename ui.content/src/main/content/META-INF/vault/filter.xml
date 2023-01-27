@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
-    <filter root="/content/rep:policy"/>
-    <filter root="/content/dam/rep:policy"/>
     <filter root="/conf/global/settings">
         <include pattern="/conf/global/settings/redirects"/>
     </filter>
@@ -9,7 +7,6 @@
         <include pattern="/etc/acs-commons/jcr:content"/>
         <include pattern="/etc/acs-commons/automatic-package-replication(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager(/jcr:content)?"/>
-        <include pattern="/etc/acs-commons/bulk-workflow-manager/rep:policy(/.*)?"/>
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?"/>
         <include pattern="/etc/acs-commons/dispatcher-flush(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/lists(/jcr:content)?"/>
@@ -21,10 +18,8 @@
         <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content/list"/>
         <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content/list/default_\d+"/>
         <include pattern="/etc/acs-commons/notifications(/jcr:content)?"/>
-        <include pattern="/etc/acs-commons/notifications/rep:policy(/.*)?"/>
         <include pattern="/etc/acs-commons/packagers(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/redirect-maps(/jcr:content)?"/>
-        <include pattern="/etc/acs-commons/redirect-maps/rep:policy(/.*)?"/>
         <include pattern="/etc/acs-commons/exporters(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter"/>
         <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter/jcr:content(/.*)?"/>
@@ -58,17 +53,9 @@
     <filter root="/etc/dam/video/ogghq"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/notification/email">
-        <include pattern="/etc/notification/email/rep:policy(/.*)?"/>
         <include pattern="/etc/notification/email/acs-commons(/.*)?"/>
     </filter>
-    <filter root="/etc/rep:policy"/>
-    <filter root="/etc/workflow/instances/rep:policy"/>
-    <filter root="/etc/workflow/packages/rep:policy"/>
-    <filter root="/home/groups/rep:policy"/>
-    <filter root="/home/users/rep:policy"/>
-    <filter root="/home/users/system/acs-commons"/>
     <filter root="/var/acs-commons">
-        <include pattern="/var/acs-commons/rep:policy(/.*)?"/>
         <include pattern="/var/acs-commons/reports"/>
         <include pattern="/var/acs-commons/reports/sample-component-instances(/.*)?"/>
         <include pattern="/var/acs-commons/reports/sample-components-report(/.*)?"/>
@@ -76,10 +63,7 @@
         <include pattern="/var/acs-commons/reports/sample-references-report(/.*)?"/>
         <include pattern="/var/acs-commons/httpcache"/>
         <include pattern="/var/acs-commons/httpcache/root"/>
-        <include pattern="/var/acs-commons/httpcache/rep:policy(/.*)?"/>
         <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
-        <include pattern="/var/acs-commons/on-deploy-scripts-status/rep:policy(/.*)?"/>
         <include pattern="/var/acs-commons/on-deploy-scripts-status/README.txt(/.*)?"/>
-        <include pattern="/var/acs-commons/mcp(/rep:policy(/.*)?)?"/>
     </filter>
 </workspaceFilter>

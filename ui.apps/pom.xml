@@ -62,21 +62,7 @@
                                 </rules>
                             </config>
                         </check>
-                        <check>
-                            <name>verify-acls-on-apps</name>
-                            <template>basic/expectAces</template>
-                            <!-- enforces resolution of issue #2048 -->
-                            <config>
-                                <principals>
-                                    <principal>acs-commons-ensure-oak-index-service</principal>
-                                    <principal>acs-commons-component-error-handler-service</principal>
-                                    <principal>acs-commons-shared-component-props-service</principal>
-                                </principals>
-                                <expectedAces>
-                                    <expectedAce>type=allow;path=/apps;privileges=jcr:read</expectedAce>
-                                </expectedAces>
-                            </config>
-                        </check>
+                        <!-- Removed verify-acls-on-apps as ACLs have been moved to repo init, which OakPal does not see -->
                     </checks>
 
                     <websterTargets>
