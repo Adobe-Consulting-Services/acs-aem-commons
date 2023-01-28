@@ -100,7 +100,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
     @Property(label = "Workflow Status",
             description = "Only remove Workflow Instances that have one of these statuses.",
-            value = { "COMPLETED", "ABORTED" })
+            value = {"COMPLETED", "ABORTED"})
     public static final String PROP_WORKFLOW_STATUSES = "workflow.statuses";
 
 
@@ -111,7 +111,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @Property(label = "Workflow Models",
             description = "Only remove Workflow Instances that belong to one of these WF Models.",
             cardinality = Integer.MAX_VALUE,
-            value = { })
+            value = {})
     public static final String PROP_WORKFLOW_MODELS = "workflow.models";
 
 
@@ -122,7 +122,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @Property(label = "Payload Patterns",
             description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
             cardinality = Integer.MAX_VALUE,
-            value = { })
+            value = {})
     public static final String PROP_WORKFLOW_PAYLOADS = "workflow.payloads";
 
 
@@ -137,10 +137,10 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     private static final long DEFAULT_OLDER_THAN_MILLIS = -1L;
     private long olderThanMillis = DEFAULT_OLDER_THAN_MILLIS;
     @Property(label = "Older Than Milliseconds",
-        description = "Only remove Workflow Instances whose payloads start date was at least desired Milliseconds ago",
-        longValue = DEFAULT_OLDER_THAN_MILLIS)
+            description = "Only remove Workflow Instances whose payloads start date was at least desired Milliseconds ago",
+            longValue = DEFAULT_OLDER_THAN_MILLIS)
     public static final String PROP_WORKFLOWS_OLDER_THAN_MILLIS = "workflow.older-than-millis";
-    
+
 
     private static final int DEFAULT_BATCH_SIZE = 1000;
     private int batchSize = DEFAULT_BATCH_SIZE;
@@ -162,14 +162,14 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @SuppressWarnings("squid:S2142")
     public final void run() {
 
-        try (ResourceResolver adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             final long start = System.currentTimeMillis();
-            WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(models,statuses,payloads,olderThan,olderThanMillis);
+            WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(models, statuses, payloads, olderThan, olderThanMillis);
             workflowRemovalConfig.setBatchSize(batchSize);
             workflowRemovalConfig.setMaxDurationInMins(maxDuration);
 
-            int count = workflowInstanceRemover.removeWorkflowInstances(adminResourceResolver, workflowRemovalConfig);
+            int count = workflowInstanceRemover.removeWorkflowInstances(serviceResourceResolver, workflowRemovalConfig);
 
             if (log.isInfoEnabled()) {
                 log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
@@ -227,7 +227,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         }
 
         olderThanMillis = PropertiesUtil.toLong(config.get(PROP_WORKFLOWS_OLDER_THAN_MILLIS), 0);
-        
+
         batchSize = PropertiesUtil.toInteger(config.get(PROP_BATCH_SIZE), DEFAULT_BATCH_SIZE);
         if (batchSize < 1) {
             batchSize = DEFAULT_BATCH_SIZE;
