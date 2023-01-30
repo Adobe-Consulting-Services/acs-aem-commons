@@ -7,8 +7,8 @@
         <exclude pattern="/apps/acs-commons/components/utilities/bulk-workflow-manager/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/page-compare/clientlibs/css/generated"/>
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
-        <exclude pattern="/apps/acs-commons/config(\..*)?(/.*)?" />
-        <exclude pattern="/apps/acs-commons/install(/.*)?" />
+        <exclude pattern="/apps/acs-commons/config(\..*)?(/.*)?"/>
+        <exclude pattern="/apps/acs-commons/install(/.*)?"/>
     </filter>
     <!-- for overlays just make sure the structure is there with the right node types -->
     <filter root="/apps/cq">
@@ -31,11 +31,12 @@
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1"/>
-        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
+        <include
+                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items"/>
-        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
+        <include
+                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
     </filter>
-    <filter root="/apps/rep:policy"/>
     <filter root="/apps/settings">
         <include pattern="/apps/settings"/>
         <include pattern="/apps/settings/dam"/>

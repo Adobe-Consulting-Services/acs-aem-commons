@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,7 +67,7 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
     @Override
     public final void doPost(SlingHttpServletRequest req,
-            SlingHttpServletResponse res) throws ServletException, IOException {
+                             SlingHttpServletResponse res) throws ServletException, IOException {
 
         log.debug("Entering ReplicatePageVersionServlet.doPost(..)");
 
@@ -158,14 +158,14 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
     }
 
     private Date getDate(String datetime) {
+        // Example input format: 2023-01-01T20:35-05:00
+
         Date date = null;
         try {
-            String modifiedDate = datetime.substring(0, datetime.indexOf('+'));
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            date = sdf.parse(modifiedDate);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
+            date = sdf.parse(datetime);
         } catch (Exception e) {
-            log.error("exception occurred", e);
+            log.error("Unable to parse input datetime of " + datetime + " using date format pattern yyyy-MM-dd'T'HH:mmXXX", e);
         }
         return date;
     }

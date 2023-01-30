@@ -48,7 +48,6 @@ dd {
 
 .report__result-container,
  .report__result-container table {
-        height: calc(100vh - 500px);
 }
 
 .report__result thead, .report__result tbody tr:hover {
