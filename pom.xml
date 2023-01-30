@@ -241,7 +241,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <jackrabbit-filter>
                                 <options>
                                     <validRoots>
-                                        /,/libs,/libs/core/wcm,/apps,/etc,/etc/clientlibs,/etc/cloudservices,/etc/dam/video,/etc/designs,/etc/notification,/etc/workflow/instances,/etc/workflow/packages,/var,/tmp,/content,/content/dam,/home,/home/users,/home/users/system,/home/groups,/conf,/conf/global
+                                        /,/libs,/libs/core/wcm,/apps,/etc,/etc/clientlibs,/etc/dam/video,/etc/designs,/etc/notification,/etc/workflow/instances,/etc/workflow/packages,/var,/tmp,/content,/content/dam,/home,/home/users,/home/users/system,/home/groups,/conf,/conf/global
                                     </validRoots>
                                 </options>
                             </jackrabbit-filter>
