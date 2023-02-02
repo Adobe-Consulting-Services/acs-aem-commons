@@ -58,12 +58,12 @@
     <div class="content-container-inner" style="width:60%; margin:0 auto;">
 
         <p>
-            The path selected below must be of a orderable node type.
+            The path selected below must be of an orderable node type.
         </p>
 
         <ul>
             <li>AEM pages are sortable.</li>
-            <li>AEM Asset folders must be set as orderable. Existing folders can be switched to orderable via their
+            <li>AEM Asset folders must be set as orderable. Existing folders can be switched to orderable via its
                 Folder Properties.
             </li>
         </ul>
@@ -89,6 +89,7 @@
                              class="coral-InputGroup coral-InputGroup--block">
                         <input
                                 class="coral-InputGroup-input js-coral-pathbrowser-input coral-Textfield source"
+                                style="width: 100%"
                                 is="coral-textfield" placeholder="Select/Enter source path"
                                 name="./destinationPath" value="" aria-invalid="false"
                                 aria-haspopup="true" aria-expanded="false" aria-owns="coral-26"
@@ -134,6 +135,7 @@
                     </coral-checkbox>
                     <coral-icon class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS"
                                 icon="infoCircle" size="S" id="file-info" role="img"
+                                style="width: 20px; height: 20px; margin-top: 6px;"
                                 aria-label="info circle"></coral-icon>
                     <coral-tooltip variant="info" placement="right" target="#file-info"
                                    class="coral3-Tooltip coral3-Tooltip--info" aria-hidden="true" tabindex="-1"

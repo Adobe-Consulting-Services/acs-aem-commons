@@ -49,7 +49,7 @@
         <include pattern="/etc/acs-commons/instant-package(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/clientlib-authoring(/.*)?"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/instant-package-image.png(/.*)?"/>
-        <include pattern="/etc/acs-commons/instant-package/jcr:content/config"/>
+        <exclude pattern="/etc/acs-commons/instant-package/jcr:content/config"/>
     </filter>
     <filter root="/etc/acs-commons" type="cleanup">
         <!-- Remove legacy /etc pages from prior version installs -->
