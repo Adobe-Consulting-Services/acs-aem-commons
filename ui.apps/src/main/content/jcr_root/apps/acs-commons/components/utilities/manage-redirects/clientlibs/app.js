@@ -132,24 +132,6 @@
         }
     });
 
-    $(document).on("click", ".cq-dialog-upload", function (e) {
-        var $form = $(this).closest('form');
-        var data = new FormData($form[0]);
-
-        var message = $(this).attr('alert');
-        $.ajax({
-            url: $form.attr('action'),
-            type: "POST",
-            data: data,
-            cache: false,
-            contentType: false,
-            processData: false,
-            async: false
-        }).done(function(response){
-            location.reload(true);
-        });
-        return false;
-    });
 
     $(document).on("click", ".cq-dialog-download", function (e) {
         var $form = $(this).closest('form');
@@ -268,6 +250,61 @@
         updatePrefixFormData($(this));
         showPrefixDialog();
 
+    });
+
+    $(document).on("click", ".acs-redirects-form-import", function (e) {
+        e.preventDefault();
+
+        var $form = $(this).closest('form');
+        var data = new FormData($form[0]);
+        $.ajax( {
+            url: $form.attr('action'),
+            type: 'POST',
+            data: new FormData( $form[0] ),
+            processData: false,
+            contentType: false
+        }).done(function( response ) {
+            var isErr= response.log.length;
+            if(response.log.length){
+                var maxItems = 10;
+				var html = "<section>";
+                if(response.log.length > maxItems){
+					html += "<p>Showing " + maxItems + " of " + response.log.length + "</p>";
+                }
+                html += "<table width='500' is='coral-table'>";
+
+                var arr = response.log.slice(0, maxItems);
+                for(var i = 0; i < arr.length; i++ ){
+                    var row = arr[i];
+                    html += "<tr is='coral-table-row'><td is='coral-table-cell'>" + row.level + "</td><td is='coral-table-cell'>" + row.cell + "</td><td is='coral-table-cell'>" + row.msg + "</td></tr>";
+                }
+                html += "</table>";
+                html += "<p><a href='"+response.path+"' target=_blank>Click to open the full log in a separate tab</a></p>";
+                html += "</section>";
+                var dialog = new Coral.Dialog().set({
+                    header: {
+                      innerHTML: "Issues Importing Redirects"
+                    },
+                    content: {
+                      innerHTML: html
+                    },
+                    footer: {
+                      innerHTML: "<button class='ok-button' is='coral-button' variant='primary' icon='check' coral-close>OK</button>"
+                    },
+                    closable: "on",
+                    variant: "warning"
+                  });
+                  document.body.appendChild(dialog);
+
+                $(dialog).find(".ok-button").click(function() { location.reload(); });
+                dialog.show().center();
+
+            } else {
+				location.reload(true);
+            }
+        });
+
+        return false;
     });
 
 

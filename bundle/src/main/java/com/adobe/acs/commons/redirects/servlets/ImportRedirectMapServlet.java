@@ -19,12 +19,18 @@
  */
 package com.adobe.acs.commons.redirects.servlets;
 
+import com.adobe.acs.commons.redirects.models.ImportLog;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.ExportColumn;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -36,15 +42,20 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -52,6 +63,7 @@ import java.util.LinkedHashMap;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.UUID;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.ACS_REDIRECTS_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
@@ -75,22 +87,27 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = -3564475196678277711L;
     private static final String MIX_CREATED = "mix:created";
     private static final String MIX_LAST_MODIFIED = "mix:lastModified";
+    private static final String AUDIT_LOG_FOLDER = "/var/acs-commons/redirects";
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
+
         String path = request.getParameter("path");
         Resource storageRoot = request.getResourceResolver().getResource(path);
         log.debug("Updating redirect maps at {}", storageRoot.getPath());
         Map<String, Resource> jcrRules = getRules(storageRoot); // rules stored in crx
+        ImportLog auditLog = new ImportLog();
         Collection<Map<String, Object>> xlsRules;
         try (InputStream is = getFile(request)) {
-            xlsRules = readEntries(is); // rules read from excel
+            xlsRules = readEntries(is, auditLog); // rules read from excel
         }
         if (!xlsRules.isEmpty()) {
             update(storageRoot, xlsRules, jcrRules);
         }
+        persistAuditLog(request.getResourceResolver(), auditLog, response.getWriter());
     }
 
     /**
@@ -154,64 +171,197 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
      * @param is  input spreadsheet
      * @return  collection of redirect properties
      */
-    private Collection<Map<String, Object>> readEntries(InputStream is)
+    Collection<Map<String, Object>> readEntries(InputStream is, ImportLog auditLog)
             throws IOException {
         Collection<Map<String, Object>> rules = new LinkedHashSet<>();
         Workbook wb = new XSSFWorkbook(is);
         Sheet sheet = wb.getSheetAt(0);
-        boolean first = true;
-        for (Row row : sheet) {
-            if (!first) {
-                Map<String, Object> props = readRedirect(row);
-                rules.add(props);
-            } else {
-                first = false;
+        Iterator<Row> it = sheet.rowIterator();
+        if(it.hasNext()){
+            Row headerRow = it.next();
+            Map<ExportColumn, Integer> cols = mapColumns(headerRow);
+
+            while(it.hasNext()){
+                Row row = it.next();
+                Map<String, Object> props = readRedirect(row, cols, auditLog);
+                if(props != null) {
+                    rules.add(props);
+                } else {
+                    log.debug("couldn't read redirect properties from row {} ", row.getRowNum());
+                }
             }
+
         }
+
         log.debug("{} rules read from spreadsheet", rules.size());
         return rules;
     }
 
+    Map<ExportColumn, Integer> mapColumns(Row row){
+        Map<ExportColumn, Integer> cols = new LinkedHashMap<>();
+        for(Cell cell : row){
+            if(cell.getColumnIndex() <= 2){
+                // columns A, B and C are reserved for source, target and statusCode
+                continue;
+            }
+            if(cell.getCellTypeEnum() == CellType.STRING){
+                String title = cell.getStringCellValue();
+                for(ExportColumn col : ExportColumn.values()){
+                    if(col.getTitle().equalsIgnoreCase(title)){
+                        cols.put(col, cell.getColumnIndex());
+                    }
+                }
+            }
+        }
+        return cols;
+    }
+
     /**
      * read redirect properties from a spreadsheet row
+     *
+     * @return a map to be merged with redirect's ValueMap
      */
-    private Map<String, Object> readRedirect(Row row){
-        Map<String, Object> props = new HashMap<>();
-        props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
-        String source = row.getCell(0).getStringCellValue();
-        props.put(SOURCE_PROPERTY_NAME, source);
-        String target = row.getCell(1).getStringCellValue();
-        props.put(RedirectRule.TARGET_PROPERTY_NAME, target);
-        int statusCode = (int) row.getCell(2).getNumericCellValue();
-        props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(statusCode));
-        Cell c3 = row.getCell(3);
-        if (DateUtil.isCellDateFormatted(c3)) {
-            Calendar untilDate = Calendar.getInstance();
-            untilDate.setTime(c3.getDateCellValue());
-            props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, untilDate);
-        }
-        Cell c12 = row.getCell(12);
-        if (DateUtil.isCellDateFormatted(c12)) {
-            Calendar effectiveFrom = Calendar.getInstance();
-            effectiveFrom.setTime(c12.getDateCellValue());
-            props.put(RedirectRule.EFFECTIVE_FROM_PROPERTY_NAME, effectiveFrom);
-        }
-        Cell c4 = row.getCell(4);
-        if(c4 != null) {
-            props.put(RedirectRule.NOTE_PROPERTY_NAME, c4.getStringCellValue());
-        }
-        Cell c5 = row.getCell(5);
-        boolean evaluateURI = (c5 != null && c5.getBooleanCellValue());
-        props.put(RedirectRule.EVALUATE_URI_PROPERTY_NAME, evaluateURI);
-        Cell c6 = row.getCell(6);
-        boolean ignoreContextPrefix = (c6 != null && c6.getBooleanCellValue());
-        props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, ignoreContextPrefix);
-        Cell c7 = row.getCell(7);
-        String[] tagIds = c7 == null ? null : c7.getStringCellValue().split("\n");
-        props.put(RedirectRule.TAGS_PROPERTY_NAME, tagIds);
+     private Map<String, Object> readRedirect(Row row, Map<ExportColumn, Integer> cols, ImportLog auditLog){
+         Map<String, Object> props = new HashMap<>();
+         props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
+         Cell c0 = row.getCell(0);
+         if (c0 == null || c0.getCellTypeEnum() != CellType.STRING) {
+             auditLog.warn(new CellReference(row.getRowNum(), 0).formatAsString(),
+                     "Cells A is required and should contain redirect source");
+             return null;
+         }
+         Cell c1 = row.getCell(1);
+         if (c1 == null || c1.getCellTypeEnum() != CellType.STRING) {
+             auditLog.warn(new CellReference(row.getRowNum(), 1).formatAsString(),
+                     "Cells B is required and should contain redirect source");
+             return null;
+         }
+         Cell c2 = row.getCell(2);
+         if (c2 == null || c2.getCellTypeEnum() != CellType.NUMERIC) {
+             auditLog.warn(new CellReference(row.getRowNum(), 2).formatAsString(),
+                     "Cells C is required and should contain redirect status code");
+             return null;
+         }
+         String source = c0.getStringCellValue();
+         props.put(SOURCE_PROPERTY_NAME, source);
+         String target = c1.getStringCellValue();
+         props.put(RedirectRule.TARGET_PROPERTY_NAME, target);
+         int statusCode = (int) c2.getNumericCellValue();
+         props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(statusCode));
+
+         if (cols.containsKey(ExportColumn.OFF_TIME)) {
+             int columnIndex = cols.get(ExportColumn.OFF_TIME);
+             Cell cell = row.getCell(columnIndex);
+             if (cell != null) {
+                 if (cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                     Calendar untilDate = Calendar.getInstance();
+                     untilDate.setTime(cell.getDateCellValue());
+                     props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, untilDate);
+                 } else {
+                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
+                             "Can't set 'Off Time' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                 }
+             }
+         }
+
+         if (cols.containsKey(ExportColumn.ON_TIME)) {
+             int columnIndex = cols.get(ExportColumn.ON_TIME);
+             Cell cell = row.getCell(columnIndex);
+             if (cell != null) {
+                 if (cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                     Calendar untilDate = Calendar.getInstance();
+                     untilDate.setTime(cell.getDateCellValue());
+                     props.put(RedirectRule.EFFECTIVE_FROM_PROPERTY_NAME, untilDate);
+                 } else {
+                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
+                             "Can't set 'On Time' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                 }
+             }
+         }
+
+         if(cols.containsKey(ExportColumn.NOTES)) {
+             int columnIndex = cols.get(ExportColumn.NOTES);
+             Cell cell = row.getCell(columnIndex);
+             if (cell != null) {
+                 if(cell.getCellTypeEnum() == CellType.STRING) {
+                     props.put(RedirectRule.NOTE_PROPERTY_NAME, cell.getStringCellValue());
+                 } else if (cell.getCellTypeEnum() != CellType.BLANK ) {
+                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
+                             "Can't set 'Notes' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                 }
+             }
+         }
+
+         if(cols.containsKey(ExportColumn.EVALUATE_URI)) {
+             int columnIndex = cols.get(ExportColumn.EVALUATE_URI);
+             Cell cell = row.getCell(columnIndex);
+             if (cell != null) {
+                 if(cell.getCellTypeEnum() == CellType.BOOLEAN) {
+                     props.put(RedirectRule.EVALUATE_URI_PROPERTY_NAME, cell.getBooleanCellValue());
+                 } else {
+                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
+                             "Can't set 'Evaluate URI' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                 }
+             }
+         }
+
+         if(cols.containsKey(ExportColumn.IGNORE_CONTEXT_PREFIX)) {
+             int columnIndex = cols.get(ExportColumn.IGNORE_CONTEXT_PREFIX);
+             Cell cell = row.getCell(columnIndex);
+             if (cell != null) {
+                 if(cell.getCellTypeEnum() == CellType.BOOLEAN) {
+                     props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, cell.getBooleanCellValue());
+                 } else {
+                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
+                             "Can't set 'Ignore Context Prefix' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                 }
+             }
+         }
+
+         if(cols.containsKey(ExportColumn.TAGS)) {
+             int columnIndex = cols.get(ExportColumn.TAGS);
+             Cell cell = row.getCell(columnIndex);
+             if (cell != null) {
+                 if(cell.getCellTypeEnum() == CellType.STRING) {
+                     String[] tagIds = cell.getStringCellValue().split("\n");
+                     props.put(RedirectRule.TAGS_PROPERTY_NAME, tagIds);
+                 } else if (cell.getCellTypeEnum() != CellType.BLANK ) {
+                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
+                             "Can't set 'Tags' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                 }
+             }
+         }
+
         return props;
     }
 
+    void persistAuditLog(ResourceResolver resourceResolver, ImportLog auditLog, PrintWriter out) throws IOException {
+        ObjectMapper om = new ObjectMapper();
+
+        ResourceUtil.getOrCreateResource(resourceResolver, AUDIT_LOG_FOLDER,
+                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER), JcrResourceConstants.NT_SLING_FOLDER, false);
+
+        String auditNodePath = AUDIT_LOG_FOLDER + "/" + UUID.randomUUID();
+        Resource ntFile = ResourceUtil.getOrCreateResource(resourceResolver, auditNodePath,
+                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE), null, false);
+
+        auditLog.setPath(ntFile.getPath());
+
+        String json = om.writeValueAsString(auditLog);
+        Map<String, Object> props = new HashMap<>();
+        props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_RESOURCE);
+        props.put(JcrConstants.JCR_MIXINTYPES, MIX_CREATED);
+        props.put(JcrConstants.JCR_MIMETYPE, "application/json");
+
+        props.put(JcrConstants.JCR_DATA, new ByteArrayInputStream(json.getBytes()));
+
+        ResourceUtil.getOrCreateResource(resourceResolver, auditNodePath + "/" + JcrConstants.JCR_CONTENT,
+                props, null, false);
+
+        resourceResolver.commit();
+
+        out.println(json);
+    }
 
     public static InputStream getFile(SlingHttpServletRequest request) throws IOException {
         InputStream stream = null;

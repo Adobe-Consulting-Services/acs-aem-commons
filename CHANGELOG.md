@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+- #3046 - Redirect Manager Import Spreadsheet Issue
+- #3009 - Redirect Manager: Add informative error message during import
 
 ## 5.6.0 - 2023-02-02
 

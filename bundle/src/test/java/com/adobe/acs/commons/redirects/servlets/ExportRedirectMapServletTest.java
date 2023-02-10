@@ -115,24 +115,24 @@ public class ExportRedirectMapServletTest {
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
         assertDateEquals("09 October 2022", new Calendar.Builder().setInstant(row1.getCell(3).getDateCellValue()).build());
-        assertEquals("note-1", row1.getCell(4).getStringCellValue());
-        assertTrue(row1.getCell(5).getBooleanCellValue());
+        assertDateEquals("02 March 2025", new Calendar.Builder().setInstant(row1.getCell(4).getDateCellValue()).build());
+        assertEquals("note-1", row1.getCell(5).getStringCellValue());
         assertTrue(row1.getCell(6).getBooleanCellValue());
-        assertEquals("redirects:tag1", row1.getCell(7).getStringCellValue());
-        assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(8).getDateCellValue()).build());
-        assertEquals("john.doe", row1.getCell(9).getStringCellValue());
-        assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(10).getDateCellValue()).build());
-        assertEquals("jane.doe", row1.getCell(11).getStringCellValue());
-        assertDateEquals("02 March 2025", new Calendar.Builder().setInstant(row1.getCell(12).getDateCellValue()).build());
+        assertTrue(row1.getCell(7).getBooleanCellValue());
+        assertEquals("redirects:tag1", row1.getCell(8).getStringCellValue());
+        assertDateEquals("16 February 1974", new Calendar.Builder().setInstant(row1.getCell(9).getDateCellValue()).build());
+        assertEquals("john.doe", row1.getCell(10).getStringCellValue());
+        assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(11).getDateCellValue()).build());
+        assertEquals("jane.doe", row1.getCell(12).getStringCellValue());
 
         XSSFRow row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
         assertEquals("/content/four", row2.getCell(1).getStringCellValue());
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());
-        assertFalse(row2.getCell(5).getBooleanCellValue());
         assertFalse(row2.getCell(6).getBooleanCellValue());
-        assertEquals("redirects:tag2", row2.getCell(7).getStringCellValue());
-        assertEquals("", row2.getCell(9).getStringCellValue());
-        assertEquals("john.doe", row2.getCell(11).getStringCellValue());
+        assertFalse(row2.getCell(7).getBooleanCellValue());
+        assertEquals("redirects:tag2", row2.getCell(8).getStringCellValue());
+        assertEquals("", row2.getCell(10).getStringCellValue());
+        assertEquals("john.doe", row2.getCell(12).getStringCellValue());
     }
 }

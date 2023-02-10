@@ -200,7 +200,8 @@ public class RedirectFilterTest {
                     .setSource("/content/we-retail/en/events/*")
                     .setTarget("/content/we-retail/en/four")
                     .setEvaluateURI(true)
-                    .setStatusCode(301).build()
+                    .setStatusCode(301).build(),
+            new RedirectResourceBuilder(context).build() // invalid rule wo source|target|statusCode should be ignored
         );
 
         ResourceBuilder rb = context.build().resource(redirectStoragePath).siblingsMode();
