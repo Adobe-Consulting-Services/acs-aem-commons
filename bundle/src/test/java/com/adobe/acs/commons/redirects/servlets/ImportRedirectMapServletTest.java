@@ -22,6 +22,7 @@ package com.adobe.acs.commons.redirects.servlets;
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.ExportColumn;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -39,6 +40,7 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Calendar;
@@ -377,7 +379,6 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());
         assertEquals(null, rule4.getUntilDate());
-    }
 
     @Test
     public void testUpdate() throws IOException {
