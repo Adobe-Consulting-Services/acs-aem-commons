@@ -42,6 +42,7 @@ public enum ExportColumn {
     private final Class<?> type;
     private final boolean importable;
 
+    @SuppressWarnings("squid:UnusedPrivateMethod") // false positive
     ExportColumn(String title, String propertyName, Class<?> type, boolean importable){
         this.title = title;
         this.propertyName = propertyName;

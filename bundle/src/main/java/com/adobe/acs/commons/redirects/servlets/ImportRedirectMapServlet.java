@@ -257,6 +257,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return props;
     }
 
+    @SuppressWarnings("squid:S3776")
     private Map<String, Object> readOptionalProperties(Row row, Map<ExportColumn, Integer> cols, ImportLog auditLog) {
         Map<String, Object> props = new HashMap<>();
         for (ExportColumn column : ExportColumn.values()) {
