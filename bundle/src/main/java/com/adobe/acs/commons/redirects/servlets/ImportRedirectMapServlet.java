@@ -118,7 +118,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     Map<String, Resource> getRules(Resource resource) {
         Map<String, Resource> rules = new LinkedHashMap<>();
         for (Resource res : resource.getChildren()) {
-            if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
+            if (res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
                 String src = res.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
                 rules.put(src, res);
             }
@@ -127,25 +127,24 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     *
-     * @param root          root resource, e.g. /conf/global/settings/redirects
-     * @param xlsRules      redirects read from an Excel spreadhseet
-     * @param jcrRedirects  existing redirect nodes keyed by the source path.
-     *                      We assume that the source path is unique.
+     * @param root         root resource, e.g. /conf/global/settings/redirects
+     * @param xlsRules     redirects read from an Excel spreadhseet
+     * @param jcrRedirects existing redirect nodes keyed by the source path.
+     *                     We assume that the source path is unique.
      */
     void update(Resource root, Collection<Map<String, Object>> xlsRules, Map<String, Resource> jcrRedirects) throws PersistenceException {
         ResourceResolver resolver = root.getResourceResolver();
         for (Map<String, Object> props : xlsRules) {
-            String sourcePath = (String)props.get(SOURCE_PROPERTY_NAME);
+            String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
             Resource redirect = getOrCreateRedirect(root, sourcePath, props, jcrRedirects);
             log.debug("rule: {}", redirect.getPath());
-         }
+        }
         resolver.commit();
     }
 
     private Resource getOrCreateRedirect(Resource root, String sourcePath, Map<String, Object> props, Map<String, Resource> jcrRedirects) throws PersistenceException {
         Resource redirect = jcrRedirects.get(sourcePath);
-        if(redirect == null){
+        if (redirect == null) {
             // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
             props.put(JCR_MIXINTYPES, MIX_CREATED);
             String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
@@ -168,8 +167,8 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     /**
      * read redirects from an Excel spreadsheet
      *
-     * @param is  input spreadsheet
-     * @return  collection of redirect properties
+     * @param is input spreadsheet
+     * @return collection of redirect properties
      */
     Collection<Map<String, Object>> readEntries(InputStream is, ImportLog auditLog)
             throws IOException {
@@ -177,14 +176,14 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         Workbook wb = new XSSFWorkbook(is);
         Sheet sheet = wb.getSheetAt(0);
         Iterator<Row> it = sheet.rowIterator();
-        if(it.hasNext()){
+        if (it.hasNext()) {
             Row headerRow = it.next();
             Map<ExportColumn, Integer> cols = mapColumns(headerRow);
 
-            while(it.hasNext()){
+            while (it.hasNext()) {
                 Row row = it.next();
                 Map<String, Object> props = readRedirect(row, cols, auditLog);
-                if(props != null) {
+                if (props != null) {
                     rules.add(props);
                 } else {
                     log.debug("couldn't read redirect properties from row {} ", row.getRowNum());
@@ -200,17 +199,17 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     /**
      * Read columns from the header row (rownum=0) and map them to column definitions
      */
-    Map<ExportColumn, Integer> mapColumns(Row row){
+    Map<ExportColumn, Integer> mapColumns(Row row) {
         Map<ExportColumn, Integer> cols = new LinkedHashMap<>();
-        for(Cell cell : row){
-            if(cell.getColumnIndex() <= 2){
+        for (Cell cell : row) {
+            if (cell.getColumnIndex() <= 2) {
                 // columns A, B and C are reserved for source, target and statusCode
                 continue;
             }
-            if(cell.getCellTypeEnum() == CellType.STRING){
+            if (cell.getCellTypeEnum() == CellType.STRING) {
                 String title = cell.getStringCellValue();
-                for(ExportColumn col : ExportColumn.values()){
-                    if(col.getTitle().equalsIgnoreCase(title)){
+                for (ExportColumn col : ExportColumn.values()) {
+                    if (col.getTitle().equalsIgnoreCase(title)) {
                         cols.put(col, cell.getColumnIndex());
                     }
                 }
@@ -252,7 +251,14 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         int statusCode = (int) c2.getNumericCellValue();
         props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(statusCode));
 
+        Map<String, Object> optionalProps = readOptionalProperties(row, cols, auditLog);
+        props.putAll(optionalProps);
 
+        return props;
+    }
+
+    private Map<String, Object> readOptionalProperties(Row row, Map<ExportColumn, Integer> cols, ImportLog auditLog) {
+        Map<String, Object> props = new HashMap<>();
         for (ExportColumn column : ExportColumn.values()) {
             if (column.ordinal() < 3 || !column.isImportable()) {
                 // columns A, B  and C are reserved
@@ -263,31 +269,23 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 Cell cell = row.getCell(columnIndex);
                 if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
                     Object value = null;
-                    if (column.getPropertyType() == String[].class) {
-                        if (cell.getCellTypeEnum() == CellType.STRING) {
-                            value = cell.getStringCellValue().split("\n");
-                         }
-                    } else if (column.getPropertyType() == String.class) {
-                        if (cell.getCellTypeEnum() == CellType.STRING) {
-                            value = cell.getStringCellValue();
-                        }
-                    } else if (column.getPropertyType() == Boolean.class) {
-                        if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
-                            value = cell.getBooleanCellValue();
-                        }
-                    } else if (column.getPropertyType() == Calendar.class) {
-                        if (cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(cell.getDateCellValue());
-                            value = calendar;
-                        }
+                    if (column.getPropertyType() == String[].class && cell.getCellTypeEnum() == CellType.STRING) {
+                        value = cell.getStringCellValue().split("\n");
+                    } else if (column.getPropertyType() == String.class && cell.getCellTypeEnum() == CellType.STRING) {
+                        value = cell.getStringCellValue();
+                    } else if (column.getPropertyType() == Boolean.class && cell.getCellTypeEnum() == CellType.BOOLEAN) {
+                        value = cell.getBooleanCellValue();
+                    } else if (column.getPropertyType() == Calendar.class && cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(cell.getDateCellValue());
+                        value = calendar;
                     }
-                    if(value != null) {
+                    if (value != null) {
                         props.put(column.getPropertyName(), value);
                     } else {
-                        String cellAddress = new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString();
-                        auditLog.info(cellAddress,"Can't set '" + column.getTitle() + "' from a "
-                                        + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                        String cellAddress = new CellReference(row.getRowNum(), cell.getColumnIndex()).formatAsString();
+                        auditLog.info(cellAddress, "Can't set '" + column.getTitle() + "' from a "
+                                + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
                     }
                 }
             }
