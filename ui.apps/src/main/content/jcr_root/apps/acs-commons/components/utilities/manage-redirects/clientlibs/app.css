@@ -25,3 +25,8 @@
 .invalid {
     color: #fa7369;
 }
+
+.dlg-import-cell {
+    padding: 4px 8px;
+    height: 36px;
+}

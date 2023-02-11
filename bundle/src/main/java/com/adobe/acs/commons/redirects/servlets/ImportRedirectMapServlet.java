@@ -197,6 +197,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         return rules;
     }
 
+    /**
+     * Read columns from the header row (rownum=0) and map them to column definitions
+     */
     Map<ExportColumn, Integer> mapColumns(Row row){
         Map<ExportColumn, Integer> cols = new LinkedHashMap<>();
         for(Cell cell : row){
@@ -219,123 +222,83 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     /**
      * read redirect properties from a spreadsheet row
      *
-     * @return a map to be merged with redirect's ValueMap
+     * @return values to be merged with redirect's ValueMap
      */
-     private Map<String, Object> readRedirect(Row row, Map<ExportColumn, Integer> cols, ImportLog auditLog){
-         Map<String, Object> props = new HashMap<>();
-         props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
-         Cell c0 = row.getCell(0);
-         if (c0 == null || c0.getCellTypeEnum() != CellType.STRING) {
-             auditLog.warn(new CellReference(row.getRowNum(), 0).formatAsString(),
-                     "Cells A is required and should contain redirect source");
-             return null;
-         }
-         Cell c1 = row.getCell(1);
-         if (c1 == null || c1.getCellTypeEnum() != CellType.STRING) {
-             auditLog.warn(new CellReference(row.getRowNum(), 1).formatAsString(),
-                     "Cells B is required and should contain redirect source");
-             return null;
-         }
-         Cell c2 = row.getCell(2);
-         if (c2 == null || c2.getCellTypeEnum() != CellType.NUMERIC) {
-             auditLog.warn(new CellReference(row.getRowNum(), 2).formatAsString(),
-                     "Cells C is required and should contain redirect status code");
-             return null;
-         }
-         String source = c0.getStringCellValue();
-         props.put(SOURCE_PROPERTY_NAME, source);
-         String target = c1.getStringCellValue();
-         props.put(RedirectRule.TARGET_PROPERTY_NAME, target);
-         int statusCode = (int) c2.getNumericCellValue();
-         props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(statusCode));
+    private Map<String, Object> readRedirect(Row row, Map<ExportColumn, Integer> cols, ImportLog auditLog) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
+        Cell c0 = row.getCell(0);
+        if (c0 == null || c0.getCellTypeEnum() != CellType.STRING) {
+            auditLog.warn(new CellReference(row.getRowNum(), 0).formatAsString(),
+                    "Cells A is required and should contain redirect source");
+            return null;
+        }
+        Cell c1 = row.getCell(1);
+        if (c1 == null || c1.getCellTypeEnum() != CellType.STRING) {
+            auditLog.warn(new CellReference(row.getRowNum(), 1).formatAsString(),
+                    "Cells B is required and should contain redirect source");
+            return null;
+        }
+        Cell c2 = row.getCell(2);
+        if (c2 == null || c2.getCellTypeEnum() != CellType.NUMERIC) {
+            auditLog.warn(new CellReference(row.getRowNum(), 2).formatAsString(),
+                    "Cells C is required and should contain redirect status code");
+            return null;
+        }
+        String source = c0.getStringCellValue();
+        props.put(SOURCE_PROPERTY_NAME, source);
+        String target = c1.getStringCellValue();
+        props.put(RedirectRule.TARGET_PROPERTY_NAME, target);
+        int statusCode = (int) c2.getNumericCellValue();
+        props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(statusCode));
 
-         if (cols.containsKey(ExportColumn.OFF_TIME)) {
-             int columnIndex = cols.get(ExportColumn.OFF_TIME);
-             Cell cell = row.getCell(columnIndex);
-             if (cell != null) {
-                 if (cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-                     Calendar untilDate = Calendar.getInstance();
-                     untilDate.setTime(cell.getDateCellValue());
-                     props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, untilDate);
-                 } else {
-                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
-                             "Can't set 'Off Time' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
-                 }
-             }
-         }
 
-         if (cols.containsKey(ExportColumn.ON_TIME)) {
-             int columnIndex = cols.get(ExportColumn.ON_TIME);
-             Cell cell = row.getCell(columnIndex);
-             if (cell != null) {
-                 if (cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-                     Calendar untilDate = Calendar.getInstance();
-                     untilDate.setTime(cell.getDateCellValue());
-                     props.put(RedirectRule.EFFECTIVE_FROM_PROPERTY_NAME, untilDate);
-                 } else {
-                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
-                             "Can't set 'On Time' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
-                 }
-             }
-         }
-
-         if(cols.containsKey(ExportColumn.NOTES)) {
-             int columnIndex = cols.get(ExportColumn.NOTES);
-             Cell cell = row.getCell(columnIndex);
-             if (cell != null) {
-                 if(cell.getCellTypeEnum() == CellType.STRING) {
-                     props.put(RedirectRule.NOTE_PROPERTY_NAME, cell.getStringCellValue());
-                 } else if (cell.getCellTypeEnum() != CellType.BLANK ) {
-                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
-                             "Can't set 'Notes' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
-                 }
-             }
-         }
-
-         if(cols.containsKey(ExportColumn.EVALUATE_URI)) {
-             int columnIndex = cols.get(ExportColumn.EVALUATE_URI);
-             Cell cell = row.getCell(columnIndex);
-             if (cell != null) {
-                 if(cell.getCellTypeEnum() == CellType.BOOLEAN) {
-                     props.put(RedirectRule.EVALUATE_URI_PROPERTY_NAME, cell.getBooleanCellValue());
-                 } else {
-                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
-                             "Can't set 'Evaluate URI' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
-                 }
-             }
-         }
-
-         if(cols.containsKey(ExportColumn.IGNORE_CONTEXT_PREFIX)) {
-             int columnIndex = cols.get(ExportColumn.IGNORE_CONTEXT_PREFIX);
-             Cell cell = row.getCell(columnIndex);
-             if (cell != null) {
-                 if(cell.getCellTypeEnum() == CellType.BOOLEAN) {
-                     props.put(RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, cell.getBooleanCellValue());
-                 } else {
-                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
-                             "Can't set 'Ignore Context Prefix' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
-                 }
-             }
-         }
-
-         if(cols.containsKey(ExportColumn.TAGS)) {
-             int columnIndex = cols.get(ExportColumn.TAGS);
-             Cell cell = row.getCell(columnIndex);
-             if (cell != null) {
-                 if(cell.getCellTypeEnum() == CellType.STRING) {
-                     String[] tagIds = cell.getStringCellValue().split("\n");
-                     props.put(RedirectRule.TAGS_PROPERTY_NAME, tagIds);
-                 } else if (cell.getCellTypeEnum() != CellType.BLANK ) {
-                     auditLog.info(new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString(),
-                             "Can't set 'Tags' from a " + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
-                 }
-             }
-         }
-
+        for (ExportColumn column : ExportColumn.values()) {
+            if (column.ordinal() < 3 || !column.isImportable()) {
+                // columns A, B  and C are reserved
+                continue;
+            }
+            if (cols.containsKey(column)) {
+                int columnIndex = cols.get(column);
+                Cell cell = row.getCell(columnIndex);
+                if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
+                    Object value = null;
+                    if (column.getPropertyType() == String[].class) {
+                        if (cell.getCellTypeEnum() == CellType.STRING) {
+                            value = cell.getStringCellValue().split("\n");
+                         }
+                    } else if (column.getPropertyType() == String.class) {
+                        if (cell.getCellTypeEnum() == CellType.STRING) {
+                            value = cell.getStringCellValue();
+                        }
+                    } else if (column.getPropertyType() == Boolean.class) {
+                        if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
+                            value = cell.getBooleanCellValue();
+                        }
+                    } else if (column.getPropertyType() == Calendar.class) {
+                        if (cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(cell.getDateCellValue());
+                            value = calendar;
+                        }
+                    }
+                    if(value != null) {
+                        props.put(column.getPropertyName(), value);
+                    } else {
+                        String cellAddress = new CellReference(row.getRowNum(), c0.getColumnIndex()).formatAsString();
+                        auditLog.info(cellAddress,"Can't set '" + column.getTitle() + "' from a "
+                                        + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                    }
+                }
+            }
+        }
         return props;
     }
 
-    void persistAuditLog(ResourceResolver resourceResolver, ImportLog auditLog, PrintWriter out) throws IOException {
+    /**
+     * Save import log in /var/acs-commons/redirects/$UUID
+     */
+    private void persistAuditLog(ResourceResolver resourceResolver, ImportLog auditLog, PrintWriter out) throws IOException {
         ObjectMapper om = new ObjectMapper();
 
         ResourceUtil.getOrCreateResource(resourceResolver, AUDIT_LOG_FOLDER,

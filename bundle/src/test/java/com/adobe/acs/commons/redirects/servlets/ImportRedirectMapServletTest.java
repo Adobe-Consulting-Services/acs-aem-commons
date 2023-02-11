@@ -21,6 +21,7 @@ package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.ExportColumn;
+import com.adobe.acs.commons.redirects.models.ImportLog;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -77,7 +78,6 @@ public class ImportRedirectMapServletTest {
     @Test
     public void testImportOnlyRequiredColumns() throws ServletException, IOException {
 
-        // new rules in a spreadsheet. will be merged with the existing rules
         XSSFWorkbook wb = new XSSFWorkbook();
         CellStyle dateStyle = wb.createCellStyle();
         dateStyle.setDataFormat(
@@ -123,15 +123,19 @@ public class ImportRedirectMapServletTest {
         assertEquals("/content/2", rule2.getSource());
         assertEquals("/en/we-retail", rule2.getTarget());
         assertEquals(302, rule2.getStatusCode());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
     }
 
     /**
-     * Row that don't have valid source/target/statusCode shoudl be skipped
+     * Rows that don't have valid source/target/statusCode should be skipped
      */
     @Test
     public void testIgnoreInvalidRows() throws ServletException, IOException {
 
-        // new rules in a spreadsheet. will be merged with the existing rules
         XSSFWorkbook wb = new XSSFWorkbook();
         CellStyle dateStyle = wb.createCellStyle();
         dateStyle.setDataFormat(
@@ -188,7 +192,59 @@ public class ImportRedirectMapServletTest {
         Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
         assertEquals("number of redirects after import ", 0, rules.size());
 
-        System.out.println(response.getOutputAsString());
+        // read ImportLog from the output json and assert that every 6 input rows had issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        List<ImportLog.Entry> logEntries = importLog.getLog();
+        assertEquals(6, logEntries.size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
+    }
+
+    /**
+     * redirects in the input spreadsheet are keyed by source path. Dupes will be collapsed.
+     */
+    @Test
+    public void testDuplicatesRedirects() throws ServletException, IOException {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        CellStyle dateStyle = wb.createCellStyle();
+        dateStyle.setDataFormat(
+                wb.createDataFormat().getFormat("mmm d, yyyy"));
+        Sheet sheet = wb.createSheet();
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(ExportColumn.SOURCE.getTitle());
+        headerRow.createCell(1).setCellValue(ExportColumn.TARGET.getTitle());
+        headerRow.createCell(2).setCellValue(ExportColumn.STATUS_CODE.getTitle());
+
+        Row row1 = sheet.createRow(1);
+        row1.createCell(0).setCellValue("/en/we-retail/about");
+        row1.createCell(1).setCellValue("/en/we-retail");
+        row1.createCell(2).setCellValue(302);
+
+        Row row2 = sheet.createRow(2);
+        row2.createCell(0).setCellValue("/en/we-retail/about");
+        row2.createCell(1).setCellValue("/en/we-retail/contact-us");
+        row2.createCell(2).setCellValue(302);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        out.close();
+        byte[] excelBytes = out.toByteArray();
+
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        request.addRequestParameter("file", excelBytes, "binary/data");
+
+        servlet.doPost(request, response);
+
+        Resource storageRoot = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
+        assertEquals("number of redirects after import ", 1, rules.size());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
     }
 
     /**
@@ -200,7 +256,6 @@ public class ImportRedirectMapServletTest {
     @Test
     public void testImportMixedColumns() throws ServletException, IOException {
 
-        // new rules in a spreadsheet. will be merged with the existing rules
         XSSFWorkbook wb = new XSSFWorkbook();
         CellStyle dateStyle = wb.createCellStyle();
         dateStyle.setDataFormat(
@@ -255,6 +310,11 @@ public class ImportRedirectMapServletTest {
         assertTrue(rule.getEvaluateURI());
         assertTrue(rule.getContextPrefixIgnored());
         assertArrayEquals(new String[]{"redirects:tag1", "redirects:tag2"}, rule.getTagIds());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
     }
 
     /**
@@ -379,6 +439,11 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());
         assertEquals(null, rule4.getUntilDate());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+    }
 
     @Test
     public void testUpdate() throws IOException {

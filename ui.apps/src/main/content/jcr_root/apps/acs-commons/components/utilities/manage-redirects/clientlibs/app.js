@@ -267,21 +267,21 @@
             var isErr= response.log.length;
             if(response.log.length){
                 var maxItems = 10;
-				var html = "<section>";
+				var html = "";
                 if(response.log.length > maxItems){
 					html += "<p>Showing " + maxItems + " of " + response.log.length + "</p>";
                 }
-                html += "<table width='500' is='coral-table'>";
+                html += "<table is='coral-table'>";
 
                 var arr = response.log.slice(0, maxItems);
                 for(var i = 0; i < arr.length; i++ ){
                     var row = arr[i];
-                    html += "<tr is='coral-table-row'><td is='coral-table-cell'>" + row.level + "</td><td is='coral-table-cell'>" + row.cell + "</td><td is='coral-table-cell'>" + row.msg + "</td></tr>";
+                    html += "<tr is='coral-table-row' class='dlg-import-cell'><td is='coral-table-cell' class='dlg-import-cell'>" +
+                    row.level + "</td><td is='coral-table-cell' class='dlg-import-cell'>" + row.cell + "</td><td is='coral-table-cell'>" + row.msg + "</td></tr>";
                 }
                 html += "</table>";
-                html += "<p><a href='"+response.path+"' target=_blank>Click to open the full log in a separate tab</a></p>";
-                html += "</section>";
-                var dialog = new Coral.Dialog().set({
+                html += "<p><a href='"+response.path+"' target=_blank>Click to download the full log</a></p>";
+                 var dialog = new Coral.Dialog().set({
                     header: {
                       innerHTML: "Issues Importing Redirects"
                     },

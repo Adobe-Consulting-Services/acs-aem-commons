@@ -19,30 +19,50 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
+import java.util.Calendar;
+
 public enum ExportColumn {
 
-    SOURCE("Source Url"),
-    TARGET("Target Url"),
-    STATUS_CODE("Status Code"),
-    OFF_TIME("Off Time"),
-    ON_TIME("On Time"),
-    NOTES("Notes"),
-    EVALUATE_URI("Evaluate URI"),
-    IGNORE_CONTEXT_PREFIX("Ignore Context Prefix"),
-    TAGS("Tags"),
-    CREATED("Created"),
-    CREATED_BY("Created By"),
-    MODIFIED("Modified"),
-    MODIFIED_BY("Modified By")
+    SOURCE("Source Url", RedirectRule.SOURCE_PROPERTY_NAME, Boolean.class, true),
+    TARGET("Target Url", RedirectRule.TARGET_PROPERTY_NAME, Boolean.class, true),
+    STATUS_CODE("Status Code", RedirectRule.STATUS_CODE_PROPERTY_NAME, Integer.class, true),
+    OFF_TIME("Off Time", RedirectRule.UNTIL_DATE_PROPERTY_NAME, Calendar.class, true),
+    ON_TIME("On Time", RedirectRule.EFFECTIVE_FROM_PROPERTY_NAME, Calendar.class, true),
+    NOTES("Notes", RedirectRule.NOTE_PROPERTY_NAME, String.class, true),
+    EVALUATE_URI("Evaluate URI", RedirectRule.EVALUATE_URI_PROPERTY_NAME, Boolean.class, true),
+    IGNORE_CONTEXT_PREFIX("Ignore Context Prefix", RedirectRule.CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, Boolean.class, true),
+    TAGS("Tags", RedirectRule.TAGS_PROPERTY_NAME, String[].class, true),
+    CREATED("Created", RedirectRule.CREATED_PROPERTY_NAME, Calendar.class, false),
+    CREATED_BY("Created By", RedirectRule.CREATED_BY_PROPERTY_NAME, String.class, false),
+    MODIFIED("Modified", RedirectRule.MODIFIED_PROPERTY_NAME, Calendar.class, false),
+    MODIFIED_BY("Modified By", RedirectRule.MODIFIED_BY_PROPERTY_NAME, String.class, false)
     ;
 
-    private String title;
+    private final String title;
+    private final String propertyName;
+    private final Class<?> type;
+    private final boolean importable;
 
-    ExportColumn(String title){
+    ExportColumn(String title, String propertyName, Class type, boolean importable){
         this.title = title;
+        this.propertyName = propertyName;
+        this.type = type;
+        this.importable = importable;
     }
 
     public String getTitle(){
         return title;
+    }
+
+    public String getPropertyName(){
+        return propertyName;
+    }
+
+    public Class<?> getPropertyType(){
+        return type;
+    }
+
+    public boolean isImportable(){
+        return importable;
     }
 }

@@ -23,8 +23,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * A class to collect messages when importing redirect rules from a spreadsheet.
+ */
 public class ImportLog {
-    private List<Entry> log = new ArrayList<>();
+    private final List<Entry> log = new ArrayList<>();
     private String path;
 
     public void setPath(String path){
@@ -49,10 +52,14 @@ public class ImportLog {
         log.add(new Entry(Level.INFO, cell , msg));
     }
 
-    static class Entry {
-        final Level level;
-        final String cell;
-        final String msg;
+    public static class Entry {
+        Level level;
+        String cell;
+        String msg;
+
+        Entry(){
+            // default constructor needed to de-serialize from json
+        }
 
         Entry(Level level, String cell, String msg) {
             this.level = level;
