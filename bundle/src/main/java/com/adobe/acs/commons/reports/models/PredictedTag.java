@@ -25,7 +25,7 @@ import org.apache.sling.models.annotations.Model;
 import javax.inject.Inject;
 
 /**
- * Model for rendering PredictedTag properties
+ * Sling Model used for rendering PredictedTags in reports
  */
 @Model(adaptables = Resource.class)
 public class PredictedTag {
