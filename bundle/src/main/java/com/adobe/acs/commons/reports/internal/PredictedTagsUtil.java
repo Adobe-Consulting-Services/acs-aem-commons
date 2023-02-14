@@ -41,6 +41,15 @@ public class PredictedTagsUtil {
 
     public static final double MINIMUM_LOWER_CONFIDENCE_THRESHOLD_VALUE = 0.0;
 
+    /**
+     * For the given resource and relative property path:
+     * Validate that the resource is an asset, extract all predicted tags below the relative property path, adapt them
+     * to PredictedTags and filter out those whose confidence value is lower than the lowerConfidenceThreshold
+     * @param resource the resource
+     * @param relativePropertyPath the property path of the predicted tags, relative to the resource
+     * @param lowerConfidenceThreshold the lower threshold for confidence values
+     * @return the list of predicted tags, sorted (desc) by confidence
+     */
     public List<PredictedTag> getPredictedTags(final Resource resource,
                                                final String relativePropertyPath,
                                                final Double lowerConfidenceThreshold) {
