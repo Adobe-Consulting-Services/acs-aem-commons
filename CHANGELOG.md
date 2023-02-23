@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3046 - Redirect Manager Import Spreadsheet Issue
 - #3009 - Redirect Manager: Add informative error message during import
 
+### Added
+
+- #2929 - Reports - added a new Report column type for Predicted Tags (Assets)
+
 ## 5.6.0 - 2023-02-02
 
 ### Added
