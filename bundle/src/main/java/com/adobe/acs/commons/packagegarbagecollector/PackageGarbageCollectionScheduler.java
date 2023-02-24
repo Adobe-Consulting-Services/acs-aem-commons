@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.packagegarbagecollector;
 
-import com.adobe.acs.commons.util.RequireAem;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.ScheduledJobInfo;
 import org.osgi.service.component.annotations.Activate;
@@ -49,9 +48,6 @@ public class PackageGarbageCollectionScheduler {
 
     @Reference
     JobManager jobManager;
-
-    @Reference(target="(distribution=classic)")
-    RequireAem requireAem;
 
     ScheduledJobInfo job;
 
