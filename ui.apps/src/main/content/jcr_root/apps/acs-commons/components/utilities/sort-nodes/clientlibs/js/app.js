@@ -29,10 +29,20 @@
             dialog.show();
 
         }).error(function(response){
+            var message = 'Unable to sort the selected node. Please ensure it is sortable.';
+
+            try {
+                if (response.responseJSON && response.responseJSON["status.message"]) {
+                    message = response.responseJSON["status.message"];
+                }
+            } catch(error) {
+                // Stick w/ default message
+            }
+
             var dialog = new Coral.Dialog();
             dialog.id = 'dialogFailure';
             dialog.header.innerHTML = 'Failure';
-    		dialog.content.innerHTML = response.responseJSON["status.message"];
+    		dialog.content.innerHTML = message;
     		dialog.footer.innerHTML = '<button class="error-button" is="coral-button" variant="primary" icon="check" coral-close>OK</button>';
             dialog.variant = 'error';
             dialog.closable = "on";

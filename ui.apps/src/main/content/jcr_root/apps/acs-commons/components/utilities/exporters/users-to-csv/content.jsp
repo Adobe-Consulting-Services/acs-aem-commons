@@ -110,7 +110,7 @@
                            ng-click="toggle(form.groups, group)"
                            type="checkbox">
                     <span class="coral-Checkbox-checkmark"></span>
-                    <span class="coral-Checkbox-description">{{ group }}</span>
+                    <span class="coral-Checkbox-description" style="word-break: break-all;">{{ group }}</span>
                 </label>
        </ul>
 
@@ -124,7 +124,7 @@
                         ng-click="toggle(form.groups, group)"
                         type="checkbox">
                  <span class="coral-Checkbox-checkmark"></span>
-                 <span class="coral-Checkbox-description">{{ group }}</span>
+                 <span class="coral-Checkbox-description" style="word-break: break-all;">{{ group }}</span>
              </label>
             </li>
         </ul>
@@ -139,7 +139,7 @@
                            ng-click="toggle(form.groups, group)"
                            type="checkbox">
                     <span class="coral-Checkbox-checkmark"></span>
-                    <span class="coral-Checkbox-description">{{ group }}</span>
+                    <span class="coral-Checkbox-description" style="word-break: break-all;">{{ group }}</span>
                 </label>
             </li>
         </ul>

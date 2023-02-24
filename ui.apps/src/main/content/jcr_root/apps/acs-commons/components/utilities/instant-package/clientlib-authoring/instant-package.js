@@ -16,7 +16,7 @@
 		Coral.commons.ready(actionBar, function() {
 			var $applyToActionBtn = $(INSTANT_PACKAGE_ACTION_BAR);
 
-			if(_.isEmpty($applyToActionBtn)){
+			if(!($applyToActionBtn)){
 				$.ajax(INSTANT_PACKAGE_BUTTON_URL).done(function(html){
 					actionBar.primary.items.add({}).appendChild($.parseHTML(html)[0]); 
 				});
@@ -26,7 +26,7 @@
 
 		// add the dialogs to the dom
 		var applyDialog = document.querySelector("#acs-commons-instant-package");
-		if(_.isEmpty(applyDialog)){
+		if(!(applyDialog)){
 			$.ajax(INSTANT_PACKAGE_OPTION_FORM_URL).done(function(html){
 				$("body").append(html);
 				applyDialog = document.querySelector("#acs-commons-instant-package");

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<workspaceFilter version="1.0">
-    <filter root="/apps/acs-commons/config"/>
-    <filter root="/apps/acs-commons/config.author"/>
-    <filter root="/apps/acs-commons/config.publish"/>
-</workspaceFilter>
