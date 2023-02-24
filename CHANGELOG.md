@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed 
 - #3050 - Garbage Collector - Removed unused package for compatible for AEMaaCS
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
