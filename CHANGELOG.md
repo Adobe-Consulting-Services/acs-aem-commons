@@ -8,9 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+# 5.7.0 - 2023-02-24
+
 ### Fixed 
 - #3050 - Garbage Collector - Removed unused package for compatible for AEMaaCS
-<!-- Keep this up to date! After a release, change the tag name to the latest release -->
 - #3046 - Redirect Manager Import Spreadsheet Issue
 - #3009 - Redirect Manager: Add informative error message during import
 
