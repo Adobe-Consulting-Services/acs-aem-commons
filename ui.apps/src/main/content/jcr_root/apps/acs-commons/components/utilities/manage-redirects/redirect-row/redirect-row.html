@@ -1,4 +1,5 @@
 <tr is="coral-table-row" id="${resource.name}" data-path="${resource.path}"
+    data-sly-test="${resource.source && resource.target && resource.statusCode}"
     data-sly-use.redirect="com.adobe.acs.commons.redirects.models.RedirectRule">
    <td is="coral-table-cell" style="width:20px;">
       <a class="coral-Link edit-redirect-rule" href="#" target="_blank"><coral-icon icon="edit" size="XS"></coral-icon></a>

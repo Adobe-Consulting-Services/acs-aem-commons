@@ -360,7 +360,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                rules.add(res.adaptTo(RedirectRule.class));
+                RedirectRule rule = res.adaptTo(RedirectRule.class);
+                if(rule != null) {
+                    rules.add(rule);
+                }
             }
         }
         return rules;

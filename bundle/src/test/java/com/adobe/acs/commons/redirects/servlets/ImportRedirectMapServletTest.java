@@ -20,7 +20,10 @@
 package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
+import com.adobe.acs.commons.redirects.models.ExportColumn;
+import com.adobe.acs.commons.redirects.models.ImportLog;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -38,6 +41,7 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Calendar;
@@ -65,8 +69,259 @@ public class ImportRedirectMapServletTest {
         context.build().resource(redirectStoragePath);
     }
 
+    /**
+     * Import a spreadsheet with ony 3 required columns:
+     *   - Cell A - source
+     *   - Cell B - target
+     *   - Cell C - statusCode
+     */
     @Test
-    public void testImport() throws ServletException, IOException {
+    public void testImportOnlyRequiredColumns() throws ServletException, IOException {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        CellStyle dateStyle = wb.createCellStyle();
+        dateStyle.setDataFormat(
+                wb.createDataFormat().getFormat("mmm d, yyyy"));
+        Sheet sheet = wb.createSheet();
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(ExportColumn.SOURCE.getTitle());
+        headerRow.createCell(1).setCellValue(ExportColumn.TARGET.getTitle());
+        headerRow.createCell(2).setCellValue(ExportColumn.STATUS_CODE.getTitle());
+
+        Row row1 = sheet.createRow(1);
+        row1.createCell(0).setCellValue("/content/1");
+        row1.createCell(1).setCellValue("/en/we-retail");
+        row1.createCell(2).setCellValue(301);
+
+        Row row2 = sheet.createRow(2);
+        row2.createCell(0).setCellValue("/content/2");
+        row2.createCell(1).setCellValue("/en/we-retail");
+        row2.createCell(2).setCellValue(302);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        out.close();
+        byte[] excelBytes = out.toByteArray();
+
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        request.addRequestParameter("file", excelBytes, "binary/data");
+
+        servlet.doPost(request, response);
+
+        Resource storageRoot = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
+        assertEquals("number of redirects after import ", 2, rules.size());
+
+        RedirectRule rule1 = rules.get("/content/1").adaptTo(RedirectRule.class);
+        assertEquals("/content/1", rule1.getSource());
+        assertEquals("/en/we-retail", rule1.getTarget());
+        assertEquals(301, rule1.getStatusCode());
+
+        RedirectRule rule2 = rules.get("/content/2").adaptTo(RedirectRule.class);
+        assertEquals("/content/2", rule2.getSource());
+        assertEquals("/en/we-retail", rule2.getTarget());
+        assertEquals(302, rule2.getStatusCode());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
+    }
+
+    /**
+     * Rows that don't have valid source/target/statusCode should be skipped
+     */
+    @Test
+    public void testIgnoreInvalidRows() throws ServletException, IOException {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        CellStyle dateStyle = wb.createCellStyle();
+        dateStyle.setDataFormat(
+                wb.createDataFormat().getFormat("mmm d, yyyy"));
+        Sheet sheet = wb.createSheet();
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(ExportColumn.SOURCE.getTitle());
+        headerRow.createCell(1).setCellValue(ExportColumn.TARGET.getTitle());
+        headerRow.createCell(2).setCellValue(ExportColumn.STATUS_CODE.getTitle());
+
+        Row row1 = sheet.createRow(1);
+        //row1.createCell(0).setCellValue("/content/1");
+        row1.createCell(1).setCellValue("/en/we-retail");
+        row1.createCell(2).setCellValue(301);
+
+        Row row2 = sheet.createRow(2);
+        row2.createCell(0).setCellValue("/content/1");
+        //row2.createCell(1).setCellValue("/en/we-retail");
+        row2.createCell(2).setCellValue(301);
+
+        Row row3 = sheet.createRow(3);
+        row3.createCell(0).setCellValue("/content/1");
+        row3.createCell(1).setCellValue("/en/we-retail");
+        //row3.createCell(2).setCellValue(301);
+
+        Row row4 = sheet.createRow(4);
+        row4.createCell(0).setCellValue(true);
+        row4.createCell(1).setCellValue("/en/we-retail");
+        row4.createCell(2).setCellValue(301);
+
+        Row row5 = sheet.createRow(5);
+        row5.createCell(0).setCellValue("/content/1");
+        row5.createCell(1).setCellValue(true);
+        row5.createCell(2).setCellValue(301);
+
+        Row row6 = sheet.createRow(6);
+        row6.createCell(0).setCellValue("/content/1");
+        row6.createCell(1).setCellValue("/en/we-retail");
+        row6.createCell(2).setCellValue(true);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        out.close();
+        byte[] excelBytes = out.toByteArray();
+
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        request.addRequestParameter("file", excelBytes, "binary/data");
+
+        servlet.doPost(request, response);
+
+        Resource storageRoot = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
+        assertEquals("number of redirects after import ", 0, rules.size());
+
+        // read ImportLog from the output json and assert that every 6 input rows had issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        List<ImportLog.Entry> logEntries = importLog.getLog();
+        assertEquals(6, logEntries.size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
+    }
+
+    /**
+     * redirects in the input spreadsheet are keyed by source path. Dupes will be collapsed.
+     */
+    @Test
+    public void testDuplicatesRedirects() throws ServletException, IOException {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        CellStyle dateStyle = wb.createCellStyle();
+        dateStyle.setDataFormat(
+                wb.createDataFormat().getFormat("mmm d, yyyy"));
+        Sheet sheet = wb.createSheet();
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(ExportColumn.SOURCE.getTitle());
+        headerRow.createCell(1).setCellValue(ExportColumn.TARGET.getTitle());
+        headerRow.createCell(2).setCellValue(ExportColumn.STATUS_CODE.getTitle());
+
+        Row row1 = sheet.createRow(1);
+        row1.createCell(0).setCellValue("/en/we-retail/about");
+        row1.createCell(1).setCellValue("/en/we-retail");
+        row1.createCell(2).setCellValue(302);
+
+        Row row2 = sheet.createRow(2);
+        row2.createCell(0).setCellValue("/en/we-retail/about");
+        row2.createCell(1).setCellValue("/en/we-retail/contact-us");
+        row2.createCell(2).setCellValue(302);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        out.close();
+        byte[] excelBytes = out.toByteArray();
+
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        request.addRequestParameter("file", excelBytes, "binary/data");
+
+        servlet.doPost(request, response);
+
+        Resource storageRoot = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
+        assertEquals("number of redirects after import ", 1, rules.size());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
+    }
+
+    /**
+     * User can change the order of optional columns (starting with D), e.g.
+     *   - Cell D - Evaluate URI
+     *   - Cell E - Notes
+     *   ...
+     */
+    @Test
+    public void testImportMixedColumns() throws ServletException, IOException {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        CellStyle dateStyle = wb.createCellStyle();
+        dateStyle.setDataFormat(
+                wb.createDataFormat().getFormat("mmm d, yyyy"));
+        Sheet sheet = wb.createSheet();
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(ExportColumn.SOURCE.getTitle());
+        headerRow.createCell(1).setCellValue(ExportColumn.TARGET.getTitle());
+        headerRow.createCell(2).setCellValue(ExportColumn.STATUS_CODE.getTitle());
+        headerRow.createCell(3).setCellValue(ExportColumn.EVALUATE_URI.getTitle());
+        headerRow.createCell(4).setCellValue(ExportColumn.OFF_TIME.getTitle());
+        headerRow.createCell(5).setCellValue(ExportColumn.ON_TIME.getTitle());
+        headerRow.createCell(6).setCellValue(ExportColumn.NOTES.getTitle());
+        headerRow.createCell(7).setCellValue(ExportColumn.IGNORE_CONTEXT_PREFIX.getTitle());
+        headerRow.createCell(8).setCellValue(ExportColumn.TAGS.getTitle());
+
+        Row row1 = sheet.createRow(1);
+        row1.createCell(0).setCellValue("/content/1");
+        row1.createCell(1).setCellValue("/en/we-retail");
+        row1.createCell(2).setCellValue(301);
+        row1.createCell(3).setCellValue(true);
+        row1.createCell(4).setCellValue(new Calendar.Builder().setDate(1974, 01, 16).build());
+        row1.getCell(4).setCellStyle(dateStyle);
+        row1.createCell(5).setCellValue(new Calendar.Builder().setDate(2025, 02, 02).build());
+        row1.getCell(5).setCellStyle(dateStyle);
+        row1.createCell(6).setCellValue("note-abc");
+        row1.createCell(7).setCellValue(true);
+        row1.createCell(8).setCellValue("redirects:tag1\nredirects:tag2");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        out.close();
+        byte[] excelBytes = out.toByteArray();
+
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        request.addRequestParameter("file", excelBytes, "binary/data");
+
+        servlet.doPost(request, response);
+
+        Resource storageRoot = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
+        assertEquals("number of redirects after import ", 1, rules.size());
+
+        RedirectRule rule = rules.get("/content/1").adaptTo(RedirectRule.class);
+        assertEquals("/en/we-retail", rule.getTarget());
+        assertEquals(301, rule.getStatusCode());
+        assertDateEquals("16 February 1974", rule.getUntilDate());
+        assertDateEquals("02 March 2025", rule.getEffectiveFrom());
+        assertEquals("note-abc", rule.getNote());
+        assertTrue(rule.getEvaluateURI());
+        assertTrue(rule.getContextPrefixIgnored());
+        assertArrayEquals(new String[]{"redirects:tag1", "redirects:tag2"}, rule.getTagIds());
+
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+        assertTrue(importLog.getPath(), context.resourceResolver().getResource(importLog.getPath()) != null);
+    }
+
+    /**
+     * Merge redirects from spreadsheet with existing redirects in the repository
+     */
+    @Test
+    public void testImportMixedExistingAndSpreadsheet() throws ServletException, IOException {
         // existing rules
         new RedirectResourceBuilder(context, redirectStoragePath)
                 .setSource("/content/one")
@@ -98,7 +353,21 @@ public class ImportRedirectMapServletTest {
         dateStyle.setDataFormat(
                 wb.createDataFormat().getFormat("mmm d, yyyy"));
         Sheet sheet = wb.createSheet();
-        sheet.createRow(0); //header.not used in import, can be all blank
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(ExportColumn.SOURCE.getTitle());
+        headerRow.createCell(1).setCellValue(ExportColumn.TARGET.getTitle());
+        headerRow.createCell(2).setCellValue(ExportColumn.STATUS_CODE.getTitle());
+        headerRow.createCell(3).setCellValue(ExportColumn.OFF_TIME.getTitle());
+        headerRow.createCell(4).setCellValue(ExportColumn.NOTES.getTitle());
+        headerRow.createCell(5).setCellValue(ExportColumn.EVALUATE_URI.getTitle());
+        headerRow.createCell(6).setCellValue(ExportColumn.IGNORE_CONTEXT_PREFIX.getTitle());
+        headerRow.createCell(7).setCellValue(ExportColumn.TAGS.getTitle());
+        headerRow.createCell(8).setCellValue(ExportColumn.CREATED.getTitle());
+        headerRow.createCell(9).setCellValue(ExportColumn.CREATED_BY.getTitle());
+        headerRow.createCell(10).setCellValue(ExportColumn.MODIFIED.getTitle());
+        headerRow.createCell(11).setCellValue(ExportColumn.MODIFIED_BY.getTitle());
+        headerRow.createCell(12).setCellValue(ExportColumn.ON_TIME.getTitle());
+
         Row row1 = sheet.createRow(1);
         row1.createCell(0).setCellValue("/content/1");
         row1.createCell(1).setCellValue("/en/we-retail");
@@ -170,8 +439,11 @@ public class ImportRedirectMapServletTest {
         RedirectRule rule4 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/en/we-retail", rule4.getTarget());
         assertEquals(null, rule4.getUntilDate());
-    }
 
+        // read ImportLog from the output json and assert there were no issues
+        ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);
+        assertEquals("ImportLog",0, importLog.getLog().size());
+    }
 
     @Test
     public void testUpdate() throws IOException {
