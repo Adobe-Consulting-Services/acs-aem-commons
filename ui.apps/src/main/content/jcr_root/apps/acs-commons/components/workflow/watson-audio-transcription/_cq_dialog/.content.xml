@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Media Extraction - Step Properties"
+    sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/coral/foundation/tabs">
+        <items jcr:primaryType="nt:unstructured">
+            <common
+                cq:hideOnEdit="true"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Common"
+                sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"/>
+            <process
+                cq:hideOnEdit="true"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Process"
+                sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"/>
+            <processargs
+                cq:hideOnEdit="true"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Arguments"
+                sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"/>
+            <processcommon
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Common"
+                sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                <items jcr:primaryType="nt:unstructured">
+                    <column
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/container">
+                        <items jcr:primaryType="nt:unstructured">
+                            <basic
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <title
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                        disabled="false"
+                                        fieldLabel="Title"
+                                        name="./jcr:title"/>
+                                    <description
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                        disabled="false"
+                                        fieldLabel="Description"
+                                        name="./jcr:description"/>
+                                </items>
+                            </basic>
+                            <advanced
+                                jcr:primaryType="nt:unstructured"
+                                jcr:title="Advanced Settings"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <advance
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                        fieldDescription="Check if your handler will advance to the next step."
+                                        fieldLabel="Handler Advance"
+                                        name="./metaData/PROCESS_AUTO_ADVANCE"
+                                        text="Handler Advance"
+                                        value="true"/>
+                                    <timeout
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                        defaultValue="3600"
+                                        fieldDescription="The external process timeout (in seconds)."
+                                        fieldLabel="Timeout"
+                                        name="./metaData/timeout"/>
+                                    <period
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                        defaultValue="300"
+                                        fieldDescription="The polling interval (in seconds) to test for external process completion."
+                                        fieldLabel="Period"
+                                        name="./metaData/period"/>
+                                    <advanceOnTimeout
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                        fieldDescription="Check if you want to advance when the timeout is reached. Uncheck if you want to proceed to the inbox when the timeout is reached ."
+                                        fieldLabel="Advance On Timeout"
+                                        name="./metaData/advanceOnTimeout"
+                                        text="Advance On Timeout"
+                                        value="true"/>
+                                </items>
+                            </advanced>
+                        </items>
+                    </column>
+                </items>
+            </processcommon>
+        </items>
+    </content>
+</jcr:root>

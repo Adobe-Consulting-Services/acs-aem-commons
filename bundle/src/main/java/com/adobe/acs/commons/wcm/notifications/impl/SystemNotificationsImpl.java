@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.wcm.notifications.impl;
@@ -85,8 +83,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private static final String INJECT_TEXT =
             "<script>"
-                    + "if(window === top) {"
-                    + "   window.jQuery || document.write('<script src=\"%s\"><\\/script>');"
+                    + "if(window === top || (window.top && window.top.document.querySelector('iframe[id^=\"exc-app-\"]'))) {"
+                    + "   (window.jQuery || document.write('<script src=\"%s\"><\\/script>'));"
                     + "   document.write('<script src=\"%s\"><\\/script>');"
                     + "}"
                     + "</script>";
@@ -215,27 +213,27 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     }
 
     private void registerAsFilter() {
-            super.registerAsSlingFilter(this.osgiComponentContext, 0, ".*");
-            log.debug("Registered System Notifications as Sling Filter");
+        super.registerAsSlingFilter(this.osgiComponentContext, 0, ".*");
+        log.debug("Registered System Notifications as Sling Filter");
     }
 
     @SuppressWarnings("squid:S1149")
     private void registerAsEventHandler() {
-            final Hashtable<String, Object> filterProps = new Hashtable<>();
+        final Hashtable<String, Object> filterProps = new Hashtable<>();
 
-            // Listen on Add and Remove under /etc/acs-commons/notifications
-            filterProps.put(ResourceChangeListener.CHANGES,
-                    new String[]{
-                            ResourceChange.ChangeType.ADDED.name(),
-                            ResourceChange.ChangeType.REMOVED.name() });
+        // Listen on Add and Remove under /etc/acs-commons/notifications
+        filterProps.put(ResourceChangeListener.CHANGES,
+                new String[]{
+                        ResourceChange.ChangeType.ADDED.name(),
+                        ResourceChange.ChangeType.REMOVED.name()});
 
-            filterProps.put(ResourceChangeListener.PATHS, new String[]{ SystemNotificationsImpl.PATH_NOTIFICATIONS });
+        filterProps.put(ResourceChangeListener.PATHS, new String[]{SystemNotificationsImpl.PATH_NOTIFICATIONS});
 
-            this.eventHandlerRegistration =
-                    this.osgiComponentContext.getBundleContext().registerService(ResourceChangeListener.class, this,
-                            filterProps);
+        this.eventHandlerRegistration =
+                this.osgiComponentContext.getBundleContext().registerService(ResourceChangeListener.class, this,
+                        filterProps);
 
-            log.debug("Registered System Notifications as Resource Change Listener");
+        log.debug("Registered System Notifications as Resource Change Listener");
     }
 
     @Override
@@ -313,7 +311,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         protected boolean isNotification(Resource resource) {
             // Treat any cq:Page as a notification
             return !PATH_NOTIFICATIONS.equals(resource.getPath())
-                && NT_PAGE.equals(resource.getValueMap().get(JCR_PRIMARYTYPE));
+                    && NT_PAGE.equals(resource.getValueMap().get(JCR_PRIMARYTYPE));
         }
     }
 
@@ -385,7 +383,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         }
 
         private boolean isDismissed(final SlingHttpServletRequest request,
-            final Page notificationPage) {
+                                    final Page notificationPage) {
             final Cookie cookie = CookieUtil.getCookie(request, COOKIE_NAME);
             if (cookie != null) {
                 return StringUtils.contains(cookie.getValue(), getNotificationId(notificationPage));

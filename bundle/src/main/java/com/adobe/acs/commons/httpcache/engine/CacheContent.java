@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.engine;
 
@@ -128,26 +126,7 @@ public class CacheContent {
      */
     public CacheContent() {
     }
-
-    /**
-     * Construct from the custom servlet response wrapper..
-     *
-     * @param responseWrapper
-     * @deprecated Use build(HttpCacheServletResponseWrapper responseWrapper,int status, String charEncoding, String contentType, Map&lt;String, List&lt;String&gt; headers) throws HttpCacheDataStreamException
-     * @return
-     */
-    @Deprecated
-    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
-          // Extracting HTTP Response Header Names and Values
-        Map<String, List<String>> extractedHeaders = responseWrapper.getHeaderNames().stream().collect(
-                        Collectors.toMap(headerName -> headerName, headerName ->
-                            new ArrayList<>(responseWrapper.getHeaders(headerName)
-                        )
-        ));
-
-        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), extractedHeaders);
-    }
-
+    
     /**
      * Construct from the custom servlet response wrapper..
      *

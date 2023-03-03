@@ -8,6 +8,36 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->
+
+## 6.0.0
+
+### Removed
+
+- #2914 - Remove deprecated Java classes/methods and adjust any uses (page-compare and version-compare)
+- #2883 - Remove Deprecated - WCM Views
+- #2885 - Remove deprecated feature: Oak Index Manager
+- #2886 - Remove deprecated feature: Assets Folder Properties Support
+- #2889 - Removed Deprecated Forms feature
+- #2891 - Remove deprecated feature: Content Finder - Query Builder
+- #2892 - Removed the deprecated WCM views feature
+- #2895 - Remove deprecated feature: Dynamic RTE configuration
+- #2896 - Remove deprecated feature: cqinclude Namespace
+- #2897 - Remove deprecated feature: ClientLibs Manager
+- #2898 - Remove deprecated feature: Adobe DTM Cloud Service
+- #2900 - Remove deprecated feature: Custom ExtJS widgets and validators
+- #2907 - Remove deprecated feature: Long Form Text component
+- #2921 - Remove ClassicUI dialogs where Touch dialogs already exist
+- #2920 - Remove ClassicUI Audio component
+- #2918 - Remove ClassicUI ShareThis
+- #2919 - Remove old GenericList implementation files
+- #2954 - Remove Classic Dialog from the WF (Generate Audio Transcription with IBM Watson)
+
+### Changed
+
+- #2992 - Updated Named Transform Image and Twitter Feed components to use HTML/Sling Models (from JSPs). No change in
+  functionality.
+
 # 5.7.0 - 2023-02-24
 
 ### Fixed 
@@ -49,6 +79,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #2998 - Updated Vanity Path Rewrite Mapper to work on AEM as a Cloud Service
 - #3021 - Updated AbstractHtmlRequestInjector to not inject on login screen or target exports
+
+## 5.4.0
+
+- #2941 - Add Query Builder support in Report Builder
+- #2950 - Rewriter Packagers (x4) to use TouchUI instead of ClassicUI
+- #2888 - Removed deprecated ComponentHelper
+- #2899 - Remove deprecated - XSS JSP Functions (fixed version/page compare)
 
 ## 5.4.0 - 2022-10-24
 

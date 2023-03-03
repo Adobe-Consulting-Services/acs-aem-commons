@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
@@ -72,7 +70,6 @@ import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
 import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
 import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.adobe.acs.commons.wcm.vanity.VanityURLService;
 import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
@@ -104,7 +101,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
-    
+
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
 
@@ -241,7 +238,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                     + "Example: 'png' "
                     + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
             cardinality = Integer.MAX_VALUE,
-            value = { "png", "jpeg", "jpg", "gif" })
+            value = {"png", "jpeg", "jpg", "gif"})
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
 
     @Reference
@@ -249,9 +246,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private Authenticator authenticator;
-
-    @Reference
-    private ComponentHelper componentHelper;
     
     @Reference
     private VanityURLService vanityUrlService;
@@ -507,7 +501,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
-     * @param request the request object
+     * @param request       the request object
      * @param errorResource the error resource
      * @return
      */
@@ -616,7 +610,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      *
      * @param request
      * @param response
-     *
      * @return true if the request will be authenticated, false is the request could not trigger authentication
      */
     protected boolean authenticateRequest(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -633,6 +626,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
      * <p>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
+     *
      * @param request
      * @param response
      */
@@ -843,7 +837,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
-        
+
         this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
                         DEFAULT_VANITY_DISPATCH_ENABLED));
@@ -1040,7 +1034,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     @Override
-    public boolean isVanityDispatchCheckEnabled(){
+    public boolean isVanityDispatchCheckEnabled() {
         return this.vanityDispatchCheckEnabled;
     }
 

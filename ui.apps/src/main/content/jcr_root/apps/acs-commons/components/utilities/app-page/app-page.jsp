@@ -75,7 +75,7 @@
                    class="coral3-Shell-homeAnchor"><coral-icon class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--sizeM coral3-Icon--adobeExperienceManagerColor" icon="adobeExperienceManagerColor" size="M" role="img" aria-label="adobe experience manager color"></coral-icon>
                     <coral-shell-homeanchor-label>Adobe Experience Manager</coral-shell-homeanchor-label>
                 </a>
-                <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${pageTitle}</span>
+                <span style="line-height: 2.375rem;"> / ACS AEM Commons / ${pageTitle}</span>
             </coral-shell-header-home>
         </coral-shell-header>
 

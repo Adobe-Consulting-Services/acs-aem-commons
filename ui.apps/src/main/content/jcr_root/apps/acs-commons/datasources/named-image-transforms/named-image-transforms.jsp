@@ -27,10 +27,14 @@
     final DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();
     final List<DataSourceOption> options = new ArrayList<DataSourceOption>();
 
-    for (final NamedImageTransformer transform : namedImageTransforms) {
-        options.add(new DataSourceOption(StringUtils.capitalize(
-                                    StringUtils.replace(transform.getTransformName(), "-", " ")),
-                                     transform.getTransformName()));
+    if (namedImageTransforms != null) {
+        for (final NamedImageTransformer transform : namedImageTransforms) {
+            options.add(new DataSourceOption(StringUtils.capitalize(
+                                        StringUtils.replace(transform.getTransformName(), "-", " ")),
+                                         transform.getTransformName()));
+        }
+    } else {
+        options.add(new DataSourceOption("No Named Image Transforms defined", ""));
     }
 
     dataSourceBuilder.addDataSource(slingRequest, options);

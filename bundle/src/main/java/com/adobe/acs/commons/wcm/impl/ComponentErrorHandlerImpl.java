@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.wcm.impl;
@@ -23,8 +21,6 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang.StringUtils;
@@ -282,7 +278,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
             return "";
         }
 
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             // Component error renditions are typically stored under /apps as part of the application; and thus
             // requires elevated ACLs to work on Publish instances.
 
