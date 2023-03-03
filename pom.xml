@@ -17,7 +17,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -71,7 +72,7 @@
         <crx.user>admin</crx.user>
         <crx.password>admin</crx.password>
         <crx.protocol>http</crx.protocol>
-        <crx.contextRoot />
+        <crx.contextRoot/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
@@ -413,7 +414,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>6.5.3</version>
+                    <version>8.1.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -786,6 +787,9 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <skipProvidedScope>true</skipProvidedScope>
                             <skipSystemScope>true</skipSystemScope>
                             <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+                            <suppressionFiles>
+                                <suppressionFile>dependency-check-maven-plugin-suppression.xml</suppressionFile>
+                            </suppressionFiles>
                         </configuration>
                     </plugin>
                 </plugins>

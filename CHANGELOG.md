@@ -10,9 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
-## 6.0.0 - 2023-03-03
+### Fixed
 
-#3057 - Re-labled asset packager, added missing excludePages property
+- #3057 - Re-labled asset packager, added missing excludePages property
+- Updated dependencies with vulnerabilities:  guava-30.1-jre.jar: CVE-2020-8908, jjwt-api-0.11.2.jar: CVE-2022-45688
+
+## 6.0.0 - 2023-03-03
 
 ### Removed
 
