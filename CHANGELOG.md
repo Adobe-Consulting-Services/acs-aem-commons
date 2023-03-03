@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 6.0.0 - 2023-03-03
 
+#3057 - Re-labled asset packager, added missing excludePages property
+
 ### Removed
 
 - #2914 - Remove deprecated Java classes/methods and adjust any uses (page-compare and version-compare)
@@ -40,7 +42,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 # 5.7.0 - 2023-02-24
 
-### Fixed 
+### Fixed
+
 - #3050 - Garbage Collector - Removed unused package for compatible for AEMaaCS
 - #3046 - Redirect Manager Import Spreadsheet Issue
 - #3009 - Redirect Manager: Add informative error message during import
@@ -53,7 +56,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 
-- #2937 - Package Garbage Collector - used to clear up old packages installed on Managed Services instances by Cloud Manager
+- #2937 - Package Garbage Collector - used to clear up old packages installed on Managed Services instances by Cloud
+  Manager
 - #3031 - Redirect Manager: support for 307 and 308 redirects
 
 ## 5.5.2 - 2023-01-19
