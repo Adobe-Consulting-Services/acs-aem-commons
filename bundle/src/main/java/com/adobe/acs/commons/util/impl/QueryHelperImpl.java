@@ -72,8 +72,8 @@ public class QueryHelperImpl implements QueryHelper {
         if (StringUtils.isEmpty(statement)) {
             return Collections.emptyList();
         }
-
-        final String[] lines = StringUtils.split(statement, '\n');
+        
+        final String[] lines = statement.split("\\r?\\n");
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
             return getResourcesFromQueryBuilder(resourceResolver, lines, relPath);
