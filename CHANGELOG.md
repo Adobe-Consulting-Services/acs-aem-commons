@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
+## 6.0.2 - 2023-03-08
+
 ### Fixed
 
 - #3060 - Query packager does only picks last list item when in list mode
