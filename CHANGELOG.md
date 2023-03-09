@@ -10,11 +10,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
-
 ### Fixed
 
-- Updated dependencies with vulnerabilities:  guava-30.1-jre.jar: CVE-2020-8908, jjwt-api-0.11.2.jar: CVE-2022-45688
 - #3060 - Query packager does only picks last list item when in list mode
+- #3057 - Re-labled asset packager, added missing excludePages property
+- Updated dependencies with vulnerabilities:  guava-30.1-jre.jar: CVE-2020-8908, jjwt-api-0.11.2.jar: CVE-2022-45688
 
 ### Changed
 

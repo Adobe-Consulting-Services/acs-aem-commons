@@ -19,9 +19,9 @@
 
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
           xmlns:jcr="http://www.jcp.org/jcr/1.0"
-          jcr:description="Utility page for defining packages of ACL nodes."
+          jcr:description="Utility page for defining packages of pages and their referenced assets."
           jcr:primaryType="cq:Template"
-          jcr:title="Asset packager"
+          jcr:title="Pages (and referenced assets) packager"
           allowedPaths="[/etc/acs-commons/packagers(/.*)?]"
           ranking="{Long}120">
     <jcr:content
@@ -30,10 +30,10 @@
         <configuration
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="acs-commons/components/utilities/packager/asset-packager/configuration"
-                packageName="assets"
+                packageName="pages-and-assets"
                 packageGroupName="Assets"
                 packageVersion="1.0.0"
-                packageDescription="Asset Package initially defined by a ACS AEM Commons - Assets Packager configuration."
+                packageDescription="Page and asset package initially defined by a ACS AEM Commons - Pages (and referenced assets) packager configuration."
                 packageACLHandling="Overwrite"
                 conflictResolution="IncrementVersion"
                 pagePath="/content"
