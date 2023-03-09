@@ -18,6 +18,7 @@
 
 package com.adobe.acs.commons.replication.dispatcher;
 
+import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.replication.Agent;
@@ -32,15 +33,17 @@ import java.util.Map;
 
 /**
  * Service used to issue Dispatcher Flush requests.
+ * <p>
+ * Consumers may override the ACS AEM Commons implementation (which is at service.ranking=-10000).
  */
-@ProviderType
+@ConsumerType
 public interface DispatcherFlusher {
 
     /**
      * Issue flush replication request.
      *
      * @param resourceResolver access into repository; Must have access to the resources to flush
-     * @param paths list of resources to flush
+     * @param paths            list of resources to flush
      * @return a map of the targeted flush agents and the result of the replication request
      * @throws ReplicationException
      */
@@ -51,25 +54,25 @@ public interface DispatcherFlusher {
      * Issue flush replication request.
      *
      * @param resourceResolver access into repository; Must have access to the resources to flush
-     * @param actionType specifies the Replication Type that will be associated with the flush requests
-     *                   (ex. Activate, Deactivate, Delete)
-     * @param synchronous specifies if the Replication Request should be synchronous or asynchronous
-     * @param paths list of resources to flush
+     * @param actionType       specifies the Replication Type that will be associated with the flush requests
+     *                         (ex. Activate, Deactivate, Delete)
+     * @param synchronous      specifies if the Replication Request should be synchronous or asynchronous
+     * @param paths            list of resources to flush
      * @return a map of the targeted flush agents and the result of the replication request
      * @throws ReplicationException
      */
     Map<Agent, ReplicationResult> flush(ResourceResolver resourceResolver, ReplicationActionType actionType,
-                                               boolean synchronous, String... paths) throws ReplicationException;
+                                        boolean synchronous, String... paths) throws ReplicationException;
 
     /**
      * Issue flush replication request.
      *
      * @param resourceResolver access into repository; Must have access to the resources to flush
-     * @param actionType specifies the Replication Type that will be associated with the flush requests
-     *                   (ex. Activate, Deactivate, Delete)
-     * @param synchronous specifies if the Replication Request should be synchronous or asynchronous
-     * @param agentFilter filter used to specify agents to flush
-     * @param paths list of resources to flush
+     * @param actionType       specifies the Replication Type that will be associated with the flush requests
+     *                         (ex. Activate, Deactivate, Delete)
+     * @param synchronous      specifies if the Replication Request should be synchronous or asynchronous
+     * @param agentFilter      filter used to specify agents to flush
+     * @param paths            list of resources to flush
      * @return a map of the targeted flush agents and the result of the replication request
      * @throws ReplicationException
      */

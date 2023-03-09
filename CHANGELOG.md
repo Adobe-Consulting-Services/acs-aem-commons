@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3057 - Re-labled asset packager, added missing excludePages property
 - Updated dependencies with vulnerabilities:  guava-30.1-jre.jar: CVE-2020-8908, jjwt-api-0.11.2.jar: CVE-2022-45688
 
+### Changed
+
+- #3045 - Make DispatcherFlush interface @ConsumerType (from @ProviderType)
+
 ## 6.0.0 - 2023-03-03
 
 ### Removed
