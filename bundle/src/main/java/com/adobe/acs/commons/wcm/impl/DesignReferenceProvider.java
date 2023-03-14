@@ -61,9 +61,14 @@ public final class DesignReferenceProvider implements ReferenceProvider {
             return Collections.emptyList();
         }
 
+        Resource contentResource = design.getContentResource();
+        if (contentResource == null) {
+            return Collections.emptyList();
+        }
+
         return Collections.singletonList(new Reference(TYPE_DESIGN_PAGE,
                 String.format("%s (Design)", design.getId()),
-                design.getContentResource(),
+                contentResource,
                 getLastModified(design)));
     }
 
