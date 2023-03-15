@@ -71,8 +71,6 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
     @Override
     public JobResult process(Job job) {
-        LOG.info("Starting the Package Garbage Collector job");
-
         String groupName = job.getProperty(GROUP_NAME, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
         boolean removeNotInstalledPackages = job.getProperty(REMOVE_NOT_INSTALLED_PACKAGES, false);
@@ -91,9 +89,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
             for (JcrPackage jcrPackage : packages) {
                 String packageDescription = getPackageDescription(jcrPackage);
-                LOG.info("HI LEO 1");
                 LOG.info("Processing package {}", packageDescription);
-                LOG.info("HI LEO 2");
 
                 if (isPackageOldEnough(jcrPackage, maxAgeInDays)) {
                     if (removeNotInstalledPackages && !isInstalled(jcrPackage)) {
