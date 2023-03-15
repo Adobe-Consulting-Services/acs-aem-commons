@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,6 +45,7 @@ public class PackageGarbageCollectionScheduler {
     public static final String JOB_TOPIC = "com/adobe/acs/commons/PackageGarbageCollectionJob";
     public static final String GROUP_NAME = "groupName";
     public static final String MAX_AGE_IN_DAYS = "maxAgeInDays";
+    static final String REMOVE_NOT_INSTALLED_PACKAGES = "removeNotInstalledPackages";
 
     @Reference
     JobManager jobManager;
@@ -55,7 +56,7 @@ public class PackageGarbageCollectionScheduler {
     protected void activate(PackageGarbageCollectionConfig config) {
         job = scheduleJob(config);
         if (LOG.isInfoEnabled() && job != null) {
-            LOG.info("Next scheduled run for job with group name {} at {}",  config.groupName(), job.getNextScheduledExecution());
+            LOG.info("Next scheduled run for job with group name {} at {}", config.groupName(), job.getNextScheduledExecution());
         }
     }
 
@@ -67,7 +68,7 @@ public class PackageGarbageCollectionScheduler {
     }
 
     private ScheduledJobInfo scheduleJob(PackageGarbageCollectionConfig config) {
-        Map<String, Object> filter = Collections.singletonMap("="+GROUP_NAME, config.groupName());
+        Map<String, Object> filter = Collections.singletonMap("=" + GROUP_NAME, config.groupName());
         Collection<ScheduledJobInfo> existingJob = jobManager.getScheduledJobs(JOB_TOPIC, 1, filter);
         if (existingJob.isEmpty()) {
             return jobManager.createJob(JOB_TOPIC)
@@ -84,6 +85,7 @@ public class PackageGarbageCollectionScheduler {
         Map<String, Object> properties = new HashMap<>();
         properties.put(GROUP_NAME, config.groupName());
         properties.put(MAX_AGE_IN_DAYS, config.maxAgeInDays());
+        properties.put(REMOVE_NOT_INSTALLED_PACKAGES, config.removeNotInstalledPackages());
         return properties;
     }
 }

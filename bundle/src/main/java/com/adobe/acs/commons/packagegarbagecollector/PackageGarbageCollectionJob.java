@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.packagegarbagecollector;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
@@ -50,13 +51,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.GROUP_NAME;
-import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.MAX_AGE_IN_DAYS;
+import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.*;
 
 @Component(
-    service = JobConsumer.class,
-    immediate = true,
-    property = { JobConsumer.PROPERTY_TOPICS + "=" + PackageGarbageCollectionScheduler.JOB_TOPIC })
+        service = JobConsumer.class,
+        immediate = true,
+        property = {JobConsumer.PROPERTY_TOPICS + "=" + PackageGarbageCollectionScheduler.JOB_TOPIC})
 public class PackageGarbageCollectionJob implements JobConsumer {
     public static final DateTimeFormatter LOCALIZED_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
     private static final Logger LOG = LoggerFactory.getLogger(PackageGarbageCollectionJob.class);
@@ -71,28 +71,41 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
     @Override
     public JobResult process(Job job) {
+        LOG.info("Starting the Package Garbage Collector job");
+
         String groupName = job.getProperty(GROUP_NAME, String.class);
         Integer maxAgeInDays = job.getProperty(MAX_AGE_IN_DAYS, Integer.class);
+        boolean removeNotInstalledPackages = job.getProperty(REMOVE_NOT_INSTALLED_PACKAGES, false);
         int packagesRemoved = 0;
         LOG.debug("Job Configuration: ["
                 + "Group Name: {}, "
                 + "Service User: {}, "
-                + "Age of Package {} days,]", groupName, SERVICE_USER, maxAgeInDays);
+                + "Age of Package {} days,"
+                + "Remove not installed packages: {}]", groupName, SERVICE_USER, maxAgeInDays, removeNotInstalledPackages);
 
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(
-            Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER))) {
+                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER))) {
             Session session = resourceResolver.adaptTo(Session.class);
             JcrPackageManager packageManager = packaging.getPackageManager(session);
             List<JcrPackage> packages = packageManager.listPackages(groupName, false);
 
             for (JcrPackage jcrPackage : packages) {
+                resourceResolver.refresh();
+
                 String packageDescription = getPackageDescription(jcrPackage);
+                LOG.info("HI LEO 1");
                 LOG.info("Processing package {}", packageDescription);
+                LOG.info("HI LEO 2");
+
                 if (isPackageOldEnough(jcrPackage, maxAgeInDays)) {
-                    if (!isLatestInstalled(jcrPackage, packages)) {
+                    if (removeNotInstalledPackages && !isInstalled(jcrPackage)) {
                         packageManager.remove(jcrPackage);
                         packagesRemoved++;
-                        LOG.info("Deleted package {}", packageDescription);
+                        LOG.info("Deleted not-installed package [ {} ]", packageDescription);
+                    } else if (isInstalled(jcrPackage) && !isLatestInstalled(jcrPackage, packages)) {
+                        packageManager.remove(jcrPackage);
+                        packagesRemoved++;
+                        LOG.info("Deleted installed package [ {} ] since it is not the latest installed version.", packageDescription);
                     } else {
                         LOG.info("Not removing package because it's the current installed one {}", packageDescription);
                     }
@@ -111,11 +124,18 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         return JobResult.OK;
     }
 
+    private boolean isInstalled(JcrPackage jcrPackage) {
+        PackageDefinition definition = new PackageDefinition(jcrPackage);
+        return definition.getLastUnpacked() != null;
+    }
+
     private boolean isLatestInstalled(JcrPackage jcrPackage, List<JcrPackage> installedPackages) {
         Optional<JcrPackage> lastInstalledPackageOptional = installedPackages.stream().filter(installedPackage -> {
-            PackageDefinition definition = new PackageDefinition(installedPackage);
-            return definition.isSameNameAndGroup(jcrPackage);
-        }).max(Comparator.comparing(pkg -> new PackageDefinition(pkg).getLastUnpacked()));
+                    PackageDefinition definition = new PackageDefinition(installedPackage);
+                    return definition.isSameNameAndGroup(jcrPackage);
+                })
+                .filter(pkg -> new PackageDefinition(pkg).getLastUnpacked() != null)
+                .max(Comparator.comparing(pkg -> new PackageDefinition(pkg).getLastUnpacked()));
 
         if (lastInstalledPackageOptional.isPresent()) {
             JcrPackage lastInstalledPackage = lastInstalledPackageOptional.get();
@@ -124,6 +144,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
             // If it's not actually installed yet.
             if (lastInstalledPackageDefinition.getLastUnpacked() == null) {
+                // This should never be here since this check is guarded by isInstalled() above.
                 return false;
             }
 
@@ -196,14 +217,31 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         Period maxAge = Period.ofDays(maxAgeInDays);
         LocalDate oldestAge = LocalDate.now().minus(maxAge);
         Calendar packageCreatedAtCalendar = jcrPackage.getPackage().getCreated();
+
+        try {
+            if (packageCreatedAtCalendar == null) {
+                // Try getting the created at directly from the JCR node that represents the package.
+                packageCreatedAtCalendar = jcrPackage.getDefinition().getNode().getProperty(JcrConstants.JCR_CREATED).getValue().getDate();
+
+                if (packageCreatedAtCalendar == null) {
+                    // This should not happen, but if it does, we don't want to delete the package.
+                    LOG.warn("Package [ {} ] has no created date, assuming it's NOT old enough", jcrPackage.getNode().getPath());
+                    return false;
+                }
+            }
+        } catch (RepositoryException e) {
+            LOG.error("Unable to get created date for package [ {} ]", jcrPackage.getNode().getPath(), e);
+            return false;
+        }
+
         LocalDate packageCreatedAt = LocalDateTime.ofInstant(
-            packageCreatedAtCalendar.toInstant(),
-            packageCreatedAtCalendar.getTimeZone().toZoneId()).toLocalDate();
+                packageCreatedAtCalendar.toInstant(),
+                packageCreatedAtCalendar.getTimeZone().toZoneId()).toLocalDate();
         String packageDescription = getPackageDescription(jcrPackage);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checking if package is old enough: Name: {}, Created At: {}, Oldest Age: {}",
-                packageDescription, packageCreatedAt.format(LOCALIZED_DATE_FORMATTER), oldestAge.format(LOCALIZED_DATE_FORMATTER));
+                    packageDescription, packageCreatedAt.format(LOCALIZED_DATE_FORMATTER), oldestAge.format(LOCALIZED_DATE_FORMATTER));
         }
         return !packageCreatedAt.isAfter(oldestAge);
     }
