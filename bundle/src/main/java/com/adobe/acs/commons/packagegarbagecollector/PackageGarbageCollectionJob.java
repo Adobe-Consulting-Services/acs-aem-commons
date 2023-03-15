@@ -90,8 +90,6 @@ public class PackageGarbageCollectionJob implements JobConsumer {
             List<JcrPackage> packages = packageManager.listPackages(groupName, false);
 
             for (JcrPackage jcrPackage : packages) {
-                resourceResolver.refresh();
-
                 String packageDescription = getPackageDescription(jcrPackage);
                 LOG.info("HI LEO 1");
                 LOG.info("Processing package {}", packageDescription);
@@ -102,7 +100,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                         packageManager.remove(jcrPackage);
                         packagesRemoved++;
                         LOG.info("Deleted not-installed package [ {} ]", packageDescription);
-                    } else if (isInstalled(jcrPackage) && !isLatestInstalled(jcrPackage, packages)) {
+                    } else if (isInstalled(jcrPackage) && !isLatestInstalled(jcrPackage, packageManager.listPackages(groupName, false))) {
                         packageManager.remove(jcrPackage);
                         packagesRemoved++;
                         LOG.info("Deleted installed package [ {} ] since it is not the latest installed version.", packageDescription);
