@@ -144,7 +144,7 @@ var ScriptRunner = {
     },
     rebuildProcessList: function () {
         jQuery.ajax({
-            url: ScriptRunner.SERVLET_URL + ".list.json",
+            url: ScriptRunner.SERVLET_URL + ".list.json?_dc=" + Date.now(),
             dataType: "json",
             success: function (response) {
                 var processDom, process, i, noErrors = true, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
