@@ -320,8 +320,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         String refererPath = refererHeaderValue;
 
         try {
-            URI uri = new URI(refererHeaderValue);
-            refererPath = uri.getPath();
+            if (StringUtils.isNotBlank(refererHeaderValue)) {
+                URI uri = new URI(refererHeaderValue);
+                refererPath = uri.getPath();
+            }
         } catch (URISyntaxException e) {
             log.info("Could not parse the HTTP Requests's referer header value [ {} ] as a URI. Using raw header value", refererHeaderValue);
         }
