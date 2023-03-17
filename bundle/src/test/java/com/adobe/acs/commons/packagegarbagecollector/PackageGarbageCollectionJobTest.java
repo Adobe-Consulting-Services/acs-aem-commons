@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,8 +45,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.GROUP_NAME;
-import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.MAX_AGE_IN_DAYS;
+import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollectionScheduler.*;
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -79,7 +78,7 @@ public class PackageGarbageCollectionJobTest {
         );
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
-        assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
+        assertLogText("Deleted installed package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip] since it is not the latest installed version.");
         assertLogText("Package Garbage Collector job finished - Removed 1 packages");
     }
 
@@ -91,7 +90,7 @@ public class PackageGarbageCollectionJobTest {
         );
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
-        assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
+        assertLogText("Deleted installed package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip] since it is not the latest installed version.");
         assertLogText("Package Garbage Collector job finished - Removed 1 packages");
     }
 
@@ -115,8 +114,8 @@ public class PackageGarbageCollectionJobTest {
         );
         Job job = mockJob();
         assertEquals(JobConsumer.JobResult.OK, consumer.process(job));
-        assertLogText("Deleted package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip]");
-        assertLogText("Deleted package acs.ui.apps:com.acs:v8.0.0 [/etc/packages/acs.ui.apps-8.0.0.zip]");
+        assertLogText("Deleted installed package acs.ui.apps:com.acs:v6.0.0 [/etc/packages/acs.ui.apps-6.0.0.zip] since it is not the latest installed version.");
+        assertLogText("Deleted installed package acs.ui.apps:com.acs:v8.0.0 [/etc/packages/acs.ui.apps-8.0.0.zip] since it is not the latest installed version.");
         assertLogText("Not removing package because it's not old enough acs.ui.apps:com.acs:v5.0.0 [/etc/packages/acs.ui.apps-5.0.0.zip]");
         assertLogText("Not removing package because it's the current installed one acs.ui.apps:com.acs:v7.0.0 [/etc/packages/acs.ui.apps-7.0.0.zip]");
         assertLogText("Not removing package because it's the current installed one acs.ui.config:com.acs:v7.0.0 [/etc/packages/acs.ui.config-7.0.0.zip]");
@@ -160,6 +159,7 @@ public class PackageGarbageCollectionJobTest {
         Job job = mock(Job.class);
         when(job.getProperty(GROUP_NAME, String.class)).thenReturn("com.adobe.acs");
         when(job.getProperty(MAX_AGE_IN_DAYS, Integer.class)).thenReturn(60);
+        when(job.getProperty(REMOVE_NOT_INSTALLED_PACKAGES, false)).thenReturn(false);
         return job;
     }
 }

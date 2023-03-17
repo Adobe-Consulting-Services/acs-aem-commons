@@ -95,11 +95,11 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                     if (removeNotInstalledPackages && !isInstalled(jcrPackage)) {
                         packageManager.remove(jcrPackage);
                         packagesRemoved++;
-                        LOG.info("Deleted not-installed package [ {} ]", packageDescription);
+                        LOG.info("Deleted not-installed package {}", packageDescription);
                     } else if (isInstalled(jcrPackage) && !isLatestInstalled(jcrPackage, packageManager.listPackages(groupName, false))) {
                         packageManager.remove(jcrPackage);
                         packagesRemoved++;
-                        LOG.info("Deleted installed package [ {} ] since it is not the latest installed version.", packageDescription);
+                        LOG.info("Deleted installed package {} since it is not the latest installed version.", packageDescription);
                     } else {
                         LOG.info("Not removing package because it's the current installed one {}", packageDescription);
                     }
