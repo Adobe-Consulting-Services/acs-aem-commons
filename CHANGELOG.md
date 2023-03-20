@@ -9,7 +9,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+
+## Fixed
+
 - #3069 - Managed Controlled Processes Dashboard not visible
+- #3062 - AEM In Unified Shell, The Environment Indicator is displayed multiple times in site Page Editor;
+
+## Changed
+
+- Added config.rde logger for acs aem commons at Debug.
 
 ## 6.0.2 - 2023-03-08
 
