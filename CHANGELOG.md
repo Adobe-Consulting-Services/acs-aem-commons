@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
+
+## 6.0.4 - 2023-03-20
+
 ## Fixed
 
 - #3044 - Package Garbage Collector failed multiple ways when it can find the date
