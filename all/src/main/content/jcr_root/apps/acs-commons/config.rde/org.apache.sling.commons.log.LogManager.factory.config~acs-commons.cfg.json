@@ -1,6 +1,0 @@
-{
-  "org.apache.sling.commons.log.names": [
-    "com.adobe.acs.commons"
-  ],
-  "org.apache.sling.commons.log.level": "debug"
-}
