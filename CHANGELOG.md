@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Fixed
 
+- #3044 - Package Garbage Collector failed multiple ways when it can find the date
 - #3069 - Managed Controlled Processes Dashboard not visible
 - #3062 - AEM In Unified Shell, The Environment Indicator is displayed multiple times in site Page Editor;
 
