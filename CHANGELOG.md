@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Fixed
 
+- #3065 - Set ACS AEM Commons SMTP Health Check to run once a day by default
 - Reverted added config.rde logger for acs aem commons at Debug.
 
 ## 6.0.4 - 2023-03-20

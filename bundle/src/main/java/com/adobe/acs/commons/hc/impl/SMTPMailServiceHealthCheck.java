@@ -71,7 +71,12 @@ import java.util.concurrent.ConcurrentHashMap;
         @Property(
                 name = HealthCheck.MBEAN_NAME,
                 value = "smtpMailService",
-                propertyPrivate = true)})
+                propertyPrivate = true),
+        @Property(
+                name = HealthCheck.ASYNC_CRON_EXPRESSION,
+                value = "0 0 12 1/1 * ? *", // Everyday at noon
+                propertyPrivate = true)
+})
 @Service
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class SMTPMailServiceHealthCheck implements HealthCheck {
@@ -101,9 +106,9 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
     private int maxEmailsPerDay = DEFAULT_MAX_EMAILS_PER_DAY;
 
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
+    @Reference(target = "(distribution=classic)")
     RequireAem requireAem;
-    
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policyOption = ReferencePolicyOption.GREEDY)
     private MessageGatewayService messageGatewayService;
 
