@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
+## 6.0.6 - 2023-03-21
+
 ## Fixed
 
 - #3065 - Set ACS AEM Commons SMTP Health Check to run once a day by default
