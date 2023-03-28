@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 
+## Fixed
+
+- #3077 - errorpagehandler/default.jsp has a reference to a removed class
+
 ## 6.0.6 - 2023-03-21
 
 ## Fixed
