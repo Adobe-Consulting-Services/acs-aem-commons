@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3077 - errorpagehandler/default.jsp has a reference to a removed class
 
+## Changed
+
+- #3079 - Support agent specific replication status
+
 ## 6.0.6 - 2023-03-21
 
 ## Fixed
