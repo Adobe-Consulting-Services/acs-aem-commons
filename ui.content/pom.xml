@@ -135,27 +135,12 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>oakpal-scan-content-class-aem64</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
-                            </summaryFile>
-                            <checklists>
-                                <checklist>content-class-aem64</checklist>
-                            </checklists>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>oakpal-verify</id>
                         <goals>
                             <goal>verify</goal>
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
-                                </summaryFile>
                                 <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
                                 </summaryFile>
                             </summaryFiles>
@@ -191,7 +176,6 @@
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
             <scope>provided</scope>
         </dependency>
     </dependencies>

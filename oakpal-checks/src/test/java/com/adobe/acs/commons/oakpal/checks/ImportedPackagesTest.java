@@ -171,7 +171,7 @@ public class ImportedPackagesTest extends CheckTestBase {
         TestPackageUtil.buildJarFromDir(new File("src/test/resources/package-imports-version-mismatch-jar"),
                 jarFile, Collections.emptyMap());
 
-        final ProgressCheck check = new ImportedPackages().newInstance(key("aemVersion", arr("6.4")).get());
+        final ProgressCheck check = new ImportedPackages().newInstance(key("aemVersion", arr("6.5")).get());
         final PackageId packageId = PackageId.fromString("my_packages:test");
         check.startedScan();
         check.beforeExtract(packageId, null, null, null, Collections.emptyList());

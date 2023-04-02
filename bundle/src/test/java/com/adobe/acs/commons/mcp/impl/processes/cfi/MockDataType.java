@@ -19,6 +19,7 @@ package com.adobe.acs.commons.mcp.impl.processes.cfi;
 
 import com.adobe.cq.dam.cfm.DataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class MockDataType implements DataType {
 
@@ -37,5 +38,15 @@ public class MockDataType implements DataType {
     @Override
     public boolean isMultiValue() {
         return false;
+    }
+
+    @Override
+    public @Nullable String getSemanticType() {
+        return type;
+    }
+
+    @Override
+    public @NotNull String getValueType() {
+        return type;
     }
 }
