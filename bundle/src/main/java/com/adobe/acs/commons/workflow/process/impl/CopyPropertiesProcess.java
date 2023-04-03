@@ -112,13 +112,13 @@ public class CopyPropertiesProcess implements WorkflowProcess {
                  * ELSE, copy the value from the source to the destination.
                  */
 
-                if (source.propertyExists() && !source.hasValue() && destination.propertyExists()) {
+                if (doesSourcePropertyValueExists(source) && destination.propertyExists()) {
                     log.debug("Remove destination property during copy properties of [ {} -> {} ] because source property exists and has no value, and destination has the property", source, destination);
                     destination.setValue(null);
                 } else if (!source.propertyExists() && destination.propertyExists()) {
                     log.debug("Remove destination property during copy properties of [ {} -> {} ] because source property does not exists, and destination has the property", source, destination);
                     destination.setValue(null);
-                } else if (source.propertyExists() && !source.hasValue() && !destination.propertyExists()) {
+                } else if (doesSourcePropertyValueExists(source) && !destination.propertyExists()) {
                     log.debug("Do nothing. Skipping [ {} -> {} ] because source has no value, and destination is missing the property", source, destination);
                 } else {
                     log.debug("Setting [ {} ] value during copy properties of [ {} -> {} ]", source.getValue(), source, destination);
@@ -129,6 +129,10 @@ public class CopyPropertiesProcess implements WorkflowProcess {
                         new String[]{entry.getKey(), entry.getValue(), resource.getPath()} , e);
             }
         }
+    }
+
+    private boolean doesSourcePropertyValueExists(PropertyResource source) {
+        return source.propertyExists() && !source.hasValue();
     }
 
     static class PropertyResource {
