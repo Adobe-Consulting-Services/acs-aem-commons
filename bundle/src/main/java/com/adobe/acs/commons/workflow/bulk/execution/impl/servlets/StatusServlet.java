@@ -179,11 +179,12 @@ public class StatusServlet extends SlingAllMethodsServlet {
     private void addWorkspaceTrackedCounts(Workspace workspace, JsonObject json) {
         // Counts
         int remainingCount = workspace.getTotalCount() - (workspace.getCompleteCount() + workspace.getFailCount());
+        float completionRatio = (workspace.getTotalCount() - remainingCount) / (workspace.getTotalCount() * 1F);
         json.addProperty("totalCount", workspace.getTotalCount());
         json.addProperty("completeCount", workspace.getCompleteCount());
         json.addProperty("remainingCount", remainingCount);
         json.addProperty("failCount", workspace.getFailCount());
-        json.addProperty("percentComplete", Math.round(((workspace.getTotalCount() - remainingCount) / (workspace.getTotalCount() * 1F)) * DECIMAL_TO_PERCENT));
+        json.addProperty("percentComplete", Math.round(completionRatio * DECIMAL_TO_PERCENT));
     }
 
     @SuppressWarnings("squid:S1192")
