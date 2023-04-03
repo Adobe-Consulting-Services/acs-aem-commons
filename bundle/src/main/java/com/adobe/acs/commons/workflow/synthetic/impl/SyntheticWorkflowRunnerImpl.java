@@ -229,11 +229,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         for (final SyntheticWorkflowStep workflowStep : workflowSteps) {
             SyntheticWorkflowProcess workflowProcess;
 
-            if (WorkflowProcessIdType.PROCESS_LABEL.equals(workflowStep.getIdType())) {
-                workflowProcess = this.workflowProcessesByLabel.get(workflowStep.getId());
-            } else {
-                workflowProcess = this.workflowProcessesByProcessName.get(workflowStep.getId());
-            }
+            workflowProcess = getWorkFlowProcess(workflowStep);
 
             if (workflowProcess != null) {
                 final long start = System.currentTimeMillis();
@@ -271,19 +267,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                     // Handle Granite Workflow Exceptions by transforming them into CQ Workflow Exceptions which the rest of this API leverages
                     throw new WorkflowException(ex);
                 } finally {
-                    try {
-                        if (!terminated && autoSaveAfterEachWorkflowProcess && session.hasPendingChanges()) {
-                            session.save();
-                        }
-
-                        log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ {} ] ms", //NOPMD - Flagged as false positive
-                                new Object[]{workflowStep.getId(), payloadPath, String.valueOf(System.currentTimeMillis() - start)});
-                    } catch (RepositoryException e) {
-                        String msg = String.format("Could not save at end of synthetic workflow process execution"
-                                + " [ %s ] for payload path [ %s ]", workflowStep.getId(), payloadPath);
-                        log.error("Synthetic workflow process save failed: {}",msg, e);
-                        throw new WorkflowException(msg,e);
-                    }
+                    persistIncompleteSession(payloadPath, autoSaveAfterEachWorkflowProcess, session, terminated, workflowStep, start);
                 }
             } else {
                 log.error("Synthetic workflow runner retrieved a null Workflow Process for process.label [ {} ]",
@@ -300,6 +284,34 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                     + " [ {} ]", payloadPath, e);
             throw new WorkflowException(e);
         }
+    }
+
+    private void persistIncompleteSession(final String payloadPath, final boolean autoSaveAfterEachWorkflowProcess,
+            final Session session, boolean terminated, final SyntheticWorkflowStep workflowStep, final long start)
+            throws WorkflowException {
+        try {
+            if (!terminated && autoSaveAfterEachWorkflowProcess && session.hasPendingChanges()) {
+                session.save();
+            }
+
+            log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ {} ] ms", //NOPMD - Flagged as false positive
+                    new Object[]{workflowStep.getId(), payloadPath, String.valueOf(System.currentTimeMillis() - start)});
+        } catch (RepositoryException e) {
+            String msg = String.format("Could not save at end of synthetic workflow process execution"
+                    + " [ %s ] for payload path [ %s ]", workflowStep.getId(), payloadPath);
+            log.error("Synthetic workflow process save failed: {}",msg, e);
+            throw new WorkflowException(msg,e);
+        }
+    }
+
+    private SyntheticWorkflowProcess getWorkFlowProcess(final SyntheticWorkflowStep workflowStep) {
+        SyntheticWorkflowProcess workflowProcess;
+        if (WorkflowProcessIdType.PROCESS_LABEL.equals(workflowStep.getIdType())) {
+            workflowProcess = this.workflowProcessesByLabel.get(workflowStep.getId());
+        } else {
+            workflowProcess = this.workflowProcessesByProcessName.get(workflowStep.getId());
+        }
+        return workflowProcess;
     }
 
 
