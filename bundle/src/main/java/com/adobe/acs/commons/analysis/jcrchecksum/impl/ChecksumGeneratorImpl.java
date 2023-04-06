@@ -50,8 +50,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
- * and calculates an aggregate checksum on the nodes with the specified node types
+ * Utility that generates checksums for JCR paths. The checksum is calculated
+ * using a depth first traversal
+ * and calculates an aggregate checksum on the nodes with the specified node
+ * types
  * (via {@link ChecksumGeneratorOptions}).
  */
 @Component
@@ -61,10 +63,11 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
     private static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorImpl.class);
 
     /**
-     * Convenience method for  generateChecksums(session, path, new DefaultChecksumGeneratorOptions()).
+     * Convenience method for generateChecksums(session, path, new
+     * DefaultChecksumGeneratorOptions()).
      *
      * @param session the session
-     * @param path tthe root path to generate checksums for
+     * @param path    tthe root path to generate checksums for
      * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
@@ -75,13 +78,16 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
     }
 
     /**
-     * Traverses the content tree whose root is defined by the path param, respecting the {@link
+     * Traverses the content tree whose root is defined by the path param,
+     * respecting the {@link
      * ChecksumGeneratorOptions}.
-     * Generates map of checksum hashes in the format [ ABSOLUTE PATH ] : [ CHECKSUM OF NODE SYSTEM ]
+     * Generates map of checksum hashes in the format [ ABSOLUTE PATH ] : [ CHECKSUM
+     * OF NODE SYSTEM ]
      *
      * @param session the session
-     * @param path the root path to generate checksums for
-     * @param options the {@link ChecksumGeneratorOptions} that define the checksum generation
+     * @param path    the root path to generate checksums for
+     * @param options the {@link ChecksumGeneratorOptions} that define the checksum
+     *                generation
      * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
@@ -101,14 +107,14 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
     /**
      * Traverse the tree for candidate aggregate nodes.
-     * @param node the current node being traversed
+     * 
+     * @param node    the current node being traversed
      * @param options the checksum generator options
      * @return a map of paths and checksums
      * @throws RepositoryException
      * @throws IOException
      */
-    private Map<String, String> traverseTree(Node node, ChecksumGeneratorOptions options) throws
-            RepositoryException,
+    private Map<String, String> traverseTree(Node node, ChecksumGeneratorOptions options) throws RepositoryException,
             IOException {
 
         final Map<String, String> checksums = new LinkedHashMap<>();
@@ -116,7 +122,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         if (isExcludedSubTree(node, options)) {
             return checksums;
         } else if (isChecksumable(node, options) && !isExcludedNodeName(node, options)) {
-            // Tree-traversal has found a node to checksum (checksum will include all valid sub-tree nodes)
+            // Tree-traversal has found a node to checksum (checksum will include all valid
+            // sub-tree nodes)
             final String checksum = generatedNodeChecksum(node.getPath(), node, options);
             if (checksum != null) {
                 checksums.put(node.getPath(), checksum);
@@ -127,7 +134,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
             NodeIterator children = node.getNodes();
 
             while (children.hasNext()) {
-                // Check each child with recursive logic; if child is checksum-able the call into traverseTree will
+                // Check each child with recursive logic; if child is checksum-able the call
+                // into traverseTree will
                 // handle this case
                 checksums.putAll(traverseTree(children.nextNode(), options));
             }
@@ -136,12 +144,13 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         return checksums;
     }
 
-
     /**
-     * Ensures the node's primary type is included in the Included Node Types and NOT in the Excluded Node Types and NOT in the Excluded Node Names.
+     * Ensures the node's primary type is included in the Included Node Types and
+     * NOT in the Excluded Node Types and NOT in the Excluded Node Names.
      *
      * @param node    the candidate node
-     * @param options the checksum options containing the included and excluded none types
+     * @param options the checksum options containing the included and excluded none
+     *                types
      * @return true if the node represents a checksum-able node system
      * @throws RepositoryException
      */
@@ -155,21 +164,27 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
     }
 
     /**
-     * Generates a checksum for a single node and its node sub-system, respecting the options.
-     * @param aggregateNodePath the absolute path of the node being aggregated into a checksum
-     * @param node the node whose subsystem to create a checksum for
-     * @param options the {@link ChecksumGeneratorOptions} options
-     * @return a map containing 1 entry in the form [ node.getPath() ] : [ CHECKSUM OF NODE SYSTEM ]
+     * Generates a checksum for a single node and its node sub-system, respecting
+     * the options.
+     * 
+     * @param aggregateNodePath the absolute path of the node being aggregated into
+     *                          a checksum
+     * @param node              the node whose subsystem to create a checksum for
+     * @param options           the {@link ChecksumGeneratorOptions} options
+     * @return a map containing 1 entry in the form [ node.getPath() ] : [ CHECKSUM
+     *         OF NODE SYSTEM ]
      * @throws RepositoryException
      * @throws IOException
      */
     @SuppressWarnings("squid:S3776")
     protected String generatedNodeChecksum(final String aggregateNodePath,
-                                                  final Node node,
-                                                  final ChecksumGeneratorOptions options)
+            final Node node,
+            final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
-        if (isExcludedSubTree(node, options)) { return ""; }
+        if (isExcludedSubTree(node, options)) {
+            return "";
+        }
 
         final Map<String, String> checksums = new LinkedHashMap<>();
 
@@ -184,6 +199,26 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         /* Then process node's children */
 
         final Map<String, String> lexicographicallySortedChecksums = new TreeMap<>();
+        final boolean hasOrderedChildren = processNodeChildren(aggregateNodePath, node, options, checksums,
+                lexicographicallySortedChecksums);
+
+        if (!hasOrderedChildren && lexicographicallySortedChecksums.size() > 0) {
+            // Order is not dictated by JCR, so add the lexicographically sorted entries to
+            // the checksums string
+            checksums.putAll(lexicographicallySortedChecksums);
+        }
+
+        final String nodeChecksum = aggregateChecksums(checksums);
+        log.debug("Node [ {} ] has a aggregated checksum of [ {} ]", getChecksumKey(aggregateNodePath, node.getPath()),
+                nodeChecksum);
+
+        return nodeChecksum;
+    }
+
+    private boolean processNodeChildren(final String aggregateNodePath, final Node node,
+            final ChecksumGeneratorOptions options,
+            final Map<String, String> checksums, final Map<String, String> lexicographicallySortedChecksums)
+            throws RepositoryException, IOException {
         final boolean hasOrderedChildren = hasOrderedChildren(node);
         final NodeIterator children = node.getNodes();
 
@@ -207,7 +242,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
                     final String checksum = generatedNodeChecksum(aggregateNodePath, child, options);
                     if (checksum != null) {
                         // If order is not dictated by JCR, collect so we can sort later
-                        lexicographicallySortedChecksums.put(getChecksumKey(aggregateNodePath, child.getPath()), checksum);
+                        lexicographicallySortedChecksums.put(getChecksumKey(aggregateNodePath, child.getPath()),
+                                checksum);
 
                         log.debug("Aggregated Unordered Node: {} ~> {}",
                                 getChecksumKey(aggregateNodePath, child.getPath()), checksum);
@@ -215,29 +251,23 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
                 }
             }
         }
-
-        if (!hasOrderedChildren && lexicographicallySortedChecksums.size() > 0) {
-            // Order is not dictated by JCR, so add the lexicographically sorted entries to the checksums string
-            checksums.putAll(lexicographicallySortedChecksums);
-        }
-
-        final String nodeChecksum = aggregateChecksums(checksums);
-        log.debug("Node [ {} ] has a aggregated checksum of [ {} ]", getChecksumKey(aggregateNodePath, node.getPath()), nodeChecksum);
-
-        return nodeChecksum;
+        return hasOrderedChildren;
     }
 
     /**
-     * Returns a lexicographically sorted map of the [PROPERTY PATH] : [CHECKSUM OF PROPERTIES].
-     * @param aggregateNodePath the absolute path of the node being aggregated into a checksum
-     * @param node  the node to collect and checksum the properties for
-     * @param options the checksum generator options
+     * Returns a lexicographically sorted map of the [PROPERTY PATH] : [CHECKSUM OF
+     * PROPERTIES].
+     * 
+     * @param aggregateNodePath the absolute path of the node being aggregated into
+     *                          a checksum
+     * @param node              the node to collect and checksum the properties for
+     * @param options           the checksum generator options
      * @return the map of the properties and their checksums
      * @throws RepositoryException
      */
     protected String generatePropertyChecksums(final String aggregateNodePath,
-                                                      final Node node,
-                                                      final ChecksumGeneratorOptions options)
+            final Node node,
+            final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
         SortedMap<String, String> propertyChecksums = new TreeMap<>();
@@ -283,11 +313,11 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         return aggregateChecksums(propertyChecksums);
     }
 
-
     /**
      * Generates the relative key used for tracking nodes and properties.
+     * 
      * @param aggregatePath the absolute path of the node being aggregated.
-     * @param path the path of the item being checksumed
+     * @param path          the path of the item being checksumed
      * @return the key
      */
     protected String getChecksumKey(String aggregatePath, String path) {
@@ -304,7 +334,9 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
     }
 
     /**
-     * Normalizes a property values to a list; allows single and multi-values to be treated the same in code.
+     * Normalizes a property values to a list; allows single and multi-values to be
+     * treated the same in code.
+     * 
      * @param property the propert to get the value(s) from
      * @return a list of the property's value(s)
      * @throws RepositoryException
@@ -323,6 +355,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
     /**
      * Gets the checksum for a Binary value.
+     * 
      * @param value the Value
      * @return the checksum
      * @throws RepositoryException
@@ -343,6 +376,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
     /**
      * Gets the checksum for a String value.
+     * 
      * @param value the Value
      * @return the checksum
      * @throws RepositoryException
@@ -353,6 +387,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
     /**
      * Checks if node has ordered children.
+     * 
      * @param node the node
      * @return true if the node has ordered children
      * @throws RepositoryException
@@ -373,11 +408,14 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
     /**
      * Aggregates a set of checksum entries into a single checksum value.
+     * 
      * @param checksums the checksums
      * @return the checksum value
      */
     protected String aggregateChecksums(final Map<String, String> checksums) {
-        if (checksums.isEmpty()) { return null; }
+        if (checksums.isEmpty()) {
+            return null;
+        }
 
         StringBuilder data = new StringBuilder();
 
@@ -388,7 +426,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         return DigestUtils.sha1Hex(data.toString());
     }
 
-    protected boolean isExcludedSubTree(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException {
+    protected boolean isExcludedSubTree(final Node node, final ChecksumGeneratorOptions options)
+            throws RepositoryException {
         for (String exclude : options.getExcludedSubTrees()) {
             if (isPathFragmentMatch(node, exclude)) {
                 return true;
@@ -398,7 +437,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         return false;
     }
 
-    protected boolean isExcludedNodeName(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException {
+    protected boolean isExcludedNodeName(final Node node, final ChecksumGeneratorOptions options)
+            throws RepositoryException {
         for (String exclude : options.getExcludedNodeNames()) {
             if (isPathFragmentMatch(node, exclude)) {
                 return true;
@@ -408,8 +448,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         return false;
     }
 
-
-    protected boolean isExcludedNodeType(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException {
+    protected boolean isExcludedNodeType(final Node node, final ChecksumGeneratorOptions options)
+            throws RepositoryException {
         return options.getExcludedNodeTypes().contains(node.getPrimaryNodeType().getName());
     }
 
@@ -425,7 +465,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
             if (current == null) {
                 return false;
-            } else if (StringUtils.startsWith(fragment,"[") && StringUtils.endsWith(fragment, "]")) {
+            } else if (StringUtils.startsWith(fragment, "[") && StringUtils.endsWith(fragment, "]")) {
                 final String nodeType = StringUtils.stripToEmpty(StringUtils.substringBetween(fragment, "[", "]"));
 
                 if (!current.isNodeType(nodeType)) {
