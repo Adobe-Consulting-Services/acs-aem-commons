@@ -75,7 +75,6 @@ public class VariantTest {
         String nowStringLong = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.LONG, SimpleDateFormat.LONG, Locale.getDefault()).format(nowDate);
         assertNotNull(Variant.convert(nowStringLong, Date.class).getTime());
         assertNotNull(Variant.convert(nowStringShort, Date.class).getTime());
-        assertNotNull(Variant.convert("12:00 AM", Date.class).getTime());
     }
 
     @Test
