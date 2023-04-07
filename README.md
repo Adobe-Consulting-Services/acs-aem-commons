@@ -4,7 +4,7 @@
 
 [![Build Status](https://github.com/Adobe-Consulting-Services/acs-aem-commons/actions/workflows/maven.yml/badge.svg)](https://github.com/Adobe-Consulting-Services/acs-aem-commons/actions)
 
-[![Code Climate Issues](https://img.shields.io/codeclimate/issues/Adobe-Consulting-Services/acs-aem-commons.svg)](https://codeclimate.com/github/Adobe-Consulting-Services/acs-aem-commons)
+[![Code Climate Issues](https://img.shields.io/codeclimate/issues/Adobe-Conseulting-Services/acs-aem-commons.svg)](https://codeclimate.com/github/Adobe-Consulting-Services/acs-aem-commons)
 
 [![codecov](https://codecov.io/gh/Adobe-Consulting-Services/acs-aem-commons/branch/master/graph/badge.svg?token=KkCffH5xs4)](https://codecov.io/gh/Adobe-Consulting-Services/acs-aem-commons)
 
