@@ -50,7 +50,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * data rows missing required columns to prevent processing errors.
  */
 @ProviderType
-public class Spreadsheet {
+public class Spreadsheet extends SpreadsheetHeaders {
 
     public static final String DEFAULT_DELIMITER = ",";
     public static final String ROW_NUMBER = "~~ROWNUM~~";
@@ -58,9 +58,8 @@ public class Spreadsheet {
     private int rowCount;
     private transient List<Map<String, CompositeVariant>> dataRows;
     private final List<String> requiredColumns;
-    private Map<String, Optional<Class>> headerTypes;
-    private List<String> headerRow;
     private final Map<String, String> delimiters;
+    private SpreadsheetHeaders headers = new SpreadsheetHeaders();
     private boolean enableHeaderNameConversion = true;
     private InputStream inputStream;
     private List<String> caseInsensitiveHeaders = new ArrayList<>();
@@ -73,9 +72,9 @@ public class Spreadsheet {
      */
     public Spreadsheet(boolean convertHeaderNames, String... headerArray) {
         this.enableHeaderNameConversion = convertHeaderNames;
-        headerTypes = Arrays.stream(headerArray)
-                .collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
-        headerRow = Arrays.asList(headerArray);
+        headers.setHeaderTypes(Arrays.stream(headerArray)
+                .collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName)));
+        headers.setHeaderRow(Arrays.asList(headerArray));
         requiredColumns = Collections.emptyList();
         dataRows = new ArrayList<>();
         delimiters = new HashMap<>();
@@ -85,7 +84,8 @@ public class Spreadsheet {
      * Simple constructor used for unit testing purposes
      *
      * @param convertHeaderNames     If true, header names are converted
-     * @param caseInsensitiveHeaders Header names that will be ignored during conversion
+     * @param caseInsensitiveHeaders Header names that will be ignored during
+     *                               conversion
      * @param headerArray            List of strings for header columns
      */
     public Spreadsheet(boolean convertHeaderNames, List<String> caseInsensitiveHeaders, String... headerArray) {
@@ -104,7 +104,7 @@ public class Spreadsheet {
                     .map(this::convertHeaderName)
                     .collect(Collectors.toList());
         }
-        this.headerRow = new ArrayList<>();
+        this.headers.setHeaderRow(new ArrayList<>());
         this.inputStream = file;
     }
 
@@ -121,14 +121,16 @@ public class Spreadsheet {
         this(true, file, required);
     }
 
-    public Spreadsheet(RequestParameter file, List<String> caseInsensitiveHeaders, String... required) throws IOException {
+    public Spreadsheet(RequestParameter file, List<String> caseInsensitiveHeaders, String... required)
+            throws IOException {
         this(true, file, required);
         Optional.ofNullable(caseInsensitiveHeaders).ifPresent(this.caseInsensitiveHeaders::addAll);
     }
-    
+
     /**
      * Parse out the input file synchronously for easier unit test validation.
-     * This overload will implicitly use the default JVM locale for numeric and date/time conversions.
+     * This overload will implicitly use the default JVM locale for numeric and
+     * date/time conversions.
      * 
      * @return List of files that will be imported, including any renditions
      * @throws IOException if the file couldn't be read
@@ -136,7 +138,7 @@ public class Spreadsheet {
     public Spreadsheet buildSpreadsheet() throws IOException {
         return buildSpreadsheet(Locale.getDefault());
     }
-    
+
     /**
      * Parse out the input file synchronously for easier unit test validation
      *
@@ -153,16 +155,15 @@ public class Spreadsheet {
         final Iterator<Row> rows = sheet.rowIterator();
 
         Row firstRow = rows.next();
-        headerRow = readRow(firstRow, locale).stream()
+        headers.setHeaderRow(readRow(firstRow, locale).stream()
                 .map(v -> v != null ? convertHeaderName(v.toString()) : null)
-                .collect(Collectors.toList());
-        headerTypes = readRow(firstRow, locale).stream()
+                .collect(Collectors.toList()));
+        headers.setHeaderTypes(readRow(firstRow, locale).stream()
                 .map(Variant::toString)
                 .collect(Collectors.toMap(
                         this::convertHeaderName,
                         this::detectTypeFromName,
-                        this::upgradeToArray
-                ));
+                        this::upgradeToArray)));
 
         Iterable<Row> remainingRows = () -> rows;
         dataRows = StreamSupport.stream(remainingRows.spliterator(), false)
@@ -199,7 +200,7 @@ public class Spreadsheet {
             if (colName != null && data.get(i) != null && !data.get(i).isEmpty()) {
                 empty = false;
                 if (!out.containsKey(colName)) {
-                    Class type = headerTypes.get(colName).orElse(data.get(i).getBaseType());
+                    Class type = headers.getHeaderTypes().get(colName).orElse(data.get(i).getBaseType());
                     if (type == Object.class) {
                         type = data.get(i).getBaseType();
                     } else if (type == Object[].class) {
@@ -207,9 +208,10 @@ public class Spreadsheet {
                     }
                     out.put(colName, new CompositeVariant(type));
                 }
-                Optional<Class> type = headerTypes.get(colName);
+                Optional<Class> type = headers.getHeaderTypes().get(colName);
                 if (type.isPresent() && type.get().isArray()) {
-                    String[] values = data.get(i).toString().split(Pattern.quote(delimiters.getOrDefault(colName, DEFAULT_DELIMITER)));
+                    String[] values = data.get(i).toString()
+                            .split(Pattern.quote(delimiters.getOrDefault(colName, DEFAULT_DELIMITER)));
                     for (String value : values) {
                         if (value != null && !value.isEmpty()) {
                             out.get(colName).addValue(value.trim());
@@ -245,7 +247,7 @@ public class Spreadsheet {
      * @return the headerRow
      */
     public List<String> getHeaderRow() {
-        return Collections.unmodifiableList(headerRow);
+        return Collections.unmodifiableList(headers.getHeaderRow());
     }
 
     /**
@@ -318,10 +320,10 @@ public class Spreadsheet {
      * Also look for array hints as well. <br>
      * Possible formats:
      * <ul>
-     * <li>column-name - A column named "column-name" </li>
-     * <li>col@int - An integer column named "col" </li>
+     * <li>column-name - A column named "column-name"</li>
+     * <li>col@int - An integer column named "col"</li>
      * <li>col2@int[] - An integer array colum named "col2", assumes standard
-     * delimiter (,) </li>
+     * delimiter (,)</li>
      * <li>col3@string[] or col3@[] - A String array named "col3", assumes
      * standard delimiter (,)</li>
      * <li>col4@string[||] - A string array where values are using a custom
