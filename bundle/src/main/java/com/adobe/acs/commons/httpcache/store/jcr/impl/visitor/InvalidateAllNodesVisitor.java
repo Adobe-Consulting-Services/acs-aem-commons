@@ -20,9 +20,7 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 
 /**
  * Removes all nodes by traversal and saves based on save threshold.
@@ -51,5 +49,16 @@ public class InvalidateAllNodesVisitor extends AbstractNodeVisitor
                 isCacheEntryNode(node)
                         ||
                 isBucketNode(node);
+    }
+
+
+    public static boolean isEmptyBucketNode(final Node node) throws RepositoryException
+    {
+        return  isBucketNode(node)
+                && !node.hasNodes();
+    }
+
+    public static boolean isBucketNode(final Node node) throws RepositoryException{
+        return node.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE);
     }
 }

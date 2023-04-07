@@ -82,15 +82,6 @@ public abstract class AbstractNodeVisitor extends TraversingItemVisitor.Default
         return node.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE);
     }
 
-    public static boolean isEmptyBucketNode(final Node node) throws RepositoryException
-    {
-        return  isBucketNode(node)
-                && !node.hasNodes();
-    }
-
-    public static boolean isBucketNode(final Node node) throws RepositoryException{
-        return node.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE);
-    }
 
     protected void persistSession() throws RepositoryException
     {

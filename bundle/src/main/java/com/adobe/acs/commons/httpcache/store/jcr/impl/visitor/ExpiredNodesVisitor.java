@@ -49,6 +49,7 @@ public class ExpiredNodesVisitor extends AbstractNodeVisitor {
         super.leaving(node, level);
     }
 
+
     private void checkNodeForExpiry(final Node node) throws RepositoryException
     {
         if(node.hasProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)){
@@ -62,6 +63,15 @@ public class ExpiredNodesVisitor extends AbstractNodeVisitor {
     }
 
 
+    public static boolean isEmptyBucketNode(final Node node) throws RepositoryException
+    {
+        return  isBucketNode(node)
+                && !node.hasNodes();
+    }
+
+    public static boolean isBucketNode(final Node node) throws RepositoryException{
+        return node.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE);
+    }
 
 
 }

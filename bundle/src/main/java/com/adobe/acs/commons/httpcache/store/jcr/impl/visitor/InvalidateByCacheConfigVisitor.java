@@ -17,6 +17,8 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
+import java.io.IOException;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
@@ -26,9 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.EntryNodeToCacheKeyHandler;
-
-import java.io.IOException;
 
 public class InvalidateByCacheConfigVisitor extends AbstractNodeVisitor
 {
@@ -74,5 +75,16 @@ public class InvalidateByCacheConfigVisitor extends AbstractNodeVisitor
 
     protected CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
         return new EntryNodeToCacheKeyHandler(node, dclm).get();
+    }
+
+
+    public static boolean isEmptyBucketNode(final Node node) throws RepositoryException
+    {
+        return  isBucketNode(node)
+                && !node.hasNodes();
+    }
+
+    public static boolean isBucketNode(final Node node) throws RepositoryException{
+        return node.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE);
     }
 }
