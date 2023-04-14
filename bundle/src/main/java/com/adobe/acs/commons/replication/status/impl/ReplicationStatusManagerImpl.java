@@ -18,14 +18,19 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.replication.ReplicationStatus;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.nodetype.NodeType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -35,12 +40,14 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.nodetype.NodeType;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 
 /**
  * ACS AEM Commons - Replication Status Manager
@@ -83,11 +90,19 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         log.trace("{}'s resource that tracks replication status is {}", type, resource.getPath());
         return resource;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @Override
     public final void setReplicationStatus(final ResourceResolver resourceResolver,
+                                           final String replicatedBy,
+                                           final Calendar replicatedAt,
+                                           final Status status,
+                                           final String... paths) throws RepositoryException, PersistenceException {
+       setReplicationStatus(resourceResolver, Collections.emptySet(), replicatedBy, replicatedAt, status, paths);
+    }
+
+    @Override
+    public final void setReplicationStatus(final ResourceResolver resourceResolver,
+                                           final Collection<String> agentIds,
                                            final String replicatedBy,
                                            final Calendar replicatedAt,
                                            final Status status,
@@ -104,11 +119,21 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     @SuppressWarnings("squid:S3776")
     public final void setReplicationStatus(final ResourceResolver resourceResolver,
+                                           final String replicatedBy,
+                                           final Calendar replicatedAt,
+                                           final Status status,
+                                           final Resource... resources)
+            throws RepositoryException, PersistenceException {
+        setReplicationStatus(resourceResolver, Collections.emptySet(), replicatedBy, replicatedAt, status, resources);
+    }
+
+    @Override
+    @SuppressWarnings("squid:S3776")
+    public final void setReplicationStatus(final ResourceResolver resourceResolver,
+                                           final Collection<String> agentIds,
                                            final String replicatedBy,
                                            final Calendar replicatedAt,
                                            final Status status,
@@ -141,9 +166,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
                 /* Clear replication status; Set all to null to remove properties */
 
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, null);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, null);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, null);
+                setReplicationStatus(node, agentIds, null, null, null);
 
                 if (!node.isNodeType(ReplicationStatus.NODE_TYPE)) {
                     // Remove Mixin if node is not a cq:ReplicationStatus nodeType
@@ -161,10 +184,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                     // Add mixin if node is not already a cq:ReplicationStatus nodeType
                     this.addReplicationStatusMixin(node);
                 }
-
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAtClean);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
+                setReplicationStatus(node, agentIds, replicatedAtClean, replicatedByClean, replicationStatus);
             }
 
             log.debug("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
@@ -177,6 +197,15 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
 
         if (count > 0) {
             session.save();
+        }
+    }
+
+    private void setReplicationStatus(Node node, Collection<String> agentIds, Calendar replicatedAt, String replicatedBy, String replicationStatus) throws RepositoryException {
+        Set<String> propertyNameSuffixes = Stream.concat(Stream.of(""), agentIds.stream().map(s -> "_" + s)).collect(Collectors.toSet());
+        for (String propertyNameSuffix : propertyNameSuffixes) {
+            JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + propertyNameSuffix, replicatedAt);
+            JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + propertyNameSuffix, replicatedBy);
+            JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION + propertyNameSuffix, replicationStatus);
         }
     }
 
