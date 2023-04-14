@@ -20,6 +20,7 @@ package com.adobe.acs.commons.redirects.models;
 import com.adobe.granite.security.user.util.AuthorizableUtil;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
@@ -58,6 +59,7 @@ public class RedirectRule {
     public static final String MODIFIED_PROPERTY_NAME = "jcr:lastModified";
     public static final String MODIFIED_BY_PROPERTY_NAME = "jcr:lastModifiedBy";
     public static final String TAGS_PROPERTY_NAME = "cq:tags";
+    public static final String CACHE_CONTROL_HEADER_NAME = "cacheControlHeader";
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private String source;
@@ -97,6 +99,9 @@ public class RedirectRule {
 
     @ValueMapValue(name = CREATED_PROPERTY_NAME)
     private Calendar created;
+
+    @ValueMapValue(name = CACHE_CONTROL_HEADER_NAME)
+    private String cacheControlHeader;
 
     @Self
     private Resource resource;
@@ -176,6 +181,14 @@ public class RedirectRule {
         return tagIds;
     }
 
+    public String getCacheControlHeader() {
+        return cacheControlHeader;
+    }
+
+    public Resource getResource(){
+        return resource;
+    }
+
     /**
      * used in the redirect-row component to print tags in HTL
      */
@@ -197,9 +210,9 @@ public class RedirectRule {
     @Override
     public String toString() {
         return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, effectiveFrom=%s, note=%s, evaluateURI=%s,"
-                        + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s}",
+                        + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s, cacheControlHeader=%s}",
                 source, target, statusCode, untilDate, effectiveFrom, note, evaluateURI, contextPrefixIgnored,
-                Arrays.toString(tagIds), created, createdBy, modified, modifiedBy);
+                Arrays.toString(tagIds), created, createdBy, modified, modifiedBy, cacheControlHeader);
     }
 
     @Override

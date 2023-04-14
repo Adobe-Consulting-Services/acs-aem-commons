@@ -9,7 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-- #3069 - Managed Controlled Processes Dashboard not visible
+- #3090 - RedirectFilter: Optionally send Cache-Control response header
+- #3089 - RedirectFilter: mapUrls should be true by default
 
 ## Fixed
 
