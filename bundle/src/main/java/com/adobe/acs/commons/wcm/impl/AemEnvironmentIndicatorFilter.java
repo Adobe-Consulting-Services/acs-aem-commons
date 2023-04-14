@@ -20,6 +20,8 @@ package com.adobe.acs.commons.wcm.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -31,6 +33,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
 import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.day.cq.commons.PathInfo;
@@ -53,16 +56,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
  * The Environment filter consists of 2 filters:
  * * the environment filter, which is registered directly to the HTTP whiteboard, and which can cover
- *   also non-Sling applications (like CRXDE and the OSGI webconsole)
+ * also non-Sling applications (like CRXDE and the OSGI webconsole)
  * * a Sling filter, which is required for the filtering based on the WCM modes.
- * 
+ * <p>
  * The environment indicator output is written by the "outer" filter, but its decision might be overwritten
  * by the Sling Filter. The status is stored as a request attribute.
- * 
- *
  */
 
 
@@ -77,7 +77,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);
 
     private static final String DIV_ID = "acs-commons-env-indicator";
-    
+
     static final String INJECT_INDICATOR_PARAMETER = "AemEnvironmentIndicatorFilter.includeIndicator";
     static final String NO_EXTENSION_PLACEHOLDER = "<NONE>";
 
@@ -91,8 +91,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     + "left: 0;"
                     + "top: 0;"
                     + "right: 0;"
-            + "height: 5px;"
-            + "z-index: 100000000000000;";
+                    + "height: 5px;"
+                    + "z-index: 100000000000000;";
 
     private static final String TITLE_UPDATE_SCRIPT = "<script>(function() { var c = 0; t = '%s' + ' | ' + document.title, "
             + "i = setInterval(function() { if (document.title === t && c++ > 10) { clearInterval(i); } else { document.title = t; } }, 1500); "
@@ -140,21 +140,21 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private String titlePrefix = DEFAULT_TITLE_PREFIX;
 
     /* Property: Always Include Base CSS */
-    
+
     private boolean alwaysIncludeBaseCss;
-    
+
     @Property(label = "Always Include Base CSS",
-        description = "Always include the base CSS scoped to #" + DIV_ID + " { .. }",
-        boolValue = false)
+            description = "Always include the base CSS scoped to #" + DIV_ID + " { .. }",
+            boolValue = false)
     public static final String PROP_ALWAYS_INCLUDE_BASE_CSS = "always-include-base-css";
 
     /* Property: Always Include Color CSS */
-    
+
     private boolean alwaysIncludeColorCss;
-    
+
     @Property(label = "Always Include Color CSS",
-        description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
-        boolValue = false)
+            description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
+            boolValue = false)
     public static final String PROP_ALWAYS_INCLUDE_COLOR_CSS = "always-include-color-css";
 
     @Property(label = "Browser Title",
@@ -163,16 +163,16 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
 
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
-    @Property (label = "Excluded WCM modes",
-            description = "Do not display the indicator when these WCM modes",
+    @Property(label = "Excluded WCM modes",
+            description = "Do not display the indicator when these WCM modes are active",
             cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
 
     private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", NO_EXTENSION_PLACEHOLDER};
-    @Property (label = "Allowed URI extensions",
-            description = "Only inject the environment indicator on URI that use these extensions. Use '"+ NO_EXTENSION_PLACEHOLDER + "' to match on no extension.",
+    @Property(label = "Allowed URI extensions",
+            description = "Only inject the environment indicator on URI that use these extensions. Use '" + NO_EXTENSION_PLACEHOLDER + "' to match on no extension.",
             cardinality = Integer.MAX_VALUE)
     public static final String PROP_ALLOWED_EXTENSIONS = "allowed-extensions";
     private String[] allowedExtensions;
@@ -180,7 +180,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private String css = "";
 
     private ServiceRegistration filterRegistration;
-    
+
     private ServiceRegistration innerFilterRegistration;
 
     @Override
@@ -208,7 +208,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         }
 
         try (BufferedHttpServletResponse capturedResponse =
-                new BufferedHttpServletResponse(response, new StringWriter(), null)) {
+                     new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
             request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.TRUE);
 
@@ -220,8 +220,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 // Get contents
                 final String contents = capturedResponse.getBufferedServletOutput()
                         .getWriteMethod() == ResponseWriteMethod.WRITER
-                                ? capturedResponse.getBufferedServletOutput().getBufferedString()
-                                : null;
+                        ? capturedResponse.getBufferedServletOutput().getBufferedString()
+                        : null;
 
                 if (contents != null) {
                     final int bodyIndex = StringUtils.lastIndexOf(contents, "</body>");
@@ -239,13 +239,13 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             }
         }
     }
-    
+
     boolean innerFilterAcceptsInjection(HttpServletRequest request) {
         return request.getAttribute(INJECT_INDICATOR_PARAMETER).equals(Boolean.TRUE);
     }
 
     void writeEnvironmentIndicator(String css, String innerHTML, String titlePrefix,
-            PrintWriter printWriter) {
+                                   PrintWriter printWriter) {
         if (StringUtils.isNotBlank(css)) {
             printWriter.write("<style>" + css + " </style>");
             printWriter.write("<div id=\"" + DIV_ID + "\">" + innerHTML + "</div>");
@@ -270,20 +270,20 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                             + "remove the OSGi configuration and disable completely.");
             return false;
         } else if (isUnsupportedExtension(request.getRequestURI())) {
-            log.debug("Request's extension does not match allowed extensions");
+            log.debug("Request's extension does not match allowed extensions [ {} ]", request.getRequestURI());
             return false;
         } else if (isUnsupportedRequestMethod(request.getMethod())) {
-            log.debug("Request was not a GET request");
+            log.debug("Request was not a GET request [ {} ]", request.getRequestURI());
             return false;
         } else if (isXhr(request.getHeader("X-Requested-With"))) {
-            log.debug("Request was an XHR");
+            log.debug("Request was an XHR [ {} ]", request.getRequestURI());
             return false;
         } else if (hasAemEditorReferrer(request.getHeader("Referer"), request.getRequestURI())) {
-            log.debug("Request was for a page in an editor");
+            log.debug("Request was for a page in an editor [ {} ]", request.getRequestURI());
             return false;
         }
         // Checking for WcmMode does not make sense, it is not available here
-        log.debug("All checks pass, filter can execute");
+        log.debug("All checks pass, filter can execute [ {} ]", request.getRequestURI());
         return true;
     }
 
@@ -316,10 +316,24 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         return StringUtils.equals(headerValue, "XMLHttpRequest");
     }
 
-    boolean hasAemEditorReferrer(final String headerValue, final String requestUri) {
-        return StringUtils.endsWith(headerValue, "/editor.html" + requestUri)
-                || StringUtils.endsWith(headerValue, "/cf")
-                || isEditExperienceFragmentVariation(headerValue, requestUri);
+    boolean hasAemEditorReferrer(final String refererHeaderValue, final String requestUri) {
+        String refererPath = refererHeaderValue;
+
+        try {
+            if (StringUtils.isNotBlank(refererHeaderValue)) {
+                URI uri = new URI(refererHeaderValue);
+                refererPath = uri.getPath();
+            }
+        } catch (URISyntaxException e) {
+            log.info("Could not parse the HTTP Requests's referer header value [ {} ] as a URI. Using raw header value", refererHeaderValue);
+        }
+
+        return StringUtils.endsWith(refererHeaderValue, "/editor.html" + requestUri)
+                || StringUtils.endsWith(refererHeaderValue, "/cf")
+                || isEditExperienceFragmentVariation(refererHeaderValue, requestUri)
+                // AEM as a Cloud Service
+                || StringUtils.endsWith(refererPath, "/editor.html" + requestUri)
+                || StringUtils.endsWith(refererPath, "/cf");
     }
 
     boolean isEditExperienceFragmentVariation(String headerValue, String requestUri) {
@@ -359,7 +373,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         titlePrefix = xss.encodeForJSString(
                 PropertiesUtil.toString(config.get(PROP_TITLE_PREFIX), "").toString());
-        
+
         excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
                 DEFAULT_EXCLUDED_WCMMODES);
 
@@ -373,10 +387,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(),
                     this, filterProps);
-            
+
             // Register the innerFilter so it is invoked after the WcmRequestFilter (Ranking = 2000)
             Dictionary<String, Object> innerFilterProps = new Hashtable<>();
-            innerFilterProps.put(EngineConstants.SLING_FILTER_SCOPE,EngineConstants.FILTER_SCOPE_REQUEST);
+            innerFilterProps.put(EngineConstants.SLING_FILTER_SCOPE, EngineConstants.FILTER_SCOPE_REQUEST);
             innerFilterProps.put(Constants.SERVICE_RANKING, 1000);
             Filter innerFilter = new InnerEnvironmentIndicatorFilter(excludedWCMModes);
             innerFilterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), innerFilter, innerFilterProps);
@@ -434,7 +448,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     String getTitlePrefix() {
         return titlePrefix;
     }
-    
+
     protected static class InnerEnvironmentIndicatorFilter implements Filter {
 
         String[] excludedWcmModes;
@@ -475,5 +489,5 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         }
 
     }
-    
+
 }

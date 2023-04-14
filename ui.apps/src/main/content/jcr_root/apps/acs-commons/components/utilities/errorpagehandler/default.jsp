@@ -20,14 +20,12 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false"
         import="org.apache.sling.api.SlingHttpServletResponse,
-                com.adobe.acs.commons.wcm.ComponentHelper,
                 com.adobe.acs.commons.util.ModeUtil,
                 com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService"%><%
 
     final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
 
     if (errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
-        final ComponentHelper componentHelper = sling.getService(ComponentHelper.class);
         final int status = errorPageHandlerService.getStatusCode(slingRequest);
 
         if (status >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR &&

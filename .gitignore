@@ -34,3 +34,6 @@ bundle/mockserver.log
 
 #Jenv
 .java-version
+
+# Maven versions plugin
+pom.xml.versionsBackup
