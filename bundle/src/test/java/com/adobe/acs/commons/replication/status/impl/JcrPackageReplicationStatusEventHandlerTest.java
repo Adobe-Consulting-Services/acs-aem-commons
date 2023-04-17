@@ -48,6 +48,7 @@ import org.osgi.service.event.Event;
 import javax.jcr.Node;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,6 +173,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
                 eq(resourceResolver),
+                eq(Collections.emptySet()),
                 eq("Package Replication"),
                 eq(calendar),
                 eq(ReplicationStatusManager.Status.ACTIVATED),
@@ -183,7 +185,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Map<String, Object> eventParams  = new HashMap<>();
         eventParams.put("paths", new String[]{PACKAGE_PATH});
         eventParams.put("userId", "replication-user");
-
+        eventParams.put("type", "Activate");
         final Event event = new Event(ReplicationAction.EVENT_TOPIC, eventParams);
 
         final ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
@@ -202,7 +204,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Map<String, Object> properties  = new HashMap<>();
         properties.put("paths", expectedPaths);
         properties.put("userId", expectedUserId);
-
+        properties.put("type", "Activate");
         final Event event = new Event(ReplicationAction.EVENT_TOPIC, properties);
 
         final Map<String, Object> actual = eventHandler.getInfoFromEvent(event);
