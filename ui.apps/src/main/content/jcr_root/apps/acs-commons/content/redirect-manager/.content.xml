@@ -283,7 +283,7 @@
                                                     granite:id="redirect-cacheControlHeader"
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                    emptyText="Cache-Control header to return for this redirect, e.g. max-age: 3600"
+                                                    emptyText="Cache-Control header to return for this redirect, e.g. max-age=3600"
                                                     fieldLabel="Cache-Control Header "
                                                     name="./cacheControlHeader"/>
                                             </items>
@@ -358,7 +358,7 @@
                             <cacheControlHeader_301
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                emptyText="e.g. max-age: 3600"
+                                emptyText="e.g. max-age=3600"
                                 fieldLabel="Default Cache-Control header for 301 redirects"
                                 name="./cacheControlHeader_301"/>
                             <cacheControlHeader_302

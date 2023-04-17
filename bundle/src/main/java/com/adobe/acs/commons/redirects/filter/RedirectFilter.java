@@ -696,8 +696,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         String ccHeader = redirectRule.getCacheControlHeader();
         if(StringUtils.isEmpty(ccHeader)) {
-            String defaultKey = CACHE_CONTROL_HEADER_NAME + "_" + redirectRule.getStatusCode();
-            ccHeader = redirectRule.getResource().getParent().getValueMap().get(defaultKey, String.class);
+            ccHeader = redirectRule.getDefaultCacheControlHeader();
         }
         if(!StringUtils.isEmpty(ccHeader)){
             response.addHeader("Cache-Control", ccHeader);

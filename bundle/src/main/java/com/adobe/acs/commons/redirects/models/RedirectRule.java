@@ -109,6 +109,7 @@ public class RedirectRule {
     private Pattern ptrn;
 
     private SubstitutionElement[] substitutions;
+    private String defaultCacheControlHeader = null;
 
     @PostConstruct
     protected void init() {
@@ -123,6 +124,9 @@ public class RedirectRule {
         }
         ptrn = toRegex(regex);
         substitutions = SubstitutionElement.parse(target);
+
+        String cacheControlProperty = CACHE_CONTROL_HEADER_NAME + "_" + getStatusCode();
+        defaultCacheControlHeader = resource.getParent().getValueMap().get(cacheControlProperty, String.class);
     }
 
     public String getSource() {
@@ -185,8 +189,11 @@ public class RedirectRule {
         return cacheControlHeader;
     }
 
-    public Resource getResource(){
-        return resource;
+    /**
+     * @return default Cache-Control header for this redirect inherited from the parent
+     */
+    public String getDefaultCacheControlHeader(){
+        return defaultCacheControlHeader;
     }
 
     /**
