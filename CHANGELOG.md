@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Fixed
 
 - #3077 - errorpagehandler/default.jsp has a reference to a removed class
+- #3045  - Dispatcher Flush UI sends "Delete" Requests One Node at a Time 
 
 ## Changed
 
