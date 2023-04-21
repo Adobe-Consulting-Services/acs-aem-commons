@@ -114,6 +114,11 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setCacheControlHeader(String value) {
+        props.put(CACHE_CONTROL_HEADER_NAME, value);
+        return this;
+    }
+
     public RedirectResourceBuilder setProperty(String key, Object value) {
         props.put(key, value);
         return this;

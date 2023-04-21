@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
 
 import org.apache.sling.api.resource.Resource;
@@ -36,7 +37,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -113,7 +113,7 @@ public class SetReplicationStatusProcessTest {
 
         CalendarMatcher calMatch = new CalendarMatcher("2017-04-21T15:02");
 
-        verify(replicationStatusManager).setReplicationStatus(any(), eq("customUser"), argThat(calMatch), eq(ReplicationStatusManager.Status.valueOf("ACTIVATED")), eq(workflowPayload));
+        verify(replicationStatusManager).setReplicationStatus(any(), eq(Collections.emptySet()), eq("customUser"), argThat(calMatch), eq(ReplicationStatusManager.Status.valueOf("ACTIVATED")), eq(workflowPayload));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class SetReplicationStatusProcessTest {
 
         setReplicationStatusProcess.execute(workItem, workflowSession, metadataMap);
 
-        verify(replicationStatusManager, never()).setReplicationStatus(any(), any(), any(), any(), anyString());
+        verify(replicationStatusManager, never()).setReplicationStatus(any(), eq(Collections.emptySet()), any(), any(), any(), anyString());
     }
 
     @Test
@@ -137,7 +137,7 @@ public class SetReplicationStatusProcessTest {
 
         CalendarMatcher calMatch = new CalendarMatcher(now);
 
-        verify(replicationStatusManager).setReplicationStatus(any(), eq("migration"), argThat(calMatch), any(), anyString());
+        verify(replicationStatusManager).setReplicationStatus(any(), eq(Collections.emptySet()), eq("migration"), argThat(calMatch), any(), anyString());
     }
 
     private static class CalendarMatcher implements ArgumentMatcher<Calendar> {

@@ -35,7 +35,8 @@ public enum ExportColumn {
     CREATED("Created", RedirectRule.CREATED_PROPERTY_NAME, Calendar.class, false),
     CREATED_BY("Created By", RedirectRule.CREATED_BY_PROPERTY_NAME, String.class, false),
     MODIFIED("Modified", RedirectRule.MODIFIED_PROPERTY_NAME, Calendar.class, false),
-    MODIFIED_BY("Modified By", RedirectRule.MODIFIED_BY_PROPERTY_NAME, String.class, false);
+    MODIFIED_BY("Modified By", RedirectRule.MODIFIED_BY_PROPERTY_NAME, String.class, false),
+    CACHE_CONTROL("Cache-Control", RedirectRule.CACHE_CONTROL_HEADER_NAME, String.class, false);
 
     private final String title;
     private final String propertyName;

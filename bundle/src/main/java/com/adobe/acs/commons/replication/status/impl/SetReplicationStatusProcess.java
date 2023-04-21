@@ -20,9 +20,13 @@ package com.adobe.acs.commons.replication.status.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -58,7 +62,8 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
     private static final String ARG_REPL_DATE = "replicationDate";
     private static final String ARG_REPL_BY = "replicatedBy";
     private static final String ARG_REPL_ACTION = "replicationAction";
-
+    private static final String ARG_AGENT_IDS = "agentIds";
+    
     @Reference
     private WorkflowHelper workflowHelper;
 
@@ -101,7 +106,14 @@ public class SetReplicationStatusProcess implements WorkflowProcess {
                 replicatedBy = params.get(ARG_REPL_BY);
             }
 
-            replStatusMgr.setReplicationStatus(resourceResolver, replicatedBy, replicatedAt, ReplicationStatusManager.Status.valueOf(replAction), replicatedResourcePath);
+            Collection<String> agentIds;
+            if (!params.containsKey(ARG_AGENT_IDS)) {
+                log.info("No agentIds argument specified, will default to unspecified agent.");
+                agentIds = Collections.emptySet();
+            } else {
+                agentIds = Arrays.asList(params.get(ARG_AGENT_IDS).split(","));
+            }
+            replStatusMgr.setReplicationStatus(resourceResolver, agentIds, replicatedBy, replicatedAt, ReplicationStatusManager.Status.valueOf(replAction), replicatedResourcePath);
         } catch (Exception e) {
             log.error("An exception occurred while setting replication status.", e);
         }

@@ -93,7 +93,7 @@ public class RedirectFilterTest {
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
-        when(configuration.additionalHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
+        when(configuration.additionalHeaders()).thenReturn(new String[]{"Expires: 12345", "Invalid"});
         when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
         when(configuration.preserveExtension()).thenReturn(true);
@@ -179,8 +179,8 @@ public class RedirectFilterTest {
         List<Header> headers = filter.getOnDeliveryHeaders();
         assertEquals(1, headers.size());
         Header header = headers.iterator().next();
-        assertEquals("Cache-Control", header.getName());
-        assertEquals("no-cache", header.getValue());
+        assertEquals("Expires", header.getName());
+        assertEquals("12345", header.getValue());
     }
 
     @Test
@@ -243,7 +243,7 @@ public class RedirectFilterTest {
         assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
-        assertEquals("On-Delivery header", "no-cache", response.getHeader("Cache-Control"));
+        assertEquals("On-Delivery header", "12345", response.getHeader("Expires"));
     }
 
     @Test
@@ -1204,5 +1204,47 @@ public class RedirectFilterTest {
 
         MockSlingHttpServletResponse responseQueryStringAndAnchor = navigateToURI("/content/geometrixx/en/page.html/suffix.html?a=3&b=4#anchorAndQueryString");
         assertEquals("/content/geometrixx/en/redirected", responseQueryStringAndAnchor.getHeader("Location"));
+    }
+
+    /**
+     * Cache-Control header is configured in the redirect properties
+     */
+    @Test
+    public void testCacheControlHeaders() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/page")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(301)
+                        .setCacheControlHeader("max-age=3600")
+                        .build()
+        );
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(RedirectRule.CACHE_CONTROL_HEADER_NAME + "_301", "no-cache");
+
+        MockSlingHttpServletResponse response = navigateToURI("/content/we-retail/en/page.html");
+        assertEquals("/content/we-retail/en/target", response.getHeader("Location"));
+        assertEquals("max-age=3600", response.getHeader("Cache-Control"));
+
+    }
+
+    /**
+     * Cache-Control header is configured in the contextual configuration
+     */
+    @Test
+    public void testCacheControlHeadersDefault() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/page")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(301)
+                        .build()
+        );
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(RedirectRule.CACHE_CONTROL_HEADER_NAME + "_301", "no-cache");
+
+        MockSlingHttpServletResponse response = navigateToURI("/content/we-retail/en/page.html");
+        assertEquals("/content/we-retail/en/target", response.getHeader("Location"));
+        assertEquals("no-cache", response.getHeader("Cache-Control"));
     }
 }

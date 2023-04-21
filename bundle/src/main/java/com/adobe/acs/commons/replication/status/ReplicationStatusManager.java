@@ -27,6 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
 import javax.jcr.RepositoryException;
 
 import java.util.Calendar;
+import java.util.Collection;
 
 @ProviderType
 public interface ReplicationStatusManager {
@@ -62,6 +63,7 @@ public interface ReplicationStatusManager {
      * updates. All other resources will be quietly skipped.
      *
      * @param resourceResolver The resource resolver must have access to modify all of target resources.
+     * @param agentIds         The agent ids for which to set the replication status. If empty set for all agents. Never null.
      * @param replicatedBy     name to set the last replicated property to. If value is null then a value of "Unknown" is used.
      * @param replicatedAt     date to set the last replicated date to. If value is null then the current time is used.
      * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
@@ -69,6 +71,13 @@ public interface ReplicationStatusManager {
      * @param paths            The paths to update.
      * @throws RepositoryException
      * @throws PersistenceException
+     * @since 6.0.8
+     */
+    void setReplicationStatus(ResourceResolver resourceResolver, Collection<String> agentIds, String replicatedBy, Calendar replicatedAt,
+                              Status status, String... paths) throws RepositoryException, PersistenceException;
+
+    /**
+     * Shortcut for {@link #setReplicationStatus(ResourceResolver, Collection, String, Calendar, Status, String...) with {@code agentIds} being set to the empty set. 
      */
     void setReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
                               Status status, String... paths) throws RepositoryException, PersistenceException;
@@ -80,6 +89,7 @@ public interface ReplicationStatusManager {
      * updates. All other resources will be quietly skipped.
      *
      * @param resourceResolver The resource resolver must have access to modify all of target resources.
+     * @param agentIds         The agent ids for which to set the replication status. If empty set for all agents. Never null.
      * @param replicatedBy     name to set the last replicated property to. If value is null then a value of "Unknown" is used.
      * @param replicatedAt     date to set the last replicated date to.  If value is null then the current time is used.
      * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
@@ -87,6 +97,13 @@ public interface ReplicationStatusManager {
      * @param resources        The resources to update.
      * @throws RepositoryException
      * @throws PersistenceException
+     * @since 6.0.8
+     */
+    void setReplicationStatus(ResourceResolver resourceResolver, Collection<String> agentIds, String replicatedBy, Calendar replicatedAt,
+                              Status status, Resource... resources) throws RepositoryException, PersistenceException;
+
+    /**
+     * Shortcut for {@link #setReplicationStatus(ResourceResolver, Collection, String, Calendar, Status, Resource...) with {@code agentIds} being set to the empty set.
      */
     void setReplicationStatus(ResourceResolver resourceResolver, String replicatedBy, Calendar replicatedAt,
                               Status status, Resource... resources) throws RepositoryException, PersistenceException;

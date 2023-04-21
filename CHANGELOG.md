@@ -9,11 +9,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+- #3090 - RedirectFilter: Optionally send Cache-Control response header
+- #3089 - RedirectFilter: mapUrls should be true by default
 
 ## Fixed
 
 - #3077 - errorpagehandler/default.jsp has a reference to a removed class
 - #3045  - Dispatcher Flush UI sends "Delete" Requests One Node at a Time 
+
+## Changed
+
+- #3079 - Support agent specific replication status
 
 ## 6.0.6 - 2023-03-21
 
