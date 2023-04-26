@@ -12,9 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3090 - RedirectFilter: Optionally send Cache-Control response header
 - #3089 - RedirectFilter: mapUrls should be true by default
 
+## 6.0.8 - 2023-04-21
+
+- #3090 - RedirectFilter: Optionally send Cache-Control response header
+- #3089 - RedirectFilter: mapUrls should be true by default
+
 ## Fixed
 
 - #3077 - errorpagehandler/default.jsp has a reference to a removed class
+- #3045  - Dispatcher Flush UI sends "Delete" Requests One Node at a Time 
 
 ## Changed
 
