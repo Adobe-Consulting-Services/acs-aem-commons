@@ -212,7 +212,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     	
     	// Warn when this servlet is used
     	AVOID_USAGE_LOGGER.warn("An image is transformed on-the-fly, which can be a very resource intensive operation. "
-    			+ "If done frequently, you should consider to create such a rendition upfront using processing profiles. "
+    			+ "If done frequently, you should consider switching to dynamic AEM web-optimized images or creating such a rendition upfront using processing profiles. "
     			+ "See https://adobe-consulting-services.github.io/acs-aem-commons/features/named-image-transform/index.html for more details.");
     	
     	
