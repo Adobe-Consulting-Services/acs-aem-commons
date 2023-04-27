@@ -126,7 +126,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
     
     private static final Logger AVOID_USAGE_LOGGER = 
-    		LoggerFactory.getLogger(NamedTransformImageServlet.class.getName() + ".avoidUsage");
+    		LoggerFactory.getLogger(NamedTransformImageServlet.class.getName() + ".AvoidUsage");
     
 
     public static final String NAME_IMAGE = "image";
@@ -544,6 +544,10 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }
         
+        /**
+         * We want to be able to determine if the absence of the messages of the AVOID_USAGE_LOGGER
+         * is caused by not using this feature or by disabling the WARN messages.
+         */
         if (!AVOID_USAGE_LOGGER.isWarnEnabled()) {
         	log.info("Warnings for the use of the NamedTransfomringImageServlet disabled");
         }
