@@ -63,7 +63,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang.StringUtils;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -99,6 +101,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.adobe.acs.commons.redirects.models.RedirectRule.CACHE_CONTROL_HEADER_NAME;
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
 import static org.osgi.framework.Constants.SERVICE_ID;
@@ -140,7 +143,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         @AttributeDefinition(name = "Rewrite Location Header", description = "Apply Sling Resource Mappings (/etc/map) to Location header. "
                 + "Use if Location header should be rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
-        boolean mapUrls() default false;
+        boolean mapUrls() default true;
 
         @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
         String[] extensions() default {};
@@ -411,9 +414,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 log.debug("Redirecting {} to {}, statusCode: {}",
                         resourcePath, location, redirectRule.getStatusCode());
                 slingResponse.setHeader("Location", location);
-                for(Header header : onDeliveryHeaders){
-                    slingResponse.addHeader(header.getName(), header.getValue());
-                }
+                setAdditionalHeaders(redirectRule, slingResponse);
                 slingResponse.setStatus(redirectRule.getStatusCode());
                 redirected = true;
             }
@@ -689,4 +690,16 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return config.configName();
     }
 
+    void setAdditionalHeaders(RedirectRule redirectRule, HttpServletResponse response){
+        for(Header header : onDeliveryHeaders){
+            response.addHeader(header.getName(), header.getValue());
+        }
+        String ccHeader = redirectRule.getCacheControlHeader();
+        if(StringUtils.isEmpty(ccHeader)) {
+            ccHeader = redirectRule.getDefaultCacheControlHeader();
+        }
+        if(!StringUtils.isEmpty(ccHeader)){
+            response.addHeader("Cache-Control", ccHeader);
+        }
+    }
 }

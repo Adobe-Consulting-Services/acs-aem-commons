@@ -175,6 +175,7 @@
         var contextPrefixIgnored = tr.find('.contextPrefixIgnored').data('value');
         var evaluateURI = tr.find('.evaluateURI').data('value');
         var tags = tr.find('.tags').data('value');
+        var cacheControlHeader = tr.find('.cacheControlHeader').data('value');
 
         var form = $('#editRuleDialog').find("form");
         form[0].reset();
@@ -186,6 +187,7 @@
         form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
         form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
         form.find('input[name="./note"]').val(note);
+        form.find('input[name="./cacheControlHeader"]').val(cacheControlHeader);
         var cpi = form.find('input[name="./contextPrefixIgnored"]');
         cpi.val(contextPrefixIgnored);
         cpi.prop("checked", contextPrefixIgnored);
