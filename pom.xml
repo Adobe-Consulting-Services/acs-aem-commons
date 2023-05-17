@@ -104,7 +104,6 @@
                     <version>3.9.0</version>
                     <configuration>
                         <showDeprecation>true</showDeprecation>
-                        <failOnError>false</failOnError>
                         <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     </configuration>
                 </plugin>
