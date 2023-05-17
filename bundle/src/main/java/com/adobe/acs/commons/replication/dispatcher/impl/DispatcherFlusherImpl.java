@@ -20,6 +20,7 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.replication.dispatcher.FlushAggregateHandler;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.AgentManager;
@@ -95,6 +96,10 @@ public class DispatcherFlusherImpl implements DispatcherFlusher {
         options.setSuppressStatusUpdate(true);
         options.setSuppressVersions(true);
         options.setListener(listener);
+
+		// Issue 3045 - Add custom AggregateHandler.  
+		// Returns only the provided path instead of all the descendent nodes on that path.
+		options.setAggregateHandler(new FlushAggregateHandler());
 
         for (final String path : paths) {
             if (log.isDebugEnabled()) {

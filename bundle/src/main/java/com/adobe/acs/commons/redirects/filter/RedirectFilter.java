@@ -544,7 +544,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
 
         String resourcePath = request.getRequestPathInfo().getResourcePath();
-        boolean matches = getPaths().isEmpty() || getPaths().stream().anyMatch(p -> resourcePath.startsWith(p + "/"));
+        boolean matches = getPaths().isEmpty() || getPaths().stream().anyMatch(p -> p.equals("/") || resourcePath.startsWith(p + "/"));
         if (!matches) {
             log.trace("Request path [{}] not within any of {}.", resourcePath, paths);
             return false;
