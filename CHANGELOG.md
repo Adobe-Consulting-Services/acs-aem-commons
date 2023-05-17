@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+- #3095 - TagsExportServlet to return data in UTF-8 instead of iso-8859-1
 
 ## 6.0.8 - 2023-04-21
 

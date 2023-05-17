@@ -63,9 +63,9 @@ public class TagsExportServlet extends SlingSafeMethodsServlet {
       Parameters params = new Parameters(request);
 
       if (params.containsPath()) {
-        Writer writer = response.getWriter();
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
+        Writer writer = response.getWriter();
 
         if (params.isLocalized()) {
           writer.write(tagsExportService.exportLocalizedTagsForPath(params.getPath(), rr, params.getDefaultLocalization()));
