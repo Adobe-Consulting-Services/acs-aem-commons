@@ -653,7 +653,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
-                <version>5.2.0</version>
+                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
