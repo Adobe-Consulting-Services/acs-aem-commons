@@ -130,8 +130,9 @@ public class RedirectFilterTest {
             request.setQueryString(resourcePath.substring(qs + 1));
         }
         context.requestPathInfo().setResourcePath(resourcePath);
-        request.setResource(context.create().resource(resourcePath));
-
+        if(context.resourceResolver().getResource(resourcePath) == null) {
+            request.setResource(context.create().resource(resourcePath));
+        }
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
         filter.doFilter(request, response, filterChain);
 
@@ -514,6 +515,43 @@ public class RedirectFilterTest {
         assertEquals(null, response.getHeader("Location"));
         verify(filterChain, atLeastOnce())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    /**
+     * #3105 Support handling redirects when the request path does not start with /content
+     */
+    @Test
+    public void testContentRootMatchAll() throws Exception {
+
+        doReturn(Collections.singletonList("/")).when(filter).getPaths();
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/test")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/test/")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/etc/tags/omg")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/source")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build()
+
+        );
+
+        Resource resource = context.resourceResolver().getResource(redirectStoragePath);
+        for(RedirectRule rule : getRules(resource)){
+
+            MockSlingHttpServletResponse response = navigate(rule.getSource());
+            assertEquals(rule.getTarget(), response.getHeader("Location"));
+
+            context.response().reset();
+        }
     }
 
     @Test
