@@ -9,8 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
+- 
+
+- ## Changed
+
 - #3105 - Redirect Manager: support handling redirects when the request path does not start with /content
 - #3095 - TagsExportServlet to return data in UTF-8 instead of iso-8859-1
+- #3110 - Update lodash to 4.17.21 for fix https://github.com/advisories/GHSA-35jh-r3h4-6jhm
 
 ## 6.0.8 - 2023-04-21
 
@@ -20,7 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Fixed
 
 - #3077 - errorpagehandler/default.jsp has a reference to a removed class
-- #3045  - Dispatcher Flush UI sends "Delete" Requests One Node at a Time 
+- #3045 - Dispatcher Flush UI sends "Delete" Requests One Node at a Time
 
 ## Changed
 
