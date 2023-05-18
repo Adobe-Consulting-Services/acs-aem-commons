@@ -34,8 +34,7 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
     </div>
 </div>
 
-<%  return;
-} %>
+<%  return; } %><%
 
 %><div ng-controller="MainCtrl"
        ng-cloak
