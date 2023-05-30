@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 - #3105 - Redirect Manager: support handling redirects when the request path does not start with /content
 - #3095 - TagsExportServlet to return data in UTF-8 instead of iso-8859-1
+- #3115 - maven: change ui.apps dependency type in ui.content/pom.xml from content-package to zip
 
 ## 6.0.8 - 2023-04-21
 
