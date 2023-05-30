@@ -180,7 +180,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-ui.apps</artifactId>
             <version>${project.version}</version>
-            <type>content-package</type>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
