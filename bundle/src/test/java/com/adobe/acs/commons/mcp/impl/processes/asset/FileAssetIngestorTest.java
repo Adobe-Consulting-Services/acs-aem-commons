@@ -37,9 +37,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -71,7 +73,6 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.AssetIngestorPaths;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
-import com.google.common.io.Files;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -84,7 +85,8 @@ public class FileAssetIngestorTest {
     private static final String SFTP_USER_TEST_NAME = "user";
     private static final String SFTP_USER_TEST_PASSWORD = "password";
 
-    @Rule // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
+    @Rule
+    // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
     public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Mock
@@ -107,7 +109,7 @@ public class FileAssetIngestorTest {
     private File tempDirectory;
 
     @Before
-    public void setup() throws PersistenceException {
+    public void setup() throws IOException {
         context.registerAdapter(ResourceResolver.class, AssetManager.class, new Function<ResourceResolver, AssetManager>() {
             @Nullable
             @Override
@@ -118,7 +120,7 @@ public class FileAssetIngestorTest {
 
         context.create().resource("/content/dam", JcrConstants.JCR_PRIMARYTYPE, "sling:Folder");
         context.resourceResolver().commit();
-        tempDirectory = Files.createTempDir();
+        tempDirectory = Files.createTempDirectory(UUID.randomUUID().toString()).toFile();
         ingestor = new FileAssetIngestor(context.getService(MimeTypeService.class));
         ingestor.timeout = 1;
         ingestor.jcrBasePath = "/content/dam";
