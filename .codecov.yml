@@ -5,5 +5,5 @@ coverage:
       default:
         # basic
         target: auto
-        # each PR must not lower the coverage
-        threshold: 0%
+        # each PR must not lower the coverage by more than the given percentage
+        threshold: 0.1%

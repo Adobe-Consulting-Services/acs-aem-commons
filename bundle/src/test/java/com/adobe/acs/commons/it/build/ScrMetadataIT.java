@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,10 +51,17 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.fluent.Request;
-import org.jetbrains.annotations.NotNull;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.Constants;
@@ -195,22 +203,47 @@ public class ScrMetadataIT {
         return problems;
     }
 
+    private static final List<Integer> TRANSIENT_ERROR_STATUS_CODES = Arrays.asList(HttpStatus.SC_BAD_GATEWAY, HttpStatus.SC_SERVICE_UNAVAILABLE, HttpStatus.SC_GATEWAY_TIMEOUT);
+
     private DescriptorList getDescriptorsFromLatestRelease() throws Exception {
-        JsonObject packageDetails = (JsonObject) Request.Get("https://search.maven.org/solrsearch/select?q=g:%22com.adobe.acs%22+AND+a:%22acs-aem-commons-bundle%22&rows=1").execute().handleResponse(responseHandler);
-        String latestVersion = packageDetails.getAsJsonObject("response").getAsJsonArray("docs").get(0).getAsJsonObject().get("latestVersion").getAsString();
+        // https://central.sonatype.org/search/rest-api-guide/
+        HttpClientBuilder builder = HttpClientBuilder.create().setServiceUnavailableRetryStrategy( new ServiceUnavailableRetryStrategy() {
+            
+            @Override
+            public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
+                return executionCount < 5 && TRANSIENT_ERROR_STATUS_CODES.contains(response.getStatusLine().getStatusCode());
+            }
+            
+            @Override
+            public long getRetryInterval() {
+                return 5000; // in milliseconds
+            }
+        });
+        final File cachedFile;
+        try (CloseableHttpClient client = builder.build()) {
+            final JsonObject packageDetails = (JsonObject) client.execute(new HttpGet("https://search.maven.org/solrsearch/select?q=g:%22com.adobe.acs%22+AND+a:%22acs-aem-commons-bundle%22&rows=1"), responseHandler);
 
-        File tempDir = new File(System.getProperty("java.io.tmpdir"));
-        File cachedFile = new File(tempDir, String.format("acs-aem-commons-bundle-%s.jar", latestVersion));
-        if (cachedFile.exists()) {
-            System.out.printf("Using cached file %s\n", cachedFile);
-        } else {
+            String latestVersion = packageDetails.getAsJsonObject("response").getAsJsonArray("docs").get(0).getAsJsonObject().get("latestVersion").getAsString();
+            File tempDir = new File(System.getProperty("java.io.tmpdir"));
+            cachedFile = new File(tempDir, String.format("acs-aem-commons-bundle-%s.jar", latestVersion));
+            if (cachedFile.exists()) {
+                System.out.printf("Using cached file %s\n", cachedFile);
+            } else {
+                String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
+                System.out.printf("Fetching %s\n", url);
+    
+                client.execute(new HttpGet(url), new ResponseHandler<Void>() {
 
-            String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
-            System.out.printf("Fetching %s\n", url);
-
-            InputStream content = Request.Get(url).execute().returnContent().asStream();
-
-            IOUtils.copy(content, new FileOutputStream(cachedFile));
+                    @Override
+                    public Void handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                        try (InputStream input = response.getEntity().getContent();
+                             OutputStream output = new FileOutputStream(cachedFile)) {
+                            IOUtils.copy(input, output);
+                        }
+                        return null;
+                    }
+                });
+            }
         }
         return parseJar(new FileInputStream(cachedFile), false);
     }
@@ -440,12 +473,12 @@ public class ScrMetadataIT {
         }
 
         @Override
-        public int read(@NotNull byte[] b) throws IOException {
+        public int read(byte[] b) throws IOException {
             return zis.read(b);
         }
 
         @Override
-        public int read(@NotNull byte[] b, int off, int len) throws IOException {
+        public int read(byte[] b, int off, int len) throws IOException {
             return zis.read(b, off, len);
         }
 
