@@ -174,18 +174,21 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-ui.apps</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-ui.content</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
