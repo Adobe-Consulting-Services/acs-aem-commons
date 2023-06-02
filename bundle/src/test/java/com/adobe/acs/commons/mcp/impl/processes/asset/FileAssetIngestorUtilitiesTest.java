@@ -17,13 +17,15 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.google.common.io.Files;
+import java.nio.file.Files;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -40,7 +42,7 @@ public class FileAssetIngestorUtilitiesTest {
     public void setup() throws Exception {
         ingestor = new FileAssetIngestor(null);
         ingestor.jcrBasePath = "/content/dam";
-        tempDirectory = Files.createTempDir();
+        tempDirectory = Files.createTempDirectory(UUID.randomUUID().toString()).toFile();
         ingestor.fileBasePath = tempDirectory.getAbsolutePath();
         ingestor.init();
     }
