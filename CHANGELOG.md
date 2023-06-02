@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3105 - Redirect Manager: support handling redirects when the request path does not start with /content
 - #3095 - TagsExportServlet to return data in UTF-8 instead of iso-8859-1
 - #3112 - Update AngularJS to latest v1.8.2 
+- #3115 - maven: change ui.apps dependency type in ui.content/pom.xml from content-package to zip
 
 ## 6.0.8 - 2023-04-21
 
