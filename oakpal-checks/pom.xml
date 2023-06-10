@@ -177,7 +177,7 @@
                                 </goals>
                                 <configuration>
                                     <defaults>
-                                        <aemVersion>6.4</aemVersion>
+                                        <aemVersion>6.5</aemVersion>
                                     </defaults>
                                     <source>${pom.basedir}/src/main/script/ExtractBundleInfo.groovy</source>
                                 </configuration>
@@ -190,51 +190,6 @@
                                 <version>0.7</version>
                             </dependency>
                         </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>webster-aem64</id>
-            <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
-            your settings.xml file that sets a "webster.repositoryHome" property with an absolute path to the
-            crx-quickstart/repository directory of a locally-installed AEM 6.4 server. -->
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>net.adamcin.oakpal</groupId>
-                        <artifactId>oakpal-maven-plugin</artifactId>
-                        <configuration>
-                            <websterTargets>
-                                <checklist>
-                                    <file>src/main/resources/OAKPAL-INF/checklist/content-class-aem64.json</file>
-                                    <config>
-                                        <jcrNamespaces>
-                                            <namespace>
-                                                <prefix>granite</prefix>
-                                                <uri>http://www.adobe.com/jcr/granite/1.0</uri>
-                                            </namespace>
-                                        </jcrNamespaces>
-                                        <selectNodeTypes>
-                                            <type>granite:PublicArea</type>
-                                            <type>granite:FinalArea</type>
-                                            <type>granite:InternalArea</type>
-                                            <type>granite:AbstractArea</type>
-                                        </selectNodeTypes>
-                                        <nodeTypeFilters>
-                                            <filter>
-                                                <type>exclude</type>
-                                                <pattern>nt:file</pattern>
-                                            </filter>
-                                            <filter>
-                                                <type>exclude</type>
-                                                <pattern>nt:resource</pattern>
-                                            </filter>
-                                        </nodeTypeFilters>
-                                    </config>
-                                </checklist>
-                            </websterTargets>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -294,7 +249,6 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>18.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -17,37 +17,54 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.testutil.LogTester;
-import com.adobe.acs.commons.util.RequireAem;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.DamConstants;
-import io.wcm.testing.mock.aem.junit.AemContext;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.IS_REMOTE_ASSET;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_RETRY_DELAY;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_WHITELISTED_SVC_USER_A;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getRemoteAssetsConfigs;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.setupRemoteAssetsServiceUser;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.ValueFactory;
+
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.resourceresolver.impl.CommonResourceResolverFactoryImpl;
+import org.apache.sling.resourceresolver.impl.ResourceResolverFactoryImpl;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.ValueFactory;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.DamConstants;
 
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.IS_REMOTE_ASSET;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import io.wcm.testing.mock.aem.junit.AemContext;
 
 public class RemoteAssetDecoratorTest {
     private static String TEST_MOCK_SYNC = "mocksync";
@@ -58,6 +75,7 @@ public class RemoteAssetDecoratorTest {
 
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    private ResourceResolver userResourceResolver = null;
 
     @Before
     public void setup() throws Exception {
@@ -77,6 +95,22 @@ public class RemoteAssetDecoratorTest {
 
         remoteAssetDecorator = spy(new RemoteAssetDecorator());
         remoteAssetsBinarySync = mock(RemoteAssetsBinarySyncImpl.class);
+        // workaround for https://issues.apache.org/jira/browse/SLING-11885 to bind the resource decorator
+        ResourceResolverFactory rrFactory = context.getService(ResourceResolverFactory.class);
+        if (rrFactory instanceof ResourceResolverFactoryImpl) {
+            // use reflection to get CommonResourceResolverFactoryImpl
+            Field crrFactoryField = ResourceResolverFactoryImpl.class.getDeclaredField("commonFactory");
+            crrFactoryField.setAccessible(true);
+            CommonResourceResolverFactoryImpl commonFactory = (CommonResourceResolverFactoryImpl) crrFactoryField.get(rrFactory);
+            commonFactory.getResourceDecoratorTracker().bindResourceDecorator(remoteAssetDecorator, Collections.emptyMap());
+        }
+    }
+
+    @After
+    public void tearDown() {
+        if (userResourceResolver != null) {
+            userResourceResolver.close();
+        }
     }
 
     private void setupCreateRemoteAsset(Node nodeDam, String damFolder, boolean isRemoteAsset) throws RepositoryException {
@@ -108,12 +142,14 @@ public class RemoteAssetDecoratorTest {
         context.registerInjectActivateService(new RemoteAssetsConfigImpl(), getRemoteAssetsConfigs());
         context.registerInjectActivateService(remoteAssetsBinarySync);
         context.registerInjectActivateService(remoteAssetDecorator);
-
         LogTester.reset();
     }
 
     private ResourceResolver getUserResourceResolver() {
-        return getUserResourceResolver("testuser", false);
+        if (userResourceResolver == null) {
+            userResourceResolver = getUserResourceResolver("testuser", false);
+        }
+        return userResourceResolver;
     }
 
     private ResourceResolver getUserResourceResolver(String username, boolean isServiceUser) {
@@ -160,8 +196,9 @@ public class RemoteAssetDecoratorTest {
     @Test
     public void testGetResourceSyncsAssetIfUserIsWhitelistedServiceUser() {
         setupFinish();
-        ResourceResolver serviceResourceResolver = getUserResourceResolver(TEST_WHITELISTED_SVC_USER_A, true);
-        assertResourceSyncs(serviceResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
+        try (ResourceResolver serviceResourceResolver = getUserResourceResolver(TEST_WHITELISTED_SVC_USER_A, true)) {
+            assertResourceSyncs(serviceResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
+        }
     }
 
     @Test
@@ -208,9 +245,10 @@ public class RemoteAssetDecoratorTest {
     @Test
     public void testGetResourceDoesNotSyncAssetIfUserIsServiceUser() {
         setupFinish();
-        ResourceResolver serviceResourceResolver = getUserResourceResolver("serviceuser", true);
-        assertResourceDoesNotSync(serviceResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
-        LogTester.assertLogText("Avoiding binary sync b/c this is a non-whitelisted service user: serviceuser");
+        try (ResourceResolver serviceResourceResolver = getUserResourceResolver("serviceuser", true)) {
+            assertResourceDoesNotSync(serviceResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
+            LogTester.assertLogText("Avoiding binary sync b/c this is a non-whitelisted service user: serviceuser");
+        }
     }
 
     @Test
