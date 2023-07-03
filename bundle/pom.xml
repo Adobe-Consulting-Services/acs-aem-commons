@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.0.9-SNAPSHOT</version>
+        <version>6.0.11-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -269,7 +269,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>31.1-jre</version>
+                <version>32.0.0-jre</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -306,6 +306,12 @@
             <artifactId>jsr305</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- @PostConstruct -->
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -372,7 +378,7 @@
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
+            <artifactId>javax.mail-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- for com.adobe.acs.commons.logging.impl.SyslogAppender  -->
@@ -581,6 +587,12 @@
             <version>1.7</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+            <scope>test</scope>
+        </dependency>
         <!-- needed to override the embedded commons.osgi in org.apache.sling.models.impl -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -607,12 +619,6 @@
         <dependency>
             <groupId>org.apache.jackrabbit</groupId>
             <artifactId>jackrabbit-jcr-commons</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>jackrabbit-api</artifactId>
-            <version>2.16.3</version>
-            <groupId>org.apache.jackrabbit</groupId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -679,6 +685,10 @@
                     <groupId>org.apache.tika</groupId>
                     <artifactId>tika-core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>jackrabbit-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -732,7 +742,6 @@
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
             <scope>provided</scope>
         </dependency>
     </dependencies>

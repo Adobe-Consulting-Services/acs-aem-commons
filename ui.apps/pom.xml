@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.0.9-SNAPSHOT</version>
+        <version>6.0.11-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -51,7 +51,12 @@
                         <dependency>
                             <group>day/cq60/product</group>
                             <name>cq-content</name>
-                            <version>[6.3.64,)</version>
+                            <version>[6.5.6,)</version><!-- version shipped with AEM 6.5.0 GA -->
+                        </dependency>
+                        <dependency>
+                            <group>adobe/cq650/servicepack</group>
+                            <name>aem-service-pkg</name>
+                            <version>[6.5.10,)</version><!-- at least SP10 required -->
                         </dependency>
                     </dependencies>
                 </configuration>
@@ -108,27 +113,12 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>oakpal-scan-content-class-aem64</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
-                            </summaryFile>
-                            <checklists>
-                                <checklist>content-class-aem64</checklist>
-                            </checklists>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>oakpal-verify</id>
                         <goals>
                             <goal>verify</goal>
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json
-                                </summaryFile>
                                 <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
                                 </summaryFile>
                             </summaryFiles>
@@ -214,7 +204,6 @@
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
             <scope>provided</scope>
         </dependency>
     </dependencies>

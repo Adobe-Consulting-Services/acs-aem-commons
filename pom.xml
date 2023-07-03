@@ -25,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>6.0.9-SNAPSHOT</version>
+    <version>6.0.11-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -88,7 +88,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1682083729</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1685736617</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -104,7 +104,6 @@
                     <version>3.9.0</version>
                     <configuration>
                         <showDeprecation>true</showDeprecation>
-                        <failOnError>false</failOnError>
                         <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     </configuration>
                 </plugin>
@@ -207,7 +206,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 -plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
--metatypeannotations-options: version;maximum=1.3.0
+-metatypeannotations-options: version;maximum=1.4.0
                                 ]]></bnd>
                             </configuration>
                         </execution>
@@ -502,11 +501,11 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- Runtime dependencies should be AEM 6.4 compatible -->
+            <!-- Runtime dependencies should be AEM 6.5.10 compatible -->
             <dependency>
                 <groupId>io.wcm.maven</groupId>
                 <artifactId>io.wcm.maven.aem-dependencies</artifactId>
-                <version>6.4.0.0004</version>
+                <version>6.5.10.0002</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -515,7 +514,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <groupId>com.day.cq</groupId>
                 <artifactId>cq-commons</artifactId>
                 <version>5.8.32
-                </version><!-- 5.11.12 is shipped with AEM 6.4, but this is the newest version provided in any public Maven repo -->
+                </version><!-- 5.12.16 is shipped with AEM 6.5, but this is the newest version provided in any public Maven repo -->
+            </dependency>
+            <dependency>
+                 <groupId>org.osgi</groupId>
+                 <artifactId>org.osgi.util.converter</artifactId>
+                 <version>1.0.9</version> <!-- override with newest minor version to be able to run tests with Java 17 -->
             </dependency>
             <!-- https://wcm-io.atlassian.net/browse/WTOOL-83 -->
             <dependency>
@@ -544,6 +548,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
                 <version>1.12.0</version>
             </dependency>
+            <!-- null annotations used by AEM libraries -->
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>23.0.0</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
@@ -553,7 +563,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>biz.aQute.bnd.annotation</artifactId>
-                <version>3.4.0</version>
+                <version>6.1.0</version>
             </dependency>
             <!-- Optional dependency: Needs to be explicitly installed, not part of AEM 6.4 Standard nor ACS AEM Commons -->
             <dependency>
@@ -604,7 +614,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.2.0</version>
+                <version>4.11.0</version><!-- >= 5.x requires Java 11 -->
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -617,32 +627,32 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
-                <version>3.1.2-1.40.0</version>
+                <version>3.1.8-1.44.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
-                <version>3.2.2</version>
+                <version>3.3.6</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
-                <version>3.2.2</version>
+                <version>3.3.6</version>
                 <scope>test</scope>
             </dependency>
             <!-- sling-mock still uses an outdated osgi-mock, therefore explicitly manage its version to the latest 3.2.2 -->
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
-                <version>3.2.2</version>
+                <version>3.4.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
-                <version>4.1.8</version>
+                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
