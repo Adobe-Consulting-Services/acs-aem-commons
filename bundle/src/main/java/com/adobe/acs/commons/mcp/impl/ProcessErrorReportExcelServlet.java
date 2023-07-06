@@ -36,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -98,7 +99,7 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
         CellStyle dateStyle = wb.createCellStyle();
         CreationHelper createHelper = wb.getCreationHelper();
         dateStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyy/mm/dd h:mm:ss"));
-        
+
         for (String columnName : Arrays.asList("Time", "Path", "Error", "Stack trace")) {
             Cell headerCell = headerRow.createCell(headerRow.getPhysicalNumberOfCells());
             headerCell.setCellValue(columnName);
@@ -128,7 +129,7 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
 
     CellStyle createHeaderStyle(Workbook wb) {
         XSSFCellStyle xstyle = (XSSFCellStyle) wb.createCellStyle();
-        XSSFColor header = new XSSFColor(new Color(79, 129, 189));
+        XSSFColor header = new XSSFColor(new Color(79, 129, 189), new DefaultIndexedColorMap());
         xstyle.setFillForegroundColor(header);
         xstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         XSSFFont font = (XSSFFont) wb.createFont();
