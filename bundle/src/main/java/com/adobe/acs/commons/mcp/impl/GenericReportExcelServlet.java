@@ -36,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -135,7 +136,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
 
     CellStyle createHeaderStyle(Workbook wb){
         XSSFCellStyle xstyle = (XSSFCellStyle)wb.createCellStyle();
-        XSSFColor header = new XSSFColor(new Color(79, 129, 189));
+        XSSFColor header = new XSSFColor(new Color(79, 129, 189), new DefaultIndexedColorMap());
         xstyle.setFillForegroundColor(header);
         xstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         XSSFFont font = (XSSFFont)wb.createFont();
