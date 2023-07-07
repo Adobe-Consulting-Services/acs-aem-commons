@@ -211,5 +211,10 @@ public final class WorkflowPackageManagerImplTest {
         public String getPath() {
             return WORKFLOW_PACKAGE_PATH;
         }
+
+        @Override
+        public boolean hasNode(String arg0) {
+            return false;
+        }
     };
 }

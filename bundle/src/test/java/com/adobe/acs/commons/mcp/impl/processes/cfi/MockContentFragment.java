@@ -26,6 +26,8 @@ import com.adobe.cq.dam.cfm.VariationDef;
 import com.adobe.cq.dam.cfm.VariationTemplate;
 import com.adobe.cq.dam.cfm.VersionDef;
 import com.adobe.cq.dam.cfm.VersionedContent;
+
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Incomplete mock that provides just enough for basic testing
@@ -155,6 +158,12 @@ public class MockContentFragment implements ContentFragment {
 
     @Override
     public void removeVariation(String name) throws ContentFragmentException {
+    }
+
+    @NotNull
+    @Override
+    public Calendar getLastModifiedDeep() throws ContentFragmentException {
+        return Calendar.getInstance();
     }
     
 }

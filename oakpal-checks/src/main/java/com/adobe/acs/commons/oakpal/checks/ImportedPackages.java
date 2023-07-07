@@ -17,29 +17,6 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import com.google.common.collect.ImmutableMap;
-import net.adamcin.oakpal.api.PathAction;
-import net.adamcin.oakpal.api.ProgressCheck;
-import net.adamcin.oakpal.api.ProgressCheckFactory;
-import net.adamcin.oakpal.api.Severity;
-import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.commons.JcrUtils;
-import org.apache.jackrabbit.vault.fs.config.MetaInf;
-import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.apache.jackrabbit.vault.packaging.PackageProperties;
-import org.jetbrains.annotations.NotNull;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
-
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.AbstractMap;
@@ -58,10 +35,33 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.commons.JcrUtils;
+import org.apache.jackrabbit.vault.fs.config.MetaInf;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.PackageProperties;
+import org.jetbrains.annotations.NotNull;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
+
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.ProgressCheckFactory;
+import net.adamcin.oakpal.api.Severity;
+import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
+
 public final class ImportedPackages implements ProgressCheckFactory {
 
     private static final String CONFIG_VERSION = "aemVersion";
-    private static final List<String> DEFAULT_VERSIONS = Arrays.asList("6.4");
+    private static final List<String> DEFAULT_VERSIONS = Arrays.asList("6.5");
 
 
     @Override
@@ -81,14 +81,14 @@ public final class ImportedPackages implements ProgressCheckFactory {
                     }
                     try (JsonReader reader = Json.createReader(inputStream)) {
                         JsonObject packageDefinitions = reader.readObject();
-                        ImmutableMap.Builder<String, Set<Version>> builder = ImmutableMap.builder();
+                        Map<String, Set<Version>> exportedPackages = new HashMap<>();
                         packageDefinitions.keySet().forEach(key -> {
-                            builder.put(key, packageDefinitions.getJsonArray(key).stream().map(v -> {
+                            exportedPackages.put(key, packageDefinitions.getJsonArray(key).stream().map(v -> {
                                 String str = ((JsonString) v).getString();
                                 return new Version(str);
                             }).collect(Collectors.toSet()));
                         });
-                        return new AbstractMap.SimpleEntry<>(version, builder.build());
+                        return new AbstractMap.SimpleEntry<>(version, exportedPackages);
                     }
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -104,16 +104,15 @@ public final class ImportedPackages implements ProgressCheckFactory {
 
         Check(Map<String, Map<String, Set<Version>>> exportedPackagesByVersion) {
             super(ImportedPackages.class);
-            ImmutableMap.Builder<String, Map<String, Set<Version>>> builder = ImmutableMap.builder();
+            this.exportedPackagesByVersion = new HashMap<>();
             exportedPackagesByVersion.forEach((version, exportedPackages) -> {
                 Map<String, Set<Version>> mutableExports = new HashMap<>();
                 exportedPackages.forEach((packageName, versions) -> {
                     mutableExports.put(packageName, new HashSet<>(versions));
                 });
-                builder.put(version, mutableExports);
+                this.exportedPackagesByVersion.put(version, mutableExports);
             });
 
-            this.exportedPackagesByVersion = builder.build();
         }
 
         @Override

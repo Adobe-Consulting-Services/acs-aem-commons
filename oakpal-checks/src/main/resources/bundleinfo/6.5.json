@@ -1,291 +1,459 @@
 {
+    "!! java.applet": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.color": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.datatransfer": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.desktop": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.dnd": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.event": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.font": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.geom": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.im": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.im.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.image": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.image.renderable": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.awt.print": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.beans": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.beans.beancontext": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.io": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.annotation": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.instrument": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.invoke": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.management": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.module": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.ref": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.lang.reflect": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.math": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.net": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.net.http": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.net.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.channels": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.channels.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.charset": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.charset.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.file": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.file.attribute": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.nio.file.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.rmi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.rmi.activation": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.rmi.dgc": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.rmi.registry": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.rmi.server": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.security": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.security.acl": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.security.cert": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.security.interfaces": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.security.spec": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.text": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.text.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.time": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.time.chrono": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.time.format": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.time.temporal": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.time.zone": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.concurrent": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.concurrent.atomic": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.concurrent.locks": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.function": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.jar": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.logging": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.prefs": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.regex": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.spi": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.stream": [
+        "0.0.0.JavaSE_011"
+    ],
+    "!! java.util.zip": [
+        "0.0.0.JavaSE_011"
+    ],
     "javax.accessibility": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "javax.activity": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "javax.annotation": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.annotation.processing": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.crypto": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.crypto.interfaces": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.crypto.spec": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio.event": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio.metadata": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio.plugins.bmp": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio.plugins.jpeg": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
+    ],
+    "javax.imageio.plugins.tiff": [
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio.spi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.imageio.stream": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "javax.jws": [
-        "0.0.0.fragment_ws"
-    ],
-    "javax.jws.soap": [
-        "0.0.0.fragment_ws"
+        "0.0.0.JavaSE_011"
     ],
     "javax.lang.model": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.lang.model.element": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.lang.model.type": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.lang.model.util": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.loading": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.modelmbean": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.monitor": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.openmbean": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.relation": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.remote": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.remote.rmi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.management.timer": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.naming": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.naming.directory": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.naming.event": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.naming.ldap": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.naming.spi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.net": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.net.ssl": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.print": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.print.attribute": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.print.attribute.standard": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.print.event": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "javax.rmi": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "javax.rmi.CORBA": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.rmi.ssl": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.script": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.auth": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.auth.callback": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.auth.kerberos": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.auth.login": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.auth.spi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.auth.x500": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.cert": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.security.sasl": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sound.midi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sound.midi.spi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sound.sampled": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sound.sampled.spi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sql": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.9_JavaSE"
     ],
     "javax.sql.rowset": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sql.rowset.serial": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.sql.rowset.spi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.border": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.colorchooser": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.event": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.filechooser": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.plaf": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.plaf.basic": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.plaf.metal": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.plaf.multi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.plaf.nimbus": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.plaf.synth": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.table": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.text": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.text.html": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.text.html.parser": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.text.rtf": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.tree": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.swing.undo": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "javax.tools": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
+    ],
+    "javax.transaction.xa": [
+        "1.1.0"
     ],
     "javax.xml": [
-        "0.0.0.fragment_xml"
-    ],
-    "javax.xml.bind": [
         "2.1.0"
     ],
-    "javax.xml.bind.annotation": [
-        "2.1.0"
-    ],
-    "javax.xml.bind.annotation.adapters": [
-        "2.1.0"
-    ],
-    "javax.xml.bind.attachment": [
-        "2.1.0"
-    ],
-    "javax.xml.bind.helpers": [
-        "2.1.0"
-    ],
-    "javax.xml.bind.util": [
-        "2.1.0"
+    "javax.xml.catalog": [
+        "1.0.0"
     ],
     "javax.xml.crypto": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "javax.xml.crypto.dom": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "javax.xml.crypto.dsig": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "javax.xml.crypto.dsig.dom": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "javax.xml.crypto.dsig.keyinfo": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "javax.xml.crypto.dsig.spec": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "javax.xml.datatype": [
         "2.1.0"
     ],
     "javax.xml.namespace": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "javax.xml.parsers": [
-        "0.0.0.fragment_xml"
-    ],
-    "javax.xml.soap": [
-        "0.0.0.fragment_ws"
+        "2.1.0"
     ],
     "javax.xml.stream": [
         "1.0.0"
@@ -297,145 +465,37 @@
         "1.0.0"
     ],
     "javax.xml.transform": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "javax.xml.transform.dom": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "javax.xml.transform.sax": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "javax.xml.transform.stax": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "javax.xml.transform.stream": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "javax.xml.validation": [
-        "0.0.0.fragment_xml"
-    ],
-    "javax.xml.ws": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.handler": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.handler.soap": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.http": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.soap": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.spi": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.spi.http": [
-        "2.1.0"
-    ],
-    "javax.xml.ws.wsaddressing": [
         "2.1.0"
     ],
     "javax.xml.xpath": [
-        "0.0.0.fragment_xml"
+        "2.1.0"
     ],
     "org.apache.sling.launchpad.api": [
         "1.2.0"
     ],
     "org.ietf.jgss": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA.DynAnyPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA.ORBPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA.TypeCodePackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA.portable": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA_2_3": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CORBA_2_3.portable": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CosNaming": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CosNaming.NamingContextExtPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.CosNaming.NamingContextPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.Dynamic": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.DynamicAny": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.DynamicAny.DynAnyFactoryPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.DynamicAny.DynAnyPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.IOP": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.IOP.CodecFactoryPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.IOP.CodecPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.Messaging": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableInterceptor": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableInterceptor.ORBInitInfoPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableServer": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableServer.CurrentPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableServer.POAManagerPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableServer.POAPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableServer.ServantLocatorPackage": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.PortableServer.portable": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.SendingContext": [
-        "0.0.0.1_008_JavaSE"
-    ],
-    "org.omg.stub.java.rmi": [
-        "0.0.0.1_008_JavaSE"
+        "0.0.0.JavaSE_011"
     ],
     "org.osgi.dto": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.osgi.framework": [
-        "1.8.0"
+        "1.9.0"
     ],
     "org.osgi.framework.dto": [
         "1.8.0"
@@ -468,7 +528,7 @@
         "1.2.0"
     ],
     "org.osgi.framework.wiring.dto": [
-        "1.2.0"
+        "1.3.0"
     ],
     "org.osgi.resource": [
         "1.0.0"
@@ -480,7 +540,7 @@
         "1.2.0"
     ],
     "org.osgi.service.resolver": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.osgi.service.startlevel": [
         "1.1.0"
@@ -489,145 +549,139 @@
         "1.0.0"
     ],
     "org.osgi.util.tracker": [
-        "1.5.1"
+        "1.5.2"
     ],
     "org.w3c.dom": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.bootstrap": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.css": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.events": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.html": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.ls": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.ranges": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.stylesheets": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.traversal": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.views": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.w3c.dom.xpath": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.xml.sax": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.xml.sax.ext": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.xml.sax.helpers": [
-        "0.0.0.fragment_xml"
+        "0.0.0.JavaSE_011"
     ],
     "org.apache.abdera.protocol.client": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.client.cache": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.client.util": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.factory": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.filter": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.model": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.protocol": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.protocol.error": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.protocol.util": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.util": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.util.filter": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.writer": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.xpath": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.ext.media": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.ext.opensearch": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.ext.opensearch.model": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.ext.opensearch.server": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.ext.opensearch.server.impl": [
-        "1.0.0.R783018"
-    ],
-    "org.apache.abdera.ext.opensearch.server.processors": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.parser": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
-    "org.apache.abdera.parser.stax": [
-        "1.0.0.R783018"
+    "org.apache.abdera.protocol": [
+        "1.1.3"
     ],
-    "org.apache.abdera.parser.stax.util": [
-        "1.0.0.R783018"
+    "org.apache.abdera.protocol.error": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.protocol.util": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.util": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.util.filter": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.writer": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.xpath": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.ext.media": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.ext.opensearch": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.ext.opensearch.model": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.ext.opensearch.server": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.ext.opensearch.server.impl": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.ext.opensearch.server.processors": [
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.context": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.filters": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.impl": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.multipart": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.processors": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.provider.basic": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.provider.managed": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.protocol.server.servlet": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "com.adobe.aemds.guide.cache": [
         "3.10.0"
@@ -642,7 +696,7 @@
         "3.10.0"
     ],
     "com.adobe.aemds.guide.fdinternal.api": [
-        "5.0.118"
+        "3.10.0"
     ],
     "com.adobe.aemds.guide.model": [
         "1.0.0"
@@ -699,7 +753,7 @@
         "3.10.0"
     ],
     "com.adobe.xmp.worker.files": [
-        "1.0.6"
+        "1.0.8"
     ],
     "com.adobe.octopus.extract": [
         "2.0.8"
@@ -720,6 +774,9 @@
         "2.0.8"
     ],
     "com.adobe.cq.deserfw.api": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.dam.bp.cloudconfig": [
         "1.0.0"
     ],
     "com.adobe.cq.commerce.api": [
@@ -752,11 +809,17 @@
     "com.adobe.cq.commerce.common.promotion": [
         "1.2.0"
     ],
+    "com.adobe.cq.commerce.ui": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.commerce.ui.admin.catalogs": [
+        "5.17.8"
+    ],
     "com.adobe.cq.commerce.pim.api": [
         "1.3.1"
     ],
     "com.adobe.cq.commerce.pim.common": [
-        "1.3.1"
+        "1.4.0"
     ],
     "com.adobe.cq.dashboards": [
         "1.0.0"
@@ -788,17 +851,20 @@
     "com.adobe.cq.upgradesexecutor": [
         "1.5.2"
     ],
+    "com.adobe.cq.wcm.launches.helper.internal": [
+        "1.0.0"
+    ],
     "com.adobe.cq.wcm.launches.utils": [
-        "1.1.0"
+        "1.2.0"
     ],
     "com.adobe.cq.account.api": [
         "1.0.0"
     ],
     "com.adobe.cq.dtm.reactor": [
-        "1.3.0"
+        "1.5.0"
     ],
     "com.adobe.cq.dtm.reactor.components.scripttag": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.cq.dtm.reactor.ui": [
         "1.0.0"
@@ -822,7 +888,7 @@
         "1.0.0"
     ],
     "com.adobe.cq.contentinsight": [
-        "1.0.0"
+        "1.0.1"
     ],
     "com.adobe.cq.contexthub.models": [
         "1.0.0"
@@ -831,19 +897,19 @@
         "1.3.0"
     ],
     "com.adobe.cq.dam.mac.sync.helper": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.adobe.cq.dam.index.bootstrap": [
-        "1.3.4"
+        "1.4.2"
     ],
     "com.adobe.cq.dam.index.builder": [
         "1.3.0"
     ],
     "com.adobe.cq.dam.index.builder.api": [
-        "1.3.4"
+        "1.4.2"
     ],
     "com.adobe.cq.dam.index.helper": [
-        "1.3.4"
+        "1.4.2"
     ],
     "com.adobe.cq.dam.dm.delivery.api": [
         "1.2.0"
@@ -861,22 +927,70 @@
         "1.1.0"
     ],
     "com.day.cq.dam.entitlement.api": [
-        "3.2.0"
+        "3.3.0"
+    ],
+    "com.day.cq.dam.stock.integration": [
+        "0.2.0"
     ],
     "com.adobe.cq.experiencelog": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.cq.gfx": [
         "1.0.0"
     ],
     "com.adobe.cq.export.json": [
-        "2.0.1"
+        "2.0.3"
+    ],
+    "com.adobe.cq.export.json.hierarchy": [
+        "1.0.2"
+    ],
+    "com.adobe.cq.export.json.hierarchy.type": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.dam.processor.api": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.dam.processor.nui.util": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.remotedam": [
+        "1.0.2"
+    ],
+    "com.adobe.cq.remotedam.config": [
+        "1.2.0"
+    ],
+    "com.adobe.cq.remotedam.config.site": [
+        "3.0.0"
+    ],
+    "com.adobe.cq.remotedam.connection": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.remotedam.server.events": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.remotedam.mountpointmanagement": [
+        "1.0.2"
+    ],
+    "com.adobe.cq.remotedam.featureflagconstants": [
+        "1.1.0"
+    ],
+    "com.adobe.cq.remotedam.referencessearch.entities": [
+        "3.0.0"
+    ],
+    "com.adobe.cq.remotedam.utils": [
+        "1.2.0"
+    ],
+    "com.adobe.cq.remotedam.server.remoterefs.entities": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.remotedam.server.remoterefs.provider": [
+        "1.0.0"
     ],
     "com.day.cq.search": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.day.cq.search.eval": [
-        "1.2.0"
+        "1.5.0"
     ],
     "com.day.cq.search.facets": [
         "1.0.0"
@@ -900,13 +1014,13 @@
         "1.0.1"
     ],
     "com.adobe.cq.wcm.translation.ui.models.cloudservices": [
-        "1.4.158"
+        "1.5.86"
     ],
     "com.adobe.cq.wcm.translation.ui.utils": [
-        "1.4.158"
+        "1.5.86"
     ],
     "com.day.cq.wcm.foundation": [
-        "5.21.0"
+        "5.22.0"
     ],
     "com.day.cq.wcm.foundation.forms": [
         "5.11.0"
@@ -915,13 +1029,16 @@
         "1.0.0"
     ],
     "com.day.cq.wcm.foundation.model": [
-        "1.0.1"
+        "1.1.0"
+    ],
+    "com.day.cq.wcm.foundation.model.export": [
+        "1.0.0"
     ],
     "com.day.cq.wcm.foundation.model.responsivegrid": [
-        "1.1.1"
+        "1.6.0"
     ],
     "com.day.cq.wcm.foundation.model.responsivegrid.export": [
-        "1.1.0"
+        "1.4.0"
     ],
     "com.day.cq.wcm.foundation.search": [
         "1.0.0"
@@ -942,7 +1059,154 @@
         "1.0.0"
     ],
     "com.day.cq.wcm.command.api": [
-        "1.1.0"
+        "1.3.0"
+    ],
+    "com.adobe.cq.wcm.core.components.commons.editor.dialog.childreneditor": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.wcm.core.components.models": [
+        "12.7.0"
+    ],
+    "com.adobe.cq.wcm.core.components.models.form": [
+        "14.2.0"
+    ],
+    "com.adobe.cq.wcm.core.components.extension.contentfragment.models": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.dam.cfm.graphql.extensions.querygen": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.dam.cfm.graphql.extensions.ui": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.graphql.sites.api": [
+        "2.0.0"
+    ],
+    "com.adobe.aem.graphql.sites.api.endpoints": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.graphql.sites.api.filter": [
+        "2.1.0"
+    ],
+    "com.adobe.aem.graphql.sites.ui.admin": [
+        "1.0.0"
+    ],
+    "com.cedarsoftware.util.io": [
+        "4.12.0"
+    ],
+    "graphql": [
+        "15.0.0"
+    ],
+    "graphql.analysis": [
+        "15.0.0"
+    ],
+    "graphql.cachecontrol": [
+        "15.0.0"
+    ],
+    "graphql.execution": [
+        "15.0.0"
+    ],
+    "graphql.execution.batched": [
+        "15.0.0"
+    ],
+    "graphql.execution.defer": [
+        "15.0.0"
+    ],
+    "graphql.execution.directives": [
+        "15.0.0"
+    ],
+    "graphql.execution.instrumentation": [
+        "15.0.0"
+    ],
+    "graphql.execution.instrumentation.dataloader": [
+        "15.0.0"
+    ],
+    "graphql.execution.instrumentation.fieldvalidation": [
+        "15.0.0"
+    ],
+    "graphql.execution.instrumentation.nextgen": [
+        "15.0.0"
+    ],
+    "graphql.execution.instrumentation.parameters": [
+        "15.0.0"
+    ],
+    "graphql.execution.instrumentation.tracing": [
+        "15.0.0"
+    ],
+    "graphql.execution.nextgen": [
+        "15.0.0"
+    ],
+    "graphql.execution.nextgen.result": [
+        "15.0.0"
+    ],
+    "graphql.execution.preparsed": [
+        "15.0.0"
+    ],
+    "graphql.execution.reactive": [
+        "15.0.0"
+    ],
+    "graphql.introspection": [
+        "15.0.0"
+    ],
+    "graphql.language": [
+        "15.0.0"
+    ],
+    "graphql.nextgen": [
+        "15.0.0"
+    ],
+    "graphql.parser": [
+        "15.0.0"
+    ],
+    "graphql.parser.antlr": [
+        "15.0.0"
+    ],
+    "graphql.relay": [
+        "15.0.0"
+    ],
+    "graphql.schema": [
+        "15.0.0"
+    ],
+    "graphql.schema.diff": [
+        "15.0.0"
+    ],
+    "graphql.schema.diff.reporting": [
+        "15.0.0"
+    ],
+    "graphql.schema.idl": [
+        "15.0.0"
+    ],
+    "graphql.schema.idl.errors": [
+        "15.0.0"
+    ],
+    "graphql.schema.transform": [
+        "15.0.0"
+    ],
+    "graphql.schema.validation": [
+        "15.0.0"
+    ],
+    "graphql.schema.visibility": [
+        "15.0.0"
+    ],
+    "graphql.util": [
+        "15.0.0"
+    ],
+    "graphql.validation": [
+        "15.0.0"
+    ],
+    "graphql.validation.rules": [
+        "15.0.0"
+    ],
+    "org.apache.sling.graphql.api": [
+        "3.3.0"
+    ],
+    "org.apache.sling.graphql.api.cache": [
+        "0.0.1"
+    ],
+    "org.apache.sling.graphql.api.engine": [
+        "0.0.1"
+    ],
+    "org.apache.sling.graphql.api.pagination": [
+        "0.0.1"
     ],
     "com.adobe.cq.sightly": [
         "3.2.0"
@@ -1055,20 +1319,8 @@
     "com.adobe.agl.util": [
         "1.5.0"
     ],
-    "com.adobe.granite.auth.saml.configuration": [
-        "1.2.0"
-    ],
-    "com.adobe.granite.auth.saml.model": [
-        "1.2.0"
-    ],
-    "com.adobe.granite.auth.saml.model.xml": [
-        "0.4.0"
-    ],
-    "com.adobe.granite.auth.saml.util": [
-        "1.4.0"
-    ],
-    "com.adobe.granite.auth.saml.util.io": [
-        "0.2.4"
+    "com.adobe.granite.acp": [
+        "0.3.28"
     ],
     "com.adobe.granite.activitystreams": [
         "0.0.2"
@@ -1077,7 +1329,19 @@
         "0.0.1"
     ],
     "com.adobe.granite.asset.api": [
-        "1.5.0"
+        "1.7.0"
+    ],
+    "com.adobe.granite.jobs.async": [
+        "1.4.0"
+    ],
+    "com.adobe.granite.jobs.async.commons": [
+        "2.5.0"
+    ],
+    "com.adobe.granite.jobs.async.notification": [
+        "1.0.0"
+    ],
+    "com.adobe.granite.jobs.async.notification.email": [
+        "1.0.0"
     ],
     "org.json": [
         "20090211.0.0"
@@ -1090,6 +1354,54 @@
     ],
     "com.adobe.granite.comments": [
         "2.1.9"
+    ],
+    "javax.servlet.jsp.jstl.core": [
+        "1.2.0"
+    ],
+    "javax.servlet.jsp.jstl.fmt": [
+        "1.2.0"
+    ],
+    "javax.servlet.jsp.jstl.sql": [
+        "1.2.0"
+    ],
+    "javax.servlet.jsp.jstl.tlv": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.functions": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.resources": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tag.common.core": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tag.common.fmt": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tag.common.sql": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tag.rt.core": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tag.rt.fmt": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tag.rt.sql": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tei": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.tlv": [
+        "1.2.0"
+    ],
+    "org.apache.taglibs.standard.util": [
+        "1.2.0"
     ],
     "com.adobe.granite.compatrouter": [
         "1.0.0"
@@ -1107,7 +1419,7 @@
         "1.1.0"
     ],
     "com.adobe.granite.contexthub.api": [
-        "9.0.1"
+        "9.1.0"
     ],
     "com.adobe.granite.contexthub.commons": [
         "0.1.28"
@@ -1116,7 +1428,7 @@
         "1.0.0"
     ],
     "com.day.crx.packaging": [
-        "2.0.1"
+        "3.0.0"
     ],
     "com.day.crx.packaging.gfx": [
         "1.0.52"
@@ -1143,7 +1455,7 @@
         "5.4.0"
     ],
     "com.adobe.granite.auth.ims": [
-        "1.0.0"
+        "1.2.1"
     ],
     "com.day.cq.jcrclustersupport": [
         "2.0.0"
@@ -1158,10 +1470,10 @@
         "1.4.0"
     ],
     "com.adobe.granite.operations": [
-        "1.1.1"
+        "1.2.0"
     ],
     "com.adobe.granite.auth.oauth": [
-        "3.9.0"
+        "3.12.0"
     ],
     "com.adobe.granite.oauth.server": [
         "1.1.1"
@@ -1179,7 +1491,7 @@
         "1.1.0"
     ],
     "com.adobe.granite.omnisearch.commons": [
-        "1.3.0"
+        "1.4.0"
     ],
     "com.adobe.granite.omnisearch.spi.core": [
         "1.1.0"
@@ -1193,11 +1505,17 @@
     "com.day.cq.replication": [
         "6.5.0"
     ],
+    "com.day.cq.replication.extensions": [
+        "1.0.0"
+    ],
     "com.adobe.granite.resourcestatus": [
         "1.0.0"
     ],
     "com.adobe.granite.resourceresolverhelper": [
         "1.0.2"
+    ],
+    "com.adobe.granite.rest.assets": [
+        "1.0.0"
     ],
     "com.adobe.granite.haf.annotations": [
         "3.7.0"
@@ -1260,28 +1578,28 @@
         "2.1.1"
     ],
     "com.day.crx.security.token": [
-        "1.0.2"
+        "1.1.0"
     ],
     "com.adobe.granite.ui.clientlibs": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.adobe.granite.ui.clientlibs.script": [
         "1.2.1"
     ],
     "com.adobe.granite.ui.components": [
-        "1.17.0"
+        "1.20.0"
     ],
     "com.adobe.granite.ui.components.ds": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.adobe.granite.ui.components.formbuilder": [
-        "1.1.0"
+        "1.1.1"
     ],
     "com.adobe.granite.ui.components.htl": [
-        "1.1.0"
+        "1.1.1"
     ],
     "com.adobe.granite.ui.components.rendercondition": [
-        "1.2.0"
+        "1.2.1"
     ],
     "com.adobe.granite.ui.tags": [
         "1.0.0"
@@ -1290,22 +1608,31 @@
         "6.0.0"
     ],
     "com.adobe.granite.workflow": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.granite.workflow.collection": [
-        "1.1.2"
+        "1.2.0"
     ],
     "com.adobe.granite.workflow.collection.util": [
         "1.0.0"
     ],
-    "com.adobe.granite.workflow.event": [
+    "com.adobe.granite.workflow.datatype": [
         "1.0.0"
+    ],
+    "com.adobe.granite.workflow.datatype.registry": [
+        "1.0.0"
+    ],
+    "com.adobe.granite.workflow.event": [
+        "1.1.0"
     ],
     "com.adobe.granite.workflow.exec": [
         "1.2.1"
     ],
     "com.adobe.granite.workflow.exec.filter": [
         "1.0.0"
+    ],
+    "com.adobe.granite.workflow.inboxshare": [
+        "1.1.0"
     ],
     "com.adobe.granite.workflow.job": [
         "1.0.0"
@@ -1317,7 +1644,7 @@
         "1.0.0"
     ],
     "com.adobe.granite.workflow.model": [
-        "1.0.0"
+        "1.2.0"
     ],
     "com.adobe.granite.workflow.payload": [
         "1.0.1"
@@ -1331,8 +1658,11 @@
     "com.adobe.granite.workflow.status": [
         "1.0.0"
     ],
+    "com.adobe.granite.workflow.console.users": [
+        "1.0.0"
+    ],
     "com.adobe.granite.workflow.core.event": [
-        "2.0.0"
+        "2.1.0"
     ],
     "com.adobe.granite.workflow.core.purge": [
         "1.0.0"
@@ -1346,8 +1676,7 @@
     "com.day.cq.xss.taglib": [
         "5.4.0"
     ],
-    "org.apache.sling.xss": [
-        "2.0.1",
+    "com.adobe.cq.adobeims.imsprofile": [
         "1.2.0"
     ],
     "com.adobe.internal.pdftoolkit.core.cos": [
@@ -1770,6 +2099,24 @@
     "javax.jms.doc-files": [
         "2.0.0"
     ],
+    "com.adobe.stock.annotations": [
+        "1.0.0"
+    ],
+    "com.adobe.stock.apis": [
+        "1.0.0"
+    ],
+    "com.adobe.stock.config": [
+        "1.0.0"
+    ],
+    "com.adobe.stock.enums": [
+        "1.0.0"
+    ],
+    "com.adobe.stock.exception": [
+        "1.0.0"
+    ],
+    "com.adobe.stock.models": [
+        "1.0.0"
+    ],
     "com.adobe.xmp.core": [
         "0.0.1"
     ],
@@ -1818,23 +2165,65 @@
     "com.adobe.xmp.core.map": [
         "6.2.6"
     ],
+    "com.adobe.cq.dam.ui.model.multipath": [
+        "1.0.0"
+    ],
     "com.adobe.cq.xf": [
-        "1.14.0"
+        "1.19.0"
     ],
     "com.adobe.cq.xf.ui": [
-        "3.10.0"
+        "3.13.0"
     ],
     "com.adobe.cq.xf.social": [
         "1.0.0"
     ],
+    "com.adobe.cq.inbox.api": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.inbox.api.preferences": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.inbox.api.preferences.domain": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.inbox.api.preferences.domain.outofoffice": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.inbox.api.preferences.domain.share": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.inbox.api.preferences.domain.view": [
+        "1.2.0"
+    ],
     "com.adobe.cq.inbox.ui": [
+        "1.4.0"
+    ],
+    "com.adobe.cq.inbox.ui.column": [
+        "2.0.0"
+    ],
+    "com.adobe.cq.inbox.ui.column.manager": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.inbox.ui.column.provider": [
+        "2.0.0"
+    ],
+    "com.adobe.cq.inbox.ui.column.rendition": [
+        "2.0.0"
+    ],
+    "com.adobe.cq.inbox.ui.inboxsharing": [
         "1.1.0"
+    ],
+    "com.adobe.cq.updateprocessor.api": [
+        "1.1.0"
+    ],
+    "com.adobe.cq.updateprocessor.util.api": [
+        "1.0.0"
     ],
     "com.adobe.cq.socialmedia": [
         "2.1.0"
     ],
     "com.day.cq.searchpromote": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.day.cq.searchpromote.xml": [
         "1.0.0"
@@ -1846,19 +2235,22 @@
         "1.1.0"
     ],
     "com.day.cq.analytics.testandtarget": [
-        "6.7.0"
+        "6.12.0"
     ],
     "com.day.cq.analytics.testandtarget.mac": [
-        "1.1.0"
+        "1.1.1"
     ],
     "com.day.cq.analytics.testandtarget.util": [
         "5.15.0"
     ],
+    "com.day.cq.analytics.testandtarget.workspaces": [
+        "1.4.0"
+    ],
     "com.adobe.cq.targetrecommendations.api": [
-        "1.1.0"
+        "1.1.1"
     ],
     "com.adobe.cq.targetrecommendations.api.model": [
-        "1.0.0"
+        "1.0.1"
     ],
     "com.adobe.cq.activitymap": [
         "1.0.0"
@@ -1867,13 +2259,13 @@
         "6.0.0"
     ],
     "com.day.cq.analytics.sitecatalyst": [
-        "7.0.0"
+        "7.0.1"
     ],
     "com.day.cq.analytics.sitecatalyst.common": [
-        "5.7.0"
+        "5.7.1"
     ],
     "com.day.cq.analytics.sitecatalyst.datainsertion": [
-        "5.7.0"
+        "5.7.1"
     ],
     "com.day.cq.analytics.sitecatalyst.rsmerger": [
         "5.7.0"
@@ -1881,8 +2273,77 @@
     "com.day.cq.analytics.sitecatalyst.util": [
         "5.7.0"
     ],
+    "com.adobe.granite.analyzer": [
+        "1.3.0"
+    ],
+    "com.adobe.granite.analyzer.aemcomponents": [
+        "2.0.1"
+    ],
+    "com.adobe.granite.analyzer.api": [
+        "3.0.0"
+    ],
+    "com.adobe.granite.analyzer.base": [
+        "3.0.1"
+    ],
+    "com.adobe.granite.analyzer.base.inspection": [
+        "2.0.0"
+    ],
+    "com.adobe.granite.analyzer.base.type.safe.properties": [
+        "2.0.0"
+    ],
+    "com.adobe.granite.analyzer.cloudservices": [
+        "1.0.11"
+    ],
+    "com.adobe.granite.analyzer.libs": [
+        "2.0.1"
+    ],
+    "com.adobe.granite.analyzer.oakindex": [
+        "1.0.11"
+    ],
+    "com.adobe.granite.analyzer.osgi": [
+        "3.0.0"
+    ],
+    "com.adobe.granite.analyzer.osgi.bundle": [
+        "2.0.1"
+    ],
+    "com.adobe.granite.analyzer.osgi.configuration": [
+        "3.0.0"
+    ],
+    "com.adobe.granite.analyzer.overlay": [
+        "1.0.11"
+    ],
+    "com.adobe.granite.analyzer.productinfo": [
+        "2.0.0"
+    ],
+    "com.adobe.granite.analyzer.reqhandlers": [
+        "2.0.1"
+    ],
+    "com.adobe.granite.analyzer.resourcetype": [
+        "1.0.11"
+    ],
+    "com.adobe.granite.analyzer.runmodes": [
+        "2.0.0"
+    ],
+    "com.adobe.granite.analyzer.scripts": [
+        "1.0.10"
+    ],
+    "com.adobe.granite.analyzer.scripts.compile": [
+        "3.0.1"
+    ],
+    "com.adobe.granite.analyzer.security.policies": [
+        "1.0.1"
+    ],
+    "com.adobe.granite.analyzer.vault.packages": [
+        "2.0.0"
+    ],
+    "com.adobe.granite.analyzer.workflow": [
+        "2.0.1"
+    ],
+    "com.adobe.granite.analyzer.vault.packages.registry": [
+        "1.0.1"
+    ],
     "com.adobe.cq.cloudservices.provisioning": [
-        "1.0.0"
+        "1.0.1"
     ],
     "com.adobe.cq.social.activitystreams.api": [
         "1.5.0"
@@ -1894,43 +2355,43 @@
         "1.4.8"
     ],
     "com.adobe.cq.social.badging.api": [
-        "1.2.7"
+        "1.3.0"
     ],
     "com.adobe.cq.social.calendar.client.api": [
-        "1.5.7"
+        "1.6.5"
     ],
     "com.adobe.cq.social.calendar.client.endpoints": [
-        "1.5.7"
+        "1.6.5"
     ],
     "com.adobe.cq.social.commons": [
-        "1.11.0"
+        "1.13.0"
     ],
     "com.adobe.cq.social.commons.bundleactivator": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.comments.api": [
-        "1.8.1"
+        "1.9.0"
     ],
     "com.adobe.cq.social.commons.comments.endpoints": [
-        "1.10.0"
+        "1.12.1"
     ],
     "com.adobe.cq.social.commons.comments.endpoints.impl": [
-        "1.10.0"
+        "1.11.1"
     ],
     "com.adobe.cq.social.commons.comments.impl": [
-        "1.8.0"
+        "1.9.0"
     ],
     "com.adobe.cq.social.commons.comments.internal.states": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.comments.listing": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.comments.scheduler.api": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.comments.search": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.comments.states.internal": [
         "1.7.55"
@@ -1942,31 +2403,31 @@
         "1.9.0"
     ],
     "com.adobe.cq.social.commons.exception": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.internal": [
         "1.8.0"
     ],
     "com.adobe.cq.social.commons.listing": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.moderation.api": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.moderation.events": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.tagcloud.api": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.tagging": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.translation": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.ugc": [
-        "1.9.47"
+        "1.10.82"
     ],
     "com.adobe.cq.social.commons.ugclimiter.api": [
         "1.9.0"
@@ -1975,190 +2436,172 @@
         "1.5.7"
     ],
     "com.adobe.cq.social.connect.ui": [
-        "1.6.21"
+        "1.7.11"
     ],
     "com.adobe.cq.social.connect.ui.impl": [
-        "1.6.21"
+        "1.7.11"
     ],
     "com.adobe.cq.social.group.api": [
-        "2.2.0"
+        "2.3.0"
     ],
     "com.adobe.cq.social.group.client.api": [
-        "1.8.0"
+        "1.12.0"
     ],
     "com.adobe.cq.social.group.client.api.internal": [
-        "1.6.33"
+        "1.7.18"
     ],
     "com.adobe.cq.social.group.client.endpoints": [
-        "1.6.0"
+        "1.7.0"
     ],
     "com.adobe.cq.social.blueprint.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.blueprint.endpoints": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.communityfunctions.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.console.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.console.utils.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.console.utils.api.internal": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.site.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.site.endpoints": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.sociallogin.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.templates.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.tenant.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.tenant.endpoints": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.theme.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.user.api": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.user.endpoints": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.user.internal": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.user.internal.validator": [
-        "1.5.62"
+        "1.6.46"
     ],
     "com.adobe.cq.social.enablement.constants": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.exceptions": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.group.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.learningpath.endpoints.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.learningpath.model.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.learningpath.model.internal": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.learningpath.reporting.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.reporting.model.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.resource.asset.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.resource.endpoints.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.resource.model.admin.internal": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.resource.model.api": [
         "2.0.0"
     ],
     "com.adobe.cq.social.enablement.resource.model.internal": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.resource.reporting.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.site.api": [
         "2.2.0"
     ],
     "com.adobe.cq.social.enablement.site.reporting.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.user.api": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.utils": [
-        "2.2.15"
+        "2.3.6"
     ],
     "com.adobe.cq.social.enablement.view.api": [
         "2.1.0"
     ],
     "com.adobe.cq.social.reporting.analytics": [
-        "1.2.2"
+        "1.3.4"
     ],
     "com.adobe.cq.social.reporting.analytics.api": [
-        "1.2.2"
+        "1.3.4"
     ],
     "com.adobe.cq.social.reporting.analytics.services": [
-        "1.2.2"
+        "1.3.4"
     ],
     "com.adobe.cq.social.reporting.dv.api": [
-        "1.2.2"
+        "1.3.4"
     ],
     "com.adobe.cq.social.reporting.dv.model.api": [
-        "1.2.2"
+        "1.3.4"
     ],
     "com.adobe.cq.social.filelibrary.client.api": [
-        "1.4.10"
+        "1.5.7"
     ],
     "com.adobe.cq.social.filelibrary.client.endpoints": [
-        "1.4.10"
+        "1.5.7"
     ],
     "com.adobe.cq.social.forum.api": [
-        "1.7.6"
+        "1.8.12"
     ],
     "com.adobe.cq.social.forum.client.api": [
-        "1.7.6"
+        "1.8.12"
     ],
     "com.adobe.cq.social.forum.client.endpoints": [
-        "1.7.6"
+        "1.8.12"
     ],
     "com.adobe.cq.social.gamification.badging.api": [
         "1.3.0"
     ],
     "com.adobe.cq.social.gamification.badging.api.utils": [
-        "1.1.7"
+        "1.2.2"
     ],
     "com.adobe.cq.social.gamification.badging.endpoints": [
-        "1.1.9"
+        "1.2.3"
     ],
     "com.adobe.cq.social.handlebars.api": [
         "0.0.1"
-    ],
-    "com.github.jknack.handlebars": [
-        "4.0.5"
-    ],
-    "com.github.jknack.handlebars.cache": [
-        "4.0.5"
-    ],
-    "com.github.jknack.handlebars.context": [
-        "4.0.5"
-    ],
-    "com.github.jknack.handlebars.helper": [
-        "4.0.5"
-    ],
-    "com.github.jknack.handlebars.io": [
-        "4.0.5"
-    ],
-    "com.github.jknack.handlebars.js": [
-        "4.0.5"
     ],
     "com.adobe.cq.social.ideation.client.api": [
         "1.1.0"
@@ -2170,64 +2613,70 @@
         "2.0.0"
     ],
     "com.adobe.cq.social.journal.client.api": [
-        "1.5.8"
+        "1.6.15"
     ],
     "com.adobe.cq.social.journal.client.endpoints": [
-        "1.5.8"
+        "1.6.15"
     ],
     "com.adobe.cq.social.members.api": [
         "1.2.0"
     ],
     "com.adobe.cq.social.members.endpoints": [
-        "1.2.0"
+        "1.4.0"
     ],
     "com.adobe.cq.social.messaging.api": [
-        "1.5.6"
+        "1.6.8"
     ],
     "com.adobe.cq.social.messaging.client.api": [
-        "1.5.6"
+        "1.6.8"
     ],
     "com.adobe.cq.social.messaging.client.endpoints": [
-        "1.5.6"
+        "1.6.8"
     ],
     "com.adobe.cq.social.messaging.osgi": [
-        "1.5.10"
+        "1.6.15"
     ],
     "com.adobe.cq.social.moderation.dashboard.api": [
-        "2.3.1"
+        "2.5.0"
+    ],
+    "com.adobe.cq.social.moderation.dashboard.internal.api": [
+        "2.5.8"
     ],
     "com.adobe.cq.social.moderation.services.api": [
-        "2.4.10"
+        "2.5.8"
     ],
     "com.adobe.cq.social.notifications.api": [
-        "1.2.9"
+        "1.4.0"
     ],
     "com.adobe.cq.social.notifications.channel": [
-        "1.2.9"
+        "1.3.7"
     ],
     "com.adobe.cq.social.notifications.client.api": [
-        "1.2.9"
+        "1.4.0"
+    ],
+    "com.adobe.cq.social.notifications.collection.endpoint": [
+        "1.3.7"
     ],
     "com.adobe.cq.social.notifications.endpoint": [
-        "1.2.9"
+        "1.3.7"
     ],
     "com.adobe.cq.social.subscriptions.api": [
-        "1.2.9"
+        "1.3.7"
     ],
     "com.adobe.cq.social.subscriptions.client.api": [
-        "1.2.9"
+        "1.3.7"
     ],
     "com.adobe.cq.social.subscriptions.endpoint": [
-        "1.2.9"
+        "1.3.7"
     ],
     "com.adobe.cq.social.qna.api": [
-        "1.6.6"
+        "1.7.11"
     ],
     "com.adobe.cq.social.qna.client.api": [
-        "1.6.6"
+        "1.7.11"
     ],
     "com.adobe.cq.social.qna.client.endpoints": [
-        "1.6.6"
+        "1.7.11"
     ],
     "com.adobe.cq.social.review.client.api": [
         "0.0.1"
@@ -2260,46 +2709,46 @@
         "1.2.0"
     ],
     "com.adobe.cq.social.scoring.api": [
-        "2.2.4"
+        "2.3.0"
     ],
     "com.adobe.cq.social.serviceusers.internal": [
-        "1.4.4"
+        "1.5.0"
     ],
     "com.adobe.cq.social.graph": [
-        "1.3.4"
+        "1.4.0"
     ],
     "com.adobe.cq.social.graph.client.api": [
-        "1.3.4"
+        "1.4.0"
     ],
     "com.adobe.cq.social.graph.client.endpoint": [
-        "1.3.4"
+        "1.4.0"
     ],
     "com.adobe.cq.social.graph.rest": [
-        "1.3.5"
+        "1.4.3"
     ],
-    "nothing": [
-        "3.1.13"
+    "com.adobe.cq.social.moderation.spamdetector.core": [
+        "3.3.1"
     ],
     "com.adobe.cq.social": [
-        "1.3.12"
+        "1.4.11"
     ],
     "com.adobe.cq.social.srp": [
-        "1.0.1"
+        "1.1.0"
     ],
     "com.adobe.cq.social.srp.config": [
         "1.3.0"
     ],
     "com.adobe.cq.social.srp.internal": [
-        "2.1.3"
+        "2.3.0"
     ],
     "com.adobe.cq.social.srp.utilities.api": [
-        "1.3.12"
+        "1.4.11"
     ],
     "com.adobe.cq.social.srp.utilities.internal": [
-        "1.3.12"
+        "1.4.11"
     ],
     "com.adobe.cq.social.sync.diagnostics.internal": [
-        "1.2.5"
+        "1.3.10"
     ],
     "com.adobe.cq.social.tally": [
         "0.1.0"
@@ -2314,42 +2763,69 @@
         "1.4.3"
     ],
     "com.adobe.cq.social.translation.api": [
-        "1.4.3"
+        "1.5.1"
     ],
     "com.adobe.cq.social.community.api": [
         "2.8.0"
     ],
     "com.adobe.cq.social.scf.utilities.api": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.scf.utilities.internal": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugcbase": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugcbase.core": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugcbase.core.attachments": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugcbase.dispatcher.api": [
         "1.0.0"
     ],
     "com.adobe.cq.social.ugcbase.moderation": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugcbase.osgi": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugcbase.security": [
-        "2.4.12"
+        "2.5.1"
     ],
     "com.adobe.cq.social.ugc.api": [
         "1.4.0"
     ],
     "com.adobe.cq.social.user.ugc.management.api": [
+        "1.2.6"
+    ],
+    "com.day.cq.dam.api.s7dam": [
+        "1.1.0"
+    ],
+    "com.day.cq.dam.api.s7dam.config": [
+        "2.4.0"
+    ],
+    "com.day.cq.dam.api.s7dam.constants": [
+        "1.6.0"
+    ],
+    "com.day.cq.dam.api.s7dam.jobs": [
+        "2.0.0"
+    ],
+    "com.day.cq.dam.api.s7dam.omnisearch": [
+        "1.1.0"
+    ],
+    "com.day.cq.dam.api.s7dam.scene7": [
+        "1.2.0"
+    ],
+    "com.day.cq.dam.api.s7dam.set": [
+        "2.1.0"
+    ],
+    "com.day.cq.dam.api.s7dam.utils": [
+        "4.5.0"
+    ],
+    "com.day.cq.dynamicmedia.api": [
         "1.1.0"
     ],
     "com.adobe.aem.formsndocuments.config": [
@@ -2382,14 +2858,44 @@
     "com.adobe.aemforms.fm.exception": [
         "5.10.0"
     ],
+    "com.adobe.aem.transaction.core": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.transaction.core.exception": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.transaction.core.fdinternal.api": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.transaction.core.fdinternal.model": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.transaction.core.fdinternal.util": [
+        "1.0.0"
+    ],
+    "com.adobe.aem.transaction.core.model": [
+        "1.0.0"
+    ],
+    "com.adobe.social.integrations.livefyre.commerce": [
+        "3.0.0"
+    ],
     "com.adobe.social.integrations.livefyre.config.api": [
-        "1.1.0"
+        "2.0.0"
+    ],
+    "com.adobe.social.integrations.livefyre.http": [
+        "2.2.1"
+    ],
+    "com.adobe.social.integrations.livefyre.livefyreAssetImporter": [
+        "2.2.1"
+    ],
+    "com.adobe.social.integrations.livefyre.models.assets": [
+        "2.2.1"
     ],
     "com.adobe.social.integrations.livefyre.user.api": [
         "1.0.0"
     ],
     "com.adobe.cq.msm.ui.models.alllivecopies": [
-        "1.0.0"
+        "1.1.1"
     ],
     "com.adobe.cq.msm.ui.models.blueprintconfig": [
         "1.0.0"
@@ -2397,11 +2903,14 @@
     "com.adobe.cq.msm.ui.rendercondition": [
         "1.0.0"
     ],
+    "com.adobe.cq.msm.ui.util": [
+        "1.1.0"
+    ],
     "com.day.cq.personalization": [
-        "7.2.0"
+        "7.3.0"
     ],
     "com.day.cq.personalization.dto": [
-        "1.0.1"
+        "1.0.2"
     ],
     "com.day.cq.personalization.offerlibrary.usebean": [
         "7.0.0"
@@ -2410,10 +2919,10 @@
         "5.7.0"
     ],
     "com.day.cq.personalization.ui.groupedservicesselector": [
-        "1.2.0"
+        "1.2.1"
     ],
     "com.day.cq.personalization.ui.items": [
-        "1.5.0"
+        "1.5.1"
     ],
     "com.adobe.cq.screens": [
         "4.1.0"
@@ -2422,16 +2931,16 @@
         "1.4.0"
     ],
     "com.adobe.cq.screens.binding": [
-        "6.17.0"
+        "6.37.0"
     ],
     "com.adobe.cq.screens.channel": [
-        "1.4.0"
+        "1.6.0"
     ],
     "com.adobe.cq.screens.device": [
-        "2.6.0"
+        "2.10.0"
     ],
     "com.adobe.cq.screens.device.registration": [
-        "0.1.0"
+        "0.2.0"
     ],
     "com.adobe.cq.screens.display": [
         "1.3.0"
@@ -2440,7 +2949,7 @@
         "5.7.0"
     ],
     "com.adobe.cq.screens.offlinecontent": [
-        "1.3.170"
+        "1.10.0"
     ],
     "com.adobe.cq.screens.schedule": [
         "2.1.0"
@@ -2448,8 +2957,11 @@
     "com.adobe.cq.screens.sessions": [
         "1.0.0"
     ],
+    "com.adobe.cq.screens.dcc": [
+        "1.4.10"
+    ],
     "com.adobe.cq.sites.ui.designfield.datasources": [
-        "0.2.14"
+        "0.3.10"
     ],
     "com.adobe.cq.sites.ui.models": [
         "1.1.0"
@@ -2458,19 +2970,28 @@
         "1.2.0"
     ],
     "com.adobe.cq.sites.ui.models.admin.security.permission": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.cq.sites.ui.renderconditions": [
         "0.2.0"
     ],
-    "com.adobe.cq.ui.commons.admin.views": [
+    "com.adobe.cq.sites.ui.tools": [
         "1.0.0"
+    ],
+    "com.adobe.cq.ui.admin.siteadmin.components.strategy": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.ui.admin.siteadmin.components.ui": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.ui.commons.admin.views": [
+        "1.1.0"
     ],
     "com.adobe.cq.ui.wcm.commons": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.cq.editor.model": [
-        "2.0.0"
+        "2.1.0"
     ],
     "com.adobe.cq.editor.model.asset.mapping": [
         "3.0.0"
@@ -2481,104 +3002,128 @@
     "com.day.cq.wcm.models.annotations.injectorspecific": [
         "1.0.0"
     ],
+    "com.adobe.cq.wcm.ui.components.container.service": [
+        "1.0.0"
+    ],
     "com.adobe.cq.wcm.style": [
         "2.1.0"
     ],
+    "org.antlr.v4.runtime": [
+        "4.7.1"
+    ],
+    "org.antlr.v4.runtime.atn": [
+        "4.7.1"
+    ],
+    "org.antlr.v4.runtime.dfa": [
+        "4.7.1"
+    ],
+    "org.antlr.v4.runtime.misc": [
+        "4.7.1"
+    ],
+    "org.antlr.v4.runtime.tree": [
+        "4.7.1"
+    ],
+    "org.antlr.v4.runtime.tree.pattern": [
+        "4.7.1"
+    ],
+    "org.antlr.v4.runtime.tree.xpath": [
+        "4.7.1"
+    ],
     "org.apache.http.auth": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.auth.params": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.cache": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.config": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.entity": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.fluent": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.methods": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.params": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.protocol": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.client.utils": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn.params": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn.routing": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn.scheme": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn.socket": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn.ssl": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.conn.util": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.cookie": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.cookie.params": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.entity.mime": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.entity.mime.content": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.auth": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.client": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.client.cache": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.client.cache.ehcache": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.client.cache.memcached": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.conn": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.conn.tsccm": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.cookie": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.impl.execchain": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http.osgi.services": [
-        "4.5.4"
+        "4.5.4.B003"
     ],
     "org.apache.http": [
         "4.4.8"
@@ -2700,9 +3245,6 @@
     "javax.transaction": [
         "1.1.0"
     ],
-    "javax.transaction.xa": [
-        "1.1.0"
-    ],
     "org.apache.aries.transaction": [
         "1.0.0"
     ],
@@ -2758,22 +3300,25 @@
         "2.0.0"
     ],
     "org.apache.commons.codec": [
-        "1.10.0"
+        "1.14.0"
     ],
     "org.apache.commons.codec.binary": [
-        "1.10.0"
+        "1.14.0"
+    ],
+    "org.apache.commons.codec.cli": [
+        "1.14.0"
     ],
     "org.apache.commons.codec.digest": [
-        "1.10.0"
+        "1.14.0"
     ],
     "org.apache.commons.codec.language": [
-        "1.10.0"
+        "1.14.0"
     ],
     "org.apache.commons.codec.language.bm": [
-        "1.10.0"
+        "1.14.0"
     ],
     "org.apache.commons.codec.net": [
-        "1.10.0"
+        "1.14.0"
     ],
     "org.apache.commons.collections": [
         "3.2.2"
@@ -2812,136 +3357,166 @@
         "3.2.2"
     ],
     "org.apache.commons.collections4": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.bag": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.bidimap": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.collection": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.comparators": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.functors": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.iterators": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.keyvalue": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.list": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.map": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.multimap": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.multiset": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.queue": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.sequence": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.set": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.splitmap": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.trie": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
     ],
     "org.apache.commons.collections4.trie.analyzer": [
-        "4.1.0"
+        "4.1.0",
+        "4.4.0"
+    ],
+    "org.apache.commons.collections4.properties": [
+        "4.4.0"
     ],
     "org.apache.commons.compress": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.ar": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.arj": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.cpio": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.dump": [
-        "1.15.0"
+        "1.20.0"
+    ],
+    "org.apache.commons.compress.archivers.examples": [
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.jar": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.sevenz": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.tar": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.archivers.zip": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.changes": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.brotli": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.bzip2": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.deflate": [
-        "1.15.0"
+        "1.20.0"
+    ],
+    "org.apache.commons.compress.compressors.deflate64": [
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.gzip": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.lz4": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.lz77support": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.lzma": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.lzw": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.pack200": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.snappy": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.xz": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.compressors.z": [
-        "1.15.0"
+        "1.20.0"
+    ],
+    "org.apache.commons.compress.compressors.zstandard": [
+        "1.20.0"
     ],
     "org.apache.commons.compress.parallel": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.compress.utils": [
-        "1.15.0"
+        "1.20.0"
     ],
     "org.apache.commons.mail": [
         "1.5.0"
@@ -2965,18 +3540,23 @@
         "1.3.0"
     ],
     "org.apache.commons.fileupload": [
+        "1.4.0",
         "1.3.3"
     ],
     "org.apache.commons.fileupload.disk": [
+        "1.4.0",
         "1.3.3"
     ],
     "org.apache.commons.fileupload.portlet": [
+        "1.4.0",
         "1.3.3"
     ],
     "org.apache.commons.fileupload.servlet": [
+        "1.4.0",
         "1.3.3"
     ],
     "org.apache.commons.fileupload.util": [
+        "1.4.0",
         "1.3.3"
     ],
     "org.apache.commons.imaging": [
@@ -3101,68 +3681,102 @@
     ],
     "org.apache.commons.io": [
         "1.4.9999",
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
     ],
     "org.apache.commons.io.comparator": [
         "1.4.9999",
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
     ],
     "org.apache.commons.io.filefilter": [
         "1.4.9999",
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
     ],
     "org.apache.commons.io.input": [
         "1.4.9999",
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
     ],
     "org.apache.commons.io.monitor": [
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
     ],
     "org.apache.commons.io.output": [
         "1.4.9999",
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
     ],
     "org.apache.commons.io.serialization": [
-        "2.5.0"
+        "2.8.0",
+        "2.6.0"
+    ],
+    "org.apache.commons.io.file": [
+        "2.8.0"
+    ],
+    "org.apache.commons.io.function": [
+        "2.8.0"
+    ],
+    "org.apache.commons.io.input.buffer": [
+        "2.8.0"
     ],
     "org.apache.commons.lang3": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.arch": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.builder": [
-        "3.6.0"
+        "3.12.0"
+    ],
+    "org.apache.commons.lang3.compare": [
+        "3.12.0"
     ],
     "org.apache.commons.lang3.concurrent": [
-        "3.6.0"
+        "3.12.0"
+    ],
+    "org.apache.commons.lang3.concurrent.locks": [
+        "3.12.0"
     ],
     "org.apache.commons.lang3.event": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.exception": [
-        "3.6.0"
+        "3.12.0"
+    ],
+    "org.apache.commons.lang3.function": [
+        "3.12.0"
     ],
     "org.apache.commons.lang3.math": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.mutable": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.reflect": [
-        "3.6.0"
+        "3.12.0"
+    ],
+    "org.apache.commons.lang3.stream": [
+        "3.12.0"
     ],
     "org.apache.commons.lang3.text": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.text.translate": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.time": [
-        "3.6.0"
+        "3.12.0"
     ],
     "org.apache.commons.lang3.tuple": [
-        "3.6.0"
+        "3.12.0"
+    ],
+    "org.apache.felix.systemready": [
+        "0.2.0"
+    ],
+    "org.apache.felix.systemready.rootcause": [
+        "0.1.0"
     ],
     "org.apache.felix.cm": [
         "1.2.0"
@@ -3172,6 +3786,9 @@
     ],
     "org.osgi.service.cm": [
         "1.6.0"
+    ],
+    "org.osgi.util.converter": [
+        "1.0.2"
     ],
     "org.osgi.service.coordinator": [
         "1.0.1"
@@ -3191,191 +3808,227 @@
     "org.osgi.service.component.runtime.dto": [
         "1.4.0"
     ],
-    "org.osgi.util.function": [
-        "1.0.0"
-    ],
-    "org.osgi.util.promise": [
-        "1.0.0"
-    ],
     "org.osgi.service.event": [
-        "1.3.1"
-    ],
-    "org.apache.felix.http.api": [
-        "2.0.8"
+        "1.4.0"
     ],
     "org.apache.felix.http.jetty": [
         "2.1.0"
     ],
-    "org.eclipse.jetty": [
-        "9.3.22"
+    "org.eclipse.jetty.alpn.server": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.client": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.client.api": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.client.http": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.client.jmx": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.client.util": [
+        "9.4.42"
     ],
     "org.eclipse.jetty.http": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.http.pathmap": [
-        "9.3.22"
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.api": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.api.server": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.frames": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.generator": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.hpack": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.parser": [
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.http2.server": [
+        "9.4.42"
     ],
     "org.eclipse.jetty.io": [
-        "9.3.22"
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.io.jmx": [
+        "9.4.42"
     ],
     "org.eclipse.jetty.io.ssl": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.jmx": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.security": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.security.authentication": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.server": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.server.handler": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.server.handler.gzip": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.server.handler.jmx": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.server.jmx": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.server.nio": [
-        "9.3.22"
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.server.resource": [
+        "9.4.42"
     ],
     "org.eclipse.jetty.server.session": [
-        "9.3.22"
-    ],
-    "org.eclipse.jetty.server.session.jmx": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.servlet": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.servlet.jmx": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.servlet.listener": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util": [
-        "9.3.22"
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.util.ajax": [
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.annotation": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.component": [
-        "9.3.22"
+        "9.4.42"
+    ],
+    "org.eclipse.jetty.util.compression": [
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.log": [
-        "9.3.22"
-    ],
-    "org.eclipse.jetty.util.log.jmx": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.preventers": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.resource": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.security": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.ssl": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.statistic": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.thread": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.util.thread.strategy": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.webapp": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.api": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.api.annotations": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.api.extensions": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.api.util": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.client": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.client.io": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.client.masks": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.events": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.events.annotated": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.extensions": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.extensions.compress": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.extensions.fragment": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.extensions.identity": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.frames": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.io": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.io.http": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.io.payload": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.message": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.scopes": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.common.util": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.server": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.server.pathmap": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.websocket.servlet": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.eclipse.jetty.xml": [
-        "9.3.22"
+        "9.4.42"
     ],
     "org.osgi.service.http": [
         "1.2.1"
@@ -3393,7 +4046,7 @@
         "1.1.0"
     ],
     "org.apache.felix.http.whiteboard": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.felix.inventory": [
         "1.0.0"
@@ -3408,7 +4061,7 @@
         "1.2.0"
     ],
     "org.osgi.service.metatype": [
-        "1.3.0"
+        "1.4.0"
     ],
     "javax.servlet": [
         "3.0.0",
@@ -3431,7 +4084,7 @@
         "3.1.0"
     ],
     "org.apache.felix.webconsole": [
-        "3.3.0"
+        "3.4.0"
     ],
     "org.apache.felix.webconsole.bundleinfo": [
         "1.0.0"
@@ -3442,41 +4095,17 @@
     "org.apache.fop.apps": [
         "1.0.0"
     ],
+    "javax.annotation": [
+        "1.3.0"
+    ],
+    "javax.annotation.security": [
+        "1.3.0"
+    ],
+    "javax.annotation.sql": [
+        "1.3.0"
+    ],
     "javax.inject": [
         "1.0.0"
-    ],
-    "org.apache.jackrabbit.api": [
-        "2.4.0"
-    ],
-    "org.apache.jackrabbit.api.jmx": [
-        "2.3.0"
-    ],
-    "org.apache.jackrabbit.api.management": [
-        "2.3.1"
-    ],
-    "org.apache.jackrabbit.api.observation": [
-        "2.3.1"
-    ],
-    "org.apache.jackrabbit.api.query": [
-        "2.13.5"
-    ],
-    "org.apache.jackrabbit.api.security": [
-        "2.4.0"
-    ],
-    "org.apache.jackrabbit.api.security.authentication.token": [
-        "2.3.0"
-    ],
-    "org.apache.jackrabbit.api.security.authorization": [
-        "2.3.0"
-    ],
-    "org.apache.jackrabbit.api.security.principal": [
-        "2.3.0"
-    ],
-    "org.apache.jackrabbit.api.security.user": [
-        "2.4.1"
-    ],
-    "org.apache.jackrabbit.api.stats": [
-        "1.2.0"
     ],
     "org.apache.jackrabbit.vault.fs": [
         "2.4.0"
@@ -3491,19 +4120,19 @@
         "2.4.0"
     ],
     "org.apache.jackrabbit.vault.fs.io": [
-        "2.7.0"
+        "2.8.0"
     ],
     "org.apache.jackrabbit.vault.fs.spi": [
         "2.4.0"
     ],
     "org.apache.jackrabbit.vault.packaging": [
-        "2.6.1"
+        "2.8.0"
     ],
     "org.apache.jackrabbit.vault.packaging.events": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.vault.packaging.registry": [
-        "1.0.0"
+        "1.3.0"
     ],
     "org.apache.jackrabbit.vault.util": [
         "2.4.0"
@@ -3512,7 +4141,7 @@
         "2.4.0"
     ],
     "org.apache.jackrabbit.vault.util.xml.serialize": [
-        "2.4.0"
+        "2.5.0"
     ],
     "org.apache.jackrabbit.vault.util.xml.xerces.dom": [
         "2.4.0"
@@ -3525,15 +4154,6 @@
     ],
     "org.apache.jackrabbit.vault.util.xml.xerces.xni.parser": [
         "2.4.0"
-    ],
-    "javax.json": [
-        "1.1.0"
-    ],
-    "javax.json.spi": [
-        "1.1.0"
-    ],
-    "javax.json.stream": [
-        "1.1.0"
     ],
     "org.apache.oltu.commons.encodedtoken": [
         "1.0.1"
@@ -3593,247 +4213,538 @@
         "1.0.3"
     ],
     "opennlp.tools.chunker": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.dictionary": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.dictionary.serializer": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.doccat": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.entitylinker": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.formats": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.formats.ad": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.formats.brat": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.formats.conllu": [
+        "1.9.3"
     ],
     "opennlp.tools.formats.convert": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.formats.frenchtreebank": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.formats.irishsentencebank": [
+        "1.9.3"
+    ],
+    "opennlp.tools.formats.leipzig": [
+        "1.9.3"
+    ],
+    "opennlp.tools.formats.letsmt": [
+        "1.9.3"
+    ],
+    "opennlp.tools.formats.moses": [
+        "1.9.3"
     ],
     "opennlp.tools.formats.muc": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.formats.nkjp": [
+        "1.9.3"
     ],
     "opennlp.tools.formats.ontonotes": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.langdetect": [
+        "1.9.3"
+    ],
+    "opennlp.tools.languagemodel": [
+        "1.9.3"
     ],
     "opennlp.tools.lemmatizer": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.ml": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.ml.maxent": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.ml.maxent.io": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.ml.maxent.quasinewton": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.ml.model": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.ml.naivebayes": [
+        "1.9.3"
     ],
     "opennlp.tools.ml.perceptron": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.namefind": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.ngram": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.parser": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.parser.chunking": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.parser.lang.en": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.parser.lang.es": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.parser.treeinsert": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.postag": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.sentdetect": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.sentdetect.lang": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.sentdetect.lang.th": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.stemmer": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.stemmer.snowball": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.tokenize": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.tokenize.lang": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.tokenize.lang.en": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.util": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.util.eval": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.util.ext": [
-        "0.0.0"
+        "1.9.3"
     ],
     "opennlp.tools.util.featuregen": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.util.java": [
+        "1.9.3"
     ],
     "opennlp.tools.util.model": [
-        "0.0.0"
+        "1.9.3"
+    ],
+    "opennlp.tools.util.normalizer": [
+        "1.9.3"
+    ],
+    "opennlp.tools.util.wordvector": [
+        "1.9.3"
+    ],
+    "org.apache.abdera.parser.stax": [
+        "1.1.3"
+    ],
+    "org.apache.abdera.parser.stax.util": [
+        "1.1.3"
+    ],
+    "org.dom4j": [
+        "2.1.3"
+    ],
+    "org.dom4j.bean": [
+        "2.1.3"
+    ],
+    "org.dom4j.datatype": [
+        "2.1.3"
+    ],
+    "org.dom4j.dom": [
+        "2.1.3"
+    ],
+    "org.dom4j.dtd": [
+        "2.1.3"
+    ],
+    "org.dom4j.io": [
+        "2.1.3"
+    ],
+    "org.dom4j.jaxb": [
+        "2.1.3"
+    ],
+    "org.dom4j.rule": [
+        "2.1.3"
+    ],
+    "org.dom4j.rule.pattern": [
+        "2.1.3"
+    ],
+    "org.dom4j.swing": [
+        "2.1.3"
+    ],
+    "org.dom4j.tree": [
+        "2.1.3"
+    ],
+    "org.dom4j.util": [
+        "2.1.3"
+    ],
+    "org.dom4j.xpath": [
+        "2.1.3"
+    ],
+    "org.dom4j.xpp": [
+        "2.1.3"
+    ],
+    "!! com.sun.istack": [
+        "2.21.0"
+    ],
+    "!! com.sun.istack.localization": [
+        "2.21.0"
+    ],
+    "!! com.sun.istack.logging": [
+        "2.21.0"
+    ],
+    "!! com.sun.xml.bind": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.annotation": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.api": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.api.impl": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.marshaller": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.unmarshaller": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.util": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.bytecode": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.doc-files": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.model.annotation": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.model.core": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.model.impl": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.model.nav": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.model.runtime": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.model.util": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.runtime": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.runtime.output": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.runtime.property": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.runtime.reflect": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.runtime.reflect.opt": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.runtime.unmarshaller": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.schemagen": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.schemagen.episode": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.schemagen.xmlschema": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.bind.v2.util": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.txw2": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.txw2.annotation": [
+        "2.2.11"
+    ],
+    "!! com.sun.xml.txw2.output": [
+        "2.2.11"
+    ],
+    "org.jdom": [
+        "1.1.0"
+    ],
+    "org.jdom.adapters": [
+        "1.1.0"
+    ],
+    "org.jdom.filter": [
+        "1.1.0"
+    ],
+    "org.jdom.input": [
+        "1.1.0"
+    ],
+    "org.jdom.output": [
+        "1.1.0"
+    ],
+    "org.jdom.transform": [
+        "1.1.0"
+    ],
+    "org.jdom.xpath": [
+        "1.1.0"
     ],
     "org.mozilla.classfile": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.annotations": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.ast": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.commonjs.module": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.commonjs.module.provider": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.debug": [
-        "1.7.7.1"
+        "1.7.13"
     ],
-    "org.mozilla.javascript.jdk13": [
-        "1.7.7.1"
+    "org.mozilla.javascript.engine": [
+        "1.7.13"
     ],
-    "org.mozilla.javascript.jdk15": [
-        "1.7.7.1"
+    "org.mozilla.javascript.jdk18": [
+        "1.7.13"
     ],
     "org.mozilla.javascript.json": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.optimizer": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.regexp": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.resources": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.serialize": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools.debugger": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools.debugger.treetable": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools.idswitch": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools.jsc": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools.resources": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.tools.shell": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.typedarrays": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.v8dtoa": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.xml": [
-        "1.7.7.1"
+        "1.7.13"
     ],
     "org.mozilla.javascript.xmlimpl": [
-        "1.7.7.1"
+        "1.7.13"
+    ],
+    "!! com.sun.xml.messaging.saaj": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.client.p2p": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.packaging.mime": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.packaging.mime.internet": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.packaging.mime.util": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.soap": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.soap.dynamic": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.soap.impl": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.soap.name": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.soap.ver1_1": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.soap.ver1_2": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.util": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.util.stax": [
+        "1.3.23"
+    ],
+    "!! com.sun.xml.messaging.saaj.util.transform": [
+        "1.3.23"
+    ],
+    "javax.xml.bind": [
+        "2.2.1"
+    ],
+    "javax.xml.bind.annotation": [
+        "2.2.1"
+    ],
+    "javax.xml.bind.annotation.adapters": [
+        "2.2.1"
+    ],
+    "javax.xml.bind.attachment": [
+        "2.2.1"
+    ],
+    "javax.xml.bind.helpers": [
+        "2.2.1"
+    ],
+    "javax.xml.bind.util": [
+        "2.2.1"
+    ],
+    "javax.xml.ws": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.handler": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.handler.soap": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.http": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.soap": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.spi": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.spi.http": [
+        "2.2.0"
+    ],
+    "javax.xml.ws.wsaddressing": [
+        "2.2.0"
+    ],
+    "javax.xml.soap": [
+        "1.3.0"
     ],
     "org.apache.sling.adapter": [
         "2.1.0"
     ],
     "org.apache.sling.api": [
-        "2.3.2"
+        "2.3.4"
     ],
     "org.apache.sling.api.adapter": [
-        "2.2.2"
+        "2.2.4"
     ],
     "org.apache.sling.api.auth": [
-        "1.0.2"
+        "1.0.4"
     ],
     "org.apache.sling.api.request": [
-        "2.4.2"
+        "2.4.4"
     ],
     "org.apache.sling.api.resource": [
-        "2.10.1"
+        "2.12.1"
     ],
     "org.apache.sling.api.resource.external": [
-        "1.0.0"
-    ],
-    "org.apache.sling.api.resource.observation": [
-        "1.2.0"
-    ],
-    "org.apache.sling.api.resource.path": [
-        "1.2.0"
-    ],
-    "org.apache.sling.api.resource.runtime": [
         "1.0.1"
     ],
-    "org.apache.sling.api.resource.runtime.dto": [
-        "1.0.0"
+    "org.apache.sling.api.resource.mapping": [
+        "1.0.1"
     ],
-    "org.apache.sling.api.scripting": [
-        "2.3.1"
+    "org.apache.sling.api.resource.observation": [
+        "1.2.2"
     ],
-    "org.apache.sling.api.security": [
+    "org.apache.sling.api.resource.path": [
+        "1.2.2"
+    ],
+    "org.apache.sling.api.resource.runtime": [
         "1.0.2"
     ],
+    "org.apache.sling.api.resource.runtime.dto": [
+        "1.0.1"
+    ],
+    "org.apache.sling.api.scripting": [
+        "2.5.0"
+    ],
+    "org.apache.sling.api.security": [
+        "1.0.4"
+    ],
     "org.apache.sling.api.servlets": [
-        "2.2.0"
+        "2.3.1"
     ],
     "org.apache.sling.api.wrappers": [
-        "2.6.1"
+        "2.6.4"
     ],
     "org.apache.sling.spi.resource.provider": [
-        "1.1.0"
+        "1.2.2"
     ],
     "org.apache.sling.atom.taglib": [
         "1.0.0"
@@ -3842,7 +4753,7 @@
         "1.0.0"
     ],
     "org.apache.sling.auth.core": [
-        "1.3.2"
+        "1.4.0"
     ],
     "org.apache.sling.auth.core.spi": [
         "1.2.2"
@@ -3850,14 +4761,32 @@
     "org.apache.sling.engine.auth": [
         "2.0.6"
     ],
+    "org.apache.sling.commons.compiler": [
+        "2.1.1"
+    ],
+    "org.apache.sling.commons.compiler.source": [
+        "1.0.0"
+    ],
     "org.apache.sling.commons.fsclassloader": [
         "1.0.8"
     ],
     "org.apache.sling.commons.html": [
         "1.0.0"
     ],
-    "org.apache.sling.commons.compiler": [
-        "2.1.1"
+    "javax.json": [
+        "1.1.0"
+    ],
+    "javax.json.spi": [
+        "1.1.0"
+    ],
+    "javax.json.stream": [
+        "1.1.0"
+    ],
+    "org.apache.johnzon.core": [
+        "1.2.8"
+    ],
+    "org.apache.johnzon.core.util": [
+        "1.2.8"
     ],
     "ch.qos.logback.classic": [
         "1.2.3"
@@ -4057,38 +4986,44 @@
     "org.slf4j.impl": [
         "1.7.21"
     ],
+    "org.apache.sling.commons.mime": [
+        "2.2.0"
+    ],
     "org.apache.sling.commons.osgi": [
         "2.4.0"
     ],
     "org.apache.sling.commons.osgi.bundleversion": [
         "2.2.0"
     ],
+    "org.apache.sling.commons.scheduler": [
+        "2.5.1"
+    ],
     "org.apache.sling.commons.contentdetection": [
         "1.0.0"
     ],
     "org.apache.sling.caconfig": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.sling.caconfig.annotation": [
         "1.1.0"
     ],
     "org.apache.sling.caconfig.resource": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.sling.caconfig.management": [
-        "2.2.0"
+        "2.2.1"
     ],
     "org.apache.sling.caconfig.management.multiplexer": [
-        "1.1.0"
+        "1.1.1"
     ],
     "org.apache.sling.caconfig.resource.spi": [
-        "2.1.0"
+        "2.1.1"
     ],
     "org.apache.sling.caconfig.spi": [
-        "2.1.0"
+        "2.1.1"
     ],
     "org.apache.sling.caconfig.spi.metadata": [
-        "2.0.0"
+        "2.0.1"
     ],
     "org.apache.sling.servlets.post": [
         "2.3.1"
@@ -4141,20 +5076,38 @@
     "org.apache.sling.distribution.transport": [
         "0.1.0"
     ],
+    "org.apache.sling.distribution.agent": [
+        "0.0.0"
+    ],
+    "org.apache.sling.distribution.agent.spi": [
+        "0.0.1"
+    ],
     "org.apache.sling.distribution.common": [
         "0.1.0"
     ],
-    "org.apache.sling.distribution.serialization": [
+    "org.apache.sling.distribution.log.spi": [
+        "0.0.0"
+    ],
+    "org.apache.sling.distribution.packaging": [
+        "0.0.1"
+    ],
+    "org.apache.sling.distribution.queue": [
         "0.1.0"
     ],
+    "org.apache.sling.distribution.queue.spi": [
+        "1.0.0"
+    ],
+    "org.apache.sling.distribution.serialization": [
+        "0.1.1"
+    ],
     "org.apache.sling.distribution.util": [
-        "0.1.0"
+        "0.1.1"
     ],
     "org.apache.sling.commons.classloader": [
         "1.4.0"
     ],
     "org.apache.sling.engine": [
-        "2.2.1"
+        "2.4.0"
     ],
     "org.apache.sling.engine.jmx": [
         "1.1.1"
@@ -4193,7 +5146,7 @@
         "2.2.1"
     ],
     "org.apache.sling.jcr.contentloader": [
-        "0.2.0"
+        "0.2.2"
     ],
     "org.apache.sling.installer.api": [
         "3.2.1"
@@ -4202,13 +5155,13 @@
         "1.0.3"
     ],
     "org.apache.sling.installer.api.info": [
-        "1.1.0"
+        "1.1.1"
     ],
     "org.apache.sling.installer.api.jmx": [
         "1.0.3"
     ],
     "org.apache.sling.installer.api.tasks": [
-        "1.4.0"
+        "1.5.0"
     ],
     "org.apache.sling.installer.factories.configuration": [
         "1.1.2"
@@ -4217,13 +5170,13 @@
         "1.1.1"
     ],
     "org.apache.sling.jcr.base": [
-        "3.3.0"
+        "3.4.0"
+    ],
+    "org.apache.sling.jcr.base.spi": [
+        "0.1.0"
     ],
     "org.apache.sling.jcr.base.util": [
-        "2.1.0"
-    ],
-    "org.apache.sling.jcr.repoinit": [
-        "1.1.2"
+        "2.2.0"
     ],
     "org.apache.sling.jcr.registration": [
         "1.1.1"
@@ -4252,20 +5205,8 @@
     "org.apache.sling.commons.json.xml": [
         "2.0.5"
     ],
-    "org.apache.sling.scripting.jsp.taglib": [
-        "2.2.0"
-    ],
-    "org.apache.sling.scripting.jsp.taglib.helpers": [
-        "2.2.0"
-    ],
-    "org.apache.sling.scripting.jsp.taglib.tei": [
-        "2.2.0"
-    ],
     "org.apache.sling.commons.metrics": [
         "1.2.0"
-    ],
-    "org.apache.sling.commons.mime": [
-        "2.1.4"
     ],
     "org.apache.sling.models.annotations": [
         "1.5.0"
@@ -4277,13 +5218,13 @@
         "1.0.0"
     ],
     "org.apache.sling.models.export.spi": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.sling.models.factory": [
-        "1.4.0"
+        "1.4.1"
     ],
     "org.apache.sling.models.spi": [
-        "1.2.0"
+        "1.2.1"
     ],
     "org.apache.sling.models.spi.injectorspecific": [
         "1.1.1"
@@ -4295,16 +5236,19 @@
         "1.3.0"
     ],
     "org.apache.sling.provisioning.model": [
-        "1.9.0"
+        "1.10.0"
     ],
     "org.apache.sling.provisioning.model.io": [
         "1.3.0"
+    ],
+    "org.apache.sling.jcr.repoinit": [
+        "1.1.2"
     ],
     "org.apache.sling.repoinit.parser": [
         "1.0.2"
     ],
     "org.apache.sling.repoinit.parser.operations": [
-        "4.1.0"
+        "4.6.0"
     ],
     "org.apache.sling.jcr.api": [
         "2.4.0"
@@ -4313,7 +5257,7 @@
         "1.0.0"
     ],
     "org.apache.sling.resource.collection": [
-        "1.0.0"
+        "1.0.2"
     ],
     "org.apache.sling.resourcemerger.api": [
         "1.2.0"
@@ -4324,14 +5268,14 @@
     "org.apache.sling.rewriter": [
         "1.0.0"
     ],
-    "org.apache.sling.commons.scheduler": [
-        "2.5.1"
-    ],
     "org.apache.sling.scripting.core": [
         "2.1.0"
     ],
     "org.apache.sling.scripting.core.servlet": [
         "1.0.0"
+    ],
+    "javax.el": [
+        "2.1.0"
     ],
     "org.apache.sling.scripting.sightly.compiler": [
         "1.0.1"
@@ -4340,13 +5284,13 @@
         "1.0.0"
     ],
     "org.apache.sling.scripting.sightly.compiler.commands": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.sling.scripting.sightly.compiler.expression": [
         "1.0.0"
     ],
     "org.apache.sling.scripting.sightly.compiler.expression.nodes": [
-        "1.0.0"
+        "1.2.0"
     ],
     "org.apache.sling.scripting.sightly.compiler.util": [
         "1.1.0"
@@ -4354,20 +5298,20 @@
     "org.apache.sling.scripting.sightly.engine": [
         "1.0.0"
     ],
+    "org.apache.sling.scripting.sightly.java.compiler": [
+        "2.0.0"
+    ],
     "org.apache.sling.scripting.sightly": [
         "2.0.0"
     ],
     "org.apache.sling.scripting.sightly.extension": [
-        "1.0.1"
-    ],
-    "org.apache.sling.scripting.sightly.java.compiler": [
-        "1.2.0"
+        "1.1.0"
     ],
     "org.apache.sling.scripting.sightly.pojo": [
         "1.0.1"
     ],
     "org.apache.sling.scripting.sightly.render": [
-        "2.1.0"
+        "3.0.0"
     ],
     "org.apache.sling.scripting.sightly.use": [
         "1.0.1"
@@ -4381,8 +5325,44 @@
     "org.apache.sling.scripting.javascript": [
         "1.0.0"
     ],
-    "javax.el": [
-        "2.1.0"
+    "org.apache.sling.scripting.jsp.util": [
+        "2.0.8"
+    ],
+    "org.apache.sling.scripting.jsp.taglib": [
+        "2.4.0"
+    ],
+    "org.apache.sling.scripting.jsp.taglib.tei": [
+        "2.2.0"
+    ],
+    "org.apache.sling.serviceusermapping": [
+        "1.4.0"
+    ],
+    "org.apache.sling.servlets.resolver.bundle.tracker": [
+        "0.2.0"
+    ],
+    "org.apache.sling.servlets.resolver.jmx": [
+        "2.3.7"
+    ],
+    "org.apache.sling.settings": [
+        "1.3.1"
+    ],
+    "org.apache.jackrabbit.server.io": [
+        "2.14.0"
+    ],
+    "org.apache.sling.startupfilter": [
+        "1.0.0"
+    ],
+    "org.apache.sling.tenant": [
+        "1.0.1"
+    ],
+    "org.apache.sling.tenant.spi": [
+        "1.1.1"
+    ],
+    "org.apache.sling.commons.threads": [
+        "3.4.0"
+    ],
+    "org.apache.sling.commons.threads.jmx": [
+        "1.1.1"
     ],
     "javax.servlet.jsp": [
         "2.1.0"
@@ -4395,39 +5375,6 @@
     ],
     "javax.servlet.jsp.tagext": [
         "2.1.0"
-    ],
-    "org.apache.sling.scripting.jsp.jasper.runtime": [
-        "2.0.8"
-    ],
-    "org.apache.sling.scripting.jsp.util": [
-        "2.0.8"
-    ],
-    "org.apache.sling.serviceusermapping": [
-        "1.3.0"
-    ],
-    "org.apache.sling.servlets.resolver.jmx": [
-        "2.3.7"
-    ],
-    "org.apache.sling.settings": [
-        "1.3.0"
-    ],
-    "org.apache.jackrabbit.server.io": [
-        "2.14.0"
-    ],
-    "org.apache.sling.startupfilter": [
-        "1.0.0"
-    ],
-    "org.apache.sling.tenant": [
-        "1.0.0"
-    ],
-    "org.apache.sling.tenant.spi": [
-        "1.1.0"
-    ],
-    "org.apache.sling.commons.threads": [
-        "3.4.0"
-    ],
-    "org.apache.sling.commons.threads.jmx": [
-        "1.1.1"
     ],
     "javax.jcr": [
         "2.0.0",
@@ -4469,287 +5416,314 @@
         "2.0.0",
         "1.1.0"
     ],
+    "org.apache.sling.xss": [
+        "2.0.1"
+    ],
     "org.apache.tika": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.concurrent": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.config": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.detect": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.embedder": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.exception": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.extractor": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.fork": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.io": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.language": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.language.detect": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.language.translate": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.metadata": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.mime": [
-        "1.2.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.digest": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.external": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.sax": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.sax.xpath": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.utils": [
-        "1.0.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.apple": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.asm": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.audio": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.captioning": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.captioning.tf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.chm": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.chm.accessor": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.chm.assertion": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.chm.core": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.chm.exception": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.chm.lzx": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.code": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.crypto": [
-        "1.17.0"
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.csv": [
+        "1.24.1"
     ],
     "org.apache.tika.parser.ctakes": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.dbf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.dif": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.dwg": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.envi": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.epub": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.executable": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.feed": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.font": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.gdal": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.geo.topic": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.geo.topic.gazetteer": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.geoinfo": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.grib": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.hdf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.html": [
-        "1.17.0"
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.html.charsetdetector": [
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.html.charsetdetector.charsets": [
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.hwp": [
+        "1.24.1"
     ],
     "org.apache.tika.parser.image": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.image.xmp": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.iptc": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.isatab": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.iwork": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.iwork.iwana": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.jdbc": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.journal": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.jpeg": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.mail": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.mat": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.mbox": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.microsoft": [
-        "1.17.0"
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.microsoft.onenote": [
+        "1.24.1"
     ],
     "org.apache.tika.parser.microsoft.ooxml": [
-        "1.17.0"
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.microsoft.ooxml.xps": [
+        "1.24.1"
     ],
     "org.apache.tika.parser.microsoft.ooxml.xslf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.microsoft.ooxml.xwpf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.microsoft.ooxml.xwpf.ml2006": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.microsoft.xml": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.mp3": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.mp4": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner.corenlp": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner.grobid": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner.mitie": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner.nltk": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner.opennlp": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ner.regex": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.netcdf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.ocr": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.odf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.opendocument": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.pdf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.pkg": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.pot": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.prt": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.recognition": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.recognition.tf": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.rtf": [
-        "1.17.0"
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.sas": [
+        "1.24.1"
     ],
     "org.apache.tika.parser.sentiment": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.strings": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.txt": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.utils": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.video": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.tika.parser.wordperfect": [
-        "1.17.0"
+        "1.24.1"
+    ],
+    "org.apache.tika.parser.xliff": [
+        "1.24.1"
     ],
     "org.apache.tika.parser.xml": [
-        "1.17.0"
+        "1.24.1"
     ],
     "org.apache.commons.lang": [
         "2.6.0"
@@ -4905,19 +5879,31 @@
         "2.2.0"
     ],
     "com.adobe.cq.dam.cfm": [
-        "1.3.1"
+        "1.9.0"
     ],
     "com.adobe.cq.dam.cfm.content": [
-        "1.0.0"
+        "1.3.10"
     ],
     "com.adobe.cq.dam.cfm.converter": [
+        "1.3.10"
+    ],
+    "com.adobe.cq.dam.cfm.extensions": [
+        "1.1.0"
+    ],
+    "com.adobe.cq.dam.cfm.extensions.plugins": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.dam.cfm.ui": [
+        "6.1.0"
+    ],
+    "com.adobe.cq.dam.cfm.ui.validation": [
         "1.0.0"
     ],
     "com.adobe.cq.upgrades.backup": [
         "6.2.0"
     ],
     "com.adobe.cq.projects.api": [
-        "0.3.0"
+        "0.4.0"
     ],
     "com.adobe.cq.projects.ui": [
         "0.1.0"
@@ -4982,78 +5968,6 @@
     "com.day.io.file": [
         "1.1.3"
     ],
-    "javax.servlet.jsp.jstl.core": [
-        "0.0.0"
-    ],
-    "javax.servlet.jsp.jstl.fmt": [
-        "0.0.0"
-    ],
-    "javax.servlet.jsp.jstl.sql": [
-        "0.0.0"
-    ],
-    "javax.servlet.jsp.jstl.tlv": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.functions": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.lang.jstl": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.lang.jstl.parser": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.lang.jstl.test": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.lang.jstl.test.beans": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.lang.support": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.resources": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.common.core": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.common.fmt": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.common.sql": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.el.core": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.el.fmt": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.el.sql": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.rt.core": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.rt.fmt": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tag.rt.sql": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tei": [
-        "0.0.0"
-    ],
-    "org.apache.taglibs.standard.tlv": [
-        "0.0.0"
-    ],
-    "com.day.commons.datasource.jdbcpool": [
-        "0.0.0"
-    ],
     "com.day.util": [
         "1.1.0"
     ],
@@ -5106,7 +6020,7 @@
         "5.7.0"
     ],
     "com.day.cq.commons.folderpreview": [
-        "5.11.12"
+        "5.12.16"
     ],
     "com.day.cq.commons.inherit": [
         "5.7.0"
@@ -5121,7 +6035,7 @@
         "5.8.0"
     ],
     "com.day.cq.commons.servlets": [
-        "5.8.0"
+        "5.10.0"
     ],
     "com.day.cq.commons.thumbnail": [
         "5.7.0"
@@ -5136,13 +6050,13 @@
         "0.0.0"
     ],
     "com.day.cq.contentsync": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.day.cq.contentsync.config": [
         "1.1.0"
     ],
     "com.day.cq.contentsync.handler": [
-        "1.1.0"
+        "1.4.0"
     ],
     "com.day.cq.contentsync.handler.util": [
         "1.1.0"
@@ -5157,10 +6071,7 @@
         "1.0.0"
     ],
     "com.day.cq.dam.api": [
-        "1.23.0"
-    ],
-    "com.day.cq.dam.api.async": [
-        "1.3.0"
+        "1.28.0"
     ],
     "com.day.cq.dam.api.cache": [
         "1.1.0"
@@ -5169,19 +6080,19 @@
         "1.1.0"
     ],
     "com.day.cq.dam.api.collection": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.day.cq.dam.api.handler": [
-        "2.0.0"
+        "2.1.0"
     ],
     "com.day.cq.dam.api.handler.store": [
         "1.1.0"
     ],
     "com.day.cq.dam.api.handler.xmp": [
-        "1.1.0"
+        "1.2.0"
     ],
     "com.day.cq.dam.api.jobs": [
-        "2.4.0"
+        "2.5.0"
     ],
     "com.day.cq.dam.api.lightbox": [
         "1.1.0"
@@ -5195,29 +6106,8 @@
     "com.day.cq.dam.api.renditions": [
         "1.2.0"
     ],
-    "com.day.cq.dam.api.s7dam": [
-        "1.1.0"
-    ],
-    "com.day.cq.dam.api.s7dam.config": [
-        "2.4.0"
-    ],
-    "com.day.cq.dam.api.s7dam.constants": [
-        "1.5.3"
-    ],
-    "com.day.cq.dam.api.s7dam.jobs": [
-        "2.0.0"
-    ],
-    "com.day.cq.dam.api.s7dam.omnisearch": [
-        "1.1.0"
-    ],
-    "com.day.cq.dam.api.s7dam.scene7": [
-        "1.1.0"
-    ],
-    "com.day.cq.dam.api.s7dam.set": [
-        "2.1.0"
-    ],
-    "com.day.cq.dam.api.s7dam.utils": [
-        "4.3.0"
+    "com.day.cq.dam.api.reporting": [
+        "1.0.0"
     ],
     "com.day.cq.dam.api.thumbnail": [
         "1.1.0"
@@ -5250,28 +6140,28 @@
         "5.8.2"
     ],
     "com.day.cq.dam.handler.standard.keynote": [
-        "5.8.2"
+        "5.9.0"
     ],
     "com.day.cq.dam.handler.standard.mp3": [
         "5.8.2"
     ],
     "com.day.cq.dam.handler.standard.msoffice": [
-        "5.10.0"
+        "6.1.0"
     ],
     "com.day.cq.dam.handler.standard.msoffice.wmf": [
         "5.8.2"
     ],
     "com.day.cq.dam.handler.standard.ooxml": [
-        "6.1.0"
+        "6.2.0"
     ],
     "com.day.cq.dam.handler.standard.pdf": [
-        "5.11.0"
+        "5.13.0"
     ],
     "com.day.cq.dam.handler.standard.pict": [
         "5.8.2"
     ],
     "com.day.cq.dam.handler.standard.ps": [
-        "5.11.0"
+        "5.13.0"
     ],
     "com.day.cq.dam.handler.standard.psd": [
         "5.10.0"
@@ -5280,10 +6170,7 @@
         "5.8.2"
     ],
     "com.day.cq.dam.commons.handler": [
-        "2.0.0"
-    ],
-    "com.day.cq.dam.commons.job": [
-        "1.1.0"
+        "2.2.0"
     ],
     "com.day.cq.dam.commons.metadata": [
         "1.5.0"
@@ -5307,7 +6194,10 @@
         "1.1.0"
     ],
     "com.day.cq.dam.commons.util": [
-        "1.40.0"
+        "1.60.0"
+    ],
+    "com.day.cq.dam.commons.util.mime": [
+        "1.0.0"
     ],
     "com.day.cq.dam.commons.watermark": [
         "1.1.0"
@@ -5316,31 +6206,31 @@
         "2.1.0"
     ],
     "com.day.cq.dam.core.process": [
-        "2.3.0"
+        "2.7.0"
     ],
     "com.day.cq.dam.indd": [
         "1.1.0"
     ],
     "com.day.cq.dam.pim": [
-        "0.4.10"
+        "0.5.4"
     ],
     "com.scene7.ipsapi": [
-        "1.2.12"
+        "1.4.0"
     ],
     "com.scene7.ipsapi.common": [
-        "1.2.12"
+        "1.3.6"
     ],
     "com.day.cq.dam.scene7": [
         "3.0.0"
     ],
     "com.day.cq.dam.scene7.api": [
-        "12.5.0"
+        "12.17.0"
     ],
     "com.day.cq.dam.scene7.api.constants": [
-        "2.2.0"
+        "2.9.0"
     ],
     "com.day.cq.dam.scene7.api.model": [
-        "2.4.0"
+        "2.6.0"
     ],
     "com.day.cq.dam.scene7.api.net": [
         "1.2.0"
@@ -5352,10 +6242,10 @@
         "5.13.0"
     ],
     "com.day.cq.dam.word.extraction": [
-        "5.11.10"
+        "5.12.6"
     ],
     "com.day.cq.dam.word.process": [
-        "5.11.10"
+        "5.12.6"
     ],
     "com.day.cq.extwidget": [
         "1.0.0"
@@ -5367,7 +6257,7 @@
         "6.0.0"
     ],
     "com.day.cq.mailer.commons": [
-        "8.0.0"
+        "8.1.0"
     ],
     "com.day.cq.mailer.email": [
         "6.0.0"
@@ -5380,9 +6270,6 @@
     ],
     "com.day.cq.mcm.core": [
         "6.0.0"
-    ],
-    "com.day.cq.mcm.exacttarget": [
-        "1.1.0"
     ],
     "com.day.cq.mcm.emailprovider": [
         "1.1.0"
@@ -5408,9 +6295,6 @@
     "com.day.cq.mcm.landingpage.parser.taghandlers.mbox": [
         "1.1.0"
     ],
-    "com.adobe.cq.mcm.salesforce": [
-        "1.3.0"
-    ],
     "com.day.cq.notification.api": [
         "1.0.0"
     ],
@@ -5430,7 +6314,7 @@
         "1.2.0"
     ],
     "com.day.cq.rewriter.linkchecker": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.day.cq.rewriter.pipeline": [
         "1.1.0"
@@ -5487,10 +6371,10 @@
         "5.9.0"
     ],
     "com.day.cq.wcm.api": [
-        "1.27.0"
+        "1.29.0"
     ],
     "com.day.cq.wcm.api.commands": [
-        "5.9.0"
+        "5.10.0"
     ],
     "com.day.cq.wcm.api.components": [
         "5.8.0"
@@ -5514,10 +6398,10 @@
         "5.7.0"
     ],
     "com.day.cq.wcm.commons": [
-        "5.8.0"
+        "5.9.0"
     ],
     "com.day.cq.wcm.commons.policy": [
-        "5.10.12"
+        "5.11.6"
     ],
     "com.day.cq.wcm.commons.search": [
         "5.7.0"
@@ -5526,19 +6410,25 @@
         "1.0.0"
     ],
     "com.day.cq.wcm.contentsync": [
-        "1.2.0"
+        "1.3.0"
     ],
     "com.day.cq.wcm.core.components": [
-        "5.8.0"
+        "5.9.0"
     ],
     "com.day.cq.wcm.core.contentfinder": [
         "5.10.0"
+    ],
+    "com.day.cq.wcm.core.contentpolicy.container": [
+        "5.12.172"
     ],
     "com.day.cq.wcm.core.references": [
         "5.8.110"
     ],
     "com.day.cq.wcm.core.stats": [
         "5.7.0"
+    ],
+    "com.day.cq.wcm.core.steps": [
+        "5.12.172"
     ],
     "com.day.cq.wcm.core.utils": [
         "5.13.0"
@@ -5580,16 +6470,22 @@
         "1.0.0"
     ],
     "com.day.cq.wcm.msm.api": [
-        "5.9.0"
+        "5.10.0"
+    ],
+    "com.day.cq.wcm.msm.spi.internal": [
+        "1.0.0"
     ],
     "com.day.cq.wcm.msm.commons": [
         "1.1.2"
+    ],
+    "com.day.cq.wcm.msm.move.api": [
+        "0.1.0"
     ],
     "com.day.cq.wcm.offline": [
         "5.7.0"
     ],
     "com.day.cq.wcm.tags": [
-        "7.0.0"
+        "7.1.0"
     ],
     "com.day.cq.wcm.undo": [
         "1.0.0"
@@ -5607,7 +6503,7 @@
         "1.0.0"
     ],
     "com.day.cq.workflow.collection": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.day.cq.workflow.collection.util": [
         "1.0.0"
@@ -5663,6 +6559,9 @@
     "com.day.cq.workflow.util": [
         "6.0.0"
     ],
+    "com.day.cq.dam.asset.sourcing.utils": [
+        "1.1.0"
+    ],
     "com.day.cq.wcm.resource.details": [
         "0.2.10"
     ],
@@ -5676,7 +6575,13 @@
         "2.3.0"
     ],
     "com.adobe.aemfd.expeditor.service": [
-        "2.10.0"
+        "2.11.0"
+    ],
+    "org.jvnet.staxex": [
+        "1.7.6"
+    ],
+    "org.jvnet.staxex.util": [
+        "1.7.6"
     ],
     "com.adobe.forms.foundation.cloudconfig": [
         "1.0.0"
@@ -5684,20 +6589,23 @@
     "com.adobe.forms.foundation.cloudconfig.migration": [
         "1.0.0"
     ],
-    "com.adobe.forms.foundation.fdinternal.jsonschema": [
-        "3.10.0"
-    ],
     "com.adobe.forms.foundation.fdinternal.utils": [
         "3.10.0"
     ],
     "com.adobe.forms.foundation.migration.api": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.forms.foundation.migration.spi": [
-        "1.0.0"
+        "1.1.0"
     ],
     "com.adobe.forms.foundation.provider": [
         "1.7.0"
+    ],
+    "com.adobe.forms.foundation.schema": [
+        "1.0.0"
+    ],
+    "com.adobe.forms.foundation.schema.fdinternal": [
+        "1.0.0"
     ],
     "com.adobe.forms.foundation.service": [
         "1.7.0"
@@ -5724,13 +6632,13 @@
         "1.0.6"
     ],
     "com.adobe.granite.translation.connector.msft.core.ui.models": [
-        "1.3.20"
+        "1.3.26"
     ],
     "com.adobe.granite.translation.connector.msft.core.ui.utils": [
-        "1.3.20"
+        "1.3.26"
     ],
     "com.adobe.granite.translation.api": [
-        "2.2.0"
+        "2.3.0"
     ],
     "com.adobe.granite.translation.api.xliff": [
         "1.0.0"
@@ -5741,17 +6649,20 @@
     "com.adobe.granite.translation.core.common": [
         "2.0.0"
     ],
+    "com.adobe.aem.graphql.api": [
+        "1.0.0"
+    ],
     "com.google.gson": [
-        "2.8.2"
+        "2.8.5"
     ],
     "com.google.gson.annotations": [
-        "2.8.2"
+        "2.8.5"
     ],
     "com.google.gson.reflect": [
-        "2.8.2"
+        "2.8.5"
     ],
     "com.google.gson.stream": [
-        "2.8.2"
+        "2.8.5"
     ],
     "com.google.common.annotations": [
         "15.0.0"
@@ -5807,41 +6718,95 @@
     "org.h2.mvstore.type": [
         "1.4.194"
     ],
+    "com.github.jknack.handlebars": [
+        "4.0.5"
+    ],
+    "com.github.jknack.handlebars.cache": [
+        "4.0.5"
+    ],
+    "com.github.jknack.handlebars.context": [
+        "4.0.5"
+    ],
+    "com.github.jknack.handlebars.helper": [
+        "4.0.5"
+    ],
+    "com.github.jknack.handlebars.io": [
+        "4.0.5"
+    ],
+    "com.github.jknack.handlebars.js": [
+        "4.0.5"
+    ],
     "org.apache.abdera.i18n.iri": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.iri.data": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.lang": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.rfc4646": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.rfc4646.enums": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.templates": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.text": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.text.data": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.text.io": [
-        "1.0.0.R783018"
+        "1.1.3"
     ],
     "org.apache.abdera.i18n.unicode.data": [
-        "1.0.0.R783018"
+        "1.1.3"
+    ],
+    "org.apache.jackrabbit.api": [
+        "2.6.0"
+    ],
+    "org.apache.jackrabbit.api.binary": [
+        "1.1.0"
+    ],
+    "org.apache.jackrabbit.api.jmx": [
+        "2.3.0"
+    ],
+    "org.apache.jackrabbit.api.management": [
+        "2.3.1"
+    ],
+    "org.apache.jackrabbit.api.observation": [
+        "2.3.1"
+    ],
+    "org.apache.jackrabbit.api.query": [
+        "2.13.5"
+    ],
+    "org.apache.jackrabbit.api.security": [
+        "2.4.1"
+    ],
+    "org.apache.jackrabbit.api.security.authentication.token": [
+        "2.3.1"
+    ],
+    "org.apache.jackrabbit.api.security.authorization": [
+        "2.4.2"
+    ],
+    "org.apache.jackrabbit.api.security.principal": [
+        "2.4.1"
+    ],
+    "org.apache.jackrabbit.api.security.user": [
+        "2.4.3"
+    ],
+    "org.apache.jackrabbit.api.stats": [
+        "1.2.0"
     ],
     "org.apache.jackrabbit.core.config": [
         "2.13.5"
     ],
     "org.apache.jackrabbit.core.data": [
-        "2.14.0"
+        "2.15.0"
     ],
     "org.apache.jackrabbit.core.data.db": [
         "2.13.6"
@@ -5925,7 +6890,7 @@
         "2.13.5"
     ],
     "org.apache.jackrabbit.util": [
-        "2.4.0"
+        "2.5.0"
     ],
     "org.apache.jackrabbit.value": [
         "2.2.1"
@@ -5946,7 +6911,7 @@
         "2.4.0"
     ],
     "org.apache.jackrabbit.spi.commons.iterator": [
-        "2.4.0"
+        "2.5.0"
     ],
     "org.apache.jackrabbit.spi.commons.lock": [
         "2.4.0"
@@ -5997,7 +6962,7 @@
         "2.4.0"
     ],
     "org.apache.jackrabbit.webdav": [
-        "1.1.0"
+        "1.4.0"
     ],
     "org.apache.jackrabbit.webdav.bind": [
         "1.0.0"
@@ -6015,7 +6980,7 @@
         "1.0.1"
     ],
     "org.apache.jackrabbit.webdav.observation": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.webdav.ordering": [
         "1.0.0"
@@ -6030,154 +6995,166 @@
         "1.0.0"
     ],
     "org.apache.jackrabbit.webdav.security.report": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.webdav.server": [
-        "1.0.0"
+        "1.2.0"
     ],
     "org.apache.jackrabbit.webdav.transaction": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.webdav.util": [
-        "1.0.1"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.webdav.version": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.webdav.version.report": [
-        "1.0.0"
-    ],
-    "org.apache.jackrabbit.webdav.xml": [
         "1.1.0"
     ],
+    "org.apache.jackrabbit.webdav.xml": [
+        "1.2.0"
+    ],
     "com.fasterxml.jackson.annotation": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core": [
-        "2.8.4"
+        "2.11.4"
+    ],
+    "com.fasterxml.jackson.core.async": [
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.base": [
-        "2.8.4"
+        "2.11.4"
+    ],
+    "com.fasterxml.jackson.core.exc": [
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.filter": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.format": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.io": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.json": [
-        "2.8.4"
+        "2.11.4"
+    ],
+    "com.fasterxml.jackson.core.json.async": [
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.sym": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.type": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.core.util": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.annotation": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.cfg": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.deser": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.deser.impl": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.deser.std": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.exc": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.ext": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.introspect": [
-        "2.8.4"
+        "2.11.4"
+    ],
+    "com.fasterxml.jackson.databind.json": [
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.jsonFormatVisitors": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.jsonschema": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.jsontype": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.jsontype.impl": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.module": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.node": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.ser": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.ser.impl": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.ser.std": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.type": [
-        "2.8.4"
+        "2.11.4"
     ],
     "com.fasterxml.jackson.databind.util": [
-        "2.8.4"
+        "2.11.4"
     ],
     "!! com.sun.mail.handlers": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.iap": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.imap": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.imap.protocol": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.pop3": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.smtp": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.util": [
-        "1.5.0"
+        "1.6.2"
     ],
     "!! com.sun.mail.util.logging": [
-        "1.5.0"
+        "1.6.2"
     ],
     "javax.mail": [
-        "1.5.0"
+        "1.6.0"
     ],
     "javax.mail.event": [
-        "1.5.0"
+        "1.6.0"
     ],
     "javax.mail.internet": [
-        "1.5.0"
+        "1.6.0"
     ],
     "javax.mail.search": [
-        "1.5.0"
+        "1.6.0"
     ],
     "javax.mail.util": [
-        "1.5.0"
+        "1.6.0"
     ],
     "org.apache.commons.logging": [
         "1.2.0"
@@ -6205,6 +7182,18 @@
     ],
     "org.joda.time.tz": [
         "2.9.1"
+    ],
+    "com.adobe.cq.jsonschema.parser": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.jsonschema.parser.servlets": [
+        "1.0.0"
+    ],
+    "com.adobe.cq.expresolver.api": [
+        "1.1.0"
+    ],
+    "com.adobe.cq.expresolver.defaultmappers": [
+        "1.0.0"
     ],
     "org.apache.log4j": [
         "1.2.17"
@@ -6255,142 +7244,217 @@
         "5.9.6"
     ],
     "com.mongodb": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.annotations": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.assertions": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.async": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.binding": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.bulk": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.client": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.client.gridfs": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.client.gridfs.codecs": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.client.gridfs.model": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.client.internal": [
+        "3.12.7"
     ],
     "com.mongodb.client.jndi": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.client.model": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.client.model.changestream": [
+        "3.12.7"
     ],
     "com.mongodb.client.model.geojson": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.client.model.geojson.codecs": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.client.model.vault": [
+        "3.12.7"
     ],
     "com.mongodb.client.result": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.client.vault": [
+        "3.12.7"
     ],
     "com.mongodb.connection": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.connection.netty": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.diagnostics.logging": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.event": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.gridfs": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.internal": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.internal.async": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.internal.authentication": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.internal.binding": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.build": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.capi": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.client.model": [
+        "3.12.7"
     ],
     "com.mongodb.internal.connection": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.internal.connection.tlschannel": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.connection.tlschannel.async": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.connection.tlschannel.impl": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.connection.tlschannel.util": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.dns": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.event": [
+        "3.12.7"
     ],
     "com.mongodb.internal.management.jmx": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.internal.operation": [
+        "3.12.7"
+    ],
+    "com.mongodb.internal.session": [
+        "3.12.7"
     ],
     "com.mongodb.internal.thread": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.internal.validator": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.lang": [
+        "3.12.7"
     ],
     "com.mongodb.management": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.operation": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.mongodb.selector": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "com.mongodb.session": [
+        "3.12.7"
     ],
     "com.mongodb.util": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.assertions": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.codecs": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.codecs.configuration": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "org.bson.codecs.jsr310": [
+        "3.12.7"
+    ],
+    "org.bson.codecs.pojo": [
+        "3.12.7"
+    ],
+    "org.bson.codecs.pojo.annotations": [
+        "3.12.7"
     ],
     "org.bson.conversions": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.diagnostics": [
-        "3.4.0"
+        "3.12.7"
+    ],
+    "org.bson.internal": [
+        "3.12.7"
     ],
     "org.bson.io": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.json": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.types": [
-        "3.4.0"
+        "3.12.7"
     ],
     "org.bson.util": [
-        "3.4.0"
+        "3.12.7"
     ],
     "com.adobe.fd.ccm.multichannel.fdinternal.api.model": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.oak.api": [
-        "3.1.1"
+        "3.3.0"
+    ],
+    "org.apache.jackrabbit.oak.api.blob": [
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.api.jmx": [
-        "4.7.0"
+        "4.9.0"
+    ],
+    "org.apache.jackrabbit.oak.blob.cloud.azure.blobstorage": [
+        "0.0.0"
     ],
     "org.apache.jackrabbit.oak.plugins.blob": [
         "0.0.0"
     ],
     "org.apache.jackrabbit.oak.plugins.blob.datastore": [
         "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.plugins.blob.datastore.directaccess": [
+        "1.0.0"
     ],
     "org.apache.jackrabbit.oak.spi.blob": [
         "0.0.0"
@@ -6402,25 +7466,28 @@
         "0.0.0"
     ],
     "org.apache.jackrabbit.oak.commons": [
-        "1.1.0"
+        "1.6.0"
     ],
     "org.apache.jackrabbit.oak.commons.cache": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.oak.commons.concurrent": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.commons.io": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.commons.json": [
+        "1.1.0"
+    ],
+    "org.apache.jackrabbit.oak.commons.properties": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.oak.commons.sort": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.composite": [
-        "0.2.0"
+        "0.3.0"
     ],
     "org.apache.jackrabbit.oak.composite.checks": [
         "0.0.0"
@@ -6494,59 +7561,59 @@
     "org.apache.jackrabbit.oak.plugins.version": [
         "0.0.0"
     ],
-    "org.apache.jackrabbit.oak.security": [
-        "0.0.0"
-    ],
     "org.apache.jackrabbit.oak.cache": [
-        "1.0.0"
+        "1.1.1"
     ],
     "org.apache.jackrabbit.oak.commons.jmx": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.namepath": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.osgi": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.spi.descriptors": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.spi.gc": [
+        "1.0.1"
+    ],
+    "org.apache.jackrabbit.oak.spi.lock": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.oak.spi.mount": [
-        "3.1.0"
+        "3.2.0"
     ],
     "org.apache.jackrabbit.oak.spi.namespace": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.spi.nodetype": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.spi.observation": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.spi.version": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.spi.whiteboard": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.stats": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.spi.security.authorization.cug": [
-        "2.0.1"
+        "2.0.2"
     ],
     "org.apache.jackrabbit.oak.plugins.document.spi": [
         "0.0.0"
     ],
     "org.apache.jackrabbit.oak.spi.security.authentication.external": [
-        "2.3.0"
+        "2.3.1"
     ],
     "org.apache.jackrabbit.oak.spi.security.authentication.external.basic": [
-        "1.3.0"
+        "1.3.2"
     ],
     "org.apache.jackrabbit.oak.jcr": [
         "0.0.0"
@@ -6561,7 +7628,7 @@
         "1.3.1"
     ],
     "org.apache.jackrabbit.oak.plugins.index.lucene.spi": [
-        "1.0.0"
+        "1.0.1"
     ],
     "org.apache.jackrabbit.oak.plugins.index.lucene.util": [
         "0.0.0"
@@ -6996,61 +8063,91 @@
         "0.0.0"
     ],
     "org.apache.jackrabbit.oak.query.facet": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.spi.query": [
-        "1.0.0"
+        "1.3.0"
     ],
     "org.apache.jackrabbit.oak.spi.query.fulltext": [
         "1.0.0"
     ],
     "org.apache.jackrabbit.oak.plugins.tree": [
-        "3.0.0"
+        "3.2.0"
     ],
     "org.apache.jackrabbit.oak.spi.security": [
-        "2.2.0"
+        "2.2.1"
     ],
     "org.apache.jackrabbit.oak.spi.security.authentication": [
-        "1.2.0"
+        "1.4.0"
     ],
     "org.apache.jackrabbit.oak.spi.security.authentication.callback": [
-        "1.0.0"
+        "1.1.0"
     ],
     "org.apache.jackrabbit.oak.spi.security.authentication.credentials": [
-        "2.1.0"
+        "2.1.1"
     ],
     "org.apache.jackrabbit.oak.spi.security.authentication.token": [
-        "1.5.0"
+        "1.6.1"
     ],
     "org.apache.jackrabbit.oak.spi.security.authorization": [
-        "1.1.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol": [
-        "1.5.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.authorization.permission": [
-        "4.0.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.authorization.restriction": [
-        "1.1.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.principal": [
-        "1.5.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.privilege": [
-        "1.2.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.user": [
-        "2.3.0"
-    ],
-    "org.apache.jackrabbit.oak.spi.security.user.action": [
         "1.1.1"
     ],
-    "org.apache.jackrabbit.oak.spi.security.user.util": [
+    "org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol": [
+        "1.7.0"
+    ],
+    "org.apache.jackrabbit.oak.spi.security.authorization.permission": [
+        "4.2.0"
+    ],
+    "org.apache.jackrabbit.oak.spi.security.authorization.restriction": [
+        "1.1.1"
+    ],
+    "org.apache.jackrabbit.oak.spi.security.principal": [
+        "1.8.0"
+    ],
+    "org.apache.jackrabbit.oak.spi.security.privilege": [
+        "1.3.0"
+    ],
+    "org.apache.jackrabbit.oak.spi.security.user": [
+        "2.3.1"
+    ],
+    "org.apache.jackrabbit.oak.spi.security.user.action": [
         "1.2.0"
     ],
+    "org.apache.jackrabbit.oak.spi.security.user.util": [
+        "1.2.1"
+    ],
     "org.apache.jackrabbit.oak.spi.xml": [
-        "1.0.0"
+        "1.0.1"
+    ],
+    "com.microsoft.azure.storage": [
+        "0.0.0"
+    ],
+    "com.microsoft.azure.storage.blob": [
+        "0.0.0"
+    ],
+    "com.microsoft.azure.storage.core": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.azure": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.azure.queue": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.azure.util": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.spi": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.spi.monitor": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.spi.persistence": [
+        "0.0.0"
+    ],
+    "org.apache.jackrabbit.oak.segment.spi.persistence.split": [
+        "0.0.0"
     ],
     "org.apache.oltu.commons.json": [
         "1.0.0"
@@ -7065,6 +8162,18 @@
         "1.0.0"
     ],
     "org.apache.oltu.oauth2.as.validator": [
+        "1.0.0"
+    ],
+    "org.apache.oltu.oauth2.client": [
+        "1.0.0"
+    ],
+    "org.apache.oltu.oauth2.client.request": [
+        "1.0.0"
+    ],
+    "org.apache.oltu.oauth2.client.response": [
+        "1.0.0"
+    ],
+    "org.apache.oltu.oauth2.client.validator": [
         "1.0.0"
     ],
     "org.apache.oltu.oauth2.rs": [
@@ -7082,55 +8191,184 @@
     "org.apache.oltu.oauth2.rs.validator": [
         "1.0.0"
     ],
+    "org.osgi.util.function": [
+        "1.1.0"
+    ],
+    "org.osgi.util.promise": [
+        "1.1.0"
+    ],
     "com.drew.imaging": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.imaging.avi": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.bmp": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.eps": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.gif": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.heif": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.ico": [
+        "2.11.0"
     ],
     "com.drew.imaging.jpeg": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.imaging.mp3": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.mp4": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.pcx": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.png": [
+        "2.11.0"
     ],
     "com.drew.imaging.psd": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.imaging.quicktime": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.raf": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.riff": [
+        "2.11.0"
     ],
     "com.drew.imaging.tiff": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.imaging.wav": [
+        "2.11.0"
+    ],
+    "com.drew.imaging.webp": [
+        "2.11.0"
     ],
     "com.drew.lang": [
-        "2.0.6"
+        "2.11.0"
     ],
     "com.drew.lang.annotations": [
-        "2.0.6"
+        "2.11.0"
     ],
     "com.drew.metadata": [
-        "2.0.6"
+        "2.11.0"
     ],
     "com.drew.metadata.adobe": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.metadata.avi": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.bmp": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.eps": [
+        "2.11.0"
     ],
     "com.drew.metadata.exif": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.metadata.exif.makernotes": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.file": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.gif": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.heif": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.heif.boxes": [
+        "2.11.0"
     ],
     "com.drew.metadata.icc": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.metadata.ico": [
+        "2.11.0"
     ],
     "com.drew.metadata.iptc": [
-        "2.0.6"
+        "2.11.0"
     ],
     "com.drew.metadata.jfif": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.metadata.jfxx": [
+        "2.11.0"
     ],
     "com.drew.metadata.jpeg": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.metadata.mov": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mov.atoms": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mov.atoms.canon": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mov.media": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mov.metadata": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mp3": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mp4": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mp4.boxes": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.mp4.media": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.pcx": [
+        "2.11.0"
     ],
     "com.drew.metadata.photoshop": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.metadata.png": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.tiff": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.wav": [
+        "2.11.0"
+    ],
+    "com.drew.metadata.webp": [
+        "2.11.0"
     ],
     "com.drew.metadata.xmp": [
-        "2.0.6"
+        "2.11.0"
+    ],
+    "com.drew.tools": [
+        "2.11.0"
     ],
     "org.apache.poi": [
         "3.0.0"
     ],
     "org.apache.poi.common.usermodel": [
+        "3.0.0"
+    ],
+    "org.apache.poi.common.usermodel.fonts": [
         "3.0.0"
     ],
     "org.apache.poi.ddf": [
@@ -7140,6 +8378,9 @@
         "2.1.0"
     ],
     "org.apache.poi.extractor": [
+        "3.0.0"
+    ],
+    "org.apache.poi.extractor.ole2": [
         "3.0.0"
     ],
     "org.apache.poi.hdgf": [
@@ -7349,6 +8590,15 @@
     "org.apache.poi.hwpf.usermodel": [
         "3.0.0"
     ],
+    "org.apache.poi.ooxml": [
+        "3.0.0"
+    ],
+    "org.apache.poi.ooxml.extractor": [
+        "3.0.0"
+    ],
+    "org.apache.poi.ooxml.util": [
+        "3.0.0"
+    ],
     "org.apache.poi.openxml4j.exceptions": [
         "2.1.0"
     ],
@@ -7366,6 +8616,9 @@
     ],
     "org.apache.poi.openxml4j.util": [
         "3.0.0"
+    ],
+    "org.apache.poi.poifs": [
+        "2.0.6"
     ],
     "org.apache.poi.poifs.common": [
         "2.1.0"
@@ -7430,6 +8683,9 @@
     "org.apache.poi.sl.draw.geom": [
         "3.0.0"
     ],
+    "org.apache.poi.sl.extractor": [
+        "3.0.0"
+    ],
     "org.apache.poi.sl.image": [
         "3.0.0"
     ],
@@ -7491,6 +8747,15 @@
         "3.0.0"
     ],
     "org.apache.poi.wp.usermodel": [
+        "3.0.0"
+    ],
+    "org.apache.poi.xddf.usermodel": [
+        "3.0.0"
+    ],
+    "org.apache.poi.xddf.usermodel.chart": [
+        "3.0.0"
+    ],
+    "org.apache.poi.xddf.usermodel.text": [
         "3.0.0"
     ],
     "org.apache.poi.xdgf.exceptions": [
@@ -7631,16 +8896,10 @@
     "org.apache.xmlbeans.impl.jam.xml": [
         "2.0.6"
     ],
-    "org.apache.xmlbeans.impl.piccolo.io": [
-        "2.0.6"
-    ],
-    "org.apache.xmlbeans.impl.piccolo.util": [
-        "2.0.6"
-    ],
-    "org.apache.xmlbeans.impl.piccolo.xml": [
-        "2.0.6"
-    ],
     "org.apache.xmlbeans.impl.regex": [
+        "2.0.6"
+    ],
+    "org.apache.xmlbeans.impl.repackage": [
         "2.0.6"
     ],
     "org.apache.xmlbeans.impl.richParser": [
@@ -7703,7 +8962,13 @@
     "org.apache.xmlbeans.impl.xb.xsdschema.impl": [
         "2.0.6"
     ],
+    "org.apache.xmlbeans.impl.xpath.saxon": [
+        "2.0.6"
+    ],
     "org.apache.xmlbeans.impl.xpathgen": [
+        "2.0.6"
+    ],
+    "org.apache.xmlbeans.impl.xquery.saxon": [
         "2.0.6"
     ],
     "org.apache.xmlbeans.impl.xsd2inst": [
@@ -7874,6 +9139,12 @@
     "org.kohsuke.rngom.rngparser.parse.xml": [
         "0.0.0"
     ],
+    "com.adobe.cq.remote.content.renderer": [
+        "2.0.0"
+    ],
+    "com.adobe.cq.screens.apps.we_retail.util": [
+        "1.1.0"
+    ],
     "org.slf4j": [
         "1.7.25"
     ],
@@ -7887,7 +9158,19 @@
         "1.7.25"
     ],
     "com.adobe.cq.smartcontent": [
-        "1.0.0"
+        "1.0.1"
+    ],
+    "we.retail.core.model": [
+        "8.3.0"
+    ],
+    "we.retail.core.model.handler": [
+        "2.0.0"
+    ],
+    "javax.jws": [
+        "2.0.0"
+    ],
+    "javax.jws.soap": [
+        "2.0.0"
     ],
     "com.adobe.xfa": [
         "0.0.0"
