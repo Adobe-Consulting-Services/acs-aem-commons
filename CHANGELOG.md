@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+
+## Fixed
+
+- #3130 - Error in remote asset sync on empty multi-value properties
+
+
 ## 6.0.12 - 2023-07-10
 
 ## Fixed
