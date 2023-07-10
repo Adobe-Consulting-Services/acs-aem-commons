@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.0.12 - 2023-07-10
+
 ## Fixed
 - #3128 - Redirect Manager: import from xlsx not working due to apache-poi bundle upgrade in cloud SDK
 - #3131 - Fix node type of /etc/acs-commons/redirect-maps
