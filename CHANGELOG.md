@@ -6,12 +6,13 @@ in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
+
 ## Unreleased ([details][unreleased changes details])
 
-<!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 ## Fixed
 - #3128 - Redirect Manager: import from xlsx not working due to apache-poi bundle upgrade in cloud SDK
-
+- #3131 - Fix node type of /etc/acs-commons/redirect-maps
 
 ## 6.0.10 - 2023-06-02
 
