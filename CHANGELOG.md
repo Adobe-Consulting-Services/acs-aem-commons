@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Fixed
 - #3128 - Redirect Manager: import from xlsx not working due to apache-poi bundle upgrade in cloud SDK
 - #3131 - Fix node type of /etc/acs-commons/redirect-maps
+- #3122 - Audit Log Search: result table is always empty
+- #3128 - Redirect Manager: import from xlsx not working due to apache-poi bundle upgrade in cloud SDK
 
 ## 6.0.10 - 2023-06-02
 
