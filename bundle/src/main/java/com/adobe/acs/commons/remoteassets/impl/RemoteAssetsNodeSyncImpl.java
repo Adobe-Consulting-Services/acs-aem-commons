@@ -349,8 +349,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     private void setNodeSimpleArrayProperty(final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
         
-        try {
-            Object[] values = new Object[0];
+       try {
+            Object[] values;
 
             if (jsonArray != null && jsonArray.size() > 0) {
                 JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
@@ -376,11 +376,12 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                         values[i] = jsonArray.get(i).getAsString();
                     }
                 }
-            }
 
-            ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
-            resourceProperties.put(key, values);
-            LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
+                // Only create a property if the array exists. We avoid creating an empty property since we don't know what type it is expected to be
+                ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+                resourceProperties.put(key, values);
+                LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
+            }
         } catch (Exception e) {
             LOG.error("Unable to assign property '{}' to resource '{}'", key, resource.getPath(), e);
         }
