@@ -348,35 +348,40 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws RepositoryException exception
      */
     private void setNodeSimpleArrayProperty(final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
-        JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
-
-        try {
+        
+       try {
             Object[] values;
-            if (firstVal.isBoolean()) {
-                values = new Boolean[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsBoolean();
-                }
-            } else if (DECIMAL_REGEX.matcher(firstVal.getAsString()).matches()) {
-                values = new BigDecimal[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsBigDecimal();
-                }
-            } else if (firstVal.isNumber()) {
-                values = new Long[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsLong();
-                }
-            } else {
-                values = new String[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsString();
-                }
-            }
 
-            ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
-            resourceProperties.put(key, values);
-            LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
+            if (jsonArray != null && jsonArray.size() > 0) {
+                JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
+
+                if (firstVal.isBoolean()) {
+                    values = new Boolean[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsBoolean();
+                    }
+                } else if (DECIMAL_REGEX.matcher(firstVal.getAsString()).matches()) {
+                    values = new BigDecimal[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsBigDecimal();
+                    }
+                } else if (firstVal.isNumber()) {
+                    values = new Long[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsLong();
+                    }
+                } else {
+                    values = new String[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsString();
+                    }
+                }
+
+                // Only create a property if the array exists. We avoid creating an empty property since we don't know what type it is expected to be
+                ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+                resourceProperties.put(key, values);
+                LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
+            }
         } catch (Exception e) {
             LOG.error("Unable to assign property '{}' to resource '{}'", key, resource.getPath(), e);
         }
