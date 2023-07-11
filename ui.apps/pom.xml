@@ -53,11 +53,7 @@
                             <name>cq-content</name>
                             <version>[6.5.6,)</version><!-- version shipped with AEM 6.5.0 GA -->
                         </dependency>
-                        <dependency>
-                            <group>adobe/cq650/servicepack</group>
-                            <name>aem-service-pkg</name>
-                            <version>[6.5.10,)</version><!-- at least SP10 required -->
-                        </dependency>
+                        <!-- cannot depend on SP 10 as never satisfied on AEMCloud -->
                     </dependencies>
                 </configuration>
             </plugin>
