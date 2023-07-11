@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Fixed
 
+- #3135 - Unable to install ACS AEM Commons 6.0.12 on AEM Cloud
 - #3117 - Dispatcher flush not working in publish mode
 
 ## 6.0.12 - 2023-07-10
