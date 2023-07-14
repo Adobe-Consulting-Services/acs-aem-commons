@@ -6,9 +6,25 @@ in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
+
 ## Unreleased ([details][unreleased changes details])
 
-<!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
+## 6.0.14 - 2023-07-11
+
+## Fixed
+
+- #3130 - Error in remote asset sync on empty multi-value properties
+- #3135 - Unable to install ACS AEM Commons 6.0.12 on AEM Cloud
+- #3117 - Dispatcher flush not working in publish mode
+
+## 6.0.12 - 2023-07-10
+
+## Fixed
+
+- #3128 - Redirect Manager: import from xlsx not working due to apache-poi bundle upgrade in cloud SDK
+- #3131 - Fix node type of /etc/acs-commons/redirect-maps
+- #3122 - Audit Log Search: result table is always empty
 
 ## 6.0.10 - 2023-06-02
 
@@ -17,7 +33,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3105 - Redirect Manager: support handling redirects when the request path does not start with /content
 - #3095 - TagsExportServlet to return data in UTF-8 instead of iso-8859-1
 - #3110 - Update lodash to 4.17.21 for fix https://github.com/advisories/GHSA-35jh-r3h4-6jhm
-- #3112 - Update AngularJS to latest v1.8.2 
+- #3112 - Update AngularJS to latest v1.8.2
 - #3118 - Build fails due to guava-31.1-jre.jar: CVE-2023-2976(6.2), move to 32.0.0
 - #3115 - maven: change ui.apps dependency type in ui.content/pom.xml from content-package to zip
 

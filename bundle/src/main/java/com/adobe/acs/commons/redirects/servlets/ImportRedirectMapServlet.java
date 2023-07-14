@@ -126,7 +126,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
 
     /**
      * @param root         root resource, e.g. /conf/global/settings/redirects
-     * @param xlsRules     redirects read from an Excel spreadhseet
+     * @param xlsRules     redirects read from an Excel spreadsheet
      * @param jcrRedirects existing redirect nodes keyed by the source path.
      *                     We assume that the source path is unique.
      */
@@ -204,7 +204,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 // columns A, B and C are reserved for source, target and statusCode
                 continue;
             }
-            if (cell.getCellTypeEnum() == CellType.STRING) {
+            if (cell.getCellType() == CellType.STRING) {
                 String title = cell.getStringCellValue();
                 for (ExportColumn col : ExportColumn.values()) {
                     if (col.getTitle().equalsIgnoreCase(title)) {
@@ -225,19 +225,19 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         Map<String, Object> props = new HashMap<>();
         props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
         Cell c0 = row.getCell(0);
-        if (c0 == null || c0.getCellTypeEnum() != CellType.STRING) {
+        if (c0 == null || c0.getCellType() != CellType.STRING) {
             auditLog.warn(new CellReference(row.getRowNum(), 0).formatAsString(),
                     "Cells A is required and should contain redirect source");
             return null;
         }
         Cell c1 = row.getCell(1);
-        if (c1 == null || c1.getCellTypeEnum() != CellType.STRING) {
+        if (c1 == null || c1.getCellType() != CellType.STRING) {
             auditLog.warn(new CellReference(row.getRowNum(), 1).formatAsString(),
                     "Cells B is required and should contain redirect source");
             return null;
         }
         Cell c2 = row.getCell(2);
-        if (c2 == null || c2.getCellTypeEnum() != CellType.NUMERIC) {
+        if (c2 == null || c2.getCellType() != CellType.NUMERIC) {
             auditLog.warn(new CellReference(row.getRowNum(), 2).formatAsString(),
                     "Cells C is required and should contain redirect status code");
             return null;
@@ -266,15 +266,15 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if (cols.containsKey(column)) {
                 int columnIndex = cols.get(column);
                 Cell cell = row.getCell(columnIndex);
-                if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
+                if (cell != null && cell.getCellType() != CellType.BLANK) {
                     Object value = null;
-                    if (column.getPropertyType() == String[].class && cell.getCellTypeEnum() == CellType.STRING) {
+                    if (column.getPropertyType() == String[].class && cell.getCellType() == CellType.STRING) {
                         value = cell.getStringCellValue().split("\n");
-                    } else if (column.getPropertyType() == String.class && cell.getCellTypeEnum() == CellType.STRING) {
+                    } else if (column.getPropertyType() == String.class && cell.getCellType() == CellType.STRING) {
                         value = cell.getStringCellValue();
-                    } else if (column.getPropertyType() == Boolean.class && cell.getCellTypeEnum() == CellType.BOOLEAN) {
+                    } else if (column.getPropertyType() == Boolean.class && cell.getCellType() == CellType.BOOLEAN) {
                         value = cell.getBooleanCellValue();
-                    } else if (column.getPropertyType() == Calendar.class && cell.getCellTypeEnum() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                    } else if (column.getPropertyType() == Calendar.class && cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
                         Calendar calendar = Calendar.getInstance();
                         calendar.setTime(cell.getDateCellValue());
                         value = calendar;
@@ -284,7 +284,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                     } else {
                         String cellAddress = new CellReference(row.getRowNum(), cell.getColumnIndex()).formatAsString();
                         auditLog.info(cellAddress, "Can't set '" + column.getTitle() + "' from a "
-                                + cell.getCellTypeEnum().toString().toLowerCase() + " cell: '" + cell + "'");
+                                + cell.getCellType().toString().toLowerCase() + " cell: '" + cell + "'");
                     }
                 }
             }

@@ -19,8 +19,20 @@
 <sly data-sly-use.model="com.adobe.acs.commons.replication.dispatcher.DispatcherFlusherModel"
      data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html">
 
+    <script>
+        async function submitAcsCommonsDispatcherFlushForm(form) {
+            const response = await fetch('/libs/granite/csrf/token.json');
+            const json = await response.json();
+            form.querySelector('input[name=":cq_csrf_token"]').value = json.token;
+            form.submit();
+        };
+
+    </script>
+
     <form data-sly-test="${model.ready}"
+          onsubmit="submitAcsCommonsDispatcherFlushForm(this); return false;"
           action="${resource.path}.flush.html" method="post">
+        <input type="hidden" name=":cq_csrf_token"/>
         <button class="spectrum-Button spectrum-Button--fill spectrum-Button--cta spectrum-Button--accent spectrum-Button--sizeL"
                 type="submit">Flush paths on Dispatcher(s)
         </button>
