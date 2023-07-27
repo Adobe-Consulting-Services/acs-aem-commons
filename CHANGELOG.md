@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+- #3138 - Re-arrange action removes data from redirect node
 
 ## 6.0.14 - 2023-07-11
 
