@@ -108,7 +108,7 @@
                 <delete
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                    action="e2e-tools.dashboard.task.delete"
+                    action="acs-commons.dashboard.task.delete"
                     activeSelectionCount="single"
                     href="\0"
                     icon="delete"

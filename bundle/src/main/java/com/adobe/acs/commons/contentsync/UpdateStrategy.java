@@ -57,5 +57,9 @@ public interface UpdateStrategy {
 
     boolean isModified(CatalogItem catalogItem, Resource targetResource);
 
+    /**
+     *
+     * @return  message to print in the UI
+     */
     String getMessage(CatalogItem catalogItem, Resource targetResource);
 }

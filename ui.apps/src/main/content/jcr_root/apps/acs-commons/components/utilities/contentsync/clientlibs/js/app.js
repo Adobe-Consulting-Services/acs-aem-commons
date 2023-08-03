@@ -26,7 +26,7 @@
             if (selections.length === 1) {
 				var card = $(selections).find("coral-card");
                 if(card.length > 0) {
-					var taskName = card.data("name");
+					var taskName = card.data("host");
                     var message = "You are going to delete the following item:" +
                     "<p><b>" + taskName + "</b></p>";
 

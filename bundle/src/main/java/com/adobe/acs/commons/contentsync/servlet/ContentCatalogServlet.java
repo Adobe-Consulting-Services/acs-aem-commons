@@ -87,16 +87,13 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
             pid = DEFAULT_STRATEGY;
         }
         UpdateStrategy updateStrategy = getStrategy(pid);
-
         try (JsonGenerator jw = Json.createGenerator(response.getWriter())) {
             jw.writeStartObject();
-
             try {
                 String rootPath = request.getParameter("root");
                 if (rootPath == null) throw new IllegalArgumentException("root request parameter is required");
 
                 Resource root = request.getResourceResolver().getResource(rootPath);
-
                 jw.writeStartArray("resources");
                 if (root != null) {
                     new AbstractResourceVisitor() {
@@ -105,57 +102,62 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
                             if (!updateStrategy.accepts(res)) {
                                 return;
                             }
-
                             jw.writeStartObject();
-                            jw.write("path", res.getPath());
-                            jw.write(JCR_PRIMARYTYPE, res.getValueMap().get(JCR_PRIMARYTYPE, String.class));
-
-                            Resource jcrContent = res.getChild(JCR_CONTENT);
-                            String exportUri;
-                            Resource contentResource;
-                            if (jcrContent != null) {
-                                exportUri = res.getPath() + "/" + JCR_CONTENT + ".infinity.json";
-                                contentResource = jcrContent;
-                            } else {
-                                exportUri = res.getPath() + ".json";
-                                contentResource = res;
-                            }
-
-                            String renderServlet = getJsonRendererServlet(request, contentResource, exportUri);
-                            // check if the resource is rendered by DefaultGetServlet, i.e. is exportable
-                            // if it isn't, go one level up and try the parent
-                            if(!DEFAULT_GET_SERVLET.equals(renderServlet)){
-                                exportUri = contentResource.getParent().getPath() + ".infinity.json";
-                                contentResource = contentResource.getParent();
-                            }
-
-                            // last try: if the rendering servlet is still not DefaultGetServlet then
-                            // put a flag in the output.
-                            renderServlet = getJsonRendererServlet(request, contentResource, exportUri);
-                            if(!DEFAULT_GET_SERVLET.equals(renderServlet)) {
-                                jw.write("renderServlet", renderServlet);
-                            }
-                            jw.write("exportUri", exportUri);
-
+                            writeCommonProperties(jw, res, request);
                             // write strategy-specific metadata
                             updateStrategy.writeMetadata(jw, res);
-
                             jw.writeEnd();
                         }
                     }.accept(root);
                 }
-
                 jw.writeEnd();
             } catch (Exception e) {
                 jw.write("error", e.getMessage());
                 response.setStatus(SC_INTERNAL_SERVER_ERROR);
             }
-
             jw.writeEnd();
         }
-
     }
 
+    void writeCommonProperties(JsonGenerator jw, Resource res, SlingHttpServletRequest request) {
+        jw.write("path", res.getPath());
+        jw.write(JCR_PRIMARYTYPE, res.getValueMap().get(JCR_PRIMARYTYPE, String.class));
+
+        Resource jcrContent = res.getChild(JCR_CONTENT);
+        String exportUri;
+        Resource contentResource;
+        if (jcrContent != null) {
+            contentResource = jcrContent;
+            exportUri = jcrContent.getPath() + ".infinity.json";
+        } else {
+            contentResource = res;
+            exportUri = res.getPath() + ".json";
+        }
+
+        String renderServlet = getJsonRendererServlet(request, contentResource, exportUri);
+        // check if the resource is rendered by DefaultGetServlet, i.e. is exportable
+        // if it isn't, go one level up and try the parent
+        if(!DEFAULT_GET_SERVLET.equals(renderServlet)){
+            contentResource = contentResource.getParent();
+            exportUri = contentResource.getPath() + ".infinity.json";
+        }
+
+        // last try: if the rendering servlet is still not DefaultGetServlet then
+        // put a flag in the output.
+        renderServlet = getJsonRendererServlet(request, contentResource, exportUri);
+        if(!DEFAULT_GET_SERVLET.equals(renderServlet)) {
+            jw.write("renderServlet", renderServlet);
+        }
+        jw.write("exportUri", exportUri);
+    }
+
+    /**
+     * 
+     *
+     * @param resource  the resource
+     * @param urlPath   the json export url,. e.g. <code>/content/wknd/page/jcr:content.infinity.json</code>
+     * @return  the render servlet, e.g. <code>org.apache.sling.servlets.get.DefaultGetServlet</code>
+     */
     String getJsonRendererServlet(SlingHttpServletRequest slingRequest, Resource resource, String urlPath) {
         Servlet s = servletResolver.resolveServlet(new SlingHttpServletRequestWrapper(slingRequest) {
             @Override
@@ -178,7 +180,7 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
             GenericServlet genericServlet = (GenericServlet)s;
             servletName = genericServlet.getServletName();
         }
-        // sling redirect servlet handles json exports by forwarding to DefaultGetServlet. So do we.
+        // Sling Redirect Servlet handles json exports by forwarding to DefaultGetServlet. So do we.
         if(REDIRECT_SERVLET.equals(servletName)){
             servletName = DEFAULT_GET_SERVLET;
         }

@@ -61,8 +61,7 @@
                             required="{Boolean}true">
                             <datasource
                                 jcr:primaryType="nt:unstructured"
-                                sling:resourceType="acs-commons/components/utilities/contentsync/selecthostdatasource"
-                                path="/var/acs-commons/contentsync"/>
+                                sling:resourceType="acs-commons/components/utilities/contentsync/selecthostdatasource"/>
                         </host>
                         <workflow
                             jcr:primaryType="nt:unstructured"
