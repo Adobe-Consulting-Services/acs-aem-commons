@@ -25,6 +25,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -228,7 +230,17 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
         ArrayList<ProcessInstance> processes = new ArrayList();
         processes.addAll(manager.getActiveProcesses());
         processes.addAll(manager.getInactiveProcesses());
-        processes.sort(Comparator.comparing((ProcessInstance p) -> p.getInfo().getStartTime()).reversed());
+        processes.sort(Comparator.comparing((ProcessInstance p) -> {
+            if (p.getInfo() == null) {
+                // If getInfo() is null, then mark it as 0L so it will be sorted to the end of the list.
+                return 0L;
+            } else if (p.getInfo().getStartTime() == null) {
+                // If getInfo().getStartTime()  is null, then mark it as 0L so it will be sorted to the end of the list.
+                return 0L;
+            } else {
+                return p.getInfo().getStartTime();
+            }
+        }).reversed());
         return processes;
     }
 }

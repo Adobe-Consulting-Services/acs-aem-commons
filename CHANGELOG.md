@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## Fixed
+
+- #3140 - Fixed issue where malformed MCP jobs can cause a NPE that breaks the entire MPC reporting view due to null
+  start time. When null info or start time is detected, the start time is set to 0, making it appear as the oldest
+  processes.
+
 ## 6.0.14 - 2023-07-11
 
 ## Fixed
