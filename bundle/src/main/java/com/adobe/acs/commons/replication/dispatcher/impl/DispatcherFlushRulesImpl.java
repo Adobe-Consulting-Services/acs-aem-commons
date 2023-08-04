@@ -20,6 +20,7 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushRules;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.AgentManager;
@@ -71,7 +72,7 @@ import java.util.regex.Pattern;
                 name = "webconsole.configurationFactory.nameHint",
                 value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
 })
-public class DispatcherFlushRulesImpl implements Preprocessor {
+public class DispatcherFlushRulesImpl implements Preprocessor, DispatcherFlushRules {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
     private static final String OPTION_INHERIT = "INHERIT";
