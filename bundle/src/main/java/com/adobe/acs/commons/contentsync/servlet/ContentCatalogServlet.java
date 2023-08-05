@@ -152,7 +152,7 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
     }
 
     /**
-     * 
+     * Returns the render servlet for the given urlPath .
      *
      * @param resource  the resource
      * @param urlPath   the json export url,. e.g. <code>/content/wknd/page/jcr:content.infinity.json</code>

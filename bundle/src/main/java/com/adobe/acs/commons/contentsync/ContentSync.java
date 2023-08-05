@@ -174,7 +174,7 @@ public class ContentSync {
     }
 
     /**
-     * Clear jcr:content and remove all propertirs except proected ones
+     * Clear jcr:content and remove all properties except protected ones
      *
      * @param node  the node to clear
      */

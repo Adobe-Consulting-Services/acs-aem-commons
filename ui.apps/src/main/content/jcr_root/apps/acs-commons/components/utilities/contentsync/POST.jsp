@@ -92,10 +92,10 @@
         out.flush();
         List<CatalogItem> catalog = contentCatalog.fetch(root, strategyPid);
         long t0 = System.currentTimeMillis();
-        out.println(catalog.size() + " resources fetched in " + (System.currentTimeMillis() - t0) + " ms");
+        out.println(catalog.size() + " resource"+(catalog.size() > 1 ? "s" : "")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
         if(incremental){
             catalog = contentCatalog.getDelta(catalog, resourceResolver, updateStrategy);
-            out.println(catalog.size() + " resources modified");
+            out.println(catalog.size() + " resource"+(catalog.size() > 1 ? "s" : "")+" modified");
         }
 
         long count = 0;
