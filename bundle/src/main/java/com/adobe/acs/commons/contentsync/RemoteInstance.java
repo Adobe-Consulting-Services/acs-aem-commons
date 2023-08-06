@@ -1,8 +1,9 @@
-/*
- * ACS AEM Commons
- *
- * Copyright (C) 2013 - 2023 Adobe
- *
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2022 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.contentsync;
 
@@ -84,15 +86,17 @@ public class RemoteInstance implements Closeable {
     public InputStream getStream(URI uri ) throws IOException {
         HttpGet request = new HttpGet(uri);
         CloseableHttpResponse response = httpClient.execute(request);
+        String msg;
         switch (response.getStatusLine().getStatusCode()){
             case HttpStatus.SC_OK:
                 return response.getEntity().getContent();
             case HttpStatus.SC_MULTIPLE_CHOICES:
-                throw new IOException("Failed to fetch data from " + uri + ", HTTP [" + response.getStatusLine().getStatusCode() + "]\n" +
+                msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
                         "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
+                throw new IOException(msg);
             default:
-                throw new IOException("Failed to fetch data from " + uri + ", HTTP [" + response.getStatusLine().getStatusCode() + "]\n" +
-                        "Response: " + EntityUtils.toString(response.getEntity()));
+                msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + EntityUtils.toString(response.getEntity()));
+                throw new IOException(msg);
         }
     }
 
@@ -103,18 +107,22 @@ public class RemoteInstance implements Closeable {
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 return str;
             } else {
-                throw new IOException("Failed to fetch data from " + uri + ", " +
-                        "HTTP [" + response.getStatusLine().getStatusCode() + "], Response: " + str);
+                String msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + str);
+                throw new IOException(msg);
             }
         }
+    }
+
+    private String formatError(String uri, int statusCode, String message) {
+        return String.format("Failed to fetch data from %s, HTTP [%d]\n%s", uri, statusCode, message);
     }
 
     public String getPrimaryType(String path) throws IOException, URISyntaxException {
         URI uri = toURI(path + "/" + JCR_PRIMARY_TYPE);
         String str = getString(uri);
         if (str.isEmpty()) {
-            throw new IllegalStateException("It appears " + hostConfiguration.getUsername() +
-                    " user does not have permissions to read " + uri);
+            throw new IllegalStateException("It appears " + hostConfiguration.getUsername()
+                    + " user does not have permissions to read " + uri);
         }
         return str;
     }
