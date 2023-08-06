@@ -264,12 +264,6 @@ public class ContentSync {
     }
 
     public void importData(CatalogItem catalogItem, JsonObject jsonObject) throws RepositoryException, IOException, URISyntaxException {
-        StringWriter sw = new StringWriter();
-        try(JsonWriter writer = Json.createWriter(sw)){
-            writer.write(jsonObject);
-        }
-        InputStream contentStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
-
         String path = catalogItem.getPath();
         log.debug("importing {}", path);
 
@@ -283,6 +277,12 @@ public class ContentSync {
         } else {
             nodeName = ResourceUtil.getName(path);
         }
+
+        StringWriter sw = new StringWriter();
+        try(JsonWriter writer = Json.createWriter(sw)){
+            writer.write(jsonObject);
+        }
+        InputStream contentStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
         importer.importContent(contentNode, nodeName + ".json", contentStream, importOptions, null);
     }
 

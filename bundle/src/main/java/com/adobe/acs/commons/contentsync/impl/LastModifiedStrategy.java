@@ -37,16 +37,16 @@ public class LastModifiedStrategy implements UpdateStrategy {
 
     @Override
     public boolean isModified(CatalogItem catalogItem, Resource targetResource) {
-        LastModified remoteLastModified = getLastModified(catalogItem);
-        LastModified localLastModified = getLastModified(targetResource);
+        LastModifiedInfo remoteLastModified = getLastModified(catalogItem);
+        LastModifiedInfo localLastModified = getLastModified(targetResource);
 
         return remoteLastModified.getLastModified() > localLastModified.getLastModified();
     }
 
     @Override
     public String getMessage(CatalogItem catalogItem, Resource targetResource) {
-        LastModified remoteLastModified = getLastModified(catalogItem);
-        LastModified localLastModified = getLastModified(targetResource);
+        LastModifiedInfo remoteLastModified = getLastModified(catalogItem);
+        LastModifiedInfo localLastModified = getLastModified(targetResource);
 
         boolean modified = remoteLastModified.getLastModified() > localLastModified.getLastModified();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy, h:mm:ss a");
@@ -81,7 +81,7 @@ public class LastModifiedStrategy implements UpdateStrategy {
     }
 
     public void writeMetadata(JsonGenerator out, Resource res){
-        LastModified lastModified = getLastModified(res);
+        LastModifiedInfo lastModified = getLastModified(res);
 
         if(lastModified.getLastModified() > 0L) {
             out.write("lastModified", lastModified.getLastModified());
@@ -93,13 +93,13 @@ public class LastModifiedStrategy implements UpdateStrategy {
     }
 
 
-    private LastModified getLastModified(CatalogItem item) {
+    private LastModifiedInfo getLastModified(CatalogItem item) {
         long lastModified = item.getLong("lastModified");
         String lastModifiedBy = item.getString("lastModifiedBy");
-        return new LastModified(lastModified, lastModifiedBy);
+        return new LastModifiedInfo(lastModified, lastModifiedBy);
     }
 
-    private LastModified getLastModified(Resource targetResource) {
+    private LastModifiedInfo getLastModified(Resource targetResource) {
         long lastModified = 0L;
         String lastModifiedBy = null;
         if (targetResource != null) {
@@ -121,14 +121,14 @@ public class LastModifiedStrategy implements UpdateStrategy {
             }
             lastModifiedBy = AuthorizableUtil.getFormattedName(targetResource.getResourceResolver(), modifiedBy);
         }
-        return new LastModified(lastModified, lastModifiedBy);
+        return new LastModifiedInfo(lastModified, lastModifiedBy);
     }
 
-    private static class LastModified {
+    private static class LastModifiedInfo {
         private final long lastModified ;
         private final String lastModifiedBy;
 
-        public LastModified(long lastModified, String lastModifiedBy) {
+        public LastModifiedInfo(long lastModified, String lastModifiedBy) {
             this.lastModified = lastModified;
             this.lastModifiedBy = lastModifiedBy;
         }

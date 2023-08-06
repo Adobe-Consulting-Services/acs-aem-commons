@@ -114,7 +114,7 @@ public class RemoteInstance implements Closeable {
     }
 
     private String formatError(String uri, int statusCode, String message) {
-        return String.format("Failed to fetch data from %s, HTTP [%d]\n%s", uri, statusCode, message);
+        return String.format("Failed to fetch data from %s, HTTP [%d]%n%s", uri, statusCode, message);
     }
 
     public String getPrimaryType(String path) throws IOException, URISyntaxException {
