@@ -48,9 +48,12 @@ import java.util.stream.Collectors;
 
 import static javax.jcr.Property.JCR_PRIMARY_TYPE;
 
+/**
+ * HTTP connection to a remote AEM instance + some sugar methods to fetch data
+ */
 public class RemoteInstance implements Closeable {
-    private static final int CONNECT_TIMEOUT = 30000;
-    private static final int SOCKET_TIMEOUT = 30000;
+    private static final int CONNECT_TIMEOUT = 5000;
+    private static final int SOCKET_TIMEOUT = 60000;
 
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;

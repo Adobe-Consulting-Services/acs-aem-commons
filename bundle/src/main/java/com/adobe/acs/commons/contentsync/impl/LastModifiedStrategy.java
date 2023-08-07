@@ -22,18 +22,64 @@ package com.adobe.acs.commons.contentsync.impl;
 import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.adobe.granite.security.user.util.AuthorizableUtil;
+import com.day.cq.commons.PathInfo;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestPathInfo;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.ServletResolver;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import javax.json.stream.JsonGenerator;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 @Component
 public class LastModifiedStrategy implements UpdateStrategy {
+    static final String DEFAULT_GET_SERVLET = "org.apache.sling.servlets.get.DefaultGetServlet";
+    static final String REDIRECT_SERVLET = "org.apache.sling.servlets.get.impl.RedirectServlet";
+
+    @Reference
+    private ServletResolver servletResolver;
+
+    @Override
+    public List<CatalogItem> getItems(SlingHttpServletRequest request) {
+        String rootPath = request.getParameter("root");
+        if (rootPath == null) {
+            throw new IllegalArgumentException("root request parameter is required");
+        }
+
+        Resource root = request.getResourceResolver().getResource(rootPath);
+        if (root == null) {
+            return Collections.emptyList();
+        }
+
+        List<CatalogItem> items = new ArrayList<>();
+        new AbstractResourceVisitor() {
+            @Override
+            public void visit(Resource res) {
+                if (!accepts(res)) {
+                    return;
+                }
+                JsonObjectBuilder json = Json.createObjectBuilder();
+                writeMetadata(json, res, request);
+                items.add(new CatalogItem(json.build()));
+            }
+        }.accept(root);
+        return items;
+    }
 
     @Override
     public boolean isModified(CatalogItem catalogItem, Resource targetResource) {
@@ -67,31 +113,103 @@ public class LastModifiedStrategy implements UpdateStrategy {
         return msg.toString();
     }
 
-    @Override
-    public boolean accepts(Resource resource) {
+    /**
+     * Determines whether to write the resource in the catalog json.
+     * <p>
+     * For example, implementations can return only dam:Asset nodes,
+     * or any nt:unstructured nodes, etc.
+     *
+     * @param resource the resource to check
+     * @return whether to write the resource in the catalog
+     */
+    boolean accepts(Resource resource) {
         if (
-                // don't drill down into jcr:content. The entire content will be grabbed by jcr:content.infinity.jsn
+            // don't drill down into jcr:content. The entire content will be grabbed by jcr:content.infinity.jsn
                 resource.getPath().contains("/" + JCR_CONTENT)
-                // ignore rep:policy, rep:cugPolicy, rep:restrictions and such
-                || resource.getPath().contains("/rep:")
+                        // ignore rep:policy, rep:cugPolicy, rep:restrictions and such
+                        || resource.getPath().contains("/rep:")
         ) {
             return false;
         }
         return true;
     }
 
-    public void writeMetadata(JsonGenerator out, Resource res){
-        LastModifiedInfo lastModified = getLastModified(res);
+    /**
+     * Returns the render servlet for the given urlPath .
+     *
+     * @param urlPath the json export url,. e.g. <code>/content/wknd/page/jcr:content.infinity.json</code>
+     * @return the render servlet, e.g. <code>org.apache.sling.servlets.get.DefaultGetServlet</code>
+     */
+    String getJsonRendererServlet(SlingHttpServletRequest slingRequest, String urlPath) {
+        Resource resource = slingRequest.getResourceResolver().resolve(urlPath);
+        Servlet s = servletResolver.resolveServlet(new SlingHttpServletRequestWrapper(slingRequest) {
+            @Override
+            public Resource getResource() {
+                return resource;
+            }
 
-        if(lastModified.getLastModified() > 0L) {
-            out.write("lastModified", lastModified.getLastModified());
-        }
-        if(lastModified.getLastModifiedBy() != null) {
-            out.write("lastModifiedBy", lastModified.getLastModifiedBy());
-        }
+            @Override
+            public String getMethod() {
+                return "GET";
+            }
 
+            @Override
+            public RequestPathInfo getRequestPathInfo() {
+                return new PathInfo(urlPath);
+            }
+        });
+        String servletName = null;
+        if (s instanceof GenericServlet) {
+            GenericServlet genericServlet = (GenericServlet) s;
+            servletName = genericServlet.getServletName();
+        }
+        // Sling Redirect Servlet handles json exports by forwarding to DefaultGetServlet. So do we.
+        if (REDIRECT_SERVLET.equals(servletName)) {
+            servletName = DEFAULT_GET_SERVLET;
+        }
+        return servletName;
     }
 
+    void writeMetadata(JsonObjectBuilder jw, Resource res, SlingHttpServletRequest request) {
+        jw.add("path", res.getPath());
+        jw.add(JCR_PRIMARYTYPE, res.getValueMap().get(JCR_PRIMARYTYPE, String.class));
+
+        Resource jcrContent = res.getChild(JCR_CONTENT);
+        String exportUri;
+        Resource contentResource;
+        if (jcrContent != null) {
+            contentResource = jcrContent;
+            exportUri = jcrContent.getPath() + ".infinity.json";
+        } else {
+            contentResource = res;
+            exportUri = res.getPath() + ".json";
+        }
+
+        String renderServlet = getJsonRendererServlet(request, exportUri);
+        // check if the resource is rendered by DefaultGetServlet, i.e. is exportable
+        // if it isn't, go one level up and try the parent
+        if (!DEFAULT_GET_SERVLET.equals(renderServlet)) {
+            contentResource = contentResource.getParent();
+            exportUri = contentResource.getPath() + ".infinity.json";
+        }
+
+        // last try: if the rendering servlet is still not DefaultGetServlet then
+        // put a flag in the output.
+        renderServlet = getJsonRendererServlet(request, exportUri);
+        if (!DEFAULT_GET_SERVLET.equals(renderServlet)) {
+            jw.add("renderServlet", renderServlet);
+        }
+        jw.add("exportUri", exportUri);
+
+        LastModifiedInfo lastModified = getLastModified(res);
+
+        if (lastModified.getLastModified() > 0L) {
+            jw.add("lastModified", lastModified.getLastModified());
+        }
+        if (lastModified.getLastModifiedBy() != null) {
+            jw.add("lastModifiedBy", lastModified.getLastModifiedBy());
+        }
+    }
 
     private LastModifiedInfo getLastModified(CatalogItem item) {
         long lastModified = item.getLong("lastModified");
@@ -125,7 +243,7 @@ public class LastModifiedStrategy implements UpdateStrategy {
     }
 
     private static class LastModifiedInfo {
-        private final long lastModified ;
+        private final long lastModified;
         private final String lastModifiedBy;
 
         public LastModifiedInfo(long lastModified, String lastModifiedBy) {

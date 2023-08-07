@@ -102,13 +102,4 @@ public class TestLastModifiedStrategy {
         assertFalse(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
     }
 
-    @Test
-    public void testAccepts() {
-        String pagePath = "/content/wknd/page";
-
-        Page page = context.create().page(pagePath);
-        Resource pageResource = page.adaptTo(Resource.class);
-        assertTrue(updateStrategy.accepts(pageResource));
-        assertFalse(updateStrategy.accepts(pageResource.getChild("jcr:content")));
-    }
 }

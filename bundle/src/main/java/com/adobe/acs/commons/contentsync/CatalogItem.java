@@ -36,7 +36,7 @@ public class CatalogItem {
     }
 
     public String getPrimaryType(){
-        return object.getString("path");
+        return object.getString("jcr:primaryType");
     }
 
     public boolean hasContentResource(){
@@ -58,5 +58,9 @@ public class CatalogItem {
     public String getCustomExporter(){
         return object.containsKey("renderServlet") ? object.getString("renderServlet") : null;
 
+    }
+
+    public JsonObject getJsonObject(){
+        return object;
     }
 }

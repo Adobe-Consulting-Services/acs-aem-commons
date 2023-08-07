@@ -1,9 +1,8 @@
-/*-
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2022 Adobe
- * %%
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,46 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.contentsync;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 
 import javax.json.stream.JsonGenerator;
+import java.util.List;
 
 public interface UpdateStrategy {
 
-    /**
-     * Determines whether to write the resource in the catalog json.
-     *
-     * For example, implementations can return only dam:Asset nodes,
-     * or any nt:unstructured nodes, etc.
-     *
-     * @param resource the resource to check
-     * @return  whether to write the resource in the catalog
-     */
-    boolean accepts(Resource resource);
-
-    /**
-     * Write implementation-specific metadata in the output json.
-     * It will be consumed by {@link #isModified(CatalogItem, Resource)}
-     * to determine if the resource was modified and should be included in the incremental delta.
-     *
-     * For example, to select resources based on their modification date an impl would emit
-     * <pre>
-     * {
-     * ...
-     * "lastModified": 1684434676569,
-     * }
-     * </pre>
-     * and the {@link #isModified(CatalogItem, Resource)} method would compare it with the local state.
-     *
-     * @param out the json writer
-     * @param resource the resource to check
-     * @return  whether to write the resource in the catalog
-     */
-    void writeMetadata(JsonGenerator out, Resource resource);
+    List<CatalogItem> getItems(SlingHttpServletRequest request);
 
 
     boolean isModified(CatalogItem catalogItem, Resource targetResource);
