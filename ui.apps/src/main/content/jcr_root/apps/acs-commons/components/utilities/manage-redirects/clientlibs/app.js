@@ -45,7 +45,6 @@
         updateFormData($(e.detail.row));
 
         var $form = $(DIALOG_FORM_SELECTOR);
-        var data = $form.serialize();
         var nextIndex = beforeIndex - 1;
         if (rowIndex == beforeIndex || rowIndex == nextIndex) {
           return false;
@@ -59,11 +58,14 @@
         if (nextIndex <= 0) {
           nextIndex = 0;
         }
-        data += "&:order=" + nextIndex;
+        var payload = {
+          ":http-equiv-accept": "application/json",
+          ":order": nextIndex
+        };
         $.ajax({
           url: $form.attr("action"),
           type: "POST",
-          data: data,
+          data: payload,
           async: false
         });
       }
