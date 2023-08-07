@@ -12,10 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Fixed
 
-- #3140 - Fixed issue where malformed MCP jobs can cause a NPE that breaks the entire MPC reporting view due to null
-  start time. When null info or start time is detected, the start time is set to 0, making it appear as the oldest
-  processes.
-
+- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
+- #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
+- #3138 - Re-arrange action removes data from redirect node
+  
 ## 6.0.14 - 2023-07-11
 
 ## Fixed

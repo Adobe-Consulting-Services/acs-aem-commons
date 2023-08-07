@@ -129,6 +129,11 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setCaseInsensitive(boolean nc) {
+        props.put(CASE_INSENSITIVE_PROPERTY_NAME, nc);
+        return this;
+    }
+
     public Resource build() throws PersistenceException {
         ContentBuilder cb = context.create();
         Resource configResource = ResourceUtil.getOrCreateResource(
