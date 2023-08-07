@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
+- #3138 - Re-arrange action removes data from redirect node
+  
 ## 6.0.14 - 2023-07-11
 
 ## Fixed
