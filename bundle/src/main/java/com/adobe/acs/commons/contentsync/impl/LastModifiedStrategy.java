@@ -48,8 +48,8 @@ import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 @Component
 public class LastModifiedStrategy implements UpdateStrategy {
-    static final String DEFAULT_GET_SERVLET = "org.apache.sling.servlets.get.DefaultGetServlet";
-    static final String REDIRECT_SERVLET = "org.apache.sling.servlets.get.impl.RedirectServlet";
+    public static final String DEFAULT_GET_SERVLET = "org.apache.sling.servlets.get.DefaultGetServlet";
+    public static final String REDIRECT_SERVLET = "org.apache.sling.servlets.get.impl.RedirectServlet";
 
     @Reference
     private ServletResolver servletResolver;
@@ -82,22 +82,22 @@ public class LastModifiedStrategy implements UpdateStrategy {
     }
 
     @Override
-    public boolean isModified(CatalogItem catalogItem, Resource targetResource) {
-        LastModifiedInfo remoteLastModified = getLastModified(catalogItem);
-        LastModifiedInfo localLastModified = getLastModified(targetResource);
+    public boolean isModified(CatalogItem remoteResource, Resource localResource) {
+        LastModifiedInfo remoteLastModified = getLastModified(remoteResource);
+        LastModifiedInfo localLastModified = getLastModified(localResource);
 
         return remoteLastModified.getLastModified() > localLastModified.getLastModified();
     }
 
     @Override
-    public String getMessage(CatalogItem catalogItem, Resource targetResource) {
-        LastModifiedInfo remoteLastModified = getLastModified(catalogItem);
-        LastModifiedInfo localLastModified = getLastModified(targetResource);
+    public String getMessage(CatalogItem remoteResource, Resource localResource) {
+        LastModifiedInfo remoteLastModified = getLastModified(remoteResource);
+        LastModifiedInfo localLastModified = getLastModified(localResource);
 
         boolean modified = remoteLastModified.getLastModified() > localLastModified.getLastModified();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy, h:mm:ss a");
         StringBuilder msg = new StringBuilder();
-        if (targetResource == null) {
+        if (localResource == null) {
             msg.append("resource does not exist");
         } else {
             msg.append(modified ? "resource modified ... " : "replacing ... ");
@@ -124,10 +124,10 @@ public class LastModifiedStrategy implements UpdateStrategy {
      */
     boolean accepts(Resource resource) {
         if (
-            // don't drill down into jcr:content. The entire content will be grabbed by jcr:content.infinity.jsn
+            // don't drill down into jcr:content. The entire content will be grabbed by jcr:content.infinity.json
                 resource.getPath().contains("/" + JCR_CONTENT)
-                        // ignore rep:policy, rep:cugPolicy, rep:restrictions and such
-                        || resource.getPath().contains("/rep:")
+                // ignore rep:policy, rep:cugPolicy, rep:restrictions and such
+                || resource.getPath().contains("/rep:")
         ) {
             return false;
         }

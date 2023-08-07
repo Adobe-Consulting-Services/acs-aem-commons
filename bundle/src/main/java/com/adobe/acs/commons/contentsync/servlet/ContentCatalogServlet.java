@@ -21,7 +21,6 @@ package com.adobe.acs.commons.contentsync.servlet;
 
 import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
-import com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -31,13 +30,18 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 import javax.json.Json;
-import javax.json.stream.JsonGenerator;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 @Component(service = Servlet.class, immediate = true, property = {
         "sling.servlet.extensions=json",
@@ -45,11 +49,6 @@ import java.util.Map;
         "sling.servlet.resourceTypes=acs-commons/components/utilities/contentsync",
 })
 public class ContentCatalogServlet extends SlingSafeMethodsServlet {
-
-    static final String DEFAULT_GET_SERVLET = "org.apache.sling.servlets.get.DefaultGetServlet";
-    static final String REDIRECT_SERVLET = "org.apache.sling.servlets.get.impl.RedirectServlet";
-
-    public static final String DEFAULT_STRATEGY = LastModifiedStrategy.class.getName();
 
     private final transient Map<String, UpdateStrategy> updateStrategies = Collections.synchronizedMap(new LinkedHashMap<>());
 
@@ -72,25 +71,38 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         response.setContentType("application/json");
 
-        String pid = request.getParameter("strategy");
-        if (pid == null) {
-            pid = DEFAULT_STRATEGY;
-        }
-        UpdateStrategy updateStrategy = getStrategy(pid);
-        try (JsonGenerator jw = Json.createGenerator(response.getWriter())) {
-            jw.writeStartObject();
+        JsonObjectBuilder result = Json.createObjectBuilder();
+        try {
+            JsonArrayBuilder resources = Json.createArrayBuilder();
+            String pid = request.getParameter("strategy");
+            UpdateStrategy updateStrategy = getStrategy(pid);
             List<CatalogItem> items = updateStrategy.getItems(request);
 
-            jw.writeStartArray("resources");
             for (CatalogItem item : items) {
-                jw.write(item.getJsonObject());
+                resources.add(item.getJsonObject());
             }
-            jw.writeEnd();
-            jw.writeEnd();
+            result.add("resources", resources);
+        } catch (Exception e){
+            result.add("error", e.getMessage());
+            response.setStatus(SC_INTERNAL_SERVER_ERROR);
+        }
+
+        try(JsonWriter out = Json.createWriter(response.getWriter())){
+            out.writeObject(result.build());
         }
     }
 
     UpdateStrategy getStrategy(String pid) {
-        return updateStrategies.get(pid);
+        UpdateStrategy strategy;
+        if(pid == null){
+            strategy = updateStrategies.values().iterator().next();
+        } else {
+            strategy = updateStrategies.get(pid);
+            if(strategy == null){
+                throw new IllegalArgumentException("Cannot find UpdateStrategy for pid " + pid + "." +
+                        " Available strategies: " + updateStrategies.values().stream().map(s -> s.getClass().getName()).collect(Collectors.toList()));
+            }
+        }
+        return strategy;
     }
 }

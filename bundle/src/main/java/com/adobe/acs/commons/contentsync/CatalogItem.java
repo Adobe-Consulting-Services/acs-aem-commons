@@ -24,6 +24,14 @@ import javax.json.JsonObject;
 
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
 
+/**
+ * A Json object describing a resource to sync.
+ *
+ * Required fields:
+ *  - path
+ *  - jcr:primaryType
+ *  - exportUri
+ */
 public class CatalogItem {
     private final JsonObject object;
 

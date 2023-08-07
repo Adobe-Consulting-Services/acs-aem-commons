@@ -19,11 +19,9 @@
  */
 package com.adobe.acs.commons.contentsync.servlet;
 
+import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.servlets.ServletResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
@@ -34,21 +32,17 @@ import org.junit.Test;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.servlet.GenericServlet;
-import javax.servlet.Servlet;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.DEFAULT_GET_SERVLET;
-import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.REDIRECT_SERVLET;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public class TestContentCatalogServlet {
@@ -57,27 +51,20 @@ public class TestContentCatalogServlet {
 
     private ContentCatalogServlet servlet;
     private UpdateStrategy updateStrategy;
-    private ServletResolver servletResolver;
 
     @Before
     public void setUp() {
-        servletResolver = mock(ServletResolver.class);
         updateStrategy = mock(UpdateStrategy.class);
-//        doAnswer(invocation -> {
-//            Resource resource = invocation.getArgument(0);
-//            return resource.isResourceType("cq:Page");
-//        }).when(updateStrategy).accepts(any(Resource.class));
         context.registerService(UpdateStrategy.class, updateStrategy);
-        context.registerService(ServletResolver.class, servletResolver);
         servlet = context.registerInjectActivateService(new ContentCatalogServlet());
-
-        GenericServlet defaultServlet = mock(GenericServlet.class);
-        doReturn(DEFAULT_GET_SERVLET).when(defaultServlet).getServletName();
-        doReturn(defaultServlet).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
     }
 
     @Test
     public void testMissingRequiredParameters() throws IOException {
+        doAnswer(invocation -> {
+            throw new IllegalArgumentException("root request parameter is required");
+        }).when(updateStrategy).getItems(eq(context.request()));
+
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
@@ -109,8 +96,20 @@ public class TestContentCatalogServlet {
 
     @Test
     public void testPageTree() throws IOException {
-        context.create().page("/content/wknd");
-        context.create().page("/content/wknd/page1");
+        doAnswer(invocation -> {
+            List<CatalogItem> items = new ArrayList<>();
+            JsonObject o1 = Json.createObjectBuilder()
+                    .add("path", "/content/wknd")
+                    .add("jcr:primaryType", "cq:Page")
+                    .build();
+            JsonObject o2 = Json.createObjectBuilder()
+                    .add("path", "/content/wknd/page1")
+                    .add("jcr:primaryType", "cq:Page")
+                    .build();
+            items.add(new CatalogItem(o1));
+            items.add(new CatalogItem(o2));
+            return items;
+        }).when(updateStrategy).getItems(eq(context.request()));
 
         MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("root", "/content/wknd");
@@ -137,145 +136,16 @@ public class TestContentCatalogServlet {
     }
 
     @Test
-    public void testForwardRedirectServletToDefaultGetServlet() throws IOException {
-        doAnswer(invocation -> {
-            SlingHttpServletRequest request = invocation.getArgument(0, SlingHttpServletRequest.class);
-            String resourcePath = request.getResource().getPath();
-            GenericServlet servlet = mock(GenericServlet.class);
-            if("/content/cq:tags".equals(resourcePath)){
-                doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
-            }
-            return servlet;
-        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
-
+    public void testInvalidStrategyPid() throws IOException {
         MockSlingHttpServletRequest request = context.request();
-
-        String path = "/content/cq:tags";
-        Resource resource = context.create().resource(path, "jcr:primaryType", "cq:Tag");
-//        String servletName = servlet.getJsonRendererServlet(request, resource, path + ".json");
-//        assertEquals(DEFAULT_GET_SERVLET, servletName);
-
-    }
-
-    @Test
-    public void testSlingRedirectDefaultGetServlet() throws IOException {
-        String path = "/content/cq:tags";
-        doAnswer(invocation -> {
-            SlingHttpServletRequest request = invocation.getArgument(0, SlingHttpServletRequest.class);
-            String resourcePath = request.getResource().getPath();
-            GenericServlet servlet = mock(GenericServlet.class);
-            if(path.equals(resourcePath)){
-                doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
-            }
-            return servlet;
-        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
-
-//        doAnswer(invocation -> {
-//            Resource resource = invocation.getArgument(0);
-//            return resource.isResourceType("cq:Tag");
-//        }).when(updateStrategy).accepts(any(Resource.class));
-
-        context.create().resource(path, "jcr:primaryType", "cq:Tag");
-
-        MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", path);
-        request.addRequestParameter("strategy", updateStrategy.getClass().getName());
+        request.addRequestParameter("root", "/content/wknd");
+        request.addRequestParameter("strategy", "invalid");
         MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
         assertEquals("application/json", response.getContentType());
-        assertEquals(SC_OK, response.getStatus());
+        assertEquals(SC_INTERNAL_SERVER_ERROR, response.getStatus());
         JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-
-        JsonArray resources = jsonResponse.getJsonArray("resources");
-        assertEquals(1, resources.size());
-
-        JsonObject item = resources.getJsonObject(0);
-        assertEquals(path, item.getString("path"));
-        assertEquals("cq:Tag", item.getString("jcr:primaryType"));
-        assertEquals("/content/cq:tags.json", item.getString("exportUri"));
-        assertFalse("unexpected custom json exporter: " + item.get("renderServlet"), item.containsKey("renderServlet"));
-
-    }
-
-    /**
-     *
-     * /conf/wknd/settings/wcm/templates/article-page-template/policies (cq:Page) export json rendered  by DefaultGetServlet
-     *   + jcr:content - export json rendered by ContentPolicyMappingServlet
-     *
-     */
-    @Test
-    public void testCustomRendererUseParent() throws IOException {
-        String path = "/conf/wknd/settings/wcm/templates/article-page-template/policies";
-        doAnswer(invocation -> {
-            SlingHttpServletRequest request = invocation.getArgument(0, SlingHttpServletRequest.class);
-            String resourcePath = request.getResource().getPath();
-            GenericServlet servlet = mock(GenericServlet.class);
-            if(resourcePath.equals(path + "/jcr:content")){
-                doReturn("com.day.cq.wcm.core.impl.policies.ContentPolicyMappingServlet").when(servlet).getServletName();
-            } else if(resourcePath.equals(path)){
-                doReturn(DEFAULT_GET_SERVLET).when(servlet).getServletName();
-            }
-            return servlet;
-        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
-
-        context.create().page(path);
-
-        MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", path);
-        request.addRequestParameter("strategy", updateStrategy.getClass().getName());
-        MockSlingHttpServletResponse response = context.response();
-        servlet.doGet(request, response);
-
-        assertEquals("application/json", response.getContentType());
-        assertEquals(SC_OK, response.getStatus());
-        JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-
-        JsonArray resources = jsonResponse.getJsonArray("resources");
-        assertEquals(1, resources.size());
-
-        JsonObject item = resources.getJsonObject(0);
-        assertEquals(path, item.getString("path"));
-        assertEquals("cq:Page", item.getString("jcr:primaryType"));
-        assertEquals(path + ".infinity.json", item.getString("exportUri"));
-        assertFalse("unexpected custom json exporter: " + item.get("renderServlet"), item.containsKey("renderServlet"));
-
-    }
-
-    @Test
-    public void testCustomExporter() throws IOException {
-        String path = "/content/page";
-        String customExporter = "com.adobe.CustomJsonExporter";
-        doAnswer(invocation -> {
-            SlingHttpServletRequest request = invocation.getArgument(0, SlingHttpServletRequest.class);
-            String resourcePath = request.getResource().getPath();
-            GenericServlet servlet = mock(GenericServlet.class);
-            if(path.equals(resourcePath)){
-                doReturn(customExporter).when(servlet).getServletName();
-            }
-            return servlet;
-        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
-
-        context.create().page(path);
-
-        MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", path);
-        request.addRequestParameter("strategy", updateStrategy.getClass().getName());
-        MockSlingHttpServletResponse response = context.response();
-        servlet.doGet(request, response);
-
-        assertEquals("application/json", response.getContentType());
-        assertEquals(SC_OK, response.getStatus());
-        JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-
-        JsonArray resources = jsonResponse.getJsonArray("resources");
-        assertEquals(1, resources.size());
-
-        JsonObject item = resources.getJsonObject(0);
-        assertEquals(path, item.getString("path"));
-        assertEquals("cq:Page", item.getString("jcr:primaryType"));
-        assertEquals("/content/page.infinity.json", item.getString("exportUri"));
-        assertEquals(customExporter, item.getString("renderServlet"));
-
+        assertTrue(jsonResponse.getString("error").startsWith("Cannot find UpdateStrategy for pid"));
     }
 }

@@ -28,7 +28,6 @@ import org.osgi.service.component.annotations.Component;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import javax.json.stream.JsonGenerator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,9 +40,9 @@ public class AssetChecksumStrategy implements UpdateStrategy {
     private static final String DAM_SHA1 = "dam:sha1";
 
     @Override
-    public boolean isModified(CatalogItem catalogItem, Resource targetResource) {
-        String remoteChecksum = getChecksum(catalogItem);
-        String localChecksum = getChecksum(targetResource);
+    public boolean isModified(CatalogItem remoteResource, Resource localResource) {
+        String remoteChecksum = getChecksum(remoteResource);
+        String localChecksum = getChecksum(localResource);
 
         return remoteChecksum != null && !remoteChecksum.equals(localChecksum);
     }
@@ -71,13 +70,13 @@ public class AssetChecksumStrategy implements UpdateStrategy {
     }
 
     @Override
-    public String getMessage(CatalogItem catalogItem, Resource targetResource) {
-        String remoteChecksum = getChecksum(catalogItem);
-        String localChecksum = getChecksum(targetResource);
+    public String getMessage(CatalogItem remoteResource, Resource localResource) {
+        String remoteChecksum = getChecksum(remoteResource);
+        String localChecksum = getChecksum(localResource);
 
         boolean modified = remoteChecksum != null && !remoteChecksum.equals(localChecksum);
         StringBuilder msg = new StringBuilder();
-        if (targetResource == null) {
+        if (localResource == null) {
             msg.append("resource does not exist");
         } else {
             msg.append(modified ? "resource modified ... " : "replacing ... ");
@@ -118,4 +117,5 @@ public class AssetChecksumStrategy implements UpdateStrategy {
         }
         jw.add("exportUri", exportUri);
         jw.add(DAM_SHA1, getChecksum(res));
-    }}
+    }
+}
