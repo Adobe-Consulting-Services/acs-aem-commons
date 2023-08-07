@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## Added
+
+- #3147 - Allow usage of Dispatcher Flush Rules in AEMaaCS
+
 ## 6.2.0 - 2023-09-14
 
 ## Added
