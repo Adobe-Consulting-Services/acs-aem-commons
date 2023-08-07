@@ -1285,4 +1285,32 @@ public class RedirectFilterTest {
         assertEquals("/content/we-retail/en/target", response.getHeader("Location"));
         assertEquals("no-cache", response.getHeader("Cache-Control"));
     }
+
+    @Test
+    public void testCaseInsensitiveRedirects() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource(" /content/we-retail/en/one")
+                        .setTarget(" /content/we-retail/en/two")
+                        .setCaseInsensitive(true)
+                        .setStatusCode(302).build()
+
+        );
+        assertEquals("/content/we-retail/en/two", navigate("/content/we-retail/en/one").getHeader("Location"));
+        assertEquals("/content/we-retail/en/two", navigate("/content/we-retail/en/ONE").getHeader("Location"));
+    }
+
+    @Test
+    public void testCaseInsensitiveRegexRedirects() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource(" /content/we-retail/en/.*")
+                        .setTarget(" /content/we-retail/en/two")
+                        .setCaseInsensitive(true)
+                        .setStatusCode(302).build()
+
+        );
+        assertEquals("/content/we-retail/en/two", navigate("/content/we-retail/en/one").getHeader("Location"));
+        assertEquals("/content/we-retail/en/two", navigate("/content/we-retail/EN/ONE").getHeader("Location"));
+    }
 }

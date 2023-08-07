@@ -60,6 +60,7 @@ public class RedirectRule {
     public static final String MODIFIED_BY_PROPERTY_NAME = "jcr:lastModifiedBy";
     public static final String TAGS_PROPERTY_NAME = "cq:tags";
     public static final String CACHE_CONTROL_HEADER_NAME = "cacheControlHeader";
+    public static final String CASE_INSENSITIVE_PROPERTY_NAME = "caseInsensitive";
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private String source;
@@ -103,6 +104,9 @@ public class RedirectRule {
     @ValueMapValue(name = CACHE_CONTROL_HEADER_NAME)
     private String cacheControlHeader;
 
+    @ValueMapValue(name = CASE_INSENSITIVE_PROPERTY_NAME)
+    private boolean caseInsensitive;
+
     @Self
     private Resource resource;
 
@@ -122,7 +126,7 @@ public class RedirectRule {
         if (regex.endsWith("*")) {
             regex = regex.replaceAll("\\*$", "(.*)");
         }
-        ptrn = toRegex(regex);
+        ptrn = toRegex(regex, caseInsensitive);
         substitutions = SubstitutionElement.parse(target);
 
         String cacheControlProperty = CACHE_CONTROL_HEADER_NAME + "_" + getStatusCode();
@@ -147,6 +151,10 @@ public class RedirectRule {
 
     public boolean getEvaluateURI() {
         return evaluateURI;
+    }
+
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
     }
 
     public String getCreatedBy() {
@@ -248,10 +256,14 @@ public class RedirectRule {
         return buf.toString();
     }
 
-    static Pattern toRegex(String src) {
+    static Pattern toRegex(String src, boolean nc) {
         Pattern ptrn;
         try {
-            ptrn = Pattern.compile(src);
+            int flags = 0;
+            if(nc) {
+                flags = Pattern.CASE_INSENSITIVE;
+            }
+            ptrn = Pattern.compile(src, flags);
             int groupCount = ptrn.matcher("").groupCount();
             if (groupCount == 0) {
                 ptrn = null;
