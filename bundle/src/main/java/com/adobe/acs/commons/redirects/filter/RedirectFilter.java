@@ -655,6 +655,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (pathMatchingRules != null) {
                 rules.addAll(pathMatchingRules.values());
             }
+            Map<String, RedirectRule> ignoreCaseRules = cfg.getCaseInsensitivePathRules();
+            if (ignoreCaseRules != null) {
+                rules.addAll(ignoreCaseRules.values());
+            }
             Map<Pattern, RedirectRule> patternMatchingRules = cfg.getPatternRules();
             if (patternMatchingRules != null) {
                 rules.addAll(patternMatchingRules.values());
