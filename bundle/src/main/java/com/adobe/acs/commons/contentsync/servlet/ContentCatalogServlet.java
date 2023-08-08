@@ -99,8 +99,9 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
         } else {
             strategy = updateStrategies.get(pid);
             if(strategy == null){
-                throw new IllegalArgumentException("Cannot find UpdateStrategy for pid " + pid + "." +
-                        " Available strategies: " + updateStrategies.values().stream().map(s -> s.getClass().getName()).collect(Collectors.toList()));
+                throw new IllegalArgumentException("Cannot find UpdateStrategy for pid " + pid + "."
+                        + " Available strategies: " + updateStrategies.values()
+                        .stream().map(s -> s.getClass().getName()).collect(Collectors.toList()));
             }
         }
         return strategy;
