@@ -90,6 +90,7 @@ public class LastModifiedStrategy implements UpdateStrategy {
     }
 
     @Override
+    @SuppressWarnings("squid:S2583")
     public String getMessage(CatalogItem remoteResource, Resource localResource) {
         LastModifiedInfo remoteLastModified = getLastModified(remoteResource);
         LastModifiedInfo localLastModified = getLastModified(localResource);
@@ -217,6 +218,7 @@ public class LastModifiedStrategy implements UpdateStrategy {
         return new LastModifiedInfo(lastModified, lastModifiedBy);
     }
 
+    @SuppressWarnings("squid:S1144")
     private LastModifiedInfo getLastModified(Resource targetResource) {
         long lastModified = 0L;
         String lastModifiedBy = null;

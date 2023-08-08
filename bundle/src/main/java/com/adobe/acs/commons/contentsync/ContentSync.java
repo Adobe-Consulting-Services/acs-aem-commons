@@ -286,6 +286,7 @@ public class ContentSync {
         importer.importContent(contentNode, nodeName + ".json", contentStream, importOptions, null);
     }
 
+    @SuppressWarnings("squid:S112")
     public String createVersion(Resource resource) throws Exception {
         String revisionId = null;
         if (resource.isResourceType("cq:Page")) {

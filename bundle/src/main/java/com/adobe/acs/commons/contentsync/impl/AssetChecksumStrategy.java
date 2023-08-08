@@ -70,6 +70,7 @@ public class AssetChecksumStrategy implements UpdateStrategy {
     }
 
     @Override
+    @SuppressWarnings("squid:S2583")
     public String getMessage(CatalogItem remoteResource, Resource localResource) {
         String remoteChecksum = getChecksum(remoteResource);
         String localChecksum = getChecksum(localResource);
@@ -96,6 +97,7 @@ public class AssetChecksumStrategy implements UpdateStrategy {
         return remoteItem.getString(DAM_SHA1);
     }
 
+    @SuppressWarnings("squid:S1144")
     private String getChecksum(Resource targetResource) {
         if (targetResource == null) {
             return null;
