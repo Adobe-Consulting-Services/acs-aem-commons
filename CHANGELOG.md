@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## Fixed
+
+- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
   
