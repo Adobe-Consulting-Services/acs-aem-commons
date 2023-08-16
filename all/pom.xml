@@ -225,7 +225,6 @@
                     <plugin>
                         <groupId>org.apache.jackrabbit</groupId>
                         <artifactId>filevault-package-maven-plugin</artifactId>
-                        <inherited>false</inherited>
                         <executions>
                             <execution>
                                 <id>generate-metadata-cloud</id>
@@ -235,7 +234,6 @@
                                 <configuration>
                                     <classifier>cloud</classifier>
                                     <name>acs-aem-commons-all-cloud</name>
-                                    <packageType>container</packageType>
                                     <properties>
                                         <cloudManagerTarget>all</cloudManagerTarget>
                                     </properties>
