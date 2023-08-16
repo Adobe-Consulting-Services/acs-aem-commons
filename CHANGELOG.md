@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+
+## Added
+
+- #3159 - Add PageProperty annotation for Sling Models
+
 ## Fixed
 
 - #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.

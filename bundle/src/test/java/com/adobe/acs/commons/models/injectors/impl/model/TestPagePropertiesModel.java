@@ -17,29 +17,10 @@
  */
 package com.adobe.acs.commons.models.injectors.impl.model;
 
-import java.util.List;
-import java.util.Set;
 
-
-public interface TestHierarchicalPagePropertiesModel {
+public interface TestPagePropertiesModel {
 
     String getPagePropertyString();
-
     String getHierarchicalPagePropertyString();
 
-    String getUndefinedProperty();
-
-    boolean getPropertyBoolean();
-
-    int getPropertyInteger();
-
-    int[] getPropertyMultivaluePrimitiveInteger();
-
-    List<Integer> getPropertyMultivalueWrappedIntegerList();
-
-    String[] getPropertyMultivalueStringArray();
-
-    Set<Long> getPropertyUnsupportedType();
-
-    Double[] getPropertyMultivalueWrappedDoubleArray();
 }
