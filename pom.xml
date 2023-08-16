@@ -86,7 +86,7 @@
         <!-- the minimum AEM 6.5 version being supported -->
         <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
-        <aem.sdk.api.version>2023.6.12255.20230608T053118Z-230400</aem.sdk.api.version>
+        <aem.sdk.api.version>2023.1.10675.20230113T110236Z-220900</aem.sdk.api.version>
 
         <jacoco.version>0.8.7</jacoco.version>
         <!-- affects both m-compiler-p and m-javadoc-p-->
