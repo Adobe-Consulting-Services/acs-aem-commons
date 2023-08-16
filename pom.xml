@@ -217,6 +217,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
+# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
+Service-Component: OSGI-INF/*.xml
                                 ]]></bnd>
                             </configuration>
                         </execution>
