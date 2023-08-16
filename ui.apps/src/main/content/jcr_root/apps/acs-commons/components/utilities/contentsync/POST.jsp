@@ -21,6 +21,7 @@
     import="
     java.util.List,
     java.util.ArrayList,
+    java.util.Collection,
     java.util.Set,
     java.util.LinkedHashSet,
     java.util.stream.Collectors,
@@ -64,6 +65,7 @@
     String workflowModel = request.getParameter("workflowModel");
 	boolean incremental = request.getParameter("incremental") != null;
 	boolean createVersion = request.getParameter("createVersion") != null;
+	boolean delete = request.getParameter("delete") != null;
 
     ValueMap generalSettings = ConfigurationUtils.getSettingsResource(resourceResolver).getValueMap();
 
@@ -90,12 +92,15 @@
 
         out.println("building catalog from " + contentCatalog.getFetchURI(root, strategyPid) );
         out.flush();
-        List<CatalogItem> catalog = contentCatalog.fetch(root, strategyPid);
+        List<CatalogItem> catalog;
+        List<CatalogItem> remoteItems = contentCatalog.fetch(root, strategyPid);
         long t0 = System.currentTimeMillis();
-        out.println(catalog.size() + " resource"+(catalog.size() > 1 ? "s" : "")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
+        out.println(remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
         if(incremental){
-            catalog = contentCatalog.getDelta(catalog, resourceResolver, updateStrategy);
-            out.println(catalog.size() + " resource"+(catalog.size() > 1 ? "s" : "")+" modified");
+            catalog = contentCatalog.getDelta(remoteItems, resourceResolver, updateStrategy);
+            out.println(catalog.size() + " resource"+(catalog.size() == 1 ? "" : "s")+" modified");
+        } else {
+            catalog = remoteItems;
         }
 
         long count = 0;
@@ -181,6 +186,23 @@
             }
         }
 
+        if(delete){
+            Collection<String> remotePaths = remoteItems.stream().map(c -> c.getPath()).collect(Collectors.toList());
+            Collection<String> localPaths = updateStrategy.getItems(slingRequest).stream().map(c -> c.getPath()).collect(Collectors.toList());
+            localPaths.removeAll(remotePaths);
+            out.println();
+            for(String path : localPaths){
+				Resource res = resourceResolver.getResource(path);
+                if(res != null){
+                	out.println("deleting " + path);
+                    if(!dryRun) {
+                        if(res != null) {
+                            resourceResolver.delete(res);
+                        }
+                    }
+                }
+            }
+        }
 
         out.println();
         for(String parentPath : sortedNodes){

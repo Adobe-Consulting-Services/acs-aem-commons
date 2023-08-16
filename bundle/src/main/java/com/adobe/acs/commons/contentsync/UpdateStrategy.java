@@ -27,7 +27,7 @@ import java.util.List;
 public interface UpdateStrategy {
 
     /**
-     * This method is called on the remote instance when Content Sync requests the list of reosurces to sync
+     * This method is called on the remote instance when Content Sync requests the list of resources to sync
      *
      * @param request   the request from the Content Sync UI
      * @return  the list of resources to sync

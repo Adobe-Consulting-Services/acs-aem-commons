@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Page">
     <configure/>
     <jcr:content
@@ -74,27 +74,40 @@
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="cq/gui/components/coral/common/admin/timeline/events/workflow/datasources/models"/>
                         </workflow>
-                        <incremental
+                        <checkboxes
+                            granite:class="checkboxes-panel"
                             jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                            checked="{Boolean}true"
-                            name="incremental"
-                            text="Incremental Update. Will only copy new and changed resources"
-                            value="true"/>
-                        <revision
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                            name="createVersion"
-                            text="Create revision before update"
-                            value="true"/>
-                        <dryRun
-                            granite:class="notice-wide"
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                            checked="{Boolean}true"
-                            name="dryRun"
-                            text="Dry Run"
-                            value="false"/>
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                            <items jcr:primaryType="nt:unstructured">
+                                <incremental
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    checked="{Boolean}true"
+                                    name="incremental"
+                                    text="Incremental update. Will only copy new and changed resources"
+                                    value="true"/>
+                                <dryRun
+                                    granite:class="notice-wide"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    checked="{Boolean}true"
+                                    name="dryRun"
+                                    text="Dry Run"
+                                    value="false"/>
+                                <revision
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    name="createVersion"
+                                    text="Create revision before update"
+                                    value="true"/>
+                                <delete
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    name="delete"
+                                    text="Delete files that exist in the destination but not in the source"
+                                    value="true"/>
+                            </items>
+                        </checkboxes>
                         <submit
                             granite:id="executeQueryButton"
                             jcr:primaryType="nt:unstructured"
@@ -105,8 +118,7 @@
                         <iframe
                             granite:id="replication_status_iframe"
                             jcr:primaryType="nt:unstructured"
-                            sling:resourceType="acs-commons/components/utilities/contentsync/iframe"
-                            />
+                            sling:resourceType="acs-commons/components/utilities/contentsync/iframe"/>
                     </items>
                 </form>
             </items>
