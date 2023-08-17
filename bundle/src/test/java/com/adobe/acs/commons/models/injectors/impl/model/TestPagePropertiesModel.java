@@ -21,6 +21,7 @@ package com.adobe.acs.commons.models.injectors.impl.model;
 public interface TestPagePropertiesModel {
 
     String getPagePropertyString();
+
     String getHierarchicalPagePropertyString();
 
 }
