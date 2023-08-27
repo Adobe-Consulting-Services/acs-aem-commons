@@ -52,15 +52,11 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Import a series of content fragments from a spreadsheet
  */
 public class ContentFragmentImport extends ProcessDefinition {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ContentFragmentImport.class);
 
     public enum ReportColumns {
         ITEM, ACTION, DESCRIPTION, COUNT
