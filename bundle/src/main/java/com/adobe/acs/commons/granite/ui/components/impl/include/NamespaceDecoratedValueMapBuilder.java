@@ -26,9 +26,11 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.Iterator;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,8 +68,8 @@ public class NamespaceDecoratedValueMapBuilder {
      * @return
      */
     private boolean isResourceType(String resourceType){
-        if(request.getAttribute(REQ_ATTR_TEST_FLAG) != null &&
-                resourceType.equals(copyMap.get( SlingConstants.NAMESPACE_PREFIX +":"+SlingConstants.PROPERTY_RESOURCE_TYPE))){
+        if(request.getAttribute(REQ_ATTR_TEST_FLAG) != null
+                && resourceType.equals(copyMap.get( SlingConstants.NAMESPACE_PREFIX +":"+SlingConstants.PROPERTY_RESOURCE_TYPE))){
             return true;
         }else {
             return request.getResourceResolver().isResourceType(request.getResource(), request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE).toString());
@@ -77,9 +79,9 @@ public class NamespaceDecoratedValueMapBuilder {
     private void applyNameSpacing() {
         ;
         Supplier<Boolean> shouldConsiderNamespacing = () ->
-                request.getAttribute(REQ_ATTR_NAMESPACE) != null && (
-                        request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE) == null ||
-                        isResourceType(request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE).toString())
+                request.getAttribute(REQ_ATTR_NAMESPACE) != null
+                        && ( request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE) == null
+                        || isResourceType(request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE).toString())
                 );
 
         if (shouldConsiderNamespacing.get()) {
