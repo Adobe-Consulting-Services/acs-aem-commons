@@ -19,6 +19,7 @@ package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import com.adobe.acs.commons.util.TypeUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -26,6 +27,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -37,6 +39,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class NamespaceDecoratedValueMapBuilder {
 
+    public static final String REQ_ATTR_TEST_FLAG = "ACS_COMMONS_TEST_FLAG";
     private final SlingHttpServletRequest request;
 
     private final Map<String,Object> copyMap;
@@ -56,12 +59,27 @@ public class NamespaceDecoratedValueMapBuilder {
         this.applyNameSpacing();
     }
 
-    private void applyNameSpacing() {
+    /**
+     * Checks whether the resource type given is the request resource's resource type.
+     * Using a separate branch for unit tests, as the AEM Mocks are bugged (returns the jcr:primaryType instead)
+     * @param resourceType
+     * @return
+     */
+    private boolean isResourceType(String resourceType){
+        if(request.getAttribute(REQ_ATTR_TEST_FLAG) != null &&
+                resourceType.equals(copyMap.get( SlingConstants.NAMESPACE_PREFIX +":"+SlingConstants.PROPERTY_RESOURCE_TYPE))){
+            return true;
+        }else {
+            return request.getResourceResolver().isResourceType(request.getResource(), request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE).toString());
+        }
+    }
 
+    private void applyNameSpacing() {
+        ;
         Supplier<Boolean> shouldConsiderNamespacing = () ->
                 request.getAttribute(REQ_ATTR_NAMESPACE) != null && (
                         request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE) == null ||
-                        request.getResourceResolver().isResourceType(request.getResource(), request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE).toString())
+                        isResourceType(request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE).toString())
                 );
 
         if (shouldConsiderNamespacing.get()) {

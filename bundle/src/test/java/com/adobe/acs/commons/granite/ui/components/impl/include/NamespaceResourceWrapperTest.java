@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.REQ_ATTR_NAMESPACE;
-import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.PREFIX;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.*;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.NamespaceDecoratedValueMapBuilder.REQ_ATTR_TEST_FLAG;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,7 +54,6 @@ public class NamespaceResourceWrapperTest {
 
     private String[] properties = new String[]{"name"};
 
-    private String[] resourceTypesIgnoreChildren = new String[]{"ignore/resource/type"};
     @Before
     public void setUp() throws Exception {
 
@@ -132,6 +131,23 @@ public class NamespaceResourceWrapperTest {
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
 
         assertEquals("./block1/doubleField", someDoubleField.getValueMap().get("name", String.class));
+
+    }
+
+    @Test
+    public void test_namespacing_disabled_for_child() {
+
+        context.request().setAttribute(REQ_ATTR_NAMESPACE, "block1");
+        context.request().setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, "ignore/children/resource/type");
+        context.request().setAttribute(REQ_ATTR_TEST_FLAG, true);
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties);
+
+        Resource shouldIgnoreChildrenField = systemUnderTest.getChild("fieldWithChildrenThatShouldBeIgnored");
+
+        assertEquals("./block1/shouldIgnoreChildren", shouldIgnoreChildrenField.getValueMap().get("name", String.class));
+
+        Resource child = shouldIgnoreChildrenField.getChild("items/someRegularField");
+        assertEquals("./displayButton",child.getValueMap().get("name", String.class));
 
     }
 
