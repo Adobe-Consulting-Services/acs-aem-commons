@@ -1,3 +1,39 @@
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2023 AEM developer community
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
@@ -12,14 +48,26 @@ import com.day.cq.wcm.api.Page;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -54,7 +102,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
 
 
     @Override
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
+    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, LoginException {
         report.setName(instance.getName());
         instance.getInfo().setDescription("Bulk Tag AEM content Pages");
         instance.defineCriticalAction("Parse Excel File", rr, this::parseExcel);
