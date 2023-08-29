@@ -133,7 +133,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
 
 
             if (tagsRootPath == null) {
-                record(ReportRowSatus.FAILED_TO_PARSE,
+                recordAction(ReportRowSatus.FAILED_TO_PARSE,
                         "Abandoning Tag parsing. Unable to determine AEM Tags root (/content/cq:tags vs /etc/tags). Please ensure the path exists and is accessible by the user running Tag Creator.", "N/A");
                 return;
             }
@@ -183,10 +183,10 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
                         try {
                             rr.commit();
                             status = ReportRowSatus.UPDATED_EXISTING;
-                            record(status, page.getPath(), Arrays.toString(updatedTagsArray));
+                            recordAction(status, page.getPath(), Arrays.toString(updatedTagsArray));
                         } catch (PersistenceException e) {
                             status = ReportRowSatus.FAILED_TO_UPDATE;
-                            record(status, page.getPath(), Arrays.toString(updatedTagsArray));
+                            recordAction(status, page.getPath(), Arrays.toString(updatedTagsArray));
                             log.error(String.format("Unable to add tags to page with page path - %s ", page.getPath()));
                         }
 
@@ -247,7 +247,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
     }
 
 
-    private void record(BulkPageTagger.ReportRowSatus status, String pagePath, String tags) {
+    private void recordAction(BulkPageTagger.ReportRowSatus status, String pagePath, String tags) {
         final EnumMap<BulkPageTagger.ReportColumns, Object> row = new EnumMap<>(BulkPageTagger.ReportColumns.class);
 
         row.put(BulkPageTagger.ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
