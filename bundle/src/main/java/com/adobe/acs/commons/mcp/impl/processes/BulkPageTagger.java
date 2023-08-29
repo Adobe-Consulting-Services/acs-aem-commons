@@ -102,7 +102,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
 
 
     @Override
-    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, LoginException {
+    public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException {
         report.setName(instance.getName());
         instance.getInfo().setDescription("Bulk Tag AEM content Pages");
         instance.defineCriticalAction("Parse Excel File", rr, this::parseExcel);
@@ -122,6 +122,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
      * @param manager the manager
      * @throws Exception the exception
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public void parseExcel(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
             final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
@@ -158,6 +159,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
      * @param manager the manager
      * @throws Exception the exception
      */
+    @SuppressWarnings({"squid:S3776", "squid:S1141"})
     public void tagPages(ActionManager manager) throws Exception {
 
         manager.withResolver(rr -> {
