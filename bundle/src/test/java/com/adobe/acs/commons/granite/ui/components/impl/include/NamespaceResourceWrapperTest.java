@@ -54,6 +54,7 @@ public class NamespaceResourceWrapperTest {
 
     private String[] properties = new String[]{"name"};
 
+    private String[] resourceTypesIgnoreChildren = new String[]{"ignore/resource/type"};
     @Before
     public void setUp() throws Exception {
 
