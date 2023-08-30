@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2023 AEM developer community
+ * Copyright (C) 2013 - 2023 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
      * @param manager the manager
      * @throws Exception the exception
      */
-    @SuppressWarnings({"squid:S3776", "squid:S1141"})
+    @SuppressWarnings("squid:S112")
     public void parseExcel(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
             final XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
@@ -143,7 +143,7 @@ public class BulkPageTagger extends ProcessDefinition implements Serializable {
      * @param manager the manager
      * @throws Exception the exception
      */
-    @SuppressWarnings({"squid:S3776", "squid:S1141"})
+    @SuppressWarnings("squid:S112")
     public void tagPages(ActionManager manager) throws Exception {
 
         manager.withResolver(rr -> {
