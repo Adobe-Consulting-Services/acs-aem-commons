@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Fixed
 
+- #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
 - #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
