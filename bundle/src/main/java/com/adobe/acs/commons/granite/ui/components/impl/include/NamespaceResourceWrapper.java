@@ -23,6 +23,7 @@ import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 
 import javax.annotation.Nonnull;
@@ -37,10 +38,12 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
 
     private final SlingHttpServletRequest request;
     private final String[] namespacedProperties;
+
     private final ValueMap valueMap;
 
     public NamespaceResourceWrapper(@Nonnull Resource resource, @Nonnull ExpressionResolver expressionResolver,
-                                    @Nonnull SlingHttpServletRequest request, String[] namespacedProperties) {
+                                    @Nonnull SlingHttpServletRequest request,
+                                    String[] namespacedProperties) {
         super(resource, expressionResolver, request);
         this.expressionResolver = expressionResolver;
         this.request = request;
@@ -59,7 +62,7 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
             return null;
         }
 
-        NamespaceResourceWrapper wrapped =new  NamespaceResourceWrapper(child, expressionResolver, request,namespacedProperties);
+        NamespaceResourceWrapper wrapped =new NamespaceResourceWrapper(child, expressionResolver, request,namespacedProperties);
 
         if(!isVisible(wrapped)){
             return null;
