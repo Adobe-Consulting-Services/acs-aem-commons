@@ -33,7 +33,6 @@ import com.adobe.cq.dam.cfm.ContentFragmentException;
 import com.adobe.cq.dam.cfm.FragmentTemplate;
 import com.day.cq.commons.jcr.JcrConstants;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -48,21 +47,16 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Import a series of content fragments from a spreadsheet
  */
 public class ContentFragmentImport extends ProcessDefinition {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ContentFragmentImport.class);
 
     public enum ReportColumns {
         ITEM, ACTION, DESCRIPTION, COUNT
@@ -313,8 +307,14 @@ public class ContentFragmentImport extends ProcessDefinition {
             String value = getString(row, contentElement);
             String currentValue = contentElement.getContent();
 
+            String contentType;
+            if(StringUtils.isBlank(currentValue)) { // Workaround issue #3147
+                contentType = cf.getTemplate().getForElement(contentElement).getInitialContentType();
+            } else {
+                contentType = contentElement.getContentType();
+            }
             if (!String.valueOf(value).equals(String.valueOf(currentValue))) {
-                contentElement.setContent(value, contentElement.getContentType());
+                contentElement.setContent(value, contentType);
             }
         }
     }
@@ -351,14 +351,8 @@ public class ContentFragmentImport extends ProcessDefinition {
     protected ContentFragment getOrCreateFragment(Resource parent, Resource template, String name, String title) throws ContentFragmentException {
         Resource fragmentResource = parent.getChild(name);
         if (fragmentResource == null) {
-            try {
-                FragmentTemplate fragmentTemplate = template.adaptTo(FragmentTemplate.class);
-// TODO: Replace this reflection hack with the proper method once ACS Commons doesn't support 6.2 anymore
-                return (ContentFragment) MethodUtils.invokeMethod(fragmentTemplate, "createFragment", parent, name, title);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-                LOG.error("Unable to call createFragment method -- Is this 6.3 or newer?", ex);
-                return null;
-            }
+            FragmentTemplate fragmentTemplate = template.adaptTo(FragmentTemplate.class);
+            return fragmentTemplate.createFragment(parent, name, title);
         } else {
             return fragmentResource.adaptTo(ContentFragment.class);
         }
