@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Added
 
 - #3159 - Add PageProperty annotation for Sling Models
+- #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
 
 ## Fixed
 
