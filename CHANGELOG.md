@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+#3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
+
+
 ## Fixed
 
 - #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
