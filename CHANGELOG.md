@@ -9,10 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+
 - #3151 - New ContentSync utility
-
-#3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
-
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+- #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
 
 ## Fixed
 
