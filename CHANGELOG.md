@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3151 - New ContentSync utility
 - #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+
+## Added
+
+- #3159 - Add PageProperty annotation for Sling Models
 - #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
 
 ## Fixed

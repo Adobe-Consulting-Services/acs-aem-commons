@@ -33,15 +33,14 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Injects a hierarchical page property.
- * Traverses upwards in the page hierarchy until the property is found.
+ * Injects a page property.
  * Note: not supported by the javax.Inject annotation because of performance reasons. Only direct annotation is supported.
  */
 @Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @InjectAnnotation
 @Source(HierarchicalPagePropertyInjector.SOURCE)
-public @interface HierarchicalPageProperty {
+public @interface PageProperty {
 
 
     /**
@@ -50,11 +49,6 @@ public @interface HierarchicalPageProperty {
      */
     String value() default StringUtils.EMPTY;
 
-    /**
-     * Specifies if it should use the hierarchy to search for the page property.
-     * If false, it will only look at the current page.
-     */
-    boolean inherit() default true;
 
     /**
      * if set to REQUIRED injection is mandatory, if set to OPTIONAL injection is optional, in case of DEFAULT
