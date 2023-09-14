@@ -20,7 +20,8 @@ package com.adobe.acs.commons.redirectmaps.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,14 +41,12 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.testing.sling.MockResourceResolver;
 import org.apache.tika.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +75,6 @@ public class TestServlets {
 
     @Mock
     private Resource mockMapContentResource;
-
-    @Mock
-    private ResourceResolver resourceResolver;
 
 
     private Map<String, String> value = new HashMap<>();
@@ -297,6 +293,7 @@ public class TestServlets {
         log.info("testAddEntryServlet");
         AddEntryServlet servlet = new AddEntryServlet();
         servlet.doPost(mockSlingRequest, mockSlingResponse);
+
         log.info("REDIRECT MAP:\n" + value.get(JcrConstants.JCR_DATA));
         assertTrue(value.get(JcrConstants.JCR_DATA).contains("/source /target"));
         log.info("Test successful!");
