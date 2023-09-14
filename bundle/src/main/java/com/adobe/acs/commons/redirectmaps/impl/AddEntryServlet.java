@@ -22,12 +22,14 @@ import java.util.*;
 
 import javax.servlet.ServletException;
 
+import com.drew.lang.annotations.NotNull;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,15 +65,21 @@ public class AddEntryServlet extends SlingAllMethodsServlet {
         Resource resource = request.getResourceResolver().getResource(ETC_ACS_COMMONS_LISTS_COUNTRIES_JCR_CONTENT_LIST);
         if (Objects.nonNull(resource)) {
             countries = new HashMap<>();
+            @NotNull
             Iterable<Resource> children = resource.getChildren();
-            for (Resource childResource : children) {
-                String title = childResource.getValueMap().get("jcr:title", String.class);
-                String nodeValue = childResource.getValueMap().get("value", String.class);
-                countries.put(nodeValue, title);
+            if(children != null){
+                for (Resource childResource : children) {
+                    ValueMap valueMap = childResource.getValueMap();
+                    if (valueMap != null) {
+                        String title = valueMap.get("jcr:title", String.class);
+                        String nodeValue = valueMap.get("value", String.class);
+                        countries.put(nodeValue, title);
+                    }
+                }
             }
         }
         List<String> lines = RedirectEntriesUtils.readEntries(request);
-        if(CollectionUtils.isNotEmpty(lines)){
+        if(countries != null && !countries.isEmpty()){
             for (Map.Entry<String,String> country : countries.entrySet()) {
                 String genericSource = country.getKey()+":" +source;
                 String genericTarget= "/"+country.getKey()+"/"+country.getValue()+target;
