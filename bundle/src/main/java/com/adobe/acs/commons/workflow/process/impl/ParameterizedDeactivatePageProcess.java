@@ -51,12 +51,15 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
 
     private static final String AGENT_ARG = "replicationAgent";
+    private static final String ARG_REPLICATION_SUPPRESS_STATUS_UPDATE = "suppressStatusUpdate";
 
     private transient ThreadLocal<String[]> agentId = new ThreadLocal<String[]>();
+    private boolean suppressStatusUpdate = false;
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap args) throws WorkflowException {
         agentId.set(args.get(AGENT_ARG, new String[] {}));
+        this.suppressStatusUpdate = Boolean.parseBoolean(args.get(ARG_REPLICATION_SUPPRESS_STATUS_UPDATE, String.class));
         super.execute(workItem, workflowSession, args);
 
     }
@@ -78,6 +81,7 @@ public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
                 return ArrayUtils.contains(agentId.get(), agent.getId());
             }
         });
+        opts.setSuppressStatusUpdate(suppressStatusUpdate);
         return opts;
     }
 
