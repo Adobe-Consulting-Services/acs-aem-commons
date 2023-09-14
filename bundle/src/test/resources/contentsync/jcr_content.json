@@ -1,0 +1,107 @@
+{
+  "jcr:primaryType": "cq:PageContent",
+  "jcr:mixinTypes": [
+    "mix:versionable"
+  ],
+  "jcr:createdBy": "admin",
+  "jcr:title": "Test",
+  "cq:lastReplicationAction": "Activate",
+  "jcr:versionHistory": "cf2b4a68-8420-4c76-9e1a-c233e77de565",
+  "cq:lastReplicatedBy": "admin",
+  "jcr:predecessors": [
+    "621ac7f5-949e-4feb-9bdc-7cb5b1914dce"
+  ],
+  "jcr:created": "2023-06-29T19:12:49.925+03:00",
+  "cq:lastReplicated": "2023-07-03T13:16:01.601+03:00",
+  "cq:lastModified": "2022-12-19T12:54:37.988Z",
+  "sling:redirectStatus": 302,
+  "jcr:baseVersion": "621ac7f5-949e-4feb-9bdc-7cb5b1914dce",
+  "jcr:isCheckedOut": true,
+  "cq:conf": "/conf/test",
+  "acs:unknown": "unknown namespace. to be sanitized",
+  ":customBinaryProperty": 100,
+  "jcr:uuid": "5ec431ff-d63c-4459-a072-ddaeb7519d4f",
+  "sling:resourceType": "foundation/components/redirect",
+  "cq:allowedTemplates": [
+    "/apps/test/templates/.*",
+    "/conf/test/settings/wcm/templates/.*"
+  ],
+  "cq:designPath": "/etc/designs/test",
+  "cq:lastModifiedBy": "vadim.filatov",
+  "image": {
+    "jcr:primaryType": "nt:unstructured",
+    "file": {
+      "jcr:primaryType": "nt:file",
+      "jcr:createdBy": "admin",
+      "jcr:created": "2023-07-03T12:24:06.732+03:00",
+      "jcr:content": {
+        "jcr:primaryType": "nt:resource",
+        "jcr:mixinTypes": [
+          "dam:Thumbnails"
+        ],
+        "jcr:lastModifiedBy": "vadim.filatov",
+        "jcr:mimeType": "image/png",
+        "jcr:lastModified": "2022-12-19T12:54:32.332Z",
+        ":jcr:data": 1518,
+        "jcr:uuid": "6866ac8a-3d69-4be7-a5ea-1be1d26bc170",
+        "dam:thumbnails": {
+          "jcr:primaryType": "nt:folder",
+          "jcr:createdBy": "admin",
+          "jcr:created": "2023-07-03T12:24:06.733+03:00",
+          "dam:thumbnail_480.png": {
+            "jcr:primaryType": "nt:file",
+            "jcr:createdBy": "admin",
+            "jcr:created": "2023-07-03T12:24:06.733+03:00",
+            "jcr:content": {
+              "jcr:primaryType": "nt:resource",
+              "jcr:lastModifiedBy": "egor.kozlov",
+              "jcr:mimeType": "image/png",
+              "jcr:lastModified": "2023-05-24T10:36:11.395Z",
+              ":jcr:data": 1162,
+              "jcr:uuid": "ad554ca4-3e9b-4742-80c3-3cb0d6b465e6"
+            }
+          },
+          "dam:thumbnail_60.png": {
+            "jcr:primaryType": "nt:file",
+            "jcr:createdBy": "admin",
+            "jcr:created": "2023-07-03T12:24:06.733+03:00",
+            "jcr:content": {
+              "jcr:primaryType": "nt:resource",
+              "jcr:lastModifiedBy": "vadim.filatov",
+              "jcr:mimeType": "image/png",
+              "jcr:lastModified": "2023-05-26T12:32:39.157Z",
+              ":jcr:data": 1556,
+              "jcr:uuid": "4f06e735-8761-48d6-9d62-1a695d61fe68"
+            }
+          },
+          "dam:thumbnail_300.png": {
+            "jcr:primaryType": "nt:file",
+            "jcr:createdBy": "admin",
+            "jcr:created": "2023-07-03T12:24:06.734+03:00",
+            "jcr:content": {
+              "jcr:primaryType": "nt:resource",
+              "jcr:lastModifiedBy": "egor.kozlov",
+              "jcr:mimeType": "image/png",
+              "jcr:lastModified": "2023-05-24T10:36:11.395Z",
+              ":jcr:data": 1162,
+              "jcr:uuid": "a342e1bf-2f36-459e-be09-0c1a732f848b"
+            }
+          },
+          "dam:thumbnail_48.png": {
+            "jcr:primaryType": "nt:file",
+            "jcr:createdBy": "admin",
+            "jcr:created": "2023-07-03T12:24:06.734+03:00",
+            "jcr:content": {
+              "jcr:primaryType": "nt:resource",
+              "jcr:lastModifiedBy": "egor.kozlov",
+              "jcr:mimeType": "image/png",
+              "jcr:lastModified": "2023-05-24T10:36:11.396Z",
+              ":jcr:data": 1230,
+              "jcr:uuid": "880abe33-61ce-4176-83b0-56267fa1f44f"
+            }
+          }
+        }
+      }
+    }
+  }
+}

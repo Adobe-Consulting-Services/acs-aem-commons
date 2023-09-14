@@ -1,0 +1,13 @@
+.diagnosis-panel-with-margin {
+    margin-top: 1rem;
+    margin-left: 3rem;
+    margin-right: 3rem;
+}
+
+.panelWithMarginTop {
+    margin-top: 1.5rem;
+}
+
+.checkboxes-panel {
+    column-width: 400px;
+}

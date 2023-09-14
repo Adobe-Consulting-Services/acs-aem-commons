@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3151 - New ContentSync utility
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+
 ## 6.1.0 - 2023-09-08
 
 ## Added
