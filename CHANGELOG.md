@@ -10,17 +10,24 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.2.0 - 2023-09-14
+
+## Added
+
 - #3151 - New ContentSync utility
 - #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+- #3166 - New option to suppress status updates in replication workflow processes
 
+## Removed
+
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
+  
 ## 6.1.0 - 2023-09-08
 
 ## Added
 
 - #3159 - Add PageProperty annotation for Sling Models
 - #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
-- #3166 - New option to suppress status updates in replication workflow processes
-
 ## Fixed
 
 - #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
@@ -29,10 +36,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
 
-## Removed
-
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
-  
 ## 6.0.14 - 2023-07-11
 
 ## Fixed
