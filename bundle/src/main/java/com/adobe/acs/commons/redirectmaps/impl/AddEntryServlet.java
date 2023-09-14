@@ -29,8 +29,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.graalvm.util.CollectionsUtil;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +63,6 @@ public class AddEntryServlet extends SlingAllMethodsServlet {
         Resource resource = request.getResourceResolver().getResource(ETC_ACS_COMMONS_LISTS_COUNTRIES_JCR_CONTENT_LIST);
         if (Objects.nonNull(resource)) {
             countries = new HashMap<>();
-            @NotNull
             Iterable<Resource> children = resource.getChildren();
             for (Resource childResource : children) {
                 String title = childResource.getValueMap().get("jcr:title", String.class);
