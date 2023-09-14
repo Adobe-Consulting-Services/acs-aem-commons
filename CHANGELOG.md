@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.0.15 - 2023-09-14
+
+## Changed
+
+- #3177 - Redirect Mapper: Automate creation of vanity URLs for each country
+
+
 ## Fixed
 
 - #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
