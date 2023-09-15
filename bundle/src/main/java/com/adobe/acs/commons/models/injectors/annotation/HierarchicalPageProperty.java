@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.models.injectors.annotation;
 
 
+import com.adobe.acs.commons.models.injectors.impl.HierarchicalPagePropertyInjector;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -39,20 +40,21 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @InjectAnnotation
-@Source(HierarchicalPageProperty.SOURCE)
+@Source(HierarchicalPagePropertyInjector.SOURCE)
 public @interface HierarchicalPageProperty {
 
-    /**
-     * Source value used for this annotation.
-     * @see Source
-     */
-    String SOURCE = "hierarchical-page-property";
 
     /**
      * Specifies the name of the value from the value map to take.
      * If empty, then the name is derived from the method or field.
      */
     String value() default StringUtils.EMPTY;
+
+    /**
+     * Specifies if it should use the hierarchy to search for the page property.
+     * If false, it will only look at the current page.
+     */
+    boolean inherit() default true;
 
     /**
      * if set to REQUIRED injection is mandatory, if set to OPTIONAL injection is optional, in case of DEFAULT

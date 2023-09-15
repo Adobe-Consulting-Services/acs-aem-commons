@@ -23,7 +23,9 @@ import java.util.Set;
 
 public interface TestHierarchicalPagePropertiesModel {
 
-    String getPropertyString();
+    String getPagePropertyString();
+
+    String getHierarchicalPagePropertyString();
 
     String getUndefinedProperty();
 

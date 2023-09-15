@@ -18,11 +18,13 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.HierarchicalPageProperty;
+import com.adobe.acs.commons.models.injectors.annotation.PageProperty;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.wcm.api.Page;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
@@ -42,15 +44,22 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
 )
 public class HierarchicalPagePropertyInjector implements Injector {
 
+    /**
+     * Source value used for injector
+     *
+     * @see Source
+     */
+    public static final String SOURCE = "hierarchical-page-property";
+
     @Override
     public String getName() {
-        return HierarchicalPageProperty.SOURCE;
+        return SOURCE;
     }
 
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element,
                            DisposalCallbackRegistry callbackRegistry) {
 
-        if (!element.isAnnotationPresent(HierarchicalPageProperty.class)) {
+        if (!(element.isAnnotationPresent(HierarchicalPageProperty.class) || element.isAnnotationPresent(PageProperty.class))) {
             //skipping javax.Inject for performance reasons. Only supports direct injection.
             return null;
         }
@@ -59,8 +68,12 @@ public class HierarchicalPagePropertyInjector implements Injector {
         if (currentResource != null) {
             Resource adaptableRes = lookUpFromPage(currentResource);
             if (adaptableRes != null) {
-                InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(adaptableRes);
-                return ReflectionUtil.convertValueMapValue(inheritanceValueMap, name, declaredType);
+                if (element.isAnnotationPresent(PageProperty.class) || !element.getAnnotation(HierarchicalPageProperty.class).inherit()) {
+                    return ReflectionUtil.convertValueMapValue(adaptableRes.getValueMap(), name, declaredType);
+                } else {
+                    InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(adaptableRes);
+                    return ReflectionUtil.convertValueMapValue(inheritanceValueMap, name, declaredType);
+                }
             }
 
         }

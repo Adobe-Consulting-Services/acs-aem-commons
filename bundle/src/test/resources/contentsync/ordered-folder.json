@@ -1,0 +1,8 @@
+{
+  "jcr:primaryType": "sling:OrderedFolder",
+  "jcr:createdBy": "john.doe",
+  "jcr:title": "Wknd Fragments",
+  "cq:adobeTargetExportFormat": "html",
+  "jcr:created": "2021-09-02T15:06:55.647Z",
+  "cq:allowedTemplates": ["/conf/wknd/settings/wcm/templates/(?!page-).*"]
+  }
