@@ -88,6 +88,9 @@ jobs:
       - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
 
+      - name: ${{ matrix.namePrefix }} Build cloud all package with Maven ${{ env.STEP_NAME_SUFFIX }}
+        run: mvn -e -B -V -pl all -P cloud ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
+
       - name: Publish Test Report
         if: ${{ always() }} # make sure to run even if previous Maven execution failed (due to failed test)
         uses: scacap/action-surefire-report@v1
