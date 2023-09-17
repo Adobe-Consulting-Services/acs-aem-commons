@@ -45,7 +45,6 @@
             <plugin>
                 <groupId>org.apache.jackrabbit</groupId>
                 <artifactId>filevault-package-maven-plugin</artifactId>
-                <inherited>false</inherited>
                 <configuration>
                     <packageType>container</packageType>
                 </configuration>
@@ -237,7 +236,6 @@
                     <plugin>
                         <groupId>org.apache.jackrabbit</groupId>
                         <artifactId>filevault-package-maven-plugin</artifactId>
-                        <inherited>false</inherited>
                         <executions>
                             <execution>
                                 <id>generate-metadata-cloud</id>
