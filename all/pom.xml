@@ -65,21 +65,21 @@
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
                                 </embedded>
-                            </embeddeds>
-                            <subPackages>
-                                <subPackage>
+                                <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                    <target>/apps/acs-commons/install</target>
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
-                                </subPackage>
-                                <subPackage>
+                                </embedded>
+                                <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
+                                    <target>/apps/acs-commons/install</target>
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
-                                </subPackage>
-                            </subPackages>
+                                </embedded>
+                            </embeddeds>
                         </configuration>
                     </execution>
                 </executions>

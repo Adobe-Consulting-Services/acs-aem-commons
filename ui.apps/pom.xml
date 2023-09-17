@@ -54,6 +54,7 @@
                         <id>default-package</id>
                         <goals>
                             <goal>generate-metadata</goal>
+                            <goal>package</goal>
                         </goals>
                         <configuration>
                             <dependencies>
@@ -69,6 +70,7 @@
                         <id>cloud-package</id>
                         <goals>
                             <goal>generate-metadata</goal>
+                            <goal>package</goal>
                         </goals>
                         <configuration>
                             <classifier>cloud</classifier>
