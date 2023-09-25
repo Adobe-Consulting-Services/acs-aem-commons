@@ -51,10 +51,9 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>default-package</id>
+                        <id>default-metadata</id>
                         <goals>
                             <goal>generate-metadata</goal>
-                            <goal>package</goal>
                         </goals>
                         <configuration>
                             <dependencies>
@@ -67,10 +66,9 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>cloud-package</id>
+                        <id>cloud-metadata</id>
                         <goals>
                             <goal>generate-metadata</goal>
-                            <goal>package</goal>
                         </goals>
                         <configuration>
                             <classifier>cloud</classifier>
@@ -81,6 +79,15 @@
                                     <version>[6.6,)</version><!-- version shipped with AEM Cloud SDK -->
                                 </dependency>
                             </dependencies>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cloud-package</id>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>cloud</classifier>
                         </configuration>
                     </execution>
                 </executions>

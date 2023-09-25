@@ -50,7 +50,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>on-prem-package</id>
+                        <id>default-metadata</id>
                         <goals>
                             <goal>generate-metadata</goal>
                         </goals>
@@ -238,7 +238,7 @@
                         <artifactId>filevault-package-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>generate-metadata-cloud</id>
+                                <id>default-metadata</id>
                                 <goals>
                                     <goal>generate-metadata</goal>
                                 </goals>
@@ -280,11 +280,6 @@
                                         </embedded>
                                     </embeddeds>
                                 </configuration>
-                            </execution>
-                            <execution>
-                                <id>on-prem-package</id>
-                                <!-- Disable configuration coming from default package (like on-prem dependencies -->
-                                <phase>none</phase>
                             </execution>
                             <execution>
                                 <id>cloud-package</id>
