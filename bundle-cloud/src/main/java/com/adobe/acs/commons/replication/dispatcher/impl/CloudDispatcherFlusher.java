@@ -21,38 +21,33 @@ package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
-import com.day.cq.replication.Agent;
-import com.day.cq.replication.AgentFilter;
-import com.day.cq.replication.AgentManager;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationException;
-import com.day.cq.replication.ReplicationResult;
+import com.day.cq.replication.*;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.distribution.DistributionRequest;
-import org.apache.sling.distribution.DistributionRequestType;
-import org.apache.sling.distribution.DistributionResponse;
-import org.apache.sling.distribution.Distributor;
-import org.apache.sling.distribution.SimpleDistributionRequest;
+import org.apache.sling.distribution.*;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.propertytypes.ServiceRanking;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @ServiceRanking(-5000)
+@Designate(ocd = CloudDispatcherFlusher.Config.class)
 public class CloudDispatcherFlusher implements DispatcherFlusher {
 
     private static final Logger log = LoggerFactory.getLogger(CloudDispatcherFlusher.class);
 
-    // Default agent name
-    private static final String PUBLISH_AGENT_NAME = "publish";
+    @ObjectClassDefinition
+    @interface Config {
+        @AttributeDefinition(description = "Agent names to trigger when executing a distribute invalidate (ex. publish, preview)")
+        String[] agent_names() default {"publish"};
+    }
 
     @Reference
     private Distributor distributor;
@@ -60,14 +55,23 @@ public class CloudDispatcherFlusher implements DispatcherFlusher {
     @Reference
     private AgentManager agentManager;
 
+    private String[] agentNames;
+
+    @Activate
+    protected void activate(Config config) {
+        this.agentNames = config.agent_names();
+    }
+
     @Override
     public Map<Agent, ReplicationResult> flush(ResourceResolver resourceResolver, String... paths) {
-        DistributionRequest distributionRequest = new SimpleDistributionRequest(DistributionRequestType.INVALIDATE, false, paths);
-        DistributionResponse distributionResponse = distributor.distribute(PUBLISH_AGENT_NAME, resourceResolver, distributionRequest);
         Map<Agent, ReplicationResult> result = new HashMap<>();
-        Agent agent = agentManager.getAgents().get(PUBLISH_AGENT_NAME);
-        if (agent != null) {
-            result.put(agent, toReplicationResult(distributionResponse));
+        DistributionRequest distributionRequest = new SimpleDistributionRequest(DistributionRequestType.INVALIDATE, false, paths);
+        for (String agentName : agentNames) {
+            DistributionResponse distributionResponse = distributor.distribute(agentName, resourceResolver, distributionRequest);
+            Agent agent = agentManager.getAgents().get(agentName);
+            if (agent != null) {
+                result.put(agent, toReplicationResult(distributionResponse));
+            }
         }
         log.debug("Executed dispatcher flush for paths {}", Arrays.asList(paths));
         return result;
