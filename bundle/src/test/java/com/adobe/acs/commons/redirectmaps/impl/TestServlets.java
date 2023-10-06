@@ -302,7 +302,7 @@ public class TestServlets {
     @Test
     public void testAddEntryServlet() throws ServletException, IOException {
         log.info("testAddEntryServlet");
-        AddEntryServlet servlet = new AddEntryServlet();
+        final AddEntryServlet servlet = new AddEntryServlet();
         when(mockSlingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(mockResource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getResource(any())).thenReturn(mockResource);
