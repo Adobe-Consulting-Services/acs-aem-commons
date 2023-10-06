@@ -18,12 +18,14 @@
 package com.adobe.acs.commons.redirectmaps.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletException;
 
 import com.drew.lang.annotations.NotNull;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
