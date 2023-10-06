@@ -72,6 +72,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
     private static final String ARG_REPLICATION_ACTION_TYPE = "replicationActionType";
     private static final String ARG_REPLICATION_SYNCHRONOUS = "synchronous";
+    private static final String ARG_REPLICATION_SUPPRESS_STATUS_UPDATE = "suppressStatusUpdate";
     private static final String ARG_REPLICATION_SUPPRESS_VERSIONS = "suppressVersions";
     private static final String ARG_THROTTLE = "throttle";
     private static final String ARG_AGENTS = "agents";
@@ -160,6 +161,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
             }
             replicationOptions.setSynchronous(Boolean.parseBoolean(data.get(ARG_REPLICATION_SYNCHRONOUS)));
             replicationOptions.setSuppressVersions(Boolean.parseBoolean(data.get(ARG_REPLICATION_SUPPRESS_VERSIONS)));
+            replicationOptions.setSuppressStatusUpdate(Boolean.parseBoolean(data.get(ARG_REPLICATION_SUPPRESS_STATUS_UPDATE)));
 
             agents = Arrays.asList(StringUtils.split(data.get(ARG_AGENTS), ","));
         }

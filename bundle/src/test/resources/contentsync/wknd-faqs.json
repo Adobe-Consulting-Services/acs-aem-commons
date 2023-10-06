@@ -1,0 +1,301 @@
+{
+  "jcr:primaryType": "cq:PageContent",
+  "jcr:mixinTypes": [],
+  "jcr:createdBy": "admin",
+  "jcr:title": "FAQs",
+  "cq:template": "/conf/wknd/settings/wcm/templates/content-page-template",
+  "jcr:created": "2023-07-03T11:58:31.272+03:00",
+  "cq:lastModified": "2020-07-07T17:58:17.582-07:00",
+  "jcr:description": "Here we answer some of the questions that we hear most often from the community.",
+  "cq:tags": [],
+  "sling:resourceType": "wknd/components/page",
+  "cq:lastModifiedBy": "admin",
+  "root": {
+    "jcr:primaryType": "nt:unstructured",
+    "sling:resourceType": "wknd/components/container",
+    "container": {
+      "jcr:primaryType": "nt:unstructured",
+      "jcr:lastModifiedBy": "admin",
+      "layout": "responsiveGrid",
+      "jcr:lastModified": "2020-07-07T17:56:59.701-07:00",
+      "sling:resourceType": "wknd/components/container",
+      "cq:styleIds": ["1554340406437"],
+      "container": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:createdBy": "admin",
+        "jcr:lastModifiedBy": "admin",
+        "layout": "responsiveGrid",
+        "jcr:lastModified": "2020-07-07T17:57:13.729-07:00",
+        "sling:resourceType": "wknd/components/container",
+        "cq:responsive": {
+          "jcr:primaryType": "nt:unstructured",
+          "default": {
+            "jcr:primaryType": "nt:unstructured",
+            "offset": "0",
+            "width": "8"
+            },
+          "tablet": {
+            "jcr:primaryType": "nt:unstructured",
+            "offset": "0",
+            "width": "12"
+            },
+          "phone": {
+            "jcr:primaryType": "nt:unstructured",
+            "offset": "0",
+            "width": "12"
+            }
+          },
+        "title": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:lastModified": "2019-10-14T09:28:37.553-07:00",
+          "sling:resourceType": "wknd/components/title",
+          "cq:styleIds": ["1568996484405"],
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "phone": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "12"
+              }
+            }
+          },
+        "image": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "fileReference": "/content/dam/wknd-shared/en/adventures/climbing-new-zealand/adobestock-277768563.jpeg",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:lastModified": "2019-10-25T16:02:31.787-07:00",
+          "sling:resourceType": "wknd/components/image",
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "default": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "8"
+              }
+            }
+          },
+        "text": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "jcr:lastModifiedBy": "admin",
+          "text": "<p>WKND is a collective of outdoors, music, crafts, adventure sports, and travel enthusiasts that want to share our experiences, connections, and expertise with the world. Our objective is create a community to help like-minded adventure seekers find fun, engaging, and responsible ways to to enjoy life and create lasting memories.</p>\n",
+          "jcr:lastModified": "2019-10-25T11:13:10.055-07:00",
+          "sling:resourceType": "wknd/components/text",
+          "textIsRich": "true",
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "phone": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "12"
+              },
+            "default": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "8"
+              }
+            }
+          },
+        "accordion": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "headingElement": "h3",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:lastModified": "2019-10-25T11:15:13.801-07:00",
+          "singleExpansion": "false",
+          "sling:resourceType": "wknd/components/accordion",
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "phone": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "12"
+              }
+            },
+          "item_1571070731882": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:panelTitle": "Who is WKND's intended audience?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>We believe the best adventures and activities are those that are accessible to everyone. WKND is designed to be inclusive of all age ranges, abilities, and budget-levels. We strive to cater to the thrill-seeking adrenaline junkie BASE-jumpers as well as novices that have a spare weekend and interest in trying something new.&nbsp; &nbsp;&nbsp;</p>\n",
+              "jcr:lastModified": "2019-10-25T11:16:36.508-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true"
+              }
+            },
+          "item_1": {
+            "jcr:primaryType": "nt:unstructured",
+            "jcr:title": "Item 1",
+            "cq:panelTitle": "How does WKND pay for itself?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>WKND charges a small fee for local promoters that want to sponsor their adventures and events on the WKND site.&nbsp; Sponsored Adventures may get sorted to more prominent positions in our Adventures listings pages.</p>\n<h3>&nbsp;</h3>\n",
+              "jcr:lastModified": "2019-10-25T11:17:16.517-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true"
+              }
+            },
+          "item_2": {
+            "jcr:primaryType": "nt:unstructured",
+            "jcr:title": "Item 2",
+            "cq:panelTitle": "Can I contribute to WKND?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>Yes!&nbsp; If you have the expertise and&nbsp;experiences&nbsp;to share, we’ll provide the platform to spread it.&nbsp; As a Guest Writer, you will play an integral role in helping people find fun and cool things to do in your community.</p>\n",
+              "jcr:lastModified": "2019-10-25T11:17:39.663-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true"
+              }
+            },
+          "item_1571070705187": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:panelTitle": "How often is WKDN updated?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>WKND is updated daily to provide you with the latest in-depth articles on fun activities that we’ve recently exploring and new adventures that are available for you to discover.&nbsp; Come back often to see the latest or subscribe to our social feeds.</p>\n",
+              "jcr:lastModified": "2019-10-25T11:18:11.562-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true"
+              }
+            },
+          "item_1571070718887": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:panelTitle": "When was WKND founded?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>WKND was created in 2015 when our founders, Daniel and Kilian, realized that their friends and family were constantly using them as resources to find fun things to do while they were in Los Angeles. They loved sharing ideas about fun events and activities they knew of, but wanted to be able to do it at larger scale across communities.&nbsp; They decided to start WKND as a way to share their insights and experiences with as many people as possible.&nbsp; &nbsp;&nbsp;</p>\n",
+              "jcr:lastModified": "2019-10-25T11:18:36.836-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true"
+              }
+            },
+          "item_1572027287775": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:panelTitle": "Is a hot dog a sandwich?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>While it may be described as meat between two pieces of bread, a hot dog is just a sandwich in the same way Michael Jordan was just a basketball player or William Shakespeare was just a playwright.&nbsp; Technically true, but vastly understated.</p>\n",
+              "jcr:lastModified": "2019-10-25T11:19:08.411-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true"
+              }
+            },
+          "item_1572027298182": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:panelTitle": "Is WKND a real company?",
+            "sling:resourceType": "wknd/components/container",
+            "text": {
+              "jcr:primaryType": "nt:unstructured",
+              "jcr:createdBy": "admin",
+              "jcr:lastModifiedBy": "admin",
+              "text": "<p>No. The WKND is a fictional online magazine and adventure company that focuses on outdoor activities and trips across the globe. The WKND site is designed to demonstrate functionality for Adobe Experience Manager. There is also a corresponding tutorial that walks a developer through the development.&nbsp; Special thanks to&nbsp;<b>Lorenzo Buosi&nbsp;</b>and<b>&nbsp;Kilian Amendola&nbsp;</b>who&nbsp;created the beautiful design for the WKND site.</p>\n",
+              "jcr:lastModified": "2019-10-25T11:19:41.501-07:00",
+              "sling:resourceType": "wknd/components/text",
+              "textIsRich": "true",
+              "cq:responsive": {
+                "jcr:primaryType": "nt:unstructured",
+                "default": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "offset": "0",
+                  "width": "12"
+                  }
+                }
+              }
+            }
+          }
+        },
+      "container_293505757": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:createdBy": "admin",
+        "jcr:lastModifiedBy": "admin",
+        "jcr:lastModified": "2019-10-14T10:20:06.270-07:00",
+        "sling:resourceType": "wknd/components/container",
+        "cq:responsive": {
+          "jcr:primaryType": "nt:unstructured",
+          "default": {
+            "jcr:primaryType": "nt:unstructured",
+            "offset": "1",
+            "width": "3"
+            },
+          "tablet": {
+            "jcr:primaryType": "nt:unstructured",
+            "offset": "0",
+            "width": "12"
+            },
+          "phone": {
+            "jcr:primaryType": "nt:unstructured",
+            "offset": "0",
+            "width": "12"
+            }
+          },
+        "separator": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:lastModified": "2019-10-14T13:49:29.760-07:00",
+          "sling:resourceType": "wknd/components/separator",
+          "cq:styleIds": [
+            "1571075919520",
+            "1571075910473"
+          ]
+          },
+        "title": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "jcr:title": "Need more help?",
+          "jcr:lastModifiedBy": "admin",
+          "type": "h3",
+          "jcr:lastModified": "2019-10-14T10:21:13.842-07:00",
+          "sling:resourceType": "wknd/components/title",
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "phone": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "12"
+              }
+            }
+          },
+        "text": {
+          "jcr:primaryType": "nt:unstructured",
+          "jcr:createdBy": "admin",
+          "jcr:lastModifiedBy": "admin",
+          "text": "<p style=\"text-align: left;\">Give us a call at <a href=\"#\">1-800-800-0000</a>.<br>\r\nE-mail us at info<a href=\"#\">@wknd.com</a><br>\r\nWe love to talk adventures!</p>\r\n",
+          "jcr:lastModified": "2019-10-14T10:31:09.107-07:00",
+          "sling:resourceType": "wknd/components/text",
+          "textIsRich": "true",
+          "cq:styleIds": ["1571074070335"],
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "phone": {
+              "jcr:primaryType": "nt:unstructured",
+              "offset": "0",
+              "width": "12"
+              }
+            }
+          }
+        }
+      }
+    }
+  }

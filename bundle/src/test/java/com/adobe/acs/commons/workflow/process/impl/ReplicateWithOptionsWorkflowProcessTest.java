@@ -200,10 +200,57 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         verifyNoInteractions(throttledTaskRunner);
     }
 
+    @Test
+    public void testExecuteDeactivateWithSupressStatusUpdate() throws Exception {
+        when(workflowPackageManager.getPaths(context.resourceResolver(), "/content/payload"))
+            .thenReturn(Arrays.asList("/content/page", "/content/asset"));
+
+        StringBuilder args = new StringBuilder();
+        args.append("replicationActionType=Deactivate");
+        args.append(System.lineSeparator());
+        args.append("agents=agent1");
+        args.append(System.lineSeparator());
+        args.append("suppressStatusUpdate=true");
+
+        when(metaDataMap.get(WorkflowHelper.PROCESS_ARGS, "")).thenReturn(args.toString());
+        process.execute(workItem, workflowSession, metaDataMap);
+
+        ReplicationOptionsMatcher optionsMatcher = new ReplicationOptionsMatcher().withSuppressStatusUpdate(true);
+
+        verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page"), argThat(optionsMatcher));
+        verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
+        verifyNoMoreInteractions(replicator);
+        verifyNoInteractions(throttledTaskRunner);
+    }
+
+    @Test
+    public void testExecuteDeactivateWithSupressStatusUpdateFalse() throws Exception {
+        when(workflowPackageManager.getPaths(context.resourceResolver(), "/content/payload"))
+            .thenReturn(Arrays.asList("/content/page", "/content/asset"));
+
+        StringBuilder args = new StringBuilder();
+        args.append("replicationActionType=Deactivate");
+        args.append(System.lineSeparator());
+        args.append("agents=agent1");
+        args.append(System.lineSeparator());
+        args.append("suppressStatusUpdate=false");
+
+        when(metaDataMap.get(WorkflowHelper.PROCESS_ARGS, "")).thenReturn(args.toString());
+        process.execute(workItem, workflowSession, metaDataMap);
+
+        ReplicationOptionsMatcher optionsMatcher = new ReplicationOptionsMatcher().withSuppressStatusUpdate(false);
+
+        verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page"), argThat(optionsMatcher));
+        verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
+        verifyNoMoreInteractions(replicator);
+        verifyNoInteractions(throttledTaskRunner);
+    }
+
     private static class ReplicationOptionsMatcher implements ArgumentMatcher<ReplicationOptions> {
 
         private String filterAgentId;
         private boolean brandPortalFilter;
+        private boolean suppressStatusUpdate;
 
         public ReplicationOptionsMatcher withAgentIdFilter(String filterAgentId) {
             this.filterAgentId = filterAgentId;
@@ -212,6 +259,11 @@ public class ReplicateWithOptionsWorkflowProcessTest {
 
         public ReplicationOptionsMatcher withBrandPortalFilter() {
             this.brandPortalFilter = true;
+            return this;
+        }
+
+        public ReplicationOptionsMatcher withSuppressStatusUpdate(boolean suppressStatusUpdate) {
+            this.suppressStatusUpdate = suppressStatusUpdate;
             return this;
         }
 
@@ -226,6 +278,9 @@ public class ReplicateWithOptionsWorkflowProcessTest {
             }
             if (brandPortalFilter) {
                 matches = matches && options.getFilter() instanceof BrandPortalAgentFilter;
+            }
+            if (suppressStatusUpdate) {
+                matches = matches && options.isSuppressStatusUpdate();
             }
             return matches;
         }

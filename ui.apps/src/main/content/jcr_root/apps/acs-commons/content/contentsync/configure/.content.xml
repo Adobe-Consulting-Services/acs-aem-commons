@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Content Sync - Configure AEM Environments"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        consoleId="contentsyncHosts"
+        contentPath="/content"
+        currentView="${state[&quot;shell.collectionpage.layoutId&quot;].string}"
+        modeGroup="contentsync-hosts-task-collection"
+        pageURITemplate="/libs/granite/operations/content/diagnosis.html"
+        targetCollection=".contentsync-hosts-task-collection">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[coralui3,granite.ui.coral.foundation,acs-commons.contentsync]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <card
+                granite:class="contentsync-hosts-task-collection"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Card View"
+                sling:resourceType="granite/ui/components/coral/foundation/masonry"
+                icon="viewCard"
+                layoutId="card"
+                limit="{Long}20"
+                selectionCount="single"
+                selectionMode="{Boolean}false"
+                size="40"
+                stateId="shell.collectionpage">
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="acs-commons/components/utilities/contentsync/configure/configurehostdatasource"
+                    itemResourceType="acs-commons/components/utilities/contentsync/configure/configurehostentry"
+                    limit="10"
+                    offset="0"
+                    path="${requestPathInfo.suffix}"/>
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    foundation-mode-group="contentsync-hosts-task-collection"/>
+            </card>
+        </views>
+        <actions jcr:primaryType="nt:unstructured">
+            <primary jcr:primaryType="nt:unstructured">
+                <configure
+                    granite:class="foundation-toggleable-control"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    href="#"
+                    icon="gear"
+                    text="General Settings"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-toggleable-control-action="show"
+                        foundation-toggleable-control-target="#modalGeneralSettings"/>
+                </configure>
+                <back
+                    granite:hidden="{Boolean}true"
+                    granite:id="backButton"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/libs/granite/operations/content/healthreports/healthreportlist.html"
+                    icon="chevronLeft"
+                    variant="actionBar"/>
+                <add
+                    granite:class="foundation-toggleable-control"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    href="#"
+                    icon="addCircle"
+                    text="Add Host"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-toggleable-control-action="show"
+                        foundation-toggleable-control-target="#modalConfigureHost"/>
+                </add>
+            </primary>
+            <secondary jcr:primaryType="nt:unstructured"/>
+            <selection jcr:primaryType="nt:unstructured">
+                <configure
+                    granite:hidden="{Boolean}true"
+                    granite:id="configureHealthCheckButton"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    foundation-collection-action="\{&quot;target&quot;:&quot;.granite-health-reports-collection&quot;, &quot;activeSelectionCount&quot;:&quot;single&quot;}"
+                    href="/system/console/configMgr"
+                    icon="gear"
+                    target="_blank"
+                    text="Configure"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip"/>
+                <view
+                    granite:hidden="{Boolean}true"
+                    granite:id="viewHealthCheckDetailsButton"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/system/console/configMgr"
+                    icon="browse"
+                    text="View"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip"/>
+                <delete
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="acs-commons.dashboard.task.delete"
+                    activeSelectionCount="single"
+                    href=""
+                    icon="delete"
+                    target=".contentsync-hosts-task-collection"
+                    text="Delete"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip"/>
+            </selection>
+        </actions>
+        <footer
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+                <create
+                    granite:id="modalConfigureHost"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Configure AEM Host To Sync"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <items jcr:primaryType="nt:unstructured">
+                        <form
+                            granite:id="createHostForm"
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Configure Host"
+                            sling:resourceType="granite/ui/components/coral/foundation/form"
+                            action="/var/acs-commons/contentsync/hosts/*"
+                            async="{Boolean}true"
+                            enctype="application/x-www-form-urlencoded"
+                            foundationForm="{Boolean}true"
+                            method="POST"
+                            style="vertical">
+                            <items jcr:primaryType="nt:unstructured">
+                                <host
+                                    granite:id="configureHost-host"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    emptyText="http://localhost:4502"
+                                    name="./host"/>
+                                <username
+                                    granite:id="configureHost-username"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    emptyText="username"
+                                    name="./username"/>
+                                <password
+                                    granite:id="configureHost-password"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/password"
+                                    emptyText="password"
+                                    name="./password"/>
+                                <resourceType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    ignoreData="{Boolean}true"
+                                    name="./sling:resourceType"
+                                    value="acs-commons/components/utilities/contentsync/configure/configurehostentry"/>
+                                <primaryType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:primaryType"
+                                    value="nt:unstructured"/>
+                            </items>
+                            <successresponse
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"
+                                target=".cq-workflow-admin-models"/>
+                        </form>
+                    </items>
+                    <footer jcr:primaryType="nt:unstructured">
+                        <cancel
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Cancel">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </cancel>
+                        <submit
+                            granite:id="createHostFormSubmitBtn"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            formId="createHostForm"
+                            text="Submit"
+                            type="submit"
+                            variant="primary">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </submit>
+                    </footer>
+                </create>
+                <general_settings
+                    granite:id="modalGeneralSettings"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="General Settings"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <items jcr:primaryType="nt:unstructured">
+                        <form
+                            granite:id="generalSettingsForm"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form"
+                            action="/var/acs-commons/contentsync/settings"
+                            async="{Boolean}true"
+                            dataPath="/var/acs-commons/contentsync/settings"
+                            enctype="application/x-www-form-urlencoded"
+                            foundationForm="{Boolean}true"
+                            method="POST"
+                            style="vertical">
+                            <items jcr:primaryType="nt:unstructured">
+                                <event-user-data
+                                    granite:id="general-observationData"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    fieldDescription="Optional string to pass to the ObservationManager API before changes are committed. This feature can be used to suppress DAM workflows that start when an asset is updated."
+                                    fieldLabel="ObservationManager User Data"
+                                    name="./event-user-data"/>
+                                <update-strategy
+                                    granite:id="general-strategy"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Update Strategy"
+                                    name="./update-strategy">
+                                    <datasource
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="acs-commons/components/utilities/contentsync/strategydatasource"/>
+                                </update-strategy>
+                                <primaryType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:primaryType"
+                                    value="nt:unstructured"/>
+                            </items>
+                            <successresponse
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"
+                                target=".cq-workflow-admin-models"/>
+                        </form>
+                    </items>
+                    <footer jcr:primaryType="nt:unstructured">
+                        <cancel
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Cancel">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </cancel>
+                        <submit
+                            granite:id="generalSettingsSubmitBtn"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            formId="generalSettingsForm"
+                            text="Submit"
+                            type="submit"
+                            variant="primary">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </submit>
+                    </footer>
+                </general_settings>
+            </items>
+        </footer>
+    </jcr:content>
+</jcr:root>

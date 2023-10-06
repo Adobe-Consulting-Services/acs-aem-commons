@@ -10,20 +10,32 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-## 6.0.15 - 2023-09-14
+## 6.2.0 - 2023-09-14
 
-## Changed
+## Added
 
-- #3177 - Redirect Mapper: Automate creation of vanity URLs for each country
+- #3151 - New ContentSync utility
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+- #3166 - New option to suppress status updates in replication workflow processes
 
+## Removed
 
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
+  
+## 6.1.0 - 2023-09-08
+
+## Added
+
+- #3159 - Add PageProperty annotation for Sling Models
+- #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
 ## Fixed
 
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
 - #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
 - #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
-  
+
 ## 6.0.14 - 2023-07-11
 
 ## Fixed

@@ -37,6 +37,10 @@ import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 /**
  * Incomplete mock that provides just enough for basic testing
  */
@@ -47,6 +51,14 @@ public class MockContentFragment implements ContentFragment {
     String path;
     HashMap<String, String> elements = new HashMap<>();
     HashMap<String, Object> metadata = new HashMap<>();
+    FragmentTemplate template;
+
+    public MockContentFragment(){
+        template = mock(FragmentTemplate.class);
+        ElementTemplate elementTemplate = mock(ElementTemplate.class);
+        doReturn("text/html").when(elementTemplate).getInitialContentType();
+        doReturn(elementTemplate).when(template).getForElement(any(ContentElement.class));
+    }
 
     @Override
     public Iterator<ContentElement> getElements() {
@@ -114,7 +126,7 @@ public class MockContentFragment implements ContentFragment {
 
     @Override
     public FragmentTemplate getTemplate() {
-        return null;
+        return template;
     }
 
     @Override
