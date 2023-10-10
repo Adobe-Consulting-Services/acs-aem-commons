@@ -17,7 +17,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -47,15 +48,49 @@
                     <!-- overwrite rep:ACE nodes defining policies for acs-aem-commons-owned service principals -->
                     <accessControlHandling>merge</accessControlHandling>
                     <packageType>application</packageType>
-                    <dependencies>
-                        <dependency>
-                            <group>day/cq60/product</group>
-                            <name>cq-content</name>
-                            <version>[6.5.6,)</version><!-- version shipped with AEM 6.5.0 GA -->
-                        </dependency>
-                        <!-- cannot depend on SP 10 as never satisfied on AEMCloud -->
-                    </dependencies>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-metadata</id>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                        <configuration>
+                            <dependencies>
+                                <dependency>
+                                    <group>day/cq60/product</group>
+                                    <name>cq-content</name>
+                                    <version>[6.5.10,)</version><!-- version shipped with AEM 6.5.0 GA -->
+                                </dependency>
+                            </dependencies>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cloud-metadata</id>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>cloud</classifier>
+                            <dependencies>
+                                <dependency>
+                                    <group>day/cq60/product</group>
+                                    <name>cq-content</name>
+                                    <version>[6.6,)</version><!-- version shipped with AEM Cloud SDK -->
+                                </dependency>
+                            </dependencies>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cloud-package</id>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>cloud</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -84,8 +119,8 @@
                     </checks>
 
                     <websterTargets>
-                        <nodetypes />
-                        <privileges />
+                        <nodetypes/>
+                        <privileges/>
                     </websterTargets>
                 </configuration>
                 <executions>
