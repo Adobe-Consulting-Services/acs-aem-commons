@@ -17,7 +17,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -44,32 +45,45 @@
             <plugin>
                 <groupId>org.apache.jackrabbit</groupId>
                 <artifactId>filevault-package-maven-plugin</artifactId>
+                <inherited>false</inherited>
                 <configuration>
                     <packageType>container</packageType>
-                    <embeddeds>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-bundle</artifactId>
-                            <target>/apps/acs-commons/install</target>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                        </embedded>
-                    </embeddeds>
-                    <subPackages>
-                        <subPackage>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-ui.apps</artifactId>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                        </subPackage>
-                        <subPackage>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-ui.content</artifactId>
-                            <filter>true</filter>
-                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                        </subPackage>
-                    </subPackages>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-metadata</id>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                        <configuration>
+                            <name>acs-aem-commons-all</name>
+                            <embeddeds>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                    <classifier>~cloud</classifier>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.content</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                            </embeddeds>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -200,6 +214,9 @@
                     <plugin>
                         <groupId>com.day.jcr.vault</groupId>
                         <artifactId>content-package-maven-plugin</artifactId>
+                        <configuration>
+                            <packageFile>${contentPackageFile}</packageFile>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>install-content-package</id>
@@ -212,6 +229,117 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>cloud</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <contentPackageFile>${project.build.directory}/${project.build.finalName}-cloud.zip</contentPackageFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.jackrabbit</groupId>
+                        <artifactId>filevault-package-maven-plugin</artifactId>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>generate-metadata-cloud</id>
+                                <goals>
+                                    <goal>generate-metadata</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                    <properties>
+                                        <cloudManagerTarget>all</cloudManagerTarget>
+                                    </properties>
+                                    <embeddeds>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-bundle</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-bundle-cloud</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                            <classifier>cloud</classifier>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-ui.content</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                    </embeddeds>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>package-cloud</id>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>validate-package-cloud</id>
+                                <goals>
+                                    <goal>validate-package</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                    <packageFile>${contentPackageFile}</packageFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.adobe.aem</groupId>
+                        <artifactId>aemanalyser-maven-plugin</artifactId>
+                        <version>1.5.8</version>
+                        <executions>
+                            <execution>
+                                <id>aem-analyser</id>
+                                <goals>
+                                    <goal>project-analyse</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>com.adobe.acs</groupId>
+                    <artifactId>acs-aem-commons-bundle-cloud</artifactId>
+                    <version>${project.version}</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.adobe.acs</groupId>
+                    <artifactId>acs-aem-commons-ui.apps</artifactId>
+                    <classifier>cloud</classifier>
+                    <version>${project.version}</version>
+                    <type>zip</type>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>

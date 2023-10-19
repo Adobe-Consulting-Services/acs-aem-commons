@@ -83,6 +83,11 @@
         <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
 
+        <!-- the minimum AEM 6.5 version being supported -->
+        <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
+        <!-- the minimum AEMaaCS version being supported -->
+        <aem.sdk.api.version>2023.1.10675.20230113T110236Z-220900</aem.sdk.api.version>
+
         <jacoco.version>0.8.7</jacoco.version>
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -98,6 +103,11 @@
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.2.2</version>
+                    <configuration>
+                        <archive>
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -207,6 +217,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
+# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
+Service-Component: OSGI-INF/*.xml
                                 ]]></bnd>
                             </configuration>
                         </execution>
@@ -242,6 +254,14 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     <groupId>org.apache.sling</groupId>
                     <artifactId>sling-maven-plugin</artifactId>
                     <version>2.4.2</version>
+                    <configuration>
+                        <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+                        <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+                        <deploymentMethod>SlingPostServlet</deploymentMethod>
+                        <user>${crx.user}</user>
+                        <password>${crx.password}</password>
+                        <failOnError>true</failOnError>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.jackrabbit</groupId>
@@ -501,11 +521,17 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.adobe.aem</groupId>
+                <artifactId>aem-sdk-api</artifactId>
+                <version>${aem.sdk.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <!-- Runtime dependencies should be AEM 6.5.10 compatible -->
             <dependency>
                 <groupId>io.wcm.maven</groupId>
                 <artifactId>io.wcm.maven.aem-dependencies</artifactId>
-                <version>6.5.10.0002</version>
+                <version>${aem.classic.api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -866,6 +892,15 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 </plugins>
             </build>
         </profile>
+
+        <!-- enable this profile to additionally build the packages/bundles for AEMaaCS,
+        the ones for AEM on prem are always built -->
+        <profile>
+            <id>cloud</id>
+            <modules>
+                <module>bundle-cloud</module>
+            </modules>
+        </profile>
     </profiles>
 
     <distributionManagement>
@@ -878,6 +913,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 
     <modules>
         <module>bundle</module>
+        <module>bundle-cloud</module>
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>

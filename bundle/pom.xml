@@ -53,11 +53,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
+                <executions>
+                    <!-- tests are reused from acs-aem-commons-bundle-cloud, therefore create a dedicated artifact, https://maven.apache.org/plugins/maven-jar-plugin/examples/create-test-jar.html -->
+                    <execution>
+                        <id>generate-test-jar</id>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
@@ -66,14 +70,6 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>sling-maven-plugin</artifactId>
-                <configuration>
-                    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
-                    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
-                    <deploymentMethod>SlingPostServlet</deploymentMethod>
-                    <user>${crx.user}</user>
-                    <password>${crx.password}</password>
-                    <failOnError>true</failOnError>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
