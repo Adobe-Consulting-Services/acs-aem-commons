@@ -207,7 +207,7 @@
     evalURI.prop("checked", evaluateURI);
 
     var ciInput = form.find('input[name="./caseInsensitive"]');
-      if(caseInsensitive) {
+    if(caseInsensitive) {
       ciInput.val(caseInsensitive);
       ciInput.prop("checked", caseInsensitive);
     }
