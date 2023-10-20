@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Added
 
+- #3196 - Content Sync: prevent exception when creating parent nodes
 - #3147 - Allow usage of Dispatcher Flush Rules in AEMaaCS
 
 ## 6.2.0 - 2023-09-14
