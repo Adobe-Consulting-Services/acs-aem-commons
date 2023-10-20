@@ -285,7 +285,7 @@
                                                         text="Ignore Case"
                                                         fieldDescription="Match in a case-insensitive manner"
                                                         uncheckedValue="{Boolean}false"
-                                                        value="{Boolean}false"/>
+                                                        value="{Boolean}true"/>
                                                 <cacheControlHeader
                                                     granite:class="note"
                                                     granite:id="redirect-cacheControlHeader"
