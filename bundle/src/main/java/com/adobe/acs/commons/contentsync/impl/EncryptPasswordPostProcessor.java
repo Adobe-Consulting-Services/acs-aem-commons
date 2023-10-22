@@ -59,6 +59,9 @@ public class EncryptPasswordPostProcessor implements SlingPostProcessor {
                             slingRequest.getResourceResolver().commit();
                         }
                     }
+                    break;
+                default:
+                    break;
             }
         }
     }

@@ -58,7 +58,6 @@ public class TestEncryptPasswordPostProcessor {
 
     @Test
     public void testProtectPassword() throws Exception {
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         Resource resource = context.create().resource(HOSTS_PATH + "/host1",
                 "host", "http://localhost:4502", "username", "admin", "password", "admin");
         context.request().setResource(resource);
@@ -66,6 +65,7 @@ public class TestEncryptPasswordPostProcessor {
         changes.add(new Modification(ModificationType.CREATE, resource.getPath(), resource.getPath()));
         postProcessor.process(context.request(), changes);
 
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         assertEquals("admin-encrypted", resource.getValueMap().get("password"));
         verify(crypto, times(1)).isProtected(captor.capture());
         verify(crypto, times(1)).protect(captor.capture());
@@ -73,7 +73,6 @@ public class TestEncryptPasswordPostProcessor {
 
     @Test
     public void testSkipProtectedPassword() throws Exception {
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         Resource resource = context.create().resource(HOSTS_PATH + "/host1",
                 "host", "http://localhost:4502", "username", "admin", "password", "admin-encrypted");
         context.request().setResource(resource);
@@ -82,6 +81,7 @@ public class TestEncryptPasswordPostProcessor {
 
         postProcessor.process(context.request(), changes);
 
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         assertEquals("admin-encrypted", resource.getValueMap().get("password"));
         verify(crypto, times(1)).isProtected(captor.capture());
         verify(crypto, times(0)).protect(captor.capture());
@@ -89,7 +89,6 @@ public class TestEncryptPasswordPostProcessor {
 
     @Test
     public void testIgnoreNonContentSyncPaths() throws Exception {
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         Resource resource = context.create().resource( "/var/unknown/host1",
                 "host", "http://localhost:4502", "username", "admin", "password", "admin");
         context.request().setResource(resource);
@@ -98,6 +97,7 @@ public class TestEncryptPasswordPostProcessor {
 
         postProcessor.process(context.request(), changes);
 
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         assertEquals("admin", resource.getValueMap().get("password"));
         verify(crypto, times(0)).isProtected(captor.capture());
         verify(crypto, times(0)).protect(captor.capture());
@@ -105,7 +105,6 @@ public class TestEncryptPasswordPostProcessor {
 
     @Test
     public void testIgnoreNullPassword() throws Exception {
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         Resource resource = context.create().resource( HOSTS_PATH + "/host1",
                 "host", "http://localhost:4502", "username", "admin");
         context.request().setResource(resource);
@@ -114,6 +113,7 @@ public class TestEncryptPasswordPostProcessor {
 
         postProcessor.process(context.request(), changes);
 
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         assertEquals(null, resource.getValueMap().get("password"));
         verify(crypto, times(0)).isProtected(captor.capture());
         verify(crypto, times(0)).protect(captor.capture());
