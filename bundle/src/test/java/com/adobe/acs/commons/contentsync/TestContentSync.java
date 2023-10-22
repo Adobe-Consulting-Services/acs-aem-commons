@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.granite.crypto.CryptoSupport;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -29,6 +30,7 @@ import org.apache.sling.jcr.contentloader.ContentImporter;
 import org.apache.sling.jcr.contentloader.internal.ContentReaderWhiteboard;
 import org.apache.sling.jcr.contentloader.internal.DefaultContentImporter;
 import org.apache.sling.jcr.contentloader.internal.readers.JsonReader;
+import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.HOSTS_PATH;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -56,6 +59,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -67,21 +71,30 @@ public class TestContentSync {
     ContentSync contentSync;
     ContentReader reader;
     RemoteInstance remoteInstance;
+    CryptoSupport crypto;
+
+
 
     @Before
-    public void setUp() throws RepositoryException {
+    public void setUp() throws Exception {
         context.registerInjectActivateService(new JsonReader());
         context.registerInjectActivateService(new ContentReaderWhiteboard());
+        crypto = MockCryptoSupport.getInstance();
+        context.registerService(CryptoSupport.class, crypto);
+
         context.addModelsForClasses(SyncHostConfiguration.class);
         reader = new ContentReader(context.resourceResolver().adaptTo(Session.class));
 
-        String configPath = "/var/acs-commons/contentsync/config";
+        String configPath = HOSTS_PATH + "/host1";
         context.build().resource(configPath, "host", "http://localhost:4502", "username", "", "password", "");
-        SyncHostConfiguration hostConfiguration = context.resourceResolver().getResource(configPath).adaptTo(SyncHostConfiguration.class);
+        SyncHostConfiguration hostConfiguration =
+                context.getService(ModelFactory.class)
+                        .createModel(context.resourceResolver().getResource(configPath), SyncHostConfiguration.class);
         ContentImporter contentImporter = context.registerInjectActivateService(new DefaultContentImporter());
         remoteInstance = spy(new RemoteInstance(hostConfiguration));
 
         contentSync = new ContentSync(remoteInstance, context.resourceResolver(), contentImporter);
+
     }
 
     @Test

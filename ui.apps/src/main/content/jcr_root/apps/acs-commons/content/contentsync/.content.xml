@@ -104,7 +104,7 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
                                     name="delete"
-                                    text="Delete files that exist in the destination but not in the source"
+                                    text="Delete resources that exist in the destination but not in the source"
                                     value="true"/>
                             </items>
                         </checkboxes>
