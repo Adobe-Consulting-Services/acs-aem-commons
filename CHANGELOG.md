@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 6.2.0 - 2023-09-14
 
+## Changed
+
+- #3177 - Redirect Mapper: Automate creation of vanity URLs for each country
+
 ## Added
 
 - #3151 - New ContentSync utility

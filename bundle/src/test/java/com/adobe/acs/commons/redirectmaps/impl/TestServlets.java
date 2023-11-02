@@ -20,8 +20,8 @@ package com.adobe.acs.commons.redirectmaps.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,12 +41,15 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.testing.sling.MockResourceResolver;
 import org.apache.tika.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +78,15 @@ public class TestServlets {
 
     @Mock
     private Resource mockMapContentResource;
+
+    @Mock
+    private ResourceResolver resourceResolver;
+
+    @Mock
+    private  Iterable<Resource> children;
+
+    @Mock
+    private  Iterator<Resource> childrenIterator;
 
     private Map<String, String> value = new HashMap<>();
 
@@ -290,11 +302,23 @@ public class TestServlets {
     @Test
     public void testAddEntryServlet() throws ServletException, IOException {
         log.info("testAddEntryServlet");
-        AddEntryServlet servlet = new AddEntryServlet();
+        final AddEntryServlet servlet = new AddEntryServlet();
+        when(mockSlingRequest.getResourceResolver()).thenReturn(resourceResolver);
+        when(mockResource.getResourceResolver()).thenReturn(resourceResolver);
+        when(resourceResolver.getResource(any())).thenReturn(mockResource);
+        when(mockResource.getChildren()).thenReturn(children);
+        when(children.iterator()).thenReturn(childrenIterator);
+        when(childrenIterator.hasNext()).thenReturn(true,false);
+        when(childrenIterator.next()).thenReturn(mockResource);
+        ValueMap valueMap = Mockito.mock(ValueMap.class);
+        when(mockResource.adaptTo(ValueMap.class)).thenReturn(valueMap);
+        when(mockResource.getValueMap()).thenReturn(valueMap);
+        when(valueMap.get("jcr:title", String.class)).thenReturn("test");
+        when(valueMap.get("value", String.class)).thenReturn("test");
         servlet.doPost(mockSlingRequest, mockSlingResponse);
 
         log.info("REDIRECT MAP:\n" + value.get(JcrConstants.JCR_DATA));
-        assertTrue(value.get(JcrConstants.JCR_DATA).contains("/source /target"));
+        assertTrue(value.get(JcrConstants.JCR_DATA).contains("/source /test/test/target"));
         log.info("Test successful!");
     }
 
