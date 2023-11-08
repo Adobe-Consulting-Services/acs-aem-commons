@@ -45,8 +45,8 @@ import com.adobe.acs.commons.util.RequireAem;
  * Servlet for updating a line in the redirect map text file
  */
 @SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/redirectmappage" }, selectors = {
-                "updateentry" }, extensions = { "json" }, metatype = false)
+    "acs-commons/components/utilities/redirectmappage" }, selectors = {
+    "updateentry" }, extensions = { "json" }, metatype = false)
 public class UpdateEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -1704915461516132101L;
@@ -60,7 +60,7 @@ public class UpdateEntryServlet extends SlingAllMethodsServlet {
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
         log.trace("doPost");
         Resource resource = request.getResourceResolver().getResource(ETC_ACS_COMMONS_LISTS_COUNTRIES_JCR_CONTENT_LIST);
         if (Objects.nonNull(resource)) {
@@ -152,7 +152,7 @@ public class UpdateEntryServlet extends SlingAllMethodsServlet {
         log.trace("Saving lines {}", lines);
         RedirectEntriesUtils.updateRedirectMap(request, lines);
         RedirectEntriesUtils.writeEntriesToResponse(request, response,
-                "Updated entry " + idx + " to " + source + " " + target);
+            "Updated entry " + idx + " to " + source + " " + target);
     }
     private boolean isFound(Map<String,String> countries, String searchString) {
         boolean found = false;
