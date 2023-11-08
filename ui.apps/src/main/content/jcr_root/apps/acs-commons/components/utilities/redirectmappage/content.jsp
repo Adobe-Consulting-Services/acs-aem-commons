@@ -27,7 +27,7 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
 <div ng-controller="MainCtrl" ng-init="app.uri = '${resourcePath}'; init();">
 
     <br/><hr/><br/>
-    
+
     <c:set var="redirectMap" value="${sling2:getRelativeResource(resource, 'redirectMap.txt')}" />
     <coral-tabview>
         <coral-tablist target="main-panel-1">
@@ -46,7 +46,7 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                     </p>
                     <form action="${resource.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-update-redirect" ng-submit="updateRedirectMap($event)" enctype="multipart/form-data">
                         <input type="hidden" name="./redirectMap.txt@TypeHint" value="nt:file" />
-                        
+
                         <div class="coral-Form-fieldwrapper">
                             <label class="coral-Form-fieldlabel" id="label-vertical-inputgroup-1">
                                 <fmt:message key="Redirect Map File" /> *
@@ -140,7 +140,14 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                             Find Entries
                         </button>
                     </form>
+
                     <br/>
+<button is="coral-button" icon="delete" iconsize="S"  variant="warning" ng-click="removeAlertMulti()">
+            		         Remove Entries
+            		</button>
+                    <button icon="add" iconsize="S" is="coral-button" class="coral-Form-field" variant="primary" ng-click="loadMoreData()">Load More Data</button>
+
+            		</button>
                     <div class="fixed-height">
                         <table id="entry-table">
                             <thead>
@@ -150,7 +157,7 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                                     <th>Target</th>
                                     <th>Status</th>
                                     <th>Origin</th>
-                                    <th>Edit</th>
+                                    <th>Edit/Bullk Remove (check)</th>
                                 </tr>
                             </thead>
                             <tbody >
@@ -167,6 +174,7 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                                             <div ng-switch-when="File">
                                                 <button is="coral-button" icon="edit" iconsize="S" ng-click="editItem(entry.id)"></button>
                                                 <button is="coral-button" icon="delete" iconsize="S" ng-click="removeAlert(entry.id)"></button>
+                                                <input type="checkbox" is="coral-checkbox" iconsize="S" ng-click="selectEntry(entry.id)"></input>
                                             </div>
                                             <div ng-switch-default>
                                                 <button is="coral-button" icon="edit" iconsize="S" ng-click="openEditor(entry.origin)"></button>
@@ -176,6 +184,7 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                                 </tr>
                             </tbody>
                         </table>
+                    </form>
                     </div>
                 </section>
                 <coral-dialog id="edit-entry" closable="on">
@@ -191,8 +200,15 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                                 <div class="coral-Form-fieldwrapper">
                                     <label class="coral-Form-fieldlabel" id="label-target" for="edit-target">Target</label>
                                     <input is="coral-textfield" class="coral-Form-field" placeholder="Source path" name="edit-target" />
+                                    <input type="hidden" name="edit-target-base" />
+
+                                </div>
+                                 <div class="coral-Form-fieldwrapper">
+                                     <label class="coral-Form-fieldlabel" id="bulk-edit" for="edit-target">Bulk Edit Languages (Remove all language codes and country codes from the target). </label>
+                                     <input type="checkbox" is="coral-checkbox" class="coral-Form-field" placeholder="Bulk Edit Languages" name="bulk-edit" />
                                 </div>
                                 <button is="coral-button" variant="primary" ng-click="saveLine()">Save</button>
+
                             </section>
                         </form>
                     </coral-dialog-content>
@@ -206,6 +222,15 @@ if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { 
                         <button is="coral-button" variant="primary" coral-close="" ng-click="removeLine()">Yes</button>
                     </coral-dialog-footer>
                 </coral-dialog>
+                 <coral-dialog id="removemulti-confirm" closable="on">
+                     <coral-dialog-header>Delete Entries</coral-dialog-header>
+                     <coral-dialog-content>
+                         Are you sure you want to delete this entries?
+                     </coral-dialog-content>
+                     <coral-dialog-footer>
+                         <button is="coral-button" variant="primary" coral-close="" ng-click="removeLine()">Yes</button>
+                     </coral-dialog-footer>
+                 </coral-dialog>
             </coral-panel>
             <coral-panel class="coral-Well">
                 <section>

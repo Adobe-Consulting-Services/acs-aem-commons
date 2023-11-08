@@ -51,17 +51,30 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doPost");
-
-        int idx = Integer.parseInt(request.getParameter("idx"), 10);
-        log.debug("Removing index {}", idx);
-
-        List<String> lines = RedirectEntriesUtils.readEntries(request);
-
-        lines.remove(idx);
-        log.debug("Removed line...");
-
-        RedirectEntriesUtils.updateRedirectMap(request, lines);
-
-        RedirectEntriesUtils.writeEntriesToResponse(request, response, "Removed entry "+idx);
+        boolean multi = Boolean.parseBoolean(request.getParameter("multi"));
+        if(multi){
+            List<String> lines = RedirectEntriesUtils.readEntries(request);
+            String[] outerArray=request.getParameterValues("idx");
+            String[] innerArray=outerArray[0].split(",");
+            int count =0;
+            for ( String i : innerArray){
+                int idx = Integer.parseInt(i);
+                log.debug("Removing index {}", idx);
+                lines.remove(idx-count);
+                log.debug("Removed line...");
+                count++;
+            }
+            RedirectEntriesUtils.updateRedirectMap(request, lines);
+            RedirectEntriesUtils.writeEntriesToResponse(request, response, "Removed entries "+innerArray);
+        }
+        else {
+            int idx = Integer.parseInt(request.getParameter("idx"), 10);
+            log.debug("Removing index {}", idx);
+            List<String> lines = RedirectEntriesUtils.readEntries(request);
+            lines.remove(idx);
+            log.debug("Removed line...");
+            RedirectEntriesUtils.updateRedirectMap(request, lines);
+            RedirectEntriesUtils.writeEntriesToResponse(request, response, "Removed entry " + idx);
+        }
     }
 }
