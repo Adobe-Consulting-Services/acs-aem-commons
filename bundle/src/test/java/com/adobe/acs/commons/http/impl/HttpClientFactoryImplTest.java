@@ -24,7 +24,6 @@ import static org.mockserver.model.HttpResponse.*;
 
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
 import com.google.gson.JsonObject;
-import junitx.util.PrivateAccessor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.fluent.Executor;
@@ -39,8 +38,9 @@ import org.junit.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class HttpClientFactoryImplTest {
 
@@ -49,23 +49,15 @@ public class HttpClientFactoryImplTest {
 
     private MockServerClient mockServerClient;
 
-    private HttpClientFactoryImpl impl;
-
-    private Map<String, Object> config;
-
     private String username;
 
     private String password;
 
     @Before
     public void setup() throws Exception {
-        config = new HashMap<String, Object>();
         username = RandomStringUtils.randomAlphabetic(5);
         password = RandomStringUtils.randomAlphabetic(6);
         final String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
-
-        config.put("hostname", "localhost");
-        config.put("port", mockServerRule.getPort().intValue());
 
         mockServerClient.when(
                 request().withMethod("GET").withPath("/anon")
@@ -83,8 +75,16 @@ public class HttpClientFactoryImplTest {
         ).respond(
                 response().withStatusCode(200).withBody("OK")
         );
-        impl = new HttpClientFactoryImpl();
-        PrivateAccessor.setField(impl, "httpClientBuilderFactory", new HttpClientBuilderFactory() {
+    }
+
+    protected HttpClientFactoryImpl createFactory() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        return createFactory(false, null, null);
+    }
+
+    protected HttpClientFactoryImpl createFactory(boolean isDisabledCertCheck, String username, String password) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        return new HttpClientFactoryImpl(false, "localhost", mockServerRule.getPort().intValue(),
+                30000, 30000, isDisabledCertCheck, username, password,
+                new HttpClientBuilderFactory() {
             @Override
             public HttpClientBuilder newBuilder() {
                 return HttpClients.custom();
@@ -94,8 +94,7 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testAnonymousGet() throws Exception {
-        impl.activate(config);
-
+        HttpClientFactoryImpl impl = createFactory();
         Request get = impl.get("/anon");
         Executor exec = impl.getExecutor();
         String str = exec.execute(get).handleResponse(new BasicResponseHandler());
@@ -104,8 +103,7 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testJsonGet() throws Exception {
-        impl.activate(config);
-
+        HttpClientFactoryImpl impl = createFactory();
         Request get = impl.get("/anonJson");
         Executor exec = impl.getExecutor();
         JsonObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler()).getAsJsonObject();
@@ -115,9 +113,7 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testAuthenticatedGet() throws Exception {
-        config.put("username", username);
-        config.put("password", password);
-        impl.activate(config);
+        HttpClientFactoryImpl impl = createFactory(false, username, password);
 
         Request get = impl.get("/auth");
         Executor exec = impl.getExecutor();
@@ -129,9 +125,7 @@ public class HttpClientFactoryImplTest {
     public void testDisableSSLCertCheck() throws Exception {
         // this test doesn't actually test anything, but at least ensures that the SSL
         // initialization code doesn't throw exceptions
-        config.put("use.ssl", true);
-        config.put("disable.certificate.check", true);
-        impl.activate(config);
+        HttpClientFactoryImpl impl = createFactory(false, null, null);
     }
 
 }

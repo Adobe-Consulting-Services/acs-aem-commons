@@ -17,14 +17,12 @@
  */
 package com.adobe.acs.commons.http.impl;
 
-import com.adobe.acs.commons.http.HttpClientFactory;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.function.Consumer;
+
 import org.apache.http.HttpHost;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -38,81 +36,81 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.function.Consumer;
+import com.adobe.acs.commons.http.HttpClientFactory;
 
-@Component(
-        label = "ACS AEM Commons - Http Components Fluent Executor Factory",
-        description = "ACS AEM Commons - Http Components Fluent Executor Factory",
-        configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
-        metatype = true)
-@Service
-@Property(label = "Factory Name", description = "Name of this factory", name = "factory.name")
+@Component()
 public class HttpClientFactoryImpl implements HttpClientFactory {
 
-    public static final boolean DEFAULT_USE_SSL = false;
+    @ObjectClassDefinition(factoryPid = "com.adobe.acs.commons.http.impl.HttpClientFactoryImpl",
+            name="ACS AEM Commons - Http Components Fluent Executor Factory",
+            description = "ACS AEM Commons - Http Components Fluent Executor Factory"
+            )
+    @interface Config {
+        @AttributeDefinition(name = "Factory Name", description = "Name of this factory")
+        String factory_name();
 
-    public static final boolean DEFAULT_DISABLE_CERT_CHECK = false;
+        @AttributeDefinition(name = "host name", description="Mandatory")
+        String hostname();
 
-    public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+        @AttributeDefinition(name = "port", description="Mandatory")
+        int port();
 
-    public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
+        @AttributeDefinition(name = "Use SSL", description = "Select it if only using https connection for calls.")
+        boolean use_ssl() default false;
 
-    @Property(label = "host name", description = "host name")
-    private static final String PROP_HOST_DOMAIN = "hostname";
+        @AttributeDefinition(name = "Disable certificate ceck", description = "If selected it will disable certificate check for the SSL connection.")
+        boolean disable_certificate_check() default false;
 
-    @Property(label = "port", description = "port")
-    private static final String PROP_GATEWAY_PORT = "port";
+        @AttributeDefinition(name = "Username", description = "Username for requests (using basic authentication)")
+        String username();
 
-    @Property(label = "Use SSL", description = "Select it if only using https connection for calls.", boolValue = DEFAULT_USE_SSL)
-    private static final String PROP_USE_SSL = "use.ssl";
+        @AttributeDefinition(name = "Password", description = "Password for requests (using basic authentication)", type = AttributeType.PASSWORD)
+        @SuppressWarnings("squid:S2068")
+        String password();
 
-    @Property(label = "Disable certificate check", description = "If selected it will disable certificate check for the SSL connection.",
-            boolValue = DEFAULT_DISABLE_CERT_CHECK)
-    private static final String PROP_DISABLE_CERT_CHECK = "disable.certificate.check";
+        @AttributeDefinition(name = "Socket Timeout", description = "Socket timeout in milliseconds")
+        int so_timeout() default 30000;
 
-    @Property(label = "Username", description = "Username for requests (using basic authentication)")
-    private static final String PROP_USERNAME = "username";
+        @AttributeDefinition(name = "Connect Timeout", description = "Connect timeout in milliseconds")
+        int conn_timeout() default 30000;
+        
+        // Internal Name hint for web console.
+        String webconsole_configurationFactory_nameHint() default "Factory Name: {factory.name}";
+    }
+    
+    private final HttpClientBuilder builder;
+    private final HttpHost httpHost;
+    private final Credentials credentials;
+    private final String baseUrl;
 
-    @Property(label = "Password", description = "Password for requests (using basic authentication)")
-    @SuppressWarnings("squid:S2068")
-    private static final String PROP_PASSWORD = "password";
-
-    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
-    private static final String PROP_SO_TIMEOUT = "so.timeout";
-
-    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
-    private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
-
-    @Reference
-    private HttpClientBuilderFactory httpClientBuilderFactory;
-
-    private HttpClientBuilder builder;
     private Executor executor;
-    private String baseUrl;
     private CloseableHttpClient httpClient;
-    private HttpHost httpHost;
-    private Credentials credentials;
 
     @Activate
-    protected void activate(Map<String, Object> config) throws Exception {
-        boolean useSSL = PropertiesUtil.toBoolean(config.get(PROP_USE_SSL), DEFAULT_USE_SSL);
+    public HttpClientFactoryImpl(HttpClientFactoryImpl.Config config, @Reference HttpClientBuilderFactory httpClientBuilderFactory) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        this(config.use_ssl(), config.hostname(), config.port(), config.so_timeout(),
+                config.conn_timeout(), config.disable_certificate_check(), config.username(), config.password(),
+                httpClientBuilderFactory);
+    }
 
+    HttpClientFactoryImpl(boolean useSSL, String hostname, int port, int soTimeout, 
+            int connectTimeout, boolean disableCertCheck, String username, String password,
+            HttpClientBuilderFactory httpClientBuilderFactory) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         String scheme = useSSL ? "https" : "http";
-        String hostname = PropertiesUtil.toString(config.get(PROP_HOST_DOMAIN), null);
-        int port = PropertiesUtil.toInteger(config.get(PROP_GATEWAY_PORT), 0);
 
         if (hostname == null || port == 0) {
             throw new IllegalArgumentException("Configuration not valid. Both host and port must be provided.");
         }
 
         baseUrl = String.format("%s://%s:%s", scheme, hostname, port);
-
-        int connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
-        int soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
 
         builder = httpClientBuilderFactory.newBuilder();
 
@@ -122,7 +120,6 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
                 .build();
         builder.setDefaultRequestConfig(requestConfig);
 
-        boolean disableCertCheck = PropertiesUtil.toBoolean(config.get(PROP_DISABLE_CERT_CHECK), DEFAULT_DISABLE_CERT_CHECK);
 
         if (useSSL && disableCertCheck) {
             // Disable hostname verification and allow self-signed certificates
@@ -133,10 +130,10 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
             builder.setSSLSocketFactory(sslsf);
         }
         httpHost = new HttpHost(hostname, port, useSSL ? "https" : "http");
-        String username = PropertiesUtil.toString(config.get(PROP_USERNAME), null);
-        String password = PropertiesUtil.toString(config.get(PROP_PASSWORD), null);
         if (username != null && password != null) {
             credentials = new UsernamePasswordCredentials(username, password);
+        } else {
+            credentials = null;
         }
     }
 
