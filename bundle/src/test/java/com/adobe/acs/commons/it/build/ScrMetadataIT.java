@@ -365,15 +365,16 @@ public class ScrMetadataIT {
                     StartElement start = event.asStartElement();
                     String elementName = start.getName().getLocalPart();
                     if (elementName.equals("Designate")) {
-                        Attribute pidAttribute = start.getAttributeByName(new QName("pid"));
+                        // Felix SCR Generator incorrectly generates both attributes "factoryPid" and "pid" for factories
+                        Attribute pidAttribute = start.getAttributeByName(new QName("factoryPid"));
                         if (pidAttribute != null) {
                             result.name = pidAttribute.getValue();
+                            result.factory = true;
                         } else {
-                            pidAttribute = start.getAttributeByName(new QName("factoryPid"));
+                            pidAttribute = start.getAttributeByName(new QName("pid"));
                             if (pidAttribute != null) {
                                 result.name = pidAttribute.getValue();
                             }
-                            result.factory = true;
                         }
                     } else if (elementName.equals("AD")) {
                         String propName = start.getAttributeByName(new QName("id")).getValue();
