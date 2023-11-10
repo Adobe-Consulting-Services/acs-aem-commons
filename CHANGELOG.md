@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## Added
+
+- #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
 
 ## 6.3.0 - 2023-10-25
 

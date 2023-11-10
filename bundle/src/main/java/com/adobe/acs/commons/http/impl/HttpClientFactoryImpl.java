@@ -26,6 +26,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
@@ -40,6 +42,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Component(
         label = "ACS AEM Commons - Http Components Fluent Executor Factory",
@@ -87,9 +90,12 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     @Reference
     private HttpClientBuilderFactory httpClientBuilderFactory;
 
+    private HttpClientBuilder builder;
     private Executor executor;
     private String baseUrl;
     private CloseableHttpClient httpClient;
+    private HttpHost httpHost;
+    private Credentials credentials;
 
     @Activate
     protected void activate(Map<String, Object> config) throws Exception {
@@ -108,7 +114,7 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
         int connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
         int soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
 
-        HttpClientBuilder builder = httpClientBuilderFactory.newBuilder();
+        builder = httpClientBuilderFactory.newBuilder();
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(connectTimeout)
@@ -126,15 +132,22 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
                     sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
             builder.setSSLSocketFactory(sslsf);
         }
-        httpClient = builder.build();
-        executor = Executor.newInstance(httpClient);
-
+        httpHost = new HttpHost(hostname, port, useSSL ? "https" : "http");
         String username = PropertiesUtil.toString(config.get(PROP_USERNAME), null);
         String password = PropertiesUtil.toString(config.get(PROP_PASSWORD), null);
         if (username != null && password != null) {
-            HttpHost httpHost = new HttpHost(hostname, port, useSSL ? "https" : "http");
-            executor.auth(httpHost, username, password).authPreemptive(httpHost);
+            credentials = new UsernamePasswordCredentials(username, password);
         }
+    }
+
+    synchronized Executor createExecutor() {
+        httpClient = builder.build();
+        executor = Executor.newInstance(httpClient);
+
+        if (credentials != null) {
+            executor.auth(httpHost, credentials).authPreemptive(httpHost);
+        }
+        return executor;
     }
 
     @Deactivate
@@ -149,7 +162,18 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     }
 
     @Override
+    public void customize(Consumer<HttpClientBuilder> builderCustomizer) {
+        if (httpClient != null) {
+            throw new IllegalStateException("The underlying http client has already been created through a call of getExecutor() and can no longer be customized");
+        }
+        builderCustomizer.accept(builder);
+    }
+
+    @Override
     public Executor getExecutor() {
+        if (executor == null) {
+            executor = createExecutor();
+        }
         return executor;
     }
 
