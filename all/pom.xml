@@ -232,9 +232,6 @@
 
         <profile>
             <id>cloud</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
             <properties>
                 <contentPackageFile>${project.build.directory}/${project.build.finalName}-cloud.zip</contentPackageFile>
             </properties>

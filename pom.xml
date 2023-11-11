@@ -893,10 +893,13 @@ Service-Component: OSGI-INF/*.xml
             </build>
         </profile>
 
-        <!-- enable this profile to additionally build the packages/bundles for AEMaaCS,
+        <!-- disable this profile to not build/deploy the packages/bundles for AEMaaCS,
         the ones for AEM on prem are always built -->
         <profile>
             <id>cloud</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <modules>
                 <module>bundle-cloud</module>
             </modules>
@@ -913,7 +916,6 @@ Service-Component: OSGI-INF/*.xml
 
     <modules>
         <module>bundle</module>
-        <module>bundle-cloud</module>
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>
