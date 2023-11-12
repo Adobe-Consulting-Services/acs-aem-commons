@@ -64,31 +64,6 @@
                             </dependencies>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>cloud-metadata</id>
-                        <goals>
-                            <goal>generate-metadata</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>cloud</classifier>
-                            <dependencies>
-                                <dependency>
-                                    <group>day/cq60/product</group>
-                                    <name>cq-content</name>
-                                    <version>[6.6,)</version><!-- version shipped with AEM Cloud SDK -->
-                                </dependency>
-                            </dependencies>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cloud-package</id>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>cloud</classifier>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 
@@ -238,6 +213,47 @@
         </dependency>
     </dependencies>
     <profiles>
+        <profile>
+            <id>cloud</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.jackrabbit</groupId>
+                        <artifactId>filevault-package-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>cloud-metadata</id>
+                                <goals>
+                                    <goal>generate-metadata</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                    <dependencies>
+                                        <dependency>
+                                            <group>day/cq60/product</group>
+                                            <name>cq-content</name>
+                                            <version>[6.6,)</version><!-- version shipped with AEM Cloud SDK -->
+                                        </dependency>
+                                    </dependencies>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cloud-package</id>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>autoInstallUiAppsPackage</id>
             <build>
