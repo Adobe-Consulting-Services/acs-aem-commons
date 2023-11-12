@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+
+## 6.3.0 - 2023-10-25
+
 ## Added
 
 - #3194 - Redirect Manager: Ignore Case value is not persisting
