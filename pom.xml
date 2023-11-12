@@ -165,7 +165,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.0.0-M5</version>
                     <configuration>
-                        <releaseProfiles>release</releaseProfiles>
+                        <releaseProfiles>release,cloud</releaseProfiles>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
                     </configuration>
