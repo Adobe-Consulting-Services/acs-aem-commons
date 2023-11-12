@@ -33,7 +33,7 @@
     <!-- ====================================================================== -->
 
     <artifactId>acs-aem-commons-all</artifactId>
-    <name>ACS AEM Commons Package</name>
+    <name>ACS AEM Commons Container Package (All)</name>
     <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps,
         acs-aem-commons-ui.content, the OSGi bundle and configuration.
     </description>

@@ -218,6 +218,9 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <properties>
+                <contentPackageFile>${project.build.directory}/${project.build.finalName}-cloud.zip</contentPackageFile>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -261,6 +264,9 @@
                     <plugin>
                         <groupId>com.day.jcr.vault</groupId>
                         <artifactId>content-package-maven-plugin</artifactId>
+                        <configuration>
+                            <packageFile>${contentPackageFile}</packageFile>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>install-content-package</id>
