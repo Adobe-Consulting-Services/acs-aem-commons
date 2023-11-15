@@ -90,8 +90,7 @@
 
         <jacoco.version>0.8.7</jacoco.version>
         <!-- affects both m-compiler-p and m-javadoc-p-->
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
         <project.build.outputTimestamp>1698267085</project.build.outputTimestamp>
     </properties>
@@ -387,19 +386,6 @@ Service-Component: OSGI-INF/*.xml
                     <version>2.0.0</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>animal-sniffer-maven-plugin</artifactId>
-                    <version>1.20</version>
-                    <configuration>
-                        <failOnError>false</failOnError>
-                        <signature>
-                            <groupId>org.codehaus.mojo.signature</groupId>
-                            <artifactId>java18</artifactId>
-                            <version>1.0</version>
-                        </signature>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.0.0</version>
@@ -459,7 +445,7 @@ Service-Component: OSGI-INF/*.xml
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>enforce-maven</id>
+                        <id>enforce-maven-and-java</id>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
@@ -468,6 +454,9 @@ Service-Component: OSGI-INF/*.xml
                                 <requireMavenVersion>
                                     <version>3.5.4</version><!-- license-maven-plugin 2.0.0 requires 3.5.4 -->
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>11</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -740,23 +729,6 @@ Service-Component: OSGI-INF/*.xml
                 </plugins>
             </build>
         </profile>
-        <!-- profile for settings when running on Java8 -->
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <additionalJOption>-Xdoclint:none</additionalJOption>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>coverage</id>
             <build>
@@ -799,17 +771,6 @@ Service-Component: OSGI-INF/*.xml
                         </executions>
                     </plugin>
                 </plugins>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>animal-sniffer-maven-plugin</artifactId>
-                            <configuration>
-                                <skip>true</skip>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
             </build>
         </profile>
         <profile>
