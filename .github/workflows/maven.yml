@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         # always act on the modified source code (even for event pull_request_target)
         # is considered potentially unsafe (https://securitylab.github.com/research/github-actions-preventing-pwn-requests/) but actions are only executed after approval from committers
         with:
@@ -55,7 +55,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           cache: 'maven'
           # Adobe is moving away from Azul Zulu to Oracle JDK (which is not an option) - Eclipse Temurin is suggested as the "closest thing"
@@ -87,9 +87,6 @@ jobs:
 
       - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
-
-      - name: ${{ matrix.namePrefix }} Build cloud all package with Maven ${{ env.STEP_NAME_SUFFIX }}
-        run: mvn -e -B -V -pl all -P cloud ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
 
       - name: Publish Test Report
         if: ${{ always() }} # make sure to run even if previous Maven execution failed (due to failed test)
