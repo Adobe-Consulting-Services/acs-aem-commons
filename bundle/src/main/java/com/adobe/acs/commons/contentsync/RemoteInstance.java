@@ -45,8 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static javax.jcr.Property.JCR_PRIMARY_TYPE;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * HTTP connection to a remote AEM instance + some sugar methods to fetch data
@@ -121,7 +120,7 @@ public class RemoteInstance implements Closeable {
     }
 
     public String getPrimaryType(String path) throws IOException, URISyntaxException {
-        URI uri = toURI(path + "/" + JCR_PRIMARY_TYPE);
+        URI uri = toURI(path + "/" + JCR_PRIMARYTYPE);
         String str = getString(uri);
         if (str.isEmpty()) {
             throw new IllegalStateException("It appears " + hostConfiguration.getUsername()
