@@ -17,21 +17,35 @@
  */
 package com.adobe.acs.commons.http;
 
+import java.util.function.Consumer;
+
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
- * Factory for building pre-configured HttpClient Fluent Executor and Request objects
- * based a configure host, port and (optionally) username/password.
+ * Factory for building pre-configured HttpClient Fluent {@link Executor} and {@link Request} objects
+ * based on a configured host, port and (optionally) username/password.
  *
- * Factories will generally be accessed by service lookup using the factory.name property.
+ * Each OSGi configuration with factory PID {@code com.adobe.acs.commons.http.impl.HttpClientFactoryImpl} exposes one service of this kind.
+ * The individual factories will generally be accessed by service lookup using the {@code factory.name} property.
+ * Despite the name each instance of this interface only holds a single {@link Executor} instance (bound to a single {@code HttpClient}).
  */
 public interface HttpClientFactory {
 
     /**
-     * Get the configured Executor object from this factory.
+     * Customizes the underlying {@link HttpClientBuilder} which is used to create the singleton http client and executor
+     * @param builderCustomizer a {@link Consumer} taking the {@link HttpClientBuilder} initialized with the configured basic options.
+     * @throws IllegalStateException in case {@link #getExecutor()} has been called already
+     * @since 2.1.0 (Bundle version 6.4.0)
+     */
+    void customize(Consumer<HttpClientBuilder> builderCustomizer);
+
+    /**
+     * Get the singleton {@link Executor} object.
      *
-     * @return an Executor object
+     * @return the executor
      */
     Executor getExecutor();
 

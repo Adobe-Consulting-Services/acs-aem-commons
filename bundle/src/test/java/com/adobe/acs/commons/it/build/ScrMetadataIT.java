@@ -112,16 +112,21 @@ public class ScrMetadataIT {
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_VENDOR);
 
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
-
-        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlusherImpl:service.ranking");
+
+        // Property port on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Integer})
+        // Property password on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Password})
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:port");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:password");
 
         ALLOWED_SCR_NS_URIS = new HashSet<>();
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.0.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.1.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.2.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.3.0");
+        ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.4.0");// AEM 6.5 supports DS up to (including) 1.4
 
         EXTRACT_VARIABLES = Pattern.compile("\\{([^}]+)}");
     }
