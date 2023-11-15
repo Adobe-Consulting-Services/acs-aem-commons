@@ -10,16 +10,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-## Added 
+## Added
 
+- #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
 - #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
+- #3197 - Encrypt user credentials in ACS Content Sync   
+- #3196 - Content Sync: prevent exception when creating parent nodes
+- #3194 - Redirect Manager: Ignore Case value is not persisting
 
 ## 6.3.0 - 2023-10-25
 
 ## Added
 
-- #3197 - Encrypt user credentials in ACS Content Sync   
-- #3194 - Redirect Manager: Ignore Case value is not persisting
 - #3147 - Allow usage of Dispatcher Flush Rules in AEMaaCS
 
 ## 6.2.0 - 2023-09-14
