@@ -180,6 +180,7 @@
     var evaluateURI = tr.find(".evaluateURI").data("value");
     var tags = tr.find(".tags").data("value");
     var cacheControlHeader = tr.find(".cacheControlHeader").data("value");
+    var caseInsensitive = tr.find(".source").data("case-insensitive");
 
     var form = $("#editRuleDialog").find("form");
     form[0].reset();
@@ -205,6 +206,11 @@
     evalURI.val(evaluateURI);
     evalURI.prop("checked", evaluateURI);
 
+    var ciInput = form.find('input[name="./caseInsensitive"]');
+    if(caseInsensitive) {
+      ciInput.val(caseInsensitive);
+      ciInput.prop("checked", caseInsensitive);
+    }
     evalURI.click(function () {
       evalURI.val(evalURI.is(":checked"));
     });

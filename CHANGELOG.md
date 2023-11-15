@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Added
 
 - #3197 - Encrypt user credentials in ACS Content Sync   
+- #3194 - Redirect Manager: Ignore Case value is not persisting
 - #3147 - Allow usage of Dispatcher Flush Rules in AEMaaCS
 
 ## 6.2.0 - 2023-09-14
