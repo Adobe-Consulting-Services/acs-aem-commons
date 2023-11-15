@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Added
 
+- #3196 - Content Sync: prevent exception when creating parent nodes
 - #3194 - Redirect Manager: Ignore Case value is not persisting
 - #3147 - Allow usage of Dispatcher Flush Rules in AEMaaCS
 
