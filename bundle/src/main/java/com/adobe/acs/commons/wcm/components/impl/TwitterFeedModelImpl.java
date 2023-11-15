@@ -46,7 +46,6 @@ public class TwitterFeedModelImpl implements TwitterFeedModel {
     private int limit;
 
     @ValueMapValue
-    @Default(values = {})
     private List<String> tweets;
 
     @PostConstruct
