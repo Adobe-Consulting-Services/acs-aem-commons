@@ -22,7 +22,7 @@
    <td is="coral-table-cell" style="width:20px;">
       <a class="coral-Link edit-redirect-rule" href="#" target="_blank"><coral-icon icon="edit" size="XS"></coral-icon></a>
    </td>
-   <td is="coral-table-cell" class="source" data-value="${redirect.source}" >
+   <td is="coral-table-cell" class="source" data-value="${redirect.source}" data-case-insensitive="${redirect.caseInsensitive ? 'true' : 'false'}">
       ${redirect.source}
    </td>
    <td is="coral-table-cell" class="target" data-value="${redirect.target}">
