@@ -36,7 +36,9 @@ mvn -Dcrx.host=otherhost -Dcrx.port=5502 <goals>
 
 ## Distribution
 
-Watch this space.
++ Maven artifact available from Maven central: [https://central.sonatype.com/artifact/com.adobe.acs/acs-aem-commons-all](https://central.sonatype.com/artifact/com.adobe.acs/acs-aem-commons-all)
++ Github releases: [https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases](https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases)
+
 
 ## Rules
 
