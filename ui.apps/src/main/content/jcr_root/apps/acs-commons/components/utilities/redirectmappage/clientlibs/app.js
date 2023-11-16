@@ -82,7 +82,7 @@
 
     $scope.loadMoreData = function () {
       if ($scope.hasMoreData && $scope.itemsPerPage < $scope.entries.length) {
-        $scope.itemsPerPage = $scope.itemsPerPage * 2;
+        $scope.itemsPerPage = $scope.itemsPerPage +100;
         $scope.filterEntries();
       }
     };
