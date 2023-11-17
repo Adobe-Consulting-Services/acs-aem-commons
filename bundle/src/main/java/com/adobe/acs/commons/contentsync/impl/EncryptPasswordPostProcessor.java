@@ -22,12 +22,13 @@ package com.adobe.acs.commons.contentsync.impl;
 import com.adobe.acs.commons.contentsync.ConfigurationUtils;
 import com.adobe.granite.crypto.CryptoSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.servlets.post.SlingPostProcessor;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.jcr.Property;
+import javax.jcr.Session;
 import java.util.List;
 
 /**
@@ -42,21 +43,22 @@ public class EncryptPasswordPostProcessor implements SlingPostProcessor {
 
     @Override
     public void process(SlingHttpServletRequest slingRequest, List<Modification> changes) throws Exception {
+        Session session = slingRequest.getResourceResolver().adaptTo(Session.class);
         for (Modification mod : changes) {
+            String path = mod.getSource();
+            if (!path.startsWith(ConfigurationUtils.HOSTS_PATH)) {
+                continue;
+            }
             switch (mod.getType()) {
                 case MODIFY:
                 case CREATE:
-                    String path = mod.getSource();
-                    if (path.startsWith(ConfigurationUtils.HOSTS_PATH)) {
-                        ModifiableValueMap vm = slingRequest.getResource().adaptTo(ModifiableValueMap.class);
-
-                        String password = vm.get(PASSWORD_PROPERTY, String.class);
+                    if (path.endsWith("/" + PASSWORD_PROPERTY) && session.propertyExists(path)) {
+                        Property property = session.getProperty(path);
+                        String password = property.getString();
                         // encrypt the password property if it is not already protected
-                        if(password != null && !crypto.isProtected(password)) {
+                        if (!crypto.isProtected(password)) {
                             String encrypted = crypto.protect(password);
-                            vm.put(PASSWORD_PROPERTY, encrypted);
-
-                            slingRequest.getResourceResolver().commit();
+                            property.setValue(encrypted);
                         }
                     }
                     break;

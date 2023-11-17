@@ -25,6 +25,7 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.servlets.post.ModificationType;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.verify;
 
 public class TestEncryptPasswordPostProcessor {
     @Rule
-    public AemContext context = new AemContext();
+    public AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private CryptoSupport crypto;
 
@@ -62,14 +63,14 @@ public class TestEncryptPasswordPostProcessor {
                 "host", "http://localhost:4502", "username", "admin", "password", "admin");
         context.request().setResource(resource);
         List<Modification> changes = new ArrayList<>();
-        changes.add(new Modification(ModificationType.CREATE, resource.getPath(), resource.getPath()));
+        changes.add(new Modification(ModificationType.CREATE, resource.getPath() + "/password", resource.getPath()));
         postProcessor.process(context.request(), changes);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         assertEquals("admin-encrypted", resource.getValueMap().get("password"));
         verify(crypto, times(1)).isProtected(captor.capture());
         verify(crypto, times(1)).protect(captor.capture());
-     }
+    }
 
     @Test
     public void testSkipProtectedPassword() throws Exception {
@@ -77,7 +78,7 @@ public class TestEncryptPasswordPostProcessor {
                 "host", "http://localhost:4502", "username", "admin", "password", "admin-encrypted");
         context.request().setResource(resource);
         List<Modification> changes = new ArrayList<>();
-        changes.add(new Modification(ModificationType.MODIFY, resource.getPath(), resource.getPath()));
+        changes.add(new Modification(ModificationType.MODIFY, resource.getPath() + "/password", resource.getPath()));
 
         postProcessor.process(context.request(), changes);
 
@@ -89,7 +90,7 @@ public class TestEncryptPasswordPostProcessor {
 
     @Test
     public void testIgnoreNonContentSyncPaths() throws Exception {
-        Resource resource = context.create().resource( "/var/unknown/host1",
+        Resource resource = context.create().resource("/var/unknown/host1",
                 "host", "http://localhost:4502", "username", "admin", "password", "admin");
         context.request().setResource(resource);
         List<Modification> changes = new ArrayList<>();
@@ -105,7 +106,7 @@ public class TestEncryptPasswordPostProcessor {
 
     @Test
     public void testIgnoreNullPassword() throws Exception {
-        Resource resource = context.create().resource( HOSTS_PATH + "/host1",
+        Resource resource = context.create().resource(HOSTS_PATH + "/host1",
                 "host", "http://localhost:4502", "username", "admin");
         context.request().setResource(resource);
         List<Modification> changes = new ArrayList<>();
