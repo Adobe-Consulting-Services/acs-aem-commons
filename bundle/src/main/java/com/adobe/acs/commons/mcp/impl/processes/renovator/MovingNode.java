@@ -185,6 +185,9 @@ public abstract class MovingNode {
                 .filter(p -> isActivated(rr, p.getPagePath()))
                 .map(ReferenceSearch.Info::getPagePath)
                 .collect(Collectors.toCollection(() -> publishedReferences));
+        if(isActivated(rr, sourcePath)){
+            publishedReferences.add(destinationPath);
+        }
     }
 
     /**
