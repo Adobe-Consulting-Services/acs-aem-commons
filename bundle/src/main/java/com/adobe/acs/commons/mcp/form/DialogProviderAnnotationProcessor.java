@@ -39,6 +39,23 @@ import org.apache.sling.models.annotations.Model;
  * processor will skip any classes which do not identify their corresponding
  * sling model either as part of the model annotation or by a property or getter
  * method.
+ * <p>
+ * This annotation processor needs to be registered explicitly via the <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/man/javac.html#annotation-processing">processor option of javac</a>
+ * in order to prevent it from being automatically active whenever this bundle is on the classpath.
+ * For usage with Maven this can be achieved with the following code:
+ * <pre>{@code
+ * <plugin>
+ *  <artifactId>maven-compiler-plugin</artifactId>
+ *  <configuration>
+ *    <annotationProcessors>
+ *      <annotationProcessor>com.adobe.acs.commons.mcp.form.DialogProviderAnnotationProcessor</annotationProcessor>
+ *    </annotatinoProcessors>
+ *  </configuration>
+ * </plugin>
+ * }</pre>
+ * 
+ * @see <a href="https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html">maven-compiler-plugin</a>
+ * @see javax.annotation.processing.Processor
  */
 public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
