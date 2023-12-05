@@ -49,7 +49,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
-import org.jetbrains.annotations.Nullable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -93,7 +92,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                 try (JcrPackage jcrPackage = tmpPackage) {
                     JcrPackageDefinition definition = jcrPackage.getDefinition();
                     if (definition == null) {
-                        LOG.warn("Skipping package without definition: " + jcrPackage.getNode().getPath());
+                        LOG.warn("Skipping package without definition: {}", jcrPackage.getNode().getPath());
                     }
                     String packageDescription = getPackageDescription(definition);
                     LOG.info("Processing package {}", packageDescription);
@@ -151,18 +150,24 @@ public class PackageGarbageCollectionJob implements JobConsumer {
 
     private boolean isLatestInstalled(JcrPackageDefinition referencePkgDefinition, Stream<JcrPackage> installedPackages) throws RepositoryException {
         try {
-            Optional<@Nullable JcrPackageDefinition> lastInstalledPckDefinitionOptional = installedPackages
+            Optional<JcrPackageDefinition> lastInstalledPckDefinitionOptional = installedPackages
                .map(p -> {
                     try {
                         return p.getDefinition();
                     } catch (RepositoryException e) {
-                        throw new UncheckedRepositoryException(e);
+                        String pckPath;
+                        try {
+                            pckPath = p.getNode().getPath();
+                        } catch (RepositoryException nestedException) {
+                            pckPath = "Unknown";
+                        }
+                        throw new UncheckedRepositoryException(new RepositoryException("Cannot read package definition of package " + pckPath, e));
                     }
                 })
                 .filter(def -> isSameNameAndGroup(referencePkgDefinition.getId(), def.getId()))
                 .filter(def -> def.getLastUnpacked() != null)
                 .max(Comparator.comparing(def -> def.getLastUnpacked()));
-    
+
             if (lastInstalledPckDefinitionOptional.isPresent()) {
                 return lastInstalledPckDefinitionOptional.get().getId().equals(referencePkgDefinition.getId());
             }
