@@ -69,7 +69,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
     private void processDialogProviderAnnotation(Element element) throws IOException {
         TypeElement t = (TypeElement) element;
         String className = t.getQualifiedName().toString();
-        String serviceClassName = DialogResourceProvider.getServiceClassName(className);
+        String serviceClassName = getServiceClassName(className);
         if (providesResourceType(t)) {
             if (LOG.isLoggable(Level.INFO)) {
                 LOG.log(Level.INFO, String.format("Generated resource provider service for class %s => %s", className, serviceClassName));
@@ -127,5 +127,25 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             default:
                 return false;
         }
+    }
+
+    private static String getServiceClassName(String modelClass) {
+        String[] parts = StringUtils.split(modelClass, '.');
+        StringBuilder name = new StringBuilder();
+        String separator = ".";
+        for (String part : parts) {
+            char firstChar = part.charAt(0);
+            String newSeparator = separator;
+            if (firstChar >= 'A' && firstChar <= 'Z' && separator.equals(".")) {
+                newSeparator = "$";
+                name.append(".impl");
+            }
+            if (name.length() > 0) {
+                name.append(separator);
+            }
+            name.append(part);
+            separator = newSeparator;
+        }
+        return name + "_dialogResourceProvider";
     }
 }
