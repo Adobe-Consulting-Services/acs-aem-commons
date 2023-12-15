@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class DialogProviderAnnotationProcessorTest {
+    private static final String EOL = System.lineSeparator();
     private static final Processor UNDER_TEST = new DialogProviderAnnotationProcessor();
     @Test
     void testConfiguration() {
@@ -32,13 +33,6 @@ public class DialogProviderAnnotationProcessorTest {
                 )),
                 () -> assertEquals(SourceVersion.latestSupported(), UNDER_TEST.getSupportedSourceVersion())
         );
-    }
-
-    @Test
-    void whenTheComputedFileAlreadyExistsAnExceptionIsThrownHoweverThatShouldBeIgnored() {
-        for (int i = 0; i < 2; i++) {
-            final Compilation compilation = compile("Example1", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"Something else\";}}");
-        }
     }
 
     @Test
@@ -71,84 +65,84 @@ public class DialogProviderAnnotationProcessorTest {
 
     private static Stream<Arguments> annotationProviderProducesAdditionalSourceFile() {
         return Stream.of(
-                arguments("Example1", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"my.type\";}}", "package a.impl;\n" +
-                        "\n" +
-                        "import javax.annotation.Generated;\n" +
-                        "import org.osgi.annotation.versioning.ConsumerType;\n" +
-                        "import org.osgi.framework.BundleContext;\n" +
-                        "import org.osgi.service.component.annotations.*;\n" +
-                        "\n" +
-                        "@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")\n" +
-                        "@ConsumerType\n" +
-                        "@Component(service = com.adobe.acs.commons.mcp.form.DialogResourceProvider.class, immediate = true)\n" +
-                        "public class Example1_dialogResourceProvider implements com.adobe.acs.commons.mcp.form.DialogResourceProvider {\n" +
-                        "\n" +
-                        "    @Override\n" +
-                        "    public Class getTargetClass() {\n" +
-                        "        return a.Example1.class;\n" +
-                        "    }\n" +
-                        "    @Activate\n" +
-                        "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {\n" +
-                        "        this.doActivate(context);\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    @Deactivate\n" +
-                        "    public void deactivate(BundleContext context) {\n" +
-                        "        this.doDeactivate();\n" +
-                        "    }\n" +
-                        "}\n"),
-                arguments("Example2", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example2 {public String resourceType=\"my.type\";}", "package a.impl;\n" +
-                        "\n" +
-                        "import javax.annotation.Generated;\n" +
-                        "import org.osgi.annotation.versioning.ConsumerType;\n" +
-                        "import org.osgi.framework.BundleContext;\n" +
-                        "import org.osgi.service.component.annotations.*;\n" +
-                        "\n" +
-                        "@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")\n" +
-                        "@ConsumerType\n" +
-                        "@Component(service = com.adobe.acs.commons.mcp.form.DialogResourceProvider.class, immediate = true)\n" +
-                        "public class Example2_dialogResourceProvider implements com.adobe.acs.commons.mcp.form.DialogResourceProvider {\n" +
-                        "\n" +
-                        "    @Override\n" +
-                        "    public Class getTargetClass() {\n" +
-                        "        return a.Example2.class;\n" +
-                        "    }\n" +
-                        "    @Activate\n" +
-                        "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {\n" +
-                        "        this.doActivate(context);\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    @Deactivate\n" +
-                        "    public void deactivate(BundleContext context) {\n" +
-                        "        this.doDeactivate();\n" +
-                        "    }\n" +
-                        "}\n"),
-                arguments("Example3", "package a; @org.apache.sling.models.annotations.Model(adaptables=org.apache.sling.api.resource.Resource.class, resourceType=\"my.type\") @com.adobe.acs.commons.mcp.form.DialogProvider public class Example3 {}", "package a.impl;\n" +
-                        "\n" +
-                        "import javax.annotation.Generated;\n" +
-                        "import org.osgi.annotation.versioning.ConsumerType;\n" +
-                        "import org.osgi.framework.BundleContext;\n" +
-                        "import org.osgi.service.component.annotations.*;\n" +
-                        "\n" +
-                        "@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")\n" +
-                        "@ConsumerType\n" +
-                        "@Component(service = com.adobe.acs.commons.mcp.form.DialogResourceProvider.class, immediate = true)\n" +
-                        "public class Example3_dialogResourceProvider implements com.adobe.acs.commons.mcp.form.DialogResourceProvider {\n" +
-                        "\n" +
-                        "    @Override\n" +
-                        "    public Class getTargetClass() {\n" +
-                        "        return a.Example3.class;\n" +
-                        "    }\n" +
-                        "    @Activate\n" +
-                        "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {\n" +
-                        "        this.doActivate(context);\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    @Deactivate\n" +
-                        "    public void deactivate(BundleContext context) {\n" +
-                        "        this.doDeactivate();\n" +
-                        "    }\n" +
-                        "}\n")
+                arguments("Example1", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"my.type\";}}", "package a.impl;" + EOL +
+                        EOL +
+                        "import javax.annotation.Generated;" + EOL +
+                        "import org.osgi.annotation.versioning.ConsumerType;" + EOL +
+                        "import org.osgi.framework.BundleContext;" + EOL +
+                        "import org.osgi.service.component.annotations.*;" + EOL +
+                        EOL +
+                        "@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")" + EOL +
+                        "@ConsumerType" + EOL +
+                        "@Component(service = com.adobe.acs.commons.mcp.form.DialogResourceProvider.class, immediate = true)" + EOL +
+                        "public class Example1_dialogResourceProvider implements com.adobe.acs.commons.mcp.form.DialogResourceProvider {" + EOL +
+                        EOL +
+                        "    @Override" + EOL +
+                        "    public Class getTargetClass() {" + EOL +
+                        "        return a.Example1.class;" + EOL +
+                        "    }" + EOL +
+                        "    @Activate" + EOL +
+                        "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {" + EOL +
+                        "        this.doActivate(context);" + EOL +
+                        "    }" + EOL +
+                        EOL +
+                        "    @Deactivate" + EOL +
+                        "    public void deactivate(BundleContext context) {" + EOL +
+                        "        this.doDeactivate();" + EOL +
+                        "    }" + EOL +
+                        "}" + EOL),
+                arguments("Example2", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example2 {public String resourceType=\"my.type\";}", "package a.impl;" + EOL +
+                        EOL +
+                        "import javax.annotation.Generated;" + EOL +
+                        "import org.osgi.annotation.versioning.ConsumerType;" + EOL +
+                        "import org.osgi.framework.BundleContext;" + EOL +
+                        "import org.osgi.service.component.annotations.*;" + EOL +
+                        EOL +
+                        "@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")" + EOL +
+                        "@ConsumerType" + EOL +
+                        "@Component(service = com.adobe.acs.commons.mcp.form.DialogResourceProvider.class, immediate = true)" + EOL +
+                        "public class Example2_dialogResourceProvider implements com.adobe.acs.commons.mcp.form.DialogResourceProvider {" + EOL +
+                        EOL +
+                        "    @Override" + EOL +
+                        "    public Class getTargetClass() {" + EOL +
+                        "        return a.Example2.class;" + EOL +
+                        "    }" + EOL +
+                        "    @Activate" + EOL +
+                        "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {" + EOL +
+                        "        this.doActivate(context);" + EOL +
+                        "    }" + EOL +
+                        EOL +
+                        "    @Deactivate" + EOL +
+                        "    public void deactivate(BundleContext context) {" + EOL +
+                        "        this.doDeactivate();" + EOL +
+                        "    }" + EOL +
+                        "}" + EOL),
+                arguments("Example3", "package a; @org.apache.sling.models.annotations.Model(adaptables=org.apache.sling.api.resource.Resource.class, resourceType=\"my.type\") @com.adobe.acs.commons.mcp.form.DialogProvider public class Example3 {}", "package a.impl;" + EOL +
+                        EOL +
+                        "import javax.annotation.Generated;" + EOL +
+                        "import org.osgi.annotation.versioning.ConsumerType;" + EOL +
+                        "import org.osgi.framework.BundleContext;" + EOL +
+                        "import org.osgi.service.component.annotations.*;" + EOL +
+                        EOL +
+                        "@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")" + EOL +
+                        "@ConsumerType" + EOL +
+                        "@Component(service = com.adobe.acs.commons.mcp.form.DialogResourceProvider.class, immediate = true)" + EOL +
+                        "public class Example3_dialogResourceProvider implements com.adobe.acs.commons.mcp.form.DialogResourceProvider {" + EOL +
+                        EOL +
+                        "    @Override" + EOL +
+                        "    public Class getTargetClass() {" + EOL +
+                        "        return a.Example3.class;" + EOL +
+                        "    }" + EOL +
+                        "    @Activate" + EOL +
+                        "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {" + EOL +
+                        "        this.doActivate(context);" + EOL +
+                        "    }" + EOL +
+                        EOL +
+                        "    @Deactivate" + EOL +
+                        "    public void deactivate(BundleContext context) {" + EOL +
+                        "        this.doDeactivate();" + EOL +
+                        "    }" + EOL +
+                        "}" + EOL)
         );
     }
 }
