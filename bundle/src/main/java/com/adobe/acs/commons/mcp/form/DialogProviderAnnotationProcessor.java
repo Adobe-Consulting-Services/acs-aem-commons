@@ -19,8 +19,7 @@ package com.adobe.acs.commons.mcp.form;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,12 +58,12 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return new HashSet<>(Arrays.asList(DialogProvider.class.getCanonicalName()));
+        return Collections.singleton(DialogProvider.class.getCanonicalName());
     }
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_8;
+        return SourceVersion.latestSupported();
     }
 
     private void processDialogProviderAnnotation(Element element) throws IOException {
