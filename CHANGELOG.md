@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3187 - Remove warning during build on Java 11 or higher when DialogProviderAnnotationProcessor is invoked
+
 ## 6.3.2 - 2023-11-22
 
 - #3162 - Renovator MCP: ensure old source path is removed
