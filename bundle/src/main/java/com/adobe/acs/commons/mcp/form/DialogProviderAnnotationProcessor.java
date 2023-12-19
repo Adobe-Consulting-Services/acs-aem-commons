@@ -97,12 +97,23 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             out.println();
             out.println("@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")");
             out.println("@ConsumerType");
-            out.println(String.format("@Component(service = %s.class, immediate = true)", osgiService));
-            out.println(String.format("public class %s implements %s {", className, osgiService));
+            out.printf("@Component(service = %s.class, immediate = true)%n", osgiService);
+            out.printf("public class %s implements %s {%n", className, osgiService);
             out.println();
-            out.println(String.format("    @Override%n    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
-            out.println("    @Activate\n    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {\n        this.doActivate(context);\n    }\n");
-            out.println("    @Deactivate\n    public void deactivate(BundleContext context) {\n        this.doDeactivate();\n    }");
+            out.println("    @Override");
+            out.println("    public Class getTargetClass() {");
+            out.printf("        return %s.class;%n", targetClass);
+            out.println("    }");
+            out.println();
+            out.println("    @Activate");
+            out.println("    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {");
+            out.println("        this.doActivate(context);");
+            out.println("    }");
+            out.println();
+            out.println("    @Deactivate");
+            out.println("    public void deactivate(BundleContext context) {");
+            out.println("        this.doDeactivate();");
+            out.println("    }");
             out.println("}");
             out.flush();
         }

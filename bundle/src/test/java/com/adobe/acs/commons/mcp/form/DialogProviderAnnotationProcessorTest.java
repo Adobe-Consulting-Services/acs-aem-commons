@@ -81,6 +81,7 @@ public class DialogProviderAnnotationProcessorTest {
                         "    public Class getTargetClass() {" + EOL +
                         "        return a.Example1.class;" + EOL +
                         "    }" + EOL +
+                        EOL +
                         "    @Activate" + EOL +
                         "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {" + EOL +
                         "        this.doActivate(context);" + EOL +
@@ -107,6 +108,7 @@ public class DialogProviderAnnotationProcessorTest {
                         "    public Class getTargetClass() {" + EOL +
                         "        return a.Example2.class;" + EOL +
                         "    }" + EOL +
+                        EOL +
                         "    @Activate" + EOL +
                         "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {" + EOL +
                         "        this.doActivate(context);" + EOL +
@@ -133,6 +135,7 @@ public class DialogProviderAnnotationProcessorTest {
                         "    public Class getTargetClass() {" + EOL +
                         "        return a.Example3.class;" + EOL +
                         "    }" + EOL +
+                        EOL +
                         "    @Activate" + EOL +
                         "    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {" + EOL +
                         "        this.doActivate(context);" + EOL +
