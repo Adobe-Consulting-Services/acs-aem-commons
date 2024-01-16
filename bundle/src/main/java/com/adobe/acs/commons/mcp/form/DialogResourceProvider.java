@@ -37,14 +37,14 @@ import org.osgi.framework.ServiceRegistration;
  */
 @SuppressWarnings("squid:S1214") // There are no constants declared here, not sure why this code smell is being detected
 public interface DialogResourceProvider {
-    Class getTargetClass();
+    Class<?> getTargetClass();
 
     default DialogProvider getDialogProvider() {
-        return (DialogProvider) getTargetClass().getAnnotation(DialogProvider.class);
+        return getTargetClass().getAnnotation(DialogProvider.class);
     }
 
     @SuppressWarnings("squid:S2386")
-    public static Map<Class, ServiceRegistration> registeredProviders = Collections.synchronizedMap(new HashMap<>());
+    public static Map<Class<?>, ServiceRegistration<?>> registeredProviders = Collections.synchronizedMap(new HashMap<>());
 
     @SuppressWarnings("squid:S1149") // Yes HashTable sucks but it's required here.
     default void doActivate(BundleContext bundleContext) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException   {
@@ -54,36 +54,15 @@ public interface DialogResourceProvider {
         props.put(ResourceProvider.PROPERTY_NAME, provider.getRoot());
         props.put(ResourceProvider.PROPERTY_ROOT, provider.getRoot());
         props.put(ResourceProvider.PROPERTY_USE_RESOURCE_ACCESS_SECURITY, Boolean.FALSE);
-        ServiceRegistration providerRegistration = bundleContext.registerService(ResourceProvider.class, provider, props);
+        ServiceRegistration<?> providerRegistration = bundleContext.registerService(ResourceProvider.class, provider, props);
         registeredProviders.put(getTargetClass(), providerRegistration);
     }
 
     default void doDeactivate() {
-        ServiceRegistration providerRegistration = registeredProviders.get(getTargetClass());
+        ServiceRegistration<?> providerRegistration = registeredProviders.get(getTargetClass());
         if (providerRegistration != null) {
             providerRegistration.unregister();
         }
         registeredProviders.remove(getTargetClass());
     }
-
-    public static String getServiceClassName(String modelClass) {
-        String[] parts = modelClass.split("\\.");
-        String name = "";
-        String separator = ".";
-        for (String part : parts) {
-            char firstChar = part.charAt(0);
-            String newSeparator = separator;
-            if (firstChar >= 'A' && firstChar <= 'Z' && separator.equals(".")) {
-                newSeparator = "$";
-                name += ".impl";
-            }
-            if (name.length() > 0) {
-                name += separator;
-            }
-            name += part;
-            separator = newSeparator;
-        }
-        return name + "_dialogResourceProvider";
-    }
-
 }
