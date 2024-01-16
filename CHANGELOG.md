@@ -10,6 +10,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3187 - Remove warning during build on Java 11 or higher when DialogProviderAnnotationProcessor is invoked
+- #3242 - Actually update lodash to 4.17.21 (was mistakenly updated to 4.17.15 instead of 4.17.21)
+
+## 6.3.2 - 2023-11-22
+
+- #3162 - Renovator MCP: ensure old source path is removed
+- #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
+- #3197 - Encrypt user credentials in ACS Content Sync   
+- #3196 - Content Sync: prevent exception when creating parent nodes
+- #3194 - Redirect Manager: Ignore Case value is not persisting
 
 ## 6.3.0 - 2023-10-25
 

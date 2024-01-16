@@ -33,6 +33,7 @@ import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Model(
@@ -53,7 +54,6 @@ public class DispatcherFlushModelImpl implements DispatcherFlusherModel {
     private String replicationActionType;
 
     @ValueMapValue
-    @Default(values = {})
     private List<String> paths;
 
     @Override
@@ -63,7 +63,7 @@ public class DispatcherFlushModelImpl implements DispatcherFlusherModel {
 
     @Override
     public Collection<String> getPaths() {
-        return paths;
+        return paths != null ? paths : Collections.emptyList();
     }
 
     @Override

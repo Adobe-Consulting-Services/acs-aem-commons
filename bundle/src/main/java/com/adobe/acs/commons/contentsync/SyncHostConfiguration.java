@@ -19,17 +19,25 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.granite.crypto.CryptoException;
+import com.adobe.granite.crypto.CryptoSupport;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 /**
  * Adapts to configuration nodes in /var/acs-commons/contentsync/hosts/*
  */
 @Model(adaptables = {Resource.class}, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class SyncHostConfiguration {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
     private String host;
@@ -40,6 +48,9 @@ public class SyncHostConfiguration {
     @ValueMapValue
     private String password;
 
+    @OSGiService
+    private CryptoSupport crypto;
+
     public String getHost() {
         return host;
     }
@@ -49,6 +60,13 @@ public class SyncHostConfiguration {
     }
 
     public String getPassword() {
+        if(crypto.isProtected(password)){
+            try {
+                password = crypto.unprotect(password);
+            } catch (CryptoException e) {
+                log.error("Error while un-protecting password: {}", password, e);
+            }
+        }
         return password;
     }
 }
