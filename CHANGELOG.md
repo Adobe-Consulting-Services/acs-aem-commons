@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3187 - Remove warning during build on Java 11 or higher when DialogProviderAnnotationProcessor is invoked
+- #3242 - Actually update lodash to 4.17.21 (was mistakenly updated to 4.17.15 instead of 4.17.21)
+
 ## 6.3.2 - 2023-11-22
 
 - #3162 - Renovator MCP: ensure old source path is removed
