@@ -19,8 +19,7 @@ package com.adobe.acs.commons.mcp.form;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,18 +75,18 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return new HashSet<>(Arrays.asList(DialogProvider.class.getCanonicalName()));
+        return Collections.singleton(DialogProvider.class.getCanonicalName());
     }
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_8;
+        return SourceVersion.latestSupported();
     }
 
     private void processDialogProviderAnnotation(Element element) throws IOException {
         TypeElement t = (TypeElement) element;
         String className = t.getQualifiedName().toString();
-        String serviceClassName = DialogResourceProvider.getServiceClassName(className);
+        String serviceClassName = getServiceClassName(className);
         if (providesResourceType(t)) {
             if (LOG.isLoggable(Level.INFO)) {
                 LOG.log(Level.INFO, String.format("Generated resource provider service for class %s => %s", className, serviceClassName));
@@ -115,12 +114,23 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             out.println();
             out.println("@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")");
             out.println("@ConsumerType");
-            out.println(String.format("@Component(service = %s.class, immediate = true)", osgiService));
-            out.println(String.format("public class %s implements %s {", className, osgiService));
+            out.printf("@Component(service = %s.class, immediate = true)%n", osgiService);
+            out.printf("public class %s implements %s {%n", className, osgiService);
             out.println();
-            out.println(String.format("    @Override%n    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
-            out.println("    @Activate\n    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {\n        this.doActivate(context);\n    }\n");
-            out.println("    @Deactivate\n    public void deactivate(BundleContext context) {\n        this.doDeactivate();\n    }");
+            out.println("    @Override");
+            out.println("    public Class getTargetClass() {");
+            out.printf("        return %s.class;%n", targetClass);
+            out.println("    }");
+            out.println();
+            out.println("    @Activate");
+            out.println("    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {");
+            out.println("        this.doActivate(context);");
+            out.println("    }");
+            out.println();
+            out.println("    @Deactivate");
+            out.println("    public void deactivate(BundleContext context) {");
+            out.println("        this.doDeactivate();");
+            out.println("    }");
             out.println("}");
             out.flush();
         }
@@ -145,5 +155,25 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             default:
                 return false;
         }
+    }
+
+    private static String getServiceClassName(String modelClass) {
+        String[] parts = StringUtils.split(modelClass, '.');
+        StringBuilder name = new StringBuilder();
+        String separator = ".";
+        for (String part : parts) {
+            char firstChar = part.charAt(0);
+            String newSeparator = separator;
+            if (firstChar >= 'A' && firstChar <= 'Z' && separator.equals(".")) {
+                newSeparator = "$";
+                name.append(".impl");
+            }
+            if (name.length() > 0) {
+                name.append(separator);
+            }
+            name.append(part);
+            separator = newSeparator;
+        }
+        return name + "_dialogResourceProvider";
     }
 }
