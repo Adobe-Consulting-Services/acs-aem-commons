@@ -45,7 +45,8 @@ import org.osgi.annotation.versioning.ProviderType;
 public final class Variant {
 
     private Class baseType = null;
-    private static final FastDateFormat STANDARD_DATE_FORMAT = FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.SHORT);
+    private static final Locale STANDARD_LOCALE = Locale.ROOT;
+    private static final FastDateFormat STANDARD_DATE_FORMAT = FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.SHORT, STANDARD_LOCALE);
     private Optional<Long> longVal = Optional.empty();
     private Optional<Double> doubleVal = Optional.empty();
     private Optional<String> stringVal = Optional.empty();
@@ -53,16 +54,16 @@ public final class Variant {
     private Optional<Date> dateVal = Optional.empty();
 
     private static final FastDateFormat[] DATE_FORMATS = {
-            FastDateFormat.getDateInstance(FastDateFormat.SHORT),
-            FastDateFormat.getDateInstance(FastDateFormat.LONG),
-            FastDateFormat.getTimeInstance(FastDateFormat.SHORT),
-            FastDateFormat.getTimeInstance(FastDateFormat.LONG),
+            FastDateFormat.getDateInstance(FastDateFormat.SHORT, STANDARD_LOCALE),
+            FastDateFormat.getDateInstance(FastDateFormat.LONG, STANDARD_LOCALE),
+            FastDateFormat.getTimeInstance(FastDateFormat.SHORT, STANDARD_LOCALE),
+            FastDateFormat.getTimeInstance(FastDateFormat.LONG, STANDARD_LOCALE),
             STANDARD_DATE_FORMAT,
-            FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.SHORT),
-            FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.LONG),
-            FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG),
-            FastDateFormat.getDateTimeInstance(FastDateFormat.FULL, FastDateFormat.FULL),
-            FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+            FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.SHORT, STANDARD_LOCALE),
+            FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.LONG, STANDARD_LOCALE),
+            FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG, STANDARD_LOCALE),
+            FastDateFormat.getDateTimeInstance(FastDateFormat.FULL, FastDateFormat.FULL, STANDARD_LOCALE),
+            FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", STANDARD_LOCALE)
     };
 
     public Variant() {
