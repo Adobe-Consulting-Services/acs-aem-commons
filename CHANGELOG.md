@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.3.4 - 2023-01-17
+
 - #3223 - Project with class extending WCMUsePojo leads to build error: cannot access aQute.bnd.annotation.ConsumerType
 - #3225 - PackageGarbageCollector leaves temp files behind
 - #3187 - Remove warning during build on Java 11 or higher when DialogProviderAnnotationProcessor is invoked
