@@ -133,7 +133,8 @@ public class PackageGarbageCollectionJobTest {
         when(packageNode.getPath()).thenReturn("/etc/packages/" + packageName);
         JcrPackageDefinition definition = mock(JcrPackageDefinition.class);
         when(definition.getLastUnpacked()).thenReturn(getDate(lastUnpackedDaysAgo));
-        when(definition.getCreated()).thenReturn(getDate(daysAgo));
+        when(definition.getLastUnwrapped()).thenReturn(getDate(daysAgo));
+        when(definition.getCreated()).thenReturn(null);
         when(definition.getNode()).thenReturn(packageNode);
         PackageId pid = mock(PackageId.class);
         when(pid.getName()).thenReturn(name);
