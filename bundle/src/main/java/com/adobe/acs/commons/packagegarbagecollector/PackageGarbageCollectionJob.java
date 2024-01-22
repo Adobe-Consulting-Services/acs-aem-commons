@@ -39,7 +39,6 @@ import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
@@ -127,6 +126,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
     }
 
     private boolean isInstalled(JcrPackageDefinition pkgDefinition) {
+        // lastUnpacked is when the package was installed (aka unpacked) to this AEM/JCR.
         return pkgDefinition.getLastUnpacked() != null;
     }
 
@@ -183,39 +183,38 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                 && otherPackageId.getName().equals(thisPackageId.getName());
     }
 
+
     private boolean isPackageOldEnough(JcrPackageDefinition pkgDefinition, Integer maxAgeInDays) throws RepositoryException, IOException {
         Period maxAge = Period.ofDays(maxAgeInDays);
         LocalDate oldestAge = LocalDate.now().minus(maxAge);
-        Calendar packageCreatedAtCalendar;
+        // lastUnwrapped is when the package was UPLOADED to this AEM/JCR, lastUnpacked is what it was last INSTALLED!
+        Calendar packageUploadedDate;
 
         try {
-            packageCreatedAtCalendar = pkgDefinition.getCreated();
-            if (packageCreatedAtCalendar == null) {
-                // Try getting the created at directly from the JCR node that represents the package.
-                // This is because pkgDefinition.getCreated() is unreliable and returns null for some packages.
-                packageCreatedAtCalendar = pkgDefinition.getNode().getProperty(JcrConstants.JCR_CREATED).getValue().getDate();
-            }
+            // getLastUnwrapped() is when the package was introduced (aka uploaded) to this AEM/JCR.
+            // getCreated() is when the package was created (aka built) by the package manager; which could be years ago.
+            packageUploadedDate = pkgDefinition.getLastUnwrapped();
 
-            if (packageCreatedAtCalendar == null) {
+            if (packageUploadedDate == null) {
                 // This should not happen, but if it does, we don't want to delete the package.
-                LOG.warn("Package [ {} ] has no created date, assuming it's NOT old enough", pkgDefinition.getNode().getPath());
+                LOG.warn("Package [ {} ] has no lastUnwrapped (uploaded) date, assuming it's NOT old enough", pkgDefinition.getNode().getPath());
                 return false;
             }
         } catch (RepositoryException e) {
-            LOG.error("Unable to get created date for package [ {} ]", pkgDefinition.getNode().getPath(), e);
+            LOG.error("Unable to get lastUnwrapped (uploaded) date for package [ {} ]", pkgDefinition.getNode().getPath(), e);
             return false;
         }
 
-        LocalDate packageCreatedAt = LocalDateTime.ofInstant(
-                packageCreatedAtCalendar.toInstant(),
-                packageCreatedAtCalendar.getTimeZone().toZoneId()).toLocalDate();
+        LocalDate packageUploadedAt = LocalDateTime.ofInstant(
+                packageUploadedDate.toInstant(),
+                packageUploadedDate.getTimeZone().toZoneId()).toLocalDate();
         String packageDescription = getPackageDescription(pkgDefinition);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Checking if package is old enough: Name: {}, Created At: {}, Oldest Age: {}",
-                    packageDescription, packageCreatedAt.format(LOCALIZED_DATE_FORMATTER), oldestAge.format(LOCALIZED_DATE_FORMATTER));
+            LOG.debug("Checking if package is old enough: Name: {}, Uploaded at: {}, Oldest age: {}",
+                    packageDescription, packageUploadedAt.format(LOCALIZED_DATE_FORMATTER), oldestAge.format(LOCALIZED_DATE_FORMATTER));
         }
-        return !packageCreatedAt.isAfter(oldestAge);
+        return !packageUploadedAt.isAfter(oldestAge);
     }
 
     private String getPackageDescription(JcrPackageDefinition definition) throws RepositoryException {
