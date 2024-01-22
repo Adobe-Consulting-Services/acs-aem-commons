@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.3.6 - 2023-01-22
+
 ### Fix
 
 - #3246 - PackageGarbageCollector is not cleaning up all packages since v6.3.4 (##3225)
