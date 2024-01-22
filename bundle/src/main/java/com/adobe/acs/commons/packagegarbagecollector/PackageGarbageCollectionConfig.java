@@ -30,7 +30,7 @@ public @interface PackageGarbageCollectionConfig {
     @AttributeDefinition(name = "Package group name", description = "The group name of the packages to remove.")
     String groupName() default "";
 
-    @AttributeDefinition(name = "Max upload age of package", description = "Packages that have been uploaded more than this age (in days) will be removed. Default is 60 days.")
+    @AttributeDefinition(name = "Max upload age of package", description = "Packages uploaded more than this age (in days) will be removed. Default is 60 days.")
     int maxAgeInDays() default 60;
 
     @AttributeDefinition(name = "Remove not installed packages", description = "Remove packages that are not installed (or have been uninstalled) and  the created date is older than maxAgeInDays. Default is false.")
