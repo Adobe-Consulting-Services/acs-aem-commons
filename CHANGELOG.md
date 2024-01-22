@@ -25,8 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3162 - Renovator MCP: ensure old source path is removed
 - #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
-- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<
-  java.lang.String>
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
 - #3197 - Encrypt user credentials in ACS Content Sync
 - #3196 - Content Sync: prevent exception when creating parent nodes
 - #3194 - Redirect Manager: Ignore Case value is not persisting
@@ -47,8 +46,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Removed
 
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in
-  Cloud Manager pipelines.
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
 
 ## 6.1.0 - 2023-09-08
 
