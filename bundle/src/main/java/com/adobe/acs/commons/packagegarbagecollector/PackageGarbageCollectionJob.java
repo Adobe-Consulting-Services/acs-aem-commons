@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
@@ -96,7 +97,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
                     }
                     String packageDescription = getPackageDescription(definition);
                     LOG.info("Processing package {}", packageDescription);
-    
+
                     if (isPackageOldEnough(definition, maxAgeInDays)) {
                         if (removeNotInstalledPackages && !isInstalled(definition)) {
                             packageManager.remove(jcrPackage);
@@ -139,7 +140,7 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         /**
          * Returns the cause of this exception.
          *
-         * @return  the {@code RepositoryException} which is the cause of this exception.
+         * @return the {@code RepositoryException} which is the cause of this exception.
          */
         @Override
         public RepositoryException getCause() {
@@ -151,22 +152,22 @@ public class PackageGarbageCollectionJob implements JobConsumer {
     private boolean isLatestInstalled(JcrPackageDefinition referencePkgDefinition, Stream<JcrPackage> installedPackages) throws RepositoryException {
         try {
             Optional<JcrPackageDefinition> lastInstalledPckDefinitionOptional = installedPackages
-               .map(p -> {
-                    try {
-                        return p.getDefinition();
-                    } catch (RepositoryException e) {
-                        String pckPath;
+                    .map(p -> {
                         try {
-                            pckPath = p.getNode().getPath();
-                        } catch (RepositoryException nestedException) {
-                            pckPath = "Unknown";
+                            return p.getDefinition();
+                        } catch (RepositoryException e) {
+                            String pckPath;
+                            try {
+                                pckPath = p.getNode().getPath();
+                            } catch (RepositoryException nestedException) {
+                                pckPath = "Unknown";
+                            }
+                            throw new UncheckedRepositoryException(new RepositoryException("Cannot read package definition of package " + pckPath, e));
                         }
-                        throw new UncheckedRepositoryException(new RepositoryException("Cannot read package definition of package " + pckPath, e));
-                    }
-                })
-                .filter(def -> isSameNameAndGroup(referencePkgDefinition.getId(), def.getId()))
-                .filter(def -> def.getLastUnpacked() != null)
-                .max(Comparator.comparing(def -> def.getLastUnpacked()));
+                    })
+                    .filter(def -> isSameNameAndGroup(referencePkgDefinition.getId(), def.getId()))
+                    .filter(def -> def.getLastUnpacked() != null)
+                    .max(Comparator.comparing(def -> def.getLastUnpacked()));
 
             if (lastInstalledPckDefinitionOptional.isPresent()) {
                 return lastInstalledPckDefinitionOptional.get().getId().equals(referencePkgDefinition.getId());
@@ -177,18 +178,24 @@ public class PackageGarbageCollectionJob implements JobConsumer {
         }
     }
 
-    public static boolean isSameNameAndGroup(PackageId thisPackageId, PackageId otherPackageId){
-           return otherPackageId.getGroup().equals(thisPackageId.getGroup())
-                        && otherPackageId.getName().equals(thisPackageId.getName());
+    public static boolean isSameNameAndGroup(PackageId thisPackageId, PackageId otherPackageId) {
+        return otherPackageId.getGroup().equals(thisPackageId.getGroup())
+                && otherPackageId.getName().equals(thisPackageId.getName());
     }
 
     private boolean isPackageOldEnough(JcrPackageDefinition pkgDefinition, Integer maxAgeInDays) throws RepositoryException, IOException {
         Period maxAge = Period.ofDays(maxAgeInDays);
         LocalDate oldestAge = LocalDate.now().minus(maxAge);
-        final Calendar packageCreatedAtCalendar;
+        Calendar packageCreatedAtCalendar;
 
         try {
             packageCreatedAtCalendar = pkgDefinition.getCreated();
+            if (packageCreatedAtCalendar == null) {
+                // Try getting the created at directly from the JCR node that represents the package.
+                // This is because pkgDefinition.getCreated() is unreliable and returns null for some packages.
+                packageCreatedAtCalendar = pkgDefinition.getNode().getProperty(JcrConstants.JCR_CREATED).getValue().getDate();
+            }
+
             if (packageCreatedAtCalendar == null) {
                 // This should not happen, but if it does, we don't want to delete the package.
                 LOG.warn("Package [ {} ] has no created date, assuming it's NOT old enough", pkgDefinition.getNode().getPath());

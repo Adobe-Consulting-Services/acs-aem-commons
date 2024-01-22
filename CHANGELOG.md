@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fix
+
+- #3246 - PackageGarbageCollector is not cleaning up all packages since v6.3.4 (##3225)
+
 ## 6.3.4 - 2023-01-17
 
 - #3223 - Project with class extending WCMUsePojo leads to build error: cannot access aQute.bnd.annotation.ConsumerType
@@ -21,8 +25,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3162 - Renovator MCP: ensure old source path is removed
 - #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
-- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
-- #3197 - Encrypt user credentials in ACS Content Sync   
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<
+  java.lang.String>
+- #3197 - Encrypt user credentials in ACS Content Sync
 - #3196 - Content Sync: prevent exception when creating parent nodes
 - #3194 - Redirect Manager: Ignore Case value is not persisting
 
@@ -42,19 +47,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Removed
 
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
-  
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in
+  Cloud Manager pipelines.
+
 ## 6.1.0 - 2023-09-08
 
 ## Added
 
 - #3159 - Add PageProperty annotation for Sling Models
 - #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
+
 ## Fixed
 
 - #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
 - #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
-- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
+- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now
+  displays more friendly values in UI to help remove the invalid nodes.
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
 
