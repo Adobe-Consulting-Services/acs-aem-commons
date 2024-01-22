@@ -37,5 +37,5 @@ public @interface PackageGarbageCollectionConfig {
     boolean removeNotInstalledPackages() default false;
 
     @AttributeDefinition(name = "webconsole.configurationFactory.nameHint")
-    String webconsole_configurationFactory_nameHint() default "Package Garbage Collection - Clear packages in {groupName} older than {maxAgeInDays} days using the schedule [{scheduler}]";
+    String webconsole_configurationFactory_nameHint() default "Package Garbage Collection - Clear packages in {groupName} uploaded older than {maxAgeInDays} days using the schedule [{scheduler}]";
 }
