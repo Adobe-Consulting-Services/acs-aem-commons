@@ -33,7 +33,7 @@ public @interface PackageGarbageCollectionConfig {
     @AttributeDefinition(name = "Max upload age of package", description = "Packages uploaded more than the given amount of days ago will be removed. Default is 60 days.")
     int maxAgeInDays() default 60;
 
-    @AttributeDefinition(name = "Remove not installed packages", description = "Remove packages that are not installed (or have been uninstalled) and  the created date is older than maxAgeInDays. Default is false.")
+    @AttributeDefinition(name = "Remove not installed packages", description = "Remove packages that are not installed (or have been uninstalled) and the upload date is older than maxAgeInDays. Default is false.")
     boolean removeNotInstalledPackages() default false;
 
     @AttributeDefinition(name = "webconsole.configurationFactory.nameHint")
