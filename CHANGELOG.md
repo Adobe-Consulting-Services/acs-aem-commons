@@ -46,8 +46,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Removed
 
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in
-  Cloud Manager pipelines.
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
 
 ## 6.1.0 - 2023-09-08
 
