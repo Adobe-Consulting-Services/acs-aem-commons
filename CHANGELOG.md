@@ -10,17 +10,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.3.8 - 2024-02-02
+
 ### Fix
 
 #3252 - Check if maxage header value is valid before setting it.
 
-## 6.3.6 - 2023-01-22
+## 6.3.6 - 2024-01-22
 
 ### Fix
 
 - #3246 - PackageGarbageCollector is not cleaning up all packages since v6.3.4 (##3225)
 
-## 6.3.4 - 2023-01-17
+## 6.3.4 - 2024-01-17
 
 - #3223 - Project with class extending WCMUsePojo leads to build error: cannot access aQute.bnd.annotation.ConsumerType
 - #3225 - PackageGarbageCollector leaves temp files behind
