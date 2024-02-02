@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fix
+
+#3252 - Check if maxage header value is valid before setting it.
+
 ## 6.3.6 - 2023-01-22
 
 ### Fix
