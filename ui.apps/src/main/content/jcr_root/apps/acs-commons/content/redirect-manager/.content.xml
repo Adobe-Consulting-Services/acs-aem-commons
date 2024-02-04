@@ -358,6 +358,14 @@
                         name="./contextPrefix"
                         required="{Boolean}false"
                         rootPath="/content"/>
+                    <ignoreSelectors
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                            fieldDescription="Ignore selectors when evaluating URLs for this content tree"
+                            text="Ignore Selectors"
+                            name="./ignoreSelectors"
+                            uncheckedValue="{Boolean}false"
+                            value="{Boolean}true"/>
                     <cache-control-headers
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Default Cache Control Headers"
