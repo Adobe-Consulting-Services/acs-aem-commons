@@ -1094,16 +1094,20 @@ public class RedirectFilterTest {
 
     private MockSlingHttpServletResponse navigate(String resourcePath, String selectorString, String extension) throws IOException, ServletException {
         StringBuilder pathBuilder = new StringBuilder(resourcePath);
-        if(selectorString != null) pathBuilder.append(".").append(selectorString);
-        if(extension != null) pathBuilder.append(".").append(extension);
+        if(selectorString != null) {
+            pathBuilder.append(".").append(selectorString);
+        }
+        if(extension != null) {
+            pathBuilder.append(".").append(extension);
+        }
         String requestPath = pathBuilder.toString();
 
-        MockSlingHttpServletRequest request = context.request();
         context.requestPathInfo().setResourcePath(requestPath);
         context.requestPathInfo().setSelectorString(selectorString);
         context.requestPathInfo().setExtension(extension);
         Resource resource = new NonExistingResource(context.resourceResolver(), requestPath);
         resource.getResourceMetadata().put("sling.resolutionPathInfo", "." + selectorString + "." + extension);
+        MockSlingHttpServletRequest request = context.request();
         request.setResource(resource);
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
         filter.doFilter(request, response, filterChain);
