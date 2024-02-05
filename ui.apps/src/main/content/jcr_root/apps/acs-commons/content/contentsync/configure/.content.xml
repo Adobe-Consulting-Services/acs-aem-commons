@@ -239,6 +239,25 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
                                     name="./jcr:primaryType"
                                     value="nt:unstructured"/>
+                                <fieldset
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Connection Properties"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <socket-timeout
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Socket timeout in milliseconds"
+                                            name="./soTimeout"
+                                            value="300000"/>
+                                        <conn-timeout
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Connect timeout in milliseconds"
+                                            name="./connTimeout"
+                                            value="5000"/>
+                                    </items>
+                                </fieldset>
                             </items>
                             <successresponse
                                 jcr:primaryType="nt:unstructured"

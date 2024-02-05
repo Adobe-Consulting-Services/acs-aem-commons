@@ -28,6 +28,8 @@ import org.apache.sling.api.resource.ResourceUtil;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.adobe.acs.commons.contentsync.RemoteInstance.CONNECT_TIMEOUT;
+import static com.adobe.acs.commons.contentsync.RemoteInstance.SOCKET_TIMEOUT;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
 import static org.apache.sling.jcr.resource.api.JcrResourceConstants.NT_SLING_FOLDER;
@@ -39,6 +41,8 @@ public class ConfigurationUtils {
 
     public static final String UPDATE_STRATEGY_KEY = "update-strategy";
     public static final String EVENT_USER_DATA_KEY = "event-user-data";
+    public static final String SO_TIMEOUT_STRATEGY_KEY = "soTimeout";
+    public static final String CONNECT_TIMEOUT_KEY = "connTimeout";
 
     private ConfigurationUtils(){
 
@@ -49,6 +53,8 @@ public class ConfigurationUtils {
         resourceProperties.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
         resourceProperties.put(UPDATE_STRATEGY_KEY, LastModifiedStrategy.class.getName());
         resourceProperties.put(EVENT_USER_DATA_KEY, "changedByPageManagerCopy");
+        resourceProperties.put(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
+        resourceProperties.put(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
         return ResourceUtil.getOrCreateResource(resourceResolver, SETTINGS_PATH, resourceProperties, NT_SLING_FOLDER, true);
     }
 
