@@ -102,6 +102,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.redirects.models.RedirectRule.CACHE_CONTROL_HEADER_NAME;
+import static com.adobe.acs.commons.redirects.models.Redirects.CFG_PROP_IGNORE_SELECTORS;
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
 import static org.osgi.framework.Constants.SERVICE_ID;
@@ -159,9 +160,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + "e.g. append .html to the Location header. ", type = AttributeType.BOOLEAN)
         boolean preserveExtension() default true;
 
-        @AttributeDefinition(name = "Evaluate Selectors", description = "(Deprecated) Use the Evaluate URI mode in redirect rule to capture selectors,", type = AttributeType.BOOLEAN)
-        boolean evaluateSelectors() default false;
-
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
         String[] additionalHeaders() default {};
@@ -192,7 +190,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
-    private boolean evaluateSelectors;
     private boolean preserveQueryString;
     private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
@@ -216,7 +213,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     protected final void activate(Configuration config, BundleContext context) {
         this.config = config;
         enabled = config.enabled();
-        evaluateSelectors = config.evaluateSelectors();
 
         if (enabled) {
             Dictionary<String, Object> properties = new Hashtable<>();
@@ -575,13 +571,13 @@ public class RedirectFilter extends AnnotatedStandardMBean
             });
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
-            if(evaluateSelectors && requestPathInfo.getSelectorString() != null) {
-                resourcePath += "." + requestPathInfo.getSelectorString();
-            }
 
             ValueMap properties = configResource.getValueMap();
             String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
-
+            boolean ignoreSelectors = properties.get(CFG_PROP_IGNORE_SELECTORS, false);
+            if(ignoreSelectors && requestPathInfo.getSelectorString() != null){
+                resourcePath = removeSelectors(resourcePath, resource.getResourceMetadata().getResolutionPathInfo());
+            }
             RedirectMatch m = rules.match(resourcePath, contextPrefix, slingRequest);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
@@ -626,6 +622,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Pattern httpRegex = Pattern.compile("^(https?:\\/\\/|www\\.|\\/\\/)(.*)");
         Matcher httpMatcher = httpRegex.matcher(path);
         return httpMatcher.matches();
+    }
+
+    static String removeSelectors(String resolutionPath, String resolutionPathInfo){
+        if(resolutionPathInfo != null){
+            return resolutionPath.replace(resolutionPathInfo, "");
+        } else {
+            return resolutionPath;
+        }
     }
 
     /**
