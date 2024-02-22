@@ -31,6 +31,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.sling.api.resource.ValueMap;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -45,32 +46,37 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.CONNECT_TIMEOUT_KEY;
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SO_TIMEOUT_STRATEGY_KEY;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * HTTP connection to a remote AEM instance + some sugar methods to fetch data
  */
 public class RemoteInstance implements Closeable {
-    private static final int CONNECT_TIMEOUT = 5000;
-    private static final int SOCKET_TIMEOUT = 60000;
+    static final int CONNECT_TIMEOUT = 5000;
+    static final int SOCKET_TIMEOUT = 300000;
 
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
 
-    public RemoteInstance(SyncHostConfiguration hostConfiguration) {
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) {
         this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient();
+        this.httpClient = createHttpClient(hostConfiguration, generalSettings);
     }
 
-    private CloseableHttpClient createHttpClient() {
+    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) {
         BasicCredentialsProvider provider = new BasicCredentialsProvider();
         provider.setCredentials(
                 AuthScope.ANY,
                 new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+        int soTimeout = generalSettings.get(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
+        int connTimeout = generalSettings.get(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
         RequestConfig requestConfig = RequestConfig
                 .custom()
-                .setConnectTimeout(CONNECT_TIMEOUT)
-                .setSocketTimeout(SOCKET_TIMEOUT)
+                .setConnectTimeout(connTimeout)
+                .setSocketTimeout(soTimeout)
                 .setCookieSpec(CookieSpecs.STANDARD).build();
         return
                 HttpClients.custom()

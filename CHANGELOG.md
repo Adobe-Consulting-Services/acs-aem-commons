@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+
+#3238 - Content Sync make timeouts configurable
 #3235 - Add an option to ignore selectors in the url.
 
 ## 6.3.8 - 2024-02-02

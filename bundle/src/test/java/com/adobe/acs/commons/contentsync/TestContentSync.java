@@ -25,6 +25,7 @@ import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.contentloader.ContentImporter;
 import org.apache.sling.jcr.contentloader.internal.ContentReaderWhiteboard;
@@ -51,7 +52,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.CONNECT_TIMEOUT_KEY;
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.HOSTS_PATH;
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SETTINGS_PATH;
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SO_TIMEOUT_STRATEGY_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,7 +63,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -87,11 +90,13 @@ public class TestContentSync {
 
         String configPath = HOSTS_PATH + "/host1";
         context.build().resource(configPath, "host", "http://localhost:4502", "username", "", "password", "");
+        context.build().resource(SETTINGS_PATH, SO_TIMEOUT_STRATEGY_KEY, 1000, CONNECT_TIMEOUT_KEY, "1000");
+        ValueMap generalSettings = context.resourceResolver().getResource(configPath).getValueMap();
         SyncHostConfiguration hostConfiguration =
                 context.getService(ModelFactory.class)
                         .createModel(context.resourceResolver().getResource(configPath), SyncHostConfiguration.class);
         ContentImporter contentImporter = context.registerInjectActivateService(new DefaultContentImporter());
-        remoteInstance = spy(new RemoteInstance(hostConfiguration));
+        remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings));
 
         contentSync = new ContentSync(remoteInstance, context.resourceResolver(), contentImporter);
 

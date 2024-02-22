@@ -71,7 +71,6 @@
 
     String observationData = generalSettings.get(ConfigurationUtils.EVENT_USER_DATA_KEY, String.class);
     String strategyPid = generalSettings.get(ConfigurationUtils.UPDATE_STRATEGY_KEY, String.class);
-
 	Resource cfg = resourceResolver.getResource(cfgPath);
     SyncHostConfiguration hostConfig = cfg.adaptTo(SyncHostConfiguration.class);
 
@@ -85,7 +84,7 @@
     ContentReader contentReader = new ContentReader(session);
 
     UpdateStrategy updateStrategy = sling.getServices(UpdateStrategy.class, "(component.name=" + strategyPid + ")")[0];
-    try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig)){
+    try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig, generalSettings)){
         ContentImporter importer = sling.getService(ContentImporter.class);
         ContentSync contentSync = new ContentSync(remoteInstance, resourceResolver, importer);
         ContentCatalog contentCatalog = new ContentCatalog(remoteInstance, catalogServlet);
