@@ -42,6 +42,7 @@ import org.apache.http.Header;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -53,6 +54,7 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -117,6 +119,31 @@ public class RedirectFilterTest {
         Mockito.when(configResolver.getResource(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(context.resourceResolver().getResource(redirectStoragePath));
         filter.configResolver = configResolver;
+    }
+
+
+    private MockSlingHttpServletResponse navigate(String resourcePath, String selectorString, String extension) throws IOException, ServletException {
+        StringBuilder pathBuilder = new StringBuilder(resourcePath);
+        if(selectorString != null) {
+            pathBuilder.append(".").append(selectorString);
+        }
+        if(extension != null) {
+            pathBuilder.append(".").append(extension);
+        }
+        String requestPath = pathBuilder.toString();
+
+        context.requestPathInfo().setResourcePath(requestPath);
+        context.requestPathInfo().setSelectorString(selectorString);
+        context.requestPathInfo().setExtension(extension);
+        Resource resource = new NonExistingResource(context.resourceResolver(), requestPath);
+        resource.getResourceMetadata().put("sling.resolutionPathInfo", "." + selectorString + "." + extension);
+        MockSlingHttpServletRequest request = context.request();
+        request.setResource(resource);
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+        filter.doFilter(request, response, filterChain);
+        filter.doFilter(request, response, filterChain);
+
+        return response;
     }
 
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
@@ -1089,84 +1116,64 @@ public class RedirectFilterTest {
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
 
-
+    /**
+     * Default behaviour: selectors are taken into account, e.g.
+     * for the rule
+     * /content/we-retail/en/one => /content/we-retail/en/page1
+     *
+     *  /content/we-retail/en/one.html will match
+     *  and
+     *  /content/we-retail/en/one.a.b.c.html will not match because of the selectors
+     *
+     */
     @Test
-    public void testMatchSelectors() throws Exception {
+    public void testNotMatchSelectors() throws Exception {
         RedirectFilter.Configuration configuration = filter.getConfiguration();
-        when(configuration.evaluateSelectors()).thenReturn(true);
         filter.activate(configuration, context.bundleContext());
 
         withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one.mobile")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build()
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/one")
+                        .setTarget("/content/we-retail/en/page1")
+                        .setStatusCode(302).build()
         );
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, false);
 
-        // happy path: selector matched
-        assertEquals("/content/geometrixx/en/two.html",
-                navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
-
-        // no selectors
-        assertEquals(null, navigate("/content/geometrixx/en/one.html").getHeader("Location"));
-        // selector does not match the rule
-        assertEquals(null, navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+        assertEquals("/content/we-retail/en/page1.html",
+                navigate("/content/we-retail/en/one", null, "html").getHeader("Location"));
+        assertEquals(null,
+                navigate("/content/we-retail/en/one", "a.b.c", "html").getHeader("Location"));
     }
 
+    /**
+     * Ignore Selectors in the caconf is checked and selectors are ignored
+     * for the rule
+     * /content/we-retail/en/one => /content/we-retail/en/page1
+     *  both will match:
+     *  /content/we-retail/en/one.html
+     *  and
+     *  /content/we-retail/en/one.a.b.c.html
+     *
+     */
     @Test
-    public void testMatchSelectorsRegex() throws Exception {
+    public void testMatchIfSelectorsIgnored() throws Exception {
         RedirectFilter.Configuration configuration = filter.getConfiguration();
-        when(configuration.evaluateSelectors()).thenReturn(true);
         filter.activate(configuration, context.bundleContext());
 
         withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one\\.(mobile|desktop)")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/we-retail/en/home.product1/*")
-                    .setTarget("/content/we-retail/en/home.product2")
-                    .setStatusCode(302).build()
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/one")
+                        .setTarget("/content/we-retail/en/page1")
+                        .setStatusCode(302).build()
         );
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, true);
 
-        assertEquals("/content/geometrixx/en/two.html",
-                navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
-        assertEquals("/content/geometrixx/en/two.html",
-                navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
-        // unknown selector, does not match the regex
-        assertEquals(null, navigate("/content/geometrixx/en/one.unknown.html").getHeader("Location"));
-
-        assertEquals("/content/we-retail/en/home.product2.html",
-                navigate("/content/we-retail/en/home.product1/feature.html").getHeader("Location"));
-        assertEquals(null, navigate("/content/we-retail/en/home.unknown/feature.html").getHeader("Location"));
-    }
-
-
-    @Test
-    public void testSelectorsDisabled() throws Exception {
-        RedirectFilter.Configuration configuration = filter.getConfiguration();
-        when(configuration.evaluateSelectors()).thenReturn(false);
-        filter.activate(configuration, context.bundleContext());
-
-        withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one")
-                    .setTarget("/content/geometrixx/en/page1")
-                    .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one.desktop")
-                    .setTarget("/content/geometrixx/en/page1")
-                    .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one.mobile")
-                    .setTarget("/content/geometrixx/en/page1")
-                    .setStatusCode(302).build()
-        );
-
-        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.html").getHeader("Location"));
-        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
-        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+        assertEquals("/content/we-retail/en/page1.html",
+                navigate("/content/we-retail/en/one", "a.b.c", "html").getHeader("Location"));
+        assertEquals("/content/we-retail/en/page1.html",
+                navigate("/content/we-retail/en/one", "a.b.c", "html").getHeader("Location"));
     }
 
     @Test

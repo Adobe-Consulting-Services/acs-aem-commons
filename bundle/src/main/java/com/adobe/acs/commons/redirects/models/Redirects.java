@@ -36,6 +36,7 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 public class Redirects {
 
     public static final String CFG_PROP_CONTEXT_PREFIX = "contextPrefix";
+    public static final String CFG_PROP_IGNORE_SELECTORS = "ignoreSelectors";
 
     @SlingObject
     private SlingHttpServletRequest request;
@@ -45,6 +46,7 @@ public class Redirects {
     List<List<Resource>> pages;
 
     String contextPrefix;
+    boolean ignoreSelectors;
 
     @PostConstruct
     protected void init() {
@@ -59,6 +61,7 @@ public class Redirects {
 
         ValueMap properties = configResource.getValueMap();
         contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
+        ignoreSelectors = properties.get(Redirects.CFG_PROP_IGNORE_SELECTORS, false);
     }
 
     public List<Resource> getItems() {
@@ -95,5 +98,9 @@ public class Redirects {
 
     public String getContextPrefix() {
         return contextPrefix;
+    }
+
+    public boolean getIgnoreSelectors() {
+        return ignoreSelectors;
     }
 }
