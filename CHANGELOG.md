@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 #3238 - Content Sync make timeouts configurable
 #3235 - Add an option to ignore selectors in the url.
 
+### Fix
+
+- #3264 - NullPointerException while displaying MCP forms
+
 ## 6.3.8 - 2024-02-02
 
 ### Fix
