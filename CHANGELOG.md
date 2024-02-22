@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fix
+
+- #3264 - NullPointerException while displaying MCP forms
+
 ## 6.3.8 - 2024-02-02
 
 ### Fix
