@@ -10,8 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-#3238 - Content Sync make timeouts configurable
-#3235 - Add an option to ignore selectors in the url.
+## 6.4.0 - 2024-02-22
+
+## Added 
+
+- #3238 - Content Sync make timeouts configurable
+- #3235 - Add an option to ignore selectors in the url.
 
 ### Fix
 
@@ -21,7 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fix
 
-#3252 - Check if maxage header value is valid before setting it.
+- #3252 - Check if maxage header value is valid before setting it.
 
 ## 6.3.6 - 2024-01-22
 
