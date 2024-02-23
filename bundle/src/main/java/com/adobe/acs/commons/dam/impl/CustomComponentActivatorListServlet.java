@@ -17,9 +17,11 @@
  */
 package com.adobe.acs.commons.dam.impl;
 
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -29,11 +31,11 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Map;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @SlingServlet(paths = "/bin/acs-commons/dam/custom-components.json", generateComponent = false)
 @Component(metatype = true, policy = ConfigurationPolicy.REQUIRE, label = "ACS AEM Commons - Custom DAM Component List Servlet",
@@ -72,7 +74,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
     }
 
     @Override
-    protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().print(json.toString());

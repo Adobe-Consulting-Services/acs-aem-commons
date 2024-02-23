@@ -67,12 +67,6 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
     </build>
 
     <dependencies>
-        <!-- annotations -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <scope>provided</scope><!-- should not transitively be exposed -->
-        </dependency>
         <dependency>
             <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>

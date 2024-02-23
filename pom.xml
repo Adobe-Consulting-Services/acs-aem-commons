@@ -569,11 +569,6 @@ Service-Component: OSGI-INF/*.xml
                 <artifactId>annotations</artifactId>
                 <version>23.0.0</version>
             </dependency>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>3.0.0</version>
-            </dependency>
             <!-- should match Bnd version used by maven-bundle-plugin -->
             <dependency>
                 <groupId>biz.aQute.bnd</groupId>

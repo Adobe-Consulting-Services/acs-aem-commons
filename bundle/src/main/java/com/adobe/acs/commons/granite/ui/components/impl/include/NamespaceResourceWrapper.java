@@ -17,19 +17,19 @@
  */
 package com.adobe.acs.commons.granite.ui.components.impl.include;
 
-import com.adobe.granite.ui.components.ExpressionResolver;
-import com.adobe.granite.ui.components.FilteringResourceWrapper;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Optional;
+
 import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Optional;
+import com.adobe.granite.ui.components.ExpressionResolver;
+import com.adobe.granite.ui.components.FilteringResourceWrapper;
 
 
 public class NamespaceResourceWrapper extends FilteringResourceWrapper {
@@ -41,8 +41,8 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
 
     private final ValueMap valueMap;
 
-    public NamespaceResourceWrapper(@Nonnull Resource resource, @Nonnull ExpressionResolver expressionResolver,
-                                    @Nonnull SlingHttpServletRequest request,
+    public NamespaceResourceWrapper(@NotNull Resource resource, @NotNull ExpressionResolver expressionResolver,
+                                    @NotNull SlingHttpServletRequest request,
                                     String[] namespacedProperties) {
         super(resource, expressionResolver, request);
         this.expressionResolver = expressionResolver;

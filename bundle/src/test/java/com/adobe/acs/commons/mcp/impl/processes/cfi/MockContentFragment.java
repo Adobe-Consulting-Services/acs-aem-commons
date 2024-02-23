@@ -32,10 +32,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -162,9 +161,9 @@ public class MockContentFragment implements ContentFragment {
         return null;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
+    public <AdapterType> AdapterType adaptTo(@NotNull Class<AdapterType> aClass) {
         return null;
     }
 

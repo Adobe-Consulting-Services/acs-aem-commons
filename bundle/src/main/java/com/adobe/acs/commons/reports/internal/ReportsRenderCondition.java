@@ -19,13 +19,13 @@ package com.adobe.acs.commons.reports.internal;
 
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 
 import com.adobe.granite.ui.components.rendercondition.RenderCondition;
@@ -38,7 +38,7 @@ public class ReportsRenderCondition extends SlingSafeMethodsServlet {
   private static final long serialVersionUID = 8821022395219226632L;
 
   @Override
-  protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+  protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response)
       throws ServletException, IOException {
     request.setAttribute(RenderCondition.class.getName(), INSTANCE);
   }

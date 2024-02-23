@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.annotation.Nonnull;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -38,6 +37,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +129,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     instance.defineCriticalAction("Finding references", rr, this::recordTags);
   }
 
-  private @Nonnull List<String> computeReferenceCellValues(Collection<String> references) {
+  private @NotNull List<String> computeReferenceCellValues(Collection<String> references) {
     List<String> cells = new ArrayList<>();
     List<String> cell = new ArrayList<>();
     int len = 0;
