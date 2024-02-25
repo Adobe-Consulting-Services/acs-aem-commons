@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fix
+
+- Re-enable accidentally disabled unit tests
+
 ## 6.4.0 - 2024-02-22
 
 ## Added 
