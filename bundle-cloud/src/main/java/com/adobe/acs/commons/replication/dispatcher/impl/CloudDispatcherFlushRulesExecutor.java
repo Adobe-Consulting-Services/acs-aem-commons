@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushRules;
-import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
@@ -52,9 +51,6 @@ import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
 public class CloudDispatcherFlushRulesExecutor implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CloudDispatcherFlushRulesExecutor.class);
-
-    @Reference(target = "(distribution=cloud-ready)")
-    private RequireAem requireAem;
 
     @Reference
     private DiscoveryService discoveryService;
