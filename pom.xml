@@ -89,6 +89,7 @@
         <aem.sdk.api.version>2023.1.10675.20230113T110236Z-220900</aem.sdk.api.version>
 
         <jacoco.version>0.8.7</jacoco.version>
+        <junit.jupiter.version>5.10.0</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
@@ -142,12 +143,12 @@
                         <dependency>
                             <groupId>org.junit.jupiter</groupId>
                             <artifactId>junit-jupiter-engine</artifactId>
-                            <version>5.10.0</version>
+                            <version>${junit.jupiter.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.junit.vintage</groupId>
                             <artifactId>junit-vintage-engine</artifactId>
-                            <version>5.10.0</version>
+                            <version>${junit.jupiter.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -619,7 +620,7 @@ Service-Component: OSGI-INF/*.xml
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.10.0</version>
+                <version>${junit.jupiter.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
