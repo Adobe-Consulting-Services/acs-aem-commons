@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3267 - Remove JSR305 dependency
 
+### Fixed
+
+- #3270 - Re-enable accidentally disabled JUnit3/4 tests
+
 ## 6.4.0 - 2024-02-22
 
 ## Added 
