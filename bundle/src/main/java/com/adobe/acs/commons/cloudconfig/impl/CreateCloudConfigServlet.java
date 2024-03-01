@@ -20,7 +20,6 @@ package com.adobe.acs.commons.cloudconfig.impl;
 import java.io.IOException;
 import java.util.Collections;
 
-import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +32,7 @@ import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.post.HtmlResponse;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class CreateCloudConfigServlet extends SlingAllMethodsServlet {
   private static final Logger log = LoggerFactory.getLogger(CreateCloudConfigServlet.class);
 
   @Override
-  protected void doPost(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+  protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response)
       throws IOException {
     ResourceResolver resolver = request.getResourceResolver();
     PageManager pageManager = resolver.adaptTo(PageManager.class);

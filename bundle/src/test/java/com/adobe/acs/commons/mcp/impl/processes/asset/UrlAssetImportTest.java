@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.JcrConstants;
@@ -43,6 +42,7 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 import javax.jcr.Node;
 import javax.jcr.Session;
 
@@ -38,6 +37,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

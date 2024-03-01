@@ -10,9 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-### Fix
+### Changed
 
-- Re-enable accidentally disabled unit tests
+- #3267 - Remove JSR305 dependency
+
+### Fixed
+
+- #3270 - Re-enable accidentally disabled JUnit3/4 tests
 
 ## 6.4.0 - 2024-02-22
 

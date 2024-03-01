@@ -18,11 +18,21 @@
 
 package com.adobe.acs.commons.oak.impl;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
-import com.adobe.acs.commons.oak.impl.EnsureOakIndex.OakIndexDefinitionException;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
@@ -32,24 +42,16 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.jcr.Node;
-import javax.jcr.Property;
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
+import com.adobe.acs.commons.oak.impl.EnsureOakIndex.OakIndexDefinitionException;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
 
 public class EnsureOakIndexJobHandler implements Runnable {
     //@formatter:off
@@ -248,7 +250,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws IOException
      */
     void handleHeavyWeightIndexOperations(final Resource oakIndexes,
-                                          final @Nonnull Resource ensureDefinition, final @Nullable Resource oakIndex)
+                                          final @NotNull Resource ensureDefinition, final @Nullable Resource oakIndex)
             throws RepositoryException, IOException {
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
 
@@ -291,7 +293,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws PersistenceException
      */
     boolean handleLightWeightIndexOperations(
-            final @Nonnull Resource ensureDefinition, final @Nullable Resource oakIndex)
+            final @NotNull Resource ensureDefinition, final @Nullable Resource oakIndex)
             throws RepositoryException, PersistenceException {
 
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
@@ -333,7 +335,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @param oakIndex the index representing the oak index
      * @throws PersistenceException
      */
-    public void forceRefresh(final @Nonnull Resource oakIndex) throws PersistenceException {
+    public void forceRefresh(final @NotNull Resource oakIndex) throws PersistenceException {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
         if (mvm == null ) {
@@ -354,7 +356,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    public Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws
+    public Resource create(final @NotNull Resource ensuredDefinition, final @NotNull Resource oakIndexes) throws
             RepositoryException {
 
         final Node oakIndex = JcrUtil.copy(
@@ -383,7 +385,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws IOException
      */
     @SuppressWarnings("squid:S3776")
-    public Resource update(final @Nonnull Resource ensureDefinition, final @Nonnull Resource oakIndexes, boolean forceReindex)
+    public Resource update(final @NotNull Resource ensureDefinition, final @NotNull Resource oakIndexes, boolean forceReindex)
             throws RepositoryException, IOException {
 
         final ValueMap ensureDefinitionProperties = ensureDefinition.getValueMap();
@@ -475,7 +477,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @param oakIndex the index
      * @throws PersistenceException
      */
-    public void disableIndex(@Nonnull Resource oakIndex) throws PersistenceException {
+    public void disableIndex(@NotNull Resource oakIndex) throws PersistenceException {
         final ModifiableValueMap oakIndexProperties = oakIndex.adaptTo(ModifiableValueMap.class);
         oakIndexProperties.put(PN_TYPE, DISABLED);
 
@@ -491,7 +493,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws IOException
      * @throws RepositoryException
      */
-    boolean needsUpdate(@Nonnull Resource ensureDefinition, @Nonnull Resource oakIndex) throws IOException, RepositoryException {
+    boolean needsUpdate(@NotNull Resource ensureDefinition, @NotNull Resource oakIndex) throws IOException, RepositoryException {
         final Session session = ensureDefinition.getResourceResolver().adaptTo(Session.class);
         final ChecksumGenerator checksumGenerator = this.ensureOakIndex.getChecksumGenerator();
 
@@ -526,7 +528,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws PersistenceException
      */
-    public void delete(final @Nonnull Resource oakIndex) throws RepositoryException {
+    public void delete(final @NotNull Resource oakIndex) throws RepositoryException {
 
         if (oakIndex.adaptTo(Node.class) != null) {
             // Remove the node and its descendants
@@ -543,7 +545,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws OakIndexDefinitionException
      */
-    public void validateEnsureDefinition(@Nonnull Resource ensureDefinition)
+    public void validateEnsureDefinition(@NotNull Resource ensureDefinition)
             throws RepositoryException, OakIndexDefinitionException {
 
         Node node = ensureDefinition.adaptTo(Node.class);
