@@ -17,31 +17,30 @@
  */
 package com.adobe.acs.commons.granite.ui.components.impl.include;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.engine.EngineConstants;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
-import javax.annotation.CheckForNull;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
 
 @Component(
         service = Filter.class,
@@ -132,7 +131,7 @@ public class IncludeDecoratorFilterImpl implements Filter {
     }
 
     private void performFilter(SlingHttpServletRequest request, ServletResponse servletResponse, FilterChain chain, ValueMap parameters) throws IOException, ServletException {
-        @CheckForNull Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
+        @Nullable Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
         if(parameterResource != null){
             parameters = parameterResource.getValueMap();
         }

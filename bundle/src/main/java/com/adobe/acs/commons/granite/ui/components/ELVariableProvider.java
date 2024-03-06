@@ -19,9 +19,8 @@ package com.adobe.acs.commons.granite.ui.components;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ConsumerType;
 
 import com.adobe.granite.ui.components.ExpressionCustomizer;
@@ -44,5 +43,5 @@ public interface ELVariableProvider {
      * The name must not contain {@code .}
      * Must never be {@code null}, but can be the empty map if no variable is provided.
      */
-    @Nonnull Map<String, Object> getVariables(SlingHttpServletRequest request);
+    @NotNull Map<String, Object> getVariables(SlingHttpServletRequest request);
 }

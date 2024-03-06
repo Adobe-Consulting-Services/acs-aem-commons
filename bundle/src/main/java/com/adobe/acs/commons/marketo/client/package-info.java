@@ -18,5 +18,5 @@
 /**
  * Adobe I/O services.
  */
-@org.osgi.annotation.versioning.Version("4.4.0")
+@org.osgi.annotation.versioning.Version("4.4.1")
 package com.adobe.acs.commons.marketo.client;

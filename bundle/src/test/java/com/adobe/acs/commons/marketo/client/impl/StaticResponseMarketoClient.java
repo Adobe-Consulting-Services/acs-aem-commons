@@ -25,14 +25,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 
-import javax.annotation.Nonnull;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.message.BasicRequestLine;
-
+import org.jetbrains.annotations.NotNull;
 import org.apache.http.ProtocolVersion;
 
 import com.adobe.acs.commons.marketo.client.MarketoApiException;
@@ -54,7 +52,7 @@ public class StaticResponseMarketoClient extends MarketoClientImpl {
     }
 
     @Override
-    protected <T> @Nonnull T getApiResponse(@Nonnull String url, String bearerToken,
+    protected <T> @NotNull T getApiResponse(@NotNull String url, String bearerToken,
             BiFunction<HttpGet, HttpResponse, ParsedResponse<T>> callback)
             throws MarketoApiException {
         InputStream is = StaticResponseMarketoClient.class.getResourceAsStream(resourcePath);

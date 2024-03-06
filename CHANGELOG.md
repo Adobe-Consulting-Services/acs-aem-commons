@@ -12,7 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fix
 
-CCVAR: Fixed Same Attribute not updating correctly.
+- #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+
+### Changed
+
+- #3267 - Remove JSR305 dependency
+
+### Fixed
+
+- #3270 - Re-enable accidentally disabled JUnit3/4 tests
 
 ## 6.4.0 - 2024-02-22
 

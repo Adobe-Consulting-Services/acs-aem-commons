@@ -26,8 +26,9 @@ import com.adobe.cq.dam.cfm.VersionDef;
 import com.adobe.cq.dam.cfm.VersionedContent;
 import java.util.Iterator;
 import java.util.Map;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Incomplete mock that provides just enough for basic testing
@@ -104,9 +105,9 @@ public class MockContentElement implements ContentElement {
         return null;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
+    public <AdapterType> AdapterType adaptTo(@NotNull Class<AdapterType> aClass) {
         return null;
     }
 

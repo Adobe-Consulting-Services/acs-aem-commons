@@ -48,6 +48,7 @@ import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollec
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -134,7 +135,7 @@ public class PackageGarbageCollectionJobTest {
         JcrPackageDefinition definition = mock(JcrPackageDefinition.class);
         when(definition.getLastUnpacked()).thenReturn(getDate(lastUnpackedDaysAgo));
         when(definition.getLastUnwrapped()).thenReturn(getDate(daysAgo));
-        when(definition.getCreated()).thenReturn(null);
+        lenient().when(definition.getCreated()).thenReturn(null);
         when(definition.getNode()).thenReturn(packageNode);
         PackageId pid = mock(PackageId.class);
         when(pid.getName()).thenReturn(name);
