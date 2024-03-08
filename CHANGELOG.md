@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fix
+
+- #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+
 ### Changed
 
 - #3267 - Remove JSR305 dependency
