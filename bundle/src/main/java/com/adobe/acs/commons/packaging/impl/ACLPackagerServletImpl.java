@@ -45,6 +45,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import org.apache.sling.api.servlets.HttpConstants;
 
 /**
  * ACS AEM Commons - ACL Packager Servlet
@@ -52,7 +53,7 @@ import com.adobe.acs.commons.packaging.PackageHelper;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "POST" },
+        methods = { HttpConstants.METHOD_POST },
         resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
         selectors = { "package" },
         extensions = { "json" }

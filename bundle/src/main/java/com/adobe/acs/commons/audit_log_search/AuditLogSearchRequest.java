@@ -157,9 +157,11 @@ public class AuditLogSearchRequest {
             throws UnsupportedRepositoryOperationException, RepositoryException {
         if (!userPaths.containsKey(userId)) {
             final UserManager userManager = resolver.adaptTo(UserManager.class);
-            final Authorizable usr = userManager.getAuthorizable(userId);
-            if (usr != null) {
-                userPaths.put(userId, usr.getPath());
+            if (userManager != null) {
+                final Authorizable usr = userManager.getAuthorizable(userId);
+                if (usr != null) {
+                    userPaths.put(userId, usr.getPath());
+                }
             }
         }
         return userPaths.get(userId);
