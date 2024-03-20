@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +18,8 @@
 package com.adobe.acs.commons.mcp.util;
 
 import java.util.Arrays;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -36,8 +35,7 @@ public class ValueMapSerializerTest {
      */
     @Test
     public void testSerializeToStringArray() {
-        System.out.println("serializeToStringArray");
-        Object value = Arrays.asList("one", "two", "three", 4, 5.0D, 6L, new Integer(7), new Long(8));
+        Object value = Arrays.asList("one", "two", "three", 4, 5.0D, 6L, Integer.valueOf(7), Long.valueOf(8));
         String[] expResult = new String[]{"one", "two", "three", "4", "5.0", "6", "7", "8"};
         String[] result = ValueMapSerializer.serializeToStringArray(value);
         assertArrayEquals(expResult, result);

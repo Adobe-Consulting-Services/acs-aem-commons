@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
@@ -30,7 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -45,6 +43,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChecksumGeneratorImplTest {
@@ -168,6 +168,106 @@ public class ChecksumGeneratorImplTest {
 
 
     @Test
+    public void testNodeNameExcludes_ExcludeLeaf() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeLeafByFragment() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "test-page/jcr:content/ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeBranch() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured").addNode("dont-ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("f3dc7765a8857e0f59129f971f81e29dfee4d2b1",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeBranchByFragment() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured").addNode("dont-ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "test-page/jcr:content/ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("f3dc7765a8857e0f59129f971f81e29dfee4d2b1",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeSubTree() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured")
+                .addNode("also-ignore-me", "nt:unstructured")
+                .addNode("and-ignore-me-too", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedSubTrees(new String[]{ "ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeSubTreeWithFragment() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured")
+                .addNode("also-ignore-me", "nt:unstructured")
+                .addNode("and-ignore-me-too", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedSubTrees(new String[]{ "test-page/jcr:content/ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
     public void testDamAsset() throws IOException, RepositoryException {
         Node asset = setupAsset1();
 
@@ -177,22 +277,22 @@ public class ChecksumGeneratorImplTest {
 
         // jcr:content/renditions/original/jcr:content
         String propertiesChecksum =
-                "jcr:content/renditions/original/jcr:content/data="+ DigestUtils.shaHex("test binary string")
-                        + "jcr:content/renditions/original/jcr:content/jcr:primaryType="+ DigestUtils.shaHex("nt:resource");
-        String aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        String nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions/original/jcr:content="
+                "jcr:content/renditions/original/jcr:content/data="+ DigestUtils.sha1Hex("test binary string")
+                        + "jcr:content/renditions/original/jcr:content/jcr:primaryType="+ DigestUtils.sha1Hex("nt:resource");
+        String aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        String nodeChecksum =  DigestUtils.sha1Hex("jcr:content/renditions/original/jcr:content="
                 + aggregatedPopertiesChecksum);
 
         final String originalJcrContentChecksum = nodeChecksum;
 
-        assertEquals(originalJcrContentChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(), asset.getNode
-                ("renditions/original/jcr:content"), opts));
+        assertEquals(originalJcrContentChecksum, checksumGenerator.generatedNodeChecksum(asset.getPath(),
+                asset.getNode("renditions/original/jcr:content"), opts));
 
         // jcr:content/renditions/original
         propertiesChecksum =
-                "jcr:content/renditions/original/jcr:primaryType=" + DigestUtils.shaHex("nt:file");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions/original="
+                "jcr:content/renditions/original/jcr:primaryType=" + DigestUtils.sha1Hex("nt:file");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content/renditions/original="
                         + aggregatedPopertiesChecksum
                         + "jcr:content/renditions/original/jcr:content=" +  originalJcrContentChecksum
         );
@@ -204,9 +304,9 @@ public class ChecksumGeneratorImplTest {
 
 
         // jcr:content/renditions
-        propertiesChecksum = "jcr:content/renditions/jcr:primaryType=" + DigestUtils.shaHex("nt:folder");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions=" + aggregatedPopertiesChecksum
+        propertiesChecksum = "jcr:content/renditions/jcr:primaryType=" + DigestUtils.sha1Hex("nt:folder");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content/renditions=" + aggregatedPopertiesChecksum
                 + "jcr:content/renditions/original=" +  originalChecksum);
 
         final String renditionsChecksum = nodeChecksum;
@@ -215,10 +315,10 @@ public class ChecksumGeneratorImplTest {
                 asset.getNode("renditions"), opts));
 
         // jcr:content/metadata
-        propertiesChecksum = "jcr:content/metadata/dc:title=" + DigestUtils.shaHex("Foo")
-                + "jcr:content/metadata/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content/metadata=" + aggregatedPopertiesChecksum);
+        propertiesChecksum = "jcr:content/metadata/dc:title=" + DigestUtils.sha1Hex("Foo")
+                + "jcr:content/metadata/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content/metadata=" + aggregatedPopertiesChecksum);
 
         final String metadataChecksum = nodeChecksum;
 
@@ -227,10 +327,10 @@ public class ChecksumGeneratorImplTest {
 
 
         // jcr:content
-        propertiesChecksum = "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("dam:AssetContent")
-                + "jcr:content/text=" + DigestUtils.shaHex("t");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content=" + aggregatedPopertiesChecksum
+        propertiesChecksum = "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("dam:AssetContent")
+                + "jcr:content/text=" + DigestUtils.sha1Hex("t");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content=" + aggregatedPopertiesChecksum
                 + "jcr:content/metadata=" + metadataChecksum
                 + "jcr:content/renditions=" + renditionsChecksum);
 
@@ -248,8 +348,8 @@ public class ChecksumGeneratorImplTest {
 
     @Test
     public void testMultiple() throws IOException, RepositoryException {
-        Node page = setupPage1();
-        Node asset = setupAsset1();
+        final Node page = setupPage1();
+        final Node asset = setupAsset1();
 
         ChecksumGeneratorOptions defaultOptions = new DefaultChecksumGeneratorOptions();
 
@@ -272,30 +372,30 @@ public class ChecksumGeneratorImplTest {
 
     @Test
     public void testGeneratedNodeChecksum() throws RepositoryException, IOException {
-        Node node = session.getRootNode().addNode("page/jcr:content");
+        final Node node = session.getRootNode().addNode("page/jcr:content");
         node.setProperty("jcr:title", "My Title");
         node.setProperty("jcr:description", "This is my test node");
-        node.setProperty("long", new Long(100));
-        node.setProperty("double", new Double(99.99));
+        node.setProperty("long", Long.valueOf(100));
+        node.setProperty("double", Double.valueOf(99.99));
         node.setProperty("boolean", true);
         session.save();
 
-        String raw =
-                "jcr:content/boolean=" + DigestUtils.shaHex("true") +
-                        "jcr:content/double=" + DigestUtils.shaHex("99.99") +
-                        "jcr:content/jcr:description=" + DigestUtils.shaHex("This is my test node") +
-                        "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured") +
-                        "jcr:content/jcr:title=" + DigestUtils.shaHex("My Title") +
-                        "jcr:content/long=" + DigestUtils.shaHex("100");
+        final String raw =
+                "jcr:content/boolean=" + DigestUtils.sha1Hex("true")
+                        + "jcr:content/double=" + DigestUtils.sha1Hex("99.99")
+                        + "jcr:content/jcr:description=" + DigestUtils.sha1Hex("This is my test node")
+                        + "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured")
+                        + "jcr:content/jcr:title=" + DigestUtils.sha1Hex("My Title")
+                        + "jcr:content/long=" + DigestUtils.sha1Hex("100");
 
-        String propertiesChecksum = DigestUtils.shaHex(raw);
-        String expected = DigestUtils.shaHex("jcr:content=" + propertiesChecksum);
+        final String propertiesChecksum = DigestUtils.sha1Hex(raw);
+        final String expected = DigestUtils.sha1Hex("jcr:content=" + propertiesChecksum);
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
         opts.addIncludedNodeTypes(new String[]{ "nt:unstructured" });
 
-        Map<String, String> actual = checksumGenerator.generateChecksums(session, node.getPath(), opts);
+        final Map<String, String> actual = checksumGenerator.generateChecksums(session, node.getPath(), opts);
 
         assertEquals(expected, actual.get("/page/jcr:content"));
     }
@@ -312,32 +412,32 @@ public class ChecksumGeneratorImplTest {
         session.save();
 
         // Test
-        String bChecksum = DigestUtils.shaHex("jcr:content/a/b/jcr:primaryType="
-                + DigestUtils.shaHex("nt:unstructured"));
-        bChecksum = DigestUtils.shaHex("jcr:content/a/b=" + bChecksum);
+        String bChecksum = DigestUtils.sha1Hex("jcr:content/a/b/jcr:primaryType="
+                + DigestUtils.sha1Hex("nt:unstructured"));
+        bChecksum = DigestUtils.sha1Hex("jcr:content/a/b=" + bChecksum);
 
         //System.out.println("jcr:content/a/b Checksum: " + bChecksum);
 
-        String cChecksum = DigestUtils.shaHex("jcr:content/a/c/jcr:primaryType="
-                + DigestUtils.shaHex("nt:unstructured"));
-        cChecksum = DigestUtils.shaHex("jcr:content/a/c=" + cChecksum);
+        String cChecksum = DigestUtils.sha1Hex("jcr:content/a/c/jcr:primaryType="
+                + DigestUtils.sha1Hex("nt:unstructured"));
+        cChecksum = DigestUtils.sha1Hex("jcr:content/a/c=" + cChecksum);
 
         //System.out.println("jcr:content/a/c Checksum: " + cChecksum);
 
-        String aChecksum = DigestUtils.shaHex("jcr:content/a/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured"))
+        String aChecksum = DigestUtils.sha1Hex("jcr:content/a/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured"))
                 + "jcr:content/a/b=" + bChecksum
                 + "jcr:content/a/c=" + cChecksum;
-        aChecksum = DigestUtils.shaHex("jcr:content/a=" + aChecksum);
+        aChecksum = DigestUtils.sha1Hex("jcr:content/a=" + aChecksum);
 
-        //System.out.println("jcr:content/a Checksum: " + DigestUtils.shaHex("jcr:content/=" + aChecksum));
+        //System.out.println("jcr:content/a Checksum: " + DigestUtils.sha1Hex("jcr:content/=" + aChecksum));
 
-        String jcrContentChecksum = DigestUtils.shaHex("jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured"))
+        String jcrContentChecksum = DigestUtils.sha1Hex("jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured"))
                 + "jcr:content/a=" + aChecksum;
 
         //System.out.println("jcrContentChecksum: " + jcrContentChecksum);
 
-        jcrContentChecksum = DigestUtils.shaHex("jcr:content=" + jcrContentChecksum);
-        String expected = jcrContentChecksum;
+        jcrContentChecksum = DigestUtils.sha1Hex("jcr:content=" + jcrContentChecksum);
+        final String expected = jcrContentChecksum;
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addIncludedNodeTypes(new String[]{ "nt:unstructured" });
@@ -358,8 +458,8 @@ public class ChecksumGeneratorImplTest {
         Node node = session.getRootNode().addNode("page/jcr:content");
         node.setProperty("jcr:title", "My Title");
         node.setProperty("jcr:description", "This is my test node");
-        node.setProperty("long", new Long(100));
-        node.setProperty("double", new Double(99.99));
+        node.setProperty("long", Long.valueOf(100));
+        node.setProperty("double", Double.valueOf(99.99));
         node.setProperty("boolean", true);
         node.setProperty("unsorted", new String[]{ "woof", "bark", "howl" });
         node.setProperty("sorted", new String[]{ "yelp", "arf" });
@@ -367,18 +467,18 @@ public class ChecksumGeneratorImplTest {
 
         // Expected to be sorted alphabetically
         String raw =
-                "jcr:content/boolean=" + DigestUtils.shaHex("true")
-                        + "jcr:content/double=" + DigestUtils.shaHex("99.99")
-                        + "jcr:content/jcr:description=" + DigestUtils.shaHex("This is my test node")
-                        + "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured")
-                        + "jcr:content/jcr:title=" + DigestUtils.shaHex("My Title")
-                        + "jcr:content/long=" + DigestUtils.shaHex("100")
-                        + "jcr:content/sorted=" + DigestUtils.shaHex("yelp") + "," + DigestUtils.shaHex("arf")
+                "jcr:content/boolean=" + DigestUtils.sha1Hex("true")
+                        + "jcr:content/double=" + DigestUtils.sha1Hex("99.99")
+                        + "jcr:content/jcr:description=" + DigestUtils.sha1Hex("This is my test node")
+                        + "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured")
+                        + "jcr:content/jcr:title=" + DigestUtils.sha1Hex("My Title")
+                        + "jcr:content/long=" + DigestUtils.sha1Hex("100")
+                        + "jcr:content/sorted=" + DigestUtils.sha1Hex("yelp") + "," + DigestUtils.sha1Hex("arf")
                         // This order is dictated by the sorted values of the corresponding hashes
-                        + "jcr:content/unsorted=" + DigestUtils.shaHex("howl") + "," + DigestUtils.shaHex("bark") + ","
-                        + DigestUtils.shaHex("woof");
+                        + "jcr:content/unsorted=" + DigestUtils.sha1Hex("howl") + "," + DigestUtils.sha1Hex("bark") + ","
+                        + DigestUtils.sha1Hex("woof");
 
-        String expected = DigestUtils.shaHex(raw);
+        String expected = DigestUtils.sha1Hex(raw);
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
@@ -395,8 +495,8 @@ public class ChecksumGeneratorImplTest {
         Node node = session.getRootNode().addNode("page/jcr:content");
         node.setProperty("jcr:title", "My Title");
         node.setProperty("jcr:description", "This is my test node");
-        node.setProperty("long", new Long(100));
-        node.setProperty("double", new Double(99.99));
+        node.setProperty("long", Long.valueOf(100));
+        node.setProperty("double", Double.valueOf(99.99));
         node.setProperty("boolean", true);
         node.setProperty("unsorted", new String[]{ "woof", "bark", "howl" });
         node.setProperty("sorted", new String[]{ "yelp", "arf" });
@@ -404,16 +504,16 @@ public class ChecksumGeneratorImplTest {
 
         // Expected to be sorted alphabetically
         String raw =
-                "jcr:content/boolean=" + DigestUtils.shaHex("true")
-                        + "jcr:content/double=" + DigestUtils.shaHex("99.99")
-                        + "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured")
-                        + "jcr:content/jcr:title=" + DigestUtils.shaHex("My Title")
-                        + "jcr:content/sorted=" + DigestUtils.shaHex("yelp") + "," + DigestUtils.shaHex("arf")
+                "jcr:content/boolean=" + DigestUtils.sha1Hex("true")
+                        + "jcr:content/double=" + DigestUtils.sha1Hex("99.99")
+                        + "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured")
+                        + "jcr:content/jcr:title=" + DigestUtils.sha1Hex("My Title")
+                        + "jcr:content/sorted=" + DigestUtils.sha1Hex("yelp") + "," + DigestUtils.sha1Hex("arf")
                         // This order is dictated by the sorted values of the corresponding hashes
-                        + "jcr:content/unsorted=" + DigestUtils.shaHex("howl") + "," + DigestUtils.shaHex("bark") + ","
-                        + DigestUtils.shaHex("woof");
+                        + "jcr:content/unsorted=" + DigestUtils.sha1Hex("howl") + "," + DigestUtils.sha1Hex("bark") + ","
+                        + DigestUtils.sha1Hex("woof");
 
-        String expected = DigestUtils.shaHex(raw);
+        String expected = DigestUtils.sha1Hex(raw);
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
@@ -430,9 +530,78 @@ public class ChecksumGeneratorImplTest {
         checksums.put("jcr:content/foo", "1234");
         checksums.put("jcr:content/bar", "5678,9012");
 
-        String expected = DigestUtils.shaHex("jcr:content/foo=1234jcr:content/bar=5678,9012");
+        String expected = DigestUtils.sha1Hex("jcr:content/foo=1234jcr:content/bar=5678,9012");
         String actual = checksumGenerator.aggregateChecksums(checksums);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testIsExcludedSubTree_ByPath() throws RepositoryException {
+        session.getRootNode()
+            .addNode("content")
+            .addNode("one", "nt:unstructured")
+            .addNode("two", "nt:unstructured")
+            .addNode("three", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "one/two" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/one"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/one/two"), opts));
+    }
+
+    @Test
+    public void testIsExcludedNodeName_ByPath() throws RepositoryException {
+        session.getRootNode()
+                .addNode("content")
+                .addNode("one", "nt:unstructured")
+                .addNode("two", "nt:unstructured")
+                .addNode("three", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "one/two" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/one"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/one/two"), opts));
+    }
+
+
+    @Test
+    public void testIsExcludedSubTree_ByNodeType() throws RepositoryException {
+        session.getRootNode()
+                .addNode("content")
+                .addNode("one", "nt:unstructured")
+                .addNode("two", "nt:unstructured")
+                .addNode("three", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "one/two" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content"), opts));
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/one"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/one/two"), opts));
+    }
+
+    @Test
+    public void testIsExcludedNodeName_ByNodeType() throws RepositoryException {
+        Node content = session.getRootNode().addNode("content");
+
+        Node parent1 = content.addNode("parent1", "nt:unstructured");
+        Node parent2 = content.addNode("parent2", "sling:Folder");
+
+        parent1.addNode("child", "nt:unstructured");
+        parent2.addNode("child", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "[sling:Folder]/child" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content"), opts));
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/parent1/child"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/parent2/child"), opts));
     }
 }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
@@ -28,8 +26,8 @@ import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.RestartWork
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.TerminateDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.UpdateWorkflowDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WFArgsWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WFDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WfArgsWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WfDataWorkflowProcess;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
@@ -38,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Session;
 import java.util.ArrayList;
@@ -46,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,11 +70,11 @@ public class SyntheticCqWorkflowRunnerImplTest {
     }
 
     @Test
-    public void testExecute_WFData() throws Exception {
+    public void testExecute_WfData() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
-        swr.bindCqWorkflowProcesses(new WFDataWorkflowProcess(), map);
+        swr.bindCqWorkflowProcesses(new WfDataWorkflowProcess(), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("test",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
@@ -134,7 +132,7 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "wf-args");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("wf-args",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,
@@ -168,7 +166,6 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Terminate() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
@@ -215,7 +212,6 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Complete_noSave() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
@@ -246,10 +242,10 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
         final Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "multi1");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs1), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs1), map);
 
         map.put("process.label", "multi2");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs2), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs2), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("multi1",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.keys;
 
@@ -40,6 +38,36 @@ public interface CacheKey extends Serializable
      * @return the hierarchy resource path
      */
     String getHierarchyResourcePath();
+
+    /**
+     * Gets the expiry time for the cache entry creation.
+     * If set, it will override the default TTL for entries to expire on cache creation.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForCreation(){
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry access / read.
+     * If set, it will refresh the expiry time when an entry is read with given value.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForAccess(){
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry updated.
+     * If set, it will refresh the expiry time when an entry is updated with given value.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForUpdate(){
+        return -1L;
+    }
 
     /**
      * Determines if the @{param cacheKey} will invalidate this cache key entry.
@@ -67,6 +95,7 @@ public interface CacheKey extends Serializable
      * @return true if the objects represent the same cache item, false otherwise.
      */
     boolean equals(Object o);
+
 
 
 }

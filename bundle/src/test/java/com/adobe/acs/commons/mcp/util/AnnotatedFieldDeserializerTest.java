@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +18,15 @@
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FormField;
-
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
 
 public class AnnotatedFieldDeserializerTest {
 
@@ -48,7 +47,7 @@ public class AnnotatedFieldDeserializerTest {
         float floatValue;
         @FormField(name = "long")
         long longValue;
-        @FormField(name = "boolean")
+        @FormField(name = "boolean", required = true)
         boolean booleanValue;
     }
 
@@ -60,8 +59,7 @@ public class AnnotatedFieldDeserializerTest {
     @Test
     public void testPrimitiveInputs() throws Exception {
 
-        System.out.println("processInput");
-        PrimitivesTest target = new PrimitivesTest();
+        final PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", "123");
         params.put("doubleValue", numberFormat.format(123.456));
@@ -93,8 +91,7 @@ public class AnnotatedFieldDeserializerTest {
      */
     @Test
     public void testPrimitiveArrayInputs() throws Exception {
-        System.out.println("processInput");
-        PrimitiveArrayTest target = new PrimitiveArrayTest();
+        final PrimitiveArrayTest target = new PrimitiveArrayTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", new String[]{"123", "456", "789"});
         params.put("doubleValue",  numberFormat.format(123.456));
@@ -115,15 +112,13 @@ public class AnnotatedFieldDeserializerTest {
     }
 
     /**
-     * Check if booleans are assumed false if missing.
+     * Check if booleans are assumed false if missing, only for required boolean fields.
      *
      * @throws java.lang.Exception
      */
     @Test
     public void testBooleanFalseByDefault() throws Exception {
-
-        System.out.println("processInput");
-        PrimitivesTest target = new PrimitivesTest();
+        final PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", "123");
         params.put("doubleValue", numberFormat.format(123.456));
@@ -138,5 +133,5 @@ public class AnnotatedFieldDeserializerTest {
         assertEquals(false, target.booleanValue);
     }
 
-    
+
 }

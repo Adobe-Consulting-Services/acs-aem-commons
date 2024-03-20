@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +18,7 @@
 package com.adobe.acs.commons.fam.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -50,7 +53,7 @@ public class ReusableResolver {
         if (getResolver().isLive()) {
             if (getResolver().hasChanges()) {
                 setChangeCount(getChangeCount() + 1);
-                getPendingItems().add(getCurrentItem());
+                pendingItems.add(getCurrentItem());
             }
             if (getChangeCount() >= getSaveInterval()) {
                 commit();
@@ -68,7 +71,7 @@ public class ReusableResolver {
                 getResolver().refresh();
                 throw e;
             } finally {
-                getPendingItems().clear();
+                pendingItems.clear();
             }
         }
     }
@@ -93,7 +96,7 @@ public class ReusableResolver {
     }
 
     public List<String> getPendingItems() {
-        return pendingItems;
+        return Collections.unmodifiableList(pendingItems);
     }
     
 }

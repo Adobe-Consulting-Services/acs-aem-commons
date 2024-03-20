@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
@@ -23,15 +21,18 @@ package com.adobe.acs.commons.workflow.synthetic.impl;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep;
+import com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkflowSession;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkflow;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.SyntheticWorkflowSession;
+import com.adobe.acs.commons.workflow.synthetic.cq.WrappedSyntheticWorkItem;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticCompleteWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticRestartWorkflowException;
 import com.adobe.acs.commons.workflow.synthetic.impl.cq.exceptions.SyntheticTerminateWorkflowException;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -45,7 +46,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -114,7 +116,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         this.execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
     }
 
-    @Override
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
                               final String[] workflowProcessLabels,
@@ -131,7 +132,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 autoSaveAtEnd);
     }
 
-    @Override
     public void execute(ResourceResolver resourceResolver,
                         String payloadPath,
                         List<SyntheticWorkflowStep> workflowSteps,
@@ -168,7 +168,6 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
     }
 
-    @Override
     public final void execute(final ResourceResolver resourceResolver,
                               final String payloadPath,
                               final WorkflowProcessIdType workflowProcessIdType,
@@ -277,14 +276,13 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                             session.save();
                         }
 
-                        log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ "
-                                        + String.valueOf(System.currentTimeMillis() - start) + " ] ms",
-                                workflowStep.getId(), payloadPath);
+                        log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ {} ] ms", //NOPMD - Flagged as false positive
+                                new Object[]{workflowStep.getId(), payloadPath, String.valueOf(System.currentTimeMillis() - start)});
                     } catch (RepositoryException e) {
-                        log.error("Could not save at end of synthetic workflow process execution"
-                                + " [ {} ] for payload path [ {} ]", workflowStep.getId(), payloadPath);
-                        log.error("Synthetic workflow process save failed.", e);
-                        throw new WorkflowException(e);
+                        String msg = String.format("Could not save at end of synthetic workflow process execution"
+                                + " [ %s ] for payload path [ %s ]", workflowStep.getId(), payloadPath);
+                        log.error("Synthetic workflow process save failed: {}",msg, e);
+                        throw new WorkflowException(msg,e);
                     }
                 }
             } else {
@@ -312,8 +310,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
         final WorkflowSession workflowSession = this.getCqWorkflowSession(session);
 
         // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
-        final SyntheticWorkItem workItem = new SyntheticWorkItem(workflow.getWorkflowData());
-        workItem.setWorkflow(workflow);
+        final SyntheticWorkItem workItem = SyntheticWorkItem.createSyntheticWorkItem(workflow.getWorkflowData());
 
         log.trace("Executing CQ synthetic workflow process [ {} ] on [ {} ]",
                 workflowProcess.getProcessId(),
@@ -321,7 +318,9 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
         // Execute the Workflow Process
         try {
-            workflowProcess.getCqWorkflowProcess().execute(workItem, workflowSession, workflowProcessMetaDataMap);
+            WorkItem wrappedWorkItem = (WorkItem) Proxy.newProxyInstance(WrappedSyntheticWorkItem.class.getClassLoader(), new Class[] { WorkItem.class, WrappedSyntheticWorkItem.class  }, workItem);
+            workItem.setWorkflow(wrappedWorkItem, workflow);
+            workflowProcess.getCqWorkflowProcess().execute(wrappedWorkItem, workflowSession, workflowProcessMetaDataMap);
             workItem.setTimeEnded(new Date());
         } catch (SyntheticCompleteWorkflowException ex) {
             // Workitem force-completed via a call to workflowSession.complete(..)
@@ -338,22 +337,21 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                                            com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflow workflow,
                                            SyntheticMetaDataMap workflowProcessMetaDataMap,
                                            SyntheticWorkflowProcess workflowProcess) throws com.adobe.granite.workflow.WorkflowException {
-
-        final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession workflowSession =
-                this.getGraniteWorkflowSession(session);
-
+       final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession syntheticWorkflowSession = this.getGraniteWorkflowSession(session);
 
         // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
         final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkItem workItem =
-                new com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkItem(workflow.getWorkflowData());
-        workItem.setWorkflow(workflow);
+                com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkItem.createSyntheticWorkItem(workflow.getWorkflowData());
 
         log.trace("Executing Granite synthetic workflow process [ {} ] on [ {} ]",
                 workflowProcess.getProcessId(),
                 workflow.getWorkflowData().getPayload());
         // Execute the Workflow Process
         try {
-            workflowProcess.getGraniteWorkflowProcess().execute(workItem, workflowSession, workflowProcessMetaDataMap);
+            com.adobe.granite.workflow.WorkflowSession workflowSession = (com.adobe.granite.workflow.WorkflowSession) Proxy.newProxyInstance(WrappedSyntheticWorkflowSession.class.getClassLoader(), new Class[] { com.adobe.granite.workflow.WorkflowSession.class, WrappedSyntheticWorkflowSession.class  }, syntheticWorkflowSession);
+            com.adobe.granite.workflow.exec.WorkItem wrappedWorkItem = (com.adobe.granite.workflow.exec.WorkItem) Proxy.newProxyInstance(com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem.class.getClassLoader(), new Class[] { com.adobe.granite.workflow.exec.WorkItem.class, com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem.class  }, workItem);
+            workItem.setWorkflow(wrappedWorkItem, workflow);
+            workflowProcess.getGraniteWorkflowProcess().execute(wrappedWorkItem, workflowSession, workflowProcessMetaDataMap);
             workItem.setTimeEnded(new Date());
         } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticCompleteWorkflowException ex) {
             // Workitem force-completed via a call to workflowSession.complete(..)
@@ -453,7 +451,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
      * @return the Granite Synthetic Workflow Session
      */
     public final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession getGraniteWorkflowSession(final Session session) {
-        return new com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession(this, session);
+        return com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession.createSyntheticWorkflowSession(this, session);
     }
 
     /**

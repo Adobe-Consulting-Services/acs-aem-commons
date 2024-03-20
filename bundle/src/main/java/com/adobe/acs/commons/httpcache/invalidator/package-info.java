@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 /**
@@ -24,7 +22,7 @@
  * invalidates the cache. For a typical implementation, invalidation event could be custom supplied based on the cache
  * config invalidation requirements. A sample implementation based on sling eventing is provided.
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@org.osgi.annotation.versioning.Version("1.1.0")
 package com.adobe.acs.commons.httpcache.invalidator;
 
 

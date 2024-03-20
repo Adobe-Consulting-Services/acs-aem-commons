@@ -1,26 +1,24 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
@@ -55,6 +53,7 @@ import java.util.TreeMap;
  * (via {@link ChecksumGeneratorOptions}).
  */
 @ProviderType
+@SuppressWarnings("squid:S2070") // SHA1 not used cryptographically
 public final class JSONGenerator {
     private static final Logger log = LoggerFactory.getLogger(ChecksumGenerator.class);
 
@@ -64,7 +63,7 @@ public final class JSONGenerator {
 
     public static void generateJSON(Session session, String path,
                                     JsonWriter out) throws RepositoryException, IOException {
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
         paths.add(path);
         generateJSON(session, paths, new DefaultChecksumGeneratorOptions(), out);
     }
@@ -175,7 +174,7 @@ public final class JSONGenerator {
             throws RepositoryException, ValueFormatException, IOException {
         Set<String> excludes = opts.getExcludedProperties();
 
-        SortedMap<String, Property> props = new TreeMap<String, Property>();
+        SortedMap<String, Property> props = new TreeMap<>();
         PropertyIterator propertyIterator = node.getProperties();
 
         // sort the properties by name as the JCR makes no guarantees on property order
@@ -204,7 +203,7 @@ public final class JSONGenerator {
             out.beginArray();
             boolean isSortedValues = sortValues.contains(property.getName());
             Value[] values = property.getValues();
-            TreeMap<String, Value> sortedValueMap = new TreeMap<String, Value>();
+            TreeMap<String, Value> sortedValueMap = new TreeMap<>();
             for (Value v : values) {
                 int type = v.getType();
                 if (type == PropertyType.BINARY) {
@@ -212,7 +211,7 @@ public final class JSONGenerator {
                         try {
                             java.io.InputStream stream =
                                     v.getBinary().getStream();
-                            String ckSum = DigestUtils.shaHex(stream);
+                            String ckSum = DigestUtils.sha1Hex(stream);
                             stream.close();
                             sortedValueMap.put(ckSum, v);
                         } catch (IOException e) {
@@ -258,7 +257,7 @@ public final class JSONGenerator {
 
         NodeIterator nodeIterator = node.getNodes();
 
-        TreeMap<String, Node> childSortMap = new TreeMap<String, Node>();
+        TreeMap<String, Node> childSortMap = new TreeMap<>();
         boolean hasOrderedChildren = false;
         try {
             hasOrderedChildren = node.getPrimaryNodeType().hasOrderableChildNodes();
@@ -292,14 +291,14 @@ public final class JSONGenerator {
     }
 
     private static void outputPropertyValue(Property property, Value value, JsonWriter out)
-            throws RepositoryException, IllegalStateException, IOException {
+            throws RepositoryException, IOException {
 
         if (value.getType() == PropertyType.STRING) {
             out.value(value.getString());
         } else if (value.getType() == PropertyType.BINARY) {
             try {
                 java.io.InputStream stream = value.getBinary().getStream();
-                String ckSum = DigestUtils.shaHex(stream);
+                String ckSum = DigestUtils.sha1Hex(stream);
                 stream.close();
                 out.value(ckSum);
             } catch (IOException e) {

@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.email.process.impl;
 
@@ -45,7 +43,7 @@ import static org.mockito.Mockito.mock;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.wcm.api.Page;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.when;
 
@@ -162,8 +160,8 @@ public class SendTemplatedEmailUtilsTest {
     public void testGetEmailAddrs_Group() throws Exception {
 
         // mock group and users
-        String groupPath = "/home/users/g/group";
-        List<Authorizable> groupMembers = new ArrayList<Authorizable>();
+        final String groupPath = "/home/users/g/group";
+        final List<Authorizable> groupMembers = new ArrayList<Authorizable>();
 
         Authorizable user1 = mock(Authorizable.class);
         Authorizable user2 = mock(Authorizable.class);

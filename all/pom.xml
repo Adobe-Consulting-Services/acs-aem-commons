@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- ====================================================================== -->
+    <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
+    <!-- ====================================================================== -->
+    <parent>
+        <groupId>com.adobe.acs</groupId>
+        <artifactId>acs-aem-commons</artifactId>
+        <version>6.4.1-SNAPSHOT</version>
+    </parent>
+
+    <!-- ====================================================================== -->
+    <!-- P R O J E C T D E S C R I P T I O N -->
+    <!-- ====================================================================== -->
+
+    <artifactId>acs-aem-commons-all</artifactId>
+    <name>ACS AEM Commons Container Package (All)</name>
+    <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps,
+        acs-aem-commons-ui.content, the OSGi bundle and configuration.
+    </description>
+    <packaging>content-package</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
+                <inherited>false</inherited>
+                <configuration>
+                    <packageType>container</packageType>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-metadata</id>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                        <configuration>
+                            <name>acs-aem-commons-all</name>
+                            <embeddeds>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                    <classifier>~cloud</classifier>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.content</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                            </embeddeds>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.xml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- disable oakpal due to false positives: https://github.com/adamcin/oakpal/issues/92
+            <plugin>
+                  <groupId>net.adamcin.oakpal</groupId>
+                  <artifactId>oakpal-maven-plugin</artifactId>
+                  <configuration>
+                      <deferBuildFailure>true</deferBuildFailure>
+                      <checklists>
+                          <checklist>acs-internal</checklist>
+                      </checklists>
+                  </configuration>
+                  <executions>
+                      <execution>
+                          <id>oakpal-scan</id>
+                          <goals>
+                              <goal>scan</goal>
+                          </goals>
+                      </execution>
+                      <execution>
+                          <id>oakpal-scan-content-class-aem65</id>
+                          <goals>
+                              <goal>scan</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                              <checklists>
+                                  <checklist>content-class-aem65</checklist>
+                              </checklists>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>oakpal-scan-content-class-aem64</id>
+                          <goals>
+                              <goal>scan</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                              <checklists>
+                                  <checklist>content-class-aem64</checklist>
+                              </checklists>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>oakpal-scan-min</id>
+                          <goals>
+                              <goal>scan-many</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+                              <scanArtifacts>
+                                  <artifact>
+                                      <groupId>${project.groupId}</groupId>
+                                      <artifactId>${project.artifactId}</artifactId>
+                                      <version>${project.version}</version>
+                                      <classifier>min</classifier>
+                                      <type>zip</type>
+                                  </artifact>
+                              </scanArtifacts>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>oakpal-verify</id>
+                          <goals>
+                              <goal>verify</goal>
+                          </goals>
+                          <configuration>
+                              <summaryFiles>
+                                  <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                                  <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                                  <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+                              </summaryFiles>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin> -->
+
+            <!-- avoid failing on JS vulnerabilities - TODO to fix -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <configuration>
+                    <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-bundle</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.apps</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.content</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>autoInstallPackage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.day.jcr.vault</groupId>
+                        <artifactId>content-package-maven-plugin</artifactId>
+                        <configuration>
+                            <packageFile>${contentPackageFile}</packageFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>install-content-package</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>install</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>cloud</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <contentPackageFile>${project.build.directory}/${project.build.finalName}-cloud.zip</contentPackageFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.jackrabbit</groupId>
+                        <artifactId>filevault-package-maven-plugin</artifactId>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>generate-metadata-cloud</id>
+                                <goals>
+                                    <goal>generate-metadata</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                    <properties>
+                                        <cloudManagerTarget>all</cloudManagerTarget>
+                                    </properties>
+                                    <embeddeds>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-bundle</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-bundle-cloud</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                            <classifier>cloud</classifier>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-ui.content</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                    </embeddeds>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>package-cloud</id>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>validate-package-cloud</id>
+                                <goals>
+                                    <goal>validate-package</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                    <packageFile>${contentPackageFile}</packageFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.adobe.aem</groupId>
+                        <artifactId>aemanalyser-maven-plugin</artifactId>
+                        <version>1.5.8</version>
+                        <executions>
+                            <execution>
+                                <id>aem-analyser</id>
+                                <goals>
+                                    <goal>project-analyse</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>com.adobe.acs</groupId>
+                    <artifactId>acs-aem-commons-bundle-cloud</artifactId>
+                    <version>${project.version}</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.adobe.acs</groupId>
+                    <artifactId>acs-aem-commons-ui.apps</artifactId>
+                    <classifier>cloud</classifier>
+                    <version>${project.version}</version>
+                    <type>zip</type>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>

@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +44,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +63,19 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerServlet.class);
 
+    private static final Collection<Class> IGNORED_CLASSES = Arrays.asList(
+            Logger.class,
+            Resource.class,
+            ResourceResolver.class,
+            byte[].class
+    );
+    private static final Collection<String> IGNORED_PACKAGES = Arrays.asList(
+            "java.io"
+    );
+    private static final List<String> IGNORED_SERVLET_INPUTS = Arrays.asList("definition", "description", "action");
+
     @Reference
-    ControlledProcessManager manager;
+    transient ControlledProcessManager manager;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
@@ -69,9 +84,12 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
-        String action = request.getRequestPathInfo().getSelectorString();
         Object result = null;
         try {
+            String action = request.getRequestPathInfo().getSelectorString();
+            if (action == null) {
+                throw new ServletException("action not provided in url selector");
+            }
             switch (action) {
                 case "start":
                     result = doStartProcess(request);
@@ -88,10 +106,10 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                 case "haltAll":
                 case "halt.all":
                 case "halt-all":
-                    result = doHaltAllProcesses(request);
+                    result = doHaltAllProcesses();
                     break;
                 case "purge":
-                    result = doPurgeCompleted(request);
+                    result = doPurgeCompleted();
                     break;
                 default:
                     throw new IllegalArgumentException("Action not understood.");
@@ -100,6 +118,11 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
             result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
+        String json = getGson().toJson(result); // #2749
+        response.getWriter().write(json);
+    }
+
+    Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.addSerializationExclusionStrategy(new ExclusionStrategy() {
             @Override
@@ -109,14 +132,14 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
             @Override
             public boolean shouldSkipClass(Class<?> type) {
-                return !type.isArray()
-                        && !type.isPrimitive()
-                        && type.getPackage().getName().startsWith("java.io");
+                return IGNORED_CLASSES.contains(type)
+                        || (type.getPackage() != null
+                        && IGNORED_PACKAGES.contains(type.getPackage().getName()));
             }
         });
         gsonBuilder.disableInnerClassSerialization();
         Gson gson = gsonBuilder.create();
-        gson.toJson(result, response.getWriter());
+        return gson;
     }
 
     private ProcessInstance doStartProcess(SlingHttpServletRequest request) throws RepositoryException, ReflectiveOperationException, DeserializeException {
@@ -147,13 +170,13 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
     }
 
     @SuppressWarnings("squid:S1172")
-    private boolean doHaltAllProcesses(SlingHttpServletRequest request) {
+    private boolean doHaltAllProcesses() {
         manager.haltActiveProcesses();
         return true;
     }
 
     @SuppressWarnings("squid:S1172")
-    private boolean doPurgeCompleted(SlingHttpServletRequest request) {
+    private boolean doPurgeCompleted() {
         manager.purgeCompletedProcesses();
         return true;
     }
@@ -180,11 +203,9 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
         }
     }
 
-    List<String> ignoredInputs = Arrays.asList("definition", "description", "action");
-
-    private Map<String, Object> convertRequestMap(RequestParameterMap requestParameterMap) {
+    Map<String, Object> convertRequestMap(RequestParameterMap requestParameterMap) {
         return requestParameterMap.entrySet().stream()
-                .filter(entry -> !ignoredInputs.contains(entry.getKey()))
+                .filter(entry -> !IGNORED_SERVLET_INPUTS.contains(entry.getKey()))
                 .collect(Collectors.toMap(
                         entry -> entry.getKey(),
                         entry -> {
@@ -197,7 +218,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                                     return values[0].getString();
                                 }
                             } else {
-                                return Arrays.stream(values).collect(Collectors.toList());
+                                return Arrays.stream(values).map(RequestParameter::getString).collect(Collectors.toList());
                             }
                         }
                 ));

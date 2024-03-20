@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +17,7 @@
  */
 package com.adobe.acs.commons.fam.actions;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
@@ -141,18 +143,19 @@ public final class Actions {
                     r.refresh();
                     LOG.info("Timeout reached, aborting work", e);
                     throw e;
+                } catch (Error e) {
+                    LOG.info("Critical runtime exception " + e.getMessage(), e);
+                    throw e;                    
                 } catch (Throwable e) {
+                    LOG.info("Error commit, retry count is {}. Switch to DEBUG logging to get the full stacktrace",
+                            remaining);
+                    LOG.debug("Error commit, retry count is " + remaining, e);
                     r.revert();
                     r.refresh();
-                    LOG.info("Error commit, retry count is " + remaining, e);
-                    if (e instanceof Exception) {
-                        if (remaining-- <= 0) {
-                            throw e;
-                        } else {
-                            Thread.sleep(pausePerRetry);
-                        }
-                    } else {
+                    if (--remaining <= 0) {
                         throw e;
+                    } else {
+                        Thread.sleep(pausePerRetry);
                     }
                 }
             }

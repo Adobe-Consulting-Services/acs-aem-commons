@@ -1,0 +1,18 @@
+{
+  "jcr:primaryType": "sling:OrderedFolder",
+  "jcr:createdBy": "admin",
+  "jcr:created": "Mon Jan 14 2019 13:11:30 GMT-0600",
+  "jcr:content": {
+    "jcr:primaryType": "nt:unstructured",
+    "jcr:title": "Sub Folder 1"
+  },
+  "image_a3.gif": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:referenceable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:created": "Mon Jan 14 2019 13:11:47 GMT-0600",
+    "jcr:uuid": "cfbb0749-a330-4a4d-85ba-198b6385b5db"
+  }
+}

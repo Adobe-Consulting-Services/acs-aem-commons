@@ -1,0 +1,37 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="spectrum-Toast spectrum-Toast--negative" style="display: block; margin: 0 auto; width: 100%;">
+    <div class="spectrum-Toast-body">
+        <div class="spectrum-Toast-content">
+            ${component.title} is not compatible with your version of Adobe Experience Manager.
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom: 4rem;"></div>
+
+<p>
+    <span data-sly-test="${component.properties.docsUrl}">
+        For more details see <a href="${component.properties.docsUrl}" target="_blank" rel="noreferrer">${component.title} documentation</a>.
+    </span>
+</p>
+
+<p>
+    Review the <a href="https://adobe-consulting-services.github.io/acs-aem-commons/pages/compatibility.html" target="_blank" rel="noreferrer">ACS AEM Commons compatibility</a> matrix for more details.
+</p>

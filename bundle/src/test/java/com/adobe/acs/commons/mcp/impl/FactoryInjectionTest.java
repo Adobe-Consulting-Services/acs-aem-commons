@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,25 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
-import com.adobe.acs.commons.mcp.impl.processes.FileAssetIngestor;
-import com.adobe.acs.commons.mcp.impl.processes.FileAssetIngestorFactory;
+import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor;
+import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.AssetReport;
 import com.adobe.acs.commons.mcp.impl.processes.AssetReportFactory;
 import com.adobe.acs.commons.mcp.impl.processes.DeepPrune;
 import com.adobe.acs.commons.mcp.impl.processes.DeepPruneFactory;
-import com.adobe.acs.commons.mcp.impl.processes.FolderRelocator;
-import com.adobe.acs.commons.mcp.impl.processes.FolderRelocatorFactory;
-import com.adobe.acs.commons.mcp.impl.processes.PageRelocatorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanup;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanupFactory;
-import com.adobe.acs.commons.mcp.impl.processes.S3AssetIngestor;
-import com.adobe.acs.commons.mcp.impl.processes.S3AssetIngestorFactory;
+import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestor;
+import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestorFactory;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
 import org.apache.sling.event.jobs.JobManager;
@@ -93,14 +89,7 @@ public class FactoryInjectionTest {
         assertNotNull(def);
         assertTrue(def instanceof DeepPrune);
     }
-
-    @Test
-    public void testFolderRelocatorFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Folder Relocator");
-        assertNotNull(def);
-        assertTrue(def instanceof FolderRelocator);
-    }
-
+   
     @Test
     public void testProcessCleanupFactory() throws Exception {
         ProcessDefinition def = cpm.findDefinitionByNameOrPath("Process Cleanup");
@@ -112,8 +101,6 @@ public class FactoryInjectionTest {
         slingContext.registerInjectActivateService(new FileAssetIngestorFactory());
         slingContext.registerInjectActivateService(new AssetReportFactory());
         slingContext.registerInjectActivateService(new DeepPruneFactory());
-        slingContext.registerInjectActivateService(new FolderRelocatorFactory());
-        slingContext.registerInjectActivateService(new PageRelocatorFactory());
         slingContext.registerInjectActivateService(new ProcessCleanupFactory());
         slingContext.registerInjectActivateService(new S3AssetIngestorFactory());
     }
@@ -123,6 +110,7 @@ public class FactoryInjectionTest {
         registerMock(JobManager.class);
         registerMock(PageManagerFactory.class);
         registerMock(Replicator.class);
+        slingContext.registerService(RequireAem.class,mock(RequireAem.class),"distribution","classic");
     }
 
     private <T> void registerMock(Class<T> clazz) {

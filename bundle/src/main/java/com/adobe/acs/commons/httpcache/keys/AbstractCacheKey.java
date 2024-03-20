@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.httpcache.keys;
@@ -38,6 +36,9 @@ public abstract class AbstractCacheKey implements Serializable{
     protected String uri;
     protected String resourcePath;
     protected String hierarchyResourcePath;
+    protected long customExpiryTime;
+    protected long expiryForAccessTime;
+    protected long expiryForUpdateTime;
 
     public AbstractCacheKey(){
 
@@ -48,6 +49,10 @@ public abstract class AbstractCacheKey implements Serializable{
         this.uri = request.getRequestURI();
         this.resourcePath = unmangle(request.getResource().getPath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
+        this.customExpiryTime = cacheConfig.getExpiryOnCreate();
+        this.expiryForAccessTime = cacheConfig.getExpiryOnCreate();
+        this.expiryForUpdateTime = cacheConfig.getExpiryForUpdate();
+        this.expiryForAccessTime = cacheConfig.getExpiryForAccess();
     }
 
     public AbstractCacheKey(String uri, HttpCacheConfig cacheConfig) {
@@ -55,6 +60,9 @@ public abstract class AbstractCacheKey implements Serializable{
         this.uri = uri;
         this.resourcePath = unmangle(new PathInfo(uri).getResourcePath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
+        this.customExpiryTime = cacheConfig.getExpiryOnCreate();
+        this.expiryForUpdateTime = cacheConfig.getExpiryForUpdate();
+        this.expiryForAccessTime = cacheConfig.getExpiryForAccess();
     }
 
     protected void parentWriteObject(ObjectOutputStream o) throws IOException
@@ -112,6 +120,18 @@ public abstract class AbstractCacheKey implements Serializable{
 
     public boolean isInvalidatedBy(CacheKey cacheKey) {
         return StringUtils.equals(hierarchyResourcePath, cacheKey.getHierarchyResourcePath());
+    }
+
+    public long getExpiryForCreation(){
+        return customExpiryTime;
+    }
+
+    public long getExpiryForAccess(){
+        return expiryForAccessTime;
+    }
+
+    public long getExpiryForUpdate(){
+        return expiryForUpdateTime;
     }
 
     protected String makeHierarchyResourcePath(String resourcePath) {

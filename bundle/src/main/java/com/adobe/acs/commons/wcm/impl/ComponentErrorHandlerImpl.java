@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang.StringUtils;
@@ -87,7 +84,6 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     static final String REQ_ATTR_PREVIOUSLY_PROCESSED =
             ComponentErrorHandlerImpl.class.getName() + "_previouslyProcessed";
 
-
     private static final String SERVICE_NAME = "component-error-handler";
     private static final Map<String, Object> AUTH_INFO;
     private static final String DISABLED = "Disabled";
@@ -99,9 +95,6 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private ComponentHelper componentHelper;
 
     /* Edit Mode */
 
@@ -188,7 +181,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                                FilterChain chain) throws IOException, ServletException {
 
-        // We are in a Sling Filter, so these request/response objects are guarenteed to be of type Sling...
+        // We are in a Sling Filter, so these request/response objects are guaranteed to be of type Sling...
         final SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
         final SlingHttpServletResponse response = (SlingHttpServletResponse) servletResponse;
 
@@ -201,18 +194,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
         if (editModeEnabled
-                && (componentHelper.isEditMode(slingRequest)
-                || componentHelper.isDesignMode(slingRequest)
-                || WCMMode.ANALYTICS.equals(WCMMode.fromRequest(slingRequest)))) {
+                && (ModeUtil.isEdit(request)
+                || ModeUtil.isDesign(request)
+                || ModeUtil.isAnalytics(slingRequest))) {
             // Edit Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, editErrorHTMLPath);
         } else if (previewModeEnabled
-                && (componentHelper.isPreviewMode(slingRequest)
-                || componentHelper.isReadOnlyMode(slingRequest))) {
+                && (ModeUtil.isPreview(request)
+                || ModeUtil.isReadOnly(request))) {
             // Preview Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, previewErrorHTMLPath);
         } else if (publishModeEnabled
-                && componentHelper.isDisabledMode(slingRequest)
+                && ModeUtil.isDisabled(request)
                 && !this.isFirstInChain(slingRequest)) {
             // Publish Modes; Requires special handling in Published Modes - do not process first filter chain
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, publishErrorHTMLPath);
@@ -280,25 +273,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     }
 
     private String getHTML(final String path) {
-        ResourceResolver resourceResolver = null;
-
         // Handle blank HTML conditions first; Avoid looking in JCR for them.
         if (StringUtils.isBlank(path) || StringUtils.equals(BLANK_HTML, path)) {
             return "";
         }
 
-        try {
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             // Component error renditions are typically stored under /apps as part of the application; and thus
             // requires elevated ACLs to work on Publish instances.
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             return ResourceDataUtil.getNTFileAsString(path, resourceResolver);
         } catch (final Exception e) {
             log.error("Could not get the component error HTML at [ {} ], using blank.", path);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return "";

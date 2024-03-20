@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
@@ -60,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * In-memory cache store implementation. Uses Google Guava Cache.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
+@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store",
            description = "Cache data store implementation for in-memory storage.",
            metatype = true)
 @Properties({
@@ -68,14 +66,14 @@ import java.util.concurrent.TimeUnit;
                     value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                     propertyPrivate = true),
         @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
+                    value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - In-Memory Cache Store",
                     propertyPrivate = true),
         @Property(name = "webconsole.configurationFactory.nameHint",
                     value = "TTL: {httpcache.cachestore.memcache.ttl}, "
                             + "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
                     propertyPrivate = true)
 })
-@Service(value = {DynamicMBean.class, HttpCacheStore.class})
+@Service(HttpCacheStore.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
@@ -95,6 +93,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
               longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
     private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+
     private long maxSizeInMb;
 
     /** Cache - Uses Google Guava's cache */
@@ -149,7 +148,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
         @Override
         public void onRemoval(RemovalNotification<CacheKey, MemCachePersistenceObject> removalNotification) {
-            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey().toString(),
+            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey(),
                     removalNotification.getCause().name());
         }
     }
@@ -170,8 +169,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
         cache.put(key, new MemCachePersistenceObject().buildForCaching(content.getStatus(), content.getCharEncoding(),
-                content.getContentType(), content.getHeaders(), content.getInputDataStream()));
-
+                content.getContentType(), content.getHeaders(), content.getInputDataStream(), content.getWriteMethod()));
     }
 
     @Override
@@ -193,7 +191,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         value.incrementHitCount();
 
         return new CacheContent(value.getStatus(), value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
-                ByteArrayInputStream(value.getBytes()));
+                ByteArrayInputStream(value.getBytes()), value.getWriteMethod());
     }
 
     @Override
@@ -239,12 +237,16 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         return new MemTempSinkImpl();
     }
 
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
+    }
+
     //-------------------------<Mbean specific implementation>
 
     public MemHttpCacheStoreImpl() throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
     }
-
 
     @Override
     public long getTtl() {

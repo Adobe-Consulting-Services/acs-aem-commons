@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.images.impl;
 
@@ -37,15 +35,16 @@ import java.io.OutputStream;
  */
 public class ProgressiveJpeg {
 
-    private ProgressiveJpeg() {}
+    private ProgressiveJpeg() {
+    }
 
     /**
      * For JPEG images, this method behaves similar to {@link Layer#write(String, double, OutputStream)}. The major
      * difference is that it uses progressive encoding.
      *
-     * @param layer the layer with the image to write to the output stream
+     * @param layer   the layer with the image to write to the output stream
      * @param quality JPEG compression quality between 0 and 1
-     * @param out target output stream
+     * @param out     target output stream
      * @throws IOException if anything goes wrong
      */
     public static void write(Layer layer, double quality, OutputStream out) throws IOException {

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.process.impl;
@@ -74,6 +72,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
     private static final String ARG_REPLICATION_ACTION_TYPE = "replicationActionType";
     private static final String ARG_REPLICATION_SYNCHRONOUS = "synchronous";
+    private static final String ARG_REPLICATION_SUPPRESS_STATUS_UPDATE = "suppressStatusUpdate";
     private static final String ARG_REPLICATION_SUPPRESS_VERSIONS = "suppressVersions";
     private static final String ARG_THROTTLE = "throttle";
     private static final String ARG_AGENTS = "agents";
@@ -144,14 +143,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
      * ProcessArgs parsed from the WF metadata map
      */
     protected static class ProcessArgs {
-        private ReplicationActionType replicationActionType = null;
+        private ReplicationActionType replicationActionType;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
-        private boolean traverseTree = false;
-        private boolean throttle = false;
-        private List<String> agents = new ArrayList<String>();
+        private boolean traverseTree;
+        private boolean throttle;
+        private List<String> agents;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            final String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
@@ -162,6 +161,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
             }
             replicationOptions.setSynchronous(Boolean.parseBoolean(data.get(ARG_REPLICATION_SYNCHRONOUS)));
             replicationOptions.setSuppressVersions(Boolean.parseBoolean(data.get(ARG_REPLICATION_SUPPRESS_VERSIONS)));
+            replicationOptions.setSuppressStatusUpdate(Boolean.parseBoolean(data.get(ARG_REPLICATION_SUPPRESS_STATUS_UPDATE)));
 
             agents = Arrays.asList(StringUtils.split(data.get(ARG_AGENTS), ","));
         }

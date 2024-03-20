@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -27,17 +26,20 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Value for cache item in mem store.
  */
-class MemCachePersistenceObject {
+public class MemCachePersistenceObject implements Serializable {
     /** Response status **/
     private int status;
     /** Response character encoding */
@@ -45,15 +47,18 @@ class MemCachePersistenceObject {
     /** Response content type */
     private String contentType;
     /** Response headers */
-    Multimap<String, String> headers;
+    transient Multimap<String, String> headers;
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
+    private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
+
     AtomicInteger count = new AtomicInteger(0);
 
     /**
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
      */
-    MemCachePersistenceObject() {
+    public MemCachePersistenceObject() {
+        //empty constructor
     }
 
     /**
@@ -67,11 +72,12 @@ class MemCachePersistenceObject {
      * @throws HttpCacheDataStreamException
      */
     public MemCachePersistenceObject buildForCaching(int status, String charEncoding, String contentType, Map<String,
-            List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
+            List<String>> headers, InputStream dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) throws HttpCacheDataStreamException {
 
         this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
+        this.writeMethod = writeMethod;
 
         // Iterate headers and take a copy.
         this.headers = HashMultimap.create();
@@ -144,7 +150,9 @@ class MemCachePersistenceObject {
      * @return
      */
     public byte[] getBytes() {
-        return bytes;
+        return Optional.ofNullable(bytes)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(new byte[0]);
     }
 
 
@@ -160,5 +168,9 @@ class MemCachePersistenceObject {
      */
     public int getHitCount() {
         return count.get();
+    }
+
+    public HttpCacheServletResponseWrapper.ResponseWriteMethod getWriteMethod() {
+        return writeMethod;
     }
 }

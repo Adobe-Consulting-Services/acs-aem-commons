@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.replication.impl;
 
@@ -39,6 +37,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * ACS AEM Commons - Replicate Version Servlet
@@ -62,11 +61,11 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
     private static final String KEY_VERSION = "version";
 
     @Reference
-    private ReplicateVersion replicateVersion;
+    private transient ReplicateVersion replicateVersion;
 
     @Override
     public final void doPost(SlingHttpServletRequest req,
-            SlingHttpServletResponse res) throws ServletException, IOException {
+                             SlingHttpServletResponse res) throws ServletException, IOException {
 
         log.debug("Entering ReplicatePageVersionServlet.doPost(..)");
 
@@ -157,13 +156,14 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
     }
 
     private Date getDate(String datetime) {
+        // Example input format: 2023-01-01T20:35-05:00
+
         Date date = null;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss aa");
-
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
             date = sdf.parse(datetime);
         } catch (Exception e) {
-            log.error("exception occurred", e);
+            log.error("Unable to parse input datetime of " + datetime + " using date format pattern yyyy-MM-dd'T'HH:mmXXX", e);
         }
         return date;
     }

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<workspaceFilter version="1.0">
+    <filter root="/conf/global/settings">
+        <include pattern="/conf/global/settings/redirects"/>
+    </filter>
+    <filter root="/etc/acs-commons">
+        <include pattern="/etc/acs-commons/jcr:content"/>
+        <include pattern="/etc/acs-commons/automatic-package-replication(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/bulk-workflow-manager(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?"/>
+        <include pattern="/etc/acs-commons/dispatcher-flush(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/lists(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/lists/dynamic-deck-query-list(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list"/>
+        <include pattern="/etc/acs-commons/lists/font-awesome-icons/jcr:content/list/item_\d+"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content/list"/>
+        <include pattern="/etc/acs-commons/lists/report-parameter-components/jcr:content/list/default_\d+"/>
+        <include pattern="/etc/acs-commons/notifications(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/packagers(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/redirect-maps(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/exporters(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter"/>
+        <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter/jcr:content(/.*)?"/>
+        <include pattern="/etc/acs-commons/qr-code"/>
+        <include pattern="/etc/acs-commons/qr-code/jcr:content"/>
+        <include pattern="/etc/acs-commons/qr-code/jcr:content/clientlib-authoring(/.*)?"/>
+        <include pattern="/etc/acs-commons/qr-code/jcr:content/qr-code-image.png(/.*)?"/>
+        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config"/>
+        <include pattern="/etc/acs-commons/instant-package(/jcr:content)?"/>
+        <include pattern="/etc/acs-commons/instant-package/jcr:content/clientlib-authoring(/.*)?"/>
+        <include pattern="/etc/acs-commons/instant-package/jcr:content/instant-package-image.png(/.*)?"/>
+        <exclude pattern="/etc/acs-commons/instant-package/jcr:content/config"/>
+    </filter>
+    <filter root="/etc/acs-commons" type="cleanup">
+        <!-- Remove legacy /etc pages from prior version installs -->
+        <include pattern="/etc/acs-commons/audit-log-search"/>
+        <include pattern="/etc/acs-commons/jcr-compare"/>
+        <include pattern="/etc/acs-commons/manage-controlled-processes"/>
+        <include pattern="/etc/acs-commons/page-compare"/>
+        <include pattern="/etc/acs-commons/reports(.*)?"/>
+        <include pattern="/etc/acs-commons/version-compare"/>
+        <include pattern="/etc/acs-commons/version-replicator"/>
+        <include pattern="/etc/acs-commons/workflow-remover"/>
+    </filter>
+    <filter root="/etc/dam/video/flacmono"/>
+    <filter root="/etc/dam/video/mp3hq"/>
+    <filter root="/etc/dam/video/ogghq"/>
+    <filter root="/etc/designs/acs-commons"/>
+    <filter root="/etc/notification/email">
+        <include pattern="/etc/notification/email/acs-commons(/.*)?"/>
+    </filter>
+    <filter root="/var/acs-commons">
+        <include pattern="/var/acs-commons/reports"/>
+        <include pattern="/var/acs-commons/reports/sample-component-instances(/.*)?"/>
+        <include pattern="/var/acs-commons/reports/sample-components-report(/.*)?"/>
+        <include pattern="/var/acs-commons/reports/sample-page-report(/.*)?"/>
+        <include pattern="/var/acs-commons/reports/sample-references-report(/.*)?"/>
+        <include pattern="/var/acs-commons/httpcache"/>
+        <include pattern="/var/acs-commons/httpcache/root"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status/README.txt(/.*)?"/>
+    </filter>
+</workspaceFilter>

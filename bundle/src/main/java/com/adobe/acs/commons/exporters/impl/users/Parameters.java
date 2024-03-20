@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.exporters.impl.users;
 
@@ -38,6 +36,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
+
 public class Parameters {
     private String[] customProperties;
     private String[] groups;
@@ -51,35 +51,45 @@ public class Parameters {
     }
 
     public Parameters(SlingHttpServletRequest request) throws IOException {
-        final JsonObject json = new JsonParser().parse(request.getParameter("params")).getAsJsonObject();
-
-        final List<String> tmpCustomProperties = new ArrayList<String>();
-        final List<String> tmpGroups = new ArrayList<String>();
-
-        groupFilter = json.getAsJsonPrimitive(GROUP_FILTER).getAsString();
-
-        JsonArray groupsJSON = json.getAsJsonArray(GROUPS);
-        for (int i = 0; i < groupsJSON.size(); i++) {
-            tmpGroups.add(groupsJSON.get(i).getAsString());
-        }
-
-        this.groups = tmpGroups.toArray(new String[tmpGroups.size()]);
-
-        JsonArray customPropertiesJSON = json.getAsJsonArray(CUSTOM_PROPERTIES);
-        for (int i = 0; i < customPropertiesJSON.size(); i++) {
-            JsonObject tmp = customPropertiesJSON.get(i).getAsJsonObject();
-
-            if (tmp.has(RELATIVE_PROPERTY_PATH)) {
-                String relativePropertyPath = tmp.get(RELATIVE_PROPERTY_PATH).getAsString();
-                tmpCustomProperties.add(relativePropertyPath);
+        
+        groups = new String[] {};
+        
+        if (request.getParameter("params") != null) {
+            
+            final JsonObject json = new JsonParser().parse(request.getParameter("params")).getAsJsonObject();
+    
+            final List<String> tmpCustomProperties = new ArrayList<String>();
+            final List<String> tmpGroups = new ArrayList<String>();
+    
+            groupFilter = getString(json, GROUP_FILTER);
+    
+            JsonArray groupsJSON = json.getAsJsonArray(GROUPS);
+            for (int i = 0; i < groupsJSON.size(); i++) {
+                tmpGroups.add(groupsJSON.get(i).getAsString());
             }
+    
+            this.groups = tmpGroups.toArray(new String[tmpGroups.size()]);
+    
+            JsonArray customPropertiesJSON = json.getAsJsonArray(CUSTOM_PROPERTIES);
+            for (int i = 0; i < customPropertiesJSON.size(); i++) {
+                JsonObject tmp = customPropertiesJSON.get(i).getAsJsonObject();
+    
+                if (tmp.has(RELATIVE_PROPERTY_PATH)) {
+                    String relativePropertyPath = getString(tmp, RELATIVE_PROPERTY_PATH);
+                    tmpCustomProperties.add(relativePropertyPath);
+                }
+            }
+    
+            this.customProperties = tmpCustomProperties.toArray(new String[tmpCustomProperties.size()]);
         }
-
-        this.customProperties = tmpCustomProperties.toArray(new String[tmpCustomProperties.size()]);
     }
 
     public String[] getCustomProperties() {
-        return Arrays.copyOf(customProperties, customProperties.length);
+        if (customProperties != null) {
+            return Arrays.copyOf(customProperties, customProperties.length);
+        } else {
+            return new String[] {};
+        }
     }
 
     protected JsonArray getCustomPropertiesAsJSON() {

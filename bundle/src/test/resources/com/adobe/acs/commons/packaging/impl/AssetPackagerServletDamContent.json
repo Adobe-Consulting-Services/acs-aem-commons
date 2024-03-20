@@ -1,0 +1,51 @@
+{
+  "jcr:primaryType": "sling:OrderedFolder",
+  "activities": {
+    "jcr:primaryType": "sling:Folder",
+    "hiking-camping": {
+      "jcr:primaryType": "sling:OrderedFolder",
+      "trekker-ama-dablam.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      }
+    }
+  },
+  "experiences": {
+    "jcr:primaryType": "sling:OrderedFolder",
+    "48-hours-of-wilderness": {
+      "jcr:primaryType": "sling:Folder",
+      "48-hours-of-wilderness-1.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      }
+    },
+    "arctic-surfing-in-lofoten": {
+      "jcr:primaryType": "sling:OrderedFolder",
+      "arctic-surfing-in-lofoten": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "camp-tent.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "surfer-ready-to-go.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "camp-fire.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "majestic-rainbow.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "fjord-waves.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "surfer-wave-01.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "surfer-wave-02.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      },
+      "northern-lights.jpg": {
+        "jcr:primaryType": "dam:Asset"
+      }
+    }
+  }
+}

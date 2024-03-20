@@ -1,0 +1,16 @@
+{
+  "jcr:primaryType": "dam:Asset",
+  "jcr:mixinTypes": [
+    "mix:referenceable"
+  ],
+  "jcr:createdBy": "admin",
+  "jcr:created": "Mon Jan 14 2019 13:11:37 GMT-0600",
+  "jcr:uuid": "0f26daa1-12bb-44d7-a9d3-b666792ab3ac",
+  "jcr:content": {
+    "jcr:primaryType": "dam:AssetContent",
+    "jcr:lastModifiedBy": "admin",
+    "dam:assetState": "processed",
+    "jcr:lastModified": "Mon Jan 14 2019 13:11:37 GMT-0600",
+    "dam:relativePath": "a/image_a2.png"
+  }
+}

@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +19,15 @@ package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
+import com.adobe.acs.commons.mcp.DynamicScriptResolverService;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessInstance;
+import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +36,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
 import org.apache.felix.scr.annotations.Component;
@@ -39,10 +47,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -52,6 +62,7 @@ import org.slf4j.LoggerFactory;
 @Service(ControlledProcessManager.class)
 @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Manage Controlled Processes")
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
+
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerImpl.class);
 
     private static final String SERVICE_NAME = "manage-controlled-processes";
@@ -59,6 +70,9 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindDefinitionFactory", unbind = "unbindDefinitionFactory", referenceInterface = ProcessDefinitionFactory.class, policy = ReferencePolicy.DYNAMIC)
     private final List<ProcessDefinitionFactory> processDefinitionFactories = new CopyOnWriteArrayList<>();
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, bind = "bindScriptResolverService", unbind = "unbindScriptResolverService", referenceInterface = DynamicScriptResolverService.class, policy = ReferencePolicy.DYNAMIC)
+    private final List<DynamicScriptResolverService> scriptResolverService = new CopyOnWriteArrayList<>();
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
@@ -83,6 +97,14 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     protected void unbindDefinitionFactory(ProcessDefinitionFactory fac) {
         processDefinitionFactories.remove(fac);
+    }
+
+    protected void bindScriptResolverService(DynamicScriptResolverService dsrs) {
+        scriptResolverService.add(dsrs);
+    }
+
+    protected void unbindScriptResolverService(DynamicScriptResolverService dsrs) {
+        scriptResolverService.remove(dsrs);
     }
 
     @Override
@@ -135,14 +157,25 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     private ProcessDefinition findDefinitionByName(String name) throws ReflectiveOperationException {
         ProcessDefinitionFactory factory = processDefinitionFactories.stream()
                 .filter(f -> name.equals(f.getName())).findFirst()
-                .orElseThrow(()->new IllegalArgumentException("Unable to find process " + name));
+                .orElseThrow(() -> new IllegalArgumentException("Unable to find process " + name));
 
         return factory.createProcessDefinition();
     }
 
-    @SuppressWarnings("squid:S1172")
-    private ProcessDefinition findDefinitionByPath(String path) throws ReflectiveOperationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    private ProcessDefinition findDefinitionByPath(String path) {
+        if (!scriptResolverService.isEmpty()) {
+            try ( ResourceResolver rr = getServiceResourceResolver()) {
+                for (DynamicScriptResolverService dsrs : scriptResolverService) {
+                    ProcessDefinitionFactory factory = dsrs.getScriptByIdentifier(rr, path);
+                    if (factory != null) {
+                        return factory.createProcessDefinition();
+                    }
+                }
+            } catch (LoginException ex) {
+                LOG.error(MessageFormat.format("Error looking for definition by path: {0}", path), ex);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -167,22 +200,60 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
         activeProcesses.forEach((id, process) -> process.updateProgress());
         return activeProcesses.values();
     }
-    
+
     @Override
     public Collection<ProcessInstance> getInactiveProcesses() {
         ArrayList<ProcessInstance> processes = new ArrayList();
-        try (ResourceResolver rr = getServiceResourceResolver()) {
+        try ( ResourceResolver rr = getServiceResourceResolver()) {
             Resource tree = rr.getResource(ProcessInstanceImpl.BASE_PATH);
             TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
-            visitor.setLeafVisitor((r,l)->{
+            visitor.setLeafVisitor((r, l) -> {
                 if (!activeProcesses.containsKey(r.getName())) {
                     processes.add(r.adaptTo(ArchivedProcessInstance.class));
                 }
             });
             visitor.accept(tree);
-        } catch (LoginException ex) {
+        } catch (Exception ex) {
             LOG.error("Error getting inactive process list", ex);
         }
         return processes;
+    }
+
+    @Override
+    public Map<String, FieldComponent> getComponentsForProcessDefinition(String identifierOrPath, SlingScriptHelper sling) throws ReflectiveOperationException {
+        if (identifierOrPath == null) {
+            return null;
+        }
+        for (DynamicScriptResolverService dsrs : scriptResolverService) {
+            Map<String, FieldComponent> components = dsrs.geFieldComponentsForProcessDefinition(identifierOrPath, sling);
+            if (components != null) {
+                return components;
+            }
+        }
+        ProcessDefinition definition = findDefinitionByNameOrPath(identifierOrPath);
+        if (definition != null) {
+            return AnnotatedFieldDeserializer.getFormFields(definition.getClass(), sling);
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, ProcessDefinitionFactory> getAllProcessDefinitionsForUser(User user) {
+        Map<String, ProcessDefinitionFactory> availableDefinitions = processDefinitionFactories.stream().filter(o -> o.isAllowed(user))
+                .collect(Collectors.toMap(ProcessDefinitionFactory::getName, o -> o, (a, b) -> a, TreeMap::new));
+        if (!scriptResolverService.isEmpty()) {
+            try ( ResourceResolver rr = getServiceResourceResolver()) {
+                for (DynamicScriptResolverService dsrs : scriptResolverService) {
+                    dsrs.getDetectedProcesDefinitionFactories(rr).forEach((path, factory) -> {
+                        if (factory.isAllowed(user)) {
+                            availableDefinitions.put(path, factory);
+                        }
+                    });
+                }
+            } catch (LoginException ex) {
+                LOG.error("Unable to look up process definitions", ex);
+            }
+        }
+        return availableDefinitions;
     }
 }

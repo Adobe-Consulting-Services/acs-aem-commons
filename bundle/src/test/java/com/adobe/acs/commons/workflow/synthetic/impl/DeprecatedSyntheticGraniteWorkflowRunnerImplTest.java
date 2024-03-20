@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
@@ -26,8 +24,8 @@ import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.Restar
 import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.TerminateDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.UpdateWorkflowDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WFArgsWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WFDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WfArgsWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.granitetestprocesses.WfDataWorkflowProcess;
 
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
@@ -37,13 +35,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Session;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,11 +64,11 @@ public class DeprecatedSyntheticGraniteWorkflowRunnerImplTest {
     }
 
     @Test
-    public void testExecute_WFData() throws Exception {
+    public void testExecute_WfData() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
-        swr.bindGraniteWorkflowProcesses(new WFDataWorkflowProcess(), map);
+        swr.bindGraniteWorkflowProcesses(new WfDataWorkflowProcess(), map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -124,7 +122,7 @@ public class DeprecatedSyntheticGraniteWorkflowRunnerImplTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "wf-args");
-        swr.bindGraniteWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs), map);
+        swr.bindGraniteWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs), map);
 
         /** WF Process Metadata */
 
@@ -164,7 +162,6 @@ public class DeprecatedSyntheticGraniteWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Terminate() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
@@ -217,7 +214,6 @@ public class DeprecatedSyntheticGraniteWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Complete_noSave() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 

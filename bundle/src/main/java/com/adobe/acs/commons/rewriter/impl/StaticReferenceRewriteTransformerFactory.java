@@ -1,33 +1,27 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -45,12 +39,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.util.ParameterUtil;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Rewriter pipeline component which rewrites static references.
- *
  */
 @Component(
         label = "ACS AEM Commons - Static Reference Rewriter",
@@ -59,17 +55,17 @@ import com.adobe.acs.commons.util.ParameterUtil;
         metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(
-            name = "pipeline.type", label = "Rewriter Pipeline Type",
-            description = "Type identifier to be referenced in rewriter pipeline configuration."),
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Pipeline: {pipeline.type}")
+        @Property(
+                name = "pipeline.type", label = "Rewriter Pipeline Type",
+                description = "Type identifier to be referenced in rewriter pipeline configuration."),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Pipeline: {pipeline.type}")
 })
 
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
 
-    public final class StaticReferenceRewriteTransformer extends AbstractTransformer {
+    public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {
 
         public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
                 throws SAXException {
@@ -83,12 +79,18 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private static final String CLASS_NOSTATIC = "nostatic";
 
-    private static final String[] DEFAULT_ATTRIBUTES = new String[] { "img:src", "link:href", "script:src" };
+    private static final String[] DEFAULT_ATTRIBUTES = new String[]{"img:src", "link:href", "script:src"};
 
     private static final int DEFAULT_HOST_COUNT = 1;
 
+    @Property(label = "Tag Attribute Separator", description = "Separator to split the tag name from the attribute name", value = ":")
+    private static final String PROP_TAG_ATTRIBUTE_SEPARATOR = "tag.attribute.separator";
+
+    @Property(label = "List Separator", description = "Separator to split the different tags", value = ",")
+    private static final String PROP_LIST_SEPARATOR = "list.separator";
+
     @Property(label = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", value = {
-            "img:src", "link:href", "script:src" })
+            "img:src", "link:href", "script:src"})
     private static final String PROP_ATTRIBUTES = "attributes";
 
     @Property(label = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
@@ -102,9 +104,15 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.", unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_HOST_NAME_PATTERN = "host.pattern";
 
+    @Property(label = "Static Host Scheme", description = "(optional) Host scheme to use if you don't want to use the host scheme of the request")
+    private static final String PROP_HOST_SCHEME = "host.scheme";
+
     @Property(unbounded = PropertyUnbounded.ARRAY, label = "Path Prefixes",
             description = "Path prefixes to rewrite.")
     private static final String PROP_PREFIXES = "prefixes";
+
+    @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten", boolValue = false)
+    private static final String PROP_REPLACE_HOST = "replaceHost";
 
     private Map<String, String[]> attributes;
 
@@ -115,6 +123,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private int staticHostCount;
 
     private String[] staticHostPattern;
+    private String staticHostScheme;
+
+    private boolean replaceHost;
 
     public Transformer createTransformer() {
         return new StaticReferenceRewriteTransformer();
@@ -127,8 +138,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             String hostNumberString = Integer.toString(fileHash);
             if (hostNumberString.length() >= 2) {
                 // get the 2nd digit as the 1st digit will not contain "0"
-                Character c = hostNumberString.charAt(1);
-                hostNumberString = c.toString();
+                char c = hostNumberString.charAt(1);
+                hostNumberString = Character.toString(c);
                 // If there are more than 10 hosts, convert it back to base10
                 // so we do not have alpha
                 hostNumberString = Integer.toString(Integer.parseInt(hostNumberString, shardCount));
@@ -150,6 +161,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 host = staticHostPattern[0].replace("{}", hostNum);
             } else {
                 host = getShardValue(value, staticHostPattern.length, lookupShardNameProvider);
+            }
+            if(StringUtils.isNotBlank(staticHostScheme)) {
+                return String.format("%s://%s%s", staticHostScheme, host, value);
             }
             return String.format("//%s%s", host, value);
         } else {
@@ -224,14 +238,24 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 if (url.startsWith(prefix)) {
                     // prepend host
                     url = prependHostName(url);
-                    m.appendReplacement(sb, Matcher.quoteReplacement(url));
-                    // First prefix match wins
+                    // Added check to determine whether the existing host has to be replaced
+                    if (this.replaceHost) {
+                        int index = attrValue.indexOf("://");
+                        sb.setLength(0);
+                        sb.append(attrValue, 0, index + 1);
+                        sb.append(url);
+                    } else {
+                        m.appendReplacement(sb, Matcher.quoteReplacement(url));
+                        // First prefix match wins
+                    }
                     break;
                 }
             }
-
         }
-        m.appendTail(sb);
+
+        if (!this.replaceHost) {
+            m.appendTail(sb);
+        }
 
         return sb.toString();
     }
@@ -240,32 +264,39 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     protected void activate(final ComponentContext componentContext) {
         final Dictionary<?, ?> properties = componentContext.getProperties();
 
+        final String tagAttributeSeparator = PropertiesUtil.toString(properties.get(PROP_TAG_ATTRIBUTE_SEPARATOR), ":");
+        final String listSeparator = PropertiesUtil.toString(properties.get(PROP_LIST_SEPARATOR), ",");
+
         final String[] attrProp = PropertiesUtil
                 .toStringArray(properties.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
-        this.attributes = ParameterUtil.toMap(attrProp, ":", ",");
+        this.attributes = ParameterUtil.toMap(attrProp, tagAttributeSeparator, listSeparator);
 
         final String[] matchingPatternsProp = PropertiesUtil.toStringArray(properties.get(PROP_MATCHING_PATTERNS));
         this.matchingPatterns = initializeMatchingPatterns(matchingPatternsProp);
 
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
         this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
+        this.staticHostScheme = PropertiesUtil.toString(properties.get(PROP_HOST_SCHEME), "");
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
+        this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
+
+        if (!this.replaceHost && matchingPatterns.values().stream().noneMatch(str -> str.toString().startsWith("^"))) {
+            log.warn("BEWARE! Replace host is false and your regex is not anchored to the start of the string, this may result in a double host.");
+        }
     }
 
     private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
-        Map<String, Pattern> result = new HashMap<String, Pattern>();
+        Map<String, Pattern> result = new HashMap<>();
 
         Map<String, String> map = ParameterUtil.toMap(matchingPatternsProp, ";");
 
-        Iterator<String> iterator = map.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            String matchingPatternString = map.get(key);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String matchingPatternString = entry.getValue();
             try {
                 Pattern compiled = Pattern.compile(matchingPatternString);
-                result.put(key, compiled);
+                result.put(entry.getKey(), compiled);
             } catch (Exception e) {
-                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, key);
+                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, entry.getKey());
             }
         }
         return result;
@@ -285,7 +316,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     };
 
     @SuppressWarnings("squid:S1604")
-    private ShardNameProvider lookupShardNameProvider = new ShardNameProvider() {
+    private final ShardNameProvider lookupShardNameProvider = new ShardNameProvider() {
 
         @Override
         public String lookup(int idx) {

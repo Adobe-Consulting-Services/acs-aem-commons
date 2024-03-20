@@ -1,28 +1,25 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
+import com.google.gson.JsonObject;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -88,16 +85,17 @@ public class TypeUtilTest {
     }
 
     @Test
-    public void testToMap() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put("one", "uno");
-        json.put("two", 2);
-        json.put("three", new Long(3));
+    public void testToMap() {
+        final JsonObject json = new JsonObject();
+        json.addProperty("one", "uno");
+        json.addProperty("two", 2);
+        json.addProperty("three", Long.valueOf(3));
 
+        // TODO: Find a way to coerce GSON to not treat all numbers as Double, but that's what it does, unavoidably.
         final Map<String, Object> expResult = new HashMap<String, Object>();
         expResult.put("one", "uno");
-        expResult.put("two", 2);
-        expResult.put("three", new Long(3));
+        expResult.put("two", 2.0);
+        expResult.put("three", 3.0);
 
         final Map<String, Object> actual = TypeUtil.toMap(json);
 
@@ -105,23 +103,7 @@ public class TypeUtilTest {
     }
 
     @Test
-    public void testToMap_withType() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put("one", "uno");
-        json.put("two", 2);
-        json.put("three", "tres");
-
-        final Map<String, String> expResult = new HashMap<String, String>();
-        expResult.put("one", "uno");
-        expResult.put("three", "tres");
-
-        final Map<String, String> actual = TypeUtil.toMap(json, String.class);
-
-        assertEquals(expResult, actual);
-    }
-
-    @Test
-    public void testToValueMap() throws JSONException {
+    public void testToValueMap() {
         final Map<String, String> stringMap = new LinkedHashMap<String, String>();
         stringMap.put("one", "uno");
         stringMap.put("two", "dos");
@@ -144,17 +126,17 @@ public class TypeUtilTest {
 
     @Test
     public void testGetType_Double() {
-        assertEquals(TypeUtil.getType(new Double(10000.00001)), Double.class);
+        assertEquals(TypeUtil.getType(Double.valueOf(10000.00001)), Double.class);
     }
 
     @Test
     public void testGetType_Float() {
-        assertEquals(Double.class, TypeUtil.getType(new Float(100.001)));
+        assertEquals(Double.class, TypeUtil.getType(Float.valueOf((float) 100.001)));
     }
 
     @Test
     public void testGetType_Long() {
-        assertEquals(Long.class, TypeUtil.getType(new Long(100000000)));
+        assertEquals(Long.class, TypeUtil.getType(Long.valueOf(100000000)));
     }
 
     @Test
@@ -174,12 +156,12 @@ public class TypeUtilTest {
 
     @Test
     public void toObjectType_Double() {
-        assertEquals(new Double(10.01), TypeUtil.toObjectType("10.01", Double.class));
+        assertEquals(Double.valueOf(10.01), TypeUtil.toObjectType("10.01", Double.class));
     }
 
     @Test
     public void toObjectType_Long() {
-        assertEquals(new Long(10), TypeUtil.toObjectType("10", Long.class));
+        assertEquals(Long.valueOf(10L), TypeUtil.toObjectType("10", Long.class));
     }
 
     @Test
@@ -208,7 +190,7 @@ public class TypeUtilTest {
     @Test
     public void toString_Double() {
         String expResult = "1000.0";
-        Double doubleValue = new Double(1000);
+        Double doubleValue = Double.valueOf(1000);
         try {
             assertEquals(expResult, TypeUtil.toString(doubleValue, Double.class));
         } catch (IllegalAccessException e) {

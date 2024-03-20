@@ -1,0 +1,176 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+#acs-commons-version-replicator-app {
+
+  .content-container {
+    top: 0;
+    padding-top: 2em;
+
+    .content-container-inner {
+      width: 960px;
+      margin: 0 auto;
+    }
+  }
+
+  .section {
+    margin: 2em 0;
+
+    h2 {
+      margin-bottom: .5em;
+    }
+  }
+
+
+  form {
+    margin-top: 2em;
+
+    .form-row {
+      line-height: 3em;
+      margin-bottom: 1em;
+
+      .instructions {
+        margin-left: 12em;
+        font-style: italic;
+        color: #666;
+        line-height: 1.5em;
+        margin-top: .5em;
+        width: 75%;
+      }
+
+      .form-left-cell {
+        width: 10em;
+        padding-right: 1em;
+        margin-right: 1em;
+        float: left;
+        height: 4em;
+      }
+
+      h4 {
+        .form-left-cell();
+        font-weight: bold;
+        text-align: right;
+      }
+
+      input[type=text],
+      table.data,
+      textarea,
+      select {
+        width: 75%;
+      }
+
+      .datepicker {
+        input[type=text] {
+          width: auto;
+        }
+      }
+
+      table.data.table-col-1 {
+        width: 350px;
+        float: left;
+      }
+
+      table.data.table-col-2 {
+        width: 350px;
+        margin-left: 550px
+      }
+
+      table.data.table-col-1,
+      table.data.table-col-2 {
+        td {
+          padding: 0 0.5rem;
+        }
+      }
+
+      table.data {
+        input[type=text],
+        textarea,
+        select {
+          width: 100%;
+        }
+      }
+
+      table.data {
+        .checkbox-col,
+        .action-col {
+          width: 3em;
+          text-align: center;
+        }
+      }
+    }
+
+    .paths input[type=text] {
+          width: 50%;
+    }
+
+    input.ng-invalid, textarea.ng-invalid, select.ng-invalid {
+      border-color: #FF4132;
+    }
+
+  }
+
+  .well {
+    position: relative;
+  }
+
+  .summary-section {
+    .left,
+    .right {
+      width: 50%;
+    }
+
+    .left {
+      float: left;
+    }
+
+
+    .hard-reset {
+      position: absolute;
+      right: 1em;
+      bottom: 0;
+
+      a {
+        float: right;
+      }
+      p {
+        padding-top: 1em;
+        clear: right;
+        text-align: right;
+      }
+    }
+  }
+
+  .notifications {
+    position: fixed;
+    top: 4em;
+    width: 960px;
+    margin: 0 aut0;
+    z-index: 100000;
+
+  }
+
+  .fixed-notifications {
+    position: fixed;
+    top: 4em;
+    width: 960px;
+    margin: 0 auto;
+    z-index: 100000;
+  }
+}

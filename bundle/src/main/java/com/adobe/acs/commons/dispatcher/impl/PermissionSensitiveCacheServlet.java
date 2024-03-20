@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 - Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.dispatcher.impl;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
-    private final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
 
 
     public void doHead(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -66,19 +66,19 @@ public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
                 if( !ResourceUtil.isNonExistingResource( requestedResource ) ){
                     log.debug("Current Session has access to {}", requestUri );
-                    response.setStatus(SlingHttpServletResponse.SC_OK);
+                    response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     log.info("Current Session does not have access to {}", requestUri );
-                    response.setStatus(SlingHttpServletResponse.SC_UNAUTHORIZED);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 }
 
             } else {
                 log.debug( "Invalid URI {}", requestUri );
-                response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
+                response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
             }
         } catch(Exception e) {
             log.error("Authchecker servlet exception", e);
-            response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED );
         }
     }
 

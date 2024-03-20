@@ -1,0 +1,65 @@
+{
+  "jcr:primaryType": "nt:unstructured",
+  "jcr:title": "Device Colors",
+  "sling:resourceType": "granite/ui/components/foundation/section",
+  "layout": {
+    "jcr:primaryType": "nt:unstructured",
+    "margin": false,
+    "sling:resourceType": "granite/ui/components/foundation/layouts/fixedcolumns"
+  },
+  "items": {
+    "jcr:primaryType": "nt:unstructured",
+    "column": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "granite/ui/components/foundation/container",
+      "items": {
+        "jcr:primaryType": "nt:unstructured",
+        "someDoubleField": {
+          "jcr:primaryType": "nt:unstructured",
+          "name": "./doubleField",
+          "text": "Some doubleField",
+          "defaultValue": "${{(Double)doubleFieldDefaultValue:20.22}}",
+          "value": "true",
+          "sling:resourceType": "granite/ui/components/foundation/form/numberfield"
+        },
+        "hideMe": {
+          "jcr:primaryType": "nt:unstructured",
+          "hide": "${{(Boolean)hideAField:false}}",
+          "name": "./shouldBeHidden",
+          "text": "Hide Me",
+          "value": "true",
+          "sling:resourceType": "granite/ui/components/foundation/form/textfield"
+        },
+        "someNumberField": {
+          "jcr:primaryType": "nt:unstructured",
+          "name": "./numberfield",
+          "text": "Some numberfield",
+          "defaultValue": "${{(Long)numberFieldDefaultValue:20}}",
+          "value": "true",
+          "sling:resourceType": "granite/ui/components/foundation/form/numberfield"
+        },
+        "someRegularField": {
+          "jcr:primaryType": "nt:unstructured",
+          "name": "./displayButton",
+          "fieldLabel": "${{(String)fieldLabelText:defaultText}}",
+          "value": "true",
+          "sling:resourceType": "granite/ui/components/foundation/form/textfield"
+        },
+        "fieldWithChildrenThatShouldBeIgnored": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "ignore/children/resource/type",
+          "name": "./shouldIgnoreChildren",
+          "items": {
+            "someRegularField": {
+              "jcr:primaryType": "nt:unstructured",
+              "name": "./displayButton",
+              "fieldLabel": "${{(String)fieldLabelText:defaultText}}",
+              "value": "true",
+              "sling:resourceType": "granite/ui/components/foundation/form/textfield"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +17,24 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.mcp.util.IntrospectionUtil;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Radio button selector component
  */
 @ProviderType
-public class CheckboxComponent extends FieldComponent {
+public final class CheckboxComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/checkbox");
-        getComponentMetadata().put("text", getFieldDefinition().name());        
-        getComponentMetadata().put("value", "true");
-        getComponentMetadata().put("uncheckedValue", "false");
-        getComponentMetadata().put("required", false);
-        getComponentMetadata().put("checked", hasOption("checked"));
-    }    
+        getProperties().put("text", getFieldDefinition().name());
+        getProperties().put("value", "true");
+        getProperties().put("uncheckedValue", "false");
+        getProperties().put("required", false);
+        boolean trueByDefault = IntrospectionUtil.getDeclaredValue(getAccessibleObject()).map(Boolean.TRUE::equals).orElse(false);
+        if (hasOption("checked") || trueByDefault) {
+            getProperties().put("checked", "true");
+        }
+    }
 }

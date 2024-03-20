@@ -1,0 +1,25 @@
+{
+  "jcr:primaryType": "dam:Asset",
+  "jcr:mixinTypes": [
+    "mix:referenceable",
+    "mix:versionable"
+  ],
+  "jcr:createdBy": "admin",
+  "jcr:versionHistory": "e20ef822-88fa-4bb9-a0aa-582d4cb171b4",
+  "jcr:predecessors": [
+    "db594b4d-0e4d-4a6f-b5ab-245ccb6c55bb"
+  ],
+  "jcr:created": "Mon Jan 14 2019 13:10:50 GMT-0600",
+  "jcr:baseVersion": "db594b4d-0e4d-4a6f-b5ab-245ccb6c55bb",
+  "jcr:isCheckedOut": true,
+  "jcr:uuid": "ac92c462-0a4b-419e-b4f5-bd1d730e7c44",
+  "jcr:content": {
+    "jcr:primaryType": "dam:AssetContent",
+    "jcr:lastModifiedBy": "admin",
+    "dam:assetState": "processed",
+    "cq:name": "image_a1.jpg",
+    "jcr:lastModified": "Thu Jan 17 2019 16:53:17 GMT-0600",
+    "cq:parentPath": "/content/dam/a",
+    "dam:relativePath": "a/image_a1.jpg"
+  }
+}

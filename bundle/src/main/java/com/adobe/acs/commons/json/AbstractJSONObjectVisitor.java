@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,26 +14,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.json;
 
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONObject;
-
-import java.util.Iterator;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import java.util.Map.Entry;
 
 public abstract class AbstractJSONObjectVisitor {
-
+    private int currentDepth = 0;
+    
+    public int getCurrentDepth() {
+        return currentDepth;
+    }
+    
     /**
      * Visit the given JSON Object and all its descendants.
      *
      * @param jsonObject The JSON Object
      */
-    public void accept(final JSONObject jsonObject) {
+    public void accept(final JsonObject jsonObject) {
         if (jsonObject != null) {
             this.visit(jsonObject);
+            currentDepth++;
             this.traverseJSONObject(jsonObject);
+            currentDepth--;
         }
     }
 
@@ -43,9 +48,11 @@ public abstract class AbstractJSONObjectVisitor {
      *
      * @param jsonArray The JSON Object
      */
-    public void accept(final JSONArray jsonArray) {
+    public void accept(final JsonArray jsonArray) {
         if (jsonArray != null) {
+            currentDepth++;
             this.traverseJSONArray(jsonArray);
+            currentDepth--;
         }
     }
 
@@ -54,20 +61,16 @@ public abstract class AbstractJSONObjectVisitor {
      *
      * @param jsonObject The JSON Array
      */
-    protected final void traverseJSONObject(final JSONObject jsonObject) {
+    protected final void traverseJSONObject(final JsonObject jsonObject) {
         if (jsonObject == null) {
             return;
         }
 
-        final Iterator<String> keys = jsonObject.keys();
-
-        while (keys.hasNext()) {
-            final String key = keys.next();
-
-            if (jsonObject.optJSONObject(key) != null) {
-                this.accept(jsonObject.optJSONObject(key));
-            } else if (jsonObject.optJSONArray(key) != null) {
-                this.accept(jsonObject.optJSONArray(key));
+        for (Entry<String, JsonElement> elem : jsonObject.entrySet()) {
+            if (elem.getValue().isJsonArray()) {
+                accept(elem.getValue().getAsJsonArray());
+            } else if (elem.getValue().isJsonObject()) {
+                accept(elem.getValue().getAsJsonObject());
             }
         }
     }
@@ -77,17 +80,16 @@ public abstract class AbstractJSONObjectVisitor {
      *
      * @param jsonArray The JSON Array
      */
-    protected final void traverseJSONArray(final JSONArray jsonArray) {
+    protected final void traverseJSONArray(final JsonArray jsonArray) {
         if (jsonArray == null) {
             return;
         }
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-
-            if (jsonArray.optJSONObject(i) != null) {
-                this.accept(jsonArray.optJSONObject(i));
-            } else if (jsonArray.optJSONArray(i) != null) {
-                this.accept(jsonArray.optJSONArray(i));
+        for (int i = 0; i < jsonArray.size(); i++) {
+            if (jsonArray.get(i).isJsonObject()) {
+                this.accept(jsonArray.get(i).getAsJsonObject());
+            } else if (jsonArray.get(i).isJsonArray()) {
+                this.accept(jsonArray.get(i).getAsJsonArray());
             }
         }
     }
@@ -97,6 +99,6 @@ public abstract class AbstractJSONObjectVisitor {
      *
      * @param jsonObject The JSON Object
      */
-    protected abstract void visit(final JSONObject jsonObject);
+    protected abstract void visit(final JsonObject jsonObject);
 
 }

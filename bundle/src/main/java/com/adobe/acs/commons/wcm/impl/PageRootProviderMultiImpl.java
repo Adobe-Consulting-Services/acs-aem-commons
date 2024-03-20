@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +29,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.osgi.Order;
+import org.apache.sling.commons.osgi.RankedServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,7 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
     @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private List<PageRootProviderConfig> configList = new ArrayList<PageRootProviderConfig>();
+    private RankedServices<PageRootProviderConfig> configList = new RankedServices<>(Order.ASCENDING);
 
     @Override
     public Page getRootPage(Resource resource) {
@@ -92,22 +91,12 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
         return null;
     }
 
-    @Activate
-    protected void activate() {
-        log.debug("Activating");
+    protected void bindConfig(final PageRootProviderConfig config, Map<String, Object> props) {
+        this.configList.bind(config, props);
     }
 
-    @Deactivate
-    protected void deactivate() {
-        log.debug("Deactivating");
-    }
-
-    protected void bindConfig(final PageRootProviderConfig config) {
-        this.configList.add(config);
-    }
-
-    protected void unbindConfig(final PageRootProviderConfig config) {
-        this.configList.remove(config);
+    protected void unbindConfig(final PageRootProviderConfig config, Map<String, Object> props) {
+        this.configList.unbind(config, props);
     }
 
 }

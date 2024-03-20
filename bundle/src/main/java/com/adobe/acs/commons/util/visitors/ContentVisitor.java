@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.util.visitors;
 
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class ContentVisitor<T extends ResourceRunnable> extends AbstractResource
     private static final Logger log = LoggerFactory.getLogger(ContentVisitor.class);
 
     private static final String[] DEFAULT_CONTAINER_TYPES = {JcrResourceConstants.NT_SLING_FOLDER, JcrResourceConstants.NT_SLING_ORDERED_FOLDER, JcrConstants.NT_FOLDER};
-    private static final String[] DEFAULT_CONTENT_TYPES = {NameConstants.NT_PAGE, DamConstants.NT_DAM_ASSET};
+    private static final String[] DEFAULT_CONTENT_TYPES = {NameConstants.NT_PAGE, DamConstants.NT_DAM_ASSET, TagConstants.NT_TAG};
 
     private final T runnable;
     private final String[] contentTypes;

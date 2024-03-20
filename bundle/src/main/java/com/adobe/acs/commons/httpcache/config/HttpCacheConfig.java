@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.config;
 
-import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.annotation.versioning.ProviderType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,7 +36,7 @@ import java.util.regex.Pattern;
 @ProviderType
 public interface HttpCacheConfig {
 
-    public enum FilterScope {
+    enum FilterScope {
         REQUEST,
         INCLUDE
     }
@@ -76,6 +75,25 @@ public interface HttpCacheConfig {
      * @return
      */
     List<Pattern> getJCRInvalidationPathPatterns();
+
+    /**
+     * Get a list of headers (as regex pattern) that should NOT be put in the cached response, to be served to the output.
+     *
+     * @return
+     */
+    default List<Pattern> getExcludedResponseHeaderPatterns() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Get a list of excluded cookie keys (simple string) of cookies that should NOT be put in the cached response, to be served to the output.
+     * This is useful for example with systems that put a login cookie in each response.
+     *
+     * @return
+     */
+    default List<String> getExcludedCookieKeys() {
+        return Collections.emptyList();
+    }
 
     /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension
@@ -143,4 +161,38 @@ public interface HttpCacheConfig {
      * @return the filter scope this HttpCacheConfig should involve itself in.
      */
     FilterScope getFilterScope();
+
+    /**
+     * Returns a custom expiry for this config in miliseconds.
+     * -1 means the entry will never expire itself.
+     * 0 means the expiry is not set, and the default expiry will be used.
+     * 1 or above is the expiry for entries produced by this config .
+     *
+     * @return
+     */
+    default long getExpiryOnCreate() {
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry access / read.
+     * If set, it will refresh the expiry time when an entry is read with given value.
+     * Value is in miliseconds.
+     *
+     * @return the expiry time
+     */
+    default long getExpiryForAccess() {
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry updated.
+     * If set, it will refresh the expiry time when an entry is updated with given value.
+     * Value is in miliseconds.
+     *
+     * @return the expiry time
+     */
+    default long getExpiryForUpdate() {
+        return -1L;
+    }
 }

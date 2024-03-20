@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +17,14 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.CancelHandler;
-import com.adobe.acs.commons.fam.Failure;
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
-import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.BiConsumer;
-import com.adobe.acs.commons.functions.BiFunction;
-import com.adobe.acs.commons.functions.CheckedBiConsumer;
-import com.adobe.acs.commons.functions.CheckedBiFunction;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.functions.Consumer;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -45,14 +39,22 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+
+import com.adobe.acs.commons.fam.ActionManagerConstants;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.CancelHandler;
+import com.adobe.acs.commons.fam.Failure;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedBiFunction;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
@@ -77,6 +79,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private final AtomicLong started = new AtomicLong(0);
     private long finished;
     private int saveInterval;
+    private int priority;
 
     private final transient ResourceResolver baseResolver;
     private final transient List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
@@ -85,17 +88,22 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private final transient ThreadLocal<String> currentPath;
     private final List<Failure> failures;
     private final transient AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    private final transient List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final transient List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final transient List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final transient List<CheckedConsumer<ResourceResolver>> successHandlers = new CopyOnWriteArrayList<>();
+    private final transient List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = new CopyOnWriteArrayList<>();
+    private final transient List<Runnable> finishHandlers = new CopyOnWriteArrayList<>();
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
+        this(name, taskRunner, resolver, saveInterval, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
+    }
+
+    ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval, int priority) throws LoginException {
         this.name = name;
         this.taskRunner = taskRunner;
         this.saveInterval = saveInterval;
         baseResolver = resolver.clone(null);
         currentPath = new ThreadLocal<>();
         failures = new ArrayList<>();
+        this.priority =  priority;
     }
 
     @Override
@@ -115,7 +123,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public int getErrorCount() {
-        return tasksError.get();
+        return Math.max(tasksError.get(), failures.size());
     }
 
     @Override
@@ -125,17 +133,12 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public int getRemainingCount() {
-        return getAddedCount() - (getSuccessCount() + getErrorCount());
+        return getAddedCount() - (getSuccessCount() + tasksError.get());
     }
 
     @Override
     public List<Failure> getFailureList() {
-        return failures;
-    }
-
-    @Override
-    public void deferredWithResolver(final Consumer<ResourceResolver> action) {
-        this.deferredWithResolver((CheckedConsumer<ResourceResolver>) action);
+        return Collections.unmodifiableList(failures);
     }
 
     @Override
@@ -151,31 +154,38 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             tasksAdded.incrementAndGet();
         }
         taskRunner.scheduleWork(() -> {
-            started.compareAndSet(0, System.currentTimeMillis());
-            try {
-                withResolver(action);
-                if (!closesResolver) {
-                    logCompletetion();
-                }
-            } catch (Exception ex) {
-                LOG.error("Error in error handler for action " + getName(), ex);
-                if (!closesResolver) {
-                    logError(ex);
-                }
-            } catch (Throwable t) {
-                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
-                if (!closesResolver) {
-                    logError(new RuntimeException(t));
-                }
-                throw t;
-            }
-        }, this);
-
+            runActionAndLogErrors(action, closesResolver);
+        }, this, priority);
     }
-
-    @Override
-    public void withResolver(Consumer<ResourceResolver> action) throws Exception {
-        withResolver((CheckedConsumer<ResourceResolver>) action);
+    
+    @SuppressWarnings("squid:S1181")
+    private void runActionAndLogErrors(CheckedConsumer<ResourceResolver> action, Boolean closesResolver) {
+        started.compareAndSet(0, System.currentTimeMillis());
+        try {
+            withResolver(action);
+            if (!closesResolver) {
+                logCompletetion();
+            }
+        } catch (Error e) {
+            // These are very fatal errors but we should log them if we can
+            LOG.error("Fatal uncaught error in action {}", getName(), e);
+            if (!closesResolver) {
+                logError(new RuntimeException(e));
+            }
+            throw e;
+        } catch (Exception t) {
+            // Less fatal errors, but still need to explicitly catch them
+            LOG.error("Error in action {}", getName(), t);
+            if (!closesResolver) {
+                logError(t);
+            }
+        } catch (Throwable t) {
+            // There are some slippery runtime errors (unchecked) which slip through the cracks
+            LOG.error("Fatal uncaught error in action {}", getName(), t);
+            if (!closesResolver) {
+                logError(new RuntimeException(t));
+            }
+        }
     }
 
     @Override
@@ -200,18 +210,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
-    public int withQueryResults(
-            final String queryStatement,
-            final String language,
-            final BiConsumer<ResourceResolver, String> callback,
-            final BiFunction<ResourceResolver, String, Boolean>... filters
-    )
-            throws RepositoryException, PersistenceException, Exception {
-        return withQueryResults(queryStatement, language, (CheckedBiConsumer<ResourceResolver, String>) callback,
-                Arrays.copyOf(filters, filters.length, CheckedBiFunction[].class));
-    }
-
-    @Override
     @SuppressWarnings("squid:S3776")
     public int withQueryResults(
             final String queryStatement,
@@ -228,7 +226,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 QueryResult results = query.execute();
                 for (NodeIterator nodeIterator = results.getNodes(); nodeIterator.hasNext();) {
                     final String nodePath = nodeIterator.nextNode().getPath();
-                    LOG.info("Processing found result " + nodePath);
+                    LOG.info("Processing found result {}", nodePath);
                     deferredWithResolver((ResourceResolver r) -> {
                         currentPath.set(nodePath);
                         if (filters != null) {
@@ -243,7 +241,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     });
                 }
             } catch (RepositoryException ex) {
-                LOG.error("Repository exception processing query " + queryStatement, ex);
+                LOG.error("Repository exception processing query '{}'", queryStatement, ex);
             }
         });
 
@@ -251,8 +249,11 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
-    public void addCleanupTask() {
-        // This is deprecated, only included for backwards-compatibility.
+    public void cancel(boolean useForce) {
+        super.cancel(useForce);
+        if (getErrorCount() > 0) {
+            processErrorHandlers();
+        }
     }
 
     @Override
@@ -277,24 +278,31 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     try {
                         this.withResolver(handler);
                     } catch (Exception ex) {
-                        LOG.error("Error in success handler for action " + getName(), ex);
+                        LOG.error("Error in success handler for action {}", getName(), ex);
                     }
                 });
             }
         } else {
-            synchronized (errorHandlers) {
-                errorHandlers.forEach(handler -> {
-                    try {
-                        this.withResolver(res -> handler.accept(getFailureList(), res));
-                    } catch (Exception ex) {
-                        LOG.error("Error in error handler for action " + getName(), ex);
-                    }
-                });
-            }
+            processErrorHandlers();
         }
         synchronized (finishHandlers) {
             finishHandlers.forEach(Runnable::run);
         }
+    }
+
+    private void processErrorHandlers() {
+        List<CheckedBiConsumer<List<Failure>, ResourceResolver>> handlerList = new ArrayList();
+        synchronized (errorHandlers) {
+            handlerList.addAll(errorHandlers);
+            errorHandlers.clear();
+        }
+        handlerList.forEach(handler -> {
+            try {
+                this.withResolver(res -> handler.accept(this.failures, res));
+            } catch (Exception ex) {
+                LOG.error("Error in error handler for action {}", getName(), ex);
+            }
+        });
     }
 
     @SuppressWarnings("squid:S2142")
@@ -309,9 +317,20 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     }
                 }
                 runCompletionTasks();
+                savePendingChanges();
                 closeAllResolvers();
-            });
+            }, priority);
         }
+    }
+    
+    private void savePendingChanges() {
+      for (ReusableResolver resolver : resolvers) {
+        try {
+          resolver.commit();
+        } catch (PersistenceException e) {
+          logPersistenceException(resolver.getPendingItems(), e);
+        }
+      }
     }
 
     @Override
@@ -339,7 +358,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     private void logError(Exception ex) {
-        LOG.error("Caught exception in task: " + ex.getMessage(), ex);
+        LOG.error("Caught exception in task: {}", ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
         fail.setException(ex);
@@ -363,12 +382,12 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             tasksError.incrementAndGet();
             tasksSuccessful.decrementAndGet();
         }
-        LOG.error("Persistence error prevented saving changes for: " + itemList, ex);
+        LOG.error("Persistence error prevented saving changes for: {}" ,itemList, ex);
     }
 
     private void logFilteredOutItem(String path) {
         tasksFilteredOut.incrementAndGet();
-        LOG.info("Filtered out " + path);
+        LOG.info("Filtered out {}", path);
     }
 
     public long getRuntime() {
@@ -405,6 +424,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         return new CompositeDataSupport(statsCompositeType, statsItemNames,
                 new Object[]{
                     name,
+                    priority,
                     tasksAdded.get(),
                     tasksCompleted.get(),
                     tasksFilteredOut.get(),
@@ -456,13 +476,17 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     static {
         try {
-            statsItemNames = new String[]{"_taskName", "started", "completed", "filtered", "successful", "errors", "runtime"};
+            statsItemNames =
+                    new String[] { "_taskName", "priority", "started", "completed", "filtered", "successful",
+                            "errors", "runtime" };
             statsCompositeType = new CompositeType(
                     "Statics Row",
                     "Single row of statistics",
                     statsItemNames,
-                    new String[]{"Name", "Started", "Completed", "Filtered", "Successful", "Errors", "Runtime"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG});
+                            new String[] { "Name", "Priority", "Started", "Completed", "Filtered", "Successful",
+                                    "Errors", "Runtime" }, new OpenType[] { SimpleType.STRING, SimpleType.INTEGER,
+                                    SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER,
+                                    SimpleType.INTEGER, SimpleType.LONG });
             statsTabularType = new TabularType("Statistics", "Collected statistics", statsCompositeType, new String[]{"_taskName"});
 
             failureItemNames = new String[]{"_taskName", "_count", "item", "error"};

@@ -1,3 +1,20 @@
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory.HASHCODE_LENGTH;
@@ -15,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.exceptions.BucketNodeFactoryException;
@@ -26,12 +43,6 @@ public class BucketNodeFactoryTest
 
     @Mock Session session;
     @Mock Node cacheRootNode;
-
-    @Before
-    public void setup() throws Exception{
-        when(session.isLive()).thenReturn(true);
-        when(cacheRootNode.getPath()).thenReturn(MockSettings.VALID_ROOT_PATH);
-    }
 
     @Test(expected = BucketNodeFactoryException.class)
     public void testInvalidPath() throws BucketNodeFactoryException, RepositoryException
@@ -98,6 +109,7 @@ public class BucketNodeFactoryTest
         assertEquals("00000", bucketNode.getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getName());
         assertEquals("00001", bucketNode.getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getName());
     }
+
     private BucketNodeFactory buildNodeFactoryWithMocks(MockSettings settings)
             throws RepositoryException, BucketNodeFactoryException
     {
@@ -140,33 +152,61 @@ public class BucketNodeFactoryTest
 
     private CacheKey mockCacheKey(final MockSettings mockSettings){
         return new CacheKey()
+
         {
-            @Override public String getUri()
+            @Override
+            public String getUri()
             {
                 return mockSettings.cacheKeyURI;
             }
 
-            @Override public String getHierarchyResourcePath()
+            @Override
+            public String getHierarchyResourcePath()
             {
                 return mockSettings.cacheKeyHierarchyResourcePath;
             }
 
-            @Override public boolean isInvalidatedBy(CacheKey cacheKey)
+            @Override
+            public long getExpiryForCreation() {
+                return -1;
+            }
+
+            @Override
+            public long getExpiryForAccess() {
+                return -1;
+            }
+
+            @Override
+            public long getExpiryForUpdate() {
+                return -1;
+            }
+
+            @Override
+            public boolean isInvalidatedBy(CacheKey cacheKey)
             {
                 return false;
             }
 
-            @Override  public int hashCode(){
+            @Override
+            public int hashCode(){
                 return mockSettings.cacheKeyHashCode;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return super.equals(obj);
             }
         };
     }
 
     private static class MockSettings{
 
-        final static String VALID_ROOT_PATH = "/etc/acs-commons/jcr-cache";
-        int bucketNodeDepth,cacheKeyHashCode;
-        String cacheRootPath, cacheKeyURI, cacheKeyHierarchyResourcePath;
+        static final String VALID_ROOT_PATH = "/etc/acs-commons/jcr-cache";
+        int bucketNodeDepth;
+        int cacheKeyHashCode;
+        String cacheRootPath;
+        String cacheKeyURI;
+        String cacheKeyHierarchyResourcePath;
 
 
     }

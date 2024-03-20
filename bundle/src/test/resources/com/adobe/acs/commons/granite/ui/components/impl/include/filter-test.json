@@ -1,0 +1,36 @@
+{
+  "jcr:primaryType": "nt:unstructured",
+  "jcr:title": "Content",
+  "sling:resourceType": "granite/ui/components/foundation/section",
+  "layout": {
+    "jcr:primaryType": "nt:unstructured",
+    "margin": false,
+    "sling:resourceType": "granite/ui/components/foundation/layouts/fixedcolumns"
+  },
+  "items": {
+    "jcr:primaryType": "nt:unstructured",
+    "column": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "granite/ui/components/foundation/container",
+      "items": {
+        "jcr:primaryType": "nt:unstructured",
+
+        "include": {
+          "jcr:primaryType": "nt:unstructured",
+          "hide": "${{hideFirst:false}}",
+          "path": "/apps/acs-commons/components/interactive/granite/fieldset_content_entry",
+          "sling:resourceType": "acs-commons/granite/ui/components/include",
+          "namespace": "block1",
+          "parameters": {
+            "jcr:primaryType": "nt:unstructured",
+            "title": "${{firstItemTitle}}"
+          }
+        },
+        "shouldIgnoreChildren": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "ignore/children/resource/type"
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,34 +14,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
-
-import aQute.bnd.annotation.ProviderType;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
 
-    public RequestChecksumGeneratorOptions(SlingHttpServletRequest request) throws IOException {
+    public RequestChecksumGeneratorOptions(SlingHttpServletRequest request)  {
         this.addIncludedNodeTypes(request.getParameterValues(NODES_TYPES));
         this.addExcludedNodeTypes(request.getParameterValues(NODE_TYPE_EXCLUDES));
         this.addExcludedProperties(request.getParameterValues(PROPERTY_EXCLUDES));
@@ -50,7 +47,7 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
     }
 
     public static Set<String> getPaths(SlingHttpServletRequest request) throws IOException {
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
 
         // Add Paths
 
@@ -77,10 +74,10 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
     private static Set<String> getPathsFromQuery(ResourceResolver resourceResolver, String language, String query) {
         if (StringUtils.isBlank(query)) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
         language = StringUtils.defaultIfEmpty(language, "xpath");
         Iterator<Resource> resources = resourceResolver.findResources(query, language);
 
@@ -93,10 +90,10 @@ public class RequestChecksumGeneratorOptions extends AbstractChecksumGeneratorOp
 
     private static Set<String> getPathsFromInputstream(InputStream is, String encoding) throws IOException {
         if (is == null) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
         encoding = (encoding != null) ?  encoding : Charset.defaultCharset().name();
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding))) {

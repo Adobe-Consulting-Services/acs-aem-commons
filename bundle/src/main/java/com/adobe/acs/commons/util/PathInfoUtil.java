@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
@@ -23,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Util class to help with parsing URIs and PathInfos.
@@ -64,15 +62,13 @@ public final class PathInfoUtil {
     }
 
     /**
-     * <p>
      * Gets the selector at the supplied index.
-     * </p><p>
+     * <p>
      * Given: /content/page.selA.selB.html
-     * <br/>
-     * getSelector(request, 0) // --> "selA"
-     * <br/>
-     * getSelector(request, 1) // --> "selB"
-     * </p>
+     * <br>
+     * getSelector(request, 0) // --&gt; "selA"
+     * <br>
+     * getSelector(request, 1) // --&gt; "selB"
      *
      * @param request
      * @param index
@@ -88,10 +84,10 @@ public final class PathInfoUtil {
      * there is no selector at that index.
      * </p><p>
      * Given: /content/page.selA.html
-     * <br/>
-     * getSelector(request, 0, "default") // --> "selA"
-     * <br/>
-     * getSelector(request, 1, "default2") // --> "default2"
+     * <br>
+     * getSelector(request, 0, "default") // --&gt; "selA"
+     * <br>
+     * getSelector(request, 1, "default2") // --&gt; "default2"
      * </p>
      *
      * @param request the request
@@ -140,10 +136,10 @@ public final class PathInfoUtil {
      * Gets the suffix segment at the supplied index.
      * </p><p>
      * Given: /content/page.html/suffixA/suffixB
-     * <br/>
-     * getSuffixSegment(request, 0) // --> "suffixA"
-     * <br/>
-     * getSuffixSegment(request, 1) // --> "suffixB"
+     * <br>
+     * getSuffixSegment(request, 0) // --&gt; "suffixA"
+     * <br>
+     * getSuffixSegment(request, 1) // --&gt; "suffixB"
      * </p>
      *
      * @param request

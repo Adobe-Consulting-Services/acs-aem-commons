@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
@@ -23,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -42,14 +40,37 @@ public class ParameterUtil {
     }
 
     /**
-     * Util for parsing Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
      *
-     * @param value     must be in the format => x<separator>y  ... ex. foo:bar
+     * @param value     must be in the format =&gt; {@code x<separator>y}  ... ex. {@code foo:bar}
      * @param separator separator between the values
-     * @return Returns a SimpleEntry representing the key/value pair
+     * @return Returns a {@link Map.Entry} representing the key/value pair. The entry's value may be {@code null} in case no separator is found.
      */
-    public static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator) {
-        final String[] tmp = StringUtils.split(value, separator);
+    public static Map.Entry<String, String> toMapEntryWithOptionalValue(final String value, final String separator) {
+        return toSimpleEntry(value, separator, true);
+    }
+    
+    /**
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
+     *
+     * @param value     must be in the format =&gt; {@code x<separator>y}  ... ex. {@code foo:bar}
+     * @param separator separator between the values
+     * @return Returns a {@link Map.Entry} representing the key/value pair. It may be {@code null} in case no separator is found.
+     */
+    public static Map.Entry<String, String> toMapEntry(final String value, final String separator) {
+        return toSimpleEntry(value, separator, false);
+    }
+
+    /**
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
+     *
+     * @param value     must be in the format =&gt; {@code x<separator>y}  ... ex. {@code foo:bar}
+     * @param separator separator between the values
+     * @param isValueOptional if {@code false} returns {@code null} in case there is not at least one separator found (not at the last position) 
+     * @return Returns a SimpleEntry representing the key/value pair. The value may be {@null} in case no separator is found and {@code isValueOptional} is {@code true}.
+     */
+    private static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator, boolean isValueOptional) {
+        final String[] tmp = StringUtils.split(value, separator, 2);
 
         if (tmp == null) {
             return null;
@@ -58,9 +79,13 @@ public class ParameterUtil {
         if (tmp.length == 2) {
             return new AbstractMap.SimpleEntry<String, String>(tmp[0], tmp[1]);
         } else {
+            if (isValueOptional && tmp.length == 1) {
+                return new AbstractMap.SimpleEntry<String, String>(tmp[0], null);
+            }
             return null;
         }
     }
+    
 
     /**
      * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
@@ -68,9 +93,9 @@ public class ParameterUtil {
      * If a value is missing from a key/value pair, the entry is rejected. To keep valueless keys used the
      * overloaded version of this function with allowValuelessKeys = true
      *
-     * @param values    Array of key/value pairs in the format => [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
+     * @param values    Array of key/value pairs in the format =&gt; [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
      * @param separator separator between the values
-     * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
+     * @return Map of key/value pairs; map.get("dog") =&gt; "woof", map.get("cat") =&gt; "meow"
      */
     public static Map<String, String> toMap(final String[] values, final String separator) {
         return toMap(values, separator, false, null);
@@ -80,10 +105,10 @@ public class ParameterUtil {
      * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
      *
      * If a value is missing from a key/value pair, the entry is rejected only if allowValuelessKyes is false.
-     * To keep the valueless keys pass in allowValuelessKeys => true
+     * To keep the valueless keys pass in allowValuelessKeys =&gt; true
      *
      * *
-     * @param values Array of key/value pairs in the format => [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
+     * @param values Array of key/value pairs in the format =&gt; [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
      * @param separator separator between the values
      * @param allowValuelessKeys true is keys are allowed without associated values
      * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true
@@ -98,10 +123,10 @@ public class ParameterUtil {
      * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
      *
      * If a value is missing from a key/value pair, the entry is rejected only if allowValuelessKyes is false.
-     * To keep the valueless keys pass in allowValuelessKeys => true
+     * To keep the valueless keys pass in allowValuelessKeys =&gt; true
      *
      * *
-     * @param values Array of key/value pairs in the format => [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
+     * @param values Array of key/value pairs in the format =&gt; [ a<separator>b, x<separator>y ] ... ex. ["dog:woof", "cat:meow"]
      * @param separator separator between the values
      * @param allowValuelessKeys true is keys are allowed without associated values
      * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true
@@ -109,6 +134,7 @@ public class ParameterUtil {
      *                                If false, entries with multiple separators are considered invalid
      * @return
      */
+    @SuppressWarnings("squid:S3776")
     public static Map<String, String> toMap(final String[] values, final String separator,
                                             final boolean allowValuelessKeys, final String defaultValue,
                                             final boolean allowMultipleSeparators) {
@@ -128,9 +154,12 @@ public class ParameterUtil {
                     continue;
                 }
 
-                map.put(tmp[0], defaultValue);
-            } else if (tmp.length == 2) {
-                map.put(tmp[0], tmp[1]);
+                if (StringUtils.stripToNull(tmp[0]) != null) {
+                    map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(defaultValue));
+                }
+            } else if (tmp.length == 2
+                    && StringUtils.stripToNull(tmp[0]) != null) {
+                map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(tmp[1]));
             }
         }
 
@@ -140,14 +169,30 @@ public class ParameterUtil {
     /**
      * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;map-separator&lt;&gt;value&gt;list-separator&lt;&gt;value&lt;&lt;
      *
-     * @param values    Array of key/value pairs in the format => [ a<map-separator>b, x<map-separator>y<list-separator>z ] ... ex. ["dog:woof", "cat:meow,purr"]
+     * @param values    Array of key/value pairs in the format =&gt; [ a&lt;map-separator&gt;b, x&lt;map-separator&gt;y&lt;list-separator&gt;z ] ... ex. ["dog:woof", "cat:meow,purr"]
      * @param mapSeparator separator between the key/values in the amp
      * @param listSeparator separator between the values in each list
-     * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
+     * @return Map of key/value pairs; map.get("dog") =&gt; "woof", map.get("cat") =&gt; ["meow", "purr"]
      */
     public static Map<String, String[]> toMap(final String[] values, final String mapSeparator, final String listSeparator) {
-        final Map<String, String> map = toMap(values, mapSeparator);
-        final Map<String, String[]> result = new LinkedHashMap<String, String[]>(map.size());
+       return toMap(values, mapSeparator, listSeparator, false, null);
+    }
+
+
+    /**
+     * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;map-separator&lt;&gt;value&gt;list-separator&lt;&gt;value&lt;&lt;
+     *
+     * @param values    Array of key/value pairs in the format =&gt; [ a&lt;map-separator&gt;b, x&lt;map-separator&gt;y&lt;list-separator&gt;z ] ... ex. ["dog:woof", "cat:meow,purr"]
+     * @param mapSeparator separator between the key/values in the amp
+     * @param listSeparator separator between the values in each list
+     * @param allowValuelessKeys true is keys are allowed without associated values
+     * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true*
+     * @return Map of key/value pairs; map.get("dog") =&gt; "woof", map.get("cat") =&gt; ["meow", "purr"]
+     */
+    public static Map<String, String[]> toMap(final String[] values, final String mapSeparator, final String listSeparator,
+                                              final boolean allowValuelessKeys, final String defaultValue) {
+        final Map<String, String> map = toMap(values, mapSeparator, allowValuelessKeys, defaultValue);
+        final Map<String, String[]> result = new LinkedHashMap<>(map.size());
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             result.put(entry.getKey(), StringUtils.split(entry.getValue(), listSeparator));
         }

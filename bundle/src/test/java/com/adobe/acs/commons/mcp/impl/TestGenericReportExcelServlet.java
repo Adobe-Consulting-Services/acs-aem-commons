@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
@@ -29,6 +27,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -39,7 +38,12 @@ import static org.junit.Assert.assertEquals;
 public class TestGenericReportExcelServlet {
     @Rule
     public final SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
-    
+
+    @Before
+    public void setUp(){
+        slingContext.addModelsForClasses(GenericReport.class);
+    }
+
     @Test
     public void testReport() throws Exception {
         int numRows = 10;
@@ -55,11 +59,11 @@ public class TestGenericReportExcelServlet {
             rb.resource("row-" + i,
                     "ColumnA", "abcdef-" + i, "ColumnB", "qwerty-" + i);
         }
+
         MockSlingHttpServletRequest request = slingContext.request();
         request.setResource(slingContext.resourceResolver().getResource(reportPath));
         MockSlingHttpServletResponse response = slingContext.response();
 
-        slingContext.addModelsForClasses(GenericReport.class);
 
         GenericReportExcelServlet servlet = new GenericReportExcelServlet();
 

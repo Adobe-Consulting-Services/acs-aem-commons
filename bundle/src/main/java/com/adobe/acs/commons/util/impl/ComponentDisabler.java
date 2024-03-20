@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util.impl;
 
@@ -29,6 +27,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -63,18 +65,21 @@ public class ComponentDisabler implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
-    @Reference(policyOption = ReferencePolicyOption.GREEDY)
-    private ComponentDisablerDriver componentDisablerDriver;
-
     @Property(label = "Disabled components", description = "The names of the components/services you want to disable",
             cardinality = Integer.MAX_VALUE)
     private static final String DISABLED_COMPONENTS = "components";
 
     private String[] disabledComponents;
 
+    @Reference
+    private ServiceComponentRuntime scr;
+
+    private BundleContext bundleContext;
+
     @Activate
-    protected void activate(Map<String, Object> properties) {
+    protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
         disabledComponents = PropertiesUtil.toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
+        this.bundleContext = bundleContext;
         handleEvent(null);
     }
 
@@ -85,7 +90,17 @@ public class ComponentDisabler implements EventHandler {
         log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
-            componentDisablerDriver.disable(component);
+            disable(component);
+        }
+    }
+
+    public void disable(String componentName) {
+        for (Bundle bundle : bundleContext.getBundles()) {
+            ComponentDescriptionDTO dto = scr.getComponentDescriptionDTO(bundle, componentName);
+            if (dto != null && scr.isComponentEnabled(dto)) {
+                log.info("Component {} disabled by configuration.", dto.implementationClass);
+                scr.disableComponent(dto);
+            }
         }
     }
 }

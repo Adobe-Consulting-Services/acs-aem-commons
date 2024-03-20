@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.impl;
@@ -37,9 +35,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.serviceusermapping.ServiceUserMapped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,10 @@ import java.util.Map;
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 
+    private static final String WORKFLOW_PACKAGES_PATH = "/var/workflow/packages";
+
+    private static final String LEGACY_WORKFLOW_PACKAGES_PATH = "/etc/workflow/packages";
+
     private static final String WORKFLOW_PACKAGE_TEMPLATE = "/libs/cq/workflow/templates/collectionpage";
 
     private static final String NT_VLT_DEFINITION = "vlt:PackageDefinition";
@@ -82,6 +87,13 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
 
+    private static final String SERVICE_NAME = "workflowpackagemanager-service";
+    private static final Map<String, Object> AUTH_INFO;
+
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
+
     @Property(label = "Workflow Package Types",
             description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
             value = { "cq:Page", "cq:PageContent", "dam:Asset" })
@@ -90,6 +102,14 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Reference
     private ResourceCollectionManager resourceCollectionManager;
+
+    @Reference
+    ResourceResolverFactory resourceResolverFactory;
+
+    @Reference(target = "("+ServiceUserMapped.SUBSERVICENAME+"="+SERVICE_NAME+")")
+    ServiceUserMapped serviceUserMapped;
+
+    private String bucketPath;
 
     /**
      * {@inheritDoc}
@@ -106,16 +126,16 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     public final Page create(final ResourceResolver resourceResolver, String bucketSegment,
                              final String name, final String... paths) throws WCMException,
             RepositoryException {
-
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        String bucketPath = "/etc/workflow/packages";
+        String workflowPackagePath = bucketPath;
+
         if (StringUtils.isNotBlank(bucketSegment)) {
-            bucketPath += "/" + bucketSegment;
+            workflowPackagePath += "/" + bucketSegment;
         }
 
-        final Node shardNode = JcrUtils.getOrCreateByPath(bucketPath,
+        final Node shardNode = JcrUtils.getOrCreateByPath(workflowPackagePath,
                 NT_SLING_FOLDER, NT_SLING_FOLDER, session, false);
         final Page page = pageManager.create(shardNode.getPath(), JcrUtil.createValidName(name),
                 WORKFLOW_PACKAGE_TEMPLATE, name, false);
@@ -154,14 +174,14 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      * {@inheritDoc}
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
-            final String path, final String[] nodeTypes) throws RepositoryException {
+                                       final String path, final String[] nodeTypes) throws RepositoryException {
         final List<String> collectionPaths = new ArrayList<String>();
 
         final Resource resource = resourceResolver.getResource(path);
 
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
         } else if (!isWorkflowPackage(resourceResolver, path)) {
             log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
@@ -174,8 +194,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             if (page != null && page.getContentResource() != null) {
                 final Node node = page.getContentResource().adaptTo(Node.class);
 
-                final ResourceCollection resourceCollection =
-                        ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+                final ResourceCollection resourceCollection = getResourceCollection(node);
 
                 if (resourceCollection != null) {
                     final List<Node> members = resourceCollection.list(nodeTypes);
@@ -188,6 +207,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
             return Arrays.asList(new String[]{ path });
         }
+    }
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected ResourceCollection getResourceCollection(final Node node) throws RepositoryException {
+        return ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
     }
 
     /**
@@ -215,7 +239,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final boolean isWorkflowPackage(final ResourceResolver resourceResolver, final String path) {
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-
         final Page workflowPackagesPage = pageManager.getPage(path);
         if (workflowPackagesPage == null) {
             return false;
@@ -254,9 +277,27 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         return rules;
     }
 
+    private String getBucketPath(final ResourceResolver resourceResolver) {
+        if (resourceResolver.getResource(WORKFLOW_PACKAGES_PATH) != null) {
+            return WORKFLOW_PACKAGES_PATH;
+        } else {
+            return LEGACY_WORKFLOW_PACKAGES_PATH;
+        }
+
+    }
+
     @Activate
     protected final void activate(final Map<String, String> config) {
         workflowPackageTypes =
                 PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+            bucketPath = getBucketPath(resolver);
+            log.debug("using {} as bucket path for wf packages",bucketPath);
+        } catch (LoginException e) {
+            log.error("Cannot determine bucket path for WorkflowPackageManager, do not activate this service",e);
+            // this service must not get activated
+            throw new IllegalStateException(e);
+        }
+
     }
 }

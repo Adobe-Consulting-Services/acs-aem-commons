@@ -1,0 +1,84 @@
+{
+    "jcr:primaryType": "sling:Folder",
+    "jcr:title": "Tags",
+    "languages": [
+        "en",
+        "de",
+        "es",
+        "fr",
+        "it",
+        "pt_br",
+        "zh_cn",
+        "zh_tw",
+        "ja",
+        "ko_kr"
+    ],
+    "workflow": {
+        "jcr:primaryType": "cq:Tag",
+        "jcr:title": "Workflow",
+        "jcr:description": "",
+        "sling:resourceType": "cq/tagging/components/tag",
+        "system": {
+            "jcr:primaryType": "cq:Tag",
+            "jcr:title": "System",
+            "jcr:description": "",
+            "sling:resourceType": "cq/tagging/components/tag"
+        },
+        "wcm": {
+            "jcr:primaryType": "cq:Tag",
+            "jcr:createdBy": "admin",
+            "jcr:title": "WCM",
+            "jcr:description": "",
+            "sling:resourceType": "cq/tagging/components/tag",
+            "translatelanguagecopy": {
+                "jcr:primaryType": "cq:Tag",
+                "jcr:title": "Translate Language Copy",
+                "jcr:description": "",
+                "sling:resourceType": "cq/tagging/components/tag"
+            },
+            "translation": {
+                "jcr:primaryType": "cq:Tag",
+                "jcr:title": "Translation",
+                "jcr:description": "",
+                "sling:resourceType": "cq/tagging/components/tag"
+            }
+        },
+        "adobe-launch": {
+            "jcr:primaryType": "cq:Tag",
+            "jcr:title": "Adobe Launch",
+            "jcr:description": "",
+            "sling:resourceType": "cq/tagging/components/tag"
+        },
+        "projects": {
+            "jcr:primaryType": "cq:Tag",
+            "jcr:title": "Projects",
+            "jcr:description": "",
+            "sling:resourceType": "cq/tagging/components/tag",
+            "wcm": {
+                "jcr:primaryType": "cq:Tag",
+                "jcr:title": "WCM",
+                "jcr:description": "",
+                "sling:resourceType": "cq/tagging/components/tag",
+                "launch": {
+                    "jcr:primaryType": "cq:Tag",
+                    "jcr:title": "Launch",
+                    "jcr:description": "",
+                    "sling:resourceType": "cq/tagging/components/tag",
+                    "sling:resoureType": "cq/tagging/components/tag"
+                },
+                "email": {
+                    "jcr:primaryType": "cq:Tag",
+                    "jcr:title": "Email",
+                    "jcr:description": "",
+                    "sling:resourceType": "cq/tagging/components/tag"
+                },
+                "landingpage": {
+                    "jcr:primaryType": "cq:Tag",
+                    "jcr:title": "Landing Page",
+                    "jcr:description": "",
+                    "sling:resourceType": "cq/tagging/components/tag"
+                }
+            }
+        }
+    }
+}

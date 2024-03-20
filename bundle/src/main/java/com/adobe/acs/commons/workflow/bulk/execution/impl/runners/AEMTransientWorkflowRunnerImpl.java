@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
@@ -128,13 +126,11 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
         public void run() {
             log.debug("Running Bulk AEM Transient Workflow job [ {} ]", jobName);
 
-            ResourceResolver serviceResourceResolver = null;
             Resource configResource = null;
             Config config = null;
             Workspace workspace = null;
 
-            try {
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 if (configResource != null) {
@@ -221,10 +217,6 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                     stop(workspace);
                 } catch (PersistenceException e1) {
                     log.error("Unable to mark this workspace [ {} ] as stopped.", workspacePath, e1);
-                }
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
                 }
             }
         }

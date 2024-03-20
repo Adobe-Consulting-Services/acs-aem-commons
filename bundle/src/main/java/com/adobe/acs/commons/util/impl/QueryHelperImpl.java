@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.util.impl;
 
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
@@ -52,9 +51,9 @@ public class QueryHelperImpl implements QueryHelper {
     @Reference
     private QueryBuilder queryBuilder;
 
-    private static final String QUERY_BUILDER = "queryBuilder";
+    public static final String QUERY_BUILDER = "queryBuilder";
 
-    private static final String LIST = "list";
+    public static final String LIST = "list";
 
     /**
      * Find all the resources needed for the package definition.
@@ -73,11 +72,11 @@ public class QueryHelperImpl implements QueryHelper {
         if (StringUtils.isEmpty(statement)) {
             return Collections.emptyList();
         }
-
-        final String[] lines = StringUtils.split(statement, '\n');
+        
+        final String[] lines = statement.split("\\r?\\n");
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            return getResourcesFromQueryBuilder(resourceResolver, lines);
+            return getResourcesFromQueryBuilder(resourceResolver, lines, relPath);
         } else if (LIST.equalsIgnoreCase(language)) {
             return getResourcesFromList(resourceResolver, lines, relPath);
         } else {
@@ -118,7 +117,7 @@ public class QueryHelperImpl implements QueryHelper {
         return resources;
     }
 
-    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines) throws RepositoryException {
+    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines, String relPath) throws RepositoryException {
         final List<Resource> resources = new ArrayList<>();
         final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
@@ -127,10 +126,16 @@ public class QueryHelperImpl implements QueryHelper {
             params.put("p.limit", "-1");
         }
 
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
         final List<Hit> hits = query.getResult().getHits();
         for (final Hit hit : hits) {
-            resources.add(hit.getResource());
+            final Resource resource = resourceResolver.getResource(hit.getPath());
+            final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+            if (relativeAwareResource != null) {
+                resources.add(relativeAwareResource);
+            }
         }
 
         return resources;
@@ -151,8 +156,10 @@ public class QueryHelperImpl implements QueryHelper {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
         return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
     }
 

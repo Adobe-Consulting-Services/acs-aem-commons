@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.workflow.process.impl;
 
@@ -53,12 +51,15 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 public class ParameterizedActivatePageProcess extends ActivatePageProcess {
 
     private static final String AGENT_ARG = "replicationAgent";
+    private static final String ARG_REPLICATION_SUPPRESS_STATUS_UPDATE = "suppressStatusUpdate";
 
     private transient ThreadLocal<String[]> agentId = new ThreadLocal<String[]>();
+    private boolean suppressStatusUpdate = false;
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap args) throws WorkflowException {
         agentId.set(args.get(AGENT_ARG, new String[] {}));
+        this.suppressStatusUpdate = Boolean.parseBoolean(args.get(ARG_REPLICATION_SUPPRESS_STATUS_UPDATE, String.class));
         super.execute(workItem, workflowSession, args);
 
     }
@@ -80,6 +81,7 @@ public class ParameterizedActivatePageProcess extends ActivatePageProcess {
                 return ArrayUtils.contains(agentId.get(), agent.getId());
             }
         });
+        opts.setSuppressStatusUpdate(suppressStatusUpdate);
         return opts;
     }
 

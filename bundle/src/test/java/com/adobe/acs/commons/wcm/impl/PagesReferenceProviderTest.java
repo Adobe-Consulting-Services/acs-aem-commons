@@ -1,50 +1,47 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Function;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
-import org.mockito.stubbing.Answer;
-
-import javax.annotation.Nullable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PagesReferenceProviderTest {
@@ -170,10 +167,18 @@ public class PagesReferenceProviderTest {
 
     }
 
+    @Test
+    public void testPageReferenceResourcePath() throws Exception {
+        // The references resource should point to the cq:Page and not the [cq:Pages]/jcr:content per https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1283
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/oneref/jcr:content"));
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
+        assertEquals("/content/geometrixx/en", actual.get(0).getResource().getPath());
+    }
+
     private Page registerPage(String path, String name) {
         Page result = mock(Page.class, path);
         when(pageManager.getContainingPage(path)).thenReturn(result);
-        when(result.getPath()).thenReturn(path);
         when(result.getName()).thenReturn(name);
         when(result.getLastModified()).thenReturn(Calendar.getInstance());
         when(result.getContentResource()).then(i -> context.resourceResolver().getResource(path + "/jcr:content"));

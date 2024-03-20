@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.workflow;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.WCMException;
@@ -69,9 +67,9 @@ public interface WorkflowPackageManager {
      * Gets the payload paths in the Workflow Package.
      *
      * This method will always return a List.
-     * - If the path does not resolve to a resource > an empty list
-     * - If the path does not resolve to a Workflow Package > a List of one item; the param path
-     * - If the path does resolve to a Workflow Package > a List of all resources in the Workflow Package but not the
+     * - If the path does not resolve to a resource &gt; an empty list
+     * - If the path does not resolve to a Workflow Package &gt; a List of one item; the param path
+     * - If the path does resolve to a Workflow Package &gt; a List of all resources in the Workflow Package but not the
      * WF Package itself.
      *
      * @param resourceResolver The resource resolver to access the Workflow Package
@@ -85,9 +83,9 @@ public interface WorkflowPackageManager {
      * Gets the payload paths in the Workflow Package.
      *
      * This method will always return a List.
-     * - If the path does not resolve to a resource > an empty list
-     * - If the path does not resolve to a Workflow Package > a List of one item; the param path
-     * - If the path does resolve to a Workflow Package > a List of all resources in the Workflow Package but not the
+     * - If the path does not resolve to a resource &gt; an empty list
+     * - If the path does not resolve to a Workflow Package &gt; a List of one item; the param path
+     * - If the path does resolve to a Workflow Package &gt; a List of all resources in the Workflow Package but not the
      * WF Package itself.
      *
      * @param resourceResolver The resource resolver to access the Workflow Package

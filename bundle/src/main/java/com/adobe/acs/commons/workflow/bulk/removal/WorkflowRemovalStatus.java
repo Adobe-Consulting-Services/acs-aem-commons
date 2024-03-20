@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.bulk.removal;
 
+import com.google.gson.JsonObject;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -150,29 +147,29 @@ public final class WorkflowRemovalStatus {
         return (end.getTimeInMillis() - start.getTimeInMillis()) / MS_IN_SECOND;
     }
 
-    public JSONObject getJSON() throws JSONException {
-        final JSONObject json = new JSONObject();
+    public JsonObject getJSON() {
+        final JsonObject json = new JsonObject();
 
-        json.put(KEY_RUNNING, this.isRunning());
-        json.put(KEY_INITIATED_BY, this.getInitiatedBy());
-        json.put(KEY_CHECKED_COUNT, this.getChecked());
-        json.put(KEY_REMOVED_COUNT, this.getRemoved());
+        json.addProperty(KEY_RUNNING, this.isRunning());
+        json.addProperty(KEY_INITIATED_BY, this.getInitiatedBy());
+        json.addProperty(KEY_CHECKED_COUNT, this.getChecked());
+        json.addProperty(KEY_REMOVED_COUNT, this.getRemoved());
 
         if (this.getStartedAt() != null) {
-            json.put(KEY_STARTED_AT, this.getStartedAt());
+            json.addProperty(KEY_STARTED_AT, this.getStartedAt());
         }
 
         if (this.getErredAt() != null) {
-            json.put(KEY_ERRED_AT, this.getErredAt());
-            json.put(KEY_DURATION, getDuration(this.startedAt, this.erredAt));
+            json.addProperty(KEY_ERRED_AT, this.getErredAt());
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, this.erredAt));
         } else if (this.getForceQuitAt() != null) {
-            json.put(KEY_FORCE_QUIT_AT, this.getForceQuitAt());
-            json.put(KEY_DURATION, getDuration(this.startedAt, this.forceQuitAt));
+            json.addProperty(KEY_FORCE_QUIT_AT, this.getForceQuitAt());
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, this.forceQuitAt));
         } else if (this.getCompletedAt() != null) {
-            json.put(KEY_COMPLETED_AT, this.getCompletedAt());
-            json.put(KEY_DURATION, getDuration(this.startedAt, this.completedAt));
+            json.addProperty(KEY_COMPLETED_AT, this.getCompletedAt());
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, this.completedAt));
         } else {
-            json.put(KEY_DURATION, getDuration(this.startedAt, Calendar.getInstance()));
+            json.addProperty(KEY_DURATION, getDuration(this.startedAt, Calendar.getInstance()));
         }
 
         return json;

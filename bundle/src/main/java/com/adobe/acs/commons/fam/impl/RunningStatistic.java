@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +21,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -28,6 +28,10 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Collect a numeric series and produce a rolling report on the trend
@@ -42,6 +46,8 @@ public class RunningStatistic {
     private double total;
     private double rollingCounter;
     private List<Long> rollingSeries;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RunningStatistic.class);
 
     public RunningStatistic(String name) {
         this.name = name;
@@ -115,7 +121,7 @@ public class RunningStatistic {
                     new OpenType[]{SimpleType.STRING, SimpleType.LONG, SimpleType.LONG, SimpleType.DOUBLE, SimpleType.DOUBLE});
             tabularType = new TabularType("Statistics", "Collected statistics", compositeType, new String[] {"attribute"});
         } catch (OpenDataException ex) {
-            Logger.getLogger(RunningStatistic.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Cannot create MBean", ex);
         }
     }
 }

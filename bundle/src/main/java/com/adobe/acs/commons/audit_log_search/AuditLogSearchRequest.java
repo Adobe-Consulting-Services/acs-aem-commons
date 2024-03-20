@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.audit_log_search;
 
@@ -25,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.jcr.RepositoryException;
@@ -89,7 +88,9 @@ public class AuditLogSearchRequest {
     }
 
     public Date getEndDate() {
-        return endDate;
+        return Optional.ofNullable(endDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     public String getOrder() {
@@ -126,7 +127,9 @@ public class AuditLogSearchRequest {
     }
 
     public Date getStartDate() {
-        return startDate;
+        return Optional.ofNullable(startDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     public String getType() {
@@ -140,7 +143,7 @@ public class AuditLogSearchRequest {
     public String getUserName(ResourceResolver resolver, String userId) throws RepositoryException {
         if (!userNames.containsKey(userId)) {
             final UserPropertiesManager upm = resolver.adaptTo(UserPropertiesManager.class);
-            UserProperties userProperties = upm.getUserProperties(userId, UserPropertiesService.PROFILE_PATH);
+            UserProperties userProperties = upm.getUserProperties(userId, UserPropertiesService.PRIVATE_PROFILE);
             String name = userId;
             if (userProperties != null && !StringUtils.isEmpty(userProperties.getDisplayName())) {
                 name = userProperties.getDisplayName();

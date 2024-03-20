@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.dam.impl;
 
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -31,11 +31,11 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Map;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @SlingServlet(paths = "/bin/acs-commons/dam/custom-components.json", generateComponent = false)
 @Component(metatype = true, policy = ConfigurationPolicy.REQUIRE, label = "ACS AEM Commons - Custom DAM Component List Servlet",
@@ -55,9 +55,9 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
             COLORANTS,
             LOCATION
         })
-    public static String PROP_COMPONENTS = "components";
+    public static final String PROP_COMPONENTS = "components";
 
-    private JsonObject json;
+    private transient JsonObject json;
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -70,11 +70,11 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
             array.add(obj);
         }
         this.json = new JsonObject();
-        json.add("components", array);
+        json.add("components", array); // NOSONAR
     }
 
     @Override
-    protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().print(json.toString());

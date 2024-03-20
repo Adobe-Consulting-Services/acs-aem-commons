@@ -1,0 +1,108 @@
+name: Java CI
+
+on:
+  # for regular master build (after the merge)
+  push:
+    branches:
+      - master
+      - acs-aem-commons-6.0.0
+  # for PRs from forked repos and non forked repos
+  # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
+  pull_request_target:
+    branches:
+      - master
+      - acs-aem-commons-6.0.0
+    types: [opened, synchronize, reopened]
+
+# restrict privileges except for setting commit status, adding PR comments and writing statuses
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  deployments: read
+  issues: read
+  packages: read
+  pull-requests: write
+  repository-projects: read
+  security-events: read
+  statuses: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        jdk: [11, 17, 21]
+        include:
+          # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
+          - os: ubuntu-latest
+            jdk: 11
+            isMainBuildEnv: true
+            namePrefix: 'Main '
+      fail-fast: false
+
+    name: ${{ matrix.namePrefix }} Maven build (${{ matrix.os }}, JDK ${{ matrix.jdk }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        # always act on the modified source code (even for event pull_request_target)
+        # is considered potentially unsafe (https://securitylab.github.com/research/github-actions-preventing-pwn-requests/) but actions are only executed after approval from committers
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          # no additional git operations after checkout triggered in workflow, no need to store credentials
+          persist-credentials: false
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          cache: 'maven'
+          # Adobe is moving away from Azul Zulu to Oracle JDK (which is not an option) - Eclipse Temurin is suggested as the "closest thing"
+          distribution: 'temurin'
+          java-version: ${{ matrix.jdk }}
+          # generate settings.xml with the correct values
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username in deploy
+          server-password: MAVEN_PASSWORD # env variable for token in deploy
+
+      # sets environment variables to be used in subsequent steps: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      - name: Set environment variables
+        shell: bash
+        run: |
+          if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
+            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check,cloud" >> $GITHUB_ENV
+            if [ "${{github.ref}}" = "refs/heads/master" ] && [ "${{github.event_name}}" = "push" ]; then
+              echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
+              echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
+              echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
+              echo "STEP_NAME_SUFFIX=(Deploys to OSSRH)" >> $GITHUB_ENV
+            else
+              echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
+            fi
+          else
+            echo "MVN_ADDITIONAL_OPTS=" >> $GITHUB_ENV
+            echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
+          fi
+
+      - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
+        run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
+
+      - name: Publish Test Report
+        if: ${{ always() }} # make sure to run even if previous Maven execution failed (due to failed test)
+        uses: scacap/action-surefire-report@v1
+        with:
+          check_name: Test report (${{ matrix.os }}, JDK ${{ matrix.jdk }})
+
+      # https://about.codecov.io/blog/javascript-code-coverage-using-github-actions-and-codecov/
+      - name: Upload code coverage to CodeCov (Main build)
+        if: matrix.isMainBuildEnv
+        uses: codecov/codecov-action@v2
+
+      # https://github.com/marketplace/actions/changelog-enforcer
+      - name: Enforce a changelog entry
+        if: matrix.isMainBuildEnv && github.event_name == 'pull_request_target'
+        uses: dangoslen/changelog-enforcer@v3
+        with:
+          changeLogPath: 'CHANGELOG.md'
+          skipLabels: 'Skip-Changelog,skip-changelog'

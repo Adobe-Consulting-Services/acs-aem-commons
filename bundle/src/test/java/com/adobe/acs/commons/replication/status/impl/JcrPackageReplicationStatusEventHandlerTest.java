@@ -1,7 +1,25 @@
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationEvent;
@@ -15,37 +33,35 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.event.Event;
 
 import javax.jcr.Node;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JcrPackageReplicationStatusEventHandlerTest {
-    final String PACKAGE_PATH = "/etc/packages/acs-commons/test.zip";
+    static final String PACKAGE_PATH = "/etc/packages/acs-commons/test.zip";
 
     Calendar calendar;
 
@@ -110,8 +126,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
         final String[] paths = new String[] {PACKAGE_PATH};
 
-        when(job.getProperty("paths")).thenReturn(paths);
-
+        when(job.getProperty("path")).thenReturn(PACKAGE_PATH);
         when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
         when(resourceResolver.getResource(PACKAGE_PATH)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
@@ -119,18 +134,15 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(packageHelper.getContents(jcrPackage)).thenReturn(contentPaths);
         when(jcrPackage.getDefinition()).thenReturn(jcrPackageDefinition);
         when(jcrPackageDefinition.getId()).thenReturn(mock(PackageId.class));
-        when(jcrPackage.getNode()).thenReturn(jcrPackageNode);
-        when(jcrPackageNode.getPath()).thenReturn(PACKAGE_PATH);
-        when(packageResource.getChild("jcr:content")).thenReturn(jcrPackageJcrContent);
 
         when(jcrPackage.getPackage()).thenReturn(vaultPackage);
         when(vaultPackage.getCreated()).thenReturn(calendar);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(JcrConstants.JCR_LASTMODIFIED, calendar);
-        when(jcrPackageJcrContent.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(properties));
 
         when(resourceResolver.getResource("/content/foo/jcr:content")).thenReturn(contentResource1);
+        when(contentResource1.getPath()).thenReturn("/content/foo/jcr:content");
         when(contentResource1.adaptTo(Node.class)).thenReturn(contentNode1);
         when(contentNode1.isNodeType("cq:PageContent")).thenReturn(true);
         when(contentResource1.getParent()).thenReturn(contentResource1parent);
@@ -161,6 +173,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
         verify(replicationStatusManager, times(1)).setReplicationStatus(
                 eq(resourceResolver),
+                eq(Collections.emptySet()),
                 eq("Package Replication"),
                 eq(calendar),
                 eq(ReplicationStatusManager.Status.ACTIVATED),
@@ -172,12 +185,10 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Map<String, Object> eventParams  = new HashMap<>();
         eventParams.put("paths", new String[]{PACKAGE_PATH});
         eventParams.put("userId", "replication-user");
-
+        eventParams.put("type", "Activate");
         final Event event = new Event(ReplicationAction.EVENT_TOPIC, eventParams);
 
         final ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-
-        eventHandler.bindRepository(null, null, true);
         eventHandler.handleEvent(event);
 
         verify(jobManager, times(1)).addJob(eq("acs-commons/replication/package"), captor.capture());
@@ -186,14 +197,14 @@ public class JcrPackageReplicationStatusEventHandlerTest {
     }
 
     @Test
-    public void testGetInfoFromEvent_CQEvent() {
+    public void testGetInfoFromEvent_CqEvent() {
         final String[] expectedPaths = new String[]{PACKAGE_PATH};
         final String expectedUserId = "replication-user";
 
         final Map<String, Object> properties  = new HashMap<>();
         properties.put("paths", expectedPaths);
         properties.put("userId", expectedUserId);
-
+        properties.put("type", "Activate");
         final Event event = new Event(ReplicationAction.EVENT_TOPIC, properties);
 
         final Map<String, Object> actual = eventHandler.getInfoFromEvent(event);
@@ -210,7 +221,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         modification.put("paths", expectedPaths);
         modification.put("userId", expectedUserId);
         modification.put("type", ReplicationActionType.ACTIVATE);
-        modification.put("time", 0l);
+        modification.put("time", 0L);
         modification.put("revision", "1");
 
         final List<Map<String, Object>> modifications = new ArrayList<>();
@@ -224,5 +235,26 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Map<String, Object> actual = eventHandler.getInfoFromEvent(event);
         assertEquals(expectedPaths, actual.get("paths"));
         assertEquals(expectedUserId, actual.get("replicatedBy"));
+    }
+
+    @Test
+    public void testDefaultNodeTypeAndPathRestrictions() {
+        Map.Entry<String, String> nodeTypeAndPathRestrictionForPageContent = ParameterUtil.toMapEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[0], " ");
+        Pattern pathPattern = Pattern.compile(nodeTypeAndPathRestrictionForPageContent.getValue());
+        // initial content below editable templates must not match
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/deeplynested/settings/wcm/templates/mytemplate/initial/somechild").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/onemarketing/azde-default/settings/wcm/templates/azde-experience-fragment-tabs-accordion/initial/jcr:content").matches());
+        Assert.assertTrue(pathPattern.matcher("/content/mypage/path").matches());
+
+
+        // "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
+        Map.Entry<String, String> nodeTypeAndPathRestrictionForNtUnstructured = ParameterUtil.toMapEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[6], " ");
+        pathPattern = Pattern.compile(nodeTypeAndPathRestrictionForNtUnstructured.getValue());
+        // only policies for editable templates must match
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
+        Assert.assertFalse(pathPattern.matcher("/content/some/otherpath").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/policies/somepolicy/deeplynested").matches());
+        Assert.assertTrue(pathPattern.matcher("/conf/we-retail/settings/wcm/templates/section-page/policies/jcr:content/deeply/nested").matches());
     }
 }

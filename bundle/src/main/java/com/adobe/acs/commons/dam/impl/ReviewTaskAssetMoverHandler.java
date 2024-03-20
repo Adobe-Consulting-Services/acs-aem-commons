@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.dam.impl;
 
 
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.asset.api.AssetVersionManager;
@@ -31,7 +30,6 @@ import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.UnhandledException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -75,7 +73,7 @@ import java.util.Map;
 @Properties({
         @Property(
                 label = "Event Topics",
-                value = {"com/adobe/granite/taskmanagement/event"},
+                value = {ReviewTaskAssetMoverHandler.DEFAULT_TOPIC},
                 description = "[Required] Event Topics this event handler will to respond to. Defaults to: com/adobe/granite/taskmanagement/event",
                 name = EventConstants.EVENT_TOPIC,
                 propertyPrivate = true
@@ -96,6 +94,7 @@ import java.util.Map;
 public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoverHandler.class);
 
+    public static final String DEFAULT_TOPIC = "com/adobe/granite/taskmanagement/event";
     private static final String PATH_CONTENT_DAM = DamConstants.MOUNTPOINT_ASSETS;
     private static final String APPROVED = "approved";
     private static final String REJECTED = "rejected";
@@ -159,10 +158,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        ResourceResolver resourceResolver = null;
 
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             final String path = (String) event.getProperty("TaskId");
             final Resource taskResource = resourceResolver.getResource(path);
 
@@ -186,11 +183,6 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             }
         } catch (LoginException e) {
             log.error("Could not get resource resolver", e);
-        } finally {
-            // Always close resource resolvers you open
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
@@ -203,10 +195,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
         @Override
         public void run() {
-            ResourceResolver resourceResolver = null;
-            try {
-                // Always use service users; never admin resource resolvers for "real" code
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
                 // Access data passed into the Job from the Event
                 Resource resource = resourceResolver.getResource(path);
@@ -217,23 +206,22 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     String contentPath = taskProperties.get(PN_CONTENT_PATH, String.class);
 
                     if (StringUtils.startsWith(contentPath, PATH_CONTENT_DAM)) {
-                        final Iterator<Resource> assets = findAssets(resourceResolver, contentPath);
+                        Query query = findAssets(resourceResolver, contentPath);
+                        log.debug("Found [ {} ] assets under [ {} ] that were reviewed and require processing.",
+                                query.getResult().getHits().size(),
+                                contentPath);
 
+                        final Iterator<Resource> assets = query.getResult().getResources();
                         resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(USER_EVENT_TYPE);
 
                         while (assets.hasNext()) {
-                            final Asset asset = assets.next().adaptTo(Asset.class);
+                            final Asset asset = assetManager.getAsset(assets.next().getPath());
                             moveAsset(resourceResolver, assetManager, asset, taskProperties);
                         }
                     }
                 }
             } catch (Exception e) {
                 log.error("Could not process Review Task Mover", e);
-            } finally {
-                // Always close resource resolvers you open
-                if (resourceResolver != null) {
-                    resourceResolver.close();
-                }
             }
         }
 
@@ -242,9 +230,9 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          *
          * @param resourceResolver the resource resolver used to find the Assets to move.
          * @param contentPath      the DAM contentPath which the task covers.
-         * @return the resources representing dam:Assets for which dam:status is set to approved or rejected
+         * @return the CloseableQuery whose result represents dam:Assets for which dam:status is set to approved or rejected
          */
-        private Iterator<Resource> findAssets(ResourceResolver resourceResolver, String contentPath) {
+        private Query findAssets(ResourceResolver resourceResolver, String contentPath) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("type", DamConstants.NT_DAM_ASSET);
             params.put("path", contentPath);
@@ -254,16 +242,9 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             params.put("p.offset", "0");
             params.put("p.limit", "-1");
 
-            Query query = queryBuilder.createQuery(PredicateGroup.create(params),
-                    resourceResolver.adaptTo(Session.class));
-
-            if (log.isDebugEnabled()) {
-                log.debug("Found [ {} ] assets under [ {} ] that were reviewed and require processing.",
-                        query.getResult().getHits().size(),
-                        contentPath);
-            }
-
-            return query.getResult().getResources();
+            Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+            QueryUtil.setResourceResolverOn(resourceResolver, query);
+            return query;
         }
 
 
@@ -303,7 +284,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * Creates a new revision of an asset and replaces its renditions (including original), and metadata node.
          *
          * @param resourceResolver the ResourceResolver object
-         * @param assetManager the AssetManager object
+         * @param assetManager     the AssetManager object
          * @param originalAsset    the asset to create a new version for
          * @param reviewedAsset    the asset to that will represent the new version
          * @throws PersistenceException
@@ -377,24 +358,24 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                                 resourceResolver.commit();
                                 assetManager.moveAsset(asset.getPath(), destAssetPath);
                                 log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                             } else if (CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
                                 destAssetPath = createUniqueAssetPath(assetManager, destPath, asset.getName());
                                 assetManager.moveAsset(asset.getPath(), destAssetPath);
                                 log.info("Moved with unique asset name [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                             } else if (CONFLICT_RESOLUTION_NEW_VERSION.equals(conflictResolution)) {
                                 log.info("Creating new version of existing asset [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                                 createRevision(resourceResolver, assetManager, assetManager.getAsset(destAssetPath), asset);
                             } else if (CONFLICT_RESOLUTION_SKIP.equals(conflictResolution)) {
                                 log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                             }
                         } else {
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
                             log.info("Moved [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                    new String[]{asset.getPath(), destAssetPath, status});
+                                    asset.getPath(), destAssetPath, status);
                         }
                     } else {
                         log.warn("Request to move reviewed asset to a non DAM Asset path [ {} ]", destPath);
@@ -409,6 +390,42 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                 resourceResolver.revert();
                 resourceResolver.refresh();
             }
+        }
+    }
+
+    protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
+        if (this.resourceResolverFactory == null) {
+            this.resourceResolverFactory = resourceResolverFactory;
+        }
+    }
+
+    protected void unbindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
+        if (this.resourceResolverFactory == resourceResolverFactory) {
+            this.resourceResolverFactory = null;
+        }
+    }
+
+    protected void bindScheduler(Scheduler scheduler) {
+        if (this.scheduler == null) {
+            this.scheduler = scheduler;
+        }
+    }
+
+    protected void unbindScheduler(Scheduler scheduler) {
+        if (this.scheduler == scheduler) {
+            this.scheduler = null;
+        }
+    }
+
+    protected void bindQueryBuilder(QueryBuilder queryBuilder) {
+        if (this.queryBuilder == null) {
+            this.queryBuilder = queryBuilder;
+        }
+    }
+
+    protected void unbindQueryBuilder(QueryBuilder queryBuilder) {
+        if (this.queryBuilder == queryBuilder) {
+            this.queryBuilder = null;
         }
     }
 }

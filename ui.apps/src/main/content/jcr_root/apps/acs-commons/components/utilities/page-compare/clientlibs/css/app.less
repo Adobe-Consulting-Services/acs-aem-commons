@@ -1,0 +1,308 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+#acs-commons-page-compare {
+
+  h1 {
+    margin-top: 1.25em;
+  }
+
+  .button-row {
+    clear: left;
+    margin: 1em;
+    text-align: right;
+    .update {
+    }
+  }
+
+  .input {
+    width: 80%;
+  }
+
+  .select {
+    margin-top: 0.5em;
+    width: 80%;
+  }
+
+  .content-container {
+    width: 100%;
+
+    .content-container-inner {
+      width: 95%;
+      margin: 0 auto;
+    }
+  }
+
+  .half {
+      width: 50%;
+      display: block;
+      float: left;
+      .half-inner {
+          margin-right: 1em;
+
+          &.border {
+            padding: 0.5em;
+            border: solid grey;
+            border-width: 1px 1px 0 1px;
+            margin-bottom: 0.2em;
+            h2 {
+              font-weight: 400;
+              font-size: 1.5rem;
+              border-bottom: 1px solid grey;
+              line-height: 2.1rem;
+              margin-bottom: 0.3rem;
+            }
+          }
+      }
+  }
+
+  .clearer {
+    clear: both;
+  }
+
+  .section {
+    margin: 2em 0;
+
+    h2 {
+      margin-bottom: .5em;
+    }
+  }
+
+  .notifications {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 750px;
+    z-index: 1000;
+  }
+
+    .content {
+        font-size: 9pt;
+    }
+    td, th {
+        padding: 10px;
+        border: 1px solid grey;
+    }
+    td {
+       vertical-align: top;
+    }
+    th {
+        background-color: lightgrey;
+    }
+    .version-header {
+        font-size: 11pt;
+        font-weight: bold;
+        padding: 5px;
+        background-color: lightgrey;
+
+        .name {
+            float: left;
+        }
+        .v {
+            float: left;
+            padding-left: 10px;
+        }
+        .date {
+            text-align: right;
+        }
+    }
+    div.version {
+        width: 100%;
+        border: 1px solid grey;
+        float: left;
+        background-color: white;
+
+        a {
+            display: block;
+            color: black;
+        }
+    }
+
+    .version-entry {
+        border-top: 1px solid grey;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .inner-version-entry {
+        padding: 2px;
+    }
+    .detail {
+        cursor: auto;
+        .inner {
+            border: 1px solid grey;
+            background-color: #FFF;
+            padding: 4px;
+        }
+        del {
+            display: none;
+        }
+        ins {
+            background-color: #FDFFA9;
+            text-decoration: none;
+        }
+    }
+    span.key {
+        font-weight: bold;
+    }
+    .type-true {
+        /*border: 2px solid grey;*/
+    }
+    .options {
+        label {
+            padding-right: 15px;
+        }
+        margin-bottom: .8em;
+    }
+    .legend {
+        width: 200px;
+        .inner-version-entry {
+            padding: 0;
+        }
+    }
+    .green, .status-added {
+        border-right: 5px solid green;
+    }
+    .red, .status-removed {
+        border-right: 5px solid red;
+    }
+    .orange, .status-changed {
+        border-right: 5px solid orange;
+    }
+    .status-added-removed {
+        border-right: 2px solid red;
+        .inner-version-entry {
+            border-right: 3px solid green;
+        }
+    }
+    .status-changed-removed {
+        border-right: 2px solid red;
+        .inner-version-entry {
+            border-right: 3px solid orange;
+        }
+    }
+
+    .depth-0 {
+        padding-left: 10px;
+    }
+    .depth-1 {
+        padding-left: 25px;
+    }
+    .depth-2 {
+        padding-left: 40px;
+    }
+    .depth-3 {
+        padding-left: 55px;
+    }
+    .depth-4 {
+        padding-left: 60px;
+    }
+    .depth-5 {
+        padding-left: 75px;
+    }
+    .depth-6 {
+        padding-left: 90px;
+    }
+    .depth-7 {
+        padding-left: 105px;
+    }
+    .depth-8 {
+        padding-left: 120px;
+    }
+
+    .search input[type=text] {
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+        width: 80%;
+    }
+
+    .differentResources-true {
+        .legend,
+        .hideUnchanged {
+            display: none;
+        }
+        .status {
+            border-right: none;
+            .inner-version-entry {
+                border-right: none;
+            }
+        }
+    }
+
+    section {
+        clear: both;
+        margin-bottom: 2.8em;
+    }
+
+    .color {
+        background-color: #FFF;
+    }
+    .color.empty {
+        background-color: lightgrey;
+    }
+    .color-ONLY_LEFT {
+        background-color: #FFBFCB;
+        &.empty {
+            background-color: lightgrey;
+        }
+    }
+    .color-ONLY_RIGHT {
+        background-color: #CBFFCA;
+        &.empty {
+            background-color: lightgrey;
+        }
+    }
+    .color-EQUAL {
+    }
+    .color-NOT_EQUAL {
+        background-color: #FDFFA9;
+    }
+
+    .legende {
+
+        margin-bottom: 16px;
+        cursor: pointer;
+        .definition {
+            .color {
+                width: 16px;
+                height: 16px;
+                border: 1px solid grey;
+            }
+            .color.second {
+                border-left: none;
+            }
+            display: block;
+            float: left;
+            padding-right: 12px;
+
+            .color,
+            .text {
+                display: block;
+                float: left;
+            }
+            .text {
+                padding-left: 4px;
+            }
+        }
+
+    }
+
+
+}

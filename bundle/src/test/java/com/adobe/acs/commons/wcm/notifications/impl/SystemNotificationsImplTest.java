@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,45 +14,41 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.notifications.impl;
 
-import com.day.cq.wcm.api.NameConstants;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.sling.api.SlingConstants;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.settings.SlingSettingsService;
-import org.apache.sling.testing.mock.osgi.MockEventAdmin;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
+import static org.apache.sling.jcr.resource.api.JcrResourceConstants.NT_SLING_ORDERED_FOLDER;
+import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.Assert.*;
-import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
-import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
-import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
-import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.http.Cookie;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.observation.ResourceChange;
+import org.apache.sling.api.resource.observation.ResourceChange.ChangeType;
+import org.apache.sling.api.resource.observation.ResourceChangeListener;
+import org.apache.sling.settings.SlingSettingsService;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
 
 public class SystemNotificationsImplTest {
 
@@ -72,40 +67,57 @@ public class SystemNotificationsImplTest {
         zeroHour.setTime(new Date(0));
     }
 
+    public <T> void assertNoSystemNotificationsImplService(Class<T> serviceClass) {
+        for (T service : aemContext.getServices(serviceClass, null)) {
+            if (service instanceof SystemNotificationsImpl) {
+                Assert.fail("Found unexpected service implementation SystemNotificationsImpl for type " + serviceClass);
+            }
+        }
+    }
+
+    public <T> void assertSystemNotificationsImplService(Class<T> serviceClass) {
+        for (T service : aemContext.getServices(serviceClass, null)) {
+            if (service instanceof SystemNotificationsImpl) {
+                return;
+            }
+        }
+        Assert.fail("Found no service implementation SystemNotificationsImpl for type " + serviceClass);
+    }
+
     @Test
     public void testOnPublish() {
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(0, aemContext.getServices(EventHandler.class, null).length);
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
     public void testOnAuthorNoNotifications() {
         setAuthorRunmode();
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(EventHandler.class, null).length);
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
     public void testOnAuthorEmptyNotificationsFolder() throws Exception {
         setAuthorRunmode();
-        aemContext.build().
-                resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE).
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
+        aemContext.build()
+                .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
         commit();
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(EventHandler.class, null).length);
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
 
-        aemContext.create().resource("/etc/acs-commons/notifications/first");
+        aemContext.create().resource("/etc/acs-commons/notifications/first", JCR_PRIMARYTYPE, NT_PAGE);
         commit();
         sendEvent();
-        assertEquals(1, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(Filter.class);
 
         notifications.deactivate(aemContext.componentContext());
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
-        assertEquals(0, aemContext.getServices(EventHandler.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
@@ -113,18 +125,41 @@ public class SystemNotificationsImplTest {
         setAuthorRunmode();
         createEnabledNotification();
         aemContext.registerInjectActivateService(notifications);
-        assertEquals(1, aemContext.getServices(EventHandler.class, null).length);
-        assertEquals(1, aemContext.getServices(Filter.class, null).length);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertSystemNotificationsImplService(Filter.class);
 
         // then remove the resource
         delete("/etc/acs-commons/notifications/enabled");
         commit();
         sendEvent();
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertNoSystemNotificationsImplService(Filter.class);
 
         notifications.deactivate(aemContext.componentContext());
-        assertEquals(0, aemContext.getServices(Filter.class, null).length);
-        assertEquals(0, aemContext.getServices(EventHandler.class, null).length);
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
+    }
+
+    @Test
+    public void testOnAuthorPopulatedNotificationsSubFolder() throws Exception  {
+        setAuthorRunmode();
+        aemContext.build()
+            .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+            .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
+
+        createEnabledNotification("/etc/acs-commons/notifications/subfolder/enabled");
+        aemContext.registerInjectActivateService(notifications);
+        assertSystemNotificationsImplService(ResourceChangeListener.class);
+        assertSystemNotificationsImplService(Filter.class);
+
+        // then remove the resource
+        delete("/etc/acs-commons/notifications/subfolder/enabled");
+        commit();
+        sendEvent();
+        assertNoSystemNotificationsImplService(Filter.class);
+
+        notifications.deactivate(aemContext.componentContext());
+        assertNoSystemNotificationsImplService(ResourceChangeListener.class);
+        assertNoSystemNotificationsImplService(Filter.class);
     }
 
     @Test
@@ -160,7 +195,7 @@ public class SystemNotificationsImplTest {
         aemContext.registerInjectActivateService(notifications);
 
         aemContext.request().setResource(aemContext.resourceResolver().getResource("/"));
-        aemContext.request().addCookie(new Cookie("acs-commons-system-notifications", "uid-" + DigestUtils.shaHex("/etc/acs-commons/notifications/enabled0")));
+        aemContext.request().addCookie(new Cookie("acs-commons-system-notifications", "uid-" + DigestUtils.sha1Hex("/etc/acs-commons/notifications/enabled0")));
 
         notifications.doFilter(aemContext.request(), aemContext.response(), outputChain);
         String output = aemContext.response().getOutputAsString();
@@ -186,29 +221,32 @@ public class SystemNotificationsImplTest {
     };
 
     private void createEnabledNotification() throws PersistenceException {
-        aemContext.build().
-                resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE).
-                siblingsMode().
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED).
-                hierarchyMode().
-                resource("enabled", JCR_PRIMARYTYPE, NT_PAGE).
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", true, "cq:lastModified", zeroHour);
+        createEnabledNotification("/etc/acs-commons/notifications/enabled");
+    }
+
+    private void createEnabledNotification(String path) throws PersistenceException {
+        aemContext.build()
+            .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+            .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED)
+            .withIntermediatePrimaryType(NT_SLING_ORDERED_FOLDER)
+            .resource(path, JCR_PRIMARYTYPE, NT_PAGE)
+            .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", true, "cq:lastModified", zeroHour);
         commit();
     }
 
     private void createDisabledNotification() throws PersistenceException {
-        aemContext.build().
-                resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE).
-                siblingsMode().
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED).
-                hierarchyMode().
-                resource("disabled", JCR_PRIMARYTYPE, NT_PAGE).
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", false, "cq:lastModified", zeroHour);
+        aemContext.build()
+                .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+                .siblingsMode()
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED)
+                .hierarchyMode()
+                .resource("disabled", JCR_PRIMARYTYPE, NT_PAGE)
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", false, "cq:lastModified", zeroHour);
         commit();
     }
 
     private void sendEvent() {
-        notifications.handleEvent(new Event("dummy", Collections.singletonMap(SlingConstants.PROPERTY_PATH, "/etc/acs-commons/notifications")));
+        notifications.onChange(Collections.singletonList(new ResourceChange(ChangeType.ADDED, "/etc/acs-commons/notifications", false, null, null, null)));
     }
 
     private void delete(String path) throws PersistenceException {

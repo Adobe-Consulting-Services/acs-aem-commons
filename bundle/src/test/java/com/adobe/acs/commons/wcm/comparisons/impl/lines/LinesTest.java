@@ -1,43 +1,40 @@
 /*
+ * ACS AEM Commons
  *
- *  * #%L
- *  * ACS AEM Commons Bundle
- *  * %%
- *  * Copyright (C) 2016 Adobe
- *  * %%
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *  * #L%
+ * Copyright (C) 2013 - 2023 Adobe
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.jetbrains.annotations.Nullable;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LinesTest {
@@ -205,8 +202,8 @@ public class LinesTest {
         return new TypeSafeMatcher<Line<String>>() {
             @Override
             protected boolean matchesSafely(Line<String> stringLine) {
-                return left.equals(Optional.fromNullable(stringLine.getLeft())) &&
-                        right.equals(Optional.fromNullable(stringLine.getRight()));
+                return left.equals(Optional.fromNullable(stringLine.getLeft()))
+                        && right.equals(Optional.fromNullable(stringLine.getRight()));
             }
 
             @Override

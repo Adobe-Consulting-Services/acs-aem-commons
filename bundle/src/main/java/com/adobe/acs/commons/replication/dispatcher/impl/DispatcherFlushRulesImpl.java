@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushRules;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.AgentManager;
@@ -40,6 +39,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -72,7 +72,7 @@ import java.util.regex.Pattern;
                 name = "webconsole.configurationFactory.nameHint",
                 value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
 })
-public class DispatcherFlushRulesImpl implements Preprocessor {
+public class DispatcherFlushRulesImpl implements Preprocessor, DispatcherFlushRules {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
     private static final String OPTION_INHERIT = "INHERIT";
@@ -128,7 +128,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @Reference
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private DispatcherFlusher dispatcherFlusher;
 
     @Reference
@@ -159,10 +159,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         final ReplicationActionType flushActionType =
                 replicationActionType == null ? replicationAction.getType() : replicationActionType;
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             // Flush full content hierarchies
             for (final Map.Entry<Pattern, String[]> entry : this.hierarchicalFlushRules.entrySet()) {
@@ -199,12 +196,11 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 }
             }
 
+        } catch (ReplicationException e) {
+            // ReplicationException must be caught here, as otherwise this will prevent the replication at all
+            log.error("Error issuing dispatcher flush rules, some downstream replication exception occurred: {}", e.getMessage(), e);
         } catch (LoginException e) {
-            log.error("Error issuing  dispatcher flush rules do to repository login exception: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
+            log.error("Error issuing dispatcher flush rules due to a repository login exception: {}", e.getMessage(), e);
         }
     }
 
@@ -257,14 +253,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
                         DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
-        log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
+        log.debug("Hierarchical flush rules: {}", this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
         this.resourceOnlyFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
                         DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 
-        log.debug("ResourceOnly flush rules: " + this.resourceOnlyFlushRules);
+        log.debug("ResourceOnly flush rules: {}", this.resourceOnlyFlushRules);
     }
 
     /**
@@ -299,7 +295,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             log.debug("Using replication action type: {}", repActionType.name());
             return repActionType;
         } catch (IllegalArgumentException ex) {
-            log.debug("Using replication action type: {}", OPTION_INHERIT);
+            log.warn("Illegal action type configured: {}. Falling back to default: {}", replicationActionTypeName, OPTION_INHERIT);
             return null;
         }
     }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
@@ -31,11 +30,13 @@ import org.apache.sling.settings.SlingSettingsService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,11 +47,11 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -105,7 +106,7 @@ public class HealthCheckStatusEmailerTest {
         when(failureExecutionResult.getHealthCheckResult()).thenReturn(failureResult);
 
         results = new ArrayList<>();
-        when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), any(String[].class))).thenReturn(results);
+        when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), ArgumentMatchers.<String>any())).thenReturn(results);
 
         when(productInfoService.getInfos()).thenReturn(new ProductInfo[]{mock(ProductInfo.class)});
         Set<String> runModes = new HashSet<String>();
@@ -121,7 +122,7 @@ public class HealthCheckStatusEmailerTest {
         healthCheckStatusEmailer.activate(config);
 
         healthCheckStatusEmailer.run();
-        verifyZeroInteractions(emailService);
+        verifyNoInteractions(emailService);
     }
 
     @Test
@@ -133,7 +134,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -145,7 +146,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -157,7 +158,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -176,7 +177,7 @@ public class HealthCheckStatusEmailerTest {
     }
 
     @Test
-    public void throttledExecution() {
+    public void throttledExecution() throws IllegalAccessException {
         results.add(failureExecutionResult);
 
         config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, true);
@@ -184,13 +185,19 @@ public class HealthCheckStatusEmailerTest {
         config.put(HealthCheckStatusEmailer.PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE, 100000);
         healthCheckStatusEmailer.activate(config);
 
+        Calendar minuteAgo = Calendar.getInstance();
+        // Make sure enough time has "ellapsed" so that the call to send email does something
+        minuteAgo.add(Calendar.MINUTE, -1);
+        minuteAgo.add(Calendar.SECOND, -1);
+        FieldUtils.writeField(healthCheckStatusEmailer, "nextEmailTime",  minuteAgo, true);
+
         // Send the first time
         healthCheckStatusEmailer.run();
         // Get throttled the 2nd time
         healthCheckStatusEmailer.run();
 
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 }
 

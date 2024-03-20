@@ -1,10 +1,24 @@
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.doAnswer;
-import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +40,6 @@ import org.apache.jackrabbit.value.BinaryImpl;
 import org.apache.sling.commons.testing.jcr.MockNodeIterator;
 import org.apache.sling.commons.testing.jcr.MockProperty;
 import org.apache.sling.commons.testing.jcr.MockPropertyIterator;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -36,7 +49,7 @@ public class RootNodeMockFactory
 {
     public static final String ROOT_PATH = "/etc/acs-commons/httpcache/root";
 
-    private static final String TEST_FILE_PATH = "com.adobe.acs.commons.httpcache.store.jcr.impl.visitor/cachecontent.html";
+    private static final String TEST_FILE_PATH = "cachecontent.html";
 
     private final Settings settings;
 
@@ -45,11 +58,11 @@ public class RootNodeMockFactory
     public RootNodeMockFactory(final Settings settings){
         this.settings = settings;
     }
+
     public Node build() throws RepositoryException, IOException
     {
         final Node rootNode = mockStandardNode("rootnode");
 
-        when(rootNode.getPath()).thenReturn(ROOT_PATH);
         Node[] bucketNodeChain = generateBucketNodeChain(rootNode, false);
 
         Node parentNode = bucketNodeChain[bucketNodeChain.length - 1];
@@ -83,7 +96,6 @@ public class RootNodeMockFactory
             when(node.getParent()).thenReturn(currentParentNode);
             when(node.getProperties()).thenReturn(new MockPropertyIterator(IteratorUtils.EMPTY_ITERATOR));
             when(node.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE)).thenReturn(false);
-            when(node.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE)).thenReturn(true);
 
             currentParentNode = node;
         }
@@ -93,15 +105,6 @@ public class RootNodeMockFactory
                 final Node node = bucketNodeChain[i];
                 final Node childNode = bucketNodeChain[i];
                 final AtomicInteger deleteCounter = new AtomicInteger();
-
-                doAnswer(new Answer<Object>()
-                {
-                    @Override public Object answer(InvocationOnMock invocationOnMock) throws Throwable
-                    {
-                        deleteCounter.getAndIncrement();
-                        return null;
-                    }
-                }).when(node).remove();
 
                 when(node.getParent().getNodes()).thenAnswer(new Answer<NodeIterator>(){
                     @Override public NodeIterator answer(InvocationOnMock invocationOnMock) throws Throwable
@@ -151,11 +154,6 @@ public class RootNodeMockFactory
         }
 
         when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_ISCACHEENTRYNODE)).thenReturn(true);
-        when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_ISBUCKETNODE)).thenReturn(false);
-        when(entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)).thenReturn(true);
-        when(entryNode.getNodes()).thenReturn(new MockNodeIterator());
-        when(entryNode.getProperties()).thenReturn(new MockPropertyIterator(IteratorUtils.EMPTY_ITERATOR));
-        when(entryNode.getParent()).thenReturn(parentNode);
 
         final MockProperty expiresMockProperty = new MockProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON);
 
@@ -170,7 +168,6 @@ public class RootNodeMockFactory
         calendar.add(Calendar.SECOND,  seconds);
         expiresMockProperty.setValue(calendar);
 
-        when(entryNode.getProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)).thenReturn(expiresMockProperty);
         return entryNode;
     }
 
@@ -180,7 +177,7 @@ public class RootNodeMockFactory
         final Node jcrContentNode = mock(Node.class);
         final Property dataProperty = mock(Property.class);
 
-        InputStream cacheTestStream = getClass().getClassLoader().getResourceAsStream(TEST_FILE_PATH);
+        InputStream cacheTestStream = getClass().getResourceAsStream(TEST_FILE_PATH);
 
         final Binary binary = new BinaryImpl(cacheTestStream);
 
@@ -198,17 +195,7 @@ public class RootNodeMockFactory
     {
         final Node node = mock(AbstractNode.class);
         when(node.getSession()).thenReturn(session);
-        when(node.toString()).thenReturn(name);
-        when(node.getName()).thenReturn(name);
         doCallRealMethod().when(node).accept(any(ItemVisitor.class));
-
-        when(node.hasNodes()).thenAnswer(new Answer<Boolean>()
-        {
-            @Override public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable
-            {
-                return node.getNodes().getSize() > 0;
-            }
-        });
 
         return node;
     }

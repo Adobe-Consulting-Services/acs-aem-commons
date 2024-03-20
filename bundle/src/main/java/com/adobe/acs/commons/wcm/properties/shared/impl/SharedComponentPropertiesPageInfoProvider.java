@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageInfoProvider;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
@@ -35,9 +34,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.slf4j.Logger;
@@ -85,6 +81,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
     @Reference
     private SlingRepository repository;
 
+    @SuppressWarnings("AEM Rules:AEM-3") // used for observation
     private Session respositorySession;
 
     private ObservationManager observationManager;
@@ -98,31 +95,33 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * can determine whether or not to enable shared/global properties for a component on a site.
      */
     @Override
-    public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
-            throws JSONException {
+    @SuppressWarnings( "deprecation" )
+    public void updatePageInfo(SlingHttpServletRequest request, org.apache.sling.commons.json.JSONObject info, Resource resource)
+            throws org.apache.sling.commons.json.JSONException {
         if (scheduledSharedComponentsMapUpdate > 0 && System.currentTimeMillis() > scheduledSharedComponentsMapUpdate) {
             scheduledSharedComponentsMapUpdate = -1L;
             updateSharedComponentsMap();
         }
 
-        JSONObject props = new JSONObject();
+        org.apache.sling.commons.json.JSONObject props = new org.apache.sling.commons.json.JSONObject();
         props.put("enabled", false);
 
-        Page page = pageRootProvider.getRootPage(resource);
-        if (page != null) {
+        String rootPagePath = pageRootProvider.getRootPagePath(resource.getPath());
+        if (StringUtils.isNotBlank(rootPagePath)) {
             Session session = request.getResourceResolver().adaptTo(Session.class);
             try {
+                String rootPageContentPath = rootPagePath + "/jcr:content";
                 AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
                 Privilege privilegeAddChild = accessControlManager.privilegeFromName("jcr:addChildNodes");
                 Privilege privilegeModifyProps = accessControlManager.privilegeFromName("jcr:modifyProperties");
                 Privilege[] requiredPrivs = new Privilege[]{privilegeAddChild, privilegeModifyProps};
 
-                if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
+                if (accessControlManager.hasPrivileges(rootPageContentPath, requiredPrivs)) {
                     props.put("enabled", true);
-                    props.put("root", page.getPath());
-                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) JSONArray::new));
+                    props.put("root", rootPagePath);
+                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) org.apache.sling.commons.json.JSONArray::new));
                 } else {
-                    log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, page.getPath() + "/jcr:content");
+                    log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, rootPageContentPath);
                 }
             } catch (RepositoryException e) {
                 log.error("Unexpected error checking permissions to modify shared component properties", e);
@@ -185,12 +184,10 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * options for editing shared/global configs.
      */
     private void updateSharedComponentsMap() {
-        ResourceResolver resourceResolver = null;
-        try {
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)){
             log.debug("Calculating map of components with shared properties dialogs");
 
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
             resourceResolver.refresh();
             ComponentManager componentManager = resourceResolver.adaptTo(ComponentManager.class);
             Map<String, List<Boolean>> localComponentsWithSharedProperties = new HashMap<>();
@@ -213,10 +210,6 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
             log.error("Unable to log into service user to determine list of components with shared properties dialogs", e);
         } catch (RepositoryException e) {
             log.error("Unexpected error attempting to determine list of components with shared properties dialogs", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

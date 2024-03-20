@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic.impl;
@@ -26,17 +24,17 @@ import java.util.Map;
 
 public class SyntheticWorkflowStepImpl implements com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep {
     private final String id;
-    public Map<String, Object> metadataMap;
-    public SyntheticWorkflowRunner.WorkflowProcessIdType idType;
+    private final Map<String, Object> metadataMap;
+    private final SyntheticWorkflowRunner.WorkflowProcessIdType idType;
 
 
-    public SyntheticWorkflowStepImpl(String id, Map<String, Object> metadataMap) {
+    SyntheticWorkflowStepImpl(String id, Map<String, Object> metadataMap) {
         this.idType = SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_NAME;
         this.id = id;
         this.metadataMap = metadataMap;
     }
 
-    public SyntheticWorkflowStepImpl(String id, SyntheticWorkflowRunner.WorkflowProcessIdType type, Map<String, Object> metadataMap) {
+    SyntheticWorkflowStepImpl(String id, SyntheticWorkflowRunner.WorkflowProcessIdType type, Map<String, Object> metadataMap) {
         this.idType = type;
         this.id = id;
         this.metadataMap = metadataMap;

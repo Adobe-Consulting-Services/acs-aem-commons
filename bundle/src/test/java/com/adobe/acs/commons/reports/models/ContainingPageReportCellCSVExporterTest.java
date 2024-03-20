@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.reports.models;
 
@@ -36,58 +34,58 @@ import com.day.cq.wcm.api.PageManager;
 
 public class ContainingPageReportCellCSVExporterTest {
 
-	private static final Logger log = LoggerFactory.getLogger(ContainingPageReportCellCSVExporterTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ContainingPageReportCellCSVExporterTest.class);
 
-	@Mock
-	private Resource validResource;
-	@Mock
-	private Resource invalidResource;
+    @Mock
+    private Resource validResource;
+    @Mock
+    private Resource invalidResource;
 
-	@Mock
-	private PageManager pageManager;
+    @Mock
+    private PageManager pageManager;
 
-	@Mock
-	private ResourceResolver resolver;
+    @Mock
+    private ResourceResolver resolver;
 
-	@Mock
-	private Page page;
+    @Mock
+    private Page page;
 
-	private final String VALID_PATH = "/content/test";
+    private static final String VALID_PATH = "/content/test";
 
-	@Before
-	public void init() {
-		log.info("init");
+    @Before
+    public void init() {
+        log.info("init");
 
-		MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.initMocks(this);
 
-		when(validResource.getResourceResolver()).thenReturn(resolver);
-		when(invalidResource.getResourceResolver()).thenReturn(resolver);
-		when(resolver.adaptTo(PageManager.class)).thenReturn(pageManager);
-		when(pageManager.getContainingPage(validResource)).thenReturn(page);
-		when(page.getPath()).thenReturn(VALID_PATH);
+        when(validResource.getResourceResolver()).thenReturn(resolver);
+        when(invalidResource.getResourceResolver()).thenReturn(resolver);
+        when(resolver.adaptTo(PageManager.class)).thenReturn(pageManager);
+        when(pageManager.getContainingPage(validResource)).thenReturn(page);
+        when(page.getPath()).thenReturn(VALID_PATH);
 
-	}
+    }
 
-	@Test
-	public void testExporter() {
-		log.info("testExporter");
+    @Test
+    public void testExporter() {
+        log.info("testExporter");
 
-		ContainingPageReportCellCSVExporter valid = new ContainingPageReportCellCSVExporter();
-		String value = valid.getValue(validResource);
-		assertEquals(VALID_PATH, value);
+        ContainingPageReportCellCSVExporter valid = new ContainingPageReportCellCSVExporter();
+        String value = valid.getValue(validResource);
+        assertEquals(VALID_PATH, value);
 
-		log.info("Test successful!");
-	}
+        log.info("Test successful!");
+    }
 
-	@Test
-	public void testInvalidPage() {
-		log.info("testInvalidPage");
+    @Test
+    public void testInvalidPage() {
+        log.info("testInvalidPage");
 
-		ContainingPageReportCellCSVExporter invalid = new ContainingPageReportCellCSVExporter();
-		String value = invalid.getValue(invalidResource);
-		assertEquals("", value);
+        ContainingPageReportCellCSVExporter invalid = new ContainingPageReportCellCSVExporter();
+        String value = invalid.getValue(invalidResource);
+        assertEquals("", value);
 
-		log.info("Test successful!");
-	}
+        log.info("Test successful!");
+    }
 
 }

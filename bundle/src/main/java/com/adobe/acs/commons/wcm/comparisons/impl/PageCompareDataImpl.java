@@ -1,23 +1,19 @@
 /*
+ * ACS AEM Commons
  *
- *  * #%L
- *  * ACS AEM Commons Bundle
- *  * %%
- *  * Copyright (C) 2016 Adobe
- *  * %%
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *  * #L%
+ * Copyright (C) 2013 - 2023 Adobe
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
@@ -43,6 +39,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 class PageCompareDataImpl implements PageCompareData {
 
@@ -103,7 +100,9 @@ class PageCompareDataImpl implements PageCompareData {
 
     @Override
     public Date getVersionDate() {
-        return versionDate;
+        return Optional.ofNullable(versionDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     @Override
@@ -113,25 +112,26 @@ class PageCompareDataImpl implements PageCompareData {
 
     @Override
     public List<VersionSelection> getVersions() {
-        return versionSelection;
+        return Collections.unmodifiableList(versionSelection);
     }
 
     @Override
     public List<PageCompareDataLine> getLines() {
-        return lines;
+        return Collections.unmodifiableList(lines);
     }
 
-    private void populate(Resource resource, String basePath, int depth) throws RepositoryException {
-        ValueMap map = resource.getValueMap();
-        List<String> keys = new ArrayList<String>(map.keySet());
+    private void populate(final Resource resource, final String basePath, final int depth) throws RepositoryException {
+        final ValueMap map = resource.getValueMap();
+        final List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
-        for (String key : keys) {
-            Property property = resource.adaptTo(Node.class).getProperty(key);
+        for (final String key : keys) {
+            final Property property = resource.adaptTo(Node.class).getProperty(key);
             lines.add(new PageCompareDataLineImpl(property, basePath, depth + 1));
         }
-        Iterator<Resource> iter = resource.getChildren().iterator();
+
+        final Iterator<Resource> iter = resource.getChildren().iterator();
         while (iter.hasNext()) {
-            Resource child = iter.next();
+            final Resource child = iter.next();
             lines.add(new PageCompareDataLineImpl(child, basePath, depth + 1));
             populate(child, basePath, depth + 1);
         }

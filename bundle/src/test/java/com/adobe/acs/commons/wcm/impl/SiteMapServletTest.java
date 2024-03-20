@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.impl;
 
@@ -27,10 +25,10 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,11 +39,13 @@ import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;
 import static org.xmlunit.matchers.EvaluateXPathMatcher.hasXPath;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SiteMapServletTest {
 
     private static final Map<String, String> NS = Collections.singletonMap("ns", "http://www.sitemaps.org/schemas/sitemap/0.9");
 
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+    
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -72,14 +72,15 @@ public class SiteMapServletTest {
 
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en"));
 
-        when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgumentAt(2, String.class));
+        when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgument(2));
     }
 
     @Test
     public void testDefaultPageSetup() throws Exception {
         servlet.activate(new HashMap<String, Object>() {{
-            put("externalizer.domain", "external");
-        }});
+                put("externalizer.domain", "external");
+            }
+        });
 
         servlet.doGet(request, response);
 
@@ -93,9 +94,10 @@ public class SiteMapServletTest {
     @Test
     public void testExtensionlessPages() throws Exception {
         servlet.activate(new HashMap<String, Object>() {{
-            put("externalizer.domain", "external");
-            put("extensionless.urls", true);
-        }});
+                put("externalizer.domain", "external");
+                put("extensionless.urls", true);
+            }
+        });
 
         servlet.doGet(request, response);
 
@@ -109,10 +111,11 @@ public class SiteMapServletTest {
     @Test
     public void testExtensionlessAndSlashlessPages() throws Exception {
         servlet.activate(new HashMap<String, Object>() {{
-            put("externalizer.domain", "external");
-            put("extensionless.urls", true);
-            put("remove.slash", true);
-        }});
+                put("externalizer.domain", "external");
+                put("extensionless.urls", true);
+                put("remove.slash", true);
+            }
+        });
 
         servlet.doGet(request, response);
 

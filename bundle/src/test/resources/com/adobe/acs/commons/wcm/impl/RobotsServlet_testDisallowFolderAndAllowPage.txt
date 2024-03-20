@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /content/geometrixx/en/allow-page-but-disallow-folder.html
+Disallow: /content/geometrixx/en/allow-page-but-disallow-folder/
+Sitemap: https://www.geometrixx.com/content/geometrixx/en.sitemap.xml

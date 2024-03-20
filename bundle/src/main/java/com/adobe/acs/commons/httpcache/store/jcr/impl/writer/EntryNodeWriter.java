@@ -1,3 +1,20 @@
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
@@ -6,7 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Calendar;
+import java.time.Clock;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,20 +43,20 @@ import com.day.cq.commons.jcr.JcrConstants;
 public class EntryNodeWriter
 {
 
-
     private final Session session;
     private final Node entryNode;
     private final CacheKey cacheKey;
     private final CacheContent cacheContent;
-    private final int expireTimeInSeconds;
+    private final long expireTimeInMilliSeconds;
+    private final Clock clock;
 
-    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent,
-            Integer expireTimeInSeconds){
+    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent, long expireTimeInMilliSeconds, Clock clock){
         this.session = session;
         this.entryNode = entryNode;
         this.cacheKey = cacheKey;
         this.cacheContent = cacheContent;
-        this.expireTimeInSeconds = expireTimeInSeconds;
+        this.expireTimeInMilliSeconds = expireTimeInMilliSeconds;
+        this.clock = clock;
     }
 
     /**
@@ -55,7 +72,7 @@ public class EntryNodeWriter
         populateBinaryContent();
 
         //if we the expire time is set, set it on the node
-        if(expireTimeInSeconds > 0){
+        if(expireTimeInMilliSeconds > 0) {
             setExpireTime();
         }
 
@@ -66,9 +83,7 @@ public class EntryNodeWriter
 
     private void setExpireTime() throws RepositoryException
     {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, expireTimeInSeconds);
-        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  calendar );
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  expireTimeInMilliSeconds + clock.instant().toEpochMilli() );
     }
 
     private void populateMetaData() throws RepositoryException
@@ -76,6 +91,7 @@ public class EntryNodeWriter
         entryNode.setProperty(JCRHttpCacheStoreConstants.PN_STATUS, cacheContent.getStatus());
         entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CHAR_ENCODING, cacheContent.getCharEncoding());
         entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CONTENT_TYPE, cacheContent.getContentType());
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_WRITEMETHOD, cacheContent.getWriteMethod().name());
     }
 
     /**
@@ -84,10 +100,9 @@ public class EntryNodeWriter
      */
     private void populateBinaryContent() throws RepositoryException
     {
-        final Node contents = JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
+        final Node contents = getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, JcrConstants.NT_FILE, JcrConstants.NT_FILE);
 
-
-        final Node jcrContent = JcrUtils.getOrCreateByPath(contents, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false);
+        final Node jcrContent = getOrCreateByPath(contents, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE);
         //save input stream to node
         final Binary binary = session.getValueFactory().createBinary(cacheContent.getInputDataStream());
         jcrContent.setProperty(JcrConstants.JCR_DATA, binary);
@@ -100,7 +115,7 @@ public class EntryNodeWriter
      */
     private void populateHeaders() throws RepositoryException
     {
-        final Node headers = JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false);
+        final Node headers = getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED);
 
         for(Iterator<Map.Entry<String, List<String>>> entryIterator = cacheContent.getHeaders().entrySet().iterator(); entryIterator.hasNext();){
             Map.Entry<String, List<String>> entry = entryIterator.next();
@@ -108,6 +123,16 @@ public class EntryNodeWriter
             final List<String> values = entry.getValue();
             headers.setProperty(key, values.toArray(new String[values.size()]));
         }
+    }
+
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected Node getOrCreateByPath(
+            final Node baseNode,
+            final String path,
+            final String intermediateNodeType,
+            final String nodeType) throws RepositoryException {
+        return JcrUtils.getOrCreateByPath(baseNode, path, false, intermediateNodeType, nodeType, false);
     }
 
     private void populateCacheKey() throws RepositoryException, IOException

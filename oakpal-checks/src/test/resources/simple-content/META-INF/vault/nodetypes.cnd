@@ -1,0 +1,7 @@
+<'sling'='http://sling.apache.org/jcr/sling/1.0'>
+
+[sling:Folder] > nt:folder
+  - * (undefined)
+  - * (undefined) multiple
+  + * (nt:base) = sling:Folder version
+

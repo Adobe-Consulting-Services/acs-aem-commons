@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.reports.models;
 
 import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
-import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.internal.ReportExecutorProvider;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,34 +53,42 @@ public class ReportRunner {
 
   private boolean succeeded = true;
 
+  @OSGiService
+  private DynamicClassLoaderManager dynamicClassLoaderManager;
+
   public ReportRunner(SlingHttpServletRequest request) {
     this.request = request;
   }
 
+  /**
+   * Used only for testing.
+   * @param request the request this model should adapt from.
+   * @param dynamicClassLoaderManager the dynamic class loader to resolve the parameter ReportRunner.
+   */
+  ReportRunner(SlingHttpServletRequest request, DynamicClassLoaderManager dynamicClassLoaderManager) {
+    this(request);
+    this.dynamicClassLoaderManager = dynamicClassLoaderManager;
+  }
+
+  @SuppressWarnings("squid:S2658") // class name is from a trusted source
   private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
     log.trace("executeConfig");
-    String reportExecutorClass = config.getValueMap().get(PN_EXECUTOR, String.class);
-    if (StringUtils.isNotBlank(reportExecutorClass)) {
-      log.debug("Loading class for: {}", reportExecutorClass);
-      try {
-        Class<?> exClass = getClass().getClassLoader().loadClass(reportExecutorClass);
-        Object model = request.adaptTo(exClass);
-        if (model instanceof ReportExecutor) {
-          ReportExecutor ex = (ReportExecutor) model;
-          ex.setConfiguration(config);
-          ex.setPage(this.page);
-          this.reportExecutor = ex;
-          return true;
-        } else {
-          log.warn("Class {} is not an instance of ReportExecutor", reportExecutor);
-        }
-      } catch (ClassNotFoundException e) {
-        log.warn("Unable to find class for " + reportExecutor, e);
-      } catch (Exception e) {
-        log.warn("Unexpected exception executing report executor " + reportExecutor, e);
+    try {
+      Class<?> exClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
+      Object model = request.adaptTo(exClass);
+      if (model instanceof ReportExecutor) {
+        ReportExecutor ex = (ReportExecutor) model;
+        ex.setConfiguration(config);
+        ex.setPage(this.page);
+        this.reportExecutor = ex;
+        return true;
+      } else {
+        log.warn("Class {} is not an instance of ReportExecutor", reportExecutor);
       }
-    } else {
-      log.warn("No executor found for {}", config);
+    } catch (ReportException e) {
+      log.warn(e.getMessage(), e);
+    } catch (Exception e) {
+      log.warn("Unexpected exception executing report executor " + reportExecutor, e);
     }
     return false;
   }
@@ -99,7 +107,7 @@ public class ReportRunner {
   }
 
   @PostConstruct
-  protected void init() throws RepositoryException {
+  protected void init() {
     log.trace("init");
 
     try {

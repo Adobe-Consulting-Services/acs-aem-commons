@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.http.impl;
 
@@ -25,7 +23,7 @@ import static org.mockserver.model.HttpRequest.*;
 import static org.mockserver.model.HttpResponse.*;
 
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
-import junitx.util.PrivateAccessor;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.fluent.Executor;
@@ -34,15 +32,15 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
-import org.apache.sling.commons.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class HttpClientFactoryImplTest {
 
@@ -51,23 +49,15 @@ public class HttpClientFactoryImplTest {
 
     private MockServerClient mockServerClient;
 
-    private HttpClientFactoryImpl impl;
-
-    private Map<String, Object> config;
-
     private String username;
 
     private String password;
 
     @Before
     public void setup() throws Exception {
-        config = new HashMap<String, Object>();
         username = RandomStringUtils.randomAlphabetic(5);
         password = RandomStringUtils.randomAlphabetic(6);
-        String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
-
-        config.put("hostname", "localhost");
-        config.put("port", mockServerRule.getPort().intValue());
+        final String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
 
         mockServerClient.when(
                 request().withMethod("GET").withPath("/anon")
@@ -80,13 +70,21 @@ public class HttpClientFactoryImplTest {
                 response().withStatusCode(200).withBody("{ 'foo' : 'bar' }")
         );
         mockServerClient.when(
-                request().withMethod("GET").withPath("/auth").
-                        withHeader("Authorization", "Basic " + authHeaderValue)
+                request().withMethod("GET").withPath("/auth")
+                        .withHeader("Authorization", "Basic " + authHeaderValue)
         ).respond(
                 response().withStatusCode(200).withBody("OK")
         );
-        impl = new HttpClientFactoryImpl();
-        PrivateAccessor.setField(impl, "httpClientBuilderFactory", new HttpClientBuilderFactory() {
+    }
+
+    protected HttpClientFactoryImpl createFactory() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        return createFactory(false, null, null);
+    }
+
+    protected HttpClientFactoryImpl createFactory(boolean isDisabledCertCheck, String username, String password) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        return new HttpClientFactoryImpl(false, "localhost", mockServerRule.getPort().intValue(),
+                30000, 30000, isDisabledCertCheck, username, password,
+                new HttpClientBuilderFactory() {
             @Override
             public HttpClientBuilder newBuilder() {
                 return HttpClients.custom();
@@ -96,8 +94,7 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testAnonymousGet() throws Exception {
-        impl.activate(config);
-
+        HttpClientFactoryImpl impl = createFactory();
         Request get = impl.get("/anon");
         Executor exec = impl.getExecutor();
         String str = exec.execute(get).handleResponse(new BasicResponseHandler());
@@ -106,20 +103,17 @@ public class HttpClientFactoryImplTest {
 
     @Test
     public void testJsonGet() throws Exception {
-        impl.activate(config);
-
+        HttpClientFactoryImpl impl = createFactory();
         Request get = impl.get("/anonJson");
         Executor exec = impl.getExecutor();
-        JSONObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler());
+        JsonObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler()).getAsJsonObject();
         assertThat(jsonObject.has("foo"), is(true));
-        assertThat(jsonObject.getString("foo"), is("bar"));
+        assertThat(jsonObject.get("foo").getAsString(), is("bar"));
     }
 
     @Test
     public void testAuthenticatedGet() throws Exception {
-        config.put("username", username);
-        config.put("password", password);
-        impl.activate(config);
+        HttpClientFactoryImpl impl = createFactory(false, username, password);
 
         Request get = impl.get("/auth");
         Executor exec = impl.getExecutor();
@@ -131,9 +125,7 @@ public class HttpClientFactoryImplTest {
     public void testDisableSSLCertCheck() throws Exception {
         // this test doesn't actually test anything, but at least ensures that the SSL
         // initialization code doesn't throw exceptions
-        config.put("use.ssl", true);
-        config.put("disable.certificate.check", true);
-        impl.activate(config);
+        HttpClientFactoryImpl impl = createFactory(false, null, null);
     }
 
 }

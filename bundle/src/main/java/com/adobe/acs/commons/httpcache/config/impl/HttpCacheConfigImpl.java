@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
@@ -28,6 +26,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
+import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -49,11 +48,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Concrete implementation of cache config for http cache. Modelled as OSGi config factory.
@@ -77,37 +79,37 @@ import java.util.regex.Pattern;
 @Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
-    private static final String FILTER_SCOPE_REQUEST = "REQUEST";
-    private static final String FILTER_SCOPE_INCLUDE = "INCLUDE";
+    static final String FILTER_SCOPE_REQUEST = "REQUEST";
+    static final String FILTER_SCOPE_INCLUDE = "INCLUDE";
 
     // Order
-    public static final int DEFAULT_ORDER = 1000;
+    static final int DEFAULT_ORDER = 1000;
     private int order = DEFAULT_ORDER;
     @Property(label = "Priority order",
             description = "Order in which the HttpCacheEngine should evaluate the HttpCacheConfigs against the "
                     + "request. Evaluates smallest to largest (Integer.MIN_VALUE -> Integer.MAX_VALUE). Defaults to "
                     + "1000 ",
             intValue = DEFAULT_ORDER)
-    public static final String PROP_ORDER = "httpcache.config.order";
+    static final String PROP_ORDER = "httpcache.config.order";
 
     // Request URIs - Whitelisted.
     @Property(label = "Request URI patterns",
               description = "Request URI patterns (REGEX) to be cached. Example - /content/mysite(.*).product-data"
                       + ".json. Mandatory parameter.",
               cardinality = Integer.MAX_VALUE)
-    private static final String PROP_REQUEST_URI_PATTERNS = "httpcache.config.requesturi.patterns";
+    static final String PROP_REQUEST_URI_PATTERNS = "httpcache.config.requesturi.patterns";
     private List<String> requestUriPatterns;
-    private List<Pattern> requestUriPatternsAsRegEx;
+    private List<Pattern> requestUriPatternsAsRegEx = Collections.emptyList();
 
     // Request URIs - Blacklisted.
     @Property(label = "Blacklisted request URI patterns",
               description = "Blacklisted request URI patterns (REGEX). Evaluated post applying the above request uri "
                       + "patterns (httpcache.config.requesturi.patterns). Optional parameter.",
               cardinality = Integer.MAX_VALUE)
-    private static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS =
+    static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS =
             "httpcache.config.requesturi.patterns.blacklisted";
     private List<String> blacklistedRequestUriPatterns;
-    private List<Pattern> blacklistedRequestUriPatternsAsRegEx;
+    private List<Pattern> blacklistedRequestUriPatternsAsRegEx = Collections.emptyList();
 
     // Authentication requirement
     // @formatter:off
@@ -123,8 +125,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               },
               value = AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST)
     // @formatter:on
-    private static final String PROP_AUTHENTICATION_REQUIREMENT = "httpcache.config.request.authentication";
-    private static final String DEFAULT_AUTHENTICATION_REQUIREMENT = AuthenticationStatusConfigConstants
+    static final String PROP_AUTHENTICATION_REQUIREMENT = "httpcache.config.request.authentication";
+    static final String DEFAULT_AUTHENTICATION_REQUIREMENT = AuthenticationStatusConfigConstants
             .ANONYMOUS_REQUEST;
     private String authenticationRequirement;
 
@@ -133,35 +135,39 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               description = "Optional set of paths in JCR (Oak) repository for which this cache has to be invalidated"
                       + ". This accepts " + "REGEX. Example - /etc/my-products(.*)",
               cardinality = Integer.MAX_VALUE)
-    private static final String PROP_CACHE_INVALIDATION_PATH_PATTERNS = "httpcache.config.invalidation.oak.paths";
+    static final String PROP_CACHE_INVALIDATION_PATH_PATTERNS = "httpcache.config.invalidation.oak.paths";
     private List<String> cacheInvalidationPathPatterns;
-    private List<Pattern> cacheInvalidationPathPatternsAsRegEx;
+    private List<Pattern> cacheInvalidationPathPatternsAsRegEx = Collections.emptyList();
 
     // Cache store
     // @formatter:off
     @Property(label = "Cache store",
               description = "Cache store for caching the response for this request URI. Example - MEM. This should "
                       + "be one of the cache stores active in this installation. Mandatory parameter.",
-              propertyPrivate = false,
               options = {
-                      @PropertyOption(name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
-                                         value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
-                      // Only MEM and JCR implementations are available now.
-                      //@PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
-                      //                value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
-                      @PropertyOption(name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
-                                      value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)
+                      @PropertyOption(
+                              name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
+                              value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE
+                      ),
+                      @PropertyOption(
+                              name = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,
+                              value = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE
+                      ),
+                      @PropertyOption(
+                              name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+                              value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE
+                      )
               },
             value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE)
     // @formatter:on
-    private static final String PROP_CACHE_STORE = "httpcache.config.cachestore";
-    private static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
+    static final String PROP_CACHE_STORE = "httpcache.config.cachestore";
+    static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
     private String cacheStore;
 
 
     // Cache store
     // @formatter:off
-    private static final String DEFAULT_FILTER_SCOPE = FILTER_SCOPE_REQUEST; // Defaults to REQUEST scope
+    static final String DEFAULT_FILTER_SCOPE = FILTER_SCOPE_REQUEST; // Defaults to REQUEST scope
     @Property(label = "Filter scope",
             description = "Specify the scope of this HttpCacheConfig in the scope of the Sling Servlet Filter processing chain.",
             options = {
@@ -172,50 +178,96 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
             },
             value = DEFAULT_FILTER_SCOPE)
     // @formatter:on
-    private static final String PROP_FILTER_SCOPE = "httpcache.config.filter-scope";
+    static final String PROP_FILTER_SCOPE = "httpcache.config.filter-scope";
     private FilterScope filterScope;
 
 
     // Making the cache config extension configurable.
-    @Property(name = "cacheConfigExtension.target",
-              label = "HttpCacheConfigExtension service pid",
+    @Property(label = "HttpCacheConfigExtension service pid",
               description = "Service pid of target implementation of HttpCacheConfigExtension to be used. Example - "
                       + "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)."
                       + " Optional parameter.",
               value = "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)")
+    private static final String PROP_CACHE_CONFIG_EXTENSION_TARGET = "cacheConfigExtension.target";
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheConfigExtension")
-    private HttpCacheConfigExtension cacheConfigExtension;
+    private volatile HttpCacheConfigExtension cacheConfigExtension;
 
     // Making the cache key factory configurable.
-    @Property(name = "cacheKeyFactory.target",
-              label = "CacheKeyFactory service pid",
+    @Property(label = "CacheKeyFactory service pid",
               description = "Service pid of target implementation of CacheKeyFactory to be used. Example - "
                       + "(service.pid=com.adobe.acs.commons.httpcac`he.config.impl.GroupHttpCacheConfigExtension)."
                       + " Mandatory parameter.",
               value = "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)")
+    private static final String PROP_CACHE_CONFIG_FACTORY_TARGET = "cacheKeyFactory.target";
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheKeyFactory")
-    private CacheKeyFactory cacheKeyFactory;
+    private volatile CacheKeyFactory cacheKeyFactory;
 
 
     @Property(label = "Config-specific HttpCacheHandlingRules",
               description = "List of Service pid of HttpCacheHandlingRule applicable for this cache config. Optional "
                       + "parameter",
               unbounded = PropertyUnbounded.ARRAY)
-    private static final String PROP_CACHE_HANDLING_RULES_PID = "httpcache.config.cache-handling-rules.pid";
+    static final String PROP_CACHE_HANDLING_RULES_PID = "httpcache.config.cache-handling-rules.pid";
     private List<String> cacheHandlingRulesPid;
+
+
+    @Property(label = "Config-specific Excluded Cookie keys",
+            description = "List of cookie keys that will NOT be put in the cached response, to be served to the output."
+                    + "parameter",
+            unbounded = PropertyUnbounded.ARRAY)
+    static final String PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS = "httpcache.config.excluded.cookie.keys";
+    private List<String> excludedCookieKeys;
+
+
+    @Property(label = "Config-specific Excluded Response headers",
+            description = "List of header keys (as regex) that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
+    static final String PROP_RESPONSE_HEADER_EXCLUSIONS = "httpcache.config.excluded.response.headers";
+    private List<Pattern> responseHeaderExclusions;
+
+
+    @Property(label = "Expiry on create",
+        description = "Specifies a custom expiry on create. Overrules the global expiry, unless the value is 0.")
+    static final String PROP_EXPIRY_ON_CREATE = "httpcache.config.expiry.on.create";
+    static final long DEFAULT_EXPIRY_ON_CREATE = 0L;
+    private long expiryOnCreate;
+
+
+    @Property(label = "Expiry on access",
+        description = "Specifies a custom expiry on access. This refreshes the expiry of the entry if it's used. Lower then 0 means no expiry on access. ")
+    static final String PROP_EXPIRY_ON_ACCESS = "httpcache.config.expiry.on.access";
+    static final long DEFAULT_EXPIRY_ON_ACCESS = 0L;
+    private long expiryOnAccess;
+
+
+    @Property(label = "Expiry on update",
+        description = "Specifies a custom expiry on update. This refreshes the expiry of the entry if it's updated. Lower then 0 means no expiry on update.")
+    static final String PROP_EXPIRY_ON_UPDATE = "httpcache.config.expiry.on.update";
+    static final long DEFAULT_EXPIRY_ON_UPDATE = 0L;
+    private long expiryOnUpdate;
+    private String cacheConfigExtensionTarget;
+    private String cacheKeyFactoryTarget;
 
     @Activate
     protected void activate(Map<String, Object> configs) {
+
+        cacheConfigExtensionTarget = PropertiesUtil.toString(configs.get(PROP_CACHE_CONFIG_EXTENSION_TARGET), null);
+        cacheKeyFactoryTarget = PropertiesUtil.toString(configs.get(PROP_CACHE_CONFIG_FACTORY_TARGET), null);
 
         // Request URIs - Whitelisted.
         requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new
                 String[]{}));
         requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
+
+        responseHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
+        excludedCookieKeys = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS), new String[]{}));
 
         // Request URIs - Blacklisted.
         blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
@@ -229,6 +281,11 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         // Cache store
         cacheStore = PropertiesUtil.toString(configs.get(PROP_CACHE_STORE), DEFAULT_CACHE_STORE);
 
+        // Custom expiry
+        expiryOnCreate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_CREATE), DEFAULT_EXPIRY_ON_CREATE);
+        expiryOnAccess = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_ACCESS), DEFAULT_EXPIRY_ON_ACCESS);
+        expiryOnUpdate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_UPDATE), DEFAULT_EXPIRY_ON_UPDATE);
+
         // Cache invalidation paths.
         cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
@@ -237,7 +294,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
         filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(PROP_FILTER_SCOPE), DEFAULT_FILTER_SCOPE).toUpperCase());
-
         // PIDs of cache handling rules.
         cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_CACHE_HANDLING_RULES_PID), new String[]{})));
@@ -317,6 +373,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         // Passing on the control to the extension point.
         if (null != cacheConfigExtension) {
             return cacheConfigExtension.accepts(request, this);
+        }else if(isNotBlank(cacheConfigExtensionTarget)){
+            log.error("Cache Config not found! Extension target: {} Factory target: {} ", cacheConfigExtensionTarget, cacheKeyFactoryTarget);
         }
 
         return true;
@@ -367,22 +425,37 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
     @Override
     public List<Pattern> getRequestUriPatterns() {
-        return this.requestUriPatternsAsRegEx;
+        return Collections.unmodifiableList(this.requestUriPatternsAsRegEx);
     }
 
     @Override
     public List<Pattern> getBlacklistedRequestUriPatterns() {
-        return this.blacklistedRequestUriPatternsAsRegEx;
+        return Collections.unmodifiableList(this.blacklistedRequestUriPatternsAsRegEx);
     }
 
     @Override
     public List<Pattern> getJCRInvalidationPathPatterns() {
-        return this.cacheInvalidationPathPatternsAsRegEx;
+        return Collections.unmodifiableList(this.cacheInvalidationPathPatternsAsRegEx);
     }
 
     @Override
     public boolean knows(CacheKey key) throws HttpCacheKeyCreationException {
         return this.cacheKeyFactory.doesKeyMatchConfig(key, this);
+    }
+
+    @Override
+    public long getExpiryOnCreate() {
+        return expiryOnCreate;
+    }
+
+    @Override
+    public long getExpiryForAccess() {
+        return expiryOnAccess;
+    }
+
+    @Override
+    public long getExpiryForUpdate() {
+        return expiryOnUpdate;
     }
 
     @Override
@@ -398,5 +471,15 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public FilterScope getFilterScope() {
         return this.filterScope;
+    }
+
+    @Override
+    public List<Pattern> getExcludedResponseHeaderPatterns() {
+        return Collections.unmodifiableList(responseHeaderExclusions);
+    }
+
+    @Override
+    public List<String> getExcludedCookieKeys() {
+        return Collections.unmodifiableList(excludedCookieKeys);
     }
 }

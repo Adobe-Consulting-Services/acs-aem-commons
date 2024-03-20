@@ -1,0 +1,27 @@
+{
+  "page" : {
+    "jcr:primaryType" : "cq:Page",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured"
+    },
+    "child1" : {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "nt:unstructured"
+      }
+    },
+    "child2" : {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "nt:unstructured"
+      }
+    }
+  },
+  "asset" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured"
+    },
+    "mpConfig" : "/content/mpConfig"
+  }
+}

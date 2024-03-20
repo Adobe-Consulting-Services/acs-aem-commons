@@ -1,3 +1,0 @@
-#base=js
-
-version-replicator.js

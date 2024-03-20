@@ -1,66 +1,22 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingConstants;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.apache.sling.auth.core.AuthUtil;
-import org.apache.sling.commons.auth.Authenticator;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
@@ -76,6 +32,49 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.auth.Authenticator;
+import org.apache.sling.api.request.RequestProgressTracker;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.auth.core.AuthUtil;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -102,7 +101,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
-    
+
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
 
@@ -239,20 +238,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                     + "Example: 'png' "
                     + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
             cardinality = Integer.MAX_VALUE,
-            value = { "png", "jpeg", "jpg", "gif" })
+            value = {"png", "jpeg", "jpg", "gif"})
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private QueryBuilder queryBuilder;
-
-    @Reference
     private Authenticator authenticator;
-
-    @Reference
-    private ComponentHelper componentHelper;
     
     @Reference
     private VanityURLService vanityUrlService;
@@ -508,7 +501,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
-     * @param request the request object
+     * @param request       the request object
      * @param errorResource the error resource
      * @return
      */
@@ -530,7 +523,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (!StringUtils.equals(path, errorResource.getPath())) {
             // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
             // we know the errorResource and what the path resolves to is the same
-            resource = resourceResolver.resolve(request, path);
+            // #1415 - First try to get the resource at the direct path; this look-up is very fast (compared to rr.resolve and often what's required)
+            resource = resourceResolver.getResource(path);
+
+            if (resource == null) {
+                // #1415 - If the resource is not available at the direct path, then try to resolve (handle sling:alias).
+                // First map the path, as the resolve could duplicate pathing.
+                resource = resourceResolver.resolve(request, resourceResolver.map(request, path));
+            }
         }
 
         // If the resource exists, then use it!
@@ -541,7 +541,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Quick check for the Parent; Handles common case of deactivated pages
         final Resource parent = resource.getParent();
-        if (parent != null) {
+        if (parent != null && !ResourceUtil.isNonExistingResource(resource)) {
             log.debug("Found real aggregate resource via getParent() at [ {} ]", parent.getPath());
             return parent;
         }
@@ -553,6 +553,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         for (int i = parts.length - 1; i >= 0; i--) {
             String[] tmpArray = (String[]) ArrayUtils.subarray(parts, 0, i);
             String candidatePath = "/".concat(StringUtils.join(tmpArray, '/'));
+
+            // #1415 - First try to get the resource at the direct path; this look-up is
+            // very fast (compared to rr.resolve and often what's required)
+            final Resource candidatePathResource = resourceResolver.getResource(candidatePath);
+            if (candidatePathResource != null) {
+                return candidatePathResource;
+            }
 
             final Resource candidateResource = resourceResolver.resolve(request, candidatePath);
 
@@ -603,7 +610,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      *
      * @param request
      * @param response
-     *
      * @return true if the request will be authenticated, false is the request could not trigger authentication
      */
     protected boolean authenticateRequest(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -620,6 +626,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
      * <p>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
+     *
      * @param request
      * @param response
      */
@@ -649,7 +656,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             log.debug(iw.toString());
         }
 
-        if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
+        if (this.getStatusCode(request) == HttpServletResponse.SC_NOT_FOUND
                 && this.isAnonymousRequest(request)
                 && AuthUtil.isBrowserRequest(request)
                 && this.isRedirectToLogin(path)) {
@@ -776,10 +783,15 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         request.setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
                 new HashSet<String>());
 
+        //Reset the component context attribute to remove inclusion of response from top level components
+        request.removeAttribute("com.day.cq.wcm.componentcontext");
+
         // Clear the response
         response.reset();
         response.setContentType("text/html");
         response.setStatus(statusCode);
+        // Header required for AEM CS; this will noop on 6.x installs
+        response.setHeader("x-aem-error-pass", "true");
     }
 
     /**
@@ -825,7 +837,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
-        
+
         this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
                         DEFAULT_VANITY_DISPATCH_ENABLED));
@@ -891,10 +903,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver serviceResourceResolver = null;
-            try {
-                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
                 final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
@@ -909,10 +919,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 }
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 
@@ -1028,7 +1034,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     @Override
-    public boolean isVanityDispatchCheckEnabled(){
+    public boolean isVanityDispatchCheckEnabled() {
         return this.vanityDispatchCheckEnabled;
     }
 

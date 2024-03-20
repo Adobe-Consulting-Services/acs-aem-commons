@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
 
@@ -99,7 +98,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
     @Property(label = "Workflow Status",
             description = "Only remove Workflow Instances that have one of these statuses.",
-            value = { "COMPLETED", "ABORTED" })
+            value = {"COMPLETED", "ABORTED"})
     public static final String PROP_WORKFLOW_STATUSES = "workflow.statuses";
 
 
@@ -110,7 +109,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @Property(label = "Workflow Models",
             description = "Only remove Workflow Instances that belong to one of these WF Models.",
             cardinality = Integer.MAX_VALUE,
-            value = { })
+            value = {})
     public static final String PROP_WORKFLOW_MODELS = "workflow.models";
 
 
@@ -121,7 +120,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @Property(label = "Payload Patterns",
             description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
             cardinality = Integer.MAX_VALUE,
-            value = { })
+            value = {})
     public static final String PROP_WORKFLOW_PAYLOADS = "workflow.payloads";
 
 
@@ -131,6 +130,14 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Millis",
             longValue = 0)
     public static final String PROP_WORKFLOWS_OLDER_THAN = "workflow.older-than";
+
+
+    private static final long DEFAULT_OLDER_THAN_MILLIS = -1L;
+    private long olderThanMillis = DEFAULT_OLDER_THAN_MILLIS;
+    @Property(label = "Older Than Milliseconds",
+            description = "Only remove Workflow Instances whose payloads start date was at least desired Milliseconds ago",
+            longValue = DEFAULT_OLDER_THAN_MILLIS)
+    public static final String PROP_WORKFLOWS_OLDER_THAN_MILLIS = "workflow.older-than-millis";
 
 
     private static final int DEFAULT_BATCH_SIZE = 1000;
@@ -153,20 +160,14 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @SuppressWarnings("squid:S2142")
     public final void run() {
 
-        ResourceResolver adminResourceResolver = null;
-        try {
-            adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             final long start = System.currentTimeMillis();
+            WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(models, statuses, payloads, olderThan, olderThanMillis);
+            workflowRemovalConfig.setBatchSize(batchSize);
+            workflowRemovalConfig.setMaxDurationInMins(maxDuration);
 
-            int count = workflowInstanceRemover.removeWorkflowInstances(
-                    adminResourceResolver,
-                    models,
-                    statuses,
-                    payloads,
-                    olderThan, 
-                    batchSize,
-                    maxDuration);
+            int count = workflowInstanceRemover.removeWorkflowInstances(serviceResourceResolver, workflowRemovalConfig);
 
             if (log.isInfoEnabled()) {
                 log.info("Removed [ {} ] Workflow instances in {} ms", count, System.currentTimeMillis() - start);
@@ -182,10 +183,6 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             log.error("Interrupted Exception during Workflow Removal", e);
         } catch (WorkflowRemovalForceQuitException e) {
             log.info("Workflow Removal force quit", e);
-        } finally {
-            if (adminResourceResolver != null) {
-                adminResourceResolver.close();
-            }
         }
     }
 
@@ -226,7 +223,9 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             olderThan = Calendar.getInstance();
             olderThan.setTimeInMillis(olderThanTs);
         }
-        
+
+        olderThanMillis = PropertiesUtil.toLong(config.get(PROP_WORKFLOWS_OLDER_THAN_MILLIS), 0);
+
         batchSize = PropertiesUtil.toInteger(config.get(PROP_BATCH_SIZE), DEFAULT_BATCH_SIZE);
         if (batchSize < 1) {
             batchSize = DEFAULT_BATCH_SIZE;

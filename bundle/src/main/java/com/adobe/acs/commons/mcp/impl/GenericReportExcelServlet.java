@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +17,11 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
+import com.adobe.acs.commons.mcp.model.AbstractReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.day.cq.commons.jcr.JcrUtil;
+import java.awt.Color;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,8 +36,10 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.LoggerFactory;
@@ -45,13 +52,14 @@ import java.util.List;
 /**
  * Export a generic report as an excel spreadsheet
  */
-@SlingServlet(resourceTypes = GenericReport.GENERIC_REPORT_RESOURCE_TYPE, extensions = {"xlsx","xls"})
+@SlingServlet(resourceTypes = { GenericReport.GENERIC_REPORT_RESOURCE_TYPE,
+        GenericBlobReport.BLOB_REPORT_RESOURCE_TYPE }, extensions = { "xlsx", "xls" })
 public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenericReportExcelServlet.class);
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
-        GenericReport report = request.getResource().adaptTo(GenericReport.class);
+        AbstractReport report = getReport(request.getResource());
         if (report != null) {
             String title = report.getName();
             String fileName = JcrUtil.createValidName(title) + ".xlsx";
@@ -70,13 +78,13 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
                 throw ex;
             }
         } else {
-            LOG.error("Unable to process report stored at "+request.getResource().getPath());
-            throw new ServletException("Unable to process report stored at "+request.getResource().getPath());
+            String msg = String.format("Unable to process report stored at %s", request.getResource().getPath());
+            throw new ServletException(msg);
         }
     }
 
     @SuppressWarnings("squid:S3776")
-    private Workbook createSpreadsheet(GenericReport report) {
+    private Workbook createSpreadsheet(AbstractReport report) {
         Workbook wb = new XSSFWorkbook();
 
         String name = report.getName();
@@ -128,7 +136,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
 
     CellStyle createHeaderStyle(Workbook wb){
         XSSFCellStyle xstyle = (XSSFCellStyle)wb.createCellStyle();
-        XSSFColor header = new XSSFColor(new byte[]{(byte)79, (byte)129, (byte)189} );
+        XSSFColor header = new XSSFColor(new Color(79, 129, 189), new DefaultIndexedColorMap());
         xstyle.setFillForegroundColor(header);
         xstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         XSSFFont font = (XSSFFont)wb.createFont();
@@ -141,9 +149,9 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
         for(int i = 0; i <= lastColumnIndex; i++ ) {
             try {
                 sheet.autoSizeColumn(i);
-            } catch (Exception e){
+            } catch (Throwable e){
                 // autosize depends on AWT stuff and can fail, but it should not be fatal
-                LOG.warn("autoSizeColumn(" + i + ") failed: " + e.getMessage());
+                LOG.warn("autoSizeColumn({}) failed: {}",i, e.getMessage());
             }
             int cw = sheet.getColumnWidth(i);
             // increase width to accommodate drop-down arrow in the header
@@ -154,4 +162,20 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
             }
         }
     }
-}
+
+    /**
+     * Retrieve the actual report from the path
+     *
+     * @param reportResource the resource from where to take the report
+     * @return the report or null if there is no report
+     */
+    AbstractReport getReport(Resource reportResource) {
+        AbstractReport result = reportResource.adaptTo(GenericReport.class);
+        if (result != null && result.getRows() != null && result.getRows().size() > 0) {
+            return result;
+        }
+        return reportResource.adaptTo(GenericBlobReport.class);
+
+    }
+
+    }

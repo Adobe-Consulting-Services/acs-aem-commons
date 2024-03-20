@@ -1,22 +1,20 @@
 /*
-* #%L
-* ACS AEM Commons Bundle
-* %%
-* Copyright (C) 2013 Adobe
-* %%
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-* #L%
-*/
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.email.impl;
 
 import com.adobe.acs.commons.email.EmailService;
@@ -255,6 +253,10 @@ public final class EmailServiceImpl implements EmailService {
             email.setSubject(params.get(EmailServiceConstants.SUBJECT));
         }
 
+        if (params.containsKey(EmailServiceConstants.BOUNCE_ADDRESS)) {
+            email.setBounceAddress(params.get(EmailServiceConstants.BOUNCE_ADDRESS));
+        }
+
         return email;
     }
 
@@ -264,10 +266,8 @@ public final class EmailServiceImpl implements EmailService {
 
     private MailTemplate getMailTemplate(String templatePath) throws IllegalArgumentException {
         MailTemplate mailTemplate = null;
-        ResourceResolver resourceResolver = null;
-        try {
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo) ){
             mailTemplate = MailTemplate.create(templatePath, resourceResolver.adaptTo(Session.class));
 
             if (mailTemplate == null) {
@@ -277,10 +277,6 @@ public final class EmailServiceImpl implements EmailService {
         } catch (LoginException e) {
             log.error("Unable to obtain an administrative resource resolver to get the Mail Template at [ "
                     + templatePath + " ]", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return mailTemplate;

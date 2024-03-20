@@ -1,25 +1,23 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
-import org.junit.*;
+import org.junit.Test;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
@@ -29,82 +27,14 @@ import static org.junit.Assert.assertEquals;
 
 public class ParameterUtilTest {
 
-    public ParameterUtilTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of toSimpleEntry method, of class OsgiPropertyUtil.
-     */
     @Test
-    public void testToSimpleEntry() {
-        String value = "key:value";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = new SimpleEntry<String, String>("key", "value");
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithOnlyKey1() {
-        String value = "key:";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithOnlyKey2() {
+    public void testToMapEntryWithOptionalValueWithOnlyKey() {
         String value = "key";
         String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
+        Map.Entry<String, String> expResult = new SimpleEntry<>(value, null);
+        Map.Entry<String, String> result = ParameterUtil.toMapEntryWithOptionalValue(value, separator);
         assertEquals(expResult, result);
     }
-
-    @Test
-    public void testToSimpleEntryWithOnlyValue() {
-        String value = ":value";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithMultipleSeparators() {
-        String value = "key:val:ue";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithMismatchSeparators() {
-        String value = "key:value";
-        String separator = "-";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
 
     /**
      * Test of toMap method, of class OsgiPropertyUtil.
@@ -112,6 +42,19 @@ public class ParameterUtilTest {
     @Test
     public void testToMap() {
         String[] values = {"key1:value1", "key2:value2", "key3:value3"};
+        String separator = ":";
+        Map<String, String> expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key2", "value2");
+        expResult.put("key3", "value3");
+
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testToMap_WithWhitesapce() {
+        String[] values = {" key1   : value1 ", " key2 :value2", "  :   ", "key3  :    value3"};
         String separator = ":";
         Map<String, String> expResult = new HashMap<String, String>();
         expResult.put("key1", "value1");

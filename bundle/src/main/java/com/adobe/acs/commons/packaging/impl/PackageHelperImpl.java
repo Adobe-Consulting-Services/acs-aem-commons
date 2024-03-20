@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
-
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -38,9 +38,6 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,18 +52,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ACS AEM Commons - Package Helper
- * Helper utility for creating CRX Packages and using the ACS AEM Commons packager.
+ * ACS AEM Commons - Package Helper Helper utility for creating CRX Packages and
+ * using the ACS AEM Commons packager.
  */
 @Component
 @Service
 public final class PackageHelperImpl implements PackageHelper {
+
     private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);
 
     private static final String NN_THUMBNAIL = "thumbnail.png";
 
-    private static final String JSON_EXCEPTION_MSG =
-            "{\"status\": \"error\", \"msg\": \"Error creating JSON response.\"}";
     private static final String KEY_STATUS = "status";
     private static final String KEY_MSG = "msg";
     private static final String KEY_PATH = "path";
@@ -114,8 +110,8 @@ public final class PackageHelperImpl implements PackageHelper {
 
     @SuppressWarnings("squid:S3776")
     public Version getNextVersion(final JcrPackageManager jcrPackageManager,
-                                  final String groupName, final String name,
-                                  final String version) throws RepositoryException {
+            final String groupName, final String name,
+            final String version) throws RepositoryException {
         final Node packageRoot = jcrPackageManager.getPackageRoot(false);
         final Version configVersion = Version.create(version);
 
@@ -135,35 +131,35 @@ public final class PackageHelperImpl implements PackageHelper {
             while (children.hasNext()) {
                 final Node child = children.nextNode();
 
-                final JcrPackage jcrPackage = jcrPackageManager.open(child, true);
-                if (jcrPackage == null
-                        || jcrPackage.getDefinition() == null
-                        || jcrPackage.getDefinition().getId() == null) {
+                try (final JcrPackage jcrPackage = jcrPackageManager.open(child, true)) {
+                    if (jcrPackage == null
+                            || jcrPackage.getDefinition() == null
+                            || jcrPackage.getDefinition().getId() == null) {
 
-                    log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node",
-                            child.getPath());
-                    continue;
+                        log.warn("Could not covert node [ {} ] into a proper JCR Package, moving to next node",
+                                child.getPath());
+                        continue;
 
-                } else if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
-                    // Name mismatch - so just skip
-                    continue;
-                }
+                    } else if (!StringUtils.equals(name, jcrPackage.getDefinition().getId().getName())) {
+                        // Name mismatch - so just skip
+                        continue;
+                    }
 
-                final Version packageVersion = jcrPackage.getDefinition().getId().getVersion();
+                    final Version packageVersion = jcrPackage.getDefinition().getId().getVersion();
 
-                log.debug(packageVersion.toString() + " compareTo " + latestVersion.toString()
-                        + " = " + packageVersion.compareTo(latestVersion));
+                    log.debug("{} compareTo {} = {}", packageVersion.toString(), latestVersion.toString(), packageVersion.compareTo(latestVersion));
 
-                if (packageVersion.compareTo(latestVersion) >= 1) {
-                    latestVersion = packageVersion;
-                    log.debug("Found a new latest version: {}", latestVersion.toString());
-                } else if (packageVersion.compareTo(configVersion) == 0) {
-                    configVersionEligible = false;
-                    log.debug("Found a package with the same version as the config version");
+                    if (packageVersion.compareTo(latestVersion) >= 1) {
+                        latestVersion = packageVersion;
+                        log.debug("Found a new latest version: {}", latestVersion);
+                    } else if (packageVersion.compareTo(configVersion) == 0) {
+                        configVersionEligible = false;
+                        log.debug("Found a package with the same version as the config version");
+                    }
                 }
             }
 
-            log.debug("Current latest version: {}", latestVersion.toString());
+            log.debug("Current latest version: {}", latestVersion);
             if (configVersionEligible && latestVersion.equals(configVersion)) {
                 // If the config-specified version is newer than any existing package, jump to the config version
                 return configVersion;
@@ -186,7 +182,6 @@ public final class PackageHelperImpl implements PackageHelper {
         final int numVersionSegments = 3;
         final String[] normalizedSegments = version.getNormalizedSegments();
         final String[] segments = new String[numVersionSegments];
-
 
         if (normalizedSegments.length <= 0) {
             segments[0] = "1";
@@ -213,16 +208,17 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public void removePackage(final JcrPackageManager jcrPackageManager,
-                              final String groupName, final String name,
-                              final String version) throws RepositoryException {
+            final String groupName, final String name,
+            final String version) throws RepositoryException {
         final PackageId packageId = new PackageId(groupName, name, version);
-        final JcrPackage jcrPackage = jcrPackageManager.open(packageId);
+        try (final JcrPackage jcrPackage = jcrPackageManager.open(packageId)) {
 
-        if (jcrPackage != null && jcrPackage.getNode() != null) {
-            jcrPackage.getNode().remove();
-            jcrPackage.getNode().getSession().save();
-        } else {
-            log.debug("Nothing to remove at: ", packageId.getInstallationPath());
+            if (jcrPackage != null && jcrPackage.getNode() != null) {
+                jcrPackage.getNode().remove();
+                jcrPackage.getNode().getSession().save();
+            } else {
+                log.debug("Nothing to remove at: {} ", packageId.getInstallationPath());
+            }
         }
     }
 
@@ -230,9 +226,9 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public JcrPackage createPackage(final Collection<Resource> resources, final Session session,
-                                    final String groupName, final String name, String version,
-                                    final ConflictResolution conflictResolution,
-                                    final Map<String, String> packageDefinitionProperties)
+            final String groupName, final String name, String version,
+            final ConflictResolution conflictResolution,
+            final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
@@ -250,10 +246,10 @@ public final class PackageHelperImpl implements PackageHelper {
      */
     @Override
     public JcrPackage createPackageForPaths(final Collection<String> paths, final Session session,
-                                            final String groupName, String name, final String version,
-                                            final ConflictResolution conflictResolution,
-                                            Map<String, String> packageDefinitionProperties)
-                    throws IOException, RepositoryException {
+            final String groupName, String name, final String version,
+            final ConflictResolution conflictResolution,
+            Map<String, String> packageDefinitionProperties)
+            throws IOException, RepositoryException {
 
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
@@ -268,11 +264,12 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("squid:S2095") // closing is responsibility of caller
     public JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets,
-                                                      final Session session,
-                                                      final String groupName, final String name, String version,
-                                                      final ConflictResolution conflictResolution,
-                                                      final Map<String, String> packageDefinitionProperties)
+            final Session session,
+            final String groupName, final String name, String version,
+            final ConflictResolution conflictResolution,
+            final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);
@@ -308,8 +305,8 @@ public final class PackageHelperImpl implements PackageHelper {
     public List<String> getContents(final JcrPackage jcrPackage) throws IOException,
             RepositoryException, PackageException {
 
-        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener =
-                new JcrPackageCoverageProgressListener();
+        JcrPackageCoverageProgressListener jcrPackageCoverageProgressListener
+                = new JcrPackageCoverageProgressListener();
 
         ImportOptions importOptions = new ImportOptions();
         importOptions.setDryRun(true);
@@ -323,20 +320,21 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public String getSuccessJSON(final JcrPackage jcrPackage) throws JSONException, RepositoryException {
-        final JSONObject json = new JSONObject();
+    public String getSuccessJSON(final JcrPackage jcrPackage) throws RepositoryException {
+        final JsonObject json = new JsonObject();
 
-        json.put(KEY_STATUS, "success");
-        json.put(KEY_PATH, jcrPackage.getNode().getPath());
-        json.put(KEY_FILTER_SETS, new JSONArray());
+        json.addProperty(KEY_STATUS, "success");
+        json.addProperty(KEY_PATH, jcrPackage.getNode().getPath());
+        JsonArray filterSetsArray = new JsonArray();
+        json.add(KEY_FILTER_SETS, filterSetsArray);
 
         final List<PathFilterSet> filterSets = jcrPackage.getDefinition().getMetaInf().getFilter().getFilterSets();
         for (final PathFilterSet filterSet : filterSets) {
-            final JSONObject jsonFilterSet = new JSONObject();
-            jsonFilterSet.put(KEY_IMPORT_MODE, filterSet.getImportMode().name());
-            jsonFilterSet.put(KEY_ROOT_PATH, filterSet.getRoot());
+            final JsonObject jsonFilterSet = new JsonObject();
+            jsonFilterSet.addProperty(KEY_IMPORT_MODE, filterSet.getImportMode().name());
+            jsonFilterSet.addProperty(KEY_ROOT_PATH, filterSet.getRoot());
 
-            json.accumulate(KEY_FILTER_SETS, jsonFilterSet);
+            filterSetsArray.add(jsonFilterSet);
         }
 
         return json.toString();
@@ -345,7 +343,7 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public String getPreviewJSON(final Collection<Resource> resources) throws JSONException {
+    public String getPreviewJSON(final Collection<Resource> resources) {
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
         for (final Resource resource : resources) {
@@ -358,7 +356,7 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public String getPreviewJSONForPaths(Collection<String> paths) throws JSONException {
+    public String getPreviewJSONForPaths(Collection<String> paths) {
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
         for (final String path : paths) {
@@ -371,38 +369,34 @@ public final class PackageHelperImpl implements PackageHelper {
     /**
      * {@inheritDoc}
      */
-    public String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException {
-        final JSONObject json = new JSONObject();
+    public String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) {
+        final JsonObject json = new JsonObject();
 
-        json.put(KEY_STATUS, "preview");
-        json.put(KEY_PATH, "Not applicable (Preview)");
-        json.put(KEY_FILTER_SETS, new JSONArray());
+        json.addProperty(KEY_STATUS, "preview");
+        json.addProperty(KEY_PATH, "Not applicable (Preview)");
+        JsonArray filterSets = new JsonArray();
+        json.add(KEY_FILTER_SETS, filterSets);
 
         for (final PathFilterSet pathFilterSet : pathFilterSets) {
-            final JSONObject tmp = new JSONObject();
-            tmp.put(KEY_IMPORT_MODE, "Not applicable (Preview)");
-            tmp.put(KEY_ROOT_PATH, pathFilterSet.getRoot());
+            final JsonObject tmp = new JsonObject();
+            tmp.addProperty(KEY_IMPORT_MODE, "Not applicable (Preview)");
+            tmp.addProperty(KEY_ROOT_PATH, pathFilterSet.getRoot());
 
-            json.accumulate("filterSets", tmp);
+            filterSets.add(tmp);
         }
 
         return json.toString();
     }
 
-
     /**
      * {@inheritDoc}
      */
     public String getErrorJSON(final String msg) {
-        final JSONObject json = new JSONObject();
-        try {
-            json.put(KEY_STATUS, "error");
-            json.put(KEY_MSG, msg);
-            return json.toString();
-        } catch (JSONException e) {
-            log.error("Error creating JSON Error response message: {}", e);
-            return JSON_EXCEPTION_MSG;
-        }
+        Gson gson = new Gson();
+        final JsonObject json = new JsonObject();
+        json.addProperty(KEY_STATUS, "error");
+        json.addProperty(KEY_MSG, msg);
+        return gson.toJson(json);
     }
 
 }

@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,31 +21,40 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import org.apache.sling.api.resource.*;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.Report;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectBrokenReferences;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectPaths;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
+import com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.Report;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.NonExistingResource;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectBrokenReferences;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectPaths;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -63,25 +74,27 @@ public class BrokenLinksTest {
 
     @Test
     public void reportBrokenReferences() throws Exception {
-        ResourceResolver rr = getEnhancedMockResolver();
+        final ResourceResolver rr = getEnhancedMockResolver();
 
-        AbstractResourceImpl content = new AbstractResourceImpl("/content", "cq:Page", "cq:Page", new ResourceMetadata());
+        AbstractResourceImpl content = new AbstractResourceImpl("/content", "cq:Page", "cq:Page", new HashMap<>());
 
-        AbstractResourceImpl pageA = new AbstractResourceImpl("/content/pageA", "cq:Page", "cq:Page", new ResourceMetadata());
+        AbstractResourceImpl pageA = new AbstractResourceImpl("/content/pageA", "cq:Page", "cq:Page", new HashMap());
         content.addChild(pageA);
-        AbstractResourceImpl pageAcontent = new AbstractResourceImpl("/content/pageA/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata() {{
-            put("ref1", "/content/pageA");
-            put("ref2", "/content/pageB");
-            put("ref3", "/content/pageC");
-        }});
+        AbstractResourceImpl pageAcontent = new AbstractResourceImpl("/content/pageA/jcr:content", "cq:PageContent", "cq:PageContent", new HashMap() {{
+                put("ref1", "/content/pageA");
+                put("ref2", "/content/pageB");
+                put("ref3", "/content/pageC");
+            }
+        });
         pageA.addChild(pageAcontent);
-        AbstractResourceImpl pageB = new AbstractResourceImpl("/content/pageB", "cq:Page", "cq:Page", new ResourceMetadata());
+        AbstractResourceImpl pageB = new AbstractResourceImpl("/content/pageB", "cq:Page", "cq:Page", new HashMap());
         content.addChild(pageB);
-        AbstractResourceImpl pageBcontent = new AbstractResourceImpl("/content/pageB/jcr:content", "cq:PageContent", "cq:PageContent", new ResourceMetadata() {{
-            put("ignoredRef", "/content/pageC");
-            put("ref2", "/content/pageD");
-            put("ref3", "/content/pageE");
-        }});
+        AbstractResourceImpl pageBcontent = new AbstractResourceImpl("/content/pageB/jcr:content", "cq:PageContent", "cq:PageContent", new HashMap() {{
+                put("ignoredRef", "/content/pageC");
+                put("ref2", "/content/pageD");
+                put("ref3", "/content/pageE");
+            }
+        });
         pageB.addChild(pageBcontent);
         when(rr.getResource("/content")).thenReturn(content);
 
@@ -122,8 +135,8 @@ public class BrokenLinksTest {
         return t.createProcessDefinition();
     }
 
-    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
-        ResourceResolver rr = getFreshMockResolver();
+    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException, PersistenceException {
+        final ResourceResolver rr = getFreshMockResolver();
 
         AbstractResourceImpl processes = new AbstractResourceImpl(ProcessInstanceImpl.BASE_PATH, null, null, new ResourceMetadata());
         when(rr.getResource(ProcessInstanceImpl.BASE_PATH)).thenReturn(processes);
@@ -139,7 +152,7 @@ public class BrokenLinksTest {
     }
 
 
-    private ControlledProcessManager getControlledProcessManager() throws LoginException {
+    private ControlledProcessManager getControlledProcessManager() throws LoginException, PersistenceException {
         ActionManager am = getActionManager();
 
         ActionManagerFactory amf = mock(ActionManagerFactoryImpl.class);

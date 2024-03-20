@@ -1,0 +1,75 @@
+{
+  "copy-properties.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "monday",
+      "offTime": "thursday",
+      "unknownTime": "",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:onTime": "tuesday",
+        "dam:offTime": "friday"
+      }
+    }
+  },
+  "source-with-destination-without.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "monday",
+      "offTime": "thursday",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured"
+      }
+    }
+  },
+  "source-without-destination-with.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:onTime": "tuesday",
+        "dam:offTime": "friday"
+      }
+    }
+  },
+  "source-empty-destination-with.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "",
+      "offTime": "",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:onTime": "tuesday",
+        "dam:offTime": "friday"
+      }
+    }
+  },
+  "source-empty-destination-without.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "",
+      "offTime": "",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured"
+      }
+    }
+  },
+  "source-with-destination-with.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "monday",
+      "offTime": "thursday",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:onTime": "tuesday",
+        "dam:offTime": "friday"
+      }
+    }
+  }
+}

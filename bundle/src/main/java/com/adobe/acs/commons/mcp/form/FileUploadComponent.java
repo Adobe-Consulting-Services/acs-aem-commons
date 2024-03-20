@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +17,26 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
+
+import java.util.Optional;
 
 /**
  * File upload component
  */
 @ProviderType
-public class FileUploadComponent extends FieldComponent {
+public final class FileUploadComponent extends FieldComponent {
 
     private static final String OPTION_MIME_TYPES = "mimeTypes";
 
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/fileupload");
-        getComponentMetadata().put("text", "Upload " + getFieldDefinition().name());
-        getComponentMetadata().put("autoStart", false);
+        getProperties().put("text", "Upload " + getFieldDefinition().name());
+        getProperties().put("autoStart", false);
 
         if (hasOption(OPTION_MIME_TYPES)) {
-            getComponentMetadata().put(OPTION_MIME_TYPES, getOption(OPTION_MIME_TYPES).get());
+            getOption(OPTION_MIME_TYPES).ifPresent(s -> getProperties().put(OPTION_MIME_TYPES, s));
         }
     }
 }

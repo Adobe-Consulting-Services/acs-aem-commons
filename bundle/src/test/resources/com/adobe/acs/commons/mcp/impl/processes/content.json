@@ -1,0 +1,39 @@
+{
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "jcr:title": "Sample Page",
+        "jcr:description": "",
+        "sling:resourceType": "a/totally/real/path",
+        "jcr:mixinTypes":["cq:ReplicationStatus"],
+        "cq:lastReplicationAction": "Activate",
+        "cq:tags": [
+            "workflow:wcm"
+        ]
+    },
+    "childpagy": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "Sample Page",
+            "jcr:description": "",
+            "sling:resourceType": "a/totally/real/path",
+            "lookacustomfield": [
+                "workflow:wcm"
+            ]
+        }
+    },
+    "theotherone": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "Sample Page",
+            "jcr:description": "",
+            "sling:resourceType": "a/totally/real/path",
+            "lookacustomfield": [
+                "workflow:wcm sdfasdfwerewr"
+            ],
+            "asingularfield": "workflow:wcm sdfasdfwerewr"
+        }
+    }
+}

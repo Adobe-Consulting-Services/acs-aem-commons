@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,42 +14,43 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.replication.ReplicationStatus;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
-import com.google.common.base.Function;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.function.Function;
+
+import javax.jcr.Node;
+import javax.jcr.Session;
+
 import org.apache.jackrabbit.commons.cnd.CndImporter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nullable;
-import javax.jcr.Node;
-import javax.jcr.Session;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Calendar;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicationStatusManagerImplTest {
@@ -186,6 +186,23 @@ public class ReplicationStatusManagerImplTest {
         assertSameTime(replicatedAt, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
         assertEquals(replicatedBy, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
         assertEquals(replicationStatus, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION).getString());
+    }
+
+
+    // Issue #1265
+    @Test
+    public void testSetReplicationStatus_NullReplicatedByAndReplicatedAt() throws Exception {
+        final String replicatedBy = null;
+        final Calendar replicatedAt = null;
+
+        replicationStatusManager.setReplicationStatus(resourceResolver,
+                replicatedBy,
+                replicatedAt,
+                ReplicationStatusManager.Status.ACTIVATED,
+                REPLICATED_PATH);
+
+        assertNotNull(replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertEquals(ReplicationStatusManagerImpl.DEFAULT_REPLICATED_BY, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
     }
 
     @Test

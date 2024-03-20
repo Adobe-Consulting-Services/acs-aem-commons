@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication;
@@ -32,7 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +62,7 @@ public class BrandPortalAgentFilterTest {
     AgentConfig agentRejectConfig;
 
     final String assetsFolderPath = "/content/dam/folder";
+    final String assetsFolderPathWithoutMpConfig = "/content/dam/folder-without-mpConfig";
     final String cloudServiceConfigPath = "/etc/cloudservices/mediaportal/brand-portal";
     final String brandPortalOrigin = "https://acs-aem-commons.brand-portal.adobe.com";
 
@@ -106,6 +105,15 @@ public class BrandPortalAgentFilterTest {
         final List<Resource> actual = filter.getBrandPortalConfigs(slingContext.resourceResolver().getResource(assetsFolderPath));
         assertEquals(expected.size(), actual.size());
         assertEquals(expected.get(0).getPath(), actual.get(0).getPath());
+    }
 
+    @Test // #1349
+    public void mpConfigIsNotConfigured() {
+        slingContext.create().resource(assetsFolderPathWithoutMpConfig,
+                ImmutableMap.<String, Object>builder()
+                        .build());
+
+        final List<Resource> actual = filter.getBrandPortalConfigs(slingContext.resourceResolver().getResource(assetsFolderPathWithoutMpConfig));
+        assertEquals(0, actual.size());
     }
 }

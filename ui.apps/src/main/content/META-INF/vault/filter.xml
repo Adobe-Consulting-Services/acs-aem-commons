@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<workspaceFilter version="1.0">
+    <filter root="/apps/acs-commons">
+        <exclude pattern="/apps/acs-commons/components/content/column-control/clientlib/css/generated"/>
+        <exclude pattern="/apps/acs-commons/widgets/source/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/page/clientlibs/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/bulk-workflow-manager/clientlibs/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/page-compare/clientlibs/css/generated"/>
+        <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
+        <exclude pattern="/apps/acs-commons/config(\..*)?(/.*)?"/>
+        <exclude pattern="/apps/acs-commons/install(/.*)?"/>
+    </filter>
+    <!-- for overlays just make sure the structure is there with the right node types -->
+    <filter root="/apps/cq">
+        <include pattern="/apps/cq"/>
+        <include pattern="/apps/cq/core"/>
+        <include pattern="/apps/cq/core/content"/>
+        <include pattern="/apps/cq/core/content/nav"/>
+        <include pattern="/apps/cq/core/content/nav/tools"/>
+        <include pattern="/apps/cq/core/content/nav/tools/acs-commons(/.*)?"/>
+        <include pattern="/apps/cq/core/content/nav/tools/cloudservices"/>
+        <include pattern="/apps/cq/core/content/nav/tools/cloudservices/marketo(/.*)?"/>
+    </filter>
+    <filter root="/apps/dam">
+        <include pattern="/apps/dam"/>
+        <include pattern="/apps/dam/gui"/>
+        <include pattern="/apps/dam/gui/content"/>
+        <include pattern="/apps/dam/gui/content/assets"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1"/>
+        <include
+                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items"/>
+        <include
+                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
+    </filter>
+    <filter root="/apps/settings">
+        <include pattern="/apps/settings"/>
+        <include pattern="/apps/settings/dam"/>
+        <include pattern="/apps/settings/dam/indesign"/>
+        <include pattern="/apps/settings/dam/indesign/scripts(/.*)?"/>
+    </filter>
+</workspaceFilter>

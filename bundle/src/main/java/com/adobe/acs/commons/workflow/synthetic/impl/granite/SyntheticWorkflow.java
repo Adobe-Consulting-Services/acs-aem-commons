@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic.impl.granite;
@@ -29,7 +27,7 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.model.WorkflowModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class SyntheticWorkflow implements Workflow {
         this.timeStarted = new Date();
     }
 
-    public final void setActiveWorkItem(final WorkItem workItem) {
+    final void setActiveWorkItem(final WorkItem workItem) {
         this.activeWorkItem = workItem;
     }
 
@@ -60,7 +58,7 @@ public class SyntheticWorkflow implements Workflow {
 
     @Override
     public final List<WorkItem> getWorkItems() {
-        return Arrays.asList(new WorkItem[]{this.activeWorkItem});
+        return Collections.singletonList((WorkItem) this.activeWorkItem);
     }
 
     @Override

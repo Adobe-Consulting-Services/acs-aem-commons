@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication.dispatcher;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
@@ -76,7 +74,7 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
+     * Checks if the @agent is considered an active Flush agent (Serialization Type ~&gt; Flush and is enabled).
      *
      * @param agent the agent to test test
      * @return true is is considered an enabled Flush agent
@@ -130,13 +128,13 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the agent has a "flush" serialization type.
+     * Checks if the agent's serialization type starts with "flush" .
      *
      * @param agent Agent to check
-     * @return true if the Agent's serialization type is "flush"
+     * @return true if the Agent's serialization type starts with "flush"
      */
     private boolean isFlushingAgent(final Agent agent) {
-        return StringUtils.equals(SERIALIZATION_TYPE, agent.getConfiguration().getSerializationType());
+        return StringUtils.startsWith(agent.getConfiguration().getSerializationType(), SERIALIZATION_TYPE);
     }
 
     /**

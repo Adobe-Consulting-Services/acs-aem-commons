@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 - Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
@@ -69,9 +67,7 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
     public void excute() throws RepositoryException, PackageException, IOException, ReplicationException {
 
         boolean succeeded = false;
-        ResourceResolver resolver = null;
-        try {
-            resolver = ConfigurationUpdateListener.getResourceResolver(resolverFactory);
+        try (ResourceResolver resolver = ConfigurationUpdateListener.getResourceResolver(resolverFactory)){
 
             Session session = resolver.adaptTo(Session.class);
 
@@ -79,25 +75,23 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
             PackageId packageId = new PackageId(packagePath);
 
             // check if the package exists
-            JcrPackage jcrPackage = pkgMgr.open(packageId);
-            if (jcrPackage == null || jcrPackage.getNode() == null) {
-                log.warn("Package at path " + packagePath + " does not exist");
-                throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
+            try (final JcrPackage jcrPackage = pkgMgr.open(packageId)) {
+                if (jcrPackage == null || jcrPackage.getNode() == null) {
+                    log.warn("Package at path '{}' does not exist", packagePath);
+                    throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
+                }
+
+                log.debug("Assembling package {}", packagePath);
+                pkgMgr.assemble(jcrPackage, null);
+
+                log.debug("Replicating package {}", packagePath);
+                replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
+
+                log.debug("Package {} replicated successfully!", packagePath);
+                fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
+                succeeded = true;
             }
-
-            log.debug("Assembling package {}", packagePath);
-            pkgMgr.assemble(jcrPackage, null);
-
-            log.debug("Replicating package {}", packagePath);
-            replicator.replicate(session, ReplicationActionType.ACTIVATE, jcrPackage.getNode().getPath());
-
-            log.debug("Package {} replicated successfully!", packagePath);
-            fireEvent(OSGI_EVENT_REPLICATED_TOPIC);
-            succeeded = true;
         } finally {
-            if(resolver != null){
-                resolver.close();
-            }
             if(!succeeded){
                 fireEvent(OSGI_EVENT_FAILED_TOPIC);
             }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic.impl.granite;
 
 import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticMetaDataMap;
+import com.adobe.granite.workflow.exec.InboxItem;
 import com.adobe.granite.workflow.exec.Status;
 import com.adobe.granite.workflow.exec.WorkItem;
 import com.adobe.granite.workflow.exec.Workflow;
@@ -28,38 +27,92 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.model.WorkflowNode;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
-public class SyntheticWorkItem implements WorkItem {
+public class SyntheticWorkItem implements InvocationHandler {
     private static final String CURRENT_ASSIGNEE = "Synthetic Workflow";
     private final UUID uuid = UUID.randomUUID();
     private Date timeStarted = null;
     private Date timeEnded = null;
+    private Date dueTime = null;
+    private Date progressBeginTime = null;
     private Workflow workflow;
 
     private final WorkflowData workflowData;
 
     private MetaDataMap metaDataMap = new SyntheticMetaDataMap();
+    private InboxItem.Priority priority = null;
 
-    public SyntheticWorkItem(final WorkflowData workflowData) {
+    private SyntheticWorkItem(final WorkflowData workflowData) {
         this.workflowData = workflowData;
         this.timeStarted = new Date();
     }
 
+    public static SyntheticWorkItem createSyntheticWorkItem(WorkflowData workflowData) {
+        return new SyntheticWorkItem(workflowData);
+    }
+
     @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        String methodName = method.getName();
+        switch (methodName) {
+            case "getTimeStarted":
+                return getTimeStarted();
+            case "getTimeEnded":
+                return getTimeEnded();
+            case "getWorkflow":
+                return getWorkflow();
+            case "getNode":
+                return getNode();
+            case "getId":
+                return getId();
+            case "getWorkflowData":
+                return getWorkflowData();
+            case "getCurrentAssignee":
+                return getCurrentAssignee();
+            case "setDueTime":
+                if (args.length > 0) {
+                    setDueTime((Date) args[0]);
+                }
+                return new Object();
+            case "setProgressBeginTime":
+                setProgressBeginTime((Date) args[0]);
+                return new Object();
+            case "setPriority":
+                setPriority((InboxItem.Priority) args[0]);
+                return new Object();
+            case "setTimeEnded":
+                this.setTimeEnded((Date) args[0]);
+                return new Object();
+            case "getMetaDataMap":
+                return getMetaDataMap();
+            default:
+                throw new UnsupportedOperationException("GRANITE SYNTHETICWORKFLOW ITEM >> NO IMPLEMENTATION FOR " + methodName);
+        }
+    }
+
     public final String getId() {
         return uuid.toString() + "_" + this.getWorkflowData().getPayload();
     }
 
-    @Override
     public final Date getTimeStarted() {
         return this.timeStarted == null ? null : (Date) this.timeStarted.clone();
     }
 
-    @Override
     public final Date getTimeEnded() {
         return this.timeEnded == null ? null : (Date) this.timeEnded.clone();
+    }
+
+    public Date getDueTime() {
+        return this.dueTime == null ? null : (Date) this.dueTime.clone();
+    }
+
+    public Date getProgressBeginTime() {
+        return this.progressBeginTime == null ? null : (Date) this.progressBeginTime.clone();
     }
 
     public final void setTimeEnded(final Date timeEnded) {
@@ -70,14 +123,24 @@ public class SyntheticWorkItem implements WorkItem {
         }
     }
 
-    @Override
     public final WorkflowData getWorkflowData() {
         return this.workflowData;
     }
 
-    @Override
     public final String getCurrentAssignee() {
         return CURRENT_ASSIGNEE;
+    }
+
+    public void setDueTime(Date date) {
+        dueTime = Optional.ofNullable(date).map(date1 -> (Date) date1.clone()).orElse(null);
+    }
+
+    public void setProgressBeginTime(Date date) {
+        progressBeginTime = Optional.ofNullable(date).map(date1 -> (Date) date1.clone()).orElse(null);
+    }
+
+    public void setPriority(InboxItem.Priority priority) {
+        this.priority = priority;
     }
 
     /**
@@ -86,39 +149,34 @@ public class SyntheticWorkItem implements WorkItem {
      *
      * @return the WorkItem's MetaDataMap
      */
-    @Override
     public final MetaDataMap getMetaDataMap() {
         return this.metaDataMap;
     }
 
-    @Override
     public final Workflow getWorkflow() {
         return this.workflow;
     }
 
-    public final void setWorkflow(final SyntheticWorkflow workflow) {
-        workflow.setActiveWorkItem(this);
+    public final void setWorkflow(final WorkItem proxy, final SyntheticWorkflow workflow) {
+        workflow.setActiveWorkItem(proxy);
         this.workflow = workflow;
     }
 
-    @Override
     public Status getStatus() {
         return Status.ACTIVE;
     }
 
     /* Unimplemented Methods */
 
-    @Override
     public final WorkflowNode getNode() {
         return null;
     }
 
-    @Override
+    @SuppressWarnings("java:S1192")
     public String getItemType() {
         return "Synthetic Workflow";
     }
 
-    @Override
     public String getItemSubType() {
         return null;
     }
@@ -129,5 +187,9 @@ public class SyntheticWorkItem implements WorkItem {
         } else {
             return null;
         }
+    }
+
+    public InboxItem.Priority getPriority() {
+        return priority;
     }
 }

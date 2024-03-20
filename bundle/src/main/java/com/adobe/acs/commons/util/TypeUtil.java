@@ -1,46 +1,43 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.lang.ClassUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @ProviderType
 public final class TypeUtil {
@@ -78,40 +75,14 @@ public final class TypeUtil {
     }
 
     /**
-     * Converts a JSONObject to a simple Map. This will only work properly for
-     * JSONObjects of depth 1.
-     * <p/>
-     * Resulting map will be type'd <String, T> where T is the type of the second parameter (klass)
-     *
-     * @param json
-     * @param klass
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Map<String, T> toMap(JSONObject json, Class<T> klass) throws JSONException {
-        final HashMap<String, T> map = new HashMap<String, T>();
-        final List<?> keys = IteratorUtils.toList(json.keys());
-
-        for (final Object key : keys) {
-            final String strKey = key.toString();
-            final Object obj = json.get(strKey);
-            if (klass.isInstance(obj)) {
-                // Only add objects of this type
-                map.put(strKey, (T) obj);
-            }
-        }
-
-        return map;
-    }
-
-    /**
      * Convenience wrapper for toMap(jsonObj, Object.class).
      *
      * @param json
      * @return
      */
-    public static Map<String, Object> toMap(JSONObject json) throws JSONException {
-        return toMap(json, Object.class);
+    public static Map<String, Object> toMap(JsonObject json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, Map.class);
     }
 
     /**
@@ -185,7 +156,8 @@ public final class TypeUtil {
         } else if (StringUtils.equalsIgnoreCase("false", data)) {
             return klass.cast(Boolean.FALSE);
         } else if (JSON_DATE.matcher(data).matches()) {
-            return klass.cast(ISODateTimeFormat.dateTimeParser().parseDateTime(data).toDate());
+            long epochSeconds = OffsetDateTime.parse(data).toInstant().toEpochMilli();
+            return klass.cast(new Date(epochSeconds));
         } else {
             return klass.cast(data);
         }
@@ -267,7 +239,7 @@ public final class TypeUtil {
     }
 
     /**
-     * Transforms a Map of <String, ?> into a ValueMap.
+     * Transforms a Map of &lgt;String, ?&gt; into a ValueMap.
      *
      * @param map
      * @return a ValueMap of the parameter map

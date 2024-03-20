@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,17 +29,19 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.WorkflowHelper;
@@ -52,8 +52,11 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 import junitx.util.PrivateAccessor;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class SetReplicationStatusProcessTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     WorkflowHelper workflowHelper;
@@ -82,10 +85,10 @@ public class SetReplicationStatusProcessTest {
     String workflowPayload = "/content/workflow-payload";
 
     @Spy
-    SetReplicationStatusProcess setReplicationStatusProcess = new SetReplicationStatusProcess();;
+    SetReplicationStatusProcess setReplicationStatusProcess = new SetReplicationStatusProcess();
 
     @Before
-    public void setUp() throws Exception {		
+    public void setUp() throws Exception {
         when(workflowHelper.getResourceResolver(workflowSession)).thenReturn(resourceResolver);
 
         when(workItem.getWorkflowData()).thenReturn(workflowData);
@@ -110,7 +113,7 @@ public class SetReplicationStatusProcessTest {
 
         CalendarMatcher calMatch = new CalendarMatcher("2017-04-21T15:02");
 
-        verify(replicationStatusManager).setReplicationStatus(any(), eq("customUser"), argThat(calMatch), eq(ReplicationStatusManager.Status.valueOf("ACTIVATED")), eq(workflowPayload));
+        verify(replicationStatusManager).setReplicationStatus(any(), eq(Collections.emptySet()), eq("customUser"), argThat(calMatch), eq(ReplicationStatusManager.Status.valueOf("ACTIVATED")), eq(workflowPayload));
     }
 
     @Test
@@ -120,7 +123,7 @@ public class SetReplicationStatusProcessTest {
 
         setReplicationStatusProcess.execute(workItem, workflowSession, metadataMap);
 
-        verify(replicationStatusManager, never()).setReplicationStatus(any(), any(), any(), any(), anyString());
+        verify(replicationStatusManager, never()).setReplicationStatus(any(), eq(Collections.emptySet()), any(), any(), any(), anyString());
     }
 
     @Test
@@ -134,38 +137,36 @@ public class SetReplicationStatusProcessTest {
 
         CalendarMatcher calMatch = new CalendarMatcher(now);
 
-        verify(replicationStatusManager).setReplicationStatus(any(), eq("migration"), argThat(calMatch), any(), anyString());
+        verify(replicationStatusManager).setReplicationStatus(any(), eq(Collections.emptySet()), eq("migration"), argThat(calMatch), any(), anyString());
     }
 
-}
+    private static class CalendarMatcher implements ArgumentMatcher<Calendar> {
 
-class CalendarMatcher extends ArgumentMatcher<Calendar> {
+        private Calendar leftCal;
 
-    private Calendar leftCal;
-
-    public CalendarMatcher(String date) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(sdf.parse(date));
-        this.leftCal = cal;
-    }
-
-    public CalendarMatcher(Calendar cal) throws ParseException {
-        this.leftCal = cal;
-    }
-
-    @Override
-    public boolean matches(Object argument) {
-        if (argument instanceof Calendar) {
-            Calendar rightCal = (Calendar)argument;
-            return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR) &&
-                    leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH) &&
-                    leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE) &&
-                    leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR) &&
-                    leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
-        } else {
-            return false;
+        public CalendarMatcher(String date) throws ParseException {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(sdf.parse(date));
+            this.leftCal = cal;
         }
+
+        public CalendarMatcher(Calendar cal) throws ParseException {
+            this.leftCal = cal;
+        }
+
+        @Override
+        public boolean matches(Calendar argument) {
+            Calendar rightCal = (Calendar) argument;
+            return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR)
+                    && leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH)
+                    && leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE)
+                    && leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR)
+                    && leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
+        }
+
     }
 
 }
+
+

@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +17,10 @@
  */
 package com.adobe.acs.commons.functions;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
@@ -33,6 +38,10 @@ import aQute.bnd.annotation.ConsumerType;
 @FunctionalInterface
 @SuppressWarnings("squid:S00112")
 public interface CheckedBiConsumer<T, U> {
+
+    static <T,U> CheckedBiConsumer<T,U> from(BiConsumer<T,U> handler) {
+        return handler == null ? null : (t, u) -> handler.accept(t, u);
+    }
 
     /**
      * Performs this operation on the given arguments.

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.util.ModeUtil;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 import org.apache.commons.lang3.ArrayUtils;
@@ -76,14 +75,16 @@ import java.util.Scanner;
 })
 @Service(value = Runnable.class)
 public class HealthCheckStatusEmailer implements Runnable {
-    private final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
+    private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
 
-    private static final Object LOCK = new Object();
-
-    private Calendar nextEmailTime = Calendar.getInstance();
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+    
+    private volatile Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */
 
@@ -199,12 +200,11 @@ public class HealthCheckStatusEmailer implements Runnable {
         log.info("Executed ACS Commons Health Check E-mailer scheduled service in [ {} ms ]", timeTaken);
 
         if (!sendEmailOnlyOnFailure || failure.size() > 0) {
-            if (nextEmailTime == null || Calendar.getInstance().after(nextEmailTime)) {
+            Calendar now = Calendar.getInstance();
+            if (nextEmailTime == null || now.equals(nextEmailTime) || now.after(nextEmailTime)) {
                 sendEmail(success, failure, timeTaken);
-                synchronized (LOCK) {
-                    nextEmailTime = Calendar.getInstance();
-                    nextEmailTime.add(Calendar.MINUTE, throttleInMins);
-                }
+                now.add(Calendar.MINUTE, throttleInMins);
+                nextEmailTime = now;
             } else {
                 log.info("Did not send e-mail as it did not meet the e-mail throttle configured time of a [ {} ] minute quiet period. Next valid time to e-mail is [ {} ]", throttleInMins, nextEmailTime.getTime());
             }
@@ -375,6 +375,7 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @return the result of the command
      * @throws IOException
      */
+    @SuppressWarnings("squid:S2076") // execCommand comes from a trusted source
     private String execReadToString(String execCommand) throws IOException {
         Process proc = Runtime.getRuntime().exec(execCommand);
         try (InputStream stream = proc.getInputStream()) {

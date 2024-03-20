@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.TransientWorkflowUtil;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl;
@@ -43,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**
@@ -64,7 +65,7 @@ public class InitFormServlet extends SlingAllMethodsServlet {
     private static final String KEY_USER_EVENT_DATA = "userEventData";
 
     @Reference
-    private WorkflowService workflowService;
+    private transient WorkflowService workflowService;
 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -100,7 +101,7 @@ public class InitFormServlet extends SlingAllMethodsServlet {
             final WorkflowModel[] workflowModels = workflowSession.getModels();
 
             for (final WorkflowModel workflowModel : workflowModels) {
-                boolean transientWorkflow = isTransient(request.getResourceResolver(), workflowModel.getId());
+                boolean transientWorkflow = TransientWorkflowUtil.isTransient(request.getResourceResolver(), workflowModel.getId());
                 String workflowLabel = workflowModel.getTitle();
                 if (transientWorkflow) {
                     workflowLabel += " ( Transient )";
@@ -114,16 +115,12 @@ public class InitFormServlet extends SlingAllMethodsServlet {
         } catch (WorkflowException e) {
             log.error("Could not create workflow model drop-down.", e);
 
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not collect workflows",
                     e.getMessage());
         }
     }
 
-    protected boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
-        Resource resource = resourceResolver.getResource(workflowModelId).getParent();
-        return resource.getValueMap().get("transient", false);
-    }
 
     private JsonObject withLabelValue(String label, String value) {
         JsonObject obj = new JsonObject();

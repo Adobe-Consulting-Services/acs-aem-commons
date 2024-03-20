@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.reports.models;
 
@@ -23,6 +21,7 @@ import java.util.Calendar;
 
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -53,30 +52,27 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
   @OSGiService
   private Replicator replicator;
 
+  @OSGiService
+  private ReplicationStatusManager replicationStatusManager;
+
   @Self
   private Resource resource;
 
   private Calendar getLastModified(ResourceResolver resourceResolver, String pageContentPath) {
     Resource pageContent = resourceResolver.getResource(pageContentPath);
     Calendar lastModified = null;
-    if (resource != null) {
+    if (pageContent != null) {
       lastModified = pageContent.getValueMap().get(NameConstants.PN_PAGE_LAST_MOD, Calendar.class);
     }
     return lastModified;
   }
 
-  public String getReplicationStatus() {
+  private String getReplicationStatus(Resource targetResource) {
+    final Resource replicationResource = replicationStatusManager.getReplicationStatusResource(targetResource.getPath(), targetResource.getResourceResolver());
 
-    Session session = resource.getResourceResolver().adaptTo(Session.class);
-    String path = resource.getPath();
-    if (path.contains(JcrConstants.JCR_CONTENT)) {
-      path = StringUtils.substringAfter(path, JcrConstants.JCR_CONTENT) + JcrConstants.JCR_CONTENT;
-    } else {
-      path += "/" + JcrConstants.JCR_CONTENT;
-    }
+    log.debug("Getting replication status for {}", replicationResource.getPath());
 
-    log.debug("Getting replication status for {}", path);
-    ReplicationStatus status = replicator.getReplicationStatus(session, path);
+    ReplicationStatus status = replicationResource.adaptTo(ReplicationStatus.class);
 
     Status rStatus = Status.NOT_ACTIVATED;
     if (status != null) {
@@ -85,22 +81,31 @@ public class PageReplicationStatusModel implements ReportCellCSVExporter {
       } else if (status.isPending()) {
         rStatus = Status.IN_PROGRESS;
       } else if (status.isActivated()) {
-        Calendar lastModified = getLastModified(resource.getResourceResolver(), path);
+        Calendar lastModified = getLastModified(targetResource.getResourceResolver(), replicationResource.getPath());
         if (lastModified != null && status.getLastPublished() != null
-            && lastModified.after(status.getLastPublished())) {
+                && lastModified.after(status.getLastPublished())) {
           rStatus = Status.MODIFIED;
         } else {
           rStatus = Status.ACTIVATED;
         }
       }
     }
-    
+
     log.debug("Retrieved replication status {}", rStatus);
     return rStatus.toString();
+
+  }
+
+  public String getReplicationStatus() {
+    return getReplicationStatus(resource);
   }
 
   @Override
   public String getValue(Object result) {
-    return getReplicationStatus();
+    if (result instanceof Resource) {
+      return getReplicationStatus((Resource) result);
+    } else {
+      return "UNKNOWN";
+    }
   }
 }

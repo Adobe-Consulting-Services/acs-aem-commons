@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.impl;
 
@@ -74,7 +72,7 @@ public final class FileImporter implements Importer {
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
+    @SuppressWarnings({"squid:S3776", "findsecbugs:PATH_TRAVERSAL_IN"}) // dataSource comes from trusted source
     public void importData(String schemeValue, String dataSource, Resource target) {
         if (scheme.equals(schemeValue)) {
             final File file = new File(dataSource);
@@ -87,44 +85,48 @@ public final class FileImporter implements Importer {
                 final Node targetParent;
                 final String targetName;
 
-                Node node = target.adaptTo(Node.class);
-                if (node != null) {
-                    try (FileInputStream stream = new FileInputStream(file)) {
-                        if (node.isNodeType(JcrConstants.NT_FILE)) {
-                            // assume that we are intending to replace this file
-                            targetParent = node.getParent();
-                            targetName = node.getName();
-                            Calendar nodeLastMod = JcrUtils.getLastModified(node);
-                            if (!nodeLastMod.before(fileLastMod)) {
-                                log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
-                                        dataSource, target);
-                                return;
-                            }
-                        } else {
-                            // assume that we are creating a new file under the current node
-                            targetParent = node;
-                            targetName = fileName;
-                            if (targetParent.hasNode(targetName)) {
-                                Node targetNode = targetParent.getNode(targetName);
-                                Calendar nodeLastMod = JcrUtils.getLastModified(targetNode);
+                if (target != null) {
+                    Node node = target.adaptTo(Node.class);
+                    if (node != null) {
+                        try (FileInputStream stream = new FileInputStream(file)) {
+                            if (node.isNodeType(JcrConstants.NT_FILE)) {
+                                // assume that we are intending to replace this file
+                                targetParent = node.getParent();
+                                targetName = node.getName();
+                                Calendar nodeLastMod = JcrUtils.getLastModified(node);
                                 if (!nodeLastMod.before(fileLastMod)) {
                                     log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
-                                            dataSource, targetNode.getPath());
+                                            dataSource, target);
                                     return;
                                 }
+                            } else {
+                                // assume that we are creating a new file under the current node
+                                targetParent = node;
+                                targetName = fileName;
+                                if (targetParent.hasNode(targetName)) {
+                                    Node targetNode = targetParent.getNode(targetName);
+                                    Calendar nodeLastMod = JcrUtils.getLastModified(targetNode);
+                                    if (!nodeLastMod.before(fileLastMod)) {
+                                        log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
+                                                dataSource, targetNode.getPath());
+                                        return;
+                                    }
+                                }
                             }
+    
+                            JcrUtils.putFile(targetParent, targetName, mimeType, stream);
+                            node.getSession().save();
+                        } catch (RepositoryException e) {
+                            throw new ImportException("Unable to import from file '" + dataSource + "' to '"
+                                    + target.getPath() + "'", e);
+                        } catch (IOException e) {
+                            throw new ImportException("Unexpected IOException while importing", e);
                         }
-
-                        JcrUtils.putFile(targetParent, targetName, mimeType, stream);
-                        node.getSession().save();
-                    } catch (RepositoryException e) {
-                        throw new ImportException("Unable to import from file '" + dataSource + "' to '"
-                                + target.getPath() + "'", e);
-                    } catch (IOException e) {
-                        throw new ImportException("Unexpected IOException while importing", e);
+                    } else {
+                        log.warn("Target '{}' is not a JCR node. Skipping import from '{}'.", target.getPath(), dataSource);
                     }
                 } else {
-                    log.warn("Target '{}' is not a JCR node. Skipping import from '{}'.", target.getPath(), dataSource);
+                    log.warn("Target resource null. Skipping import from '{}'.", dataSource);
                 }
             } else {
                 log.warn("File at '{}' does not exist. Skipping import.", dataSource);

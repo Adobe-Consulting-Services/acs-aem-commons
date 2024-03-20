@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 - Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.NotCompliantMBeanException;
@@ -32,11 +31,13 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
+import org.apache.sling.api.resource.observation.ResourceChange;
+import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -46,10 +47,10 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.util.ResourceServiceManager;
 import com.adobe.acs.commons.replication.packages.automatic.AutomaticPackageReplicatorMBean;
 import com.adobe.acs.commons.replication.packages.automatic.model.AutomaticPackageReplicatorModel;
 import com.adobe.acs.commons.replication.packages.automatic.model.AutomaticPackageReplicatorModel.TRIGGER;
+import com.adobe.acs.commons.util.ResourceServiceManager;
 import com.day.cq.replication.Replicator;
 
 /**
@@ -57,14 +58,14 @@ import com.day.cq.replication.Replicator;
  * manages the Automatic Package Replicator jobs based on the updates.
  */
 @Component(immediate = true)
-@Service(value = { EventHandler.class, AutomaticPackageReplicatorMBean.class })
+// Note: We implement EventHandler because our superclass does, but we get notifications via the new ResourceChangeListener API
+@Service(value = { ResourceChangeListener.class, AutomaticPackageReplicatorMBean.class })
 @Properties({
-        @Property(name = EventConstants.EVENT_TOPIC, value = { SlingConstants.TOPIC_RESOURCE_ADDED,
-                SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_REMOVED }),
         @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Automatic Package Replicator"),
-        @Property(name = EventConstants.EVENT_FILTER, value = "(path=/etc/acs-commons/automatic-package-replication/*/jcr:content)") })
+        @Property(name=ResourceChangeListener.CHANGES, value= {"ADDED","CHANGED","REMOVED"}),
+        @Property(name = ResourceChangeListener.PATHS, value = "glob:/etc/acs-commons/automatic-package-replication/**/jcr:content") })
 public class ConfigurationUpdateListener extends ResourceServiceManager
-        implements EventHandler, AutomaticPackageReplicatorMBean {
+        implements ResourceChangeListener, ExternalResourceChangeListener, AutomaticPackageReplicatorMBean {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurationUpdateListener.class);
 
@@ -158,7 +159,7 @@ public class ConfigurationUpdateListener extends ResourceServiceManager
         AutomaticPackageReplicatorModel model = new AutomaticPackageReplicatorModel(config);
         AutomaticPackageReplicatorJob job = new AutomaticPackageReplicatorJob(resourceResolverFactory, replicator,
                 eventAdmin, model.getPackagePath());
-        ServiceRegistration serviceRegistration = null;
+        ServiceRegistration<?> serviceRegistration = null;
         props.put(TRIGGER_KEY, model.getTrigger().name());
         if (AutomaticPackageReplicatorModel.TRIGGER.cron == model.getTrigger()) {
             if(StringUtils.isEmpty(model.getCronTrigger())){
@@ -181,5 +182,11 @@ public class ConfigurationUpdateListener extends ResourceServiceManager
                     props);
         }
         return serviceRegistration;
+    }
+    
+    @Override
+    public void onChange(List<ResourceChange> changes) {
+        // We don't care what exactly changed, a cache refresh is always appropriate.
+        refreshCache();
     }
 }

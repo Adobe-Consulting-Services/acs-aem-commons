@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +17,18 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedFunction;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
 import org.apache.sling.api.resource.Resource;
 
 public class SimpleFilteringResourceVisitor {
@@ -31,30 +38,50 @@ public class SimpleFilteringResourceVisitor {
     }
 
     TraversalMode mode = TraversalMode.BREADTH;
-    BiConsumer<Map.Entry<String, Object>, Integer> propertyVisitor = null;
-    BiConsumer<Resource, Integer> resourceVisitor = null;
-    BiConsumer<Resource, Integer> leafVisitor = null;
+    CheckedBiConsumer<Map.Entry<String, Object>, Integer> propertyVisitor = null;
+    CheckedBiConsumer<Resource, Integer> resourceVisitor = null;
+    CheckedBiConsumer<Resource, Integer> leafVisitor = null;
     LinkedList<Resource> stack = new LinkedList<>();
-    Function<String, Boolean> propertyFilter = s -> true;
-    Function<Resource, Boolean> traversalFilter = r -> true;
+    CheckedFunction<String, Boolean> propertyFilter = s -> true;
+    CheckedFunction<Resource, Boolean> traversalFilter = r -> true;
 
     public void setPropertyFilter(Function<String, Boolean> filter) {
+        propertyFilter = CheckedFunction.from(filter);
+    }
+
+    public void setPropertyFilterChecked(CheckedFunction<String, Boolean> filter) {
         propertyFilter = filter;
     }
 
     public final void setTraversalFilter(Function<Resource, Boolean> filter) {
+        traversalFilter = CheckedFunction.from(filter);
+    }
+
+    public final void setTraversalFilterChecked(CheckedFunction<Resource, Boolean> filter) {
         traversalFilter = filter;
     }
 
     public final void setResourceVisitor(BiConsumer<Resource, Integer> handler) {
+        resourceVisitor = CheckedBiConsumer.from(handler);
+    }
+
+    public final void setResourceVisitorChecked(CheckedBiConsumer<Resource, Integer> handler) {
         resourceVisitor = handler;
     }
 
     public final void setLeafVisitor(BiConsumer<Resource, Integer> handler) {
+        leafVisitor = CheckedBiConsumer.from(handler);
+    }
+
+    public final void setLeafVisitorChecked(CheckedBiConsumer<Resource, Integer> handler) {
         leafVisitor = handler;
     }
 
     public final void setPropertyVisitor(BiConsumer<Map.Entry<String, Object>, Integer> handler) {
+        propertyVisitor = CheckedBiConsumer.from(handler);
+    }
+
+    public final void setPropertyVisitorChecked(CheckedBiConsumer<Map.Entry<String, Object>, Integer> handler) {
         propertyVisitor = handler;
     }
 
@@ -66,41 +93,67 @@ public class SimpleFilteringResourceVisitor {
         mode = TraversalMode.DEPTH;
     }
 
-    public void accept(final Resource head) {
+    public void accept(final Resource head) throws TraversalException {
         if (head == null) {
             return;
         }
-        
+
         stack.clear();
         stack.add(head);
 
         int headLevel = getDepth(head.getPath());
 
         while (!stack.isEmpty()) {
-            Resource res = stack.poll();
+            visitNodesInStack(headLevel);
+        }
+    }
 
-            int level = getDepth(res.getPath()) - headLevel;
+    private void visitNodesInStack(int headLevel) throws TraversalException {
+        Resource res = stack.poll();
 
-            if (propertyVisitor != null) {
-                res.getValueMap().entrySet().stream()
-                        .filter(e -> propertyFilter.apply(e.getKey()))
-                        .forEach(entry -> propertyVisitor.accept(entry, level));
-            }
+        int level = getDepth(res.getPath()) - headLevel;
 
+        if (propertyVisitor != null) {
+            visitProperties(res, level);
+        }
+
+        try {
             if (traversalFilter == null || traversalFilter.apply(res)) {
-                if (resourceVisitor != null) {
-                    resourceVisitor.accept(res, level);
-                }
-                switch (mode) {
-                    case BREADTH:
-                        stack.addAll(toList(res.getChildren()));
-                        break;
-                    default:
-                        stack.addAll(0, toList(res.getChildren()));
-                }
+                traverseChildren(res, level);
             } else if (leafVisitor != null) {
                 leafVisitor.accept(res, level);
             }
+        } catch (Exception e) {
+            throw new TraversalException(e);
+        }
+    }
+
+    private void visitProperties(Resource res, int level) throws TraversalException {
+        try {
+            for (Entry<String, Object> entry : res.getValueMap().entrySet()) {
+                if (propertyFilter == null || propertyFilter.apply(entry.getKey())) {
+                    propertyVisitor.accept(entry, level);
+                }
+            }
+        } catch (Exception e) {
+            throw new TraversalException(e);
+        }
+    }
+
+    private void traverseChildren(Resource res, int level) throws TraversalException {
+        if (resourceVisitor != null) {
+            try {
+                resourceVisitor.accept(res, level);
+            } catch (Exception e) {
+                throw new TraversalException(e);
+            }
+        }
+        switch (mode) {
+            case BREADTH:
+                stack.addAll(toList(res.getChildren()));
+                break;
+            default:
+                stack.addAll(0, toList(res.getChildren()));
         }
     }
 
@@ -108,8 +161,8 @@ public class SimpleFilteringResourceVisitor {
         return StreamSupport.stream(iterable.spliterator(), false)
                 .collect(Collectors.toList());
     }
-    
+
     public static int getDepth(String path) {
         return (int) path.chars().filter(c -> c == '/').count() - 1;
-    }    
+    }
 }

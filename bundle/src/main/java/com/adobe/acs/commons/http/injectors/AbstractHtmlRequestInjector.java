@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +14,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.http.injectors;
 
-import com.adobe.acs.commons.util.BufferingResponse;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -37,10 +32,19 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Dictionary;
-import java.util.Hashtable;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.util.BufferedHttpServletResponse;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 
 public abstract class AbstractHtmlRequestInjector implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AbstractHtmlRequestInjector.class);
@@ -66,36 +70,35 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         // Prepare to capture the original response
-        final BufferingResponse originalResponse = new BufferingResponse(response);
+        try (BufferedHttpServletResponse originalResponse = new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
-        // Process and capture the original response
-        filterChain.doFilter(request, originalResponse);
+            // Process and capture the original response
+            filterChain.doFilter(request, originalResponse);
 
-        // Get contents
-        final String originalContents = originalResponse.getContents();
+            // Get contents
+            final String originalContents = originalResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? originalResponse.getBufferedServletOutput().getBufferedString() : null;
 
-        if (originalContents != null 
-                && StringUtils.contains(response.getContentType(), "html")) {
+            if (originalContents != null 
+                    && StringUtils.contains(response.getContentType(), "html")) {
 
-            final int injectionIndex = getInjectIndex(originalContents);
-            
-            if (injectionIndex != -1) {
-                final PrintWriter printWriter = response.getWriter();
+                final int injectionIndex = getInjectIndex(originalContents);
+                
+                if (injectionIndex != -1) {
+                    // prevent the captured response from being given out a 2nd time via the implicit close()
+                    originalResponse.setFlushBufferOnClose(false);
+                    final PrintWriter printWriter = response.getWriter();
 
-                // Write all content up to the injection index
-                printWriter.write(originalContents.substring(0, injectionIndex));
+                    // Write all content up to the injection index
+                    printWriter.write(originalContents.substring(0, injectionIndex));
 
-                // Inject the contents; Pass the request/response - consumer can use as needed
-                inject(request, response, printWriter);
+                    // Inject the contents; Pass the request/response - consumer can use as needed
+                    inject(request, response, printWriter);
 
-                // Write all content after the injection index
-                printWriter.write(originalContents.substring(injectionIndex));
-                return;
+                    // Write all content after the injection index
+                    printWriter.write(originalContents.substring(injectionIndex));
+                    return;
+                }
             }
-        }
-
-        if (originalContents != null) {
-            response.getWriter().write(originalContents);
         }
     }
 
@@ -118,14 +121,14 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         }
 
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
-        
+
         if (!StringUtils.equalsIgnoreCase("get", request.getMethod())) {
             // Only inject on GET requests
             return false;
         } else if (StringUtils.equals(request.getHeader("X-Requested-With"), "XMLHttpRequest")) {
             // Do not inject into XHR requests
             return false;
-        } else if (StringUtils.contains(request.getPathInfo(), ".") 
+        } else if (StringUtils.contains(request.getPathInfo(), ".")
                 && !StringUtils.contains(request.getPathInfo(), ".html")) {
             // If extension is provided it must be .html
             return false;
@@ -135,8 +138,19 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         } else if (StringUtils.endsWith(request.getHeader("Referer"), "/cf")) {
             // Do not apply to pages loaded in the Classic Content Finder
             return false;
+        } else if (StringUtils.startsWith(request.getPathInfo(), "/libs/granite/core/content/login.html")) {
+            // Do not apply on login screen
+            return false;
         }
-        
+
+        // Do not apply when exporting Target Offers
+        if (request instanceof SlingHttpServletRequest) {
+            final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+            if (ArrayUtils.contains(slingRequest.getRequestPathInfo().getSelectors(), "atoffer")) {
+                return false;
+            }
+        }
+
         // Add HTML check
         if (log.isTraceEnabled()) {
             log.trace("Injecting HTML via AbstractHTMLRequestInjector");

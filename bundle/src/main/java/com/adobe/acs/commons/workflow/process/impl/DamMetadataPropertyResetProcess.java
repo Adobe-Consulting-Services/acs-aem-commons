@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.process.impl;
@@ -41,7 +39,7 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,11 +75,9 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
 
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        ResourceResolver resourceResolver = null;
         String wfPayload = null;
 
-        try {
-            resourceResolver = this.getResourceResolver(workflowSession.getSession());
+        try ( ResourceResolver resourceResolver = this.getResourceResolver(workflowSession.getSession()) ){
             wfPayload = (String) workItem.getWorkflowData().getPayload();
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, wfPayload);
@@ -100,8 +96,8 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                 Resource metadataResource = resourceResolver.getResource(metadataPath);
 
                 if (metadataResource == null) {
-                    log.error("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
-                    throw new WorkflowException("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
+                    String msg = String.format("Could not find the metadata node for Asset [ %s ]", asset.getPath());
+                    throw new WorkflowException(msg);
                 }
 
                 final ModifiableValueMap mvm = metadataResource.adaptTo(ModifiableValueMap.class);
@@ -130,10 +126,6 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
             throw new WorkflowException("Could not get a ResourceResolver object from the WorkflowSession", e);
         } catch (RepositoryException e) {
             throw new WorkflowException(String.format("Could not find the payload for '%s'", wfPayload), e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

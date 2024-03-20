@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +17,30 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.data.Variant;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 import com.adobe.acs.commons.util.datadefinitions.impl.BasicResourceDefinition;
 import com.day.cq.dam.api.DamConstants;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import javax.jcr.RepositoryException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.poi.ss.usermodel.Cell;
@@ -38,20 +52,9 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Creates Asset Folder definitions (node and Title) based on a well defined Excel document.
@@ -126,7 +129,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
         instance.defineCriticalAction("Create Asset Folders", rr, this::createAssetFolders);
     }
 
-    volatile HashMap<String, AssetFolderDefinition> assetFolderDefinitions = new LinkedHashMap<>();
+    transient volatile HashMap<String, AssetFolderDefinition> assetFolderDefinitions = new LinkedHashMap<>();
 
     /**
      * Parses the input Excel file and creates a list of AssetFolderDefinition objects to process.
@@ -181,7 +184,11 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
      * @throws IllegalArgumentException
      */
     private String parseAssetFolderCell(final Cell cell, final String previousAssetFolderPath) throws IllegalArgumentException {
-        final String cellValue = StringUtils.trimToNull(cell.getStringCellValue());
+        // #1791 - Cannot read from non-String type fields.
+        // Note: switch from using cell.setCellType because it breaks in newer versions of POI
+        // Use variant to proxy the value as it can deal with POI 3.x -> 4.x changes
+        Variant var = new Variant(cell, Locale.getDefault());
+        final String cellValue = StringUtils.trimToNull(var.toString());
 
         if (StringUtils.isNotBlank(cellValue)) {
 
@@ -308,9 +315,9 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     /** Reporting **/
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
 
-    private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
+    private final transient ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private enum ReportColumns {
         STATUS,

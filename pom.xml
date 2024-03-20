@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
@@ -7,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>3.14.11-SNAPSHOT</version>
+    <version>6.4.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -21,16 +39,28 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+
     <organization>
-        <name>Adobe</name>
-        <url>http://www.adobe.com/</url>
+        <name>AEM developer community</name>
+        <url>https://adobe-consulting-services.github.io/acs-aem-commons/</url>
     </organization>
+
     <scm>
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
         <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
         <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
-        <tag>HEAD</tag>
+        <tag>acs-aem-commons-6.3.0</tag>
     </scm>
+
+    <!-- Do not remove developers section - this is required to release to maven central -->
+    <developers>
+        <developer>
+            <id>acs-aem-commons</id>
+            <organization>Adobe Community Software</organization>
+            <organizationUrl>https://adobe-consulting-services.github.io/</organizationUrl>
+            <url>https://adobe-consulting-services.github.io/acs-aem-commons/</url>
+        </developer>
+    </developers>
 
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
@@ -38,33 +68,220 @@
     <properties>
         <crx.host>localhost</crx.host>
         <crx.port>4502</crx.port>
+        <crx.user>admin</crx.user>
+        <crx.password>admin</crx.password>
+        <crx.protocol>http</crx.protocol>
         <crx.contextRoot />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
+        <sl4fj.version>1.7.25</sl4fj.version>
+        <oakpal.version>2.2.2</oakpal.version>
+        <bnd.version>6.4.0</bnd.version>
+        <!-- Supress CQRules:CQBP-84-\-dependencies -->
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml
+        </sonar.issue.ignore.multicriteria.e1.resourceKey>
+
+        <!-- the minimum AEM 6.5 version being supported -->
+        <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
+        <!-- the minimum AEMaaCS version being supported -->
+        <aem.sdk.api.version>2023.1.10675.20230113T110236Z-220900</aem.sdk.api.version>
+
+        <jacoco.version>0.8.11</jacoco.version>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
+        <!-- affects both m-compiler-p and m-javadoc-p-->
+        <maven.compiler.release>8</maven.compiler.release>
+        <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
+        <project.build.outputTimestamp>1708638825</project.build.outputTimestamp>
     </properties>
 
     <build>
         <pluginManagement>
             <plugins>
+                <!-- all standard Maven plugins (in group org.apache.maven.plugins) -->
                 <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.17.0</version>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <configuration>
+                        <archive>
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.12.1</version>
+                    <configuration>
+                        <showDeprecation>true</showDeprecation>
+                        <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.3.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version>
                     <dependencies>
+                        <!-- due to https://issues.apache.org/jira/browse/SUREFIRE-2240 need to override transitive plugin dependencies of junit-jupiter-engine as well -->
                         <dependency>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-simple</artifactId>
-                            <version>1.6.4</version>
+                          <groupId>org.junit.platform</groupId>
+                          <artifactId>junit-platform-engine</artifactId>
+                          <version>1.10.2</version>
+                        </dependency>
+                        <dependency>
+                          <groupId>org.opentest4j</groupId>
+                          <artifactId>opentest4j</artifactId>
+                          <version>1.3.0</version>
+                        </dependency>
+                        <dependency>
+                          <groupId>org.junit.platform</groupId>
+                          <artifactId>junit-platform-commons</artifactId>
+                          <version>1.10.2</version>
+                        </dependency>
+                        <dependency>
+                          <groupId>org.apiguardian</groupId>
+                          <artifactId>apiguardian-api</artifactId>
+                          <version>1.1.2</version>
+                        </dependency>
+                        <dependency>
+                          <groupId>org.junit.jupiter</groupId>
+                          <artifactId>junit-jupiter-api</artifactId>
+                          <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <!-- end overridden transitive deps of junit-jupiter-engine -->
+                        <dependency>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-engine</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.vintage</groupId>
+                            <artifactId>junit-vintage-engine</artifactId>
+                            <version>${junit.jupiter.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.6.3</version>
+                    <configuration>
+                        <excludePackageNames>
+                            *.impl
+                        </excludePackageNames>
+                        <additionalJOption>-Xdoclint:none</additionalJOption>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
                     <version>3.0.1</version>
-                    <extensions>true</extensions>
+                    <configuration>
+                        <releaseProfiles>release,cloud</releaseProfiles>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.release</groupId>
+                            <artifactId>maven-release-oddeven-policy</artifactId>
+                            <version>3.0.1</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <!-- Bnd Maven Plugin -->
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
+                    <executions>
+                        <execution>
+                            <id>bnd-process</id>
+                            <goals>
+                                <goal>bnd-process</goal>
+                            </goals>
+                            <configuration>
+                                <bnd><![CDATA[
+# a lot of bundle header are generated from pom elements by default: https://github.com/bndtools/bnd/tree/master/maven/bnd-maven-plugin#default-bundle-headers
+Bundle-Category: acs-aem-commons
+# export all versioned packages except for conditional ones (https://github.com/bndtools/bnd/issues/3721#issuecomment-579026778)
+-exportcontents: ${removeall;${packages;VERSIONED};${packages;CONDITIONAL}}
+# see https://issues.apache.org/jira/browse/SLING-8980
+-snapshot: SNAPSHOT
+# reproducible builds (https://github.com/bndtools/bnd/issues/3521)
+-noextraheaders: true
+# we cannot let bnd-maven-plugin generate it automatically, as Maven applies some inheritance logic which is incorrect
+Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
+# generate error (instead of warning) when exported package uses private (non-exported) reference
+-fixupmessages:"Export *,  has \\d+,  private references"; \
+    restrict:=warning; \
+    is:=error
+# enable plugins (https://bnd.bndtools.org/instructions/plugin.html)
+-plugin.models: org.apache.sling.bnd.models.ModelsScannerPlugin
+-plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
+# support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
+# paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
+-plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
+# support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
+-dsannotations-options: version;maximum=1.4.0,inherit
+-metatypeannotations-options: version;maximum=1.4.0
+# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
+Service-Component: OSGI-INF/*.xml
+                                ]]></bnd>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <!-- enable generating the manifest header for Sling Models, https://sling.apache.org/documentation/bundles/models.html#registration-of-sling-models-classes-via-bnd-plugin -->
+                        <dependency>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.bnd.models</artifactId>
+                            <version>1.0.0</version>
+                        </dependency>
+                        <!-- enable generating the 'Sling-ContextAware-Configuration-Classes' bundle header, https://sling.apache.org/documentation/bundles/context-aware-configuration/context-aware-configuration.html#context-aware-configuration-bnd-plugin -->
+                        <dependency>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
+                            <version>1.0.2</version>
+                        </dependency>
+                        <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
+                            with the Bnd process -->
+                        <dependency>
+                            <groupId>org.apache.felix</groupId>
+                            <artifactId>org.apache.felix.scr.bnd</artifactId>
+                            <version>1.9.6</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-baseline-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
                     <executions>
                         <execution>
                             <id>baseline</id>
@@ -75,96 +292,135 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
+                    <groupId>org.apache.sling</groupId>
+                    <artifactId>sling-maven-plugin</artifactId>
+                    <version>3.0.2</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+                        <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+                        <deploymentMethod>SlingPostServlet</deploymentMethod>
+                        <user>${crx.user}</user>
+                        <password>${crx.password}</password>
+                        <failOnError>true</failOnError>
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.5</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.sling</groupId>
-                    <artifactId>maven-sling-plugin</artifactId>
-                    <version>2.1.0</version>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>filevault-package-maven-plugin</artifactId>
+                    <version>1.3.6</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <group>adobe/consulting</group>
+                        <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                        <thumbnailImage>src/main/resources/thumbnail.png</thumbnailImage>
+                        <failOnUncoveredSourceFiles>true</failOnUncoveredSourceFiles>
+                        <validatorsSettings>
+                            <jackrabbit-filter>
+                                <options>
+                                    <validRoots>
+                                        /,/libs,/libs/core/wcm,/apps,/etc,/etc/clientlibs,/etc/dam/video,/etc/designs,/etc/notification,/etc/workflow/instances,/etc/workflow/packages,/var,/tmp,/content,/content/dam,/home,/home/users,/home/users/system,/home/groups,/conf,/conf/global
+                                    </validRoots>
+                                </options>
+                            </jackrabbit-filter>
+                            <jackrabbit-nodetypes>
+                                <options>
+                                    <!-- use the nodetypes and namespaces from the aem-nodetypes.jar provided in the plugin dependencies -->
+                                    <cnds>tccl:aem.cnd</cnds>
+                                </options>
+                            </jackrabbit-nodetypes>
+                            <jackrabbit-packagetype>
+                                <options>
+                                    <allowComplexFilterRulesInApplicationPackages>true
+                                    </allowComplexFilterRulesInApplicationPackages>
+                                </options>
+                            </jackrabbit-packagetype>
+                            <netcentric-aem-classification>
+                                <!-- only raise to WARN once we start tackling these issues -->
+                                <defaultSeverity>INFO</defaultSeverity>
+                                <options>
+                                    <maps>
+                                        tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/coral2deprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-deprecations/graniteuideprecations.map,tccl:biz/netcentric/filevault/validator/maps/aem-classification-map-repo-annotations.map
+                                    </maps>
+                                </options>
+                            </netcentric-aem-classification>
+                            <netcentric-aem-cloud>
+                                <options>
+                                    <allowReadOnlyMutablePaths>true
+                                    </allowReadOnlyMutablePaths><!-- default value is true, as it is allowed to have /var nodes inside author-only container -->
+                                </options>
+                            </netcentric-aem-cloud>
+                        </validatorsSettings>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>generate-cnd</id>
+                            <goals>
+                                <goal>generate-cnd</goal>
+                            </goals>
+                            <configuration>
+                                <additionalInputCndUrls>tccl:aem.cnd</additionalInputCndUrls>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <!-- validates against content classifications from AEM (https://github.com/Netcentric/aem-classification/tree/master/aem-classification-validator)  -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator</groupId>
+                            <artifactId>aem-classification-validator</artifactId>
+                            <version>1.1.1</version>
+                        </dependency>
+                        <!-- the dependency containing the actual classification map -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator.maps</groupId>
+                            <artifactId>aem-classification-map-repo-annotations</artifactId>
+                            <version>6.5.3.0</version>
+                        </dependency>
+                        <!-- map containing additional deprecations from release notes -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator.maps</groupId>
+                            <artifactId>aem-classification-map-deprecations</artifactId>
+                            <version>6.5.0.0</version>
+                        </dependency>
+                        <!-- contains all node types and namespaces of AEM 6.5.7, necessary for validator 'jackrabbit-nodetypes' -->
+                        <dependency>
+                            <groupId>biz.netcentric.aem</groupId>
+                            <artifactId>aem-nodetypes</artifactId>
+                            <version>6.5.7.0</version>
+                        </dependency>
+                        <!-- https://github.com/Netcentric/aem-cloud-validator -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator</groupId>
+                            <artifactId>aem-cloud-validator</artifactId>
+                            <version>1.2.2</version>
+                        </dependency>
+                        <!-- https://github.com/apache/sling-org-apache-sling-repoinit-filevault-validator -->
+                        <dependency>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.repoinit.filevault.validator</artifactId>
+                            <version>1.0.0</version>
+                        </dependency>
+                        <!-- https://github.com/Netcentric/aem-replication-metadata-validator -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator</groupId>
+                            <artifactId>aem-replication-metadata-validator</artifactId>
+                            <version>1.3.1</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-                    <version>0.0.24</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.9</version>
-                    <executions>
-                        <execution>
-                            <id>default-prepare-agent</id>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.5</version>
+                    <version>1.0.4</version>
                     <configuration>
-                        <linkXRef>false</linkXRef>
-                        <rulesets>
-                            <ruleset>acs/pmd/rules.xml</ruleset>
-                        </rulesets>
-                        <targetJdk>1.8</targetJdk>
+                        <userId>${crx.user}</userId>
+                        <password>${crx.password}</password>
+                        <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>coding-standards</artifactId>
-                            <version>0.0.1</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>3.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.12.1</version>
-                    <configuration>
-                        <linkXRef>false</linkXRef>
-                        <configLocation>acs/checkstyle/checks.xml</configLocation>
-                        <includeResources>false</includeResources>
-                        <includeTestResources>false</includeTestResources>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>checkstyle-osgi-checks</artifactId>
-                            <version>0.0.3</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>coding-standards</artifactId>
-                            <version>0.0.1</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9</version>
-                    <configuration>
-                        <excludePackageNames>
-                            *.impl
-                        </excludePackageNames>
-                    </configuration>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -174,54 +430,59 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.5</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0-r1585899</version>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.release</groupId>
-                            <artifactId>maven-release-oddeven-policy</artifactId>
-                            <version>3.0-r1585899</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.20.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.17</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>animal-sniffer-maven-plugin</artifactId>
-                    <version>1.15</version>
-                    <configuration>
-                        <signature>
-                            <groupId>org.codehaus.mojo.signature</groupId>
-                            <artifactId>java18</artifactId>
-                            <version>1.0</version>
-                        </signature>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.eluder.coveralls</groupId>
-                    <artifactId>coveralls-maven-plugin</artifactId>
-                    <version>4.3.0</version>
+                    <version>2.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>net.adamcin.oakpal</groupId>
+                    <artifactId>oakpal-maven-plugin</artifactId>
+                    <version>${oakpal.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.adobe.acs</groupId>
+                            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>biz.netcentric.aem</groupId>
+                            <artifactId>aem-nodetypes</artifactId>
+                            <version>6.5.7.0</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <cndNames>
+                            <name>aem.cnd</name>
+                        </cndNames>
+                        <jcrNamespaces>
+                            <jcrNamespace>
+                                <prefix>crx</prefix>
+                                <uri>http://www.day.com/crx/1.0</uri>
+                            </jcrNamespace>
+                        </jcrNamespaces>
+                        <jcrPrivileges>
+                            <jcrPrivilege>crx:replicate</jcrPrivilege>
+                        </jcrPrivileges>
+                        <forcedRoots>
+                            <root>
+                                <path>/apps</path>
+                                <primaryType>nt:folder</primaryType>
+                            </root>
+                        </forcedRoots>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>9.0.9</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.8</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -231,15 +492,18 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>enforce-maven</id>
+                        <id>enforce-maven-and-java</id>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.3.9</version>
+                                    <version>3.6.3</version><!-- maven-shade-plugin 3.5.2 requires 3.6.3 -->
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>11</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -254,11 +518,27 @@
                                     <excludes>
                                         <exclude>*:*:*:*:compile</exclude>
                                     </excludes>
+                                    <includes>
+                                        <include>com.adobe.acs:acs-aem-commons-*</include>
+                                    </includes>
                                 </bannedDependencies>
                             </rules>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- use https://help.sonatype.com/repomanager2/staging-releases/configuring-your-project-for-deployment#ConfiguringYourProjectforDeployment-DeploymentwiththeNexusStagingMavenPlugin
+            instead of maven-deploy-plugin -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <!-- manually release in https://oss.sonatype.org/#stagingRepositories after the Maven release build -->
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -266,76 +546,117 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.core</artifactId>
-                <version>6.0.0</version>
+                <groupId>com.adobe.acs</groupId>
+                <artifactId>acs-aem-commons-bundle</artifactId>
+                <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.cmpn</artifactId>
-                <version>6.0.0</version>
+                <groupId>com.adobe.acs</groupId>
+                <artifactId>acs-aem-commons-oakpal-checks</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.adobe.aem</groupId>
+                <artifactId>aem-sdk-api</artifactId>
+                <version>${aem.sdk.api.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <!-- Runtime dependencies should be AEM 6.5.10 compatible -->
+            <dependency>
+                <groupId>io.wcm.maven</groupId>
+                <artifactId>io.wcm.maven.aem-dependencies</artifactId>
+                <version>${aem.classic.api.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--  https://wcm-io.atlassian.net/browse/WTOOL-82 -->
+            <dependency>
+                <groupId>com.day.cq</groupId>
+                <artifactId>cq-commons</artifactId>
+                <version>5.8.32
+                </version><!-- 5.12.16 is shipped with AEM 6.5, but this is the newest version provided in any public Maven repo -->
+            </dependency>
+            <dependency>
+                 <groupId>org.osgi</groupId>
+                 <artifactId>org.osgi.util.converter</artifactId>
+                 <version>1.0.9</version> <!-- override with newest minor version to be able to run tests with Java 17 -->
+            </dependency>
+            <!-- https://wcm-io.atlassian.net/browse/WTOOL-83 -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-parsers</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <!-- should match https://github.com/apache/jackrabbit-oak/blob/jackrabbit-oak-1.8.0/oak-blob-cloud/pom.xml#L121 shipped with AEM 6.4 -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>1.11.24</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.9.8</version>
-                <scope>provided</scope>
+                <version>1.12.0</version>
+            </dependency>
+            <!-- null annotations used by AEM libraries -->
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>23.0.0</version>
+            </dependency>
+            <!-- should match Bnd version used by maven-bundle-plugin -->
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bnd.annotation</artifactId>
+                <version>6.1.0</version>
+            </dependency>
+            <!-- Optional dependency: Needs to be explicitly installed, not part of AEM 6.4 Standard nor ACS AEM Commons -->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.6.2</version>
             </dependency>
             <dependency>
-                <groupId>biz.aQute</groupId>
-                <artifactId>bndlib</artifactId>
-                <version>1.43.0</version>
-                <scope>provided</scope>
+                <groupId>org.twitter4j</groupId>
+                <artifactId>twitter4j-core</artifactId>
+                <version>3.0.6</version>
             </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.6.4</version>
-                <scope>provided</scope>
-            </dependency>
+            <!-- Testing dependencies -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>1.6.4</version>
+                <version>${sl4fj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.6.4</version>
+                <version>${sl4fj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.0.1</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>javax.jcr</groupId>
-                <artifactId>jcr</artifactId>
-                <version>2.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.adobe.aem</groupId>
-                <artifactId>uber-jar</artifactId>
-                <version>6.2.0</version>
-                <classifier>apis</classifier>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient-osgi</artifactId>
-                <version>4.3.4</version>
-                <scope>provided</scope>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -355,64 +676,72 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.twitter4j</groupId>
-                <artifactId>twitter4j-core</artifactId>
-                <version>3.0.5</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.5</version>
-                <scope>provided</scope>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>4.11.0</version><!-- >= 5.x requires Java 11 -->
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>1.10.19</version>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>4.11.0</version><!-- >= 5.x requires Java 11 -->
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>1.6.2</version>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.agent</artifactId>
+                <classifier>runtime</classifier>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>1.6.2</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.sling-mock</artifactId>
-                <version>2.2.8</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.sling-mock-jackrabbit</artifactId>
-                <version>1.0.0</version>
-                <scope>test</scope>
+                <version>${jacoco.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
-                <version>2.0.2</version>
+                <version>3.1.8-1.44.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.jcr-mock</artifactId>
-                <version>1.3.0</version>
+                <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
+                <version>3.3.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
+                <version>3.3.6</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- sling-mock still uses an outdated osgi-mock, therefore explicitly manage its version to the latest 3.2.2 -->
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+                <version>3.4.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.wcm</groupId>
-                <artifactId>io.wcm.testing.aem-mock</artifactId>
-                <version>2.2.2</version>
+                <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
+                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.wcm</groupId>
+                <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
+                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.skyscreamer</groupId>
@@ -422,17 +751,27 @@
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-library</artifactId>
+                <artifactId>hamcrest-all</artifactId>
                 <version>1.3</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- Http Cache Dependency -->
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>15.0</version>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-api</artifactId>
+                <version>${oakpal.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-core</artifactId>
+                <version>${oakpal.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-testing</artifactId>
+                <version>${oakpal.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -444,7 +783,7 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.sling</groupId>
-                        <artifactId>maven-sling-plugin</artifactId>
+                        <artifactId>sling-maven-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>install-bundle</id>
@@ -458,57 +797,42 @@
             </build>
         </profile>
         <profile>
-            <id>analysis</id>
+            <id>coverage</id>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-pmd-plugin</artifactId>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <id>default-prepare-agent</id>
                                 <goals>
-                                    <goal>pmd</goal>
-                                    <goal>cpd</goal>
-                                    <!-- build will fail on warnings -->
-                                    <goal>check</goal>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>*</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jacoco-instrument</id>
+                                <goals>
+                                    <goal>instrument</goal>
                                 </goals>
                             </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
                             <execution>
-                                <phase>package</phase>
+                                <id>jacoco-restore-instrumented-classes</id>
                                 <goals>
-                                    <goal>javadoc</goal>
+                                    <goal>restore-instrumented-classes</goal>
                                 </goals>
                             </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>findbugs-maven-plugin</artifactId>
-                        <executions>
                             <execution>
-                                <phase>package</phase>
+                                <id>report</id>
+                                <phase>prepare-package</phase>
                                 <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                    <!--
-                                    See https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/28
-                                    <goal>check</goal>
-                                    -->
+                                    <goal>report</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -517,116 +841,112 @@
             </build>
         </profile>
         <profile>
-            <id>analysisCI</id>
+            <id>dependency-check</id>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-pmd-plugin</artifactId>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <id>check-dependencies-for-vulnerabilities</id>
+                                <phase>validate</phase>
                                 <goals>
-                                    <goal>pmd</goal>
-                                    <goal>cpd</goal>
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>javadoc</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>findbugs-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>findbugs</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!-- profile for settings when running on Java8 -->
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <cveValidForHours>24</cveValidForHours>
+                            <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                            <skipProvidedScope>true</skipProvidedScope>
+                            <skipSystemScope>true</skipSystemScope>
+                            <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+                            <suppressionFiles>
+                                <suppressionFile>dependency-check-maven-plugin-suppression.xml</suppressionFile>
+                            </suppressionFiles>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                </property>
+            </activation>
+            <build>
+                <!-- https://central.sonatype.org/pages/requirements.html -->
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- disable this profile to not build/deploy the packages/bundles for AEMaaCS,
+        the ones for AEM on prem are always built -->
+        <profile>
+            <id>cloud</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>bundle-cloud</module>
+            </modules>
+        </profile>
     </profiles>
 
-    <!--
-        Inclusion of repositories in POMs is controversial, to say the least.
-        It would be best if you proxied the Adobe repository using a Maven
-        Repository Manager. Once you do that, remove these sections.
-     -->
-    <repositories>
-        <repository>
-            <id>adobe-public-releases</id>
-            <name>Adobe Public Repository</name>
-            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>adobe-public-releases</id>
-            <name>Adobe Public Repository</name>
-            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
-            <layout>default</layout>
-        </pluginRepository>
-    </pluginRepositories>
-
     <distributionManagement>
-        <repository>
-            <id>bintray</id>
-            <name>acs-releases-acs-aem-commons</name>
-            <url>https://api.bintray.com/maven/acs/releases/acs-aem-commons</url>
-        </repository>
+        <!-- the nexus-staging-maven-plugin only needs a snapshot repository -->
         <snapshotRepository>
-            <id>${snapshotRepository-Id}</id>
-            <name>${snapshotRepository-Name}</name>
-            <url>${snapshotRepository-URL}</url>
-            <uniqueVersion>false</uniqueVersion>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
     <modules>
         <module>bundle</module>
-        <module>bundle-twitter</module>
-        <module>content</module>
+        <module>oakpal-checks</module>
+        <module>ui.apps</module>
+        <module>ui.content</module>
+        <module>all</module>
     </modules>
 </project>

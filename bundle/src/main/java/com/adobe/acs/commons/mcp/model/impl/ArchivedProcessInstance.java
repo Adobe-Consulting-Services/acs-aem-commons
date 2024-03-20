@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +23,21 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
-import java.io.Serializable;
-import java.util.Map;
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.jcr.RepositoryException;
-import javax.management.openmbean.CompositeData;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Via;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.jcr.RepositoryException;
+import javax.management.openmbean.CompositeData;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
@@ -56,26 +60,44 @@ public class ArchivedProcessInstance implements ProcessInstance, Serializable {
 
     @Inject
     @Named("jcr:content")
-    ManagedProcess infoBean;
+    public ManagedProcess infoBean;
+
 
     @Override
     public String getName() {
-        return getInfo().getName();
+        return StringUtils.defaultIfBlank(getInfo().getName(), getId());
     }
 
     @Override
     public ManagedProcess getInfo() {
+        // Handle cases where archived processes are invalid/null such that they display in the UI and do not break its rendering.
+        if (infoBean.getName() == null) {
+            infoBean.setName("Invalid (" + getId() + ")");
+        }
+
+        if (infoBean.getDescription() == null) {
+            infoBean.setDescription("Archived process at " + getPath() + " is null");
+        }
+
+        if (infoBean.getStartTime() == null) {
+            infoBean.setStartTime(-1L);
+        }
+
+        if (infoBean.getStopTime() == null) {
+            infoBean.setStopTime(-1L);
+        }
+
         return infoBean;
     }
 
     @Override
     public String getId() {
-        return id;
+        return StringUtils.defaultString(id, resource.getName());
     }
 
     @Override
     public String getPath() {
-        return path;
+        return StringUtils.defaultString(path, resource.getPath());
     }
 
     @PostConstruct
@@ -85,7 +107,7 @@ public class ArchivedProcessInstance implements ProcessInstance, Serializable {
             getInfo().setStatus("Halted abnormally");
         }
     }
-    
+
     @PostConstruct
     protected void setValues() {
         id = resource.getName();

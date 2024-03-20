@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.wcm.notifications.impl;
 
-import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
-import com.adobe.acs.commons.util.CookieUtil;
-import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -32,42 +43,32 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
+import org.apache.sling.api.resource.observation.ResourceChange;
+import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
+import com.adobe.acs.commons.util.CookieUtil;
+import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 
 @Component(immediate = true)
 @Service(value = SystemNotifications.class)
-public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, EventHandler {
+public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, ResourceChangeListener, ExternalResourceChangeListener {
     private static final Logger log = LoggerFactory.getLogger(SystemNotificationsImpl.class);
 
     public static final String COOKIE_NAME = "acs-commons-system-notifications";
@@ -80,12 +81,10 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private static final String PN_ENABLED = "enabled";
 
-    private static final String REP_POLICY = "rep:policy";
-
     private static final String INJECT_TEXT =
             "<script>"
-                    + "if(window === top) {"
-                    + "   window.jQuery || document.write('<script src=\"%s\"><\\/script>');"
+                    + "if(window === top || (window.top && window.top.document.querySelector('iframe[id^=\"exc-app-\"]'))) {"
+                    + "   (window.jQuery || document.write('<script src=\"%s\"><\\/script>'));"
                     + "   document.write('<script src=\"%s\"><\\/script>');"
                     + "}"
                     + "</script>";
@@ -101,7 +100,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private ComponentContext osgiComponentContext;
 
-    private ServiceRegistration eventHandlerRegistration;
+    private ServiceRegistration<ResourceChangeListener> eventHandlerRegistration;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -153,25 +152,18 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     @Override
     public List<Resource> getNotifications(final SlingHttpServletRequest request,
                                            final Resource notificationsFolder) {
-        final List<Resource> notifications = new ArrayList<Resource>();
-        final Iterator<Resource> itr = notificationsFolder.listChildren();
 
-        while (itr.hasNext()) {
-            final Resource notification = itr.next();
-
-            if (this.isActiveNotification(request, notification)) {
-                notifications.add(notification);
-            }
-        }
-
-        return notifications;
+        final ActiveNotificationsResourceVisitor visitor = new ActiveNotificationsResourceVisitor(request);
+        visitor.accept(notificationsFolder);
+        return visitor.getNotifications();
     }
 
     @Override
+    @SuppressWarnings("squid:S2070") // SHA1 not used cryptographically
     public String getNotificationId(final Page notificationPage) {
         final String path = notificationPage.getPath();
         final String lastModified = String.valueOf(notificationPage.getLastModified().getTimeInMillis());
-        return "uid-" + DigestUtils.shaHex(path + lastModified);
+        return "uid-" + DigestUtils.sha1Hex(path + lastModified);
     }
 
     @Override
@@ -203,138 +195,57 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         return message;
     }
 
-    private boolean isActiveNotification(final SlingHttpServletRequest request,
-                                         final Resource resource) {
-        if (JcrConstants.JCR_CONTENT.equals(resource.getName())
-                || REP_POLICY.equals(resource.getName())) {
-            return false;
-        }
-
-        final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-        final Page notificationPage = pageManager.getContainingPage(resource);
-
-        if (notificationPage == null) {
-            log.warn("Trying to get a invalid System Notification page at [ {} ]", resource.getPath());
-            return false;
-        } else if (this.isDismissed(request, notificationPage)) {
-            // System Notification previously dismissed by the user
-            return false;
-        }
-
-        // Looks like a valid Notification Page; now check if the properties are valid
-        final ValueMap properties = notificationPage.getProperties();
-
-        final boolean enabled = properties.get(PN_ENABLED, false);
-        if (!enabled) {
-            // Disabled
-            return false;
-        } else {
-            final Calendar onTime = properties.get(PN_ON_TIME, Calendar.class);
-            final Calendar offTime = properties.get(PN_OFF_TIME, Calendar.class);
-
-            if (onTime == null && offTime == null) {
-                // No on time or off time is set, but is enabled so always show
-                return true;
-            }
-
-            final Calendar now = Calendar.getInstance();
-
-            if (onTime != null && now.before(onTime)) {
-                return false;
-            }
-
-            if (offTime != null && now.after(offTime)) {
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private boolean isDismissed(final SlingHttpServletRequest request,
-                                final Page notificationPage) {
-        final Cookie cookie = CookieUtil.getCookie(request, COOKIE_NAME);
-        if (cookie != null) {
-            return StringUtils.contains(cookie.getValue(), this.getNotificationId(notificationPage));
-        } else {
-            // No cookie has been set, so nothing has been dismissed
-            return false;
-        }
-    }
-
     private boolean hasNotifications() {
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             final Resource notificationsFolder = resourceResolver.getResource(PATH_NOTIFICATIONS);
-            if (notificationsFolder != null) {
-                final Iterator<Resource> resources = notificationsFolder.listChildren();
+            final NotificationsResourceVisitor visitor = new NotificationsResourceVisitor();
 
-                while (resources.hasNext()) {
-                    final Resource resource = resources.next();
-                    if (!JcrConstants.JCR_CONTENT.equals(resource.getName())
-                            && !REP_POLICY.equals(resource.getName())) {
-                        return true;
-                    }
-                }
-            }
+            visitor.accept(notificationsFolder);
+
+            return visitor.hasNotifications();
         } catch (LoginException e) {
             log.error("Could not get an service ResourceResolver", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return false;
     }
 
     private void registerAsFilter() {
-            super.registerAsSlingFilter(this.osgiComponentContext, 0, ".*");
-            log.debug("Registered System Notifications as Sling Filter");
+        super.registerAsSlingFilter(this.osgiComponentContext, 0, ".*");
+        log.debug("Registered System Notifications as Sling Filter");
     }
 
     @SuppressWarnings("squid:S1149")
     private void registerAsEventHandler() {
-            final Hashtable filterProps = new Hashtable<String, String>();
+        final Hashtable<String, Object> filterProps = new Hashtable<>();
 
-            // Listen on Add and Remove under /etc/acs-commons/notifications
+        // Listen on Add and Remove under /etc/acs-commons/notifications
+        filterProps.put(ResourceChangeListener.CHANGES,
+                new String[]{
+                        ResourceChange.ChangeType.ADDED.name(),
+                        ResourceChange.ChangeType.REMOVED.name()});
 
-            filterProps.put(EventConstants.EVENT_TOPIC,
-                    new String[]{
-                            SlingConstants.TOPIC_RESOURCE_ADDED,
-                            SlingConstants.TOPIC_RESOURCE_REMOVED });
+        filterProps.put(ResourceChangeListener.PATHS, new String[]{SystemNotificationsImpl.PATH_NOTIFICATIONS});
 
-            filterProps.put(EventConstants.EVENT_FILTER, "(&"
-                    + "(" + SlingConstants.PROPERTY_PATH + "=" + SystemNotificationsImpl.PATH_NOTIFICATIONS + "/*)"
-                    + ")");
+        this.eventHandlerRegistration =
+                this.osgiComponentContext.getBundleContext().registerService(ResourceChangeListener.class, this,
+                        filterProps);
 
-            this.eventHandlerRegistration =
-                    this.osgiComponentContext.getBundleContext().registerService(EventHandler.class.getName(), this,
-                            filterProps);
-
-            log.debug("Registered System Notifications as Event Handler");
+        log.debug("Registered System Notifications as Resource Change Listener");
     }
 
     @Override
-    public void handleEvent(final Event event) {
+    public void onChange(final List<ResourceChange> changes) {
         final long start = System.currentTimeMillis();
 
         if (!this.isAuthor()) {
-            log.warn("This event handler should ONLY run on AEM Author.");
+            log.warn("This change listener should ONLY run on AEM Author.");
             return;
         }
 
         /** The following code will ONLY execute on AEM Author **/
-
-        final String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-        if (StringUtils.endsWith(path, JcrConstants.JCR_CONTENT)) {
-            // Ignore jcr:content nodes; Only handle events for cq:Page
-            return;
-        }
 
         if (this.hasNotifications()) {
             if (!this.isFilter.getAndSet(true)) {
@@ -348,7 +259,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         }
 
         if (System.currentTimeMillis() - start > 2500) {
-            log.warn("Event handling for System notifications took [ {} ] ms. Event blacklisting occurs after 5000 ms.",
+            log.warn("Change handling for System notifications took [ {} ] ms.",
                     System.currentTimeMillis() - start);
         }
     }
@@ -383,4 +294,104 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     private boolean isAuthor() {
         return slingSettings.getRunModes().contains("author");
     }
+
+    private class NotificationsResourceVisitor extends AbstractResourceVisitor {
+
+        boolean hasNotifications;
+
+        public boolean hasNotifications() {
+            return hasNotifications;
+        }
+
+        @Override
+        protected void visit(Resource resource) {
+            hasNotifications = hasNotifications || isNotification(resource);
+        }
+
+        protected boolean isNotification(Resource resource) {
+            // Treat any cq:Page as a notification
+            return !PATH_NOTIFICATIONS.equals(resource.getPath())
+                    && NT_PAGE.equals(resource.getValueMap().get(JCR_PRIMARYTYPE));
+        }
+    }
+
+
+    private class ActiveNotificationsResourceVisitor extends NotificationsResourceVisitor {
+
+        private final List<Resource> notifications = new ArrayList<Resource>();
+        private SlingHttpServletRequest request;
+
+        public ActiveNotificationsResourceVisitor(SlingHttpServletRequest request) {
+            this.request = request;
+        }
+
+        public List<Resource> getNotifications() {
+            return Collections.unmodifiableList(notifications);
+        }
+
+        @Override
+        protected void visit(Resource resource) {
+            if (isActiveNotification(request, resource)) {
+                notifications.add(resource);
+            }
+        }
+
+        private boolean isActiveNotification(final SlingHttpServletRequest request, final Resource resource) {
+            if (!isNotification(resource)) {
+                return false;
+            }
+
+            final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+            final Page notificationPage = pageManager.getContainingPage(resource);
+
+            if (notificationPage == null) {
+                log.warn("Trying to get a invalid System Notification page at [ {} ]", resource.getPath());
+                return false;
+            } else if (this.isDismissed(request, notificationPage)) {
+                // System Notification previously dismissed by the user
+                return false;
+            }
+
+            // Looks like a valid Notification Page; now check if the properties are valid
+            final ValueMap properties = notificationPage.getProperties();
+
+            final boolean enabled = properties.get(PN_ENABLED, false);
+            if (!enabled) {
+                // Disabled
+                return false;
+            } else {
+                final Calendar onTime = properties.get(PN_ON_TIME, Calendar.class);
+                final Calendar offTime = properties.get(PN_OFF_TIME, Calendar.class);
+
+                if (onTime == null && offTime == null) {
+                    // No on time or off time is set, but is enabled so always show
+                    return true;
+                }
+
+                final Calendar now = Calendar.getInstance();
+
+                if (onTime != null && now.before(onTime)) {
+                    return false;
+                }
+
+                if (offTime != null && now.after(offTime)) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        private boolean isDismissed(final SlingHttpServletRequest request,
+                                    final Page notificationPage) {
+            final Cookie cookie = CookieUtil.getCookie(request, COOKIE_NAME);
+            if (cookie != null) {
+                return StringUtils.contains(cookie.getValue(), getNotificationId(notificationPage));
+            } else {
+                // No cookie has been set, so nothing has been dismissed
+                return false;
+            }
+        }
+    }
+
 }

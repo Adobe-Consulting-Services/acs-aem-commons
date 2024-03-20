@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.http.headers.impl;
 
@@ -32,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -82,7 +80,7 @@ public class MonthlyExpiresHeaderFilterTest {
 
         actual.set(Calendar.DAY_OF_MONTH, 15);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -103,7 +101,7 @@ public class MonthlyExpiresHeaderFilterTest {
         expected.setTime(actual.getTime());
         expected.add(Calendar.MONTH, 1);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -124,7 +122,7 @@ public class MonthlyExpiresHeaderFilterTest {
         Calendar expected = Calendar.getInstance();
         expected.setTime(actual.getTime());
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -147,7 +145,7 @@ public class MonthlyExpiresHeaderFilterTest {
 
         actual.set(Calendar.DAY_OF_MONTH, 15);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -170,7 +168,7 @@ public class MonthlyExpiresHeaderFilterTest {
         expected.setTime(actual.getTime());
         expected.add(Calendar.MONTH, 1);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, "LAST");
 
         filter.doActivate(componentContext);
@@ -192,7 +190,7 @@ public class MonthlyExpiresHeaderFilterTest {
         Calendar expected = Calendar.getInstance();
         expected.setTime(actual.getTime());
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, "LAST");
 
         filter.doActivate(componentContext);

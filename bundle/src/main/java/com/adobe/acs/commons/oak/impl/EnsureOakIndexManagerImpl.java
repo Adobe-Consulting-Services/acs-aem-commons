@@ -1,25 +1,24 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.oak.EnsureOakIndexManager;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -44,8 +43,10 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -89,11 +90,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
                 propertyPrivate = true
         )
 })
-@Reference(
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        referenceInterface = AppliableEnsureOakIndex.class,
-        policy = ReferencePolicy.DYNAMIC
-)
 @Service(value = {DynamicMBean.class, EnsureOakIndexManager.class})
 //@formatter:on
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
@@ -108,6 +104,16 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
             value = {})
     public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
 
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+
+    @Reference(
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+        referenceInterface = AppliableEnsureOakIndex.class,
+        policy = ReferencePolicy.DYNAMIC
+    )
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
             new CopyOnWriteArrayList<AppliableEnsureOakIndex>();
@@ -160,7 +166,6 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
     protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
         if (index != null && !this.ensureIndexes.contains(index)) {
-            index.setIgnoreProperties(this.additionalIgnoreProperties);
             this.ensureIndexes.add(index);
         }
     }
@@ -213,5 +218,12 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     @Activate
     protected void activate(Map<String, Object> config) {
         additionalIgnoreProperties = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+    }
+    
+    
+    protected String[] getIgnoredProperties() {
+        return Optional.ofNullable(this.additionalIgnoreProperties)
+                .map(array -> Arrays.copyOf(array, array.length))
+                .orElse(DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
     }
 }

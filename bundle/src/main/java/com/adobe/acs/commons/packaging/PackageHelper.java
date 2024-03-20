@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.packaging;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -28,7 +26,6 @@ import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -77,13 +74,13 @@ public interface PackageHelper {
      * Derives the next package version to use based on the input params and the existing package versions matching
      * the input Package group and name. Next version increments "minor" version only.
      *
-     * Ex. 1.0.0 ~> 1.1.0
-     *     3.22.0 ~> 3.23.0
+     * Ex. 1.0.0 ~&gt; 1.1.0
+     *     3.22.0 ~&gt; 3.23.0
      *
      * If the param version's major is greater than the largest existing package version in jcr,
      * then the param version will be used.
      *
-     * Ex. param ~> 2.0.0, largest in jcr ~>1.40.0; returned version will be 2.0.0
+     * Ex. param ~&gt; 2.0.0, largest in jcr ~&gt; 1.40.0; returned version will be 2.0.0
      *
      * @param jcrPackageManager JcrPackageManager object
      * @param groupName package group name
@@ -163,7 +160,7 @@ public interface PackageHelper {
      * @param jcrPackage the successfully created jcr package
      * @return a string representation of JSON to write to response
      */
-    String getSuccessJSON(JcrPackage jcrPackage) throws JSONException, RepositoryException;
+    String getSuccessJSON(JcrPackage jcrPackage) throws RepositoryException;
 
 
     /**
@@ -171,9 +168,8 @@ public interface PackageHelper {
      *
      * @param resources the resources that represent the filterSet roots
      * @return a string representation of JSON to write to response
-     * @throws JSONException
      */
-    String getPreviewJSON(final Collection<Resource> resources) throws JSONException;
+    String getPreviewJSON(final Collection<Resource> resources);
 
 
     /**
@@ -181,9 +177,8 @@ public interface PackageHelper {
      *
      * @param pathFilterSets the pathFilterSets of the package
      * @return a string representation of JSON to write to response
-     * @throws JSONException
      */
-    String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException;
+    String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets);
 
 
     /**
@@ -199,9 +194,8 @@ public interface PackageHelper {
      *
      * @param paths the paths that represent the filterSet roots
      * @return a string representation of JSON to write to response
-     * @throws JSONException
      */
-    String getPreviewJSONForPaths(Collection<String> paths) throws JSONException;
+    String getPreviewJSONForPaths(Collection<String> paths);
 
     /**
     *

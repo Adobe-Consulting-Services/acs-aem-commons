@@ -1,0 +1,33 @@
+.audit-log-search-results{
+	overflow: auto;
+	max-height:500px;
+}
+.audit-log-search-results thead .coral-Table-row {
+	background-color: #ccc;
+}
+
+.audit-log-search-results  .coral-Table-row {
+    background-color: #fff;
+}
+
+.form-row{
+	padding-bottom: 1em;
+	clear:both;
+}
+
+.form-row input{
+	width: 75%;
+}
+
+.form-row > label {
+	display:inline;
+	float:left;
+	width:100px;
+	font-weight:bold;
+	padding: 10px 0;
+}
+
+.form-row > span {
+	margin-left: 75px;
+}
+

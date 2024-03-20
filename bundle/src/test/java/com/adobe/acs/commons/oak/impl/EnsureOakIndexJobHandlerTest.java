@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,41 +14,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.oak.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.CustomChecksumGeneratorOptions;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
-import org.junit.Assert;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.testing.resourceresolver.MockValueMap;
+import org.apache.sling.commons.scheduler.Scheduler;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
-
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.adobe.acs.commons.oak.impl.EnsureOakIndex.OakIndexDefinitionException;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 
 /**
  * 
@@ -58,221 +49,196 @@ import com.adobe.acs.commons.oak.impl.EnsureOakIndex.OakIndexDefinitionException
  * 
  *
  */
-
 @RunWith(MockitoJUnitRunner.class)
 public class EnsureOakIndexJobHandlerTest {
 
-    // Create a job handler, where we mock the execution of the index actions
-    @Spy
-    private EnsureOakIndexJobHandler handler = new EnsureOakIndexJobHandler(null, OAK_INDEX, DEFINITION_PATH);
-
+    
+    /**
+     * It's required to use JCR_OAK here, although it's not really necessary from a 
+     * feature point of view.
+     * But the Node implementation of JCR_MOCK (MockNode.class) does not support the 
+     * "setPrimaryType()" call, but throws an exception instead. So falling back to the
+     * full-blown Oak implementation.
+     * That makes testing a bit slower and also requires to make all index definitions fully compliant.
+     */
+    
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    
+    EnsureOakIndexJobHandler handler;
+    
     private static final String OAK_INDEX = "/oak:index";
-    private static final String INDEX_NAME = "testIndex";
-    private static final String DEFINITION_PATH = "/apps/mydefinitions/index/" + INDEX_NAME;
+    private static final String INDEX_NAME = "myIndex";
+    private static final String DEFINITION_PATH = "/apps/mydefinitions/index";
+    
+    private static final String ENSURE_INDEX_PATH = DEFINITION_PATH + "/" + INDEX_NAME;
+    private static final String OAK_INDEX_PATH = OAK_INDEX + "/" + INDEX_NAME;
 
-    private Resource oakIndexResource;
+    Map<String,Object> ensureIndexProperties;
+    Map<String,Object> oakIndexProperties;
+    
+    @Mock
+    Scheduler scheduler;
     
 
     @Before
-    public void init() throws RepositoryException, IOException, OakIndexDefinitionException {
-        oakIndexResource = mock(Resource.class);
+    public void setup() {
+        
+        // setup test content in the repo
+        context.build().resource(OAK_INDEX).commit();
+        
+        // setup dependencies
+        Map<String,Object> props = new HashMap<>();
+        props.put("oak.indexes.path", OAK_INDEX);
+        props.put("ensure-definitions.path",DEFINITION_PATH);
+        props.put("immediate", "false");
+        
+        EnsureOakIndexManager eoim = Mockito.mock(EnsureOakIndexManager.class);
+        context.registerService(EnsureOakIndexManager.class, eoim);
+        
+        context.registerService(Scheduler.class,scheduler);
+        context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
+        EnsureOakIndex eoi = new EnsureOakIndex();
+        context.registerInjectActivateService(eoi, props);
 
-        doNothing().when(handler).disableIndex(any(Resource.class));
-        doNothing().when(handler).delete(any(Resource.class));
-        doNothing().when(handler).forceRefresh(any(Resource.class));
-        doNothing().when(handler).validateEnsureDefinition(any(Resource.class));
-
-        doReturn(null).when(handler).update(any(Resource.class), any(Resource.class), anyBoolean());
-        doReturn(null).when(handler).create(any(Resource.class), any(Resource.class));
-
+        handler = new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH);
+        
+        // setup the invariant properties for the index definition
+        ensureIndexProperties = new HashMap<>();
+        ensureIndexProperties.put("jcr:primaryType",EnsureOakIndexJobHandler.NT_OAK_UNSTRUCTURED);
+        ensureIndexProperties.put("type","property");
+        ensureIndexProperties.put("propertyNames","newProp");
+        
+        // we need to create a working index definition, let's choose a property index to make it simpler here.
+        // it has also the advantage that indexing is synchronous, so we can validate the result immediately after
+        oakIndexProperties = new HashMap<>();
+        oakIndexProperties.put("jcr:primaryType", EnsureOakIndexJobHandler.NT_OAK_QUERY_INDEX_DEFINITION);
+        oakIndexProperties.put("type", "property");
+        oakIndexProperties.put("propertyNames", "randomProp");
+        
     }
-
-    Resource getEnsureOakDefinition(Map<String, Object> properties) {
-        Resource r = mock(Resource.class);
-        ValueMap vm = new MockValueMap(r, properties);
-        when(r.getValueMap()).thenReturn(vm);
-        when(r.adaptTo(ModifiableValueMap.class)).thenReturn(new ModifiableValueMapDecorator(properties));
-        when(r.getName()).thenReturn(INDEX_NAME);
-        when(r.getPath()).thenReturn(DEFINITION_PATH);
-        when(r.listChildren()).thenReturn(IteratorUtils.EMPTY_LIST_ITERATOR);
-
-        return r;
-    }
-
-    Resource getOakDefinition(Map<String, Object> properties) {
-        Resource r = mock(Resource.class);
-        ValueMap vm = new MockValueMap(r, properties);
-        when(r.adaptTo(ModifiableValueMap.class)).thenReturn(new ModifiableValueMapDecorator(properties));
-        when(r.getValueMap()).thenReturn(vm);
-        when(r.getName()).thenReturn(INDEX_NAME);
-        when(r.getPath()).thenReturn(OAK_INDEX + "/" + INDEX_NAME);
-        when(r.listChildren()).thenReturn(IteratorUtils.EMPTY_LIST_ITERATOR);
-
-        return r;
-    }
-
-
+    
     @Test
-    public void testIgnoreProperty() throws PersistenceException, RepositoryException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_IGNORE, "true");
-        props.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
-        props.put(EnsureOakIndexJobHandler.PN_DELETE, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Assert.assertTrue(handler.handleLightWeightIndexOperations(def, null));
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
-
+    public void testIgnoreProperty() {
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_IGNORE, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNull(indexResource);   
     }
-
-
+    
     @Test
-    public void testDisableProperty() throws PersistenceException, RepositoryException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource r = mock(Resource.class);
-
-        Assert.assertTrue(handler.handleLightWeightIndexOperations(def, r));
-        verify(handler, times(1)).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
+    public void testDeleteIndex() {
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_DELETE, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        context.build().resource(OAK_INDEX_PATH, oakIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNull(indexResource);
+        // re-run the test and get the log message (statement about non-existing index)
+        handler.run();
+        indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNull(indexResource);
     }
-
+    
     @Test
-    public void testDisablePropertyWithoutExistingIndex() throws PersistenceException, RepositoryException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource r = null;
-
-        Assert.assertTrue(handler.handleLightWeightIndexOperations(def, r));
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
+    public void testDisableIndex() {
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        context.build().resource(OAK_INDEX_PATH, oakIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNotNull("Index does not exist anymore",indexResource);
+        ValueMap vm = indexResource.adaptTo(ValueMap.class);
+        assertNotNull(vm);
+        assertEquals("disabled",vm.get("type",String.class));
+        
     }
-
+    
     @Test
-    public void testDeleteProperty() throws PersistenceException, RepositoryException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_DELETE, "true");
-        props.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource r = mock(Resource.class);
-
-        Assert.assertTrue(handler.handleLightWeightIndexOperations(def, r));
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, times(1)).delete(any(Resource.class));
+    public void testDisableIndexWithNonExistingOakIndex() {
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNull("Index has been created, but it should not have",indexResource);
     }
-
+    
     @Test
-    public void testDeletePropertyWithoutExistingIndex() throws PersistenceException, RepositoryException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_DELETE, "true");
-        props.put(EnsureOakIndexJobHandler.PN_DISABLE, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource r = null;
-
-        Assert.assertTrue(handler.handleLightWeightIndexOperations(def, r));
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
+    public void testCreate() {
+        
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNotNull(indexResource);
+        ValueMap vm = indexResource.adaptTo(ValueMap.class);
+        assertNotNull(vm);
+        assertEquals("newProp",vm.get("propertyNames",String.class));
+        assertEquals("1",vm.get("reindexCount",String.class));
     }
-
+    
     @Test
-    public void testCreate() throws RepositoryException, IOException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource index = null;
-
-        Assert.assertFalse(handler.handleLightWeightIndexOperations(def, index));
-        handler.handleHeavyWeightIndexOperations(oakIndexResource, def, index);
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
-
-        verify(handler, times(1)).create(eq(def), eq(oakIndexResource));
-        verify(handler, never()).forceRefresh(any(Resource.class));
+    public void testCreateWithForcedRefresh() {
+        
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_FORCE_REINDEX, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNotNull(indexResource);
+        ValueMap vm = indexResource.adaptTo(ValueMap.class);
+        assertNotNull(vm);
+        assertEquals("newProp",vm.get("propertyNames",String.class));
+        assertEquals("1",vm.get("reindexCount",String.class));
+        assertEquals("true",vm.get(EnsureOakIndexJobHandler.PN_FORCE_REINDEX,String.class));
     }
-
+    
     @Test
-    public void testCreateWithForcedReindex() throws RepositoryException, IOException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_FORCE_REINDEX, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource index = null;
-
-        Assert.assertFalse(handler.handleLightWeightIndexOperations(def, index));
-        handler.handleHeavyWeightIndexOperations(oakIndexResource, def, index);
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
-
-        verify(handler, times(1)).create(eq(def), eq(oakIndexResource));
-        verify(handler, times(1)).forceRefresh(any(Resource.class));
+    public void testUpdate() {
+        
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        context.build().resource(OAK_INDEX_PATH, oakIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNotNull(indexResource);
+        ValueMap vm = indexResource.adaptTo(ValueMap.class);
+        assertNotNull(vm);
+        assertEquals("newProp",vm.get("propertyNames",String.class));
+        assertEquals("1",vm.get("reindexCount",String.class));
     }
-
+    
     @Test
-    public void testUpdate() throws RepositoryException, IOException {
-
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EnsureOakIndexJobHandler.PN_FORCE_REINDEX, "true");
-        Resource def = getEnsureOakDefinition(props);
-
-        Resource index = mock(Resource.class);
-
-        Assert.assertFalse(handler.handleLightWeightIndexOperations(def, index));
-        handler.handleHeavyWeightIndexOperations(oakIndexResource, def, index);
-        verify(handler, never()).disableIndex(any(Resource.class));
-        verify(handler, never()).delete(any(Resource.class));
-
-        verify(handler, never()).create(any(Resource.class), any(Resource.class));
-        verify(handler, times(1)).update(eq(def), eq(oakIndexResource), eq(true));
-        verify(handler, never()).forceRefresh(any(Resource.class));
+    public void testUpdateRecreateOnUpdate() {
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        context.build().resource(OAK_INDEX_PATH, oakIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNotNull(indexResource);
+        ValueMap vm = indexResource.adaptTo(ValueMap.class);
+        assertNotNull(vm);
+        assertEquals("newProp",vm.get("propertyNames",String.class));
+        assertNull(vm.get("reindexCount",String.class));
     }
-
-    @Ignore("This test passes locally but fails on TravisCI; Figure out how to make this test pass on TravisCI")
-    public void testUpdateOperation() throws RepositoryException, IOException {
-        String PN_IGNORE_ME = "ignoreMe";
-
-        ChecksumGenerator checksumGenerator = mock(ChecksumGenerator.class);
-
-        List<String> ignoreProperties = new ArrayList<String>();
-        ignoreProperties.add(PN_IGNORE_ME);
-        EnsureOakIndex eoi = mock(EnsureOakIndex.class);
-        when(eoi.getIgnoreProperties()).thenReturn(ignoreProperties);
-        when(eoi.getChecksumGenerator()).thenReturn(checksumGenerator);
-
-        Map<String, Object> ensureProps = spy(new HashMap<String, Object>());
-        ensureProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
-        Resource def = getEnsureOakDefinition(ensureProps);
-
-        Map<String, Object> oakProps = spy(new HashMap<String, Object>());
-        oakProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
-        oakProps.put(PN_IGNORE_ME, "true");
-        Resource oak = getOakDefinition(oakProps);
-
-        Map<String,String> defChecksum = new HashMap<String, String>();
-        defChecksum.put(def.getPath(), "123");
-        when(checksumGenerator.generateChecksums(any(Session.class), any(String.class), any(CustomChecksumGeneratorOptions.class))).thenReturn(defChecksum);
-
-        Map<String,String> oakChecksum = new HashMap<String, String>();
-        oakChecksum.put(oak.getPath(), "456");
-        when(checksumGenerator.generateChecksums(any(Session.class), any(String.class), any(CustomChecksumGeneratorOptions.class))).thenReturn(oakChecksum);
-
-        when(oakIndexResource.getChild(INDEX_NAME)).thenReturn(oak);
-
-        handler.update(def, oakIndexResource, false);
-
-        verify(oakProps, never()).remove(PN_IGNORE_ME);
+    
+    @Test
+    public void testUpdateWithForcedRefresh() {
+        
+        ensureIndexProperties.put(EnsureOakIndexJobHandler.PN_FORCE_REINDEX, "true");
+        context.build().resource(ENSURE_INDEX_PATH, ensureIndexProperties).commit();
+        context.build().resource(OAK_INDEX_PATH, oakIndexProperties).commit();
+        handler.run();
+        Resource indexResource = context.resourceResolver().getResource(OAK_INDEX_PATH);
+        assertNotNull(indexResource);
+        ValueMap vm = indexResource.adaptTo(ValueMap.class);
+        assertNotNull(vm);
+        assertEquals("newProp",vm.get("propertyNames",String.class));
+        assertEquals("2",vm.get("reindexCount",String.class));
+        
+        // if we repeat this step, forceReindex should be ignored
+        handler.run();
+        vm = indexResource.adaptTo(ValueMap.class);
+        assertEquals("2",vm.get("reindexCount",String.class));
     }
+    
+
 }

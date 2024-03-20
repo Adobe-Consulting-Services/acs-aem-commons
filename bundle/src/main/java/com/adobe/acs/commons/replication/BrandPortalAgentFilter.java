@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication;
@@ -51,7 +49,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
 
         for (final Resource config : brandPortalConfigs) {
             if (log.isDebugEnabled()) {
-                log.debug("Checking Agent [ {} ] against Brand Portal cloud service config [ {} ] for property [ {} ]", new String[]{agent.getId(), config.getPath(), PROP_TENTANT_URL});
+                log.debug("Checking Agent [ {} ] against Brand Portal cloud service config [ {} ] for property [ {} ]", agent.getId(), config.getPath(), PROP_TENTANT_URL);
             }
 
             final ValueMap properties = config.getValueMap();
@@ -86,7 +84,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
             String[] configs = properties.get(PROP_MP_CONFIG, new String[]{});
             if (ArrayUtils.isNotEmpty(configs)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resolved Brand Portal configs [ {}@{} -> {} ]", new String[]{content.getPath(), PROP_MP_CONFIG, StringUtils.join(configs, ",")});
+                    log.debug("Resolved Brand Portal configs [ {}@{} -> {} ]", content.getPath(), PROP_MP_CONFIG, StringUtils.join(configs, ","));
                 }
 
                 for (final String config : configs) {
@@ -99,9 +97,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
                 break;
             }
 
-            if (content.getParent() != null) {
-                content = content.getParent();
-            }
+            content = content.getParent();
 
         } while (content != null);
 

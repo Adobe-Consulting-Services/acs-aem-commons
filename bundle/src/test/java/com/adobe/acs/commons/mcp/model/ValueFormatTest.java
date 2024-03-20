@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +18,7 @@
 package com.adobe.acs.commons.mcp.model;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -25,7 +28,7 @@ public class ValueFormatTest {
 
     private static String ONE = String.format("%.1f", 1f);
 
-    enum fieldEnum {
+    enum FieldEnum {
         @FieldFormat(ValueFormat.plain)
         somePlainField,
         @FieldFormat(ValueFormat.storageSize)
@@ -35,32 +38,32 @@ public class ValueFormatTest {
     
     @Test
     public void testDefinedAnnotations() {
-        assertEquals(ValueFormat.plain, ValueFormat.forField(fieldEnum.somePlainField));
-        assertEquals(ValueFormat.storageSize, ValueFormat.forField(fieldEnum.someStorageSizeField));
+        assertEquals(ValueFormat.plain, ValueFormat.forField(FieldEnum.somePlainField));
+        assertEquals(ValueFormat.storageSize, ValueFormat.forField(FieldEnum.someStorageSizeField));
     }
     
     @Test
     public void testUndefinedAnnotations() {
-        assertEquals(ValueFormat.plain, ValueFormat.forField(fieldEnum.someUnannotatedField));
+        assertEquals(ValueFormat.plain, ValueFormat.forField(FieldEnum.someUnannotatedField));
     }
     
     @Test
     public void oneKb() {
-        assertEquals(ONE + " kb", ValueFormat.getHumanSize(1 << 10));
+        assertEquals(ONE + " KiB", ValueFormat.getHumanSize(1 << 10));
     }
     
     @Test
     public void oneMb() {
-        assertEquals(ONE + " mb", ValueFormat.getHumanSize(1 << 20));
+        assertEquals(ONE + " MiB", ValueFormat.getHumanSize(1 << 20));
     }    
     
     @Test
     public void oneGb() {
-        assertEquals(ONE + " gb", ValueFormat.getHumanSize(1 << 30));
+        assertEquals(ONE + " GiB", ValueFormat.getHumanSize(1 << 30));
     }
     
     @Test
     public void onetb() {
-        assertEquals(ONE + " tb", ValueFormat.getHumanSize(((long) (1 << 30)) * 1024L));
+        assertEquals(ONE + " TiB", ValueFormat.getHumanSize(((long) (1 << 30)) * 1024L));
     }
 }

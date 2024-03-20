@@ -1,28 +1,27 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.dam;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,32 +43,24 @@ public class RenditionPatternPickerTest {
     public RenditionPatternPickerTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
     @Before
     public void setUp() {
-        originalRendition = mock(Rendition.class);
+        originalRendition = mock(Rendition.class, "original");
         when(originalRendition.getName()).thenReturn("original");
 
-        largeRendition = mock(Rendition.class);
+        largeRendition = mock(Rendition.class, "large");
         when(largeRendition.getName()).thenReturn("cq5dam.thumbnail.1000.1000");
 
-        smallRendition = mock(Rendition.class);
+        smallRendition = mock(Rendition.class, "small");
         when(smallRendition.getName()).thenReturn("cq5dam.thumbnail.100.100");
 
-        webRendition = mock(Rendition.class);
+        webRendition = mock(Rendition.class, "web");
         when(webRendition.getName()).thenReturn("cq5dam.web.1280.1280");
 
-        customRendition = mock(Rendition.class);
+        customRendition = mock(Rendition.class, "custom");
         when(customRendition.getName()).thenReturn("custom");
 
-        renditions = new ArrayList<Rendition>();
+        renditions = new ArrayList<>();
         renditions.add(originalRendition);
         renditions.add(webRendition);
         renditions.add(largeRendition);
@@ -78,10 +69,6 @@ public class RenditionPatternPickerTest {
 
         asset = mock(Asset.class);
         when(asset.getRenditions()).thenReturn(renditions);
-    }
-
-    @After
-    public void tearDown() {
     }
 
     /**
@@ -95,13 +82,15 @@ public class RenditionPatternPickerTest {
         assertEquals(expResult, result);
     }
 
+    @Test
     public void testGetRendition_MultiMatchingRegex() {
-        RenditionPatternPicker instance = new RenditionPatternPicker("^cq5dam.*");
+        RenditionPatternPicker instance = new RenditionPatternPicker("^cq5dam\\.thumb*");
         Rendition expResult = largeRendition;
         Rendition result = instance.getRendition(asset);
         assertEquals(expResult, result);
     }
 
+    @Test
     public void testGetRendition_NonMatchingRegex() {
         RenditionPatternPicker instance = new RenditionPatternPicker("nothinghere");
         Rendition expResult = originalRendition;

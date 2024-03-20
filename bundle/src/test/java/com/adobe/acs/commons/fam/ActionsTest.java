@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +18,12 @@
 package com.adobe.acs.commons.fam;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.*;
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
+import com.adobe.acs.commons.functions.CheckedConsumer;
 import org.apache.sling.api.resource.ResourceResolver;
-import static org.junit.Assert.fail;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -41,8 +45,8 @@ public class ActionsTest {
 
     @Test
     public void retryThrowsError() throws Exception {
-        ResourceResolver rr = mock(ResourceResolver.class);
-        CheckedConsumer retry = mock(CheckedConsumer.class);
+        final ResourceResolver rr = mock(ResourceResolver.class);
+        final CheckedConsumer retry = mock(CheckedConsumer.class);
         try {
             doThrow(Exception.class)
                     .doThrow(Exception.class)

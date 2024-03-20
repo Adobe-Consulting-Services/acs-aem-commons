@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +18,7 @@
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.ActionManagerConstants;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
@@ -41,6 +44,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
+
     @Reference
     ThrottledTaskRunner taskRunner;
     
@@ -50,12 +54,17 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
         super(ActionManagerMBean.class);
         tasks = Collections.synchronizedMap(new LinkedHashMap<>());
     }
-    
+
     @Override
     public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval) throws LoginException {
+        return this.createTaskManager(name, resourceResolver, saveInterval, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
+    }
+
+    @Override
+    public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval, int priority) throws LoginException {
         String fullName = String.format("%s (%s)", name, UUID.randomUUID().toString());
         
-        ActionManagerImpl manager = new ActionManagerImpl(fullName, taskRunner, resourceResolver, saveInterval);
+        ActionManagerImpl manager = new ActionManagerImpl(fullName, taskRunner, resourceResolver, saveInterval, priority);
         tasks.put(fullName, manager);
         return manager;
     }

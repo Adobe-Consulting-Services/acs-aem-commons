@@ -1,0 +1,23 @@
+{
+  "jcr:primaryType": "nt:unstructured",
+  "jcr:mixinTypes": [
+    "cq:Taggable"
+  ],
+  "dam:Physicalheightininches": "0.6944444179534912",
+  "dam:Physicalwidthininches": "0.6944444179534912",
+  "dam:Fileformat": "GIF",
+  "dam:Progressive": "no",
+  "tiff:ImageLength": 50,
+  "dam:extracted": "Mon Jan 14 2019 13:11:47 GMT-0600",
+  "dc:format": "image/gif",
+  "dam:Bitsperpixel": 7,
+  "dam:MIMEtype": "image/gif",
+  "dam:Comments": "CREATOR: gd-jpeg v1.0 (using IJG JPEG v62), quality = 65\n\n",
+  "dam:Physicalwidthindpi": 72,
+  "dam:Physicalheightindpi": 72,
+  "dam:Numberofimages": 1,
+  "dam:Numberoftextualcomments": 1,
+  "tiff:ImageWidth": 50,
+  "dam:sha1": "e5a684cf6bfeae56892558192323ccfbfb74e8b0",
+  "dam:size": 3326
+}

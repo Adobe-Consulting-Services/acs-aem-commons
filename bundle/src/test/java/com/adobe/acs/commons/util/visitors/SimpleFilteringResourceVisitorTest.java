@@ -1,5 +1,7 @@
 /*
- * Copyright 2017 Adobe.
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +17,10 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.function.BiConsumer;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -26,6 +28,7 @@ import org.apache.sling.commons.testing.sling.MockResource;
 import org.apache.sling.commons.testing.sling.MockResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class SimpleFilteringResourceVisitorTest {
@@ -59,10 +62,10 @@ public class SimpleFilteringResourceVisitorTest {
     public void accept_breadthFirst() throws Exception {
         SimpleFilteringResourceVisitor visitor = new SimpleFilteringResourceVisitor();
         ArrayList<Resource> visitOrder = new ArrayList<>();
-        BiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
+        CheckedBiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
         
         visitor.setBreadthFirstMode();
-        visitor.setResourceVisitor(tracker);
+        visitor.setResourceVisitorChecked(tracker);
         visitor.accept(root);
         assertArrayEquals(breadthFirstList, visitOrder.toArray());
     }
@@ -71,10 +74,10 @@ public class SimpleFilteringResourceVisitorTest {
     public void accept_depthFirst() throws Exception {
         SimpleFilteringResourceVisitor visitor = new SimpleFilteringResourceVisitor();
         ArrayList<Resource> visitOrder = new ArrayList<>();
-        BiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
+        CheckedBiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
         
         visitor.setDepthFirstMode();
-        visitor.setResourceVisitor(tracker);
+        visitor.setResourceVisitorChecked(tracker);
         visitor.accept(root);
         assertArrayEquals(depthFirstList, visitOrder.toArray());
     }
