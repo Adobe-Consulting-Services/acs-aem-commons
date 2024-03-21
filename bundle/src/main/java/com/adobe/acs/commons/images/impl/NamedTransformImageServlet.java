@@ -146,10 +146,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final String PROP_ADD_URL_PARAMETERS = "addUrlParams";
 
     /* Asset Rendition Pattern Picker */
-
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
-
     private static final String TIFF_ORIENTATION = "tiff:Orientation";
+    public static final String PARAM_SEPARATOR = ":";
 
     @Property(label = "Asset Rendition Picker Regex",
             description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
@@ -513,7 +512,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
       String[] params = StringUtils.split(paramsString, "/");
       for (String param : params) {
         urlParams.put(StringUtils.substringBefore(param, ":"),
-              StringUtils.substringAfter(param, CropConstants.PARAM_SEPARATOR));
+              StringUtils.substringAfter(param, PARAM_SEPARATOR));
       }
       return urlParams;
   }
