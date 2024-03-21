@@ -148,10 +148,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final String TYPE_QUALITY = "quality";
 
     private static final String TYPE_PROGRESSIVE = "progressive";
-
     private static final String PROP_ADD_URL_PARAMETERS = "addUrlParams";
 
-   
     /* Asset Rendition Pattern Picker */
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
@@ -232,8 +230,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = resolveImage(request);
         final String mimeType = getMimeType(request, image);
         Layer layer = getLayer(image);
-      
-      // Adjust layer to image orientation
+
+        // Adjust layer to image orientation
         processImageOrientation(image.getResource(), layer);
         
         if (layer == null) {
@@ -268,12 +266,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      *
      * @param layer the Image layer
      * @param imageTransformersWithParams the transforms and their params
-     * @param request                     the SlingHttpServletRequest
      * @return the transformed Image layer
      */
-    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams,
-            SlingHttpServletRequest request) {
-
+    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams, SlingHttpServletRequest request) {
         for (final String type : imageTransformersWithParams.keySet()) {
             if (StringUtils.equals(TYPE_QUALITY, type)) {
                 // Do not process the "quality" transform in the usual manner
@@ -289,13 +284,14 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
             if (transformParams != null) {
-                if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
-                    LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
-                    if(!cropParamsFromUrl.isEmpty()) {
-                        transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
-                        transformParams.putAll(cropParamsFromUrl);
-                    }
+              if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
+                LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
+                if(!cropParamsFromUrl.isEmpty()) {
+                  transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
+                  transformParams.putAll(cropParamsFromUrl);
                 }
+              }
+
                 layer = imageTransformer.transform(layer, transformParams);
             }
         }
@@ -303,58 +299,60 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         return layer;
     }
 
-    /**
-     * Rotate and flip image based on it's tiff:Orientation metadata.
-     * @param imageResource image resource
-     * @param layer image Layer object
-     */
-    protected void processImageOrientation(Resource imageResource, Layer layer) {
-        ValueMap properties = getImageMetadataValueMap(imageResource);
-        if(properties != null) {
-            String orientation = properties.get(TIFF_ORIENTATION, String.class);
-            if(orientation != null &&  Short.parseShort(orientation) != OrientationUtil.ORIENTATION_NORMAL) {
-                switch(Short.parseShort(orientation)) {
-                    case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL:
-                        layer.flipHorizontally();
-                        break;
-                    case OrientationUtil.ORIENTATION_ROTATE_180:
-                        layer.rotate(180);
-                        break;
-                    case OrientationUtil.ORIENTATION_MIRROR_VERTICAL:
-                        layer.flipVertically();
-                        break;
-                    case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_270_CW:
-                        layer.flipHorizontally();
-                        layer.rotate(270);
-                        break;
-                    case OrientationUtil.ORIENTATION_ROTATE_90_CW:
-                        layer.rotate(90);
-                        break;
-                    case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_90_CW:
-                        layer.flipHorizontally();
-                        layer.rotate(90);
-                        break;
-                    case OrientationUtil.ORIENTATION_ROTATE_270_CW:
-                        layer.rotate(270);
-                        break;
-                }
-            }
+  /**
+   * Rotate and flip image based on it's tiff:Orientation metadata.
+   * @param imageResource image resource
+   * @param layer image Layer object
+   */
+  protected void processImageOrientation(Resource imageResource, Layer layer) {
+    ValueMap properties = getImageMetadataValueMap(imageResource);
+    if(properties != null) {
+      String orientation = properties.get(TIFF_ORIENTATION, String.class);
+      if(orientation != null &&  Short.parseShort(orientation) != OrientationUtil.ORIENTATION_NORMAL) {
+        switch(Short.parseShort(orientation)) {
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL:
+            layer.flipHorizontally();
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_180:
+            layer.rotate(180);
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_VERTICAL:
+            layer.flipVertically();
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_270_CW:
+            layer.flipHorizontally();
+            layer.rotate(270);
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_90_CW:
+            layer.rotate(90);
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_90_CW:
+            layer.flipHorizontally();
+            layer.rotate(90);
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_270_CW:
+            layer.rotate(270);
+            break;
         }
+      }
     }
+  }
 
-    /**
-     * Returns ValueMap of the Image Metadata resource
-     * @param imageResource image resource
-     * @return metadata ValueMap, or null if given resource doesn't have jcr:content/metadata node.
-     */
-    protected ValueMap getImageMetadataValueMap(Resource imageResource) {
-        ValueMap result = null;
-        final Resource metadata = imageResource.getChild("jcr:content/metadata");
-        if (metadata != null) {
-            result = metadata.adaptTo(ValueMap.class);
-        }
-        return result;
+  /**
+   * Returns ValueMap of the Image Metadata resource
+   * @param imageResource image resource
+   * @return metadata ValueMap, or null if given resource doesn't have jcr:content/metadata node.
+   */
+  protected ValueMap getImageMetadataValueMap(Resource imageResource) {
+    ValueMap result = null;
+    final Resource metadata = imageResource.getChild("jcr:content/metadata");
+    if (metadata != null) {
+      result = metadata.adaptTo(ValueMap.class);
     }
+    return result;
+  }
+
+  /**
 
     /**
      * Gets the NamedImageTransformers based on the Suffix segments in order.
@@ -516,19 +514,19 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     }
 
     private LinkedHashMap<String, Object> getCropParamsFromUrl(SlingHttpServletRequest request) {
-        LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>();
+      LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>();
 
-        String transformName = PathInfoUtil.getFirstSuffixSegment(request);
-        String extension = PathInfoUtil.getLastSuffixSegment(request);
+      String transformName = PathInfoUtil.getFirstSuffixSegment(request);
+      String extension = PathInfoUtil.getLastSuffixSegment(request);
 
-        String paramsString = StringUtils.substringBetween(request.getRequestURI(), transformName + "/", extension);
-        String[] params = StringUtils.split(paramsString, "/");
-        for (String param : params) {
-            urlParams.put(StringUtils.substringBefore(param, ":"),
-                    StringUtils.substringAfter(param, CropConstants.PARAM_SEPARATOR));
-        }
-        return urlParams;
-    }
+      String paramsString = StringUtils.substringBetween(request.getRequestURI(), transformName + "/", extension);
+      String[] params = StringUtils.split(paramsString, "/");
+      for (String param : params) {
+        urlParams.put(StringUtils.substringBefore(param, ":"),
+              StringUtils.substringAfter(param, CropConstants.PARAM_SEPARATOR));
+      }
+      return urlParams;
+  }
 
     /**
      * Gets the Image layer.
