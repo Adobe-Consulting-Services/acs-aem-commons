@@ -18,7 +18,6 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
-import com.adobe.acs.commons.images.CropConstants;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
@@ -126,10 +125,6 @@ import java.util.regex.Pattern;
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
 
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
-    
-    private static final Logger AVOID_USAGE_LOGGER = 
-    		LoggerFactory.getLogger(NamedTransformImageServlet.class.getName() + ".AvoidUsage");
-    
 
     public static final String NAME_IMAGE = "image";
 
@@ -213,13 +208,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
-    	
-    	
-    	// Warn when this servlet is used
-    	AVOID_USAGE_LOGGER.warn("An image is transformed on-the-fly, which can be a very resource intensive operation. "
-    			+ "If done frequently, you should consider switching to dynamic AEM web-optimized images or creating such a rendition upfront using processing profiles. "
-    			+ "See https://adobe-consulting-services.github.io/acs-aem-commons/features/named-image-transform/index.html for more details.");
-    	
+
     	
         // Get the transform names from the suffix
         final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
@@ -332,6 +321,8 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             break;
           case OrientationUtil.ORIENTATION_ROTATE_270_CW:
             layer.rotate(270);
+            break;
+          default:
             break;
         }
       }
@@ -629,14 +620,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                     DEFAULT_ASSET_RENDITION_PICKER_REGEX);
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }
-        
-        /**
-         * We want to be able to determine if the absence of the messages of the AVOID_USAGE_LOGGER
-         * is caused by not using this feature or by disabling the WARN messages.
-         */
-        if (!AVOID_USAGE_LOGGER.isWarnEnabled()) {
-        	log.info("Warnings for the use of the NamedTransfomringImageServlet disabled");
-        }
+
     }
 
     protected final void bindNamedImageTransformers(final NamedImageTransformer service,
