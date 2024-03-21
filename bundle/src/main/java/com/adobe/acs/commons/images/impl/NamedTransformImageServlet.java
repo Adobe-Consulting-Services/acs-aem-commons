@@ -209,7 +209,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
 
-    	
         // Get the transform names from the suffix
         final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
 
