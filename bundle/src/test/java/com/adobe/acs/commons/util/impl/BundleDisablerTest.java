@@ -17,31 +17,34 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.junit.Before;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.osgi.framework.BundleException;
-import org.osgi.service.component.ComponentContext;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.util.converter.Converters;
+
+import com.adobe.acs.commons.util.impl.BundleDisabler.Config;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleDisablerTest {
-
-    @Mock
-    private ComponentContext componentContext;
 
     @Mock
     private BundleContext bundleContext;
@@ -49,21 +52,18 @@ public class BundleDisablerTest {
     @Mock
     private Bundle ownBundle;
 
-    @InjectMocks
-    private BundleDisabler disabler;
-
     private final List<Bundle> bundles = new ArrayList<Bundle>();
 
     @Test
     public void testNullProperties() {
-        disabler.activate(componentContext, Collections.<String, Object>emptyMap());
+        Converters.standardConverter().convert(bundleContext).to(BundleDisabler.Config.class);
+        new BundleDisabler(bundleContext, configuration(), Collections.emptyList() );
         verifyNoMoreInteractions(bundleContext);
     }
 
     @Before
     public void setUp() {
         bundles.clear();
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
         when(bundleContext.getBundles()).then(new Answer<Bundle[]>() {
             @Override
             public Bundle[] answer(final InvocationOnMock invocationOnMock) throws Throwable {
@@ -74,7 +74,7 @@ public class BundleDisablerTest {
 
     @Test
     public void shouldNotDisableOwnBundle() {
-        disabler.activate(componentContext, bundleProperties("my.own.bundle"));
+        new BundleDisabler(bundleContext, configuration("my.own.bundle"), Collections.emptyList());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class BundleDisablerTest {
 
         when(targetBundle.getSymbolicName()).thenReturn("to.stop.bundle");
 
-        disabler.activate(componentContext, bundleProperties("to.stop.bundle"));
+        new BundleDisabler(bundleContext, configuration("to.stop.bundle"), Collections.emptyList());
 
         try {
             verify(targetBundle).stop();
@@ -101,7 +101,7 @@ public class BundleDisablerTest {
         when(targetBundle.getState()).thenReturn(Bundle.UNINSTALLED);
         when(targetBundle.getSymbolicName()).thenReturn("to.stop.bundle");
 
-        disabler.activate(componentContext, bundleProperties("to.stop.bundle"));
+        new BundleDisabler(bundleContext, configuration("to.stop.bundle"), Collections.emptyList());
 
         try {
             verify(targetBundle, never()).stop();
@@ -110,8 +110,10 @@ public class BundleDisablerTest {
         }
     }
 
-    private Map<String, Object> bundleProperties(String... bundles) {
-        return Collections.<String, Object>singletonMap("bundles", bundles);
+    
+    private @NotNull Config configuration(String... bundles) {
+        Map<String, Object> propertiesMap = Collections.<String, Object>singletonMap("bundles", bundles);
+        return Converters.standardConverter().convert(propertiesMap).to(BundleDisabler.Config.class);
     }
 
 }
