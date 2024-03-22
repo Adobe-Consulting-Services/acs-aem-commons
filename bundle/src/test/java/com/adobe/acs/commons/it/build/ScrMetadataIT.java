@@ -31,6 +31,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -273,7 +274,7 @@ public class ScrMetadataIT {
             while (entry != null) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".xml")) {
                     if (entry.getName().startsWith("OSGI-INF/metatype")) {
-                        metatypeDescriptors.add(parseMetatype(new InputStreamFacade(zis), entry.getName()));
+                        metatypeDescriptors.addAll(parseMetatype(new InputStreamFacade(zis), entry.getName()));
                     } else if (entry.getName().startsWith("OSGI-INF/")) {
                         result.merge(parseScr(new InputStreamFacade(zis), entry.getName(), checkNs));
                     }
@@ -308,7 +309,7 @@ public class ScrMetadataIT {
                         }
                     } else if ("metatype".equals(parentDirectoryName)) {
                         try (InputStream input = Files.newInputStream(file)) {
-                            metatypeDescriptors.add(parseMetatype(input, file.getFileName().toString()));
+                            metatypeDescriptors.addAll(parseMetatype(input, file.getFileName().toString()));
                         }
                     }
                 }
@@ -360,8 +361,9 @@ public class ScrMetadataIT {
         return result;
     }
 
-    private Descriptor parseMetatype(InputStream is, String name) throws IOException {
-        Descriptor result = new Descriptor();
+    private Collection<Descriptor> parseMetatype(InputStream is, String name) throws IOException {
+        List<Descriptor> descriptors = new ArrayList<>();
+        List<Property> properties = new ArrayList<>();
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
             while (reader.hasNext()) {
@@ -370,25 +372,32 @@ public class ScrMetadataIT {
                     StartElement start = event.asStartElement();
                     String elementName = start.getName().getLocalPart();
                     if (elementName.equals("Designate")) {
+                        // each designate defines a mapping between SCR component and metatype, the same metatype may be bound to multiple components
                         Attribute pidAttribute = start.getAttributeByName(new QName("pid"));
+                        Descriptor descriptor = new Descriptor();
+                        descriptor.properties = properties;
                         if (pidAttribute != null) {
-                            result.name = pidAttribute.getValue();
+                            descriptor.name = pidAttribute.getValue();
                         } else {
                             pidAttribute = start.getAttributeByName(new QName("factoryPid"));
                             if (pidAttribute != null) {
-                                result.name = pidAttribute.getValue();
+                                descriptor.name = pidAttribute.getValue();
                             }
-                            result.factory = true;
+                            descriptor.factory = true;
                         }
+                        if (descriptor.name == null) {
+                            throw new IllegalArgumentException("Could not identify (factory)pid for " + name);
+                        }
+                        descriptors.add(descriptor);
                     } else if (elementName.equals("AD")) {
                         String propName = start.getAttributeByName(new QName("id")).getValue();
                         Attribute value = start.getAttributeByName(new QName("default"));
                         Attribute typeAttr = start.getAttributeByName(new QName("type"));
                         String type = typeAttr == null ? "String" : typeAttr.getValue();
                         if (value == null) {
-                            result.properties.add(new Property(propName, "(metatype)", type));
+                            properties.add(new Property(propName, "(metatype)", type));
                         } else {
-                            result.properties.add(new Property(propName, "(metatype)" + value.getValue(), type));
+                            properties.add(new Property(propName, "(metatype)" + value.getValue(), type));
                         }
                     }
                 }
@@ -396,10 +405,7 @@ public class ScrMetadataIT {
         } catch (XMLStreamException e) {
             throw new IOException("Error parsing XML", e);
         }
-        if (result.name == null) {
-            throw new IllegalArgumentException("Could not identify pid for " + name);
-        }
-        return result;
+        return descriptors;
     }
 
     private String cleanText(String input) {
