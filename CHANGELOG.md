@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #3267 - Remove JSR305 dependency
+- #3296 - Add image cropping customisation
 
 ### Fixed
 
