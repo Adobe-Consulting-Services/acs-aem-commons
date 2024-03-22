@@ -31,6 +31,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 
 /**
  * ACS AEM Commons - Asset Packager Servlet
@@ -38,7 +39,7 @@ import org.apache.sling.api.resource.ValueMap;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = {"POST"},
+        methods = {HttpConstants.METHOD_POST},
         resourceTypes = {"acs-commons/components/utilities/packager/asset-packager"},
         selectors = {"package"},
         extensions = {"json"}
