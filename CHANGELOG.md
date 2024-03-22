@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3270 - Re-enable accidentally disabled JUnit3/4 tests
 - #3200 - Remove useless public interface in Cloud Bundle to get javadocs to be built
+- #3295 - Updated the annotations in QueryReportConfig fixing the query manager issue due to empty query language
 - #3284 - Allow anonymous to read redirect caconfig options
 
 ## 6.4.0 - 2024-02-22
