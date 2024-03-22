@@ -28,7 +28,6 @@ import org.apache.sling.models.annotations.Optional;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
-import javax.inject.Inject;
 import java.util.List;
 
 /**
@@ -43,10 +42,10 @@ public class PredictedTagsCellValue {
     @ValueMapValue
     private String property;
 
-    @Inject @Optional
+    @ValueMapValue @Optional
     private Double lowerConfidenceThreshold;
 
-    @Inject @Optional
+    @ValueMapValue @Optional
     private boolean confidenceShown;
 
     private PredictedTagsUtil predictedTagsUtil = new PredictedTagsUtil();

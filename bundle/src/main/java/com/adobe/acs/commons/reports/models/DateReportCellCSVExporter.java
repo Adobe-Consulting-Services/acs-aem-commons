@@ -20,8 +20,6 @@ package com.adobe.acs.commons.reports.models;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import javax.inject.Inject;
-
 import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -29,6 +27,7 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
 
 import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 /**
  * An exporter for exporting formatted string values
@@ -36,10 +35,10 @@ import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 @Model(adaptables = Resource.class)
 public class DateReportCellCSVExporter implements ReportCellCSVExporter {
 
-  @Inject
+  @ValueMapValue
   private String property;
 
-  @Inject
+  @ValueMapValue
   @Optional
   private String format;
 
