@@ -26,6 +26,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.dam.commons.util.OrientationUtil;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -124,10 +125,9 @@ import java.util.regex.Pattern;
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
 
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
-    
-    private static final Logger AVOID_USAGE_LOGGER = 
-    		LoggerFactory.getLogger(NamedTransformImageServlet.class.getName() + ".AvoidUsage");
-    
+
+    private static final Logger AVOID_USAGE_LOGGER =
+          LoggerFactory.getLogger(NamedTransformImageServlet.class.getName() + ".AvoidUsage");
 
     public static final String NAME_IMAGE = "image";
 
@@ -146,10 +146,12 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final String TYPE_QUALITY = "quality";
 
     private static final String TYPE_PROGRESSIVE = "progressive";
+    private static final String PROP_ADD_URL_PARAMETERS = "addUrlParams";
 
     /* Asset Rendition Pattern Picker */
-
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
+    private static final String TIFF_ORIENTATION = "tiff:Orientation";
+    public static final String PARAM_SEPARATOR = ":";
 
     @Property(label = "Asset Rendition Picker Regex",
             description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
@@ -208,14 +210,12 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
-    	
-    	
-    	// Warn when this servlet is used
-    	AVOID_USAGE_LOGGER.warn("An image is transformed on-the-fly, which can be a very resource intensive operation. "
-    			+ "If done frequently, you should consider switching to dynamic AEM web-optimized images or creating such a rendition upfront using processing profiles. "
-    			+ "See https://adobe-consulting-services.github.io/acs-aem-commons/features/named-image-transform/index.html for more details.");
-    	
-    	
+
+         // Warn when this servlet is used
+         AVOID_USAGE_LOGGER.warn("An image is transformed on-the-fly, which can be a very resource intensive operation. "
+              + "If done frequently, you should consider switching to dynamic AEM web-optimized images or creating such a rendition upfront using processing profiles. "
+              + "See https://adobe-consulting-services.github.io/acs-aem-commons/features/named-image-transform/index.html for more details.");
+
         // Get the transform names from the suffix
         final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
 
@@ -225,6 +225,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = resolveImage(request);
         final String mimeType = getMimeType(request, image);
         Layer layer = getLayer(image);
+
+        // Adjust layer to image orientation
+        processImageOrientation(image.getResource(), layer);
         
         if (layer == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -232,7 +235,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
         
         // Transform the image
-        layer = this.transform(layer, imageTransformersWithParams);
+        layer = this.transform(layer, imageTransformersWithParams, request);
 
         // Get the quality
         final double quality = this.getQuality(mimeType,
@@ -260,7 +263,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @param imageTransformersWithParams the transforms and their params
      * @return the transformed Image layer
      */
-    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
+    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams, SlingHttpServletRequest request) {
         for (final String type : imageTransformersWithParams.keySet()) {
             if (StringUtils.equals(TYPE_QUALITY, type)) {
                 // Do not process the "quality" transform in the usual manner
@@ -273,15 +276,80 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 continue;
             }
 
-            final ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
+            ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
             if (transformParams != null) {
+              if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
+                LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
+                if(!cropParamsFromUrl.isEmpty()) {
+                  transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
+                  transformParams.putAll(cropParamsFromUrl);
+                }
+              }
+
                 layer = imageTransformer.transform(layer, transformParams);
             }
         }
 
         return layer;
     }
+
+  /**
+   * Rotate and flip image based on it's tiff:Orientation metadata.
+   * @param imageResource image resource
+   * @param layer image Layer object
+   */
+  protected void processImageOrientation(Resource imageResource, Layer layer) {
+    ValueMap properties = getImageMetadataValueMap(imageResource);
+    if(properties != null) {
+      String orientation = properties.get(TIFF_ORIENTATION, String.class);
+      if(orientation != null &&  Short.parseShort(orientation) != OrientationUtil.ORIENTATION_NORMAL) {
+        switch(Short.parseShort(orientation)) {
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL:
+            layer.flipHorizontally();
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_180:
+            layer.rotate(180);
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_VERTICAL:
+            layer.flipVertically();
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_270_CW:
+            layer.flipHorizontally();
+            layer.rotate(270);
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_90_CW:
+            layer.rotate(90);
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_90_CW:
+            layer.flipHorizontally();
+            layer.rotate(90);
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_270_CW:
+            layer.rotate(270);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Returns ValueMap of the Image Metadata resource
+   * @param imageResource image resource
+   * @return metadata ValueMap, or null if given resource doesn't have jcr:content/metadata node.
+   */
+  protected ValueMap getImageMetadataValueMap(Resource imageResource) {
+    ValueMap result = null;
+    final Resource metadata = imageResource.getChild("jcr:content/metadata");
+    if (metadata != null) {
+      result = metadata.adaptTo(ValueMap.class);
+    }
+    return result;
+  }
+
+  /**
 
     /**
      * Gets the NamedImageTransformers based on the Suffix segments in order.
@@ -442,6 +510,21 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
+    private LinkedHashMap<String, Object> getCropParamsFromUrl(SlingHttpServletRequest request) {
+      LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>();
+
+      String transformName = PathInfoUtil.getFirstSuffixSegment(request);
+      String extension = PathInfoUtil.getLastSuffixSegment(request);
+
+      String paramsString = StringUtils.substringBetween(request.getRequestURI(), transformName + "/", extension);
+      String[] params = StringUtils.split(paramsString, "/");
+      for (String param : params) {
+        urlParams.put(StringUtils.substringBefore(param, ":"),
+              StringUtils.substringAfter(param, PARAM_SEPARATOR));
+      }
+      return urlParams;
+  }
+
     /**
      * Gets the Image layer.
      *
@@ -543,14 +626,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                     DEFAULT_ASSET_RENDITION_PICKER_REGEX);
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }
-        
+
         /**
-         * We want to be able to determine if the absence of the messages of the AVOID_USAGE_LOGGER
-         * is caused by not using this feature or by disabling the WARN messages.
-         */
+        * We want to be able to determine if the absence of the messages of the AVOID_USAGE_LOGGER
+        * is caused by not using this feature or by disabling the WARN messages.
+        */
         if (!AVOID_USAGE_LOGGER.isWarnEnabled()) {
-        	log.info("Warnings for the use of the NamedTransfomringImageServlet disabled");
+          log.info("Warnings for the use of the NamedTransfomringImageServlet disabled");
         }
+
     }
 
     protected final void bindNamedImageTransformers(final NamedImageTransformer service,
@@ -583,3 +667,4 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 }
+
