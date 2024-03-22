@@ -477,7 +477,7 @@ Service-Component: OSGI-INF/*.xml
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>9.0.9</version>
+                    <version>9.0.10</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
