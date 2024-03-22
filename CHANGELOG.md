@@ -13,12 +13,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #3267 - Remove JSR305 dependency
+- #3262 - Allow to configure Component/BundleDisabler via Configuration Factories
 - #3296 - Add image cropping customisation
 
 ### Fixed
 
 - #3270 - Re-enable accidentally disabled JUnit3/4 tests
 - #3200 - Remove useless public interface in Cloud Bundle to get javadocs to be built
+- #3294 - Cloud manager report issues partial fix
+- #3295 - Updated the annotations in QueryReportConfig fixing the query manager issue due to empty query language
+- #3284 - Allow anonymous to read redirect caconfig options
 
 ## 6.4.0 - 2024-02-22
 

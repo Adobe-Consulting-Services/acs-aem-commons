@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -36,11 +35,12 @@ import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 import com.adobe.granite.references.Reference;
 import com.adobe.granite.references.ReferenceAggregator;
 import com.adobe.granite.references.ReferenceList;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 @Model(adaptables = Resource.class)
 public class ReferencesModel implements ReportCellCSVExporter {
 
-  @Inject
+  @ValueMapValue
   @OSGiService
   private ReferenceAggregator aggregator;
 
