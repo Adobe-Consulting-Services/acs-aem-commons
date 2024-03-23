@@ -463,7 +463,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     try {
                         md5FromCache = getCacheEntry(uriInfo.cacheKey);
                     } catch (Exception e) {
-                        log.debug("Failed to get cache entry for '{}'", uriInfo.cacheKey);
+                        log.warn("Failed to get cache entry for '{}'", uriInfo.cacheKey);
                     }
 
                     // this static value "Invalid cache key parameter." happens when the cache key can't be

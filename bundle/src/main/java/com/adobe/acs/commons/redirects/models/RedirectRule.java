@@ -20,7 +20,6 @@ package com.adobe.acs.commons.redirects.models;
 import com.adobe.granite.security.user.util.AuthorizableUtil;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
@@ -269,7 +268,7 @@ public class RedirectRule {
                 ptrn = null;
             }
         } catch (PatternSyntaxException e) {
-            log.info("invalid regex: {}", src);
+            log.error("invalid regex: {}", src);
             ptrn = null;
         }
         return ptrn;

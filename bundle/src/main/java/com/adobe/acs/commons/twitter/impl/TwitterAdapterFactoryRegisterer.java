@@ -68,7 +68,7 @@ public class TwitterAdapterFactoryRegisterer {
             this.adapterFactoryServiceRegistration = bundleContext.registerService(AdapterFactory.class, adapterFactory, serviceProps);
 
         } catch (NoClassDefFoundError e) {
-            log.info("Twitter4J Library not found. Not registering TwitterAdapterFactory.");
+            log.error("Twitter4J Library not found. Not registering TwitterAdapterFactory.");
         }
     }
 

@@ -203,9 +203,9 @@ public class EndpointServiceImpl implements EndpointService {
             URIBuilder builder = new URIBuilder(actionUrl);
              queryParameters.forEach((k, v) -> builder.addParameter(k, v));
              uri = builder.build();
-         
-      } catch(URISyntaxException uriexception) {
-            LOGGER.error(uriexception.getMessage());
+
+      } catch(URISyntaxException uriException) {
+            LOGGER.error("Unable to process the actionURL: {} using uriBuilder", actionUrl, uriException);
             return new JsonObject();
       }
 
@@ -223,11 +223,9 @@ public class EndpointServiceImpl implements EndpointService {
            }
       }
       catch (IOException ioexception) {
-         LOGGER.error(ioexception.getMessage());
+         LOGGER.error("Unable to process the request", ioexception);
          return new JsonObject();
-         
       }
-
    }
 
    private JsonObject processGet(@NotNull final URI uri, String[] headers) throws IOException {

@@ -296,9 +296,9 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 session.save();
             }
         } catch (RepositoryException e) {
-            log.error("Could not complete save at end of synthetic workflow execution process"
-                    + " [ {} ]", payloadPath, e);
-            throw new WorkflowException(e);
+            throw new WorkflowException(String.format(
+                    "Could not complete save at end of synthetic workflow execution process [ %s ]", payloadPath),
+                    e);
         }
     }
 
