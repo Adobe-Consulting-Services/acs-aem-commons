@@ -104,7 +104,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
                     }
                 }
             } catch (RuntimeException | ReflectiveOperationException ex) {
-                LOGGER.debug("Unable to determine sling resource type for model bean: {} ", originalClass);
+                LOGGER.error("Unable to determine sling resource type for model bean: {} ", originalClass);
             }
         }
     }

@@ -232,7 +232,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
             if (this.isComponentErrorHandlingSuppressed(slingRequest)) {
                 // Allows disabling from within an inclusion.
                 // This is checked before the suppression is reset to the "pre-inclusion" state
-                log.debug("Suppressed component error handling for: {}",
+                log.warn("Suppressed component error handling for: {}",
                         slingRequest.getResource().getPath());
 
                 throw new ServletException(ex);

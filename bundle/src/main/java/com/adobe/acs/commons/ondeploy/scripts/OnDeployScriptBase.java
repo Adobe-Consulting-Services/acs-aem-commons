@@ -127,7 +127,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         try {
             return session.getNode(absolutePath);
         } catch (PathNotFoundException e) {
-            logger.info("Creating node (and missing parents): {}", absolutePath);
+            logger.warn("Creating node (and missing parents): {}", absolutePath);
             return JcrUtil.createPath(absolutePath, intermediateNodeType, nodeType, session, false);
         }
     }

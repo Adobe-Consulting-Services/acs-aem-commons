@@ -1005,7 +1005,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 try {
                     dispatcher.include(new GetRequest(request), response);
                 } catch (Exception e) {
-                    log.debug("Exception swallowed while including error page", e);
+                    log.error("Exception swallowed while including error page", e);
                 }
             }
         } else {
@@ -1013,7 +1013,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             try {
                 response.getWriter().write(responseData);
             } catch (Exception e) {
-                log.info("Exception swallowed while including error page", e);
+                log.error("Exception swallowed while including error page", e);
             }
         }
     }
