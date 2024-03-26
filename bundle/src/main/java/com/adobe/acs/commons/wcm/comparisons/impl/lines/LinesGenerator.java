@@ -45,10 +45,8 @@ public class LinesGenerator<T> {
     private Stepper<T> right;
 
     private T leftValue;
-    private int leftSpacer;
 
     private T rightValue;
-    private int rightSpacer;
 
     public LinesGenerator(Function<T, Serializable> toId) {
         this.toId = toId;
@@ -64,24 +62,23 @@ public class LinesGenerator<T> {
         this.rightValue = this.right.next();
 
         do {
-            this.leftSpacer = this.right.positionOfIdAfterCurrent(leftValue);
-            this.rightSpacer = this.left.positionOfIdAfterCurrent(rightValue);
+            int leftSpacer = this.right.positionOfIdAfterCurrent(leftValue);
+            int rightSpacer = this.left.positionOfIdAfterCurrent(rightValue);
 
             if (leftValue != null && rightValue != null && toId.apply(leftValue).equals(toId.apply(rightValue))) {
                 addPair(lines);
 
             } else if (leftSpacer < rightSpacer && leftSpacer > 0) {
-                addWithLeftSpacers(lines);
+                addWithLeftSpacers(lines, leftSpacer);
 
             } else if (rightSpacer > 0) {
-                addWithRightSpacers(lines);
+                addWithRightSpacers(lines, rightSpacer);
 
             } else if (leftSpacer > 0) {
-                addWithLeftSpacers(lines);
+                addWithLeftSpacers(lines, leftSpacer);
 
             } else {
                 addSeperated(lines);
-
             }
         } while (leftValue != null || rightValue != null);
 
@@ -99,14 +96,14 @@ public class LinesGenerator<T> {
         }
     }
 
-    private void addWithLeftSpacers(List<Line<T>> lines) {
+    private void addWithLeftSpacers(List<Line<T>> lines, int leftSpacer) {
         for (int i = 0; i < leftSpacer; i++) {
             lines.add(LineImpl.right(rightValue));
             rightValue = this.right.next();
         }
     }
 
-    private void addWithRightSpacers(List<Line<T>> lines) {
+    private void addWithRightSpacers(List<Line<T>> lines, int rightSpacer) {
         for (int i = 0; i < rightSpacer; i++) {
             lines.add(LineImpl.left(leftValue));
             leftValue = this.left.next();
@@ -118,6 +115,4 @@ public class LinesGenerator<T> {
         this.leftValue = this.left.next();
         this.rightValue = this.right.next();
     }
-
-
 }
