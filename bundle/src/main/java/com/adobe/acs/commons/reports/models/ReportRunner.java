@@ -45,8 +45,6 @@ public class ReportRunner {
 
   private String failureMessage;
 
-  private int page;
-
   private ReportExecutor reportExecutor;
 
   private SlingHttpServletRequest request;
@@ -71,7 +69,7 @@ public class ReportRunner {
   }
 
   @SuppressWarnings("squid:S2658") // class name is from a trusted source
-  private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
+  private boolean executeConfig(Resource config, SlingHttpServletRequest request, int page) {
     log.trace("executeConfig");
     try {
       Class<?> exClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
@@ -79,7 +77,7 @@ public class ReportRunner {
       if (model instanceof ReportExecutor) {
         ReportExecutor ex = (ReportExecutor) model;
         ex.setConfiguration(config);
-        ex.setPage(this.page);
+        ex.setPage(page);
         this.reportExecutor = ex;
         return true;
       } else {
@@ -110,6 +108,7 @@ public class ReportRunner {
   protected void init() {
     log.trace("init");
 
+    int page;
     try {
       page = Integer.parseInt(request.getParameter("page"), 10);
     } catch (Exception e) {
@@ -123,7 +122,7 @@ public class ReportRunner {
       Iterator<Resource> children = configCtr.listChildren();
       while (children.hasNext()) {
         Resource config = children.next();
-        if (executeConfig(config, request)) {
+        if (executeConfig(config, request, page)) {
           log.debug("Successfully executed report with configuration: {}", config);
           resultsRetrieved = true;
           break;
