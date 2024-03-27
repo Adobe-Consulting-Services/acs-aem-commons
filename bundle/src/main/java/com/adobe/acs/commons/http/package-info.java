@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 /**
- * Http Injectors.
+ * HTTP related services.
  */
-@org.osgi.annotation.versioning.Version("2.1.0")
+@org.osgi.annotation.versioning.Version("2.2.0")
 package com.adobe.acs.commons.http;
