@@ -56,9 +56,9 @@ public class ContentPolicyPropertiesViaProvider implements ViaProvider {
             ResourceResolver resourceResolver = getResourceResolver(original);
             final Resource resource;
 
-            if(StringUtils.equals(value, "currentPage")){
+            if(StringUtils.equals(value, VIA_CURRENT_PAGE)){
                 resource = getCurrentPage(original).getContentResource();
-            }else if(StringUtils.equals(value, "resourcePage")){
+            }else if(StringUtils.equals(value, VIA_RESOURCE_PAGE)){
                 resource = getResourcePage(original).getContentResource();
             }else{
                 resource = getResource(original);

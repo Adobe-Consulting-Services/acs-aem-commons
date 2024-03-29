@@ -80,6 +80,7 @@ public class InjectorUtils {
         }
         return null;
     }
+
     public static ResourceResolver getResourceResolver(Object adaptable) {
         if (adaptable instanceof SlingHttpServletRequest) {
             return ((SlingHttpServletRequest) adaptable).getResourceResolver();
