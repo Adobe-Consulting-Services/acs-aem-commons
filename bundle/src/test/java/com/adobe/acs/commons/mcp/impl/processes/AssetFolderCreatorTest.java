@@ -19,23 +19,12 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 import com.adobe.acs.commons.util.datadefinitions.impl.JcrValidNameDefinitionBuilderImpl;
 import com.adobe.acs.commons.util.datadefinitions.impl.LowercaseWithDashesDefinitionBuilderImpl;
 import com.adobe.acs.commons.util.datadefinitions.impl.TitleAndNodeNameDefinitionBuilderImpl;
-import com.amazonaws.auth.AnonymousAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.S3ClientOptions;
-import com.day.cq.dam.api.AssetManager;
-import com.google.common.base.Function;
-import me.alexpanov.net.FreePortFinder;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.mime.MimeTypeService;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,10 +37,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

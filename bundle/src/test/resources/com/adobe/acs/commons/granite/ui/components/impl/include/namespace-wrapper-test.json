@@ -44,6 +44,20 @@
           "fieldLabel": "${{(String)fieldLabelText:defaultText}}",
           "value": "true",
           "sling:resourceType": "granite/ui/components/foundation/form/textfield"
+        },
+        "fieldWithChildrenThatShouldBeIgnored": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "ignore/children/resource/type",
+          "name": "./shouldIgnoreChildren",
+          "items": {
+            "someRegularField": {
+              "jcr:primaryType": "nt:unstructured",
+              "name": "./displayButton",
+              "fieldLabel": "${{(String)fieldLabelText:defaultText}}",
+              "value": "true",
+              "sling:resourceType": "granite/ui/components/foundation/form/textfield"
+            }
+          }
         }
       }
     }

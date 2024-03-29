@@ -35,9 +35,12 @@ import java.util.Set;
 public class TestHierarchicalPagePropertiesModelModelImpl implements TestHierarchicalPagePropertiesModel {
 
     @HierarchicalPageProperty
+    private String pagePropertyString;
+
+    @HierarchicalPageProperty
     private String hierarchicalPagePropertyString;
 
-    @HierarchicalPageProperty("hierarchicalPagePropertyBoolean")
+    @HierarchicalPageProperty(value = "hierarchicalPagePropertyBoolean", inherit = false)
     private boolean hierarchicalPagePropertyBoolean;
 
     @HierarchicalPageProperty
@@ -63,7 +66,12 @@ public class TestHierarchicalPagePropertiesModelModelImpl implements TestHierarc
 
 
     @Override
-    public String getPropertyString() {
+    public String getPagePropertyString() {
+        return pagePropertyString;
+    }
+
+    @Override
+    public String getHierarchicalPagePropertyString() {
         return hierarchicalPagePropertyString;
     }
 

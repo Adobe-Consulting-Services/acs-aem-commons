@@ -26,16 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
-import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
-import com.adobe.acs.commons.reports.api.ReportException;
-import com.adobe.acs.commons.reports.api.ReportExecutor;
-import com.adobe.acs.commons.reports.api.ResultsPage;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.text.csv.Csv;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,10 +36,18 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
+import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.api.ReportExecutor;
+import com.adobe.acs.commons.reports.api.ResultsPage;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.text.csv.Csv;
 
 /**
  * Servlet for exporting the results of the report to CSV.
@@ -67,7 +67,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
   private DelimiterConfiguration delimiterConfiguration;
 
   @Override
-  protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+  protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response)
       throws ServletException, IOException {
     log.trace("doGet");
 

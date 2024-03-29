@@ -100,7 +100,11 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDisp
             Resource resource = getResource(slingRequest);
             if (resource != null) {
                 String headerValue = resource.getValueMap().get(propertyName, String.class);
-                return HEADER_PREFIX + headerValue;
+                if (isValidMaxAgeValue(headerValue)) {
+                    return HEADER_PREFIX + headerValue;
+                } else {
+                    log.debug("Invalid value <{}> found in property <{}> for max-age header", headerValue, propertyName);
+                }
             }
         }
         log.debug("An error occurred, falling back to the default max age value of this filter");
@@ -117,6 +121,15 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDisp
             throw new ConfigurationException(PROP_PROPERTY_NAME, "Property name should be specified.");
         }
         inheritPropertyValue = PropertiesUtil.toString(properties.get(PROP_INHERIT_PROPERTY_VALUE), "INHERIT");
+    }
+
+    private boolean isValidMaxAgeValue(String headerValue) {
+        try {
+            Integer.parseInt(headerValue);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
     }
 
     public String toString() {

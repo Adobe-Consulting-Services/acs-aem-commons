@@ -41,10 +41,9 @@ import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 class TwitterAdapterFactory implements AdapterFactory {
 
     TwitterAdapterFactory(String httpProxyHost, int httpProxyPort, boolean useSsl) {
-        this.httpProxyHost = httpProxyHost;
-        this.httpProxyPort = httpProxyPort;
-        this.useSsl = useSsl;
-        this.factory = new TwitterFactory(buildConfiguration());
+        this.factory = new TwitterFactory(
+                buildConfiguration(httpProxyHost, httpProxyPort, useSsl)
+        );
     }
 
     @VisibleForTesting
@@ -57,13 +56,6 @@ class TwitterAdapterFactory implements AdapterFactory {
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
 
     private final TwitterFactory factory;
-
-    private final String httpProxyHost;
-
-    private final int httpProxyPort;
-
-    private final boolean useSsl;
-
 
 
     @SuppressWarnings("unchecked")
@@ -87,7 +79,7 @@ class TwitterAdapterFactory implements AdapterFactory {
         return null;
     }
 
-    private Configuration buildConfiguration() {
+    private Configuration buildConfiguration(String httpProxyHost, int httpProxyPort, boolean useSsl) {
         final ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.setUseSSL(useSsl);
         builder.setJSONStoreEnabled(true);

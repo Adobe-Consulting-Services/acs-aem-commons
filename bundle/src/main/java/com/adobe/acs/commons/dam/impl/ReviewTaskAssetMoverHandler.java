@@ -201,7 +201,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                 Resource resource = resourceResolver.getResource(path);
                 AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
 
-                if (resource != null) {
+                if (resource != null && assetManager != null) {
                     ValueMap taskProperties = resource.getValueMap();
                     String contentPath = taskProperties.get(PN_CONTENT_PATH, String.class);
 

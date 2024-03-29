@@ -36,6 +36,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
@@ -46,7 +47,7 @@ import com.adobe.acs.commons.packaging.PackageHelper;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "POST" },
+        methods = { HttpConstants.METHOD_POST },
         resourceTypes = { "acs-commons/components/utilities/packager/authorizable-packager" },
         selectors = { "package" },
         extensions = { "json" }

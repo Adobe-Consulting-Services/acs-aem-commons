@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.0.15-SNAPSHOT</version>
+        <version>6.5.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -47,15 +47,24 @@
                     <!-- overwrite rep:ACE nodes defining policies for acs-aem-commons-owned service principals -->
                     <accessControlHandling>merge</accessControlHandling>
                     <packageType>application</packageType>
-                    <dependencies>
-                        <dependency>
-                            <group>day/cq60/product</group>
-                            <name>cq-content</name>
-                            <version>[6.5.6,)</version><!-- version shipped with AEM 6.5.0 GA -->
-                        </dependency>
-                        <!-- cannot depend on SP 10 as never satisfied on AEMCloud -->
-                    </dependencies>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-metadata</id>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                        <configuration>
+                            <dependencies>
+                                <dependency>
+                                    <group>day/cq60/product</group>
+                                    <name>cq-content</name>
+                                    <version>[6.5.10,)</version><!-- version shipped with AEM 6.5.0 GA -->
+                                </dependency>
+                            </dependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -205,12 +214,59 @@
     </dependencies>
     <profiles>
         <profile>
+            <id>cloud</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <contentPackageFile>${project.build.directory}/${project.build.finalName}-cloud.zip</contentPackageFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.jackrabbit</groupId>
+                        <artifactId>filevault-package-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>cloud-metadata</id>
+                                <goals>
+                                    <goal>generate-metadata</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                    <dependencies>
+                                        <dependency>
+                                            <group>day/cq60/product</group>
+                                            <name>cq-content</name>
+                                            <version>[6.6,)</version><!-- version shipped with AEM Cloud SDK -->
+                                        </dependency>
+                                    </dependencies>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cloud-package</id>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>autoInstallUiAppsPackage</id>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>com.day.jcr.vault</groupId>
                         <artifactId>content-package-maven-plugin</artifactId>
+                        <configuration>
+                            <packageFile>${contentPackageFile}</packageFile>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>install-content-package</id>

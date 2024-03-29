@@ -32,10 +32,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Incomplete mock that provides just enough for basic testing
@@ -47,6 +50,14 @@ public class MockContentFragment implements ContentFragment {
     String path;
     HashMap<String, String> elements = new HashMap<>();
     HashMap<String, Object> metadata = new HashMap<>();
+    FragmentTemplate template;
+
+    public MockContentFragment(){
+        template = mock(FragmentTemplate.class);
+        ElementTemplate elementTemplate = mock(ElementTemplate.class);
+        doReturn("text/html").when(elementTemplate).getInitialContentType();
+        doReturn(elementTemplate).when(template).getForElement(any(ContentElement.class));
+    }
 
     @Override
     public Iterator<ContentElement> getElements() {
@@ -114,7 +125,7 @@ public class MockContentFragment implements ContentFragment {
 
     @Override
     public FragmentTemplate getTemplate() {
-        return null;
+        return template;
     }
 
     @Override
@@ -150,9 +161,9 @@ public class MockContentFragment implements ContentFragment {
         return null;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
+    public <AdapterType> AdapterType adaptTo(@NotNull Class<AdapterType> aClass) {
         return null;
     }
 

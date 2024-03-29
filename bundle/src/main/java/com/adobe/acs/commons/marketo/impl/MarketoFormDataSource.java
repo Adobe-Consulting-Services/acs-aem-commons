@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 
@@ -35,6 +34,7 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.servlets.ServletResolverConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public class MarketoFormDataSource extends SlingSafeMethodsServlet {
   }
 
   @Override
-  public void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+  public void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) {
     log.trace("doGet");
 
     List<Resource> options = null;

@@ -25,6 +25,10 @@
             "jcr:primaryType": "nt:unstructured",
             "title": "${{firstItemTitle}}"
           }
+        },
+        "shouldIgnoreChildren": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "ignore/children/resource/type"
         }
       }
     }

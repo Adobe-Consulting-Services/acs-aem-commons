@@ -7,6 +7,7 @@
     "cq:template": "/conf/we-retail/settings/wcm/templates/hero-page",
     "cq:designPath": "/etc/designs/acs-commons",
     "hierarchicalPagePropertyString": "inherited!",
+    "pagePropertyString": "inherited!",
     "hierarchicalPagePropertyBoolean": true,
     "hierarchicalPagePropertyInteger": 11,
     "hierarchicalPagePropertyMultiValueInteger": [
@@ -168,6 +169,8 @@
         "cq:lastModified": "Tue Nov 06 2018 11:00:39 GMT+0100",
         "sling:resourceType": "weretail/components/structure/page",
         "cq:lastModifiedBy": "admin",
+        "pagePropertyString": "not inherited",
+        "hierarchicalPagePropertyBoolean": false,
         "root": {
           "jcr:primaryType": "nt:unstructured",
           "sling:resourceType": "wcm/foundation/components/responsivegrid",
