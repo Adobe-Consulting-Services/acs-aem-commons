@@ -1,12 +1,9 @@
 package com.adobe.acs.commons.models.via.impl;
 
-import com.adobe.acs.commons.models.via.annotations.ContentPolicyViaType;
+
 import com.adobe.acs.commons.models.via.annotations.PageContentResourceViaType;
-import com.day.cq.wcm.api.policies.ContentPolicy;
-import com.day.cq.wcm.api.policies.ContentPolicyManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.ViaProviderType;
 import org.apache.sling.models.spi.ViaProvider;
 import org.osgi.service.component.annotations.Component;
@@ -18,7 +15,7 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
 
 @Component(service = ViaProvider.class)
 public class PageContentResourceViaProvider implements ViaProvider {
-    private static final Logger logger = LoggerFactory.getLogger(ContentPolicyPropertiesViaProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(PageContentResourceViaProvider.class);
 
 
     @Override

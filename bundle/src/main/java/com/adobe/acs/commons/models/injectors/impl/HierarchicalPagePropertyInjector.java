@@ -73,10 +73,10 @@ public class HierarchicalPagePropertyInjector implements Injector {
             Resource adaptableRes = lookUpFromPage(adaptable, currentResource, element);
             if (adaptableRes != null) {
                 if (useInheritance(element)) {
-                    return ReflectionUtil.convertValueMapValue(adaptableRes.getValueMap(), name, declaredType);
-                } else {
                     InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(adaptableRes);
                     return ReflectionUtil.convertValueMapValue(inheritanceValueMap, name, declaredType);
+                } else {
+                    return ReflectionUtil.convertValueMapValue(adaptableRes.getValueMap(), name, declaredType);
                 }
             }
 
@@ -101,7 +101,9 @@ public class HierarchicalPagePropertyInjector implements Injector {
 
         if(containingPage != null && element.isAnnotationPresent(HierarchicalPageProperty.class)) {
             HierarchicalPageProperty annotation = element.getAnnotation(HierarchicalPageProperty.class);
-            containingPage = containingPage.getAbsoluteParent(annotation.traverseFromAbsoluteParent());
+            if(annotation.traverseFromAbsoluteParent() > -1){
+                containingPage = containingPage.getAbsoluteParent(annotation.traverseFromAbsoluteParent());
+            }
         }
 
         return containingPage != null ? containingPage.getContentResource() : null;
@@ -120,9 +122,7 @@ public class HierarchicalPagePropertyInjector implements Injector {
     }
 
     private boolean useInheritance(AnnotatedElement element){
-
-        return element.isAnnotationPresent(PageProperty.class) || !element.getAnnotation(HierarchicalPageProperty.class).inherit();
-
+        return element.isAnnotationPresent(HierarchicalPageProperty.class) && element.getAnnotation(HierarchicalPageProperty.class).inherit();
     }
 
 
