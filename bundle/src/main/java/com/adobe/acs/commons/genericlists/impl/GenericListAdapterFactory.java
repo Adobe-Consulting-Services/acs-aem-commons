@@ -17,14 +17,13 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.Page;
@@ -37,14 +36,14 @@ public class GenericListAdapterFactory implements AdapterFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public final <AdapterType> AdapterType getAdapter(@CheckForNull Object obj, @Nonnull Class<AdapterType> clazz) {
+    public final <AdapterType> AdapterType getAdapter(@Nullable Object obj, @NotNull Class<AdapterType> clazz) {
         if (clazz == GenericList.class) {
             return (AdapterType) adaptToGenericList(obj);
         }
         return null;
     }
 
-    private GenericList adaptToGenericList(@CheckForNull Object obj) {
+    private GenericList adaptToGenericList(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }

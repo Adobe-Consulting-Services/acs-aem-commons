@@ -21,7 +21,7 @@ import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -35,17 +35,19 @@ import javax.jcr.query.RowIterator;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.jetbrains.annotations.NotNull;
+import org.osgi.service.component.annotations.Component;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.apache.jackrabbit.util.ISO8601;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
 
 /**
  * This servlet submits a JCR-SQL2 query with an additional oak:scoreExplanation column that contains the explanation of
@@ -130,8 +132,8 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
     static final String KEY_ERROR = "error";
 
     @Override
-    protected void doPost(@Nonnull final SlingHttpServletRequest request,
-                          @Nonnull final SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(@NotNull final SlingHttpServletRequest request,
+                          @NotNull final SlingHttpServletResponse response) throws ServletException, IOException {
 
         response.setContentType("application/json;charset=utf-8");
 

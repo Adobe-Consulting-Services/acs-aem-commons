@@ -113,10 +113,13 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
         final Resource metadataResource = assetResource.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER);
         final Resource smartTagsResource = assetResource.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER + "/" + NN_PREDICTED_TAGS);
 
-        if (metadataResource.getChild(processArgs.getSequenceName()) != null) {
-            // Remove existing, as they will be re-created
-            resourceResolver.delete(metadataResource.getChild(processArgs.getSequenceName()));
-        }
+            if (metadataResource != null) {
+                Resource childResource = metadataResource.getChild(processArgs.getSequenceName());
+                if (childResource != null) {
+                    // Remove existing, as they will be re-created
+                    resourceResolver.delete(childResource);
+                }
+            }
 
         final Resource parentResource = resourceResolver.create(metadataResource, processArgs.getSequenceName(),
                 new ImmutableMap.Builder<String, Object>()

@@ -177,6 +177,14 @@
                                                     text="Evaluate request URI"
                                                     uncheckedValue="{Boolean}false"
                                                     value="{Boolean}true"/>
+                                                <caseInsensitive
+                                                        jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                                        name="./caseInsensitive"
+                                                        text="Ignore Case"
+                                                        fieldDescription="Match in a case-insensitive manner"
+                                                        uncheckedValue="{Boolean}false"
+                                                        value="{Boolean}true"/>
                                                 <target
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
@@ -278,14 +286,6 @@
                                                     text="Ignore Context Prefix"
                                                     uncheckedValue="{Boolean}false"
                                                     value="{Boolean}false"/>
-                                                <caseInsensitive
-                                                        jcr:primaryType="nt:unstructured"
-                                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                                        name="./caseInsensitive"
-                                                        text="Ignore Case"
-                                                        fieldDescription="Match in a case-insensitive manner"
-                                                        uncheckedValue="{Boolean}false"
-                                                        value="{Boolean}false"/>
                                                 <cacheControlHeader
                                                     granite:class="note"
                                                     granite:id="redirect-cacheControlHeader"
@@ -358,6 +358,14 @@
                         name="./contextPrefix"
                         required="{Boolean}false"
                         rootPath="/content"/>
+                    <ignoreSelectors
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                            fieldDescription="Ignore selectors when evaluating URLs for this content tree"
+                            text="Ignore Selectors"
+                            name="./ignoreSelectors"
+                            uncheckedValue="{Boolean}false"
+                            value="{Boolean}true"/>
                     <cache-control-headers
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Default Cache Control Headers"

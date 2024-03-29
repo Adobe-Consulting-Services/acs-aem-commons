@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <configure/>
+    <jcr:content
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Content Sync"
+        sling:resourceType="granite/ui/components/shell/page"
+        recurse="true">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[granite.ui.foundation,acs-commons.contentsync]"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/text"
+            text="Content Sync"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <secondary jcr:primaryType="nt:unstructured">
+                <configure
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/apps/acs-commons/content/contentsync/configure.html"
+                    icon="gear"
+                    text="Configure"
+                    variant="primary"/>
+            </secondary>
+        </actions>
+        <content
+            granite:class="diagnosis-panel-with-margin"
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+                <form
+                    granite:class="transform-form"
+                    granite:id="transform-form"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    action="/apps/acs-commons/content/contentsync/jcr:content/sync.html"
+                    foundation-form="{Boolean}true"
+                    method="POST"
+                    style="vertical"
+                    target="replication_status_iframe">
+                    <items jcr:primaryType="nt:unstructured">
+                        <path
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                            fieldLabel="Path to synchronize"
+                            filter="hierarchyNotFile"
+                            name="root"
+                            required="{Boolean}true"
+                            rootPath="/content"
+                            value="/content/my-site"/>
+                        <host
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Source environment"
+                            name="source"
+                            required="{Boolean}true">
+                            <datasource
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="acs-commons/components/utilities/contentsync/selecthostdatasource"/>
+                        </host>
+                        <workflow
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            emptyText="Select one"
+                            fieldLabel="On-complete workflow "
+                            ignoreData="{Boolean}true"
+                            name="workflowModel">
+                            <datasource
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="cq/gui/components/coral/common/admin/timeline/events/workflow/datasources/models"/>
+                        </workflow>
+                        <checkboxes
+                            granite:class="checkboxes-panel"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                            <items jcr:primaryType="nt:unstructured">
+                                <incremental
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    checked="{Boolean}true"
+                                    name="incremental"
+                                    text="Incremental update. Will only copy new and changed resources"
+                                    value="true"/>
+                                <dryRun
+                                    granite:class="notice-wide"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    checked="{Boolean}true"
+                                    name="dryRun"
+                                    text="Dry Run"
+                                    value="false"/>
+                                <revision
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    name="createVersion"
+                                    text="Create revision before update"
+                                    value="true"/>
+                                <delete
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                    name="delete"
+                                    text="Delete resources that exist in the destination but not in the source"
+                                    value="true"/>
+                            </items>
+                        </checkboxes>
+                        <submit
+                            granite:id="executeQueryButton"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Submit"
+                            type="submit"
+                            variant="primary"/>
+                        <iframe
+                            granite:id="replication_status_iframe"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="acs-commons/components/utilities/contentsync/iframe"/>
+                    </items>
+                </form>
+            </items>
+        </content>
+        <sync
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="acs-commons/components/utilities/contentsync"/>
+    </jcr:content>
+</jcr:root>

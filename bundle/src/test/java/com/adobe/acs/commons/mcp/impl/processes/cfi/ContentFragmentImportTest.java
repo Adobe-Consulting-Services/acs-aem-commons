@@ -28,8 +28,6 @@ import com.adobe.cq.dam.cfm.ContentFragmentException;
 
 import java.util.Date;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;

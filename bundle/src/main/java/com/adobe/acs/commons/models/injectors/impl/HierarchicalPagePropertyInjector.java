@@ -18,23 +18,23 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.HierarchicalPageProperty;
+import com.adobe.acs.commons.models.injectors.annotation.PageProperty;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.wcm.api.Page;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.*;
+import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResource;
+import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResourcePage;
 
 @Component(
         property = {
@@ -44,29 +44,36 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.*;
 )
 public class HierarchicalPagePropertyInjector implements Injector {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ContentPolicyValueInjector.class);
+    /**
+     * Source value used for injector
+     *
+     * @see Source
+     */
+    public static final String SOURCE = "hierarchical-page-property";
 
     @Override
     public String getName() {
-        return HierarchicalPageProperty.SOURCE;
+        return SOURCE;
     }
 
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element,
                            DisposalCallbackRegistry callbackRegistry) {
 
-        if (!element.isAnnotationPresent(HierarchicalPageProperty.class)) {
+        if (!(element.isAnnotationPresent(HierarchicalPageProperty.class) || element.isAnnotationPresent(PageProperty.class))) {
             //skipping javax.Inject for performance reasons. Only supports direct injection.
             return null;
         }
-        HierarchicalPageProperty annotation = element.getAnnotation(HierarchicalPageProperty.class);
 
         Resource currentResource = getResource(adaptable);
         if (currentResource != null) {
-
-            Resource adaptableRes = lookUpFromPage(adaptable, currentResource, annotation);
+            Resource adaptableRes = lookUpFromPage(currentResource);
             if (adaptableRes != null) {
-                InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(adaptableRes);
-                return ReflectionUtil.convertValueMapValue(inheritanceValueMap, name, declaredType);
+                if (element.isAnnotationPresent(PageProperty.class) || !element.getAnnotation(HierarchicalPageProperty.class).inherit()) {
+                    return ReflectionUtil.convertValueMapValue(adaptableRes.getValueMap(), name, declaredType);
+                } else {
+                    InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(adaptableRes);
+                    return ReflectionUtil.convertValueMapValue(inheritanceValueMap, name, declaredType);
+                }
             }
 
         }
@@ -74,23 +81,8 @@ public class HierarchicalPagePropertyInjector implements Injector {
 
     }
 
-    private Resource lookUpFromPage(Object adaptable, Resource currentResource, HierarchicalPageProperty annotation) {
-
-        Page containingPage;
-
-        if(annotation.useCurrentPage()){
-            containingPage = getCurrentPage(adaptable);
-            if(containingPage == null){
-                LOG.error("Could not find current page for resource: {}. Only SlingHttpServletRequest is supported as adaptable", getResource(adaptable).getPath());
-            }
-        }else{
-            containingPage = getResourcePage(currentResource);
-        }
-
-        if(containingPage != null && annotation.traverseFromAbsoluteParent() > -1) {
-            containingPage = containingPage.getAbsoluteParent(annotation.traverseFromAbsoluteParent());
-        }
-
+    private Resource lookUpFromPage(Resource currentResource) {
+        Page containingPage = getResourcePage(currentResource);
         return containingPage != null ? containingPage.getContentResource() : null;
     }
 

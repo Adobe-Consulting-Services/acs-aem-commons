@@ -120,7 +120,7 @@ public class MovingPage extends MovingNode {
             manager.move(source,
                     getDestinationPath(),
                     getPreviousSibling(),
-                    true,
+                    false,
                     true,
                     listToStringArray(getAllReferences()),
                     listToStringArray(getPublishedReferences()));

@@ -120,6 +120,14 @@
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="acs-commons/components/workflow/select-agent/datasource"/>
                                     </agentToUse>
+                                    <suppressStatusUpdate
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                        fieldDescription="Check to suppress replication status updates"
+                                        fieldLabel="Suppress Status Update"
+                                        name="./metaData/suppressStatusUpdate"
+                                        text="Suppress Status Update"
+                                        value="true"/>
                                 </items>
                             </arguments>
                         </items>

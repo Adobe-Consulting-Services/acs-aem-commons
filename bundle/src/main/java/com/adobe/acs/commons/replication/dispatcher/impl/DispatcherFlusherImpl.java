@@ -32,6 +32,7 @@ import com.day.cq.replication.Replicator;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +45,8 @@ import java.util.Map;
  * ACS AEM Commons - Dispatcher Flusher
  * Service used to issue flush requests to enabled Dispatcher Flush Agents.
  */
-@Component(
-        property = {
-                "service.ranking=-10000"
-        },
-        service = {DispatcherFlusher.class}
-)
+@Component
+@ServiceRanking(-10000)
 public class DispatcherFlusherImpl implements DispatcherFlusher {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherImpl.class);
 

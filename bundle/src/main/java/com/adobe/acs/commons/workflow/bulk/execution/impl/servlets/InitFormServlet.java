@@ -36,6 +36,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = {"GET"},
+        methods = {HttpConstants.METHOD_GET},
         resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
         selectors = {"init-form"},
         extensions = {"json"}

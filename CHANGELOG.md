@@ -10,12 +10,96 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.5.0 - 2024-03-22
+
+### Changed
+
+- #3267 - Remove JSR305 dependency
+- #3262 - Allow to configure Component/BundleDisabler via Configuration Factories
+- #3296 - Add image cropping customisation
+
+### Fixed
+
+- #3270 - Re-enable accidentally disabled JUnit3/4 tests
+- #3200 - Remove useless public interface in Cloud Bundle to get javadocs to be built
+- #3294 - Cloud manager report issues partial fix
+- #3295 - Updated the annotations in QueryReportConfig fixing the query manager issue due to empty query language
+- #3284 - Allow anonymous to read redirect caconfig options
+- #2854 - Code optimization: convert class fields to local variables
+
+## 6.4.0 - 2024-02-22
+
+## Added 
+
+- #3238 - Content Sync make timeouts configurable
+- #3235 - Add an option to ignore selectors in the url.
+
+### Fix
+
+- #3264 - NullPointerException while displaying MCP forms
+
+## 6.3.8 - 2024-02-02
+
+### Fix
+
+- #3252 - Check if maxage header value is valid before setting it.
+
+## 6.3.6 - 2024-01-22
+
+### Fix
+
+- #3246 - PackageGarbageCollector is not cleaning up all packages since v6.3.4 (##3225)
+
+## 6.3.4 - 2024-01-17
+
+- #3223 - Project with class extending WCMUsePojo leads to build error: cannot access aQute.bnd.annotation.ConsumerType
+- #3225 - PackageGarbageCollector leaves temp files behind
+- #3187 - Remove warning during build on Java 11 or higher when DialogProviderAnnotationProcessor is invoked
+- #3242 - Actually update lodash to 4.17.21 (was mistakenly updated to 4.17.15 instead of 4.17.21)
+
+## 6.3.2 - 2023-11-22
+
+- #3162 - Renovator MCP: ensure old source path is removed
+- #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
+- #3197 - Encrypt user credentials in ACS Content Sync
+- #3196 - Content Sync: prevent exception when creating parent nodes
+- #3194 - Redirect Manager: Ignore Case value is not persisting
+
+## 6.3.0 - 2023-10-25
+
+## Added
+
+- #3147 - Allow usage of Dispatcher Flush Rules in AEMaaCS
+
+## 6.2.0 - 2023-09-14
+
+## Added
+
+- #3151 - New ContentSync utility
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+- #3166 - New option to suppress status updates in replication workflow processes
+
+## Removed
+
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
+
+## 6.1.0 - 2023-09-08
+
+## Added
+
+- #3159 - Add PageProperty annotation for Sling Models
+- #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
+
 ## Fixed
 
-- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
+- #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
+- #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
+- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now
+  displays more friendly values in UI to help remove the invalid nodes.
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
-  
+
 ## 6.0.14 - 2023-07-11
 
 ## Fixed

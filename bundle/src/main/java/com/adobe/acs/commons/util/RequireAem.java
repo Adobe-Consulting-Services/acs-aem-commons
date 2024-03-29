@@ -20,11 +20,12 @@ package com.adobe.acs.commons.util;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * This OSGi Service can be used in 2 different ways....
+ * This OSGi Service allows to distinguish between AEM Classic or AEM as a Cloud Service instance types. It can be used in two different ways:
  *
- * 1. It can be used In-line in code to detect if AEM is running as Cloud Ready (AEM as a Cloud Service or local AEM as a Cloud Service SDK QuickStart Jar) or not.
- *
- * @Reference
+ * <ol>
+ * <li>To check if AEM is running as Cloud Ready (AEM as a Cloud Service or local AEM as a Cloud Service SDK QuickStart Jar) or not by leveraging its method in code.
+ * <pre>
+ * &#64;Reference
  * RequireAem requireAem;
  * ...
  * if ((Distribution.CLOUD_READY.equals(requireAem.getDistribution()) {
@@ -32,26 +33,28 @@ import org.osgi.annotation.versioning.ProviderType;
  * } else {
  *     .. Do something for AMS / On-Prem ..
  * }
- *
- * 2. It can be used to allow/stop OSGi Components from starting entirely
- *
- * @Component
+ * </pre>
+ * </li>
+ * <li>To prevent OSGi Components from starting by using it as service reference with target (without actually leveraging it in code).
+ * <pre>
+ * &#64;Component
  * public class IOnlyWorkOnTheCloud implements Foo {
- *
- *    @Reference(target="(distribution=cloud-ready)")
- *    RequireAem requireAem;
- *    ...
+ *     &#64;Reference(target="(distribution=cloud-ready)")
+ *     RequireAem requireAem;
+ *     ...
  * }
- *
+ * </pre>
  * ... OR ...
- *
- * @Component
+ * <pre>
+ * &#64;Component
  * public class IOnlyWorkOnAmsOrOnPrem implements Bar {
- *
- *      @Reference(target="(distribution=classic)")
- *      RequireAem requireAem;
- *      ...
- *  }
+ *     &#64;Reference(target="(distribution=classic)")
+ *     RequireAem requireAem;
+ *     ...
+ * }
+ * </pre>
+ * </li>
+ * </ol>
  */
 @ProviderType
 public interface RequireAem {

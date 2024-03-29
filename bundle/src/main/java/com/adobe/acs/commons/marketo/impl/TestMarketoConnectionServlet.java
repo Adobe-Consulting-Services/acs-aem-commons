@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
@@ -39,6 +38,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -60,8 +60,8 @@ public class TestMarketoConnectionServlet extends SlingSafeMethodsServlet {
     @Reference
     private MarketoClient client;
 
-    protected void doGet(@Nonnull SlingHttpServletRequest request,
-            @Nonnull SlingHttpServletResponse response) throws ServletException,
+    protected void doGet(@NotNull SlingHttpServletRequest request,
+            @NotNull SlingHttpServletResponse response) throws ServletException,
             IOException {
 
         List<String> logs = new ArrayList<>();
