@@ -40,6 +40,15 @@ public class TestHierarchicalPagePropertiesModelModelImpl implements TestHierarc
     @HierarchicalPageProperty
     private String hierarchicalPagePropertyString;
 
+    @HierarchicalPageProperty(useCurrentPage = true)
+    private String currentPagePropertyString;
+
+    @HierarchicalPageProperty(useCurrentPage = true)
+    private String currentPageHierarchicalPagePropertyString;
+
+    @HierarchicalPageProperty(traverseFromAbsoluteParent  = 3)
+    private String skipLevelHierarchicalPagePropertyString;
+
     @HierarchicalPageProperty(value = "hierarchicalPagePropertyBoolean", inherit = false)
     private boolean hierarchicalPagePropertyBoolean;
 
@@ -71,8 +80,18 @@ public class TestHierarchicalPagePropertiesModelModelImpl implements TestHierarc
     }
 
     @Override
+    public String getCurrentPagePropertyString() {
+        return currentPagePropertyString;
+    }
+
+    @Override
     public String getHierarchicalPagePropertyString() {
         return hierarchicalPagePropertyString;
+    }
+
+    @Override
+    public String getCurrentPageHierarchicalPagePropertyString() {
+        return currentPageHierarchicalPagePropertyString;
     }
 
     @Override
@@ -115,4 +134,8 @@ public class TestHierarchicalPagePropertiesModelModelImpl implements TestHierarc
         return hierarchicalPagePropertyMultivalueWrappedDoubleArray;
     }
 
+    @Override
+    public String getSkipLevelHierarchicalPagePropertyString() {
+        return skipLevelHierarchicalPagePropertyString;
+    }
 }

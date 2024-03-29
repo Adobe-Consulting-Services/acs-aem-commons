@@ -7,6 +7,8 @@
     "cq:template": "/conf/we-retail/settings/wcm/templates/hero-page",
     "cq:designPath": "/etc/designs/acs-commons",
     "hierarchicalPagePropertyString": "inherited!",
+    "currentPageHierarchicalPagePropertyString": "inherited!",
+    "skipLevelHierarchicalPagePropertyString": "inherited!",
     "pagePropertyString": "inherited!",
     "hierarchicalPagePropertyBoolean": true,
     "hierarchicalPagePropertyInteger": 11,
@@ -111,6 +113,7 @@
         "",
         ""
       ],
+      "currentPageHierarchicalPagePropertyString": "not inherited",
       "sling:resourceType": "weretail/components/structure/page",
       "cq:lastModifiedBy": "admin",
       "hideSubItemsInNav": true,
@@ -170,6 +173,8 @@
         "sling:resourceType": "weretail/components/structure/page",
         "cq:lastModifiedBy": "admin",
         "pagePropertyString": "not inherited",
+        "currentPageHierarchicalPagePropertyString": "this value should not be used",
+        "skipLevelHierarchicalPagePropertyString": "this value should not be used",
         "hierarchicalPagePropertyBoolean": false,
         "root": {
           "jcr:primaryType": "nt:unstructured",
