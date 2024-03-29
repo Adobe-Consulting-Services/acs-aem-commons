@@ -1,8 +1,9 @@
-/*
- * ACS AEM Commons
- *
- * Copyright (C) 2013 - 2023 Adobe
- *
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2024 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.models.via.impl;
 
@@ -43,13 +45,13 @@ public class PageContentResourceViaProviderTest
 
         PageContentResourceViaProvider systemUnderTest = new PageContentResourceViaProvider();
 
-        Object newAdaptableResourcePage = systemUnderTest.getAdaptable(context.currentResource(), PageContentResourceViaType.VIA_RESOURCE_PAGE);
+        Object newAdaptableResourcePage = systemUnderTest.getAdaptable(context.currentResource(), "");
         Resource resourcePageJcrContent = (Resource) newAdaptableResourcePage;
         assertEquals("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content", resourcePageJcrContent.getPath());
 
 
 
-        Object newAdaptableCurrentPage = systemUnderTest.getAdaptable(context.request(), PageContentResourceViaType.VIA_CURRENT_PAGE);
+        Object newAdaptableCurrentPage = systemUnderTest.getAdaptable(context.request(), PageContentResourceViaProvider.VIA_CURRENT_PAGE);
         Resource currentPageJcrContent = (Resource) newAdaptableCurrentPage;
         assertEquals("/content/we-retail/language-masters/en/experience/jcr:content", currentPageJcrContent.getPath());
     }
