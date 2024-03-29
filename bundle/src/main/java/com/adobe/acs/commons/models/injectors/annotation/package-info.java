@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@org.osgi.annotation.versioning.Version("3.6.0")
+@org.osgi.annotation.versioning.Version("3.6.1")
 package com.adobe.acs.commons.models.injectors.annotation;
 
 

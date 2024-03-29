@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.HierarchicalPageProperty;
+import com.adobe.acs.commons.models.injectors.annotation.PageProperty;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
@@ -38,35 +39,50 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.*;
 
 @Component(
         property = {
-                Constants.SERVICE_RANKING + ":Integer=5502"
+                Constants.SERVICE_RANKING + ":Integer=5501"
         },
         service = Injector.class
 )
-public class HierarchicalPagePropertyInjector implements Injector {
+public class PagePropertyInjector implements Injector {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContentPolicyValueInjector.class);
 
     @Override
     public String getName() {
-        return HierarchicalPageProperty.SOURCE;
+        return PageProperty.SOURCE;
     }
 
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element,
                            DisposalCallbackRegistry callbackRegistry) {
 
-        if (!element.isAnnotationPresent(HierarchicalPageProperty.class)) {
-            //skipping javax.Inject for performance reasons. Only supports direct injection.
+        if (!element.isAnnotationPresent(PageProperty.class)) {
+            //skipping javax. Don't want to cause confusing behaviour for existing components.
+            // Only supports direct injection to make it explicit.
             return null;
         }
-        HierarchicalPageProperty annotation = element.getAnnotation(HierarchicalPageProperty.class);
 
+        PageProperty pageProperty = element.getAnnotation(PageProperty.class);
+
+        // current page ( SlingHttpServletRequest adaptable only)
+        if(pageProperty.useCurrentPage()){
+            Page currentPage = getCurrentPage(adaptable);
+            if(currentPage != null){
+                Resource contentResource = currentPage.getContentResource();
+                ValueMap valueMap = contentResource.getValueMap();
+                return ReflectionUtil.convertValueMapValue(valueMap, name, declaredType);
+            }
+            LOG.error("Could not find current page for resource: {}. Only SlingHttpServletRequest is supported as adaptable", getResource(adaptable).getPath());
+
+            return null;
+        }
+
+        // resource page
         Resource currentResource = getResource(adaptable);
         if (currentResource != null) {
-
-            Resource adaptableRes = lookUpFromPage(adaptable, currentResource, annotation);
+            Resource adaptableRes = lookUpFromPage(currentResource);
             if (adaptableRes != null) {
-                InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(adaptableRes);
-                return ReflectionUtil.convertValueMapValue(inheritanceValueMap, name, declaredType);
+                ValueMap valueMap = adaptableRes.getValueMap();
+                return ReflectionUtil.convertValueMapValue(valueMap, name, declaredType);
             }
 
         }
@@ -74,23 +90,8 @@ public class HierarchicalPagePropertyInjector implements Injector {
 
     }
 
-    private Resource lookUpFromPage(Object adaptable, Resource currentResource, HierarchicalPageProperty annotation) {
-
-        Page containingPage;
-
-        if(annotation.useCurrentPage()){
-            containingPage = getCurrentPage(adaptable);
-            if(containingPage == null){
-                LOG.error("Could not find current page for resource: {}. Only SlingHttpServletRequest is supported as adaptable", getResource(adaptable).getPath());
-            }
-        }else{
-            containingPage = getResourcePage(currentResource);
-        }
-
-        if(containingPage != null && annotation.traverseFromAbsoluteParent() > -1) {
-            containingPage = containingPage.getAbsoluteParent(annotation.traverseFromAbsoluteParent());
-        }
-
+    private Resource lookUpFromPage(Resource currentResource) {
+        Page containingPage = getResourcePage(currentResource);
         return containingPage != null ? containingPage.getContentResource() : null;
     }
 
