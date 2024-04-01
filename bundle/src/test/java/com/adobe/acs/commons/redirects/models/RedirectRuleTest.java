@@ -18,12 +18,14 @@
 package com.adobe.acs.commons.redirects.models;
 
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -33,6 +35,7 @@ import java.util.GregorianCalendar;
 import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
 import static junit.framework.TestCase.assertTrue;
 import static junitx.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -82,7 +85,6 @@ public class RedirectRuleTest {
         assertEquals("/content/we-retail/en/two", rule.getTarget());
         assertEquals(302, rule.getStatusCode());
         assertEquals(null, rule.getUntilDate());
-
     }
 
     @Test
@@ -230,5 +232,46 @@ public class RedirectRuleTest {
         assertTrue(rule1.isPublished());
         assertTrue(rule2.isPublished());
         assertTrue(rule3.isPublished());
+    }
+    
+    @Test
+    public void testRedirectRuleFromRequestAttribute() {
+        Resource resource = context.create().resource("/var/acs-commons/redirects/rule",
+                "source", "/content/we-retail/en/one",
+                "target", "/content/we-retail/en/two",
+                "statusCode", 302,
+                "evaluateURI", true,
+                "untilDate", "2021-01-03T00:00:00.000Z",
+                "note", "my test note",
+                "contextPrefixIgnored", true,
+                TAGS_PROPERTY_NAME, new String[]{"tag1", "tag2"},
+                CREATED_BY_PROPERTY_NAME, "yegor",
+                CREATED_PROPERTY_NAME, "2021-01-01T00:00:00.000Z",
+                MODIFIED_BY_PROPERTY_NAME, "david",
+                MODIFIED_PROPERTY_NAME, "2021-01-02T00:00:00.000Z",
+                CACHE_CONTROL_HEADER_NAME, "no-cache",
+                CASE_INSENSITIVE_PROPERTY_NAME, true
+        );
+
+        MockSlingHttpServletRequest request = context.request();
+        request.setResource(null);
+        request.setAttribute(REDIRECT_RESOURCE_REQUEST_ATTRIBUTE, resource);
+
+        RedirectRule rule = request.adaptTo(RedirectRule.class);
+        assertEquals("/content/we-retail/en/one", rule.getSource());
+        assertEquals("/content/we-retail/en/two", rule.getTarget());
+        assertEquals(302, rule.getStatusCode());
+        assertDateEquals("03 January 2021", rule.getUntilDate());
+        assertTrue(rule.getEvaluateURI());
+        assertEquals("my test note", rule.getNote());
+        assertTrue(rule.getContextPrefixIgnored());
+        assertEquals("tag1", rule.getTagIds()[0]);
+        assertEquals("tag2", rule.getTagIds()[1]);
+        assertEquals("yegor", rule.getCreatedBy());
+        assertDateEquals("01 January 2021", rule.getCreated());
+        assertEquals("david", rule.getModifiedBy());
+        assertDateEquals("02 January 2021", rule.getModified());
+        assertEquals("no-cache", rule.getCacheControlHeader());
+        assertTrue(rule.isCaseInsensitive());
     }
 }
