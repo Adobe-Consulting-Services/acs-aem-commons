@@ -1,7 +1,7 @@
-<!--/*
+<!--
   ~ ACS AEM Commons
   ~
-  ~ Copyright (C) 2013 - 2023 Adobe
+  ~ Copyright (C) 2013 - 2024 Adobe
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  */-->
+  -->
 
-<template data-sly-template.row="${@ redirectResource }">
-
+<template data-sly-template.row="${@ redirectResource, allowRearrange=true }">
     <tr is="coral-table-row" id="${redirectResource.name}" data-path="${redirectResource.path}"
         data-sly-test="${redirectResource.source && redirectResource.target && redirectResource.statusCode}"
         data-sly-use.redirect="${'com.adobe.acs.commons.redirects.models.RedirectRule' @ redirectResource = redirectResource}">
@@ -71,9 +70,10 @@
             ${redirect.cacheControlHeader}
         </td>
         <td is="coral-table-cell" style="width:30px;">
-            <button is="coral-button" type="button" variant="minimal" icon="dragHandle" coral-table-roworder
+            <button
+                    data-sly-test="${allowRearrange}"
+                    is="coral-button" type="button" variant="minimal" icon="dragHandle" coral-table-roworder
                     title="drag to re-arrange"></button>
         </td>
     </tr>
-
 </template>

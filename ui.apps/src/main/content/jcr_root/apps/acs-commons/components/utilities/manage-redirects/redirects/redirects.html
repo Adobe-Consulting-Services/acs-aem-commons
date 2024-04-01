@@ -30,7 +30,9 @@
 <coral-shell-header aria-hidden="false" aria-label="Header Bar"
                     class="coral--dark granite-shell-header coral3-Shell-header"
                     role="region">
-    <coral-shell-header-home aria-level="2" class="globalnav-toggle" data-globalnav-toggle-href="/mnt/overlay/granite/ui/content/shell/globalnav.html" role="heading">
+    <coral-shell-header-home aria-level="2" class="globalnav-toggle"
+                             data-globalnav-toggle-href="/mnt/overlay/granite/ui/content/shell/globalnav.html"
+                             role="heading">
         <a class="coral3-Shell-homeAnchor" href="/"
            icon="adobeExperienceManagerColor" is="coral-shell-homeanchor"
            style="display: inline-block; padding-right: 0;">
@@ -42,7 +44,7 @@
             <coral-shell-homeanchor-label>Adobe Experience Manager
             </coral-shell-homeanchor-label>
         </a>
-        <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${properties.jcr:title} </span>
+        <span style="line-height: 2.375rem;"> / ACS AEM Commons / ${properties.jcr:title} </span>
     </coral-shell-header-home>
 </coral-shell-header>
 
@@ -55,12 +57,12 @@
             </betty-titlebar-title>
             <betty-titlebar-primary>
             </betty-titlebar-primary>
-             <betty-titlebar-secondary>
-             	</betty-titlebar-secondary>
+            <betty-titlebar-secondary>
+            </betty-titlebar-secondary>
         </betty-titlebar>
-    </div> 
+    </div>
     <div class="content-container-inner" style="width:60%; margin: 0 auto;">
-        <coral-alert variant="warning" size="L" data-sly-test=${upgradeContext.moved} >
+        <coral-alert variant="warning" size="L" data-sly-test=${upgradeContext.moved}>
             <coral-alert-header>Your redirect rules were moved</coral-alert-header>
             <coral-alert-content>
                 Starting with release 5.0.5 ACS Commons Redirect Manager supports context-aware configurations.
@@ -76,19 +78,26 @@
             <coral-alert-content>RedirectFilter is disabled and requires an OSGi configuration to start.
                 Please create an OSGi configuration for PID <i>com.adobe.acs.commons.redirects.filter.RedirectFilter</i>
                 <p>
-                    For more information, see the <a target="_blank" href="https://adobe-consulting-services.github.io/acs-aem-commons/features/redirect-manager/index.html">ACS AEM Commons Redirect Manager feature doc page</a>.
+                    For more information, see the <a target="_blank"
+                                                     href="https://adobe-consulting-services.github.io/acs-aem-commons/features/redirect-manager/index.html">ACS
+                    AEM Commons Redirect Manager feature doc page</a>.
                 </p>
             </coral-alert-content>
         </coral-alert>
 
-        <button class="coral-Button" icon="add" is="coral-button" style="margin-top: 1rem; margin-bottom: 1rem;" variant="primary" id="addConfigurationButton">Add Configuration</button>
-        <coral-anchorlist data-sly-use.defs="com.adobe.acs.commons.redirects.models.Configurations" data-sly-list="${defs.configurations}">
-        	<a icon="viewList" is="coral-anchorlist-item" 
-        	href="/apps/acs-commons/content/redirect-manager.html${item.path}">${item.name}</a>
-        </coral-anchorlist>
+        <sly data-sly-test=${!context.disabled}>
+            <button class="coral-Button" icon="add" is="coral-button" style="margin-top: 1rem; margin-bottom: 1rem;"
+                    variant="primary" id="addConfigurationButton">Add Configuration
+            </button>
+            <coral-anchorlist data-sly-use.defs="com.adobe.acs.commons.redirects.models.Configurations"
+                              data-sly-list="${defs.configurations}">
+                <a icon="viewList" is="coral-anchorlist-item"
+                   href="/apps/acs-commons/content/redirect-manager.html${item.path}">${item.name}</a>
+            </coral-anchorlist>
+        </sly>
 
         <sly data-sly-list="${resource.getChildren}">
-	        <sly data-sly-resource="${item.path}"></sly>
+            <sly data-sly-resource="${item.path}"></sly>
         </sly>
     </div>
 </div>
