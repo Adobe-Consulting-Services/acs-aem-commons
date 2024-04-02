@@ -10,12 +10,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-## 6.5.0 - 2024-03-22
+### Added
 
 - #3306 - Sling Model Page injector
 - #3306 - Sling Model Content Policy injector
 - #3306 - Sling Model Tag injector
+
+### Changed 
+
 - #3310 - User mapping | moved author specific user mapping from config to config.author 
+
+## 6.5.0 - 2024-03-22
 
 ### Changed
 
