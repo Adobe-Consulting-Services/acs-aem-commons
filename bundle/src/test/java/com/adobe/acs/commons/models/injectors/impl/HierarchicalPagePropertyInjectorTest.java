@@ -23,6 +23,7 @@ import com.adobe.acs.commons.models.injectors.impl.model.TestPagePropertiesModel
 import com.adobe.acs.commons.models.injectors.impl.model.impl.TestHierarchicalPagePropertiesModelModelImpl;
 import com.adobe.acs.commons.models.injectors.impl.model.impl.TestPagePropertiesModelModelImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
@@ -48,17 +49,10 @@ public class HierarchicalPagePropertyInjectorTest {
 
     @Before
     public void setUp() throws Exception {
-        context.currentPage("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
-        context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root");
-
         context.registerService(Injector.class, injector);
         context.registerService(StaticInjectAnnotationProcessorFactory.class, new HierarchicalPagePropertyAnnotationProcessorFactory());
         context.addModelsForClasses(TestHierarchicalPagePropertiesModelModelImpl.class);
         context.addModelsForClasses(TestPagePropertiesModelModelImpl.class);
-
-        Resource adaptable = context.request().getResource();
-        hierarchicalModel = adaptable.adaptTo(TestHierarchicalPagePropertiesModel.class);
-        pageModel = adaptable.adaptTo(TestPagePropertiesModel.class);
     }
 
     @Test
@@ -68,11 +62,19 @@ public class HierarchicalPagePropertyInjectorTest {
 
     @Test
     public void test() {
+
+        context.currentPage("/content/we-retail/language-masters/en/experience");
+        context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root");
+
+        SlingHttpServletRequest adaptable = context.request();
+        hierarchicalModel = adaptable.adaptTo(TestHierarchicalPagePropertiesModel.class);
+        pageModel = adaptable.adaptTo(TestPagePropertiesModel.class);
+
         assertNotNull(hierarchicalModel);
         assertEquals("inherited!", hierarchicalModel.getHierarchicalPagePropertyString());
         assertNull(pageModel.getHierarchicalPagePropertyString());
         assertEquals("not inherited", hierarchicalModel.getPagePropertyString());
+
+        assertEquals("inherited!", hierarchicalModel.getSkipLevelHierarchicalPagePropertyString());
     }
-
-
 }

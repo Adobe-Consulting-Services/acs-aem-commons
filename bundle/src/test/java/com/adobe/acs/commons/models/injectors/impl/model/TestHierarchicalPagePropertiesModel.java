@@ -25,7 +25,13 @@ public interface TestHierarchicalPagePropertiesModel {
 
     String getPagePropertyString();
 
+    String getSkipLevelHierarchicalPagePropertyString();
+
+    String getCurrentPagePropertyString();
+
     String getHierarchicalPagePropertyString();
+
+    String getCurrentPageHierarchicalPagePropertyString();
 
     String getUndefinedProperty();
 
