@@ -45,6 +45,27 @@ public @interface HierarchicalPageProperty {
 
 
     /**
+     * Start traversing upwards in the hierarchy from a specific level, skipping lower levels.
+     * @since 6.0.16
+     * @see https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/com/day/cq/wcm/api/Page.html#getAbsoluteParent-int-
+     *   | level | returned                        |
+     *  |     0 | /content                        |
+     *  |     1 | /content/geometrixx             |
+     *  |     2 | /content/geometrixx/en          |
+     *  |     3 | /content/geometrixx/en/products |
+     *  |     4 | null
+     * If we'd use 1 in this example, we would skip over level 2 and 3.
+     * -1 means we disable this value.
+     */
+    int traverseFromAbsoluteParent() default -1;
+
+    /**
+     * Whether to use the current page (true) or the resource page (false).
+     * @return
+     */
+    boolean useCurrentPage() default false;
+
+    /**
      * Specifies the name of the value from the value map to take.
      * If empty, then the name is derived from the method or field.
      */
