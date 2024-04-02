@@ -47,6 +47,7 @@ public class InjectorAEMContext {
             //set the current resource page
             context.currentResource("/content/we-retail/language-masters/en/about-us");
 
+
         }
     }
 

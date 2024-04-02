@@ -17,6 +17,8 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
+import com.adobe.acs.commons.util.impl.ReflectionUtil;
+import com.day.cq.tagging.TagManager;
 import org.apache.sling.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -127,6 +129,8 @@ public final class AemObjectInjector implements Injector {
             return getComponentContext(adaptable);
         case PAGE_MANAGER:
             return getPageManager(adaptable);
+        case TAG_MANAGER:
+            return getTagManager(adaptable);
         case CURRENT_PAGE:
             return getCurrentPage(adaptable);
         case RESOURCE_PAGE:
@@ -148,6 +152,15 @@ public final class AemObjectInjector implements Injector {
         default:
             return null;
         }
+    }
+
+    private TagManager getTagManager(Object adaptable) {
+        final ResourceResolver resourceResolver = getResourceResolver(adaptable);
+
+        if(resourceResolver != null){
+            return resourceResolver.adaptTo(TagManager.class);
+        }
+        return null;
     }
 
     private Object resolveLocale(Object adaptable) {
@@ -190,6 +203,7 @@ public final class AemObjectInjector implements Injector {
         CURRENT_STYLE,
         SESSION,
         LOCALE,
+        TAG_MANAGER,
         XSS_API;
 
         private static final String RESOURCE_PAGE_STRING = "resourcePage";
@@ -203,6 +217,8 @@ public final class AemObjectInjector implements Injector {
                 return ObjectType.RESOURCE_RESOLVER;
             } else if (classOrGenericParam.isAssignableFrom(ComponentContext.class)) {
                 return ObjectType.COMPONENT_CONTEXT;
+            } else if (classOrGenericParam.isAssignableFrom(TagManager.class)) {
+                return ObjectType.TAG_MANAGER;
             } else if (classOrGenericParam.isAssignableFrom(PageManager.class)) {
                 return ObjectType.PAGE_MANAGER;
             } else if (classOrGenericParam.isAssignableFrom(Page.class)) {
