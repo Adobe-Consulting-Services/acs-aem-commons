@@ -16,9 +16,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3306 - Sling Model Content Policy injector
 - #3306 - Sling Model Tag injector
 
-### Changed 
+### Fixed 
 
 - #3310 - User mapping | moved author specific user mapping from config to config.author 
+- #3301 - CM report fix WrongLogLevelInCatchBlock issue
 
 ## 6.5.0 - 2024-03-22
 
@@ -36,7 +37,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3295 - Updated the annotations in QueryReportConfig fixing the query manager issue due to empty query language
 - #3284 - Allow anonymous to read redirect caconfig options
 - #2854 - Code optimization: convert class fields to local variables
-- #3301 - CM report fix WrongLogLevelInCatchBlock issue
 
 ## 6.4.0 - 2024-02-22
 
