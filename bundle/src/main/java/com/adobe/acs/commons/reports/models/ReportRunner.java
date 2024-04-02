@@ -86,7 +86,7 @@ public class ReportRunner {
     } catch (ReportException e) {
       log.warn(e.getMessage(), e);
     } catch (Exception e) {
-      log.warn("Unexpected exception executing report executor " + reportExecutor, e);
+      log.warn("Unexpected exception executing report executor {} ", reportExecutor, e);
     }
     return false;
   }

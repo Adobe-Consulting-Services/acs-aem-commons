@@ -56,7 +56,7 @@ public final class QueryUtil {
         try {
             internalSetResourceResolverOn(resolver, query);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            log.debug("Could not set ResourceResolver on provided Query: {} => {}",
+            log.error("Could not set ResourceResolver on provided Query: {} => {}",
                     e.getClass().getName(), e.getMessage());
         }
     }

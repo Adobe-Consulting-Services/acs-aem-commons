@@ -102,7 +102,7 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
          try {
             return super.getHeaderNames();
         } catch (AbstractMethodError e) {
-             log.debug("Known issue when internal sling redirects are made - the call to getHeaders() will throw an exception.", e);
+             log.warn("Known issue when internal sling redirects are made - the call to getHeaders() will throw an exception.", e);
             return Collections.EMPTY_LIST;
         }
     }
