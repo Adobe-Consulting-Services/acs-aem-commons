@@ -28,6 +28,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.jcr.Session;
 
+import com.day.cq.tagging.TagManager;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -58,13 +59,15 @@ public class AemObjectInjectorTest {
     private PageManager pageManager;
     @Mock
     private Designer designer;
+    @Mock
+    private TagManager tagManager;
 
     @Mock
     private Page resourcePage;
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
-    
+
 
     @Before
     public final void setUp() throws Exception {
@@ -76,6 +79,7 @@ public class AemObjectInjectorTest {
         context.registerAdapter(ResourceResolver.class, PageManager.class, adaptHandler);
         context.registerService(PageManager.class,pageManager);
         context.registerService(Designer.class,designer);
+        context.registerService(TagManager.class, tagManager);
         context.addModelsForClasses(TestResourceModel.class);
 
 
@@ -95,6 +99,7 @@ public class AemObjectInjectorTest {
         assertNotNull(testResourceModel.getResource());
         assertNotNull(testResourceModel.getResourceResolver());
         assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getTagManager());
         assertNotNull(testResourceModel.getDesigner());
         assertNotNull(testResourceModel.getLocale());
         assertEquals(Locale.ENGLISH, testResourceModel.getLocale());
@@ -112,6 +117,7 @@ public class AemObjectInjectorTest {
         assertNotNull(testResourceModel.getResource());
         assertNotNull(testResourceModel.getResourceResolver());
         assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getTagManager());
         assertNotNull(testResourceModel.getDesigner());
         assertNotNull(testResourceModel.getLocale());
         assertEquals(Locale.ENGLISH, testResourceModel.getLocale());
@@ -147,6 +153,10 @@ public class AemObjectInjectorTest {
         private Session session;
         @Inject @Optional
         private XSSAPI xssApi;
+
+        @Inject @Optional
+        private TagManager tagManager;
+
         @Inject @Optional
         private String namedSomethingElse;
 
@@ -167,6 +177,10 @@ public class AemObjectInjectorTest {
 
         public PageManager getPageManager() {
             return pageManager;
+        }
+
+        public TagManager getTagManager() {
+            return tagManager;
         }
 
         public Page getCurrentPage() {
