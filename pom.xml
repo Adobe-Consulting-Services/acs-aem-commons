@@ -93,7 +93,7 @@
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1711838899</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1712087710</project.build.outputTimestamp>
     </properties>
 
     <build>

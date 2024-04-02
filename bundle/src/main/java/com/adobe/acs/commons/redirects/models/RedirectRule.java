@@ -298,7 +298,7 @@ public class RedirectRule {
                 ptrn = null;
             }
         } catch (PatternSyntaxException e) {
-            log.info("invalid regex: {}", src);
+            log.error("invalid regex: {}", src);
             ptrn = null;
         }
         return ptrn;

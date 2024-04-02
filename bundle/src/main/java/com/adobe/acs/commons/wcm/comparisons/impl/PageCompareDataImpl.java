@@ -82,7 +82,7 @@ class PageCompareDataImpl implements PageCompareData {
                 }
             }
         } catch (javax.jcr.UnsupportedRepositoryOperationException e) {
-            log.debug(String.format("node %s not versionable", this.resource.getPath()));
+            log.warn(String.format("node %s not versionable", this.resource.getPath()));
         }
         versionSelection.add(new VersionSelectionImpl("latest", Properties.lastModified(resource)));
     }
