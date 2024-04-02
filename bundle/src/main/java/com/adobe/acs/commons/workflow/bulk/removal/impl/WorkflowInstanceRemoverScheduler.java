@@ -182,7 +182,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         } catch (InterruptedException e) {
             log.error("Interrupted Exception during Workflow Removal", e);
         } catch (WorkflowRemovalForceQuitException e) {
-            log.info("Workflow Removal force quit", e);
+            log.error("Workflow Removal force quit", e);
         }
     }
 
