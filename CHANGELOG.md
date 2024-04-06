@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3310 - User mapping | moved author specific user mapping from config to config.author 
 - #3301 - CM report fix WrongLogLevelInCatchBlock issue
 - #2854 - Code optimization: convert class fields to local variables
+- #2279 - Unit tests coverage for Deck Dynamo: servlet and service configuration
 
 ## 6.5.0 - 2024-03-22
 
