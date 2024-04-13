@@ -27,9 +27,14 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ValueMap;
 
@@ -42,12 +47,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.CONNECT_TIMEOUT_KEY;
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.DISABLE_CERT_CHECK_KEY;
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SO_TIMEOUT_STRATEGY_KEY;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
@@ -61,28 +70,38 @@ public class RemoteInstance implements Closeable {
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
 
-    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) {
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException{
         this.hostConfiguration = hostConfiguration;
         this.httpClient = createHttpClient(hostConfiguration, generalSettings);
     }
 
-    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) {
+    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings)
+            throws GeneralSecurityException{
         BasicCredentialsProvider provider = new BasicCredentialsProvider();
         provider.setCredentials(
                 AuthScope.ANY,
                 new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
         int soTimeout = generalSettings.get(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
         int connTimeout = generalSettings.get(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
+        boolean disableCertCheck = generalSettings.get(DISABLE_CERT_CHECK_KEY, false);
         RequestConfig requestConfig = RequestConfig
                 .custom()
                 .setConnectTimeout(connTimeout)
                 .setSocketTimeout(soTimeout)
                 .setCookieSpec(CookieSpecs.STANDARD).build();
-        return
-                HttpClients.custom()
-                        .setDefaultRequestConfig(requestConfig)
-                        .setDefaultCredentialsProvider(provider)
-                        .build();
+        HttpClientBuilder builder = HttpClients.custom();
+        builder.setDefaultRequestConfig(requestConfig)
+                .setDefaultCredentialsProvider(provider);
+        if (disableCertCheck) {
+            // Disable hostname verification and allow self-signed certificates
+            SSLContextBuilder sslbuilder = new SSLContextBuilder();
+            sslbuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = null;
+            sslsf = new SSLConnectionSocketFactory(
+                    sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
+            builder.setSSLSocketFactory(sslsf);
+        }
+        return builder.build();
     }
 
     public InputStream getStream(String path) throws IOException, URISyntaxException {
