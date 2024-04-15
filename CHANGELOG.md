@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+6.6.0 - 2024-04-15
+
 ## Added
 
 - #3308 - Added fulltext search support to Redirect Manager
