@@ -1,0 +1,25 @@
+{
+  "dam": {
+    "jcr:primaryType": "sling:Folder",
+    "dynamic-deck-dynamo": {
+      "jcr:primaryType": "sling:Folder",
+      "templates": {
+        "jcr:primaryType": "sling:Folder",
+        "simple-template-2018": {
+          "jcr:primaryType": "sling:Folder"
+        }
+      },
+      "master-assets": {
+        "get-outside-master-asset.jpg": {
+          "jcr:primaryType": "dam:Asset"
+        }
+      },
+      "destination": {
+        "jcr:primaryType": "sling:Folder"
+      },
+      "collectionPath": {
+        "jcr:primaryType": "sling:Folder"
+      }
+    }
+  }
+}
