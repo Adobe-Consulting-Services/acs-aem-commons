@@ -256,6 +256,13 @@
                                             fieldLabel="Connect timeout in milliseconds"
                                             name="./connTimeout"
                                             value="5000"/>
+                                        <disable-cert-check
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                                text="Disable SSL Certificate Check"
+                                                fieldDescription="If selected it will disable certificate check for the SSL connection."
+                                                name="./disableCertCheck"
+                                                value="true"/>
                                     </items>
                                 </fieldset>
                             </items>

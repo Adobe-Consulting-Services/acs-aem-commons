@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3306 - Sling Model Page injector
 - #3306 - Sling Model Content Policy injector
 - #3306 - Sling Model Tag injector
+- #3320 - Content Sync: add an option to disable ssl cert check
 
 ### Fixed 
 
@@ -22,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3301 - CM report fix WrongLogLevelInCatchBlock issue
 - #2854 - Code optimization: convert class fields to local variables
 - #2279 - Unit tests coverage for Deck Dynamo: servlet and service configuration
+- #3319 - Grant permissions to read redirects to everyone instead of anonymous
 
 ## 6.5.0 - 2024-03-22
 
