@@ -191,7 +191,6 @@ public class Redirects {
             }
 
         } catch (RepositoryException e) {
-            //log.error("Error collecting search results", e);
         } finally {
             if (leakingResourceResolver != null) {
                 // Always Close the leaking QueryBuilder resourceResolver.
