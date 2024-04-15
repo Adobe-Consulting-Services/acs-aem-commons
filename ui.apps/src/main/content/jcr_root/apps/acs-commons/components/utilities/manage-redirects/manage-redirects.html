@@ -24,8 +24,12 @@
 <body class="coral--light foundation-layout-util-maximized-alt">
 <sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'acs-commons.manage-redirects.app']}"
      data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-use.redirectsTemplate="template.html"
      data-sly-use.context="serverlibs/context.js"
      data-sly-use.pg="com.adobe.acs.commons.redirects.models.Redirects"/>
+
+<input type="hidden" name="caconfig" value="${context.redirectResource.path}"/>
+<input type="hidden" name="fulltextSearchEnabled" value="${context.redirectResource.valueMap['fulltextSearchEnabled']}"/>
 
 <coral-shell-header aria-hidden="false" aria-label="Header Bar"
                     class="coral--dark granite-shell-header coral3-Shell-header"
@@ -42,7 +46,7 @@
             <coral-shell-homeanchor-label>Adobe Experience Manager
             </coral-shell-homeanchor-label>
         </a>
-        <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${properties.jcr:title} </span>
+        <span style="line-height: 2.375rem;"> / ACS AEM Commons / ${properties.jcr:title} </span>
     </coral-shell-header-home>
 </coral-shell-header>
 
@@ -98,7 +102,7 @@
                     <section class="coral-Form coral-Form--vertical">
                         <div clas="coral-Form-fieldset">
                             <br>
-                            <coral-search placeholder="Search" class="coral-Form-field" name="name" id="redirect-search-box"/>
+                            <coral-search placeholder="Search" class="coral-Form-field" name="redirect-rule-search" id="redirect-search-box"  data-path="${context.redirectResource.path}/"/>
                             </coral-search>
                         </div>
 
@@ -136,19 +140,21 @@
                                 <th is="coral-table-headercell"></th>
                             </tr>
                             </thead>
-                            <tbody is="coral-table-body"  divider="cell">
-                            <sly data-sly-list="${pg.items}">
-                                <div data-sly-test="${item.sling:resourceType}" data-sly-unwrap>
-                                    <sly data-sly-resource="${@path=item.path, resourceType='acs-commons/components/utilities/manage-redirects/redirect-row'}"/>
-                                </div>
-                            </sly>
+
+                            <tbody is="coral-table-body" id="redirect-rows" divider="cell">
+                                <sly data-sly-list.item="${pg.items}">
+                                    <sly data-sly-call="${redirectsTemplate.row @ redirectResource = item, allowRearrange = true}"/>
+                                </sly>
                             </tbody>
+
                         </table>
-                        <div data-sly-test="${pg.paginated}">
-                            Page ${pg.pageNumber} of ${pg.pages}
+                        <div id="table-footer" data-sly-test="${pg.paginated}">
                             <a data-sly-test="${pg.hasPrevious}" href="/apps/acs-commons/content/redirect-manager.html${request.requestPathInfo.suffix}?page=${pg.previousPage}">
                                 Previous
                             </a>
+
+                            Page ${pg.pageNumber} of ${pg.pages}
+
                             <a  data-sly-test="${pg.hasNext}"  href="/apps/acs-commons/content/redirect-manager.html${request.requestPathInfo.suffix}?page=${pg.nextPage}">
                                 Next
                             </a>
@@ -207,11 +213,17 @@
                 </coral-panel>
             </coral-panelstack>
         </coral-tabview>
-        <sly data-sly-list="${resource.getChildren}">
+
+        <div data-sly-list="${resource.getChildren}">
             <sly data-sly-resource="${item.path}"></sly>
-        </sly>
+        </div>
 
     </div>
+</div>
+
+<div id="swap">
+    <tbody is="coral-table-body" id="search-tbody" divider="cell" style="display: none;">
+    </tbody>
 </div>
 </body>
 </html>
