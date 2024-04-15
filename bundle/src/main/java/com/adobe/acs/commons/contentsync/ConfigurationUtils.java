@@ -43,6 +43,7 @@ public class ConfigurationUtils {
     public static final String EVENT_USER_DATA_KEY = "event-user-data";
     public static final String SO_TIMEOUT_STRATEGY_KEY = "soTimeout";
     public static final String CONNECT_TIMEOUT_KEY = "connTimeout";
+    public static final String DISABLE_CERT_CHECK_KEY = "disableCertCheck";
 
     private ConfigurationUtils(){
 

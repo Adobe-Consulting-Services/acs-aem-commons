@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3306 - Sling Model Page injector
 - #3306 - Sling Model Content Policy injector
 - #3306 - Sling Model Tag injector
+- #3320 - Content Sync: add an option to disable ssl cert check
 
 ### Fixed 
 
