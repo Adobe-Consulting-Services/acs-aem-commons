@@ -86,7 +86,7 @@
         <!-- the minimum AEM 6.5 version being supported -->
         <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
-        <aem.sdk.api.version>2023.1.10675.20230113T110236Z-220900</aem.sdk.api.version>
+        <aem.sdk.api.version>2023.11.14227.20231108T162349Z-231100</aem.sdk.api.version>
 
         <jacoco.version>0.8.11</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
@@ -247,6 +247,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
 # paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
 -plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
+-plugin.providertype:org.apache.sling.providertype.bndplugin.ProviderTypeScanner
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
@@ -275,6 +276,12 @@ Service-Component: OSGI-INF/*.xml
                             <groupId>org.apache.felix</groupId>
                             <artifactId>org.apache.felix.scr.bnd</artifactId>
                             <version>1.9.6</version>
+                        </dependency>
+                        <!-- enforce that provider types are not implemented/extended, https://github.com/apache/sling-org-apache-sling-providertype-bnd-plugin --> 
+                        <dependency>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.providertype.bnd-plugin</artifactId>
+                            <version>1.0.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>

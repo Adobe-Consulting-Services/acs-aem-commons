@@ -20,3 +20,4 @@ Import-Package: \
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
   *
+-classpath: $(basedir)/target/aem-sdk-api-info/

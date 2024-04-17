@@ -46,6 +46,33 @@
     <build>
 
         <plugins>
+            <!-- extract only api-info.json from aem-sdk-api for provider type checks -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>extract-api-info-json-from-aem-sdk</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.adobe.aem</groupId>
+                                    <artifactId>aem-sdk-api</artifactId>
+                                    <version>${aem.sdk.api.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/aem-sdk-api-info</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>META-INF/api-info.json</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
