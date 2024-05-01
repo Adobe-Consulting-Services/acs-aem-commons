@@ -20,31 +20,41 @@ package com.adobe.acs.commons.redirectmaps.impl;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.RequireAem;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
+
 /**
  * Servlet for removing a line from the redirect map text file
  */
-@SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/redirectmappage" }, selectors = {
-                "removeentry" }, extensions = { "json" }, metatype = false)
+@Component(
+        service = {Servlet.class},
+        property = {
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/redirectmappage",
+                SLING_SERVLET_METHODS + "=POST",
+                SLING_SERVLET_EXTENSIONS + "=json",
+                SLING_SERVLET_SELECTORS + "=removeentry"
+        }
+        // Registering multiple values simply requires multiple key/value pairs for the same key.
+)
 public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -5963945855717054678L;
     private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
-    
+
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
+    @Reference(target = "(distribution=classic)")
     transient RequireAem requireAem;
 
     @Override
@@ -62,6 +72,6 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
         RedirectEntriesUtils.updateRedirectMap(request, lines);
 
-        RedirectEntriesUtils.writeEntriesToResponse(request, response, "Removed entry "+idx);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response, "Removed entry " + idx);
     }
 }

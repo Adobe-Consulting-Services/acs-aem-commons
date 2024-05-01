@@ -20,7 +20,6 @@ package com.adobe.acs.commons.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.felix.scr.annotations.Component;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.cm.ConfigurationException;
@@ -30,6 +29,7 @@ import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.WCMMode;
 
 import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.service.component.annotations.Component;
 
 
 @ProviderType
@@ -58,7 +58,7 @@ public final class ModeUtil {
 
     /**
      * Is AEM runmode author.
-     * 
+     *
      * @return true if runmode author is present
      */
     public static boolean isAuthor() {
@@ -67,7 +67,7 @@ public final class ModeUtil {
 
     /**
      * Is AEM runmode publish.
-     * 
+     *
      * @return true if runmode publish is present
      */
     public static boolean isPublish() {
@@ -76,9 +76,8 @@ public final class ModeUtil {
 
     /**
      * Helper method to check for given runmode.
-     * 
-     * @param mode
-     *            the mode to check
+     *
+     * @param mode the mode to check
      * @return true if the specified mode is present
      */
     public static boolean isRunmode(String mode) {
@@ -87,9 +86,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in mode {@link WCMMode#ANALYTICS}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in analytics mode
      */
     public static boolean isAnalytics(SlingHttpServletRequest request) {
@@ -98,9 +96,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in mode {@link WCMMode#DESIGN}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in design mode
      */
     public static boolean isDesign(SlingHttpServletRequest request) {
@@ -109,9 +106,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in mode {@link WCMMode#DISABLED}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in disabled mode
      */
     public static boolean isDisabled(SlingHttpServletRequest request) {
@@ -120,9 +116,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in mode {@link WCMMode#EDIT}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in edit mode
      */
     public static boolean isEdit(SlingHttpServletRequest request) {
@@ -131,9 +126,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in mode {@link WCMMode#PREVIEW}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in preview mode
      */
     public static boolean isPreview(SlingHttpServletRequest request) {
@@ -142,9 +136,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in mode {@link WCMMode#READ_ONLY}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in read-only mode
      */
     public static boolean isReadOnly(SlingHttpServletRequest request) {
@@ -153,9 +146,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in {@link AuthoringUIMode#CLASSIC}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in Classic authoring mode
      */
     public static boolean isClassic(SlingHttpServletRequest request) {
@@ -164,9 +156,8 @@ public final class ModeUtil {
 
     /**
      * Checks if the request is in {@link AuthoringUIMode#TOUCH}
-     * 
-     * @param request
-     *            request to check
+     *
+     * @param request request to check
      * @return true if the request is in Touch authoring mode
      */
     public static boolean isTouch(SlingHttpServletRequest request) {

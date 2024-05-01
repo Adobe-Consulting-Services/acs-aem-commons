@@ -21,28 +21,34 @@ package com.adobe.acs.commons.packaging.impl;
 import java.io.IOException;
 
 import javax.jcr.RepositoryException;
+import javax.servlet.Servlet;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.packaging.util.AssetPackageUtil;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 /**
  * ACS AEM Commons - Asset Packager Servlet
  * Servlet end-point used to create packages of pages and the referenced assets.
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = {HttpConstants.METHOD_POST},
-        resourceTypes = {"acs-commons/components/utilities/packager/asset-packager"},
-        selectors = {"package"},
-        extensions = {"json"}
+@Component(
+        service = {Servlet.class},
+        property = {
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/asset-packager\"",
+                SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
+                SLING_SERVLET_EXTENSIONS + "=json",
+                SLING_SERVLET_SELECTORS + "=package",
+        }
 )
 public class AssetPackagerServletImpl extends AbstractPackagerServlet {
 

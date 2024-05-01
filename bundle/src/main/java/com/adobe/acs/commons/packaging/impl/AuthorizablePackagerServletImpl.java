@@ -20,13 +20,12 @@ package com.adobe.acs.commons.packaging.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.jcr.RepositoryException;
+import javax.servlet.Servlet;
 
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -37,20 +36,25 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import org.osgi.service.component.annotations.Component;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 /**
  * ACS AEM Commons - Authorizable Packager Servlet
  * Servlet end-point used to create CRX packages of authorizables based on the underlying resource's configuration.
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = { HttpConstants.METHOD_POST },
-        resourceTypes = { "acs-commons/components/utilities/packager/authorizable-packager" },
-        selectors = { "package" },
-        extensions = { "json" }
+@Component(
+        service = {Servlet.class},
+        property = {
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/authorizable-packager",
+                SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
+                SLING_SERVLET_EXTENSIONS + "=json",
+                SLING_SERVLET_SELECTORS + "=package"
+        }
 )
 public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
 
@@ -96,7 +100,7 @@ public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
     }
 
     private List<PathFilterSet> findPaths(final ResourceResolver resourceResolver,
-                                         final String[] authorizableIds) throws RepositoryException {
+                                          final String[] authorizableIds) throws RepositoryException {
 
         final UserManager userManager = resourceResolver.adaptTo(UserManager.class);
 

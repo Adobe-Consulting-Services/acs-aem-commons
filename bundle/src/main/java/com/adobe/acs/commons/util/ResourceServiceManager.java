@@ -20,15 +20,15 @@ package com.adobe.acs.commons.util;
 import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import javax.management.NotCompliantMBeanException;
+
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -38,6 +38,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -120,12 +122,10 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
      * Checks whether or not the specified ServiceReference is up to date with
      * the configuration resource.
      *
-     * @param config
-     *            the configuration resource
-     * @param reference
-     *            the service reference to check
+     * @param config    the configuration resource
+     * @param reference the service reference to check
      * @return true if the ServiceReference is up to date with the resource,
-     *         false otherwise
+     * false otherwise
      */
     protected abstract boolean isServiceUpdated(Resource config, ServiceReference reference);
 
@@ -134,7 +134,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     public synchronized void refreshCache() {
         log.trace("refreshCache");
 
-        try ( ResourceResolver resolver = getResourceResolver()) {
+        try (ResourceResolver resolver = getResourceResolver()) {
 
             Resource aprRoot = resolver.getResource(getRootPath());
             if (aprRoot == null) {
@@ -194,10 +194,8 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     /**
      * Register the service with the OSGi Container based on the configuration.
      *
-     * @param config
-     *            the configuration resource
-     * @param props
-     *            the default properties
+     * @param config the configuration resource
+     * @param props  the default properties
      * @return the ServiceRegistration from registering the service
      */
     @SuppressWarnings("squid:S1149")

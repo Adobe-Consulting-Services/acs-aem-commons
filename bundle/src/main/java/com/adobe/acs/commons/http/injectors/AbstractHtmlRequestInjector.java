@@ -35,10 +35,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
     @Override
     public final void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
                                final FilterChain filterChain) throws IOException, ServletException {
-        
+
         if (!this.accepts(servletRequest, servletResponse)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
@@ -78,11 +78,11 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
             // Get contents
             final String originalContents = originalResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? originalResponse.getBufferedServletOutput().getBufferedString() : null;
 
-            if (originalContents != null 
+            if (originalContents != null
                     && StringUtils.contains(response.getContentType(), "html")) {
 
                 final int injectionIndex = getInjectIndex(originalContents);
-                
+
                 if (injectionIndex != -1) {
                     // prevent the captured response from being given out a 2nd time via the implicit close()
                     originalResponse.setFlushBufferOnClose(false);
@@ -113,7 +113,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
 
     @SuppressWarnings("squid:S3923")
     protected boolean accepts(final ServletRequest servletRequest,
-                            final ServletResponse servletResponse) {
+                              final ServletResponse servletResponse) {
 
         if (!(servletRequest instanceof HttpServletRequest)
                 || !(servletResponse instanceof HttpServletResponse)) {

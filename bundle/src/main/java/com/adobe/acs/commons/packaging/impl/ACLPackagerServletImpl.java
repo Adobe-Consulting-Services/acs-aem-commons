@@ -31,9 +31,8 @@ import java.util.regex.Pattern;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
+import javax.servlet.Servlet;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -46,17 +45,26 @@ import org.apache.sling.api.resource.ValueMap;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import org.apache.sling.api.servlets.HttpConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 /**
  * ACS AEM Commons - ACL Packager Servlet
  * Servlet end-point used to create ACL CRX packages based on the underlying resource's configuration.
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = { HttpConstants.METHOD_POST },
-        resourceTypes = { "acs-commons/components/utilities/packager/acl-packager" },
-        selectors = { "package" },
-        extensions = { "json" }
+
+@Component(
+        service = {Servlet.class},
+        property = {
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/acl-packager",
+                SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
+                SLING_SERVLET_EXTENSIONS + "=json",
+                SLING_SERVLET_SELECTORS + "=package"
+        }
+        // Registering multiple values simply requires multiple key/value pairs for the same key.
 )
 public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
@@ -80,7 +88,7 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
     // rep:ACE covers rep:GrantACE and rep:DenyACE
     private static final String AEM6_QUERY_ACE = "SELECT * FROM [rep:ACE] where [rep:principalName] is not null";
 
-    private static final String[] AEM6_QUERIES = new String[] {AEM6_QUERY_ACE};
+    private static final String[] AEM6_QUERIES = new String[]{AEM6_QUERY_ACE};
 
     private static final String ACL_PACKAGE_THUMBNAIL_RESOURCE_PATH =
             "/apps/acs-commons/components/utilities/packager/acl-packager/definition/package-thumbnail.png";

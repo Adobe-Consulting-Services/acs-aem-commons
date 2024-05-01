@@ -19,14 +19,12 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
 
 import javax.jcr.RepositoryException;
 
-@Component
-@Service
+@Component(service = {PageCompareDataLoader.class})
 public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
 
     @Override
