@@ -87,7 +87,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             target = "(component.name=com.day.cq.workflow.impl.process.CQWorkflowProcess)",
             unbind = "unbindCqWorkflowProcesses"
     )
-    private transient WorkflowProcess[] cqWorkflowProcesses;
+    private volatile WorkflowProcess[] cqWorkflowProcesses;
 
     @Reference(
             service = com.adobe.granite.workflow.exec.WorkflowProcess.class,
@@ -96,7 +96,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
             target = "(component.name=com.adobe.granite.workflow.core.job.JobHandler)",
             unbind = "unbindGraniteWorkflowProcesses"
     )
-    private transient com.adobe.granite.workflow.exec.WorkflowProcess[] graniteWorkflowProcesses;
+    private volatile com.adobe.granite.workflow.exec.WorkflowProcess[] graniteWorkflowProcesses;
 
 
     @Reference

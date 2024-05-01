@@ -44,7 +44,7 @@ import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 @Component(
         service = {Servlet.class},
         property = {
-                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/asset-packager\"",
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/asset-packager",
                 SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
                 SLING_SERVLET_EXTENSIONS + "=json",
                 SLING_SERVLET_SELECTORS + "=package",
