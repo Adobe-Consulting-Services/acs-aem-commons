@@ -26,16 +26,15 @@ import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.designer.Style;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import com.adobe.acs.commons.i18n.I18nProvider;
 import com.adobe.acs.commons.models.injectors.annotation.AemObject;
 import com.day.cq.i18n.I18n;
@@ -86,18 +85,21 @@ import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericPa
  * Note: This Injector requires at least org.apache.sling.models.impl version 1.0.2
  *
  */
-@Component
-@Service
 /*
  * SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
  * otherwise the generic XSSAPI service would be injected from the OSGi Service Registry instead of the
  * pre-configured from the current request.
  */
-@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
+@Component(
+        service = {Injector.class},
+        property = {
+                Constants.SERVICE_RANKING + ":Integer=" + 4500
+        }
+)
 public final class AemObjectInjector implements Injector {
 
     @Reference
-    private XSSAPI genericXxsApi;
+    private transient XSSAPI genericXxsApi;
 
     @Override
     public String getName() {
