@@ -17,6 +17,15 @@
  */
 package com.adobe.acs.commons.notifications.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.notifications.InboxNotification;
 import com.adobe.acs.commons.notifications.InboxNotificationSender;
 import com.adobe.granite.taskmanagement.Task;
@@ -24,22 +33,12 @@ import com.adobe.granite.taskmanagement.TaskAction;
 import com.adobe.granite.taskmanagement.TaskManager;
 import com.adobe.granite.taskmanagement.TaskManagerException;
 import com.adobe.granite.taskmanagement.TaskManagerFactory;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /*
     ACS AEM Commons - AEM Inbox Notification Sender
     Service for sending AEM Inbox Notification
  */
-@Component
-@Service
+@Component(service = InboxNotificationSender.class)
 public class InboxNotificationSenderImpl implements InboxNotificationSender {
     private static final Logger log = LoggerFactory.getLogger(InboxNotificationSenderImpl.class);
 
@@ -52,7 +51,7 @@ public class InboxNotificationSenderImpl implements InboxNotificationSender {
 
     @Override
     public void sendInboxNotification(ResourceResolver resourceResolver,
-                                      InboxNotification inboxNotification) throws TaskManagerException {
+            InboxNotification inboxNotification) throws TaskManagerException {
 
         log.debug("Sending Inbox Notification [ {} ] to [ {} ]",
                 inboxNotification.getTitle(), inboxNotification.getAssignee());
@@ -63,7 +62,7 @@ public class InboxNotificationSenderImpl implements InboxNotificationSender {
 
     @Override
     public void sendInboxNotifications(ResourceResolver resourceResolver,
-                                       List<InboxNotification> inboxNotifications)
+            List<InboxNotification> inboxNotifications)
             throws TaskManagerException {
 
         for (InboxNotification notificationDetails : inboxNotifications) {
@@ -72,7 +71,7 @@ public class InboxNotificationSenderImpl implements InboxNotificationSender {
     }
 
     private Task createTask(TaskManager taskManager,
-                            InboxNotification inboxNotification) throws TaskManagerException {
+            InboxNotification inboxNotification) throws TaskManagerException {
 
         Task newTask = taskManager.getTaskManagerFactory().newTask(NOTIFICATION_TASK_TYPE);
 
