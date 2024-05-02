@@ -17,6 +17,28 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.Session;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
@@ -27,59 +49,40 @@ import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.URLEntity;
 import twitter4j.json.DataObjectFactory;
 
-import javax.jcr.Session;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-@Component(label = "ACS AEM Commons - Twitter Feed Update Service",
-        metatype = true, description = "Service to update Twitter Feed components.")
-@Service
+@Component(service = { TwitterFeedUpdater.class }, property = {
+        "process.label=ACS AEM Commons - Twitter Feed Update Service"
+})
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);
 
-    @Reference
-    private Replicator replicator;
+    @ObjectClassDefinition(name = "ACS AEM Commons - Twitter Feed Update Service", description = "Service to update Twitter Feed components on AEM pages.")
+    @interface Config {
+        @AttributeDefinition(name = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.", defaultValue = {
+                "acs-commons/components/content/twitter-feed" }, cardinality = Integer.MAX_VALUE)
+        String[] twitter_component_paths();
+    }
+
+    private Config config;
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private transient Replicator replicator;
 
-    @Property(value = "acs-commons/components/content/twitter-feed", unbounded = PropertyUnbounded.ARRAY,
-            label = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
-    private static final String TWITTER_COMPONENT_PATHS = "twitter.component.paths";
+    @Reference
+    private transient QueryBuilder queryBuilder;
 
     private String[] twitterComponentPaths = null;
 
-    protected void activate(ComponentContext ctx) {
-        final Dictionary<?, ?> props = ctx.getProperties();
-
-        twitterComponentPaths = PropertiesUtil.toStringArray(props.get(TWITTER_COMPONENT_PATHS));
-
+    protected void activate(Config config) {
+        this.config = config;
+        twitterComponentPaths = PropertiesUtil.toStringArray(this.config.twitter_component_paths(), new String[0]);
     }
 
     @Override
@@ -135,7 +138,9 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
                                 e);
                     }
                 } else {
-                    log.warn("Twitter component found on {}, but page cannot be adapted to Twitter API. Check Cloud SErvice configuration", page.getPath());
+                    log.warn(
+                            "Twitter component found on {}, but page cannot be adapted to Twitter API. Check Cloud SErvice configuration",
+                            page.getPath());
                 }
             }
 
@@ -158,7 +163,8 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
         predicateMap.put("p.limit", "-1");
 
-        Query query = queryBuilder.createQuery(PredicateGroup.create(predicateMap), resourceResolver.adaptTo(Session.class));
+        Query query = queryBuilder.createQuery(PredicateGroup.create(predicateMap),
+                resourceResolver.adaptTo(Session.class));
         QueryUtil.setResourceResolverOn(resourceResolver, query);
 
         SearchResult result = query.getResult();
