@@ -35,6 +35,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +57,8 @@ import twitter4j.TwitterException;
 import twitter4j.URLEntity;
 import twitter4j.json.DataObjectFactory;
 
-@Component(service = { TwitterFeedUpdater.class }, property = {
-        "process.label=ACS AEM Commons - Twitter Feed Update Service"
-})
+@Component(service = { TwitterFeedUpdater.class })
+@Designate(ocd = TwitterFeedUpdaterImpl.Config.class)
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);

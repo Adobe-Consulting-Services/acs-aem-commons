@@ -53,7 +53,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Component(
         service = WorkflowProcess.class, 
         property = {
-                "process.label=Workflow Label",
+                "process.label=Set Replicated By Property to Workflow Initiator",
         })
 public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicatedByWorkflowProcess.class);

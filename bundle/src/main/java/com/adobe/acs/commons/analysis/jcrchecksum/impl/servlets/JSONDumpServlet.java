@@ -46,7 +46,12 @@ import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGe
 import com.google.gson.stream.JsonWriter;
 
 @SuppressWarnings("serial")
-@Component(service = { Servlet.class })
+@Component(
+    service = { Servlet.class },
+    property = {
+        "sling.auth.requirements="+"-" + JSONDumpServlet.SERVLET_PATH
+    }
+    )
 @SlingServletPaths(value = {
         JSONDumpServlet.SERVLET_PATH
 })
