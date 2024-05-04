@@ -63,4 +63,17 @@ class DynamicDeckServiceImplTest {
                 dynamicDeckService.createDeck("deckTitle", masterAssetResource, assetResourceList, templateFolderResource,
                         destinationFolderResource, resourceResolver));
     }
+
+    @Test
+    void shouldThrowExceptionInCaseOfDamAssetResourceNull() {
+        context.request().setPathInfo("/content/some/en/en/some.json");
+        List<Resource> assetResourceList = Collections.singletonList(Mockito.mock(Resource.class));
+        Resource masterAssetResource = resourceResolver.getResource("/content/dam/dynamic-deck-dynamo/master-assets");
+        Resource templateFolderResource = resourceResolver.getResource("/content/dam/dynamic-deck-dynamo/templates/simple-template-2019");
+        Resource destinationFolderResource = resourceResolver.getResource("/content/dam/dynamic-deck-dynamo/destination");
+
+        assertThrows(DynamicDeckDynamoException.class, () ->
+                dynamicDeckService.createDeck("deckTitle", masterAssetResource, assetResourceList, templateFolderResource,
+                        destinationFolderResource, resourceResolver));
+    }
 }
