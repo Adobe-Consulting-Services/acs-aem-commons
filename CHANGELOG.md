@@ -10,9 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-## Added
+### Added
 
 - #3323 - Add Provider Type Checker Plugin
+
+### Fixed
+
+- #3241 - Fix overlapping Service-Component header entries leading to double registration of components
 
 ## 6.6.0 - 2024-04-15
 
