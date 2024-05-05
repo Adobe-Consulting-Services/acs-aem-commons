@@ -244,15 +244,10 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # enable plugins (https://bnd.bndtools.org/instructions/plugin.html)
 -plugin.models: org.apache.sling.bnd.models.ModelsScannerPlugin
 -plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
-# support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
-# paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
--plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
 -plugin.providertype:org.apache.sling.providertype.bndplugin.ProviderTypeScanner
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
-# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
-Service-Component: OSGI-INF/*.xml
                                 ]]></bnd>
                             </configuration>
                         </execution>
@@ -269,13 +264,6 @@ Service-Component: OSGI-INF/*.xml
                             <groupId>org.apache.sling</groupId>
                             <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
                             <version>1.0.2</version>
-                        </dependency>
-                        <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
-                            with the Bnd process -->
-                        <dependency>
-                            <groupId>org.apache.felix</groupId>
-                            <artifactId>org.apache.felix.scr.bnd</artifactId>
-                            <version>1.9.6</version>
                         </dependency>
                         <!-- enforce that provider types are not implemented/extended, https://github.com/apache/sling-org-apache-sling-providertype-bnd-plugin --> 
                         <dependency>

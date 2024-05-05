@@ -20,4 +20,10 @@ Import-Package: \
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
   *
+# support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
+# paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
+-plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
+# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
+# this is not properly merged with entries from Felix SCR Bnd plugin, therefore later on patched with m-shade-p
+Service-Component: OSGI-INF/*.xml
 -classpath: $(basedir)/target/aem-sdk-api-info/
