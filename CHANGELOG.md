@@ -10,8 +10,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-### Added
+## Added
 
+- #3333 - Use lodash embedded by ACS AEM Commons
+- #3323 - Add Provider Type Checker Plugin
+- #3338 - Prevent URL modification on dismiss
+
+## 6.6.0 - 2024-04-15
+
+## Added
+
+- #3308 - Added fulltext search support to Redirect Manager
 - #3306 - Sling Model Page injector
 - #3306 - Sling Model Content Policy injector
 - #3306 - Sling Model Tag injector
@@ -43,7 +52,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 6.4.0 - 2024-02-22
 
-## Added 
+## Added
 
 - #3238 - Content Sync make timeouts configurable
 - #3235 - Add an option to ignore selectors in the url.
@@ -75,7 +84,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3162 - Renovator MCP: ensure old source path is removed
 - #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
-- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<
+  java.lang.String>
 - #3197 - Encrypt user credentials in ACS Content Sync
 - #3196 - Content Sync: prevent exception when creating parent nodes
 - #3194 - Redirect Manager: Ignore Case value is not persisting
@@ -96,7 +106,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Removed
 
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in
+  Cloud Manager pipelines.
 
 ## 6.1.0 - 2023-09-08
 

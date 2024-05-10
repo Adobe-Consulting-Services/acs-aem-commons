@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<!--/*
   ~ ACS AEM Commons
   ~
   ~ Copyright (C) 2013 - 2023 Adobe
@@ -15,9 +14,11 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
+  */-->
 
-<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    jcr:primaryType="cq:Component"
-    jcr:title="Redirect Row"
-    componentGroup=".hidden"/>
+<sly data-sly-use.redirectsTemplate="template.html"
+     data-sly-use.pg="com.adobe.acs.commons.redirects.models.Redirects"/>
+
+<sly data-sly-list.item="${pg.items}">
+    <sly data-sly-call="${redirectsTemplate.row @ redirectResource = item, allowRearrange = false}"/>
+</sly>
