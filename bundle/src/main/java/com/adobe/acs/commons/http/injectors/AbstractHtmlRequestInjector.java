@@ -186,6 +186,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
     }
 
     @Deactivate
+    @org.apache.felix.scr.annotations.Deactivate
     protected void deactivate(ComponentContext ctx) {
         this.unregisterFilter();
     }

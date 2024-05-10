@@ -67,6 +67,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Activate
+    @org.apache.felix.scr.annotations.Activate
     public synchronized void activate(ComponentContext context) throws LoginException {
         log.trace("activate");
         bctx = context.getBundleContext();
@@ -75,6 +76,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Deactivate
+    @org.apache.felix.scr.annotations.Deactivate
     public synchronized void deactivate(ComponentContext context) throws LoginException {
         log.trace("deactivate");
         for (String id : registeredServices.keySet()) {

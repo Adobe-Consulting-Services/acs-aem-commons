@@ -44,7 +44,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import org.apache.sling.api.servlets.HttpConstants;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -56,16 +56,12 @@ import static org.apache.sling.api.servlets.ServletResolverConstants.*;
  */
 @SuppressWarnings("serial")
 
-@Component(
-        service = {Servlet.class},
-        property = {
-                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/acl-packager",
-                SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
-                SLING_SERVLET_EXTENSIONS + "=json",
-                SLING_SERVLET_SELECTORS + "=package"
-        }
-        // Registering multiple values simply requires multiple key/value pairs for the same key.
-)
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/packager/acl-packager",
+        methods = "POST",
+        extensions = "json",
+        selectors = "package")
 public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
     private static final String INCLUDE_PATTERNS = "includePatterns";

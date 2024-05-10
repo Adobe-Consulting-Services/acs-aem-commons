@@ -23,11 +23,12 @@ import java.util.List;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,16 +39,12 @@ import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 /**
  * Servlet for removing a line from the redirect map text file
  */
-@Component(
-        service = {Servlet.class},
-        property = {
-                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/redirectmappage",
-                SLING_SERVLET_METHODS + "=POST",
-                SLING_SERVLET_EXTENSIONS + "=json",
-                SLING_SERVLET_SELECTORS + "=removeentry"
-        }
-        // Registering multiple values simply requires multiple key/value pairs for the same key.
-)
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/redirectmappage",
+        methods = "POST",
+        extensions = "json",
+        selectors = "removeentry")
 public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -5963945855717054678L;

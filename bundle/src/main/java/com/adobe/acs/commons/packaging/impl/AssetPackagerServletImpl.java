@@ -31,6 +31,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -41,15 +42,13 @@ import static org.apache.sling.api.servlets.ServletResolverConstants.*;
  * Servlet end-point used to create packages of pages and the referenced assets.
  */
 @SuppressWarnings("serial")
-@Component(
-        service = {Servlet.class},
-        property = {
-                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/packager/asset-packager",
-                SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
-                SLING_SERVLET_EXTENSIONS + "=json",
-                SLING_SERVLET_SELECTORS + "=package",
-        }
-)
+
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/packager/asset-packager",
+        methods = "POST",
+        extensions = "json",
+        selectors = "package")
 public class AssetPackagerServletImpl extends AbstractPackagerServlet {
 
     /* Default Properties */

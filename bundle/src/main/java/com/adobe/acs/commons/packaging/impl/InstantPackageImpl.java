@@ -24,8 +24,6 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -38,11 +36,15 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.Servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,8 +59,12 @@ import java.util.Date;
  * Sites or Assets UI Console
  */
 @SuppressWarnings("serial")
-@SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/instant-package" }, selectors = { "package" }, extensions = { "json" })
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/instant-package",
+        methods = "POST",
+        extensions = "json",
+        selectors = "package")
 public class InstantPackageImpl extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InstantPackageImpl.class);
 
@@ -165,14 +171,12 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
     /**
      * Get the list of immediate children for the current selected path in sites
      * console
-     * 
-     * @param comma
-     *            separated select paths from sites console
-     * @param resource
-     *            resolver object
+     *
+     * @param comma    separated select paths from sites console
+     * @param resource resolver object
      */
     private ArrayList<Resource> getImmediateChildren(ResourceResolver resourceResolver, String[] pathList,
-            ArrayList<Resource> allPaths) {
+                                                     ArrayList<Resource> allPaths) {
 
         Iterator<Resource> childAssetRes;
         Iterator<Page> childPageRes;
@@ -197,7 +201,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 
     /**
      * Get the list of immediate child pages
-     * 
+     *
      * @param resourceResolver
      * @param path
      * @param childPageRes
@@ -205,7 +209,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
      * @return
      */
     private ArrayList<Resource> getImmediatePages(ResourceResolver resourceResolver, Resource pagePath,
-            Iterator<Page> childPageRes, ArrayList<Resource> allPaths) {
+                                                  Iterator<Page> childPageRes, ArrayList<Resource> allPaths) {
 
         allPaths.add(resourceResolver.getResource(pagePath.getPath() + JCR_CONTENT_APPEND));
         while (childPageRes.hasNext()) {
@@ -222,7 +226,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 
     /**
      * Get the list of immediate assets
-     * 
+     *
      * @param resourceResolver
      * @param path
      * @param childRes
@@ -230,7 +234,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
      * @return
      */
     private ArrayList<Resource> getImmediateAssets(ResourceResolver resourceResolver, Iterator<Resource> childRes,
-            ArrayList<Resource> allPaths) {
+                                                   ArrayList<Resource> allPaths) {
 
         while (childRes.hasNext()) {
             Resource res = resourceResolver.getResource(childRes.next().getPath());
@@ -246,14 +250,12 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 
     /**
      * Get only selected path in sites console
-     * 
-     * @param comma
-     *            separated select paths from sites console
-     * @param resource
-     *            resolver object
+     *
+     * @param comma    separated select paths from sites console
+     * @param resource resolver object
      */
     private ArrayList<Resource> getSelectedPath(ResourceResolver resourceResolver, String[] pathList,
-            ArrayList<Resource> allPaths) {
+                                                ArrayList<Resource> allPaths) {
 
         // only selected path by adding jcr:content at the end
         for (String path : pathList) {
@@ -267,14 +269,12 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 
     /**
      * Get all children of selected path in sites console
-     * 
-     * @param comma
-     *            separated select paths from sites console
-     * @param resource
-     *            resolver object
+     *
+     * @param comma    separated select paths from sites console
+     * @param resource resolver object
      */
     private ArrayList<Resource> getAllChildren(ResourceResolver resourceResolver, String[] pathList,
-            ArrayList<Resource> allPaths) {
+                                               ArrayList<Resource> allPaths) {
         // all selected path with jcr:content to include all children
         for (String path : pathList) {
             Resource currentPath = resourceResolver.getResource(path);
