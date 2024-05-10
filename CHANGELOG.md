@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Added
 
+- #3333 - Use lodash embedded by ACS AEM Commons
 - #3323 - Add Provider Type Checker Plugin
 - #3338 - Prevent URL modification on dismiss
 
