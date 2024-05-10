@@ -23,7 +23,9 @@ $(function() {
         $('body').append(data);
     });
     
-    $('body').on('click', '.acsCommons-System-Notification-dismiss', function() {
+    $('body').on('click', '.acsCommons-System-Notification-dismiss', function(e) {
+        e.preventDefault();
+        
         var $notification = $(this).closest('.acsCommons-System-Notification'),
             uid = $notification.data('uid'),
             dismissible = $notification.data('dismissible'),
