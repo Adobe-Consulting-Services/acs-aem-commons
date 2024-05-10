@@ -29,6 +29,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SlingServlet(
-        methods = {"GET"},
+        methods = {HttpConstants.METHOD_GET},
         resourceTypes = {"acs-commons/components/utilities/audit-log-search"},
         selectors = {"auditlogsearch"},
         extensions = {"json"})

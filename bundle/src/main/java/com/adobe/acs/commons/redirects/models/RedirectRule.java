@@ -21,16 +21,16 @@ import com.adobe.granite.security.user.util.AuthorizableUtil;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
-import org.apache.sling.models.annotations.injectorspecific.Self;
-import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
+import org.apache.sling.models.annotations.injectorspecific.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Named;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-@Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
+@Model(adaptables = {SlingHttpServletRequest.class, Resource.class}, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class RedirectRule {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -61,15 +61,16 @@ public class RedirectRule {
     public static final String TAGS_PROPERTY_NAME = "cq:tags";
     public static final String CACHE_CONTROL_HEADER_NAME = "cacheControlHeader";
     public static final String CASE_INSENSITIVE_PROPERTY_NAME = "caseInsensitive";
+    public static final String REDIRECT_RESOURCE_REQUEST_ATTRIBUTE = "redirectResource";
 
-    @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
+    @ValueMapValue
     private String source;
 
-    @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
+    @ValueMapValue
     private String target;
 
-    @ValueMapValue(injectionStrategy = InjectionStrategy.REQUIRED)
-    private int statusCode;
+    @ValueMapValue
+    private Integer statusCode;
 
     @ValueMapValue
     private boolean evaluateURI;
@@ -110,6 +111,10 @@ public class RedirectRule {
     @Self
     private Resource resource;
 
+    @RequestAttribute
+    @Named(REDIRECT_RESOURCE_REQUEST_ATTRIBUTE)
+    private Resource redirectResource;
+
     private Pattern ptrn;
 
     private SubstitutionElement[] substitutions;
@@ -117,6 +122,30 @@ public class RedirectRule {
 
     @PostConstruct
     protected void init() {
+        if (redirectResource != null) {
+            resource = redirectResource;
+
+            source = resource.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
+            target = resource.getValueMap().get(TARGET_PROPERTY_NAME, String.class);
+            statusCode = resource.getValueMap().get(STATUS_CODE_PROPERTY_NAME, Integer.class);
+            evaluateURI = resource.getValueMap().get(EVALUATE_URI_PROPERTY_NAME, false);
+            untilDate = resource.getValueMap().get(UNTIL_DATE_PROPERTY_NAME, Calendar.class);
+            effectiveFrom = resource.getValueMap().get(EFFECTIVE_FROM_PROPERTY_NAME, Calendar.class);
+            note = resource.getValueMap().get(NOTE_PROPERTY_NAME, String.class);
+            contextPrefixIgnored = resource.getValueMap().get(CONTEXT_PREFIX_IGNORED_PROPERTY_NAME, false);
+            tagIds = resource.getValueMap().get(TAGS_PROPERTY_NAME, String[].class);
+            createdBy = resource.getValueMap().get(CREATED_BY_PROPERTY_NAME, String.class);
+            modifiedBy = resource.getValueMap().get(MODIFIED_BY_PROPERTY_NAME, String.class);
+            modified = resource.getValueMap().get(MODIFIED_PROPERTY_NAME, Calendar.class);
+            created = resource.getValueMap().get(CREATED_PROPERTY_NAME, Calendar.class);
+            cacheControlHeader = resource.getValueMap().get(CACHE_CONTROL_HEADER_NAME, String.class);
+            caseInsensitive = resource.getValueMap().get(CASE_INSENSITIVE_PROPERTY_NAME, false);
+        }
+
+        if (StringUtils.isBlank(source) || StringUtils.isBlank(target) || statusCode == null) {
+            throw new IllegalArgumentException("RedirectRule must have a non-empty source, target and status code.");
+        }
+
         source = source.trim();
         target = target.trim();
         createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
@@ -200,7 +229,7 @@ public class RedirectRule {
     /**
      * @return default Cache-Control header for this redirect inherited from the parent
      */
-    public String getDefaultCacheControlHeader(){
+    public String getDefaultCacheControlHeader() {
         return defaultCacheControlHeader;
     }
 
@@ -209,13 +238,13 @@ public class RedirectRule {
      */
     public List<Tag> getTags() {
         TagManager tagMgr = resource.getResourceResolver().adaptTo(TagManager.class);
-        if(tagIds == null || tagMgr == null){
+        if (tagIds == null || tagMgr == null) {
             return Collections.emptyList();
         }
         List<Tag> tags = new ArrayList<>();
-        for(String tagId : tagIds){
+        for (String tagId : tagIds) {
             Tag tag = tagMgr.resolve(tagId);
-            if(tag != null) {
+            if (tag != null) {
                 tags.add(tag);
             }
         }
@@ -260,7 +289,7 @@ public class RedirectRule {
         Pattern ptrn;
         try {
             int flags = 0;
-            if(nc) {
+            if (nc) {
                 flags = Pattern.CASE_INSENSITIVE;
             }
             ptrn = Pattern.compile(src, flags);
@@ -269,7 +298,7 @@ public class RedirectRule {
                 ptrn = null;
             }
         } catch (PatternSyntaxException e) {
-            log.info("invalid regex: {}", src);
+            log.error("invalid regex: {}", src);
             ptrn = null;
         }
         return ptrn;
@@ -278,20 +307,19 @@ public class RedirectRule {
     /**
      * @return whether the rule has expired, i.e. the 'untilDate' property is before the current time
      * ----[effectiveFrom]---[now]---[untilDate]--->
-
-     *
      * @return
      */
-    public RedirectState getState(){
+    public RedirectState getState() {
         boolean expired = untilDate != null && untilDate.before(Calendar.getInstance());
-        boolean pending = effectiveFrom != null && Calendar.getInstance().before(effectiveFrom);;
+        boolean pending = effectiveFrom != null && Calendar.getInstance().before(effectiveFrom);
+        ;
         boolean invalid = effectiveFrom != null && untilDate != null && effectiveFrom.after(untilDate);
 
-        if (invalid){
+        if (invalid) {
             return RedirectState.INVALID;
-        } else if (expired){
+        } else if (expired) {
             return RedirectState.EXPIRED;
-        } else if (pending){
+        } else if (pending) {
             return RedirectState.PENDING;
         } else {
             return RedirectState.ACTIVE;
@@ -301,7 +329,7 @@ public class RedirectRule {
     /**
      * @return whether the redirect is published
      */
-    public boolean isPublished(){
+    public boolean isPublished() {
         Calendar lastReplicated = resource.getParent().getValueMap().get("cq:lastReplicated", Calendar.class);
         boolean isPublished = lastReplicated != null;
         boolean modifiedAfterPublication = isPublished

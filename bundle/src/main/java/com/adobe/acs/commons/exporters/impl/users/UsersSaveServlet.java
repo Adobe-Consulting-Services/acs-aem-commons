@@ -30,10 +30,11 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 
 @SlingServlet(
-        methods = {"POST"},
+        methods = {HttpConstants.METHOD_POST},
         resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
         selectors = {"save"},
         extensions = {"json"}

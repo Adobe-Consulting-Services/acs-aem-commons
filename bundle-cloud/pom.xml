@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.4.1-SNAPSHOT</version>
+        <version>6.6.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -50,6 +50,9 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-baseline-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip><!-- temporarily ignore due to empty interface being exported in 6.3.x -->
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
@@ -115,4 +118,37 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <!-- generate empty jar, as long as no javadoc is generated -->
+                            <execution>
+                                <id>javadoc-jar</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <classesDirectory>${project.build.directory}/invalid</classesDirectory>
+                                    <classifier>javadoc</classifier>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+         </profile>
+    </profiles>
 </project>

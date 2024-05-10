@@ -5,8 +5,14 @@
     "jcr:language": "en_US",
     "jcr:title": "English",
     "cq:template": "/conf/we-retail/settings/wcm/templates/hero-page",
+    "singleTagInherited": [
+      "wknd-shared:activity/inherited-tag",
+      "wknd-shared:activity/hiking"
+    ],
     "cq:designPath": "/etc/designs/acs-commons",
     "hierarchicalPagePropertyString": "inherited!",
+    "currentPageHierarchicalPagePropertyString": "inherited!",
+    "skipLevelHierarchicalPagePropertyString": "inherited!",
     "pagePropertyString": "inherited!",
     "hierarchicalPagePropertyBoolean": true,
     "hierarchicalPagePropertyInteger": 11,
@@ -111,6 +117,7 @@
         "",
         ""
       ],
+      "currentPageHierarchicalPagePropertyString": "not inherited",
       "sling:resourceType": "weretail/components/structure/page",
       "cq:lastModifiedBy": "admin",
       "hideSubItemsInNav": true,
@@ -161,6 +168,15 @@
       "jcr:createdBy": "admin",
       "jcr:created": "Thu Oct 25 2018 11:27:52 GMT+0200",
       "jcr:content": {
+        "cq:tags": [
+          "wknd-shared:activity/specific-tag",
+          "wknd-shared:activity/surfing"
+        ],
+        "multipleTagsSet": [
+          "wknd-shared:activity/surfing",
+          "wknd-shared:activity/hiking"
+        ],
+
         "jcr:primaryType": "cq:PageContent",
         "jcr:createdBy": "admin",
         "jcr:title": "Arctic Surfing In Lofoten",
@@ -170,6 +186,8 @@
         "sling:resourceType": "weretail/components/structure/page",
         "cq:lastModifiedBy": "admin",
         "pagePropertyString": "not inherited",
+        "currentPageHierarchicalPagePropertyString": "this value should not be used",
+        "skipLevelHierarchicalPagePropertyString": "this value should not be used",
         "hierarchicalPagePropertyBoolean": false,
         "root": {
           "jcr:primaryType": "nt:unstructured",

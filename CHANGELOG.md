@@ -14,17 +14,49 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 
+## Added
+
+- #3333 - Use lodash embedded by ACS AEM Commons
+- #3323 - Add Provider Type Checker Plugin
+- #3338 - Prevent URL modification on dismiss
+
+## 6.6.0 - 2024-04-15
+
+## Added
+
+- #3308 - Added fulltext search support to Redirect Manager
+- #3306 - Sling Model Page injector
+- #3306 - Sling Model Content Policy injector
+- #3306 - Sling Model Tag injector
+- #3320 - Content Sync: add an option to disable ssl cert check
+
+### Fixed 
+
+- #3310 - User mapping | moved author specific user mapping from config to config.author 
+- #3301 - CM report fix WrongLogLevelInCatchBlock issue
+- #2854 - Code optimization: convert class fields to local variables
+- #2279 - Unit tests coverage for Deck Dynamo: servlet and service configuration
+- #3319 - Grant permissions to read redirects to everyone instead of anonymous
+
+## 6.5.0 - 2024-03-22
+
 ### Changed
 
 - #3267 - Remove JSR305 dependency
+- #3262 - Allow to configure Component/BundleDisabler via Configuration Factories
+- #3296 - Add image cropping customisation
 
 ### Fixed
 
 - #3270 - Re-enable accidentally disabled JUnit3/4 tests
+- #3200 - Remove useless public interface in Cloud Bundle to get javadocs to be built
+- #3294 - Cloud manager report issues partial fix
+- #3295 - Updated the annotations in QueryReportConfig fixing the query manager issue due to empty query language
+- #3284 - Allow anonymous to read redirect caconfig options
 
 ## 6.4.0 - 2024-02-22
 
-## Added 
+## Added
 
 - #3238 - Content Sync make timeouts configurable
 - #3235 - Add an option to ignore selectors in the url.
@@ -56,7 +88,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3162 - Renovator MCP: ensure old source path is removed
 - #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
-- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<
+  java.lang.String>
 - #3197 - Encrypt user credentials in ACS Content Sync
 - #3196 - Content Sync: prevent exception when creating parent nodes
 - #3194 - Redirect Manager: Ignore Case value is not persisting
@@ -77,7 +110,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Removed
 
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in
+  Cloud Manager pipelines.
 
 ## 6.1.0 - 2023-09-08
 

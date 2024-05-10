@@ -19,14 +19,13 @@ package com.adobe.acs.commons.reports.models;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
-
-import javax.inject.Inject;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 @Model(adaptables = Resource.class)
 public interface PathListReportConfig {
-    @Inject
+    @ValueMapValue
     int getPageSize();
 
-    @Inject
+    @ValueMapValue
     String getPathArea();
 }

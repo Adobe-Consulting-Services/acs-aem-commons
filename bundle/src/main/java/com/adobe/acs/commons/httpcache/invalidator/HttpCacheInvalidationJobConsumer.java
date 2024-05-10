@@ -110,7 +110,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
                 log.debug("invalidating {}", path);
                 httpCacheEngine.invalidateCache(path);
             } catch (HttpCacheException e){
-                log.debug("Job with the payload path - {} has invalidated the cache", path);
+                log.error("Job with the payload path - {} has invalidated the cache", path);
             }
         }
 
@@ -131,7 +131,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
 
             }
         } catch (Exception e){
-            log.debug("failed to invalidate references of {}", path);
+            log.error("failed to invalidate references of {}", path);
         }
     }
 }

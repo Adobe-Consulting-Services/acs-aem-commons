@@ -219,7 +219,6 @@ public class DataImporter extends ProcessDefinition {
                 }
                 instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
             } catch (IOException ex) {
-                LOG.error("Unable to process import", ex);
                 instance.getInfo().setDescription("Import " + data.getFileName() + " (failed)");
                 throw new RepositoryException("Unable to parse input file", ex);
             }

@@ -1,9 +1,9 @@
-package com.adobe.acs.commons;
-/*
- * ACS AEM Commons
- *
- * Copyright (C) 2013 - 2023 Adobe
- *
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2024 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,12 @@ package com.adobe.acs.commons;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
+package com.adobe.acs.commons.models.via.annotations;
 
-import org.osgi.annotation.versioning.ProviderType;
+import org.apache.sling.models.annotations.ViaProviderType;
 
-/**
- * Marker interface for Cloud Bundles to allow Javadocs to be generated from the cloud fragment bundle required for deployment to Nexus.
- * 
- * This bundle contains only internal implementation classes so has no JavaDocs of its own.
- */
-@ProviderType
-public interface CloudBundle {
-    
+public interface PageContentResourceViaType extends ViaProviderType {
+
 }

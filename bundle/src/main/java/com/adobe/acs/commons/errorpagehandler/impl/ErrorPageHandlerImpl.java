@@ -126,8 +126,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /* Fallback Error Code Extension */
     private static final String DEFAULT_FALLBACK_ERROR_NAME = "500";
 
-    private String fallbackErrorName = DEFAULT_FALLBACK_ERROR_NAME;
-
     @Property(
             label = "Fallback error page name",
             description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
@@ -852,7 +850,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_PAGE_EXTENSION),
                         DEFAULT_ERROR_PAGE_EXTENSION));
 
-        this.fallbackErrorName = PropertiesUtil.toString(config.get(PROP_FALLBACK_ERROR_NAME),
+        final String fallbackErrorName = PropertiesUtil.toString(config.get(PROP_FALLBACK_ERROR_NAME),
                 PropertiesUtil.toString(config.get(legacyPrefix + PROP_FALLBACK_ERROR_NAME),
                         DEFAULT_FALLBACK_ERROR_NAME));
 
@@ -936,7 +934,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         pw.printf("Enabled: %s", this.enabled).println();
         pw.printf("System Error Page Path: %s", this.systemErrorPagePath).println();
         pw.printf("Error Page Extension: %s", this.errorPageExtension).println();
-        pw.printf("Fallback Error Page Name: %s", this.fallbackErrorName).println();
+        pw.printf("Fallback Error Page Name: %s", fallbackErrorName).println();
 
         pw.printf("Resource Not Found - Behavior: %s", this.notFoundBehavior).println();
         pw.printf("Resource Not Found - Exclusion Path Patterns %s", Arrays.toString(tmpNotFoundExclusionPatterns)).println();
@@ -1005,7 +1003,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 try {
                     dispatcher.include(new GetRequest(request), response);
                 } catch (Exception e) {
-                    log.debug("Exception swallowed while including error page", e);
+                    log.error("Exception swallowed while including error page", e);
                 }
             }
         } else {
@@ -1013,7 +1011,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             try {
                 response.getWriter().write(responseData);
             } catch (Exception e) {
-                log.info("Exception swallowed while including error page", e);
+                log.error("Exception swallowed while including error page", e);
             }
         }
     }

@@ -103,8 +103,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     /* Property: Default Color */
 
-    private String color = "";
-
     @Property(label = "Color",
             description = "The color of the indicator bar; takes any valid value"
                     + " for CSS's 'background-color' attribute."
@@ -113,8 +111,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     public static final String PROP_COLOR = "css-color";
 
     /* Property: CSS Override */
-
-    private String cssOverride = "";
 
     @Property(label = "CSS Override",
             description = "Accepts any valid CSS to style the AEM indicator div. All CSS rules must only be "
@@ -141,16 +137,12 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     /* Property: Always Include Base CSS */
 
-    private boolean alwaysIncludeBaseCss;
-
     @Property(label = "Always Include Base CSS",
             description = "Always include the base CSS scoped to #" + DIV_ID + " { .. }",
             boolValue = false)
     public static final String PROP_ALWAYS_INCLUDE_BASE_CSS = "always-include-base-css";
 
     /* Property: Always Include Color CSS */
-
-    private boolean alwaysIncludeColorCss;
 
     @Property(label = "Always Include Color CSS",
             description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
@@ -167,7 +159,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             description = "Do not display the indicator when these WCM modes are active",
             cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
-    private String[] excludedWCMModes;
 
 
     private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", NO_EXTENSION_PLACEHOLDER};
@@ -345,15 +336,12 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     protected final void activate(ComponentContext ctx) {
         Dictionary<?, ?> config = ctx.getProperties();
 
-        color = PropertiesUtil.toString(config.get(PROP_COLOR), "");
-        cssOverride = PropertiesUtil.toString(config.get(PROP_CSS_OVERRIDE), "");
         innerHTML = PropertiesUtil.toString(config.get(PROP_INNER_HTML), "");
         innerHTML = new StrSubstitutor(StrLookup.systemPropertiesLookup()).replace(innerHTML);
-        alwaysIncludeBaseCss = PropertiesUtil.toBoolean(PROP_ALWAYS_INCLUDE_BASE_CSS, false);
-        alwaysIncludeColorCss = PropertiesUtil.toBoolean(PROP_ALWAYS_INCLUDE_COLOR_CSS, false);
-
-        alwaysIncludeBaseCss = PropertiesUtil.toBoolean(PROP_ALWAYS_INCLUDE_BASE_CSS, false);
-        alwaysIncludeColorCss = PropertiesUtil.toBoolean(PROP_ALWAYS_INCLUDE_COLOR_CSS, false);
+        String color = PropertiesUtil.toString(config.get(PROP_COLOR), "");
+        String cssOverride = PropertiesUtil.toString(config.get(PROP_CSS_OVERRIDE), "");
+        boolean alwaysIncludeBaseCss = PropertiesUtil.toBoolean(PROP_ALWAYS_INCLUDE_BASE_CSS, false);
+        boolean alwaysIncludeColorCss = PropertiesUtil.toBoolean(PROP_ALWAYS_INCLUDE_COLOR_CSS, false);
 
         StringBuilder cssSb = new StringBuilder();
 
@@ -374,7 +362,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         titlePrefix = xss.encodeForJSString(
                 PropertiesUtil.toString(config.get(PROP_TITLE_PREFIX), "").toString());
 
-        excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
+        String[] excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
                 DEFAULT_EXCLUDED_WCMMODES);
 
         allowedExtensions = PropertiesUtil.toStringArray(config.get(PROP_ALLOWED_EXTENSIONS),

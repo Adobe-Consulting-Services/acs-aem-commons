@@ -37,18 +37,14 @@ import java.util.List;
 public class EvolutionContextImpl implements EvolutionContext {
     private static final Logger log = LoggerFactory.getLogger(EvolutionContext.class);
 
-    private Resource resource = null;
-    private VersionHistory history = null;
-    private ResourceResolver resolver = null;
-    private VersionManager versionManager = null;
     private List<Evolution> versions = new ArrayList<Evolution>();
     private List<Evolution> evolutionItems = new ArrayList<Evolution>();
-    private EvolutionConfig config;
 
-    public EvolutionContextImpl(Resource resource, EvolutionConfig config) {
-        this.resource = resource.isResourceType("cq:Page") ? resource.getChild("jcr:content") : resource;
-        this.config = config;
-        populateEvolutions();
+    public EvolutionContextImpl(Resource providedResource, EvolutionConfig config) {
+        Resource resource = providedResource.isResourceType("cq:Page")
+                ? providedResource.getChild("jcr:content")
+                : providedResource;
+        populateEvolutions(resource, config);
     }
 
     @Override
@@ -61,11 +57,11 @@ public class EvolutionContextImpl implements EvolutionContext {
         return Collections.unmodifiableList(versions);
     }
 
-    private void populateEvolutions() {
+    private void populateEvolutions(Resource resource, EvolutionConfig config) {
         try {
-            this.resolver = resource.getResourceResolver();
-            this.versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
-            this.history = versionManager.getVersionHistory(resource.getPath());
+            ResourceResolver resolver = resource.getResourceResolver();
+            VersionManager versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
+            VersionHistory history = versionManager.getVersionHistory(resource.getPath());
             Iterator<Version> iter = history.getAllVersions();
             while (iter.hasNext()) {
                 Version next = iter.next();
@@ -80,7 +76,6 @@ public class EvolutionContextImpl implements EvolutionContext {
             log.error("Could not find versions", e);
         }
         evolutionItems = new ArrayList<>(versions);
-        evolutionItems.add(new CurrentEvolutionImpl(this.resource, this.config));
+        evolutionItems.add(new CurrentEvolutionImpl(resource, config));
     }
-
 }

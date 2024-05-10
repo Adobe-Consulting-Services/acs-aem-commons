@@ -42,6 +42,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Source(HierarchicalPagePropertyInjector.SOURCE)
 public @interface PageProperty {
 
+    /**
+     * Whether to use the current page (true) or the resource page (false).
+     * @return
+     */
+    boolean useCurrentPage() default false;
 
     /**
      * Specifies the name of the value from the value map to take.

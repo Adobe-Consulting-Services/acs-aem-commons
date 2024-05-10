@@ -343,28 +343,93 @@
     first.attr("selected", "");
     $(".coral-panel-stack").show();
 
-    $("#redirect-search-box").bind("keyup keydown change", function (e) {
-      var searchText = $(this).val();
-      var editRedirectTable = $("#edit-redirect-coral-table");
-      var rows = editRedirectTable.find("tr");
-      $.each(rows, function (rowIndex, row) {
-        var source = $(row).find(".source").data("value");
-        var target = $(row).find(".target").data("value");
-        var comment = $(row).find(".note").data("value");
-        if (
-          (source &&
-            source.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
-          (target &&
-            target.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
-          (comment &&
-            comment.toLowerCase().indexOf(searchText.toLowerCase()) != -1)
-        ) {
-          $(row).show();
-        } else {
-          if (rowIndex > 0) $(row).hide();
-        }
-      });
+    var searching = false;
+    var searchTimeout;
+
+  $("#redirect-search-box").on("input", function (e) {
+      var searchText = $(this).val().trim();
+      var caconfig = $("input[name='caconfig']").val();
+      var supportsFulltextSearch = $("input[name='fulltextSearchEnabled']").val() || false;
+
+      if (supportsFulltextSearch) {
+          var swap = $("#swap");
+          var table = $("#edit-redirect-coral-table");
+          var tbody = table.find("tbody");
+          var tableFooter = $("#table-footer");
+          var mode = table.data("mode") || "browse"; // Default mode is 'browse'
+
+          // Clear previous timeout if it exists
+          clearTimeout(searchTimeout);
+
+          // Set a new timeout to trigger search after 2 seconds of inactivity
+          searchTimeout = setTimeout(function () {
+              if (searchText !== "") {
+                  if (searching) { return; } // If a search is already in progress, do nothing
+                  searching = true; // Set searching flag to true
+                  table.removeAttr("orderable");
+
+                   var url = "/apps/acs-commons/content/redirect-manager.search.html" + caconfig + "?term=" + searchText;
+                  // Perform AJAX request for search
+                  $.ajax(url).done(function (response) {
+                      searching = false; // Reset searching flag once search is complete
+
+                      tableFooter.hide();
+
+                      if (mode !== "search") {
+                          // Save the browse rows and display search results
+                          swap.html(tbody.html());
+                      }
+
+                      table.data("mode", "search");
+                      tbody.html(response);
+
+                      if (tbody.children().length === 0) {
+                        tbody.append(EMPTY_ROW);
+                      }
+
+                  });
+              } else if (mode !== "browse") {
+                  // If search text is empty and mode is not 'browse', switch back to browse mode
+                  tbody.html(swap.html());
+                  swap.html("");
+                  table.data("mode", "browse");
+                  table.attr("orderable", true);
+
+                  tableFooter.show();
+
+                  if (tbody.children().length === 0) {
+                    tbody.append(EMPTY_ROW);
+                  }
+              }
+
+          }, 150); // in ms
+      } else {
+          var editRedirectTable = $("#edit-redirect-coral-table");
+          var rows = editRedirectTable.find("tr");
+          $.each(rows, function (rowIndex, row) {
+            var source = $(row).find(".source").data("value");
+            var target = $(row).find(".target").data("value");
+            var comment = $(row).find(".note").data("value");
+            if (
+              (source &&
+                source.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
+              (target &&
+                target.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
+              (comment &&
+                comment.toLowerCase().indexOf(searchText.toLowerCase()) != -1)
+            ) {
+              $(row).show();
+            } else {
+              if (rowIndex > 0) $(row).hide();
+            }
+          });
+      }
     });
+
+    var EMPTY_ROW =
+      '<tr is="coral-table-row" class="empty-row">' +
+        '<td is="coral-table-cell" colspan="14" style="text-align: center;">No redirect rules match this search.</td>' +
+      '</tr>';
 
     $("#status-code-select-box").change(function (e) {
       var val = $(e.target).find(":selected").val();
@@ -433,3 +498,4 @@
     }
   );
 }($, $(document)));
+

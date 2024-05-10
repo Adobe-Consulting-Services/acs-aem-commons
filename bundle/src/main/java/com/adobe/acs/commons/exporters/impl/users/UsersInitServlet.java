@@ -22,6 +22,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 
 import com.google.gson.Gson;
@@ -41,7 +42,7 @@ import java.util.Arrays;
 import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 
 @SlingServlet(
-        methods = {"GET"},
+        methods = {HttpConstants.METHOD_GET},
         resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
         selectors = {"init"},
         extensions = {"json"}

@@ -108,7 +108,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               cardinality = Integer.MAX_VALUE)
     static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS =
             "httpcache.config.requesturi.patterns.blacklisted";
-    private List<String> blacklistedRequestUriPatterns;
     private List<Pattern> blacklistedRequestUriPatternsAsRegEx = Collections.emptyList();
 
     // Authentication requirement
@@ -136,7 +135,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
                       + ". This accepts " + "REGEX. Example - /etc/my-products(.*)",
               cardinality = Integer.MAX_VALUE)
     static final String PROP_CACHE_INVALIDATION_PATH_PATTERNS = "httpcache.config.invalidation.oak.paths";
-    private List<String> cacheInvalidationPathPatterns;
     private List<Pattern> cacheInvalidationPathPatternsAsRegEx = Collections.emptyList();
 
     // Cache store
@@ -270,7 +268,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         excludedCookieKeys = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS), new String[]{}));
 
         // Request URIs - Blacklisted.
-        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
+        List<String> blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
         blacklistedRequestUriPatternsAsRegEx = compileToPatterns(blacklistedRequestUriPatterns);
 
@@ -287,7 +285,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         expiryOnUpdate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_UPDATE), DEFAULT_EXPIRY_ON_UPDATE);
 
         // Cache invalidation paths.
-        cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
+        List<String> cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
 
