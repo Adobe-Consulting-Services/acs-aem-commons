@@ -29,11 +29,9 @@ import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.xss.XSSAPI;
 
 import javax.jcr.Session;
-import javax.servlet.ServletRequest;
 
 /**
  * Common methods for the injectors
@@ -81,6 +79,13 @@ public class InjectorUtils {
         return null;
     }
 
+    public static <T> T adaptFromResourceResolver(Object adaptable, Class<T> clazz){
+        ResourceResolver resourceResolver = getResourceResolver(adaptable);
+        if(resourceResolver != null){
+            return resourceResolver.adaptTo(clazz);
+        }
+        return null;
+    }
     public static ResourceResolver getResourceResolver(Object adaptable) {
         if (adaptable instanceof SlingHttpServletRequest) {
             return ((SlingHttpServletRequest) adaptable).getResourceResolver();
