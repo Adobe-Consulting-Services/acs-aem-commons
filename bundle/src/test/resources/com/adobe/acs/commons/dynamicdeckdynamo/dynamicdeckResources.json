@@ -7,6 +7,33 @@
         "jcr:primaryType": "sling:Folder",
         "simple-template-2018": {
           "jcr:primaryType": "sling:Folder"
+        },
+        "simple-template-2019": {
+          "jcr:primaryType": "sling:Folder",
+          "asset.indd": {
+            "jcr:primaryType": "dam:Asset"
+          },
+          "asset.xml": {
+            "jcr:primaryType": "dam:Asset",
+            "jcr:content": {
+              "renditions": {
+                "original.dir": {
+                  "jcr:primaryType": "nt:file",
+                  "jcr:content": {
+                  }
+                },
+                "original": {
+                  "jcr:primaryType": "nt:file",
+                  "jcr:content": {
+                    "jcr:primaryType": "oak:Resource",
+                    "jcr:mimeType": "application/x-indesign",
+                    "jcr:data": {
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "master-assets": {

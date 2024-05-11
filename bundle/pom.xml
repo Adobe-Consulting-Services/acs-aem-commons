@@ -76,6 +76,15 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
+                <dependencies>
+                    <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
+                        with the Bnd process -->
+                    <dependency>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.apache.felix.scr.bnd</artifactId>
+                        <version>1.9.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -243,6 +252,14 @@
                                     </includes>
                                 </filter>
                             </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <!-- overwrite Service-Component again, as incorrectly merged by Felix SCR Bnd Plugin -->
+                                        <Service-Component>OSGI-INF/*.xml</Service-Component>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
