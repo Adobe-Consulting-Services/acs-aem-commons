@@ -140,6 +140,11 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             return false;
         }
 
+        // Do not apply when exporting / updating experience fragments to Adobe Target
+		if (StringUtils.contains(slingRequest.getQueryString(), "wcmmode=disabled")) {
+			return false;
+		}
+
         return super.accepts(servletRequest, servletResponse);
     }
 

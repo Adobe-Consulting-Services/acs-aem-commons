@@ -14,11 +14,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 
-## Added
+### Added
 
 - #3333 - Use lodash embedded by ACS AEM Commons
 - #3323 - Add Provider Type Checker Plugin
 - #3338 - Prevent URL modification on dismiss
+
+### Fixed
+
+- #3241 - Fix overlapping Service-Component header entries leading to double registration of components
+- #3362 - Prevent System notification while exporting / updating experience fragment to Adobe Target
 
 ## 6.6.0 - 2024-04-15
 
