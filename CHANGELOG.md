@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3241 - Fix overlapping Service-Component header entries leading to double registration of components
+- #3362 - Prevent System notification while exporting / updating experience fragment to Adobe Target
 
 ## 6.6.0 - 2024-04-15
 
