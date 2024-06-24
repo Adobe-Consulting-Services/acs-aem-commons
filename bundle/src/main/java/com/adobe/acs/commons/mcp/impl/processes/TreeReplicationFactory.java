@@ -20,20 +20,19 @@ package com.adobe.acs.commons.mcp.impl.processes;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.replication.Replicator;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+
+@Component(service = {ProcessDefinitionFactory.class})
 public class TreeReplicationFactory extends ProcessDefinitionFactory<TreeReplication> {
 
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
-    RequireAem requireAem;
+    @Reference(target = "(distribution=classic)")
+    transient RequireAem requireAem;
 
     @Reference
-    Replicator replicator;
+    transient Replicator replicator;
 
 
     @Override

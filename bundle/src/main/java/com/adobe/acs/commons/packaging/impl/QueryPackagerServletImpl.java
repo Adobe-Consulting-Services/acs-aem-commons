@@ -20,8 +20,6 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.util.QueryHelper;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -31,15 +29,18 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
+import javax.servlet.Servlet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -50,12 +51,12 @@ import java.util.Map;
  * Servlet end-point used to create Query-based CRX packages based on the underlying resource's configuration.
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = { HttpConstants.METHOD_POST },
-        resourceTypes = { "acs-commons/components/utilities/packager/query-packager" },
-        selectors = { "package" },
-        extensions = { "json" }
-)
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/packager/query-packager",
+        methods = "POST",
+        extensions = "json",
+        selectors = "package")
 public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(QueryPackagerServletImpl.class);
 

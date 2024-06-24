@@ -27,9 +27,6 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -39,6 +36,8 @@ import org.apache.sling.commons.scheduler.Scheduler;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.Queue;
 import org.apache.sling.event.jobs.Statistics;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +45,7 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-@Service(value = BulkWorkflowRunner.class)
+@Component(service = {BulkWorkflowRunner.class})
 public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AEMTransientWorkflowRunnerImpl.class);
 
@@ -96,7 +94,9 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
         log.info("Cannot force terminate Transient Workflow for [ {} ]", payload.getPayloadPath());
     }
 
-    /** Runner's Runnable **/
+    /**
+     * Runner's Runnable
+     **/
 
     private class AEMTransientWorkflowRunnable implements Runnable {
         private final ResourceResolverFactory resourceResolverFactory;
@@ -104,7 +104,7 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
         private final WorkflowService workflowService;
         private final Scheduler scheduler;
         private final JobManager jobManager;
-        private String configPath ;
+        private String configPath;
         private String jobName;
 
         public AEMTransientWorkflowRunnable(Config config,
@@ -130,7 +130,7 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
             Config config = null;
             Workspace workspace = null;
 
-            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 if (configResource != null) {
@@ -211,7 +211,7 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                 }
             } catch (Exception e) {
                 String workspacePath = workspace != null ? workspace.getPath() : "unknown";
-                log.error("Error processing periodic execution for job [ {} ] for workspace [ {} ]", new String[]{ jobName, workspacePath }, e);
+                log.error("Error processing periodic execution for job [ {} ] for workspace [ {} ]", new String[]{jobName, workspacePath}, e);
                 unscheduleJob(scheduler, jobName, configResource, workspace);
                 try {
                     stop(workspace);

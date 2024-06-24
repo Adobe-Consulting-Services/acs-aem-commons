@@ -20,19 +20,15 @@ package com.adobe.acs.commons.util.datadefinitions.impl;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
 
-@Component
-@Properties({
-        @Property(
-                name = ResourceDefinitionBuilder.PROP_NAME,
-                value = LowercaseWithDashesDefinitionBuilderImpl.NAME
-        )
-})
-@Service
+
+@Component(
+        service = {ResourceDefinitionBuilder.class},
+        property = {
+                ResourceDefinitionBuilder.PROP_NAME + "=" + LowercaseWithDashesDefinitionBuilderImpl.NAME
+        }
+)
 public class LowercaseWithDashesDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "LOWERCASE_WITH_DASHES";
 
