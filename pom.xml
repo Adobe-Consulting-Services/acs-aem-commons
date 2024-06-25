@@ -17,7 +17,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -71,7 +72,7 @@
         <crx.user>admin</crx.user>
         <crx.password>admin</crx.password>
         <crx.protocol>http</crx.protocol>
-        <crx.contextRoot />
+        <crx.contextRoot/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
@@ -86,7 +87,7 @@
         <!-- the minimum AEM 6.5 version being supported -->
         <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
-        <aem.sdk.api.version>2023.11.14227.20231108T162349Z-231100</aem.sdk.api.version>
+        <aem.sdk.api.version>2024.6.16799.20240614T073455Z-240500</aem.sdk.api.version>
 
         <jacoco.version>0.8.11</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
@@ -139,29 +140,29 @@
                     <dependencies>
                         <!-- due to https://issues.apache.org/jira/browse/SUREFIRE-2240 need to override transitive plugin dependencies of junit-jupiter-engine as well -->
                         <dependency>
-                          <groupId>org.junit.platform</groupId>
-                          <artifactId>junit-platform-engine</artifactId>
-                          <version>1.10.2</version>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-engine</artifactId>
+                            <version>1.10.2</version>
                         </dependency>
                         <dependency>
-                          <groupId>org.opentest4j</groupId>
-                          <artifactId>opentest4j</artifactId>
-                          <version>1.3.0</version>
+                            <groupId>org.opentest4j</groupId>
+                            <artifactId>opentest4j</artifactId>
+                            <version>1.3.0</version>
                         </dependency>
                         <dependency>
-                          <groupId>org.junit.platform</groupId>
-                          <artifactId>junit-platform-commons</artifactId>
-                          <version>1.10.2</version>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-commons</artifactId>
+                            <version>1.10.2</version>
                         </dependency>
                         <dependency>
-                          <groupId>org.apiguardian</groupId>
-                          <artifactId>apiguardian-api</artifactId>
-                          <version>1.1.2</version>
+                            <groupId>org.apiguardian</groupId>
+                            <artifactId>apiguardian-api</artifactId>
+                            <version>1.1.2</version>
                         </dependency>
                         <dependency>
-                          <groupId>org.junit.jupiter</groupId>
-                          <artifactId>junit-jupiter-api</artifactId>
-                          <version>${junit.jupiter.version}</version>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-api</artifactId>
+                            <version>${junit.jupiter.version}</version>
                         </dependency>
                         <!-- end overridden transitive deps of junit-jupiter-engine -->
                         <dependency>
@@ -265,7 +266,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
                             <version>1.0.2</version>
                         </dependency>
-                        <!-- enforce that provider types are not implemented/extended, https://github.com/apache/sling-org-apache-sling-providertype-bnd-plugin --> 
+                        <!-- enforce that provider types are not implemented/extended, https://github.com/apache/sling-org-apache-sling-providertype-bnd-plugin -->
                         <dependency>
                             <groupId>org.apache.sling</groupId>
                             <artifactId>org.apache.sling.providertype.bnd-plugin</artifactId>
@@ -574,9 +575,10 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 </version><!-- 5.12.16 is shipped with AEM 6.5, but this is the newest version provided in any public Maven repo -->
             </dependency>
             <dependency>
-                 <groupId>org.osgi</groupId>
-                 <artifactId>org.osgi.util.converter</artifactId>
-                 <version>1.0.9</version> <!-- override with newest minor version to be able to run tests with Java 17 -->
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.util.converter</artifactId>
+                <version>1.0.9
+                </version> <!-- override with newest minor version to be able to run tests with Java 17 -->
             </dependency>
             <!-- https://wcm-io.atlassian.net/browse/WTOOL-83 -->
             <dependency>
@@ -717,7 +719,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
-                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
+                <version>5.1.2
+                </version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -729,7 +732,8 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
+                <version>5.1.2
+                </version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
