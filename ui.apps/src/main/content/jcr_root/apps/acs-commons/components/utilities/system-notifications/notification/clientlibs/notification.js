@@ -18,59 +18,42 @@
  * #L%
  */
 
-$(function() { 
-    $.get('/etc/acs-commons/notifications/_jcr_content.list.html', function(data) {
-        $('body').append(data);
+$(function() {
+    var LOCAL_STORAGE_KEY = 'acs-commons-system-notifications-dismissed-uids';
+
+    $.get('/etc/acs-commons/notifications/_jcr_content.list.html', function(html) {
+        var $tmp = $('<div>').html(html),
+            $notification,
+            uids = localStorage.getItem(LOCAL_STORAGE_KEY) || '';
+            uids = uids.split(',');
+
+        uids.forEach(function(uid) {
+            $tmp.find('[data-fn-acs-commons-system-notification-uid="'+ uid +'"]').remove();
+        });
+
+        $('body').append($tmp.html());
     });
+
+    /* Handle dismissing of notifications */
     
-    $('body').on('click', '.acsCommons-System-Notification-dismiss', function(e) {
+    $('body').on('click', '[data-fn-acs-commons-system-notification-dismiss]', function(e) {
         e.preventDefault();
-        
-        var $notification = $(this).closest('.acsCommons-System-Notification'),
-            uid = $notification.data('uid'),
-            dismissible = $notification.data('dismissible'),
-            uids;
-        
-        $notification.hide();
 
-        if (dismissible) {
-            // Track dismissal
-            uids = getCookieValue('acs-commons-system-notifications');
-            if (uids) {
-                // UIDs have been tracked
-                if (uids.indexOf(uid) === -1) {
-                    // This notification has not been dismissed before, mark as dismissed
-                    uids = uids + "," + uid;
-                }
-            } else {
-                // Nothing has been dismissed, mark this notification as dismissed
-                uids = uid;
-            }
-
-            setSessionCookie('acs-commons-system-notifications', uids);
+        if ($('[data-fn-acs-commons-system-notification-form]').length > 0) {
+            return;
         }
+
+        var uid = $(this).data('fn-acs-commons-system-notification-dismiss'),
+            uids = localStorage.getItem(LOCAL_STORAGE_KEY) || '';
+
+        if (uids.indexOf(uid) === -1) {
+            // This notification has not been dismissed before, mark as dismissed
+            localStorage.setItem(LOCAL_STORAGE_KEY, uids + "," + uid);
+        } else {
+            // Nothing has been dismissed, mark this notification as dismissed
+            localStorage.setItem(LOCAL_STORAGE_KEY, uid);
+        }
+
+        $(this).closest('[data-fn-acs-commons-system-notification-uid]').remove();
     });
-    
-    function setSessionCookie(name, value) {
-        document.cookie = name + '=' + value + '; expires=Tue, 01 Jan 2999 12:00:00 UTC; path=/;';
-    }
-
-    function getCookieValue(name) {
-        var cookies = document.cookie.split(';'),
-            i,
-            cookie;
-        name = name + '=';
-        
-        for (i = 0; i < cookies.length; i++) {
-            cookie = cookies[i];
-            while (cookie.charAt(0) === ' ') {
-                cookie = cookie.substring(1, cookie.length);
-                if (cookie.indexOf(name) === 0) {
-                    return cookie.substring(name.length, cookie.length);
-                }
-            }
-        }
-        
-        return null;
-    } 
 });
