@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
+
 ## 6.6.2 - 2024-06-25
 
 ### Fixed
