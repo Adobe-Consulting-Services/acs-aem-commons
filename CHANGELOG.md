@@ -10,11 +10,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+
+### Fixed
+
+- #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+
 ## 6.6.2 - 2024-06-25
 
 ### Fixed
 
 - #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
+
 
 ### Added
 
