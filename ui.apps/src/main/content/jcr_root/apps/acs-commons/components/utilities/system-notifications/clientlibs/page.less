@@ -20,42 +20,87 @@
 
 #acsCommons-System-Notifications-Page {
   padding-bottom: 2rem;
+  margin: 1rem auto;
+  max-width: 800px;
 
-  .acsCommons-System-Notifications-Page-form {
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    text-align: left;
-    width: 50%;
-    min-width: 300px;
+     .preview {
+          grid-area: preview;
+          margin-bottom: 2rem;
 
+          .acsCommons-System-Notification {
+            position: relative;
+            top: auto;
+            left: auto;
+            margin-left: auto;
+            width: 100%;
+            z-index: 0;
+          }
+      }
 
-    .acsCommons-System-Notifications-Form-row {
-      margin: 1rem 0;
+  .form {
+    display: grid;
+    grid-template-areas:
+        'enabled enabled'
+        'style style'
+        'title title'
+        'message message'
+        'dismissable dismissableLabel'
+        'onTime offTime'
+        'save save';
+    grid-gap: 1rem;
+
+     coral-alert,
+     coral-datepicker,
+     input,
+     textarea {
+        width: 100%;
     }
 
-    .acsCommons-System-Notifications-Page-input--text,
-    .acsCommons-System-Notifications-Page-input--textarea {
-      width: 100%;
+
+    label {
+        display: block;
+        margin-bottom: .25rem;
     }
 
-    .acsCommons-System-Notifications-Page-input--datepicker {
-      width: 80%
-    }
-  }
 
-  #acsCommons-System-Notifications {
-    position: static;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    margin-left: 0;
-    left: auto;
-    width: 100%;
-
-    .acsCommons-System-Notification {
-      width: calc(100% - 4rem - 10px);
+    .enabled {
+        grid-area: enabled;
     }
-  }
+
+    .style {
+        grid-area: style;
+    }
+
+    .title {
+        grid-area: title;
+    }
+
+    .message {
+        grid-area: message;
+    }
+
+    .dismissable {
+        grid-area: dismissable;
+    }
+
+    .dismissable-label {
+        grid-area: dismissableLabel;
+    }
+
+    .on-time {
+        grid-area: onTime;
+    }
+
+    .off-time {
+        grid-area: offTime;
+    }
+
+    .save {
+        grid-area: save;
+        justify-self: end;
+    }
+
+     }
 }
 
 

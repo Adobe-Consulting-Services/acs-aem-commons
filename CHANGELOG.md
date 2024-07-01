@@ -10,9 +10,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-### Fix
+
+### Fixed
 
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+
+## 6.6.2 - 2024-06-25
+
+### Fixed
+
+- #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
+
 
 ### Added
 
@@ -35,9 +43,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3306 - Sling Model Tag injector
 - #3320 - Content Sync: add an option to disable ssl cert check
 
-### Fixed 
+### Fixed
 
-- #3310 - User mapping | moved author specific user mapping from config to config.author 
+- #3310 - User mapping | moved author specific user mapping from config to config.author
 - #3301 - CM report fix WrongLogLevelInCatchBlock issue
 - #2854 - Code optimization: convert class fields to local variables
 - #2279 - Unit tests coverage for Deck Dynamo: servlet and service configuration
