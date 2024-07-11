@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #3380 - Remove forced red theme from system notification text body
+
 ## 6.6.2 - 2024-06-25
 
 ### Fixed
