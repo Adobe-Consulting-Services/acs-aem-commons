@@ -22,7 +22,7 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.RequestPathCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @Component(
         configurationPolicy = ConfigurationPolicy.REQUIRE,

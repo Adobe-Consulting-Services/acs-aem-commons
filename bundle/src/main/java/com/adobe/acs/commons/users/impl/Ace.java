@@ -19,7 +19,7 @@
 package com.adobe.acs.commons.users.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;

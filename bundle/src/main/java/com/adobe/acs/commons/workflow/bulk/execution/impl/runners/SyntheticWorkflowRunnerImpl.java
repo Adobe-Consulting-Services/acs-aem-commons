@@ -28,7 +28,6 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.workflow.WorkflowException;
-import org.apache.commons.collections.ListUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -42,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
+
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -227,7 +228,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
         private List<Payload> onboardNextPayloads(Workspace workspace, PayloadGroup payloadGroup) throws PersistenceException {
             if (payloadGroup == null) {
-                return ListUtils.EMPTY_LIST;
+                return Collections.emptyList();
             }
 
             List<Payload> payloads = payloadGroup.getPayloads();
