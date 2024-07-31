@@ -26,7 +26,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.feed.StringResponseWrapper;
-import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.collections4.map.SingletonMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;

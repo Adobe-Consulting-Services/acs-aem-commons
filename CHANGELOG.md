@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 - #3376 - Redirect Manager: refactor code to not require service user
 
+### Changed
+
+- #3390 - Remove usage of commons collections 3
+
 ## 6.6.2 - 2024-06-25
 
 ### Fixed

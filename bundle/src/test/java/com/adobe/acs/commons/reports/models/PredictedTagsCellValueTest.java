@@ -22,7 +22,7 @@ package com.adobe.acs.commons.reports.models;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.jackrabbit.vault.util.PathUtil;
 import org.apache.sling.api.SlingHttpServletRequest;
