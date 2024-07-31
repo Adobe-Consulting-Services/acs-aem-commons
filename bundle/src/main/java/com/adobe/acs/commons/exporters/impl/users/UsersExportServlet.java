@@ -19,7 +19,7 @@ package com.adobe.acs.commons.exporters.impl.users;
 
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.text.csv.Csv;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
