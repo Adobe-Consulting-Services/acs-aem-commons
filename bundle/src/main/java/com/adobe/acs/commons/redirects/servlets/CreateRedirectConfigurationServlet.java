@@ -30,6 +30,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -89,7 +90,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             Resource bucket = root.getChild(bucketName);
             if (bucket == null) {
                 bucket = resolver.create(root, bucketName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, "sling:Folder"));
+                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER));
                 log.info("created {}", bucket.getPath());
             }
 
@@ -97,7 +98,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             if (config == null) {
                 String contextPrefix = StringUtils.defaultString(request.getParameter(REQ_PARAM_CTX_PREFIX));
                 config = resolver.create(bucket, configName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED,
+                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER,
                                 ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH,
                                 REQ_PARAM_CTX_PREFIX, contextPrefix));
                 log.info("created {} with context prefix '{}'", config.getPath(), contextPrefix);
