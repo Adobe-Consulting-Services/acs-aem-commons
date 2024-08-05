@@ -10,10 +10,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-
 ### Fixed
 
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+
+### Changed
+
+- #3390 - Remove usage of commons collections 3
+
+### Fixed
+
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+
 
 ## 6.6.2 - 2024-06-25
 
