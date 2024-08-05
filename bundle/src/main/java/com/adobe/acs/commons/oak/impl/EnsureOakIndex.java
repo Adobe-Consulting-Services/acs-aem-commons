@@ -48,7 +48,8 @@ import com.adobe.acs.commons.oak.EnsureOakIndexManager;
         description = "Component Factory to manage Oak indexes.",
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+        metatype = true,
+        immediate = true
 )
 @Properties({
         @Property(

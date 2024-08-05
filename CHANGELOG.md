@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
 
+### Fixed
+
+- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
+
 ## 6.6.2 - 2024-06-25
 
 ### Fixed

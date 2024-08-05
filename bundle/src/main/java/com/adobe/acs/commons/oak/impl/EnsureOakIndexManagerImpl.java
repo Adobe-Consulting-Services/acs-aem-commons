@@ -29,6 +29,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +112,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
     @Reference(
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+        policyOption = ReferencePolicyOption.GREEDY,
         referenceInterface = AppliableEnsureOakIndex.class,
         policy = ReferencePolicy.DYNAMIC
     )
