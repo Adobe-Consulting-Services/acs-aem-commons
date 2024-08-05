@@ -18,17 +18,16 @@
 package com.adobe.acs.commons.httpcache.rule.impl;
 
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * ACS AEM Commons - HTTP Cache - Rule: Cache only request http method is GET.
- *
+ * <p>
  * Process only Http GET requests.
  */
-@Component
-@Service
+@Component(service = {HttpCacheHandlingRule.class})
 public class CacheOnlyGetRequest extends AbstractHttpCacheHandlingRule {
     private static final String HTTP_GET_METHOD = "GET";
 

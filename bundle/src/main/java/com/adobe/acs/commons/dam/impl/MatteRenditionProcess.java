@@ -25,10 +25,8 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +38,12 @@ import com.day.image.Layer;
 /**
  * Workflow process which mattes an image against a solid background to the specified size.
  */
-@Component(metatype = false)
-@Service
-@Property(name = "process.label", value = "Matte Rendition")
+
+@Component(
+        service = {WorkflowProcess.class},
+        property = {
+                "process.label=Matte Rendition"
+        })
 @SuppressWarnings({"squid:S00115", "checkstyle:localvariablename"})
 public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
@@ -63,11 +64,11 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
     private static final String SPECIFIER = "matte";
 
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
-    RequireAem requireAem;
+    @Reference(target = "(distribution=classic)")
+    private transient RequireAem requireAem;
 
     @Reference
-    private WorkflowHelper workflowHelper;
+    private transient WorkflowHelper workflowHelper;
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -109,28 +110,28 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
 
             VerticalPosition vpos = VerticalPosition.valueOf(verticalPositionArgument);
             switch (vpos) {
-            case bottom:
-                topAnchor = newLayer.getHeight() - layer.getHeight();
-                break;
-            case middle:
-                topAnchor = (newLayer.getHeight() - layer.getHeight()) / 2;
-                break;
-            default:
-                topAnchor = 0;
-                break;
+                case bottom:
+                    topAnchor = newLayer.getHeight() - layer.getHeight();
+                    break;
+                case middle:
+                    topAnchor = (newLayer.getHeight() - layer.getHeight()) / 2;
+                    break;
+                default:
+                    topAnchor = 0;
+                    break;
             }
 
             HoritzonalPosition hpos = HoritzonalPosition.valueOf(horizontalPositionArgument);
             switch (hpos) {
-            case right:
-                leftAnchor = newLayer.getWidth() - layer.getWidth();
-                break;
-            case center:
-                leftAnchor = (newLayer.getWidth() - layer.getWidth()) / 2;
-                break;
-            default:
-                leftAnchor = 0;
-                break;
+                case right:
+                    leftAnchor = newLayer.getWidth() - layer.getWidth();
+                    break;
+                case center:
+                    leftAnchor = (newLayer.getWidth() - layer.getWidth()) / 2;
+                    break;
+                default:
+                    leftAnchor = 0;
+                    break;
             }
             newLayer.blit(layer, leftAnchor, topAnchor, layer.getWidth(), layer.getHeight(), 0, 0);
             return newLayer;
@@ -161,7 +162,7 @@ public final class MatteRenditionProcess extends AbstractRenditionModifyingProce
             return d;
         }
         // default value(s)
-        return new Integer[] { DEFAULT_WIDTH, DEFAULT_HEIGHT };
+        return new Integer[]{DEFAULT_WIDTH, DEFAULT_HEIGHT};
     }
 
 }

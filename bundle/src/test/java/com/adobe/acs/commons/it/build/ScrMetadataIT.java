@@ -74,7 +74,7 @@ import com.google.gson.JsonObject;
  * The purpose of this test is to validate that SCR and Metatype properties are not inadvertantly changed between ACS AEM Commons releases.
  * It does this by downloading the bundle from the latest release and comparing the SCR and Metatype XML files to the ones generated
  * by the current build.
- *
+ * <p>
  * In exceptional cases, there are use cases where changes are appropriate. These can be controlled by three sets defined in this class:
  *
  * <dl>
@@ -85,11 +85,10 @@ import com.google.gson.JsonObject;
  *   <dt>COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE</dt>
  *   <dd>These are properties to ignore specifically for type changes, but will still produce a test failure when the property value changes. Syntax is the same as COMPONENT_PROPERTIES_TO_IGNORE</dd>
  * </dl>
- *
+ * <p>
  * In addition, this test validates that all factory components have an OSGi Web Console name hint and all variables
  * referenced from the name hint exist. Currently there is no affordance for ignoring components or variables for this
  * aspect of the test.
- *
  */
 @SuppressWarnings("PMD.SystemPrintln")
 public class ScrMetadataIT {
@@ -113,14 +112,13 @@ public class ScrMetadataIT {
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_VENDOR);
 
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
-        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
-        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlusherImpl:service.ranking");
+        // Example entry
+        //COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
 
-        // Property port on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Integer})
-        // Property password on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Password})
+
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
-        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:port");
-        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:password");
+        // Example entry
+        //COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:port");
 
         ALLOWED_SCR_NS_URIS = new HashSet<>();
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.0.0");
@@ -185,27 +183,27 @@ public class ScrMetadataIT {
 
         current.properties.stream().filter(cp -> !PROPERTIES_TO_IGNORE.contains(cp.name))
                 .filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
-            Optional<Property> fromLatest = latestRelease.properties.stream().filter(p -> p.name.equals(cp.name)).findFirst();
-            if (fromLatest.isPresent()) {
-                Property lp = fromLatest.get();
-                if (!StringUtils.equals(cp.value, lp.value)) {
-                    problems.add(String.format("Property %s on component %s has different values (was: {%s}, is: {%s})", cp.name, current.name, lp.value, cp.value));
-                }
-                if (!COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.contains(current.name + ":" + cp.name) && !StringUtils.equals(cp.type, lp.type)) {
-                    problems.add(String.format("Property %s on component %s has different types (was: {%s}, is: {%s})", cp.name, current.name, lp.type, cp.type));
-                }
-            } else {
-                System.out.printf("Property %s on component %s is only in current. Assuming OK.\n", cp.name, current.name);
-            }
-        });
+                    Optional<Property> fromLatest = latestRelease.properties.stream().filter(p -> p.name.equals(cp.name)).findFirst();
+                    if (fromLatest.isPresent()) {
+                        Property lp = fromLatest.get();
+                        if (!StringUtils.equals(cp.value, lp.value)) {
+                            problems.add(String.format("Property %s on component %s has different values (was: {%s}, is: {%s})", cp.name, current.name, lp.value, cp.value));
+                        }
+                        if (!COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.contains(current.name + ":" + cp.name) && !StringUtils.equals(cp.type, lp.type)) {
+                            problems.add(String.format("Property %s on component %s has different types (was: {%s}, is: {%s})", cp.name, current.name, lp.type, cp.type));
+                        }
+                    } else {
+                        System.out.printf("Property %s on component %s is only in current. Assuming OK.\n", cp.name, current.name);
+                    }
+                });
 
         latestRelease.properties.stream().filter(lp -> !PROPERTIES_TO_IGNORE.contains(lp.name))
                 .filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
-            Optional<Property> fromCurrent = current.properties.stream().filter(p -> p.name.equals(lp.name)).findFirst();
-            if (!fromCurrent.isPresent()) {
-                problems.add(String.format("Property %s on component %s has been removed.", lp.name, latestRelease.name));
-            }
-        });
+                    Optional<Property> fromCurrent = current.properties.stream().filter(p -> p.name.equals(lp.name)).findFirst();
+                    if (!fromCurrent.isPresent()) {
+                        problems.add(String.format("Property %s on component %s has been removed.", lp.name, latestRelease.name));
+                    }
+                });
 
         return problems;
     }
@@ -214,13 +212,13 @@ public class ScrMetadataIT {
 
     private DescriptorList getDescriptorsFromLatestRelease() throws Exception {
         // https://central.sonatype.org/search/rest-api-guide/
-        HttpClientBuilder builder = HttpClientBuilder.create().setServiceUnavailableRetryStrategy( new ServiceUnavailableRetryStrategy() {
-            
+        HttpClientBuilder builder = HttpClientBuilder.create().setServiceUnavailableRetryStrategy(new ServiceUnavailableRetryStrategy() {
+
             @Override
             public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
                 return executionCount < 5 && TRANSIENT_ERROR_STATUS_CODES.contains(response.getStatusLine().getStatusCode());
             }
-            
+
             @Override
             public long getRetryInterval() {
                 return 5000; // in milliseconds
@@ -238,7 +236,7 @@ public class ScrMetadataIT {
             } else {
                 String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
                 System.out.printf("Fetching %s\n", url);
-    
+
                 client.execute(new HttpGet(url), new ResponseHandler<Void>() {
 
                     @Override
@@ -315,7 +313,7 @@ public class ScrMetadataIT {
                 }
                 return super.visitFile(file, attrs);
             }
-            
+
         });
         // metatype descriptors must come last (after component descriptions)
         for (Descriptor metatypeDescriptor : metatypeDescriptors) {
@@ -423,6 +421,7 @@ public class ScrMetadataIT {
 
         /**
          * Properties with same name overwrite existing properties in an existing descriptor with the same name
+         *
          * @param toAdd
          */
         private void merge(Descriptor toAdd) {

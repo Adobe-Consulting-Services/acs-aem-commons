@@ -34,14 +34,6 @@ import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -49,6 +41,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,25 +62,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * ACS AEM Commons - Synthetic Workflow Runner
  * Facilitates the execution of synthetic workflow.
  */
-@Component(immediate = true)
-@References({
-        @Reference(
-                referenceInterface = WorkflowProcess.class,
-                policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-                bind = "bindCqWorkflowProcesses",
-                unbind = "unbindCqWorkflowProcesses"
-        ),
-        @Reference(
-                referenceInterface = com.adobe.granite.workflow.exec.WorkflowProcess.class,
-                policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-                bind = "bindGraniteWorkflowProcesses",
-                unbind = "unbindGraniteWorkflowProcesses"
-        )
-})
-// Explicitly register to the SyntheticWorkflowRunner interface (as this extends WorkflowService, which we do not want to register a service against)
-@Service(value = SyntheticWorkflowRunner.class)
+@Component(
+        service = {SyntheticWorkflowRunner.class},
+        immediate = true
+)
 public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);
 
@@ -102,11 +80,30 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private Map<String, SyntheticWorkflowProcess> workflowProcessesByProcessName =
             new ConcurrentHashMap<String, SyntheticWorkflowProcess>();
 
-    @Reference
-    private WorkflowService aemWorkflowService;
+    @Reference(
+            service = WorkflowProcess.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            target = "(component.name=com.day.cq.workflow.impl.process.CQWorkflowProcess)",
+            unbind = "unbindCqWorkflowProcesses"
+    )
+    private volatile WorkflowProcess[] cqWorkflowProcesses;
+
+    @Reference(
+            service = com.adobe.granite.workflow.exec.WorkflowProcess.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            target = "(component.name=com.adobe.granite.workflow.core.job.JobHandler)",
+            unbind = "unbindGraniteWorkflowProcesses"
+    )
+    private volatile com.adobe.granite.workflow.exec.WorkflowProcess[] graniteWorkflowProcesses;
+
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private transient WorkflowService aemWorkflowService;
+
+    @Reference
+    private transient ResourceResolverFactory resourceResolverFactory;
 
     private ServiceRegistration accessorReg;
 
@@ -253,7 +250,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                     terminated = true;
                     log.info("Synthetic CQ workflow execution stopped via terminate for [ {} ]", payloadPath);
                     break;
-                } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException ex) {
+                } catch (
+                        com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException ex) {
                     // Terminate entire Workflow execution for this payload
                     terminated = true;
                     log.info("Synthetic Granite workflow execution stopped via terminate for [ {} ]", payloadPath);
@@ -261,7 +259,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 } catch (SyntheticRestartWorkflowException ex) {
                     // Handle CQ Restart Workflow; catch/throw for clarity in whats happening
                     throw ex;
-                } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticRestartWorkflowException ex) {
+                } catch (
+                        com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticRestartWorkflowException ex) {
                     // Handle Granite Restart Exceptions by transforming them into CQ Worlflow Restart Exceptions which the rest of this API leverages
                     throw new SyntheticRestartWorkflowException(ex.getMessage());
                 } catch (WorkflowException ex) {
@@ -281,8 +280,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                     } catch (RepositoryException e) {
                         String msg = String.format("Could not save at end of synthetic workflow process execution"
                                 + " [ %s ] for payload path [ %s ]", workflowStep.getId(), payloadPath);
-                        log.error("Synthetic workflow process save failed: {}",msg, e);
-                        throw new WorkflowException(msg,e);
+                        log.error("Synthetic workflow process save failed: {}", msg, e);
+                        throw new WorkflowException(msg, e);
                     }
                 }
             } else {
@@ -318,7 +317,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
 
         // Execute the Workflow Process
         try {
-            WorkItem wrappedWorkItem = (WorkItem) Proxy.newProxyInstance(WrappedSyntheticWorkItem.class.getClassLoader(), new Class[] { WorkItem.class, WrappedSyntheticWorkItem.class  }, workItem);
+            WorkItem wrappedWorkItem = (WorkItem) Proxy.newProxyInstance(WrappedSyntheticWorkItem.class.getClassLoader(), new Class[]{WorkItem.class, WrappedSyntheticWorkItem.class}, workItem);
             workItem.setWorkflow(wrappedWorkItem, workflow);
             workflowProcess.getCqWorkflowProcess().execute(wrappedWorkItem, workflowSession, workflowProcessMetaDataMap);
             workItem.setTimeEnded(new Date());
@@ -337,7 +336,7 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                                            com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflow workflow,
                                            SyntheticMetaDataMap workflowProcessMetaDataMap,
                                            SyntheticWorkflowProcess workflowProcess) throws com.adobe.granite.workflow.WorkflowException {
-       final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession syntheticWorkflowSession = this.getGraniteWorkflowSession(session);
+        final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkflowSession syntheticWorkflowSession = this.getGraniteWorkflowSession(session);
 
         // Each Workflow Process Step gets its own workItem whose life starts and ends w the WF Process
         final com.adobe.acs.commons.workflow.synthetic.impl.granite.SyntheticWorkItem workItem =
@@ -348,16 +347,18 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                 workflow.getWorkflowData().getPayload());
         // Execute the Workflow Process
         try {
-            com.adobe.granite.workflow.WorkflowSession workflowSession = (com.adobe.granite.workflow.WorkflowSession) Proxy.newProxyInstance(WrappedSyntheticWorkflowSession.class.getClassLoader(), new Class[] { com.adobe.granite.workflow.WorkflowSession.class, WrappedSyntheticWorkflowSession.class  }, syntheticWorkflowSession);
-            com.adobe.granite.workflow.exec.WorkItem wrappedWorkItem = (com.adobe.granite.workflow.exec.WorkItem) Proxy.newProxyInstance(com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem.class.getClassLoader(), new Class[] { com.adobe.granite.workflow.exec.WorkItem.class, com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem.class  }, workItem);
+            com.adobe.granite.workflow.WorkflowSession workflowSession = (com.adobe.granite.workflow.WorkflowSession) Proxy.newProxyInstance(WrappedSyntheticWorkflowSession.class.getClassLoader(), new Class[]{com.adobe.granite.workflow.WorkflowSession.class, WrappedSyntheticWorkflowSession.class}, syntheticWorkflowSession);
+            com.adobe.granite.workflow.exec.WorkItem wrappedWorkItem = (com.adobe.granite.workflow.exec.WorkItem) Proxy.newProxyInstance(com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem.class.getClassLoader(), new Class[]{com.adobe.granite.workflow.exec.WorkItem.class, com.adobe.acs.commons.workflow.synthetic.granite.WrappedSyntheticWorkItem.class}, workItem);
             workItem.setWorkflow(wrappedWorkItem, workflow);
             workflowProcess.getGraniteWorkflowProcess().execute(wrappedWorkItem, workflowSession, workflowProcessMetaDataMap);
             workItem.setTimeEnded(new Date());
-        } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticCompleteWorkflowException ex) {
+        } catch (
+                com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticCompleteWorkflowException ex) {
             // Workitem force-completed via a call to workflowSession.complete(..)
             workItem.setTimeEnded(new Date());
             log.trace(ex.getMessage());
-        } catch (com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException ex) {
+        } catch (
+                com.adobe.acs.commons.workflow.synthetic.impl.granite.exceptions.SyntheticTerminateWorkflowException ex) {
             workItem.setTimeEnded(new Date());
             log.trace(ex.getMessage());
             throw ex;
@@ -368,8 +369,9 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     /**
      * Converts the legacy Workflow Process IDs and Process Args maps into the SyntheticWorkflowStep abstraction that allows for
      * multiple Processes of the same type to be executed in the same WF.
+     *
      * @param workflowProcessIds the ordered list of workflow process id or labels
-     * @param processArgs the metadata map args, indexed by workflowProcessId
+     * @param processArgs        the metadata map args, indexed by workflowProcessId
      * @return the ordered list of SyntheticWorkflowSteps that represent the parameter data
      */
     private List<SyntheticWorkflowStep> convertToSyntheticWorkflowSteps(String[] workflowProcessIds,

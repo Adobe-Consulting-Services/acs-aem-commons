@@ -22,29 +22,18 @@ import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.ClusterLeader;
 import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Packaging;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
@@ -58,14 +47,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -113,18 +95,18 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
-        "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
-        "dam:AssetContent",
-        "rep:User",
-        "rep:Group",
-        "sling:OrderedFolder/nt:unstructured",
-        ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
-        "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
-        "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
+            "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
+            "dam:AssetContent",
+            "rep:User",
+            "rep:Group",
+            "sling:OrderedFolder/nt:unstructured",
+            ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+            "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
+            "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
     };
 
     @Property(label = "Replication Status Node Type and Path Restrictions",
-            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'. Make sure that one (composed)nodetype value appears only once in the list (because duplicate nodetypes will overwrite each other)! Also the order is important as the first nodetype hit (from the top of the list) determines the outcome." ,
+            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'. Make sure that one (composed)nodetype value appears only once in the list (because duplicate nodetypes will overwrite each other)! Also the order is important as the first nodetype hit (from the top of the list) determines the outcome.",
             cardinality = Integer.MAX_VALUE,
             value = {
                     "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
@@ -137,7 +119,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
-    
+
     /**
      * key = allowed node type (hierarchy), value = optional path restriction (may be null).
      */
@@ -179,12 +161,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             description = "The 'value' used to set the 'replicated at' property. [ Default: Package Last Modified ]",
             options = {
                     @PropertyOption(
-                        name = "PACKAGE_LAST_MODIFIED",
-                        value = "Package Last Modified"
+                            name = "PACKAGE_LAST_MODIFIED",
+                            value = "Package Last Modified"
                     ),
                     @PropertyOption(
-                        name = "CURRENT_TIME",
-                        value = "Current Time"
+                            name = "CURRENT_TIME",
+                            value = "Current Time"
                     )
             })
     public static final String PROP_REPLICATED_AT = "replicated-at";
@@ -202,13 +184,13 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         final Map<String, Object> jobConfig = getInfoFromEvent(event);
         final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
 
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO))  {
-        
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+
             for (String path : paths) {
                 if (!this.containsJcrPackagePath(path)) {
                     continue;
                 }
-                
+
                 final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
                 if (jcrPackage != null) {
                     // Close jcrPackages after they've been used to check if a Job should be invoked.
@@ -220,7 +202,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             }
         } catch (LoginException e) {
             log.error("Could not obtain a resource resolver.", e);
-        } 
+        }
     }
 
     @Override
@@ -234,21 +216,21 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         }
         log.debug("Processing Replication Status Update for JCR Package: {}", path);
 
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
             if (jcrPackage == null) {
                 log.warn("JCR Package is unavailable for Replication Status Update at: {}", path);
                 return JobResult.OK;
             }
-            
+
             try {
                 setReplicationStatus(jcrPackage, agentIds, replicatedBy, resourceResolver);
             } finally {
                 // Close  package when we are done.
                 jcrPackage.close();
             }
-            
+
         } catch (LoginException e) {
             log.error("Could not obtain a resource resolver for applying replication status updates", e);
             return JobResult.CANCEL;
@@ -263,10 +245,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     /**
      * Emits the given error and exception either with level WARN or ERROR depending on whether the job is retried.
      * This method can be removed once <a href="https://issues.apache.org/jira/browse/SLING-7756">SLING-7756</a> is resolved.
+     *
      * @param job
      * @param errorMessage
      * @param e
-     * 
      */
     private void logJobError(Job job, String errorMessage, Exception e) {
         if (job.getRetryCount() < job.getNumberOfRetries()) {
@@ -275,8 +257,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             log.error("Job permanently failed with error '{}' in attempt '{}', no more retries", errorMessage, job.getRetryCount(), e);
         }
     }
-    
-    
+
+
     private void setReplicationStatus(JcrPackage jcrPackage, Collection<String> agentIds, String replicatedBy, ResourceResolver resourceResolver) throws RepositoryException {
         final List<Resource> resources = new ArrayList<>();
         final String packageId;
@@ -289,8 +271,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             }
         } catch (RepositoryException e) {
             throw new RepositoryException("Could not determine the ID for just replicated package (package invalid?).", e);
-        } 
-        
+        }
+
         try {
             for (final String packagePath : packageHelper.getContents(jcrPackage)) {
                 final Resource resource = resourceResolver.getResource(packagePath);
@@ -298,7 +280,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     resources.add(resource);
                 }
             }
-        } catch (RepositoryException|PackageException|IOException e) {
+        } catch (RepositoryException | PackageException | IOException e) {
             throw new RepositoryException("Could not retrieve the Packages contents for package '" + packageId + "'", e);
         }
         try {
@@ -315,15 +297,16 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 log.info("Could not find any resources in JCR Package [ {} ] that are candidates to have their Replication Status updated",
                         packageId);
             }
-        } catch (RepositoryException|IOException e) {
+        } catch (RepositoryException | IOException e) {
             // enrich exception with path information (limited to 10 paths only)
-            String paths = resources.stream().map( r -> r.getPath() ).limit(10).collect( Collectors.joining( ", " ) );
+            String paths = resources.stream().map(r -> r.getPath()).limit(10).collect(Collectors.joining(", "));
             throw new RepositoryException("Exception occurred updating replication status for contents of package '" + packageId + "' covering paths: '" + paths + ", ...'", e);
         }
     }
 
     /**
      * Extracts relevant event information from a Granite Replication Event OR a Day CQ Replication event.
+     *
      * @param event the Osgi Event
      * @return a Map containing the relevant data points.
      */
@@ -346,7 +329,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             eventConfig.put(PROPERTY_PATHS, paths);
             eventConfig.put(PROPERTY_REPLICATED_BY, userId);
             // set by AEMaaCS in com.day.cq.replication.ReplicatedAction#toEvent(...)
-            eventConfig.put(PROPERTY_AGENT_IDS, (List<String>)event.getProperty("agentIds"));
+            eventConfig.put(PROPERTY_AGENT_IDS, (List<String>) event.getProperty("agentIds"));
         } else {
             ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
             // Granite event (com/adobe/granite/replication)
@@ -360,7 +343,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     /**
      * Checks if the given path looks like a Jcr Package path.
-     *
+     * <p>
      * Provides a very fast, String-based, in-memory check to weed out most false positives and avoid
      * resolving the path to a Jcr Package and ensure it is valid.
      *
@@ -398,7 +381,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         } catch (RepositoryException e) {
             log.warn("Error checking if the path [ {} ] is a JCR Package.", path);
         }
-        
+
         return jcrPackage;
     }
 
@@ -472,8 +455,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         log.trace("Activating the ACS AEM Commons - JCR Package Replication Status Updater (Event Handler)");
 
         this.replicatedByOverride = PropertiesUtil.toString(config.get(PROP_REPLICATED_BY_OVERRIDE),
-                                        PropertiesUtil.toString(config.get(LEGACY_PROP_REPLICATED_BY_OVERRIDE),
-                                                DEFAULT_REPLICATED_BY_OVERRIDE));
+                PropertiesUtil.toString(config.get(LEGACY_PROP_REPLICATED_BY_OVERRIDE),
+                        DEFAULT_REPLICATED_BY_OVERRIDE));
 
         String tmp = PropertiesUtil.toString(config.get(PROP_REPLICATED_AT), "");
         try {
@@ -495,7 +478,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             } else {
                 pathRestrictionPattern = null;
             }
-            
+
             pathRestrictionByNodeType.put(nodeTypeAndPathRestriction.getKey(), pathRestrictionPattern);
         }
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
