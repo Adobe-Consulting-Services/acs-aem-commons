@@ -71,10 +71,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
@@ -101,7 +100,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.adobe.acs.commons.redirects.models.RedirectRule.CACHE_CONTROL_HEADER_NAME;
 import static com.adobe.acs.commons.redirects.models.Redirects.CFG_PROP_IGNORE_SELECTORS;
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
@@ -134,8 +132,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     public static final String DEFAULT_CONFIG_NAME = "redirects";
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    private static final String SERVICE_NAME = "redirect-manager";
 
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
@@ -173,9 +169,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + " where 'settings' is the bucket and 'redirects' is the config name", type = AttributeType.STRING)
         String configName() default  DEFAULT_CONFIG_NAME;
     }
-
-    @Reference
-    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     ConfigurationResourceResolver configResolver;
@@ -312,19 +305,15 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     void invalidate(String changePath) {
         String redirectSubPath = config.bucketName() + "/" + config.configName();
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
-                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
-            Resource resource = resolver.resolve(changePath);
-            while(resource != null){
-                if(resource.getPath().endsWith(redirectSubPath)){
-                    log.debug("invalidating {}", resource.getPath());
-                    rulesCache.invalidate(resource.getPath());
-                    break;
-                }
-                resource = resource.getParent();
+
+        String cacheKey = changePath;
+        while( cacheKey != null){
+            if(cacheKey.endsWith(redirectSubPath)){
+                log.debug("invalidating {}", cacheKey);
+                rulesCache.invalidate(cacheKey);
+                break;
             }
-        } catch (LoginException e) {
-            log.error("Failed to get resolver for {}", SERVICE_NAME, e);
+            cacheKey = ResourceUtil.getParent(cacheKey);
         }
     }
 
@@ -333,23 +322,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
         rulesCache.invalidateAll();
     }
 
-    RedirectConfiguration loadRules(String storagePath) {
-        RedirectConfiguration rules = null;
+    RedirectConfiguration loadRules(Resource storageResource) {
         long t0 = System.currentTimeMillis();
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
-                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
-            Resource storageResource = resolver.getResource(storagePath);
-            if(storageResource != null) {
-                String storageSuffix = getBucket() + "/" + getConfigName();
-                rules = new RedirectConfiguration(storageResource, storageSuffix);
-                log.debug("{} rules loaded from {} in {} ms", rules.getPathRules().size() + rules.getPatternRules().size(),
-                        storagePath, System.currentTimeMillis() - t0);
-            } else {
-                log.warn("redirects not found in {}", storagePath);
-            }
-        } catch (LoginException e) {
-            log.error("Failed to get resolver for {}", SERVICE_NAME, e);
-        }
+        String storageSuffix = getBucket() + "/" + getConfigName();
+        RedirectConfiguration rules = new RedirectConfiguration(storageResource, storageSuffix);
+        log.debug("{} rules loaded from {} in {} ms", rules.getPathRules().size() + rules.getPatternRules().size(),
+                storageResource.getPath(), System.currentTimeMillis() - t0);
         return rules;
     }
 
@@ -565,10 +543,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         String configPath = configResource.getPath();
         try {
-            RedirectConfiguration rules = rulesCache.get(configPath, () -> {
-                RedirectConfiguration cfg = loadRules(configPath);
-                return cfg == null ? RedirectConfiguration.EMPTY : cfg;
-            });
+            RedirectConfiguration rules = rulesCache.get(configPath, () -> loadRules(configResource));
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
 

@@ -86,10 +86,6 @@ public class RedirectFilterTest {
     public void setUp() throws Exception {
         context.addModelsForClasses(RedirectRule.class);
         filter = spy(new RedirectFilter());
-        ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
-        when(resourceResolverFactory.getServiceResourceResolver(any(Map.class)))
-                .thenReturn(context.resourceResolver());
-        filter.resourceResolverFactory = resourceResolverFactory;
 
         configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(true);
