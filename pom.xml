@@ -84,7 +84,7 @@
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
 
         <!-- the minimum AEM 6.5 version being supported -->
-        <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
+        <aem.classic.api.version>6.5.21.0000</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
         <aem.sdk.api.version>2023.11.14227.20231108T162349Z-231100</aem.sdk.api.version>
 
