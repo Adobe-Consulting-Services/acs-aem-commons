@@ -17,13 +17,13 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Dictionary;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -88,7 +88,7 @@ public class SyslogAppenderTest {
             nullHostThrown = true;
         }
 
-        assertTrue("a null host should throw an IllegalArgumentException", nullHostThrown);
+        assertTrue(nullHostThrown, "a null host should throw an IllegalArgumentException");
         boolean emptyHostThrown = false;
         try {
             ch.qos.logback.classic.net.SyslogAppender logAppender =
@@ -98,7 +98,7 @@ public class SyslogAppenderTest {
             emptyHostThrown = true;
         }
 
-        assertTrue("an empty host should throw an IllegalArgumentException", emptyHostThrown);
+        assertTrue(emptyHostThrown, "an empty host should throw an IllegalArgumentException");
 
         boolean negativePortThrown = false;
         try {
@@ -109,12 +109,12 @@ public class SyslogAppenderTest {
             negativePortThrown = true;
         }
 
-        assertTrue("a negative port should throw an IllegalArgumentException", negativePortThrown);
+        assertTrue(negativePortThrown, "a negative port should throw an IllegalArgumentException");
 
         ch.qos.logback.classic.net.SyslogAppender logAppender =
                 SyslogAppender.constructAppender(createConfig("localhost", 465, "test",
                         "USER", "fff", false, "my.logger"));
-        assertEquals("stack trace pattern should match", "fff", logAppender.getStackTracePattern());
+        assertEquals("fff", logAppender.getStackTracePattern(), "stack trace pattern should match");
 
 
     }
