@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
 - #3390 - Remove usage of commons collections 3
 
 ### Fixed
