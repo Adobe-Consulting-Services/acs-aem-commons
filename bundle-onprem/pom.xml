@@ -64,6 +64,47 @@
     </build>
 
     <dependencies>
+        <!-- ======================== -->
+        <!-- START build dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.versioning</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.bundle</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.metatype.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.servlets.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- END build dependencies -->
+        <!-- ======================== -->
+        <!-- START runtime dependencies not contained in uber-jar -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- END runtime dependencies not contained in uber-jar -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -110,10 +151,11 @@
             </exclusions>
         </dependency>
         <!-- End Test dependencies -->
-        <!-- the aem-sdk-api should be the last dependency, as other dependencies should take precedence in case of package clashes -->
+      <!-- ======================== -->
+        <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
-            <artifactId>aem-sdk-api</artifactId>
+            <artifactId>uber-jar</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
