@@ -21,13 +21,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
 import org.apache.sling.commons.testing.osgi.MockBundle;
 import org.apache.sling.commons.testing.osgi.MockBundleContext;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -71,21 +68,21 @@ public class SyslogAppenderTest {
         }
     }
 
-    public static Map<String, Object> createConfig(final String host,
+    public static SyslogAppender.Config createConfig(final String host,
                                                    final int port,
                                                    final String suffixPattern,
                                                    final String facility,
                                                    final String stackTracePattern,
                                                    final boolean throwableExcluded, final String... loggers) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(SyslogAppender.PROP_HOST, host);
-        map.put(SyslogAppender.PROP_PORT, port);
-        map.put(SyslogAppender.PROP_SUFFIX_PATTERN, suffixPattern);
-        map.put(SyslogAppender.PROP_FACILITY, facility);
-        map.put(SyslogAppender.PROP_STACK_TRACE_PATTERN, stackTracePattern);
-        map.put(SyslogAppender.PROP_THROWABLE_EXCLUDED, throwableExcluded);
-        map.put(SyslogAppender.PROP_LOGGERS, loggers);
-        return map;
+        final SyslogAppender.Config config = Mockito.mock(SyslogAppender.Config.class);
+        Mockito.when(config.host()).thenReturn(host);
+        Mockito.when(config.port()).thenReturn(port);
+        Mockito.when(config.suffix_pattern()).thenReturn(suffixPattern);
+        Mockito.when(config.facility()).thenReturn(facility);
+        Mockito.when(config.stack_trace_pattern()).thenReturn(stackTracePattern);
+        Mockito.when(config.throwable_excluded()).thenReturn(throwableExcluded);
+        Mockito.when(config.loggers()).thenReturn(loggers);
+        return config;
     }
 
 
