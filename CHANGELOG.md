@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by SlingHttpServletRequestBuilder 
 - #3390 - Remove usage of commons collections 3
 
 ### Fixed

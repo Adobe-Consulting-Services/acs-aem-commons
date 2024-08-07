@@ -76,4 +76,9 @@ public class MockFragmentData implements FragmentData {
     public void setContentType(@Nullable String contentType) {
 
     }
+
+    @Override
+    public @Nullable Calendar getLastModified() {
+        return null;
+    }
 }

@@ -17,16 +17,14 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import org.apache.sling.engine.SlingRequestProcessor;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.util.RequireAem;
-import com.day.cq.contentsync.handler.util.RequestResponseFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.sling.engine.SlingRequestProcessor;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+@Component(service = ProcessDefinitionFactory.class)
 public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<RefreshFolderTumbnails> {
 
     // Disable this feature on AEM as a Cloud Service
@@ -35,10 +33,7 @@ public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<Ref
 
     @Reference
     private SlingRequestProcessor slingProcessor;
-    
-    @Reference
-    RequestResponseFactory reqRspFactory;
-    
+
     @Override
     public String getName() {
         return "Refresh asset folder thumbnails";
@@ -46,7 +41,6 @@ public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<Ref
 
     @Override
     protected RefreshFolderTumbnails createProcessDefinitionInstance() {
-        return new RefreshFolderTumbnails(reqRspFactory, slingProcessor);
+        return new RefreshFolderTumbnails(slingProcessor);
     }
-    
 }
