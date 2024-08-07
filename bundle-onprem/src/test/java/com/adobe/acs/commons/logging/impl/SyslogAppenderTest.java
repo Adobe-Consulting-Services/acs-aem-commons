@@ -17,56 +17,21 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Dictionary;
-import org.apache.sling.commons.testing.osgi.MockBundle;
-import org.apache.sling.commons.testing.osgi.MockBundleContext;
+
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import ch.qos.logback.core.Appender;
+
 public class SyslogAppenderTest {
-
-    class UnregMockServiceRegistration implements ServiceRegistration {
-        final ServiceRegistration wrapped;
-        boolean unregistered = false;
-
-        public UnregMockServiceRegistration(final ServiceRegistration wrapped) {
-            this.wrapped = wrapped;
-        }
-
-        @Override
-        public ServiceReference getReference() {
-            return wrapped.getReference();
-        }
-
-        @Override
-        public void setProperties(final Dictionary dictionary) {
-            this.wrapped.setProperties(dictionary);
-        }
-
-        @Override
-        public void unregister() {
-            if (this.unregistered) {
-                throw new IllegalStateException("already unregistered");
-            }
-            this.unregistered = true;
-        }
-    }
-
-    class UnregMockBundleContext extends MockBundleContext {
-        public UnregMockBundleContext(final MockBundle bundle) {
-            super(bundle);
-        }
-
-        @Override
-        public ServiceRegistration registerService(final String s, final Object o, final Dictionary dictionary) {
-            return new UnregMockServiceRegistration(super.registerService(s, o, dictionary));
-        }
-    }
 
     public static SyslogAppender.Config createConfig(final String host,
                                                    final int port,
@@ -87,12 +52,29 @@ public class SyslogAppenderTest {
 
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testActivate() {
+        BundleContext ctx = Mockito.mock(BundleContext.class);
+        ServiceRegistration<Appender> reg = Mockito.mock(ServiceRegistration.class);
+        Mockito.when(ctx.registerService(Mockito.eq(Appender.class), Mockito.any(ch.qos.logback.classic.net.SyslogAppender.class), Mockito.any()))
+            .thenReturn(reg);
+
         SyslogAppender appender = new SyslogAppender();
-        MockBundleContext ctx = new UnregMockBundleContext(null);
         appender.activate(ctx, createConfig("localhost", 42, "test",
                 "USER", null, false, "my.logger"));
+
+        ArgumentCaptor<Dictionary<String, ?>> propCaptor = ArgumentCaptor.forClass(Dictionary.class);
+        Mockito.verify(ctx, Mockito.times(1))
+            .registerService(
+                Mockito.eq(Appender.class),
+                Mockito.any(ch.qos.logback.classic.net.SyslogAppender.class),
+                propCaptor.capture());
+        Mockito.verifyNoMoreInteractions(ctx);
+        assertArrayEquals(new String[] {"my.logger"}, (String[])propCaptor.getValue().get("loggers"));
+
         appender.deactivate();
+        Mockito.verify(reg, Mockito.times(1)).unregister();
+        Mockito.verifyNoMoreInteractions(ctx);
     }
 
     @Test
