@@ -17,12 +17,8 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.jcr.RepositoryException;
-
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
@@ -31,19 +27,23 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.oak.EnsureOakIndexManager;
+import javax.jcr.RepositoryException;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 //@formatter:off
 @Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
-        immediate = true
+        configurationPolicy = ConfigurationPolicy.REQUIRE
 )
 @Designate(ocd = EnsureOakIndex.Config.class, factory = true)
 //@formatter:on
@@ -105,8 +105,12 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     @Reference
     private Scheduler scheduler;
     
-    @Reference
-    private EnsureOakIndexManager indexManager;
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY
+    )
+    private volatile EnsureOakIndexManager indexManager;
 
     private String ensureDefinitionsPath;
     private String oakIndexesPath;
