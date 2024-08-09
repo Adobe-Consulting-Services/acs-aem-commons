@@ -20,7 +20,7 @@ package com.adobe.acs.commons.mcp.impl.processes.renovator;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;

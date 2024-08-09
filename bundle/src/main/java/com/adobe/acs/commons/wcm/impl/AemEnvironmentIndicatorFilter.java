@@ -40,8 +40,8 @@ import com.day.cq.commons.PathInfo;
 import com.day.cq.wcm.api.WCMMode;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang.text.StrLookup;
-import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
