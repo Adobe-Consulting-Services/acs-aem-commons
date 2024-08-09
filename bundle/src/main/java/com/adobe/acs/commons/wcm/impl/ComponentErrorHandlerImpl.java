@@ -23,7 +23,7 @@ import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;

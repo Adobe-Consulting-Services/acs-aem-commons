@@ -19,7 +19,7 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.commons.iterator.NodeIteratorAdapter;
 import org.apache.jackrabbit.commons.iterator.PropertyIteratorAdapter;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;

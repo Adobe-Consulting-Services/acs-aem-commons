@@ -20,7 +20,7 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
 import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.slf4j.Logger;

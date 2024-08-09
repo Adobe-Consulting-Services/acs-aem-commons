@@ -5,7 +5,7 @@
                 com.adobe.granite.ui.components.ds.EmptyDataSource,
                 com.adobe.granite.ui.components.ds.SimpleDataSource,
                 com.adobe.granite.ui.components.ds.ValueMapResource,
-                org.apache.commons.lang.StringUtils,
+                org.apache.commons.lang3.StringUtils,
                 org.apache.sling.api.SlingHttpServletRequest,
                 org.apache.sling.api.SlingHttpServletResponse,
                 org.apache.sling.api.resource.Resource,

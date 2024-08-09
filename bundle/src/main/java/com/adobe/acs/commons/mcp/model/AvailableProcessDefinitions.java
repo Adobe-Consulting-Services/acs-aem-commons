@@ -23,7 +23,7 @@ import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.cq.sightly.WCMUsePojo;
 import java.util.Collections;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.osgi.annotation.versioning.ProviderType;

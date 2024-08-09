@@ -17,7 +17,7 @@
  */
 package com.adobe.acs.commons.dam;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.osgi.annotation.versioning.ProviderType;
 

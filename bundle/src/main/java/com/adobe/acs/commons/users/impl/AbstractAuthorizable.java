@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.vault.util.PathUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;

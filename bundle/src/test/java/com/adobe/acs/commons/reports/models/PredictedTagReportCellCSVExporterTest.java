@@ -22,7 +22,7 @@ package com.adobe.acs.commons.reports.models;
 import com.adobe.acs.commons.reports.internal.PredictedTagsUtil;
 import com.day.cq.dam.api.Asset;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;

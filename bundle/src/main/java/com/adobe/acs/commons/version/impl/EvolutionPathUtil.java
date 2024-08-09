@@ -17,7 +17,7 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class EvolutionPathUtil {
 

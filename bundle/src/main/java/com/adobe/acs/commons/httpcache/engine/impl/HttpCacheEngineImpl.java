@@ -37,7 +37,7 @@ import com.adobe.acs.commons.httpcache.util.CacheUtils;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Properties;

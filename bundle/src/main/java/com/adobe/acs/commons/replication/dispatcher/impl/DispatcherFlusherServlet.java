@@ -24,7 +24,7 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;

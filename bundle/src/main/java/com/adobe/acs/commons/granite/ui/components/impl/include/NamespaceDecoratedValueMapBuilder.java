@@ -18,7 +18,7 @@
 package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import com.adobe.acs.commons.util.TypeUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;

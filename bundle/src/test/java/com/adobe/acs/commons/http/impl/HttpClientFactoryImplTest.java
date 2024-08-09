@@ -25,7 +25,7 @@ import static org.mockserver.model.HttpResponse.*;
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
 import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.impl.client.BasicResponseHandler;

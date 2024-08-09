@@ -24,7 +24,7 @@ import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;

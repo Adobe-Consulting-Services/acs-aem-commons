@@ -30,7 +30,7 @@ import javax.management.openmbean.TabularType;
 
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 

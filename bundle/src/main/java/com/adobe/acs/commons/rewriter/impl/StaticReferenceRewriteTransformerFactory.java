@@ -19,9 +19,9 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -228,7 +228,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     }
 
     private String handleMatchingPatternAttribute(Pattern pattern, String attrValue) {
-        String unescapedValue = StringEscapeUtils.unescapeHtml(attrValue);
+        String unescapedValue = StringEscapeUtils.unescapeHtml4(attrValue);
         Matcher m = pattern.matcher(unescapedValue);
         StringBuffer sb = new StringBuffer(unescapedValue.length());
 

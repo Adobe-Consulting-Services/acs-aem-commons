@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
