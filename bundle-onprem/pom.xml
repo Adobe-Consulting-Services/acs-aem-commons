@@ -33,13 +33,18 @@
     <!-- ====================================================================== -->
 
     <artifactId>acs-aem-commons-bundle-onprem</artifactId>
-    <name>ACS AEM Commons Bundle - On Prem</name>
-    <description>Core ACS AEM Commons OSGi Bundle for AEM on prem only</description>
+    <name>ACS AEM Commons - Bundle Fragment (for On Prem</name>
+    <description>ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring On Prem</description>
    <build>
         <plugins>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
+                <configuration>
+                    <bnd><![CDATA[
+Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
+                    ]]></bnd>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
