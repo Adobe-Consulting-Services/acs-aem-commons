@@ -19,7 +19,7 @@
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 import java.io.IOException;

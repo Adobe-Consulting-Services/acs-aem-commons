@@ -20,7 +20,7 @@ package com.adobe.acs.commons.httpcache.invalidator;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.day.cq.wcm.commons.ReferenceSearch;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;

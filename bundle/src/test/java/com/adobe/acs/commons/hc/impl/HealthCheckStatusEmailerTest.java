@@ -20,7 +20,7 @@ package com.adobe.acs.commons.hc.impl;
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;

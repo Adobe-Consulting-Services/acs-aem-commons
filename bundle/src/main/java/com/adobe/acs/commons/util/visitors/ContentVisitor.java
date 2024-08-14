@@ -21,7 +21,7 @@ package com.adobe.acs.commons.util.visitors;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
