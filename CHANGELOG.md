@@ -10,10 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-
 ### Fixed
 
 - #3380 - Remove forced red theme from system notification text body
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
+- #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
 - #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 
@@ -23,12 +25,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3408 - Reduce usage of Apache Commons Lang 2
 - #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
 - #3390 - Remove usage of commons collections 3
-
-
-### Fixed
-
-- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
-
 
 ## 6.6.2 - 2024-06-25
 
