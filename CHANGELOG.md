@@ -13,6 +13,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+
+### Changed
+
+- #3408 - Reduce usage of Apache Commons Lang 2
+- #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
+- #3390 - Remove usage of commons collections 3
 
 ## 6.6.2 - 2024-06-25
 

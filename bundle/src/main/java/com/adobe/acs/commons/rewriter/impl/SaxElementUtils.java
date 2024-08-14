@@ -17,7 +17,7 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 
 import com.adobe.granite.ui.clientlibs.LibraryType;

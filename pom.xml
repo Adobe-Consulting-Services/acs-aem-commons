@@ -472,7 +472,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>9.0.10</version>
+                    <version>10.0.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -939,6 +939,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 
     <modules>
         <module>bundle</module>
+        <module>bundle-onprem</module>
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>

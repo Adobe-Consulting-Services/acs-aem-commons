@@ -176,7 +176,7 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
 
         public ProcessArgs(MetaDataMap map) {
 
-            String[] lines = org.apache.commons.lang.StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            String[] lines = org.apache.commons.lang3.StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             sequenceName = StringUtils.defaultIfEmpty(data.get(ARG_SEQUENCE_NAME), DEFAULT_NN_SEQUENCE);
