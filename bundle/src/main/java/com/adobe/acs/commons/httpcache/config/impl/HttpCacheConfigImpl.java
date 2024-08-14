@@ -28,7 +28,7 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;

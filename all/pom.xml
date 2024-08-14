@@ -66,6 +66,13 @@
                                 </embedded>
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle-onprem</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.apps</artifactId>
                                     <classifier>~cloud</classifier>
                                     <target>/apps/acs-commons/install</target>
@@ -312,7 +319,7 @@
                     <plugin>
                         <groupId>com.adobe.aem</groupId>
                         <artifactId>aemanalyser-maven-plugin</artifactId>
-                        <version>1.5.8</version>
+                        <version>1.6.4</version>
                         <executions>
                             <execution>
                                 <id>aem-analyser</id>

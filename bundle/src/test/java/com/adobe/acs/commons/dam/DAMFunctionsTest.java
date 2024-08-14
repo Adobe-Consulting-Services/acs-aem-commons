@@ -20,7 +20,7 @@ package com.adobe.acs.commons.dam;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 
 import com.day.cq.dam.api.Asset;
