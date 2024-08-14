@@ -64,7 +64,7 @@ import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.jackrabbit.oak.spi.security.privilege.PrivilegeConstants;
 import org.apache.sling.api.request.RequestParameter;

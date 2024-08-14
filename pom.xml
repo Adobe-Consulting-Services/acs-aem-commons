@@ -939,6 +939,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 
     <modules>
         <module>bundle</module>
+        <module>bundle-onprem</module>
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>

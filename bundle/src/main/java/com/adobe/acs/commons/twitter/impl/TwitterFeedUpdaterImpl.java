@@ -27,7 +27,7 @@ import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;

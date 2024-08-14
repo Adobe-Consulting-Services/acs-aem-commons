@@ -24,7 +24,7 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMMode;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.osgi.service.component.annotations.Component;
