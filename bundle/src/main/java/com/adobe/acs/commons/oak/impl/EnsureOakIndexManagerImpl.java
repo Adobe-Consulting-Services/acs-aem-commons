@@ -20,7 +20,7 @@ package com.adobe.acs.commons.oak.impl;
 import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.FieldOption;

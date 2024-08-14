@@ -24,7 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
