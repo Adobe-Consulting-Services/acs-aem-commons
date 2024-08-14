@@ -21,15 +21,16 @@ import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.FieldOption;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,39 +59,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 //@formatter:off
 @Component(
-        label = "ACS AEM Commons - Ensure Oak Index Manager",
-        description = "Manage for ensuring oak indexes.",
+        service = {DynamicMBean.class, EnsureOakIndexManager.class},
         immediate = true,
-        metatype = true
+        property = {
+                "felix.webconsole.title=Ensure Oak Index",
+                "felix.webconsole.label=ensureOakIndex",
+                "felix.webconsole.category=Sling",
+                "jmx.objectname=com.adobe.acs.commons.oak:type=Ensure Oak Index"
+        }
 )
-@Properties({
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Additional Ignore properties: {properties.ignore}",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "felix.webconsole.title",
-                value = "Ensure Oak Index",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "felix.webconsole.label",
-                value = "ensureOakIndex",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "felix.webconsole.category",
-                value = "Sling",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "jmx.objectname",
-                value = "com.adobe.acs.commons.oak:type=Ensure Oak Index",
-                propertyPrivate = true
-        )
-})
-@Service(value = {DynamicMBean.class, EnsureOakIndexManager.class})
+@Designate(ocd = EnsureOakIndexManagerImpl.Config.class)
 //@formatter:on
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
     private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
@@ -98,21 +76,35 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     //@formatter:off
     private static final String[] DEFAULT_ADDITIONAL_IGNORE_PROPERTIES = new String[]{};
     private String[] additionalIgnoreProperties = DEFAULT_ADDITIONAL_IGNORE_PROPERTIES;
-    @Property(label = "Additional ignore properties",
-            description = "Property names that are to be ignored when determining if an oak index has changed, as well as what properties should be removed/updated.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
     public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
 
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Ensure Oak Index Manager",
+            description = "Manage for ensuring oak indexes."
+    )
+    @interface Config {
+
+        @AttributeDefinition(
+                name = "Additional ignore properties",
+                description = "Property names that are to be ignored when determining if an oak index has changed, "
+                        + "as well as what properties should be removed/updated.",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] properties_ignore() default {};
+
+        String webconsole_configurationFactory_nameHint() default "Additional Ignore properties: {properties.ignore}";
+
+    }
 
     // Disable this feature on AEM as a Cloud Service
     @Reference(target="(distribution=classic)")
     RequireAem requireAem;
 
     @Reference(
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        referenceInterface = AppliableEnsureOakIndex.class,
-        policy = ReferencePolicy.DYNAMIC
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policyOption = ReferencePolicyOption.GREEDY,
+            policy = ReferencePolicy.DYNAMIC,
+            fieldOption = FieldOption.UPDATE
     )
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
@@ -216,8 +208,8 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
 
     @Activate
-    protected void activate(Map<String, Object> config) {
-        additionalIgnoreProperties = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+    protected void activate(Config config) {
+        additionalIgnoreProperties = config.properties_ignore();
     }
     
     
