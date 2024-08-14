@@ -22,7 +22,7 @@ import com.adobe.acs.commons.replication.AgentHosts;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.AgentManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;

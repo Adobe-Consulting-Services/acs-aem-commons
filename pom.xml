@@ -25,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>6.6.1-SNAPSHOT</version>
+    <version>6.6.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -93,7 +93,7 @@
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1713209580</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1719333213</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -472,7 +472,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>9.0.10</version>
+                    <version>10.0.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -939,6 +939,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 
     <modules>
         <module>bundle</module>
+        <module>bundle-onprem</module>
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>

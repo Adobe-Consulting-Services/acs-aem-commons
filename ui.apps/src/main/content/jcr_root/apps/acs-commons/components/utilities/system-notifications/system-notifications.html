@@ -17,13 +17,14 @@
   -->
 
 <!DOCTYPE html>
-<html class="coral-App">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
     <title>${'System Notification' @ i18n}</title>
+
     <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
          data-sly-call="${clientlib.all @ categories= 'acs-commons.system-notifications.page' }"/>
     <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
@@ -31,13 +32,20 @@
 
 
 </head>
-<body id="acsCommons-System-Notifications-Page" class="coral--light">
-<form id="fn-acsCommons-Notifications-form"
-      onsubmit="return false;"
+<body id="acsCommons-System-Notifications-Page" class="coral-light">
+
+<h1 class="coral-Heading coral-Heading--1">${'System Notification' @ i18n}</h1>
+
+<div class="preview"
+     data-fn-acs-commons-system-notification-preview="${currentPage.path}.notification.html">
+    <sly data-sly-include="notification/notification.jsp"></sly>
+</div>
+
+
+<form data-fn-acs-commons-system-notification-form
+      class="form"
       action="${resource.path}"
-      method="post"
-      class="coral-Wizard"
-      data-init="flexwizard">
+      method="post">
 
     <input type="hidden" name="_charset_" value="utf-8">
     <input type="hidden" name="./enabled@TypeHint" value="Boolean"/>
@@ -51,136 +59,103 @@
     <input type="hidden" name="./onTime@TypeHint" value="Date"/>
     <input type="hidden" name="./offTime@TypeHint" value="Date"/>
 
-    <nav class="js-coral-Wizard-nav coral-Wizard-nav coral--dark">
-        <ol class="coral-Wizard-steplist">
-            <li class="js-coral-Wizard-steplist-item coral-Wizard-steplist-item">${'System Notification' @ i18n}
-            </li>
-        </ol>
-    </nav>
-    <div class="acsCommons-System-Notifications-Page-form">
-        <div class="js-coral-Wizard-step coral-Wizard-step">
-            <a class="js-coral-Wizard-step-control coral-Button" href="/acs-commons.html/etc/acs-commons/notifications"
-               data-action="cancel">Back</a>
-            <button class="fn-acsCommons-Notifications-save js-coral-Wizard-step-control coral-Button" type="button"
-                    data-action="next">Save
-            </button>
+    <div class="enabled">
+        <label id="enabled" class="coral-Form-fieldlabel">Enabled</label>
+        <coral-switch class="coral-Form-field"
+                      labelledby="enabled"
+                      name="./enabled" value="true"
+                      data-sly-attribute.checked="${pageProperties.enabled}"></coral-switch>
+    </div>
 
-            <h2 class="coral-Heading coral-Heading--2">${'System Notification' @ i18n}</h2>
-
-            <div id="acsCommons-System-Notifications">
-                <div data-sly-include="notification/notification.jsp"></div>
-            </div>
-
-            <section class="coral-Form-fieldset">
-
-                <div class="acsCommons-System-Notifications-Form-row">
-                    <label class="coral-Checkbox">
-                        <input class="coral-Checkbox-input" type="checkbox" name="./enabled" value="true"
-                               data-sly-attribute.checked="${pageProperties.enabled}"/>
-
-                        <span class="coral-Checkbox-checkmark"></span>
-                        <span class="coral-Checkbox-description">Enabled</span>
-                    </label>
-                </div>
-
-                <div class="acsCommons-System-Notifications-Form-row">
-                    <label class="coral-Form-fieldlabel">Style</label>
-                    <div>
-                    <span class="coral-Select" data-init="select">
-                      <button type="button" class="coral-Select-button coral-MinimalButton">
-                          <span class="coral-Select-button-text">Select a style</span>
-                      </button>
-                      <select class="coral-Select-select" name="./style">
-                          <option data-sly-attribute.selected="${pageProperties.style == 'green' }"
-                                  value="green">Green</option>
-                          <option data-sly-attribute.selected="${pageProperties.style == 'blue'  }"
-                                  value="blue">Blue</option>
-                          <option data-sly-attribute.selected="${pageProperties.style == 'yellow'}" value="yellow">Yellow</option>
-                          <option data-sly-attribute.selected="${pageProperties.style == 'red'   }"
-                                  value="red">Red</option>
-                      </select>
-                    </span>
-                    </div>
-                </div>
-
-                <div class="acsCommons-System-Notifications-Form-row">
-                    <label class="coral-Form-fieldlabel">Title</label>
-                    <input type="text"
-                           class="coral-Textfield acsCommons-System-Notifications-Page-input--text"
-                           name="./jcr:title"
-                           value="${properties.jcr:title}"/>
-                </div>
-
-                <div class="acsCommons-System-Notifications-Form-row">
-                    <label class="coral-Form-fieldlabel">Message</label>
-                    <textarea
-                            class="coral-Textfield coral-Textfield--multiline acsCommons-System-Notifications-Page-input--textarea"
-                            rows="6"
-                            name="./jcr:description">${properties.jcr:description}</textarea>
-                </div>
+    <div class="title">
+        <label id="title" class="coral-Form-fieldlabel">Notification title</label>
+        <input is="coral-textfield" placeholder="Notification title"
+               labelledby="title"
+               name="./jcr:title"
+               value="${properties.jcr:title}"
+               required
+               data-fn-acs-commons-system-notification-update-preview>
+    </div>
 
 
-                <div class="acsCommons-System-Notifications-Form-row">
-                    <label class="coral-Checkbox">
-                        <input class="coral-Checkbox-input" type="checkbox" name="./dismissible" value="true"
-                               data-sly-attribute.checked="${pageProperties.dismissible}"/>
+    <div class="message">
+        <label id="message" class="coral-Form-fieldlabel">Notification message</label>
+        <textarea is="coral-textarea"
+                  labelledby="message"
+                  rows="6"
+                  name="./jcr:description">${properties.jcr:description}</textarea>
+    </div>
 
-                        <span class="coral-Checkbox-checkmark"></span>
-                        <span class="coral-Checkbox-description">Dismissible</span>
-                    </label>
-                </div>
+    <div class="style">
+        <label id="style" class="coral-Form-fieldlabel">Style</label>
+        <coral-select name="style" placeholder="Choose a style" name="./style" labelledby="style">
+            <coral-select-item value="green" data-sly-attribute.selected="${pageProperties.style == 'green' }">
+                Green
+            </coral-select-item>
+            <coral-select-item value="blue" data-sly-attribute.selected="${pageProperties.style == 'bleu' }">
+                Blue
+            </coral-select-item>
+            <coral-select-item value="yellow" data-sly-attribute.selected="${pageProperties.style == 'yellow' }">
+                Yellow
+            </coral-select-item>
+            <coral-select-item value="red" data-sly-attribute.selected="${pageProperties.style == 'red' }">
+                Red
+            </coral-select-item>
+        </coral-select>
+    </div>
 
-                <div class="acsCommons-System-Notifications-Form-row">
+    <div class="dismissible">
+        <label id="dismissible" class="coral-Form-fieldlabel">Dismissible?</label>
+        <coral-switch class="coral-Form-field"
+                      labelledby="dismissible"
+                      name="./dismissible" value="true"
+                      data-sly-attribute.checked="${pageProperties.dismissible}"></coral-switch>
+    </div>
 
-                    <div style="width:50%; float: left;">
-                        <label class="coral-Form-fieldlabel">On Time</label>
+    <div class="dismissable-label">
+        <label id="dismissibleLabel" class="coral-Form-fieldlabel">Dismissible label</label>
+        <input is="coral-textfield" placeholder="Defaults to 'Close'"
+               labelledby="dismissibleLabel"
+               name="./dismissibleLabel"
+               value="${properties.dismissibleLabel}">
+    </div>
 
-                        <div>
-                            <div class="coral-Datepicker coral-InputGroup acsCommons-System-Notifications-Page-input--datepicker"
-                                 data-displayed-format="llll"
-                                 data-stored-format="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
-                                 data-init="datepicker">
-                                <input class="coral-InputGroup-input coral-Textfield"
-                                       value="${'YYYY-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=pageProperties.onTime}"
-                                       type="datetime"
-                                       name="./onTime"/>
-                                <span class="coral-InputGroup-button">
-                                <button class="coral-Button coral-Button--secondary coral-Button--square" type="button"
-                                        title="Datetime Picker">
-                                    <i class="coral-Icon coral-Icon--sizeS coral-Icon--calendar"></i>
-                                </button>
-                            </span>
-                            </div>
-                        </div>
-                    </div>
+    <div class="on-time">
+        <label id="on-time" class="coral-Form-fieldlabel">On time</label>
+        <coral-datepicker labelledby="on-time"
+                          placeholder="Start showing this notification at..."
+                          name="./onTime"
+                          value="${'YYYY-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=pageProperties.onTime}"
+                          valueformat="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
+                          displayformat="llll"
+                          startday="0">
+        </coral-datepicker>
+    </div>
 
-                    <div style="width:50%; float: left;">
-                        <label class="coral-Form-fieldlabel">Off Time</label>
 
-                        <div>
-                            <div class="coral-Datepicker coral-InputGroup acsCommons-System-Notifications-Page-input--datepicker"
-                                 data-displayed-format="llll"
-                                 data-stored-format="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
-                                 data-init="datepicker">
-                                <input class="coral-InputGroup-input coral-Textfield"
-                                       value="${'YYYY-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=pageProperties.offTime}"
-                                       type="datetime"
-                                       name="./offTime"/>
-                                <span class="coral-InputGroup-button">
-                                <button class="coral-Button coral-Button--secondary coral-Button--square" type="button"
-                                        title="Datetime Picker">
-                                    <i class="coral-Icon coral-Icon--sizeS coral-Icon--calendar"></i>
-                                </button>
-                            </span>
-                            </div>
-                        </div>
-                    </div>
+    <div class="off-time">
+        <label id="off-time" class="coral-Form-fieldlabel">Off time</label>
+        <coral-datepicker labelledby="off-time"
+                          placeholder="Stop showing this notification at..."
+                          name="./offTime"
+                          value="${'YYYY-MM-dd\'T\'HH:mm:ss.SSSZ' @ format=pageProperties.offTime}"
+                          valueformat="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
+                          displayformat="llll"
+                          startday="1">
+        </coral-datepicker>
+    </div>
 
-                    <div style="clear:both;"></div>
-                </div>
+    <div class="save">
+        <button variant="secondary" is="coral-button"
+                data-fn-acs-commons-system-notification-cancel="/acs-commons.html/etc/acs-commons/notifications">
+            ${'Cancel' @ i18n}
+        </button>
 
-            </section>
-        </div>
+        <button variant="cta" is="coral-button"
+                data-fn-acs-commons-system-notification-save>
+            ${'Save' @ i18n}
+        </button>
+
     </div>
 </form>
 </body>

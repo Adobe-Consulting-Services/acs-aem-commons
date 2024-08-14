@@ -27,8 +27,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import javax.management.NotCompliantMBeanException;
-
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;

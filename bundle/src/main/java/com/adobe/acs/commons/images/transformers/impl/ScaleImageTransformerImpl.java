@@ -20,7 +20,7 @@ package com.adobe.acs.commons.images.transformers.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.osgi.service.component.annotations.Component;

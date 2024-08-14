@@ -24,7 +24,7 @@ import com.adobe.granite.taskmanagement.TaskAction;
 import com.adobe.granite.taskmanagement.TaskManager;
 import com.adobe.granite.taskmanagement.TaskManagerException;
 import com.adobe.granite.taskmanagement.TaskManagerFactory;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;

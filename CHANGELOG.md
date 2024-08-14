@@ -10,6 +10,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Changed
+
+- #3408 - Reduce usage of Apache Commons Lang 2
+- #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
+- #3390 - Remove usage of commons collections 3
+
+### Fixed
+
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+
+## 6.6.2 - 2024-06-25
+
+### Fixed
+
+- #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
+
 ### Added
 
 - #3333 - Use lodash embedded by ACS AEM Commons
@@ -19,6 +35,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3241 - Fix overlapping Service-Component header entries leading to double registration of components
+- #3362 - Prevent System notification while exporting / updating experience fragment to Adobe Target
 
 ## 6.6.0 - 2024-04-15
 
@@ -30,9 +47,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3306 - Sling Model Tag injector
 - #3320 - Content Sync: add an option to disable ssl cert check
 
-### Fixed 
+### Fixed
 
-- #3310 - User mapping | moved author specific user mapping from config to config.author 
+- #3310 - User mapping | moved author specific user mapping from config to config.author
 - #3301 - CM report fix WrongLogLevelInCatchBlock issue
 - #2854 - Code optimization: convert class fields to local variables
 - #2279 - Unit tests coverage for Deck Dynamo: servlet and service configuration

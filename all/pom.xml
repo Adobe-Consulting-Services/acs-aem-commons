@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.6.1-SNAPSHOT</version>
+        <version>6.6.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -60,6 +60,13 @@
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-bundle</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle-onprem</artifactId>
                                     <target>/apps/acs-commons/install</target>
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
