@@ -19,8 +19,6 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.tagging.TagManager;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
@@ -29,6 +27,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.servlets.post.SlingPostProcessor;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +49,14 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * ACS AEM Commons - Property Merge Sling POST Processor
  */
-@Component
-@Service
+@Component(service = {SlingPostProcessor.class})
 public class PropertyMergePostProcessor implements SlingPostProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PropertyMergePostProcessor.class);
@@ -72,7 +71,7 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
 
     @Override
     public final void process(final SlingHttpServletRequest request,
-            final List<Modification> modifications) throws Exception {
+                              final List<Modification> modifications) throws Exception {
 
         final List<PropertyMerge> propertyMerges = this.getPropertyMerges(request);
 
@@ -80,10 +79,10 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
 
         for (final PropertyMerge propertyMerge : propertyMerges) {
             this.merge(resource,
-                    propertyMerge.getDestination(),
-                    propertyMerge.getSources(),
-                    propertyMerge.getTypeHint(),
-                    propertyMerge.isAllowDuplicates())
+                            propertyMerge.getDestination(),
+                            propertyMerge.getSources(),
+                            propertyMerge.getTypeHint(),
+                            propertyMerge.isAllowDuplicates())
                     .ifPresent(modifiedResource -> {
                         modifications.add(Modification.onModified(modifiedResource.getPath()));
                         log.debug("Merged property values from {} into [ {} ]",
@@ -135,12 +134,12 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
 
         // Convert the Mappings into PropertyMerge objects
         return mapping.entrySet().stream().map(
-                entry -> new PropertyMerge(
-                        entry.getKey(),
-                        entry.getValue(),
-                        areDuplicatesAllowed(requestParameters, entry.getKey()),
-                        getFieldTypeHint(requestParameters, entry.getKey())
-                ))
+                        entry -> new PropertyMerge(
+                                entry.getKey(),
+                                entry.getValue(),
+                                areDuplicatesAllowed(requestParameters, entry.getKey()),
+                                getFieldTypeHint(requestParameters, entry.getKey())
+                        ))
                 .collect(Collectors.toList());
     }
 
@@ -213,28 +212,27 @@ public class PropertyMergePostProcessor implements SlingPostProcessor {
      * Merges the values found in the the source properties into the destination
      * property as a multi-value. The values of the source properties and
      * destination properties must all be the same property type.
-     *
+     * <p>
      * The unique set of properties will be stored in
      *
-     * @param resource the resource to look for the source and destination
-     * properties on
-     * @param destination the property to store the collected properties.
-     * @param sources the properties to collect values from for merging
-     * @param typeHint the data type that should be used when reading and
-     * storing the data
+     * @param resource        the resource to look for the source and destination
+     *                        properties on
+     * @param destination     the property to store the collected properties.
+     * @param sources         the properties to collect values from for merging
+     * @param typeHint        the data type that should be used when reading and
+     *                        storing the data
      * @param allowDuplicates true to allow duplicates values in the destination
-     * property; false to make values unique
+     *                        property; false to make values unique
      * @return Optional resource updated, if any
      */
     protected final <T> Optional<Resource> merge(final Resource resource, final String destination,
-            final Collection<String> sources, final Class<T> typeHint,
-            final boolean allowDuplicates) throws PersistenceException {
+                                                 final Collection<String> sources, final Class<T> typeHint,
+                                                 final boolean allowDuplicates) throws PersistenceException {
 
         ResourceResolver rr = resource.getResourceResolver();
 
         // Create an empty array of type T
-        @SuppressWarnings("unchecked")
-        final T[] emptyArray = (T[]) Array.newInstance(typeHint, 0);
+        @SuppressWarnings("unchecked") final T[] emptyArray = (T[]) Array.newInstance(typeHint, 0);
 
         Collection<T> collectedValues;
 

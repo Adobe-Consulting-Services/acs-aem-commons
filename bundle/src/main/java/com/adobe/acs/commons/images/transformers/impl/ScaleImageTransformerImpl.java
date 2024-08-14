@@ -21,13 +21,10 @@ package com.adobe.acs.commons.images.transformers.impl;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,16 +36,12 @@ import java.util.HashMap;
  * percentage (e.g. "50%").
  * Rounding is one of "round" (using Math.round), "up" (using Math.ceil), or "down" (using Math.floor)
  * "round" being the default
- *
  */
-@Component
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = ScaleImageTransformerImpl.TYPE
-        )
-})
-@Service
+@Component(
+        service = {ImageTransformer.class},
+        property = {
+                ImageTransformer.PROP_TYPE + "=" + ScaleImageTransformerImpl.TYPE
+        })
 public class ScaleImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ScaleImageTransformerImpl.class);
 
@@ -60,7 +53,7 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
     private static final String ROUND_UP = "up";
     private static final String ROUND_DOWN = "down";
 
-    @Reference(target = "(" + ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE  +")")
+    @Reference(target = "(" + ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE + ")")
     ImageTransformer resizeImageTransformer;
 
     @Override
@@ -106,8 +99,8 @@ public class ScaleImageTransformerImpl implements ImageTransformer {
             // Invoke the ResizeImageTransformer with the new values
 
             final ValueMap params = new ValueMapDecorator(new HashMap<String, Object>());
-            params.put(ResizeImageTransformerImpl.KEY_WIDTH, (int)newWidth);
-            params.put(ResizeImageTransformerImpl.KEY_HEIGHT, (int)newHeight);
+            params.put(ResizeImageTransformerImpl.KEY_WIDTH, (int) newWidth);
+            params.put(ResizeImageTransformerImpl.KEY_HEIGHT, (int) newHeight);
 
             layer = resizeImageTransformer.transform(layer, params);
         }

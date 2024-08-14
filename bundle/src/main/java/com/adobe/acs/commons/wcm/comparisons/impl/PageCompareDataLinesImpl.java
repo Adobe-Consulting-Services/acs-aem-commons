@@ -22,15 +22,13 @@ import com.adobe.acs.commons.wcm.comparisons.impl.lines.LinesGenerator;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
 import com.google.common.base.Function;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.jetbrains.annotations.Nullable;
+import org.osgi.service.component.annotations.Component;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Component(metatype = false)
-@Service
+@Component(service = {PageCompareDataLines.class})
 public class PageCompareDataLinesImpl implements PageCompareDataLines {
 
     @Override

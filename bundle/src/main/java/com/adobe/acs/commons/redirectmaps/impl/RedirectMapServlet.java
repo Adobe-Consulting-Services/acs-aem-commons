@@ -20,13 +20,15 @@ package com.adobe.acs.commons.redirectmaps.impl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +40,19 @@ import com.google.common.net.MediaType;
  * Servlet for generating an Apache RedirectMap text file from an uploaded file
  * and a list vanity properties in cq:Page and dam:Asset nodes.
  */
-@SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
-        "redirectmap" }, extensions = { "txt" }, metatype = false)
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/redirectmappage",
+        methods = "GET",
+        extensions = "txt",
+        selectors = "redirectmap")
 public class RedirectMapServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
-    
+
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
+    @Reference(target = "(distribution=classic)")
     transient RequireAem requireAem;
 
     @Override

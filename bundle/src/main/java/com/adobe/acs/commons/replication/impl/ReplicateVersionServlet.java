@@ -23,33 +23,35 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * ACS AEM Commons - Replicate Version Servlet
  * Servlet end-point used to initiate replication of resource versions.
  */
 @SuppressWarnings("serial")
-@SlingServlet(
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
         resourceTypes = "acs-commons/components/utilities/version-replicator",
-        selectors = "replicateversion",
-        extensions = "json",
         methods = "POST",
-        generateComponent = true)
+        extensions = "json",
+        selectors = "replicateversion")
+
 public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
     private static final Logger log = LoggerFactory

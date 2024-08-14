@@ -26,16 +26,15 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,24 +61,23 @@ import java.util.Map;
  * <p>
  * https://docs.adobe.com/docs/en/cq/5-6-1/developing/pageinfo.html#Creating a Page Information Provider
  */
-@org.apache.felix.scr.annotations.Component
-@Service(PageInfoProvider.class)
+@org.osgi.service.component.annotations.Component(service = {PageInfoProvider.class})
 public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvider, EventListener {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesPageInfoProvider.class);
 
     private static final String SERVICE_NAME = "shared-component-props";
 
     @Reference
-    private PageRootProvider pageRootProvider;
+    private transient PageRootProvider pageRootProvider;
 
     @Reference
-    private SharedComponentProperties sharedComponentProperties;
+    private transient SharedComponentProperties sharedComponentProperties;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private transient ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private SlingRepository repository;
+    private transient SlingRepository repository;
 
     @SuppressWarnings("AEM Rules:AEM-3") // used for observation
     private Session respositorySession;
@@ -95,7 +93,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * can determine whether or not to enable shared/global properties for a component on a site.
      */
     @Override
-    @SuppressWarnings( "deprecation" )
+    @SuppressWarnings("deprecation")
     public void updatePageInfo(SlingHttpServletRequest request, org.apache.sling.commons.json.JSONObject info, Resource resource)
             throws org.apache.sling.commons.json.JSONException {
         if (scheduledSharedComponentsMapUpdate > 0 && System.currentTimeMillis() > scheduledSharedComponentsMapUpdate) {
@@ -136,7 +134,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
     /**
      * Listen for add/update/delete of shared dialog nodes, in order to trigger an update of the
      * map of components that have shared property dialogs.
-     *
+     * <p>
      * Technically a delete may not be caught if a node higher in the ancestry is deleted (thus
      * deleting its children) but having a stale entry in the map does not cause any problems.
      */
@@ -167,7 +165,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
     /**
      * Schedule an update of the map of components with shared/global properties to be updated
      * 5 seconds from now.
-     *
+     * <p>
      * This handles race conditions where the map calculation happens before all nodes are installed,
      * and also prevents stampedes from multiple JCR update events such as during a package installation.
      */
@@ -179,13 +177,13 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
     /**
      * Traverse the entire set of components in the /apps directory and create a map of all component types
      * that have shared/global config dialogs.
-     *
+     * <p>
      * This is used by the JS libs in the authoring interface to determine if a component should show the
      * options for editing shared/global configs.
      */
     private void updateSharedComponentsMap() {
         Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)){
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
             log.debug("Calculating map of components with shared properties dialogs");
 
             resourceResolver.refresh();

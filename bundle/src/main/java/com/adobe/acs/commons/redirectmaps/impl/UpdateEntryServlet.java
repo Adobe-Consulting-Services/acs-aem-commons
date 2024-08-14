@@ -20,13 +20,15 @@ package com.adobe.acs.commons.redirectmaps.impl;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +37,19 @@ import com.adobe.acs.commons.util.RequireAem;
 /**
  * Servlet for updating a line in the redirect map text file
  */
-@SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/redirectmappage" }, selectors = {
-                "updateentry" }, extensions = { "json" }, metatype = false)
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/redirectmappage",
+        methods = "POST",
+        extensions = "json",
+        selectors = "updateentry")
 public class UpdateEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -1704915461516132101L;
     private static final Logger log = LoggerFactory.getLogger(UpdateEntryServlet.class);
-    
+
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
+    @Reference(target = "(distribution=classic)")
     transient RequireAem requireAem;
 
     @Override

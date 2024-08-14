@@ -32,11 +32,10 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +52,7 @@ import com.day.cq.wcm.api.PageManager;
  * ACS AEM Commons - Replication Status Manager
  * OSGi Service for changing the replication status of resources.
  */
-@Component
-@Service
+@Component(service = {ReplicationStatusManager.class})
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
@@ -97,7 +95,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                                            final Calendar replicatedAt,
                                            final Status status,
                                            final String... paths) throws RepositoryException, PersistenceException {
-       setReplicationStatus(resourceResolver, Collections.emptySet(), replicatedBy, replicatedAt, status, paths);
+        setReplicationStatus(resourceResolver, Collections.emptySet(), replicatedBy, replicatedAt, status, paths);
     }
 
     @Override
@@ -147,7 +145,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             replicatedAtClean = Calendar.getInstance();
             log.warn("The provided [ replicatedAt ] parameter is null. Force setting the [ {} ] value to [ {} ]",
                     ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED,
-                    new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime()));
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime()));
         }
 
         String replicatedByClean = replicatedBy;
@@ -213,7 +211,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
      * {@inheritDoc}
      */
     public final void clearReplicationStatus(final ResourceResolver resourceResolver,
-                                       final Resource... resources) throws RepositoryException, PersistenceException {
+                                             final Resource... resources) throws RepositoryException, PersistenceException {
         this.setReplicationStatus(resourceResolver, null, null, Status.CLEAR, resources);
     }
 
@@ -246,7 +244,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     /**
      * Checks if the node has the mixin.
      *
-     * @param node the node obj
+     * @param node  the node obj
      * @param mixin the mixin name
      * @return true if the node has the mixin
      * @throws RepositoryException

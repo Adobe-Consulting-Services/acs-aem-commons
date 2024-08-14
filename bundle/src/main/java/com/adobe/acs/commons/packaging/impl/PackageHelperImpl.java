@@ -23,9 +23,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -38,6 +35,8 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +51,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ACS AEM Commons - Package Helper Helper utility for creating CRX Packages and
+ * ACS AEM Commons - Package Helper utility for creating CRX Packages and
  * using the ACS AEM Commons packager.
  */
-@Component
-@Service
+@Component(service = {PackageHelper.class})
 public final class PackageHelperImpl implements PackageHelper {
 
     private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);
@@ -110,8 +108,8 @@ public final class PackageHelperImpl implements PackageHelper {
 
     @SuppressWarnings("squid:S3776")
     public Version getNextVersion(final JcrPackageManager jcrPackageManager,
-            final String groupName, final String name,
-            final String version) throws RepositoryException {
+                                  final String groupName, final String name,
+                                  final String version) throws RepositoryException {
         final Node packageRoot = jcrPackageManager.getPackageRoot(false);
         final Version configVersion = Version.create(version);
 
@@ -208,8 +206,8 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public void removePackage(final JcrPackageManager jcrPackageManager,
-            final String groupName, final String name,
-            final String version) throws RepositoryException {
+                              final String groupName, final String name,
+                              final String version) throws RepositoryException {
         final PackageId packageId = new PackageId(groupName, name, version);
         try (final JcrPackage jcrPackage = jcrPackageManager.open(packageId)) {
 
@@ -226,9 +224,9 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public JcrPackage createPackage(final Collection<Resource> resources, final Session session,
-            final String groupName, final String name, String version,
-            final ConflictResolution conflictResolution,
-            final Map<String, String> packageDefinitionProperties)
+                                    final String groupName, final String name, String version,
+                                    final ConflictResolution conflictResolution,
+                                    final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
@@ -246,9 +244,9 @@ public final class PackageHelperImpl implements PackageHelper {
      */
     @Override
     public JcrPackage createPackageForPaths(final Collection<String> paths, final Session session,
-            final String groupName, String name, final String version,
-            final ConflictResolution conflictResolution,
-            Map<String, String> packageDefinitionProperties)
+                                            final String groupName, String name, final String version,
+                                            final ConflictResolution conflictResolution,
+                                            Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
@@ -266,10 +264,10 @@ public final class PackageHelperImpl implements PackageHelper {
      */
     @SuppressWarnings("squid:S2095") // closing is responsibility of caller
     public JcrPackage createPackageFromPathFilterSets(final Collection<PathFilterSet> pathFilterSets,
-            final Session session,
-            final String groupName, final String name, String version,
-            final ConflictResolution conflictResolution,
-            final Map<String, String> packageDefinitionProperties)
+                                                      final Session session,
+                                                      final String groupName, final String name, String version,
+                                                      final ConflictResolution conflictResolution,
+                                                      final Map<String, String> packageDefinitionProperties)
             throws IOException, RepositoryException {
 
         final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);

@@ -25,11 +25,10 @@ import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -44,12 +43,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Component
-@Service
+@Component(service = {QueryHelper.class})
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private transient QueryBuilder queryBuilder;
 
     public static final String QUERY_BUILDER = "queryBuilder";
 
@@ -72,7 +70,7 @@ public class QueryHelperImpl implements QueryHelper {
         if (StringUtils.isEmpty(statement)) {
             return Collections.emptyList();
         }
-        
+
         final String[] lines = statement.split("\\r?\\n");
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {

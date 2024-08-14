@@ -21,21 +21,19 @@ import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.util.RequireAem;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.mime.MimeTypeService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+@Component(service = {ProcessDefinitionFactory.class})
 public class FileAssetIngestorFactory extends AuthorizedGroupProcessDefinitionFactory<FileAssetIngestor> {
 
     // Disable this feature on AEM as a Cloud Service
-    @Reference(target="(distribution=classic)")
-    RequireAem requireAem;
+    @Reference(target = "(distribution=classic)")
+    transient RequireAem requireAem;
 
     @Reference
-    MimeTypeService mimetypeService;
+    transient MimeTypeService mimetypeService;
 
     @Override
     public String getName() {
@@ -46,7 +44,7 @@ public class FileAssetIngestorFactory extends AuthorizedGroupProcessDefinitionFa
     public FileAssetIngestor createProcessDefinitionInstance() {
         return new FileAssetIngestor(mimetypeService);
     }
-    
+
     @Override
     protected final String[] getAuthorizedGroups() {
         return AssetIngestor.AUTHORIZED_GROUPS;
