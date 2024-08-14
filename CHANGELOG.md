@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 - #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
 - #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 
 ### Changed
 
@@ -30,6 +31,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
+
 
 ### Added
 
