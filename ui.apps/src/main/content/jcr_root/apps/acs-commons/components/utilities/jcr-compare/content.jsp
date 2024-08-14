@@ -22,7 +22,7 @@
           import="com.adobe.acs.commons.replication.AemPublishAgentFilter,
                   com.adobe.acs.commons.replication.AgentHosts,
                   java.util.List,
-                  org.apache.commons.lang.StringUtils"%><%
+                  org.apache.commons.lang3.StringUtils"%><%
 
     AgentHosts agentHosts = sling.getService(AgentHosts.class);
     List<String> hosts = agentHosts.getHosts(AemPublishAgentFilter.AEM_PUBLISH_AGENT_FILTER);

@@ -22,7 +22,7 @@ import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.SimpleEmail;

@@ -18,7 +18,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.tagging.TagManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;

@@ -24,7 +24,7 @@
           javax.jcr.RepositoryException,
           javax.jcr.Session,
           javax.jcr.security.AccessControlManager,
-          org.apache.commons.lang.StringUtils,
+          org.apache.commons.lang3.StringUtils,
           org.apache.jackrabbit.util.Text,
           org.apache.sling.api.resource.ResourceResolver,
           com.adobe.granite.ui.components.AttrBuilder,

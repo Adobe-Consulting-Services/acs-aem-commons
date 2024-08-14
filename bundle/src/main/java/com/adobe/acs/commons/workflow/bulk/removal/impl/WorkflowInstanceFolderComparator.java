@@ -18,7 +18,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.Comparator;
