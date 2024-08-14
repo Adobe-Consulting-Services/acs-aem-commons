@@ -9,15 +9,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
-- #3376 - Redirect Manager: refactor code to not require service user
+
 
 ### Fixed
 
 - #3380 - Remove forced red theme from system notification text body
 - #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 
 ### Changed
 
+- #3376 - Redirect Manager: refactor code to not require service user
 - #3408 - Reduce usage of Apache Commons Lang 2
 - #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
 - #3390 - Remove usage of commons collections 3
@@ -27,11 +29,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 
+
 ## 6.6.2 - 2024-06-25
 
 ### Fixed
 
 - #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
+
 
 ### Added
 
