@@ -20,7 +20,7 @@ package com.adobe.acs.commons.marketo.client;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -42,7 +42,7 @@ public class MarketoApiException extends IOException {
         if (response != null) {
             try {
                 return StringEscapeUtils
-                        .escapeHtml(StringUtils.abbreviate(EntityUtils.toString(response.getEntity()), 100));
+                        .escapeHtml4(StringUtils.abbreviate(EntityUtils.toString(response.getEntity()), 100));
             } catch (ParseException | IOException e) {
                 log.warn("Failed to read response from: {}", response, e);
             }

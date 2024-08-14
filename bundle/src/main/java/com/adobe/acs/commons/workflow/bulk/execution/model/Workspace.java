@@ -20,8 +20,8 @@ package com.adobe.acs.commons.workflow.bulk.execution.model;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
