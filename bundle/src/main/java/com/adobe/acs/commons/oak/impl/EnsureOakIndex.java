@@ -17,80 +17,84 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.jcr.RepositoryException;
-
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.oak.EnsureOakIndexManager;
+import javax.jcr.RepositoryException;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 //@formatter:off
 @Component(
-        label = "ACS AEM Commons - Ensure Oak Index",
-        description = "Component Factory to manage Oak indexes.",
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+        configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}",
-                propertyPrivate = true
-        )
-})
-@Service
+@Designate(ocd = EnsureOakIndex.Config.class, factory = true)
 //@formatter:on
 public class EnsureOakIndex implements AppliableEnsureOakIndex {
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
 
     //@formatter:off
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
-    @Property(label = "Ensure Definitions Path",
-            description = "The absolute path to the resource containing the "
-                    + "ACS AEM Commons ensure definitions",
-            value = DEFAULT_ENSURE_DEFINITIONS_PATH)
-    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
-
-
     private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
-    @Property(label = "Oak Indexes Path",
-            description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
-            value = DEFAULT_OAK_INDEXES_PATH)
-    public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
-
     private static final boolean DEFAULT_IMMEDIATE = true;
-    @Property(
-            label = "Immediate",
-            description = "Apply the indexes on startup of service. Defaults to [ true ]",
-            boolValue = DEFAULT_IMMEDIATE
-    )
+    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
+    public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
     public static final String PROP_IMMEDIATE = "immediate";
-    
-    private static final String[] DEFAULT_ADDITIONAL_IGNORE_PROPERTIES = new String[]{};
-    @Property(label = "Additional ignore properties",
-            description = "Property names that are to be ignored when determining if an oak index has changed, as well as what properties should be removed/updated.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
     public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Ensure Oak Index",
+            description = "Component Factory to manage Oak indexes."
+    )
+    @interface Config {
+
+        @AttributeDefinition(
+                name = "Ensure Definitions Path",
+                description = "The absolute path to the resource containing the "
+                        + "ACS AEM Commons ensure definitions"
+        )
+        String ensure$_$definitions_path() default DEFAULT_ENSURE_DEFINITIONS_PATH;
+
+        @AttributeDefinition(
+                name = "Oak Indexes Path",
+                description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]"
+        )
+        String oak$_$indexes_path() default DEFAULT_OAK_INDEXES_PATH;
+
+        @AttributeDefinition(
+                name = "Immediate",
+                description = "Apply the indexes on startup of service. Defaults to [ true ]"
+        )
+        boolean immediate() default DEFAULT_IMMEDIATE;
+
+        @AttributeDefinition(
+                name = "Additional ignore properties",
+                description = "Property names that are to be ignored when determining if an oak index has changed, "
+                        + "as well as what properties should be removed/updated.",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] properties_ignore() default {};
+
+        String webconsole_configurationFactory_nameHint() default "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}";
+
+    }
 
     @Reference
     private ChecksumGenerator checksumGenerator;
@@ -101,8 +105,12 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     @Reference
     private Scheduler scheduler;
     
-    @Reference
-    private EnsureOakIndexManager indexManager;
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY
+    )
+    private volatile EnsureOakIndexManager indexManager;
 
     private String ensureDefinitionsPath;
     private String oakIndexesPath;
@@ -112,13 +120,11 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     //@formatter:on
 
     @Activate
-    protected final void activate(Map<String, Object> config) throws RepositoryException {
+    protected final void activate(Config config) throws RepositoryException {
 
-        ensureDefinitionsPath = PropertiesUtil.toString(config.get(PROP_ENSURE_DEFINITIONS_PATH),
-                DEFAULT_ENSURE_DEFINITIONS_PATH);
+        ensureDefinitionsPath = config.ensure$_$definitions_path();
 
-        oakIndexesPath = PropertiesUtil.toString(config.get(PROP_OAK_INDEXES_PATH),
-                DEFAULT_OAK_INDEXES_PATH);
+        oakIndexesPath = config.oak$_$indexes_path();
 
         if (StringUtils.isBlank(ensureDefinitionsPath)) {
             throw new IllegalArgumentException("OSGi Configuration Property `"
@@ -128,9 +134,9 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
                     + PROP_OAK_INDEXES_PATH + "` " + "cannot be blank.");
         }
 
-        this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
+        this.immediate = config.immediate();
         
-        String[] ignoredProps = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+        String[] ignoredProps = config.properties_ignore();
         String[] indexManagerIgnoredProps = getIndexManagerConfiguredIgnoreProperties();
         
         if (ignoredProps.length == 0) {
