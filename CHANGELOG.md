@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Added
+
+- #3415 - Allow Robots.txt generation to serve different file by requested resource path
+
 ## 6.6.4 - 2024-08-14
 
 ### Fixed
