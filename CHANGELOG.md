@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ## 6.6.4 - 2024-08-14
-- #3417 - Content Sync: Added 'Recursive' option 
+- #3417 - Configurable recursion in Content Sync
 
 ### Fixed
 
