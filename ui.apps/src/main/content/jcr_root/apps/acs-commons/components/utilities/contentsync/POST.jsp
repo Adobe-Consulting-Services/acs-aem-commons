@@ -19,7 +19,12 @@
 %><%@page session="false" contentType="text/html; charset=utf-8"
 	pageEncoding="UTF-8"
     import="
-    java.util.*,
+    java.util.List,
+    java.util.Arrays,
+    java.util.ArrayList,
+    java.util.Collection,
+    java.util.Set,
+    java.util.LinkedHashSet,
     java.util.stream.Collectors,
     java.io.InputStream,
     java.io.IOException,
@@ -31,13 +36,11 @@
 	javax.json.Json,
  	javax.json.JsonArray,
  	javax.json.JsonObject,
-    org.apache.sling.api.resource.ResourceResolver,
     org.apache.sling.jcr.contentloader.ContentImporter,
 	org.apache.sling.api.resource.ResourceUtil,
 	org.apache.commons.lang3.time.DurationFormatUtils,
     org.apache.commons.io.output.TeeWriter,
-	com.adobe.acs.commons.contentsync.*,
-    org.apache.jackrabbit.JcrConstants
+	com.adobe.acs.commons.contentsync.*
 
 "%><%
 %>
@@ -228,7 +231,7 @@
 	        println(printWriter, "started " + updatedResources.size() + " workflows, in " + (System.currentTimeMillis() - t1) + " ms");
         }
         if(!dryRun){
-            persistAuditLog(resourceResolver, root, count, tempWriter.toString());
+            ConfigurationUtils.persistAuditLog(resourceResolver, root, count, tempWriter.toString());
         }
     } catch(Exception e){
         if(e.getMessage() != null && e.getMessage().startsWith("Not a date string:")){
@@ -260,37 +263,6 @@
         out.print("<span class=\"error\">");
         e.printStackTrace(new PrintWriter(out));
         out.println("</span>");
-    }
-
-    void persistAuditLog(ResourceResolver resourceResolver, String path, long count, String data) throws IOException {
-
-        String auditHome = "/var/acs-commons/contentsync/audit";
-        ResourceUtil.getOrCreateResource(resourceResolver, auditHome,
-                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED), JcrConstants.NT_FOLDER, false);
-
-        String auditResourcePath = auditHome + "/" + UUID.randomUUID();
-        Map<String, Object> auditProps = new HashMap<>();
-        auditProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
-        auditProps.put("syncPath", path);
-        auditProps.put(JcrConstants.JCR_MIXINTYPES, "mix:created");
-        auditProps.put("count", count);
-        Resource auditResource = ResourceUtil.getOrCreateResource(resourceResolver, auditResourcePath, auditProps, null, false);
-
-        String auditLogPath = auditResourcePath + "/log";
-        Resource ntFile = ResourceUtil.getOrCreateResource(resourceResolver, auditLogPath,
-                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE), null, false);
-
-        Map<String, Object> props = new HashMap<>();
-        props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_RESOURCE);
-        props.put(JcrConstants.JCR_MIMETYPE, "text/plain");
-
-        props.put(JcrConstants.JCR_DATA, new ByteArrayInputStream(data.getBytes()));
-
-        ResourceUtil.getOrCreateResource(resourceResolver, auditLogPath + "/" + JcrConstants.JCR_CONTENT,
-                props, null, false);
-
-        resourceResolver.commit();
-
     }
 
 %>

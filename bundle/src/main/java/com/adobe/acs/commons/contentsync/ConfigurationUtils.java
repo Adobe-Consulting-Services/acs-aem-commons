@@ -20,13 +20,17 @@
 package com.adobe.acs.commons.contentsync;
 
 import com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 
+import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.adobe.acs.commons.contentsync.RemoteInstance.CONNECT_TIMEOUT;
 import static com.adobe.acs.commons.contentsync.RemoteInstance.SOCKET_TIMEOUT;
@@ -63,5 +67,35 @@ public class ConfigurationUtils {
         Map<String, Object> resourceProperties = new HashMap<>();
         resourceProperties.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
         return ResourceUtil.getOrCreateResource(resourceResolver, HOSTS_PATH, resourceProperties, NT_SLING_FOLDER, true);
+    }
+
+    public static void persistAuditLog(ResourceResolver resourceResolver, String path, long count, String data) throws PersistenceException {
+
+        String auditHome = CONFIG_PATH + "/audit";
+        ResourceUtil.getOrCreateResource(resourceResolver, auditHome,
+                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED), JcrConstants.NT_FOLDER, false);
+
+        String auditResourcePath = auditHome + "/" + UUID.randomUUID();
+        Map<String, Object> auditProps = new HashMap<>();
+        auditProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+        auditProps.put("syncPath", path);
+        auditProps.put(JcrConstants.JCR_MIXINTYPES, "mix:created");
+        auditProps.put("count", count);
+        ResourceUtil.getOrCreateResource(resourceResolver, auditResourcePath, auditProps, null, false);
+
+        String auditLogPath = auditResourcePath + "/log";
+        ResourceUtil.getOrCreateResource(resourceResolver, auditLogPath,
+                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE), null, false);
+
+        Map<String, Object> props = new HashMap<>();
+        props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_RESOURCE);
+        props.put(JcrConstants.JCR_MIMETYPE, "text/plain");
+
+        props.put(JcrConstants.JCR_DATA, new ByteArrayInputStream(data.getBytes()));
+
+        ResourceUtil.getOrCreateResource(resourceResolver, auditLogPath + "/" + JcrConstants.JCR_CONTENT,
+                props, null, false);
+
+        resourceResolver.commit();
     }
 }
