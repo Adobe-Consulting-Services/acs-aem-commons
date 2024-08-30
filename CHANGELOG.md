@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Changed
+
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
+
 ## 6.6.4 - 2024-08-14
 
 ### Fixed
