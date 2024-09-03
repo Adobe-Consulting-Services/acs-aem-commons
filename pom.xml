@@ -91,7 +91,7 @@
         <jacoco.version>0.8.11</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
         <!-- affects both m-compiler-p and m-javadoc-p-->
-        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.release>11</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
         <project.build.outputTimestamp>1723652768</project.build.outputTimestamp>
     </properties>
