@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
+- #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
 
 ## 6.6.4 - 2024-08-14
 

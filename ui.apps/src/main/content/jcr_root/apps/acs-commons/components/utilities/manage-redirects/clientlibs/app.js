@@ -194,7 +194,7 @@
         .adaptTo("foundation-field")
         .setValues(tags.split(","));
     var select = $("#status-code-select-box").get(0);
-    select.value = statusCode;
+    select.value = "" + statusCode;
     form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
     form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
     form.find('input[name="./note"]').val(note);
