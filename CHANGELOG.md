@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
-- # - Content Sync: view history of completed jobs
+- #3426 - Content Sync: view history of completed jobs
 
 ### Changed
 
