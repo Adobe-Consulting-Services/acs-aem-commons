@@ -75,12 +75,12 @@ public class ConfigurationUtils {
         ResourceUtil.getOrCreateResource(resourceResolver, auditHome,
                 Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED), JcrConstants.NT_FOLDER, false);
 
-        String auditResourcePath = auditHome + "/" + UUID.randomUUID();
         Map<String, Object> auditProps = new HashMap<>();
         auditProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
         auditProps.put("syncPath", path);
         auditProps.put(JcrConstants.JCR_MIXINTYPES, "mix:created");
         auditProps.put("count", count);
+        String auditResourcePath = auditHome + "/" + UUID.randomUUID();
         ResourceUtil.getOrCreateResource(resourceResolver, auditResourcePath, auditProps, null, false);
 
         String auditLogPath = auditResourcePath + "/log";
