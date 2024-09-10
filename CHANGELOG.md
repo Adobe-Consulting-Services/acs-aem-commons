@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
+- #3429 - UI Widgets - add uniq function to embedded lodash library to resolve issue with composite multifield widget
 
 ## 6.6.4 - 2024-08-14
 
