@@ -943,6 +943,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>
+        <module>ui.config</module>
         <module>all</module>
     </modules>
 </project>
