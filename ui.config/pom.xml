@@ -123,25 +123,6 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.adobe.acs</groupId>
-            <artifactId>acs-aem-commons-bundle</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- put UberJar last so that more specific artifacts take precedence -->
-        <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
     <profiles>
         <profile>
             <id>autoInstallUiConfigPackage</id>
