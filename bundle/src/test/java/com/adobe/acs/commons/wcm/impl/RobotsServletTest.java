@@ -86,12 +86,39 @@ public class RobotsServletTest {
     }
 
     @Test
+    public void testWriteFromPagePropertyFromPathMappings() throws IOException, ServletException {
+        Map<String, Object> props = new HashMap<>();
+        props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
+        props.put("robots.content.property.pathMappings", new String[] {"/content/geometrixx/es/jcr:content=thisPropDoesntExist",
+                "/content/geometrixx/en/jcr:content=robotsContents"});
+        RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse("RobotsServlet_testWriteFromPageProperty.txt", response);
+    }
+
+    @Test
     public void testWriteFromAsset() throws ServletException, IOException {
         context.create().asset("/content/dam/geometrixx/robots.txt", getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), "text/plain");
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data");
+        props.put("robots.content.property.pathMappings", new String[] {"/content/some/other/page/jcr:content=/some/other/path/jcr:data"});
+        RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse("RobotsServlet_testWriteFromAsset.txt", response);
+    }
+
+    @Test
+    public void testWriteFromAssetFromMappings() throws ServletException, IOException {
+        context.create().asset("/content/dam/geometrixx/robots.txt", getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), "text/plain");
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
+        props.put("robots.content.property.pathMappings", new String[] {"/content/some/other/page/jcr:content=/some/other/path/jcr:data",
+                "/content/geometrixx/en/jcr:content=/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data"});
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
         robotsServlet.doGet(request, response);
         assertEquals("servlet returned an error", 200, response.getStatus());
@@ -240,6 +267,17 @@ public class RobotsServletTest {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "jcr:content/thisPropDoesntExist");
+        RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet did not return the expected error", 404, response.getStatus());
+    }
+
+    @Test
+    public void testWriteFromNonExistentPathMapping() throws ServletException, IOException {
+        Map<String, Object> props = new HashMap<>();
+        props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
+        props.put("robots.content.property.pathMappings", new String[] {"/content/some/other/page/jcr:content=/non/existent/path",
+                "", "/content/geometrixx/en/jcr:content"});
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
         robotsServlet.doGet(request, response);
         assertEquals("servlet did not return the expected error", 404, response.getStatus());
