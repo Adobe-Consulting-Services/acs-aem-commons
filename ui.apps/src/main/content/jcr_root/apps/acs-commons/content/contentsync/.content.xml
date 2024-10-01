@@ -26,6 +26,13 @@
                     icon="gear"
                     text="Configure"
                     variant="primary"/>
+                <history
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        href="/apps/acs-commons/content/contentsync/history.html"
+                        icon="stopwatch"
+                        text="History"
+                        variant="primary"/>
             </secondary>
         </actions>
         <content
