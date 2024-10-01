@@ -199,4 +199,42 @@ public class TestLastModifiedStrategy {
         assertEquals(path + ".infinity.json", item.getContentUri());
         assertEquals(customExporter, item.getCustomExporter());
     }
+
+    @Test
+    public void testRecursive()  {
+        doAnswer(invocation -> {
+            GenericServlet servlet = mock(GenericServlet.class);
+            doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
+            return servlet;
+        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
+
+        context.create().page("/content/wknd");
+        context.create().page("/content/wknd/en");
+        context.create().page("/content/wknd/en/home");
+        MockSlingHttpServletRequest request = context.request();
+
+        request.addRequestParameter("root", "/content/wknd");
+        request.addRequestParameter("recursive", "true");
+
+        List<CatalogItem> items = updateStrategy.getItems(request);
+        assertEquals(3, items.size());
+    }
+
+    @Test
+    public void testNonRecursive()  {
+        doAnswer(invocation -> {
+            GenericServlet servlet = mock(GenericServlet.class);
+            doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
+            return servlet;
+        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
+
+        context.create().page("/content/wknd");
+        context.create().page("/content/wknd/en");
+        context.create().page("/content/wknd/en/home");
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter("root", "/content/wknd");
+
+        List<CatalogItem> items = updateStrategy.getItems(request);
+        assertEquals(1, items.size());
+    }
 }
