@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3415 - Allow Robots.txt generation to serve different file by requested resource path
 - #3426 - Content Sync: view history of completed jobs
+- #3417 - Configurable recursion in Content Sync
 
 ### Changed
 
@@ -36,9 +37,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
 - #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 
 ### Changed
 
+- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by SlingHttpServletRequestBuilder 
 - #3376 - Redirect Manager: refactor code to not require service user
 - #3408 - Reduce usage of Apache Commons Lang 2
 - #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
@@ -49,7 +52,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
-
 
 ### Added
 
