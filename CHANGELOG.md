@@ -10,9 +10,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Added
+
+- #3426 - Content Sync: view history of completed jobs
+
+### Changed
+
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
+
+## 6.6.4 - 2024-08-14
+
 ### Fixed
 
 - #3380 - Remove forced red theme from system notification text body
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
+- #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
 - #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
@@ -30,7 +43,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
-
 
 ### Added
 
