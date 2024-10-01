@@ -115,15 +115,18 @@
       $.ajax({
         url: redirectPath + ".html"
       }).done(function (trHtml) {
+        var tr;
         if (response.isCreate) {
           var editRedirectTable = $(TABLE_SELECTOR);
-          var tr = editRedirectTable
+          tr = editRedirectTable
             .find("tbody")[0]
             .appendChild(document.createElement("tr"));
-          $(tr).replaceWith(trHtml);
+          tr.id = redirectId;
+          tr.dataset.path = redirectPath;
         } else {
-          $("#" + redirectId).replaceWith(trHtml);
+          tr = $("#" + redirectId)[0];
         }
+        tr.innerHTML = trHtml;
         var ui = $(window).adaptTo("foundation-ui");
         ui.clearWait();
       });
