@@ -9,12 +9,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+- #3426 - Content Sync: view history of completed jobs
 
 ### Changed
 
 - #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
+- #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
+
+### Added
+
+- #3415 - Allow Robots.txt generation to serve different file by requested resource path
 
 ## 6.6.4 - 2024-08-14
+- #3417 - Configurable recursion in Content Sync
 
 ### Fixed
 
