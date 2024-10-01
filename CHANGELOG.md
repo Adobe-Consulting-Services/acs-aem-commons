@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
 
 ## 6.6.4 - 2024-08-14
+- #3417 - Configurable recursion in Content Sync
 
 ### Fixed
 

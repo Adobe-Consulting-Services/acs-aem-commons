@@ -60,17 +60,17 @@ public class LastModifiedStrategy implements UpdateStrategy {
         if (rootPath == null) {
             throw new IllegalArgumentException("root request parameter is required");
         }
+        boolean recursive = "true".equals(request.getParameter("recursive"));
 
         Resource root = request.getResourceResolver().getResource(rootPath);
         if (root == null) {
             return Collections.emptyList();
         }
-
         List<CatalogItem> items = new ArrayList<>();
         new AbstractResourceVisitor() {
             @Override
             public void visit(Resource res) {
-                if (!accepts(res)) {
+                if ((!recursive && !res.getPath().equals(root.getPath())) || !accepts(res)) {
                     return;
                 }
                 JsonObjectBuilder json = Json.createObjectBuilder();
