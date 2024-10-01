@@ -1,26 +1,7 @@
-<%@ page session="false" contentType="text/html" pageEncoding="utf-8"
-    import="com.adobe.acs.commons.util.RequireAem" %>
+<%@ page session="false" contentType="text/html" pageEncoding="utf-8" %>
 <%@include file="/libs/foundation/global.jsp" %>
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<cq:setContentBundle /><%
-
-RequireAem requireAem = sling.getService(RequireAem.class);
-
-if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { %>
-<link rel="stylesheet" href="https://unpkg.com/@adobe/spectrum-css@2.15.1/dist/standalone/spectrum-light.css"/>
-
-<div class="spectrum-Toast spectrum-Toast--negative" style="display: block; margin: 0 auto; width: 100%;">
-    <div class="spectrum-Toast-body">
-        <div class="spectrum-Toast-content">
-            Redirect Maps are not compatible with your version of Adobe Experience Manager.
-            <br/>
-            Please checkout ACS AEM Commons' Redirect Manager instead.
-        </div>
-    </div>
-</div>
-
-<%  return;
-} %>
+<cq:setContentBundle />
 
 
 
