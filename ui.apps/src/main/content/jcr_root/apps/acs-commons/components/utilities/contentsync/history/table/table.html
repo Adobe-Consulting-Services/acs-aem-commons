@@ -1,0 +1,56 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<section class="coral-Form coral-Form--vertical">
+
+    <table is="coral-table">
+        <colgroup>
+            <col is="coral-table-column"/>
+            <col is="coral-table-column"/>
+            <col is="coral-table-column"/>
+            <col is="coral-table-column"/>
+            <col is="coral-table-column"/>
+            <col is="coral-table-column"/>
+        </colgroup>
+        <thead is="coral-table-head">
+            <tr is="coral-table-row">
+                <th is="coral-table-headercell">Initiator</th>
+                <th is="coral-table-headercell">Start Time</th>
+                <th is="coral-table-headercell">Path</th>
+                <th is="coral-table-headercell">Resources Updated</th>
+                <th is="coral-table-headercell">Log</th>
+            </tr>
+        </thead>
+
+        <tbody is="coral-table-body" divider="cell">
+            <sly
+                data-sly-list="${resource.getChildren}">
+                <tr is="coral-table-row">
+                    <td is="coral-table-cell">${item.jcr:createdBy}</td>
+                    <td is="coral-table-cell">${'dd-MM-yyyy hh:mm:ss' @ format=item.jcr:created}</td>
+                    <td is="coral-table-cell">${item.syncPath}</td>
+                    <td is="coral-table-cell">${item.count}</td>
+                    <td is="coral-table-cell">
+						<a title="view log in a new tab" href="${item.path @ context='unsafe'}/log" target="_blank"><coral-icon icon="download" size="XS"></coral-icon></a>
+                    </td>
+                </tr>
+            </sly>
+        </tbody>
+
+    </table>
+
+</section>

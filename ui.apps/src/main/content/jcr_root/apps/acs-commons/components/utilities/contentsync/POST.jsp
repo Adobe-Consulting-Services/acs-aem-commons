@@ -20,6 +20,7 @@
 	pageEncoding="UTF-8"
     import="
     java.util.List,
+    java.util.Arrays,
     java.util.ArrayList,
     java.util.Collection,
     java.util.Set,
@@ -27,6 +28,8 @@
     java.util.stream.Collectors,
     java.io.InputStream,
     java.io.IOException,
+    java.io.Writer,
+    java.io.StringWriter,
     java.io.PrintWriter,
     java.io.ByteArrayInputStream,
     javax.jcr.Session,
@@ -36,6 +39,7 @@
     org.apache.sling.jcr.contentloader.ContentImporter,
 	org.apache.sling.api.resource.ResourceUtil,
 	org.apache.commons.lang3.time.DurationFormatUtils,
+    org.apache.commons.io.output.TeeWriter,
 	com.adobe.acs.commons.contentsync.*
 
 "%><%
@@ -83,21 +87,24 @@
     Session session = resourceResolver.adaptTo(Session.class);
     ContentReader contentReader = new ContentReader(session);
 
+	StringWriter tempWriter = new StringWriter();
+    TeeWriter printWriter = new TeeWriter(Arrays.asList(new PrintWriter(out), new PrintWriter(tempWriter)));
+
     UpdateStrategy updateStrategy = sling.getServices(UpdateStrategy.class, "(component.name=" + strategyPid + ")")[0];
     try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig, generalSettings)){
         ContentImporter importer = sling.getService(ContentImporter.class);
         ContentSync contentSync = new ContentSync(remoteInstance, resourceResolver, importer);
         ContentCatalog contentCatalog = new ContentCatalog(remoteInstance, catalogServlet);
 
-        out.println("building catalog from " + contentCatalog.getFetchURI(root, strategyPid) );
+        println(printWriter, "building catalog from " + contentCatalog.getFetchURI(root, strategyPid) );
         out.flush();
         List<CatalogItem> catalog;
         List<CatalogItem> remoteItems = contentCatalog.fetch(root, strategyPid);
         long t0 = System.currentTimeMillis();
-        out.println(remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
+        println(printWriter, remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
         if(incremental){
             catalog = contentCatalog.getDelta(remoteItems, resourceResolver, updateStrategy);
-            out.println(catalog.size() + " resource"+(catalog.size() == 1 ? "" : "s")+" modified");
+            println(printWriter, catalog.size() + " resource"+(catalog.size() == 1 ? "" : "s")+" modified");
         } else {
             catalog = remoteItems;
         }
@@ -124,9 +131,9 @@
             boolean modified = updateStrategy.isModified(item, targetResource);
 
             if(targetResource == null || modified || !incremental) {
-                out.println(++count + "\t" + path);
+                println(printWriter, ++count + "\t" + path);
                 String msg = updateStrategy.getMessage(item, targetResource);
-                out.println("\t" + msg);
+                println(printWriter, "\t" + msg);
                 if(!dryRun) {
                     String reqPath = item.getContentUri() ;
                     JsonObject json = remoteInstance.getJson(reqPath);
@@ -137,18 +144,18 @@
                     if(targetResource != null && createVersion) {
                         String revisionId = contentSync.createVersion(targetResource);
                         if(revisionId != null) {
-                            out.println("\tcreated revision: " + revisionId);
+                            println(printWriter, "\tcreated revision: " + revisionId);
                         }
                     }
                     if(observationData != null){
                         session.getWorkspace().getObservationManager().setUserData(observationData);
                     }
 
-                    out.println("\timporting data");
+                    println(printWriter, "\timporting data");
                     contentSync.importData(item, sanitizedJson);
 
                     if(!binaryProperties.isEmpty()){
-                        out.println("\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
+                        println(printWriter, "\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
                         boolean contentResource = item.hasContentResource();
                         String basePath = path + (contentResource ? "/jcr:content" : "");
                         List<String> propertyPaths = binaryProperties.stream().map(p -> basePath + p).collect(Collectors.toList());
@@ -175,7 +182,7 @@
                         String eta = DurationFormatUtils.formatDurationWords(estimatedTime, true, true);
                         String etaMsg = pct +"%, ETA: " + eta;
                         t00 = System.currentTimeMillis();
-                        out.println(etaMsg);
+                        println(printWriter, etaMsg);
                     }
 
                     updatedResources.add(path);
@@ -189,11 +196,11 @@
             Collection<String> remotePaths = remoteItems.stream().map(c -> c.getPath()).collect(Collectors.toList());
             Collection<String> localPaths = updateStrategy.getItems(slingRequest).stream().map(c -> c.getPath()).collect(Collectors.toList());
             localPaths.removeAll(remotePaths);
-            out.println();
+            println(printWriter, "");
             for(String path : localPaths){
 				Resource res = resourceResolver.getResource(path);
                 if(res != null){
-                	out.println("deleting " + path);
+                	println(printWriter, "deleting " + path);
                     if(!dryRun) {
                         if(res != null) {
                             resourceResolver.delete(res);
@@ -203,27 +210,29 @@
             }
         }
 
-        out.println();
+        println(printWriter, "");
         for(String parentPath : sortedNodes){
             Node targetNode = resourceResolver.getResource(parentPath).adaptTo(Node.class);
-            out.println("sorting child nodes of " + targetNode.getPath() );
+            println(printWriter, "sorting child nodes of " + targetNode.getPath() );
             contentSync.sort(targetNode);
         }
         session.save();
 
-        out.println();
-        out.println("sync-ed " + count + " resources, in " + (System.currentTimeMillis() - t0) + " ms");
+        println(printWriter, "");
+        println(printWriter, "sync-ed " + count + " resources, in " + (System.currentTimeMillis() - t0) + " ms");
 
         if(!dryRun && workflowModel != null && !workflowModel.isEmpty()){
-	        out.println();
+	        println(printWriter, "");
             long t1 = System.currentTimeMillis();
 
-            out.println("starting a " + workflowModel + " workflow for each processed item");
+            println(printWriter, "starting a " + workflowModel + " workflow for each processed item");
             out.flush();
             contentSync.runWorkflows(workflowModel, updatedResources);
-	        out.println("started " + updatedResources.size() + " workflows, in " + (System.currentTimeMillis() - t1) + " ms");
+	        println(printWriter, "started " + updatedResources.size() + " workflows, in " + (System.currentTimeMillis() - t1) + " ms");
         }
-
+        if(!dryRun){
+            ConfigurationUtils.persistAuditLog(resourceResolver, root, count, tempWriter.toString());
+        }
     } catch(Exception e){
         if(e.getMessage() != null && e.getMessage().startsWith("Not a date string:")){
             error(out, "It appears Sling GET Servlet on " + hostConfig.getHost() + " is configured to use the legacy ECMA date format.\n" +
@@ -239,6 +248,11 @@
 </html>
 <%!
 
+    void println(Writer out, String msg) throws IOException {
+        out.write(msg);
+    	out.write('\n');
+    }
+
     void error(JspWriter out, String msg) throws IOException {
         out.print("<span class=\"error\">");
         out.print(msg);
@@ -250,4 +264,5 @@
         e.printStackTrace(new PrintWriter(out));
         out.println("</span>");
     }
+
 %>
