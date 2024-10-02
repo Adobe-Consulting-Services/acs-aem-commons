@@ -17,13 +17,13 @@
  */
 package com.adobe.acs.commons.hc.impl;
 
+import com.adobe.acs.commons.email.impl.MailTemplateManager;
 import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.felix.scr.annotations.Activate;
@@ -112,6 +112,9 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policyOption = ReferencePolicyOption.GREEDY)
     private MessageGatewayService messageGatewayService;
 
+    @Reference
+    private MailTemplateManager mailTemplateManager;
+
     private transient ConcurrentHashMap<String, Integer> tracker = new ConcurrentHashMap<>();
 
     @Activate
@@ -145,7 +148,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     List<InternetAddress> emailAddresses = new ArrayList<InternetAddress>();
                     emailAddresses.add(new InternetAddress(this.toEmail));
                     MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE, "UTF-8"), CharEncoding.UTF_8);
-                    SimpleEmail email = mailTemplate.getEmail(StrLookup.mapLookup(Collections.emptyMap()), SimpleEmail.class);
+                    SimpleEmail email = mailTemplateManager.getEmail(mailTemplate, null, SimpleEmail.class);
 
                     email.setSubject("AEM E-mail Service Health Check");
                     email.setTo(emailAddresses);

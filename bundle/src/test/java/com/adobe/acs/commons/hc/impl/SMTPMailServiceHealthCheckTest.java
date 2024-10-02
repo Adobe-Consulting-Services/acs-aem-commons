@@ -20,12 +20,23 @@ package com.adobe.acs.commons.hc.impl;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
+import java.io.IOException;
+import java.util.Map;
+
+import javax.mail.MessagingException;
+
+import com.adobe.acs.commons.email.impl.MailTemplateManager;
 import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.impl.RequireAemImpl;
+import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 
+import org.apache.commons.lang.text.StrLookup;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.junit.Before;
@@ -52,6 +63,13 @@ public class SMTPMailServiceHealthCheckTest {
     public void setUp() {
         ctx.registerService(RequireAem.class, new RequireAemImpl(), "distribution", "classic");
         ctx.registerService(MessageGatewayService.class, messageGatewayService);
+        ctx.registerService(MailTemplateManager.class, new MailTemplateManager() {
+            @Override
+            public <T extends Email> T getEmail(MailTemplate template, Map<String, String> params, Class<T> mailType)
+            throws IOException, EmailException, MessagingException {
+                return template.getEmail(StrLookup.mapLookup(params), mailType) ;
+            }
+        });
     }
 
     @Test
