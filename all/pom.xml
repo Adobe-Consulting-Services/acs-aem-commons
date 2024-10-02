@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.7.0-SNAPSHOT</version>
+        <version>6.7.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -35,7 +35,7 @@
     <artifactId>acs-aem-commons-all</artifactId>
     <name>ACS AEM Commons Container Package (All)</name>
     <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps,
-        acs-aem-commons-ui.content, the OSGi bundle and configuration.
+        acs-aem-commons-ui.content, acs-aem-commons-ui.config and the OSGi bundle.
     </description>
     <packaging>content-package</packaging>
 
@@ -47,6 +47,7 @@
                 <inherited>false</inherited>
                 <configuration>
                     <packageType>container</packageType>
+                    <excludes>**/META-INF/*,**/thumbnail.png</excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -82,6 +83,13 @@
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.config</artifactId>
                                     <target>/apps/acs-commons/install</target>
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
@@ -210,6 +218,13 @@
             <type>zip</type>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.config</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -288,6 +303,13 @@
                                         <embedded>
                                             <groupId>${project.groupId}</groupId>
                                             <artifactId>acs-aem-commons-ui.content</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-ui.config</artifactId>
                                             <target>/apps/acs-commons/install</target>
                                             <filter>true</filter>
                                             <isAllVersionsFilter>true</isAllVersionsFilter>

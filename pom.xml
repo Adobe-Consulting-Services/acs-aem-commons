@@ -25,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>6.7.0-SNAPSHOT</version>
+    <version>6.7.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -84,7 +84,7 @@
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
 
         <!-- the minimum AEM 6.5 version being supported -->
-        <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
+        <aem.classic.api.version>6.5.21.0000</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
         <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
 
@@ -93,7 +93,7 @@
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1723652768</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1727818721</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -943,6 +943,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
         <module>oakpal-checks</module>
         <module>ui.apps</module>
         <module>ui.content</module>
+        <module>ui.config</module>
         <module>all</module>
     </modules>
 </project>

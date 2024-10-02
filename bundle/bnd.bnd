@@ -19,6 +19,7 @@ Import-Package: \
   !io.jsonwebtoken.*,\
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
+  com.day.cq.wcm.api;version="[1.30,2)",\
   *
 # support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
 # paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file

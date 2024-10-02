@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ ACS AEM Commons
   ~
@@ -15,8 +14,12 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
+  --><!--
 
-<workspaceFilter version="1.0">
-    <filter root="/apps/acs-commons/install"/>
-</workspaceFilter>
+      Render a redirect as html.
+      Used by the "Configure Redirection Rule" dialog to update the table of redirects
+ -->
+<sly
+        data-sly-use.redirectsTemplate="../template.html"
+        data-sly-call="${redirectsTemplate.row @ redirectResource = resource, allowRearrange = true}"
+/>
