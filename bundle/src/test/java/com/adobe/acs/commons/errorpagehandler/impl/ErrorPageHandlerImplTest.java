@@ -17,21 +17,24 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ErrorPageHandlerImplTest {
@@ -48,43 +51,53 @@ public class ErrorPageHandlerImplTest {
         resourceResolver = context.resourceResolver();
         request = context.request();
     }
-    
+
     /**
-     * Test {@link ErrorPageHandlerImpl#findErrorPage(org.apache.sling.api.SlingHttpServletRequest, org.apache.sling.api.resource.Resource)}
+     * Test
+     * {@link ErrorPageHandlerImpl#findErrorPage(org.apache.sling.api.SlingHttpServletRequest, org.apache.sling.api.resource.Resource)}
      * with a page without {@code jcr:content} node.
      */
     @Test
     public void testFindErrorPage_withoutContent() {
-        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-without-content")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request,
+                resourceResolver.getResource("/content/project/test/page-without-content")));
     }
 
     /**
-     * Test {@link ErrorPageHandlerImpl#findErrorPage(org.apache.sling.api.SlingHttpServletRequest, org.apache.sling.api.resource.Resource)}
+     * Test
+     * {@link ErrorPageHandlerImpl#findErrorPage(org.apache.sling.api.SlingHttpServletRequest, org.apache.sling.api.resource.Resource)}
      * with a page with direct configuration.
      */
     @Test
     public void testFindErrorPage_withDirectConfig() {
-        assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
+        assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request,
+                resourceResolver.getResource("/content/project/test/page-with-config")));
     }
-    
+
     @Test
     public void testFindErrorPage_subResource() {
-        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/jcr:content/root/non-existing-resource")));
+        assertEquals("/content/project/test/error-pages.html",
+                new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver,
+                        "/content/project/test/jcr:content/root/non-existing-resource")));
     }
 
     @Test
     public void testFindErrorPage_nonExistingPage() {
-        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request,
+                new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page")));
     }
 
     @Test
     public void testFindErrorPage_nonExistingPageSubResource() {
-        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page/jcr:content/test1/test2")));
+        assertEquals("/content/project/test/error-pages.html",
+                new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver,
+                        "/content/project/test/non-existing-page/jcr:content/test1/test2")));
     }
 
     @Test
     public void testFindErrorPage_nonExistingPageWithoutExtension() {
-        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/non-existing-page")));
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request,
+                new NonExistingResource(resourceResolver, "/content/project/non-existing-page")));
     }
 
     @Test
@@ -93,20 +106,45 @@ public class ErrorPageHandlerImplTest {
                 new ErrorPageHandlerImpl().findErrorPage(request,
                         new NonExistingResource(resourceResolver, "/content/project/jcr:content/non-existing")));
     }
+
     @Test
     public void testResetRequestAndResponse() {
         context.response().setStatus(200);
 
         context.request().setAttribute("com.day.cq.widget.HtmlLibraryManager.included", "Some prior clientlibs");
-        context.request().setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included", "Some prior clientlibs");
+        context.request().setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
+                "Some prior clientlibs");
         context.request().setAttribute("com.day.cq.wcm.componentcontext", "some prior component context");
 
         new ErrorPageHandlerImpl().resetRequestAndResponse(context.request(), context.response(), 500);
 
         assertEquals("true", context.response().getHeader("x-aem-error-pass"));
         assertEquals(500, context.response().getStatus());
-        assertEquals(0, ((HashSet<String>) context.request().getAttribute("com.day.cq.widget.HtmlLibraryManager.included")).size());
-        assertEquals(0, ((HashSet<String>) context.request().getAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included")).size());
+        assertEquals(0,
+                ((HashSet<String>) context.request().getAttribute("com.day.cq.widget.HtmlLibraryManager.included"))
+                        .size());
+        assertEquals(0, ((HashSet<String>) context.request()
+                .getAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included")).size());
         assertNull(context.request().getAttribute("com.day.cq.wcm.componentcontext"));
+    }
+
+    @Test
+    public void testPathExclusion_true() {
+        SlingHttpServletRequest request = Mockito.mock(SlingHttpServletRequest.class);
+        Mockito.when(request.getRequestURI()).thenReturn("/content");
+
+        ErrorPageHandlerImpl errorPageHandlerService = new ErrorPageHandlerImpl();
+        errorPageHandlerService.excludedPaths = new String[]{"/content/test-page"};
+        assertTrue(errorPageHandlerService.shouldRequestUseErrorPageHandler(request));
+    }
+
+    @Test
+    public void testPathExclusion_false() {
+        SlingHttpServletRequest request = Mockito.mock(SlingHttpServletRequest.class);
+        Mockito.when(request.getRequestURI()).thenReturn("/content/test-page/test1234");
+
+        ErrorPageHandlerImpl errorPageHandlerService = new ErrorPageHandlerImpl();
+        errorPageHandlerService.excludedPaths = new String[]{"/content/test-page"};
+        assertFalse(errorPageHandlerService.shouldRequestUseErrorPageHandler(request));
     }
 }

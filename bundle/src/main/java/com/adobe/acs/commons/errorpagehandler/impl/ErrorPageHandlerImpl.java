@@ -26,12 +26,15 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
@@ -92,6 +95,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private static final String REDIRECT_TO_LOGIN = "redirect-to-login";
     private static final String RESPOND_WITH_404 = "respond-with-404";
+
+    public String[] excludedPaths = null;
 
     /* Enable/Disable */
     private static final boolean DEFAULT_ENABLED = true;
@@ -238,6 +243,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             cardinality = Integer.MAX_VALUE,
             value = {"png", "jpeg", "jpg", "gif"})
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
+
+    @Property(
+        label = "Excluded pages from handler",
+        description = "A list of pages that should not be considered as applicable to this service",
+        cardinality = Integer.MAX_VALUE,
+        value = { "/content/test-site", "/content/dam/test"})
+    private static final String EXCLUDED_PATHS_FROM_HANDLER = "error-page.exclusion-list";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -832,6 +844,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         Dictionary<?, ?> config = componentContext.getProperties();
         final String legacyPrefix = "prop.";
 
+        this.excludedPaths = PropertiesUtil.toStringArray(config.get(EXCLUDED_PATHS_FROM_HANDLER));
+
         this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
@@ -1034,6 +1048,16 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Override
     public boolean isVanityDispatchCheckEnabled() {
         return this.vanityDispatchCheckEnabled;
+    }
+
+    @Override
+    public boolean shouldRequestUseErrorPageHandler(SlingHttpServletRequest request) {
+        if (this.excludedPaths == null) {
+            return true;
+        }
+
+        long result = Stream.of(this.excludedPaths).filter((item) -> request.getRequestURI().contains(item)).count();
+        return (result == 0);
     }
 
 }
