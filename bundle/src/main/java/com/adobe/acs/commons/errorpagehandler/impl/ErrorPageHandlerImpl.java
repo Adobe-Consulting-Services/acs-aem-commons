@@ -26,15 +26,12 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
@@ -42,6 +39,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -96,8 +94,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     private static final String REDIRECT_TO_LOGIN = "redirect-to-login";
     private static final String RESPOND_WITH_404 = "respond-with-404";
 
-    public String[] excludedPaths = null;
-
     /* Enable/Disable */
     private static final boolean DEFAULT_ENABLED = true;
 
@@ -106,6 +102,16 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
+
+    /* Excluded URI patterns */
+    protected ArrayList<Pattern> excludedUriPatterns = new ArrayList<>();
+
+    @Property(
+            label = "Excluded URI patterns from handler",
+            description = "Regex URI patterns that are excluded from the error page handler. [Optional] [Default: None] [Forces: ^/content/test-site(/.*)?, ^/content/dam/test(/.*)?] ",
+            cardinality = Integer.MAX_VALUE)
+    private static final String EXCLUDED_URIS_FROM_HANDLER = "error-page.uri-exclusions";
+
 
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
@@ -179,7 +185,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Not Found Path Patterns */
     private static final String[] DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS = {};
-    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<Pattern>();
+    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<>();
 
     @Property(
             label = "Not Found Exclusions",
@@ -244,19 +250,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             value = {"png", "jpeg", "jpg", "gif"})
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
 
-    @Property(
-        label = "Excluded pages from handler",
-        description = "A list of pages that should not be considered as applicable to this service",
-        cardinality = Integer.MAX_VALUE,
-        value = { "/content/test-site", "/content/dam/test"})
-    private static final String EXCLUDED_PATHS_FROM_HANDLER = "error-page.exclusion-list";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     private Authenticator authenticator;
-    
+
     @Reference
     private VanityURLService vanityUrlService;
 
@@ -844,8 +844,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         Dictionary<?, ?> config = componentContext.getProperties();
         final String legacyPrefix = "prop.";
 
-        this.excludedPaths = PropertiesUtil.toStringArray(config.get(EXCLUDED_PATHS_FROM_HANDLER));
-
         this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
@@ -879,11 +877,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         String[] tmpNotFoundExclusionPatterns = PropertiesUtil.toStringArray(
                 config.get(PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS), DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS);
 
-        this.notFoundExclusionPatterns = new ArrayList<Pattern>();
+        this.notFoundExclusionPatterns = new ArrayList<>();
         for (final String tmpPattern : tmpNotFoundExclusionPatterns) {
             this.notFoundExclusionPatterns.add(Pattern.compile(tmpPattern));
         }
 
+        String[] tmpExcludedUriPatterns = ArrayUtils.addAll(PropertiesUtil.toStringArray(config.get(EXCLUDED_URIS_FROM_HANDLER)),
+                "^/content/test-site(/.*)?", "^/content/dam/test(/.*)?");
+        // The above patterns are the default patterns that are always excluded from the error page handler due to a requirement by AEM Cloud Manager
+        for (final String tmpPattern : tmpExcludedUriPatterns) {
+            this.excludedUriPatterns.add(Pattern.compile(tmpPattern));
+        }
 
         /** Error Page Cache **/
 
@@ -949,6 +953,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         pw.printf("System Error Page Path: %s", this.systemErrorPagePath).println();
         pw.printf("Error Page Extension: %s", this.errorPageExtension).println();
         pw.printf("Fallback Error Page Name: %s", fallbackErrorName).println();
+        pw.printf("Excluded URI Patterns: %s", Arrays.toString(excludedUriPatterns.toArray())).println();
 
         pw.printf("Resource Not Found - Behavior: %s", this.notFoundBehavior).println();
         pw.printf("Resource Not Found - Exclusion Path Patterns %s", Arrays.toString(tmpNotFoundExclusionPatterns)).println();
@@ -1052,12 +1057,18 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Override
     public boolean shouldRequestUseErrorPageHandler(SlingHttpServletRequest request) {
-        if (this.excludedPaths == null) {
+        if (CollectionUtils.isEmpty(this.excludedUriPatterns)) {
             return true;
         }
 
-        long result = Stream.of(this.excludedPaths).filter((item) -> request.getRequestURI().contains(item)).count();
-        return (result == 0);
-    }
+        String requestURI = request.getRequestURI();
 
+        for (Pattern excludedPattern : this.excludedUriPatterns) {
+            if (excludedPattern.matcher(requestURI).matches()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
