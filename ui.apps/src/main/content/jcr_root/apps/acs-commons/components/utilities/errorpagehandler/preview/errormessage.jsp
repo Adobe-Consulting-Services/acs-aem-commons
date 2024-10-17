@@ -24,7 +24,7 @@
                 javax.servlet.http.HttpServletResponse" %><%
 
     final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
-    if (errorPageHandlerService == null || !errorPageHandlerService.isEnabled()) {
+    if (errorPageHandlerService == null || !errorPageHandlerService.isEnabled() || !errorPageHandlerService.shouldRequestUseErrorPageHandler(slingRequest)) {
         return;
     }
 
