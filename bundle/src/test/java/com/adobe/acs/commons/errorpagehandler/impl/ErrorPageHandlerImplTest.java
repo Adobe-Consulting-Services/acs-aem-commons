@@ -160,7 +160,8 @@ public class ErrorPageHandlerImplTest {
 
     @Test
     public void testUriExclusion_defaults_dam_false() {
-        context.registerInjectActivateService(new ErrorPageHandlerImpl());
+        context.registerInjectActivateService(new ErrorPageHandlerImpl(), "error-page.uri-exclusions", new String[]{"^/whatever(/.*)?"});
+        ;
         ErrorPageHandlerImpl errorPageHandlerService = (ErrorPageHandlerImpl) context.getService(ErrorPageHandlerService.class);
 
         context.request().setPathInfo("/content/dam/test/file.png");
