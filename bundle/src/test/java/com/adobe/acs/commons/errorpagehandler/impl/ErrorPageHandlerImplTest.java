@@ -18,28 +18,18 @@
 package com.adobe.acs.commons.errorpagehandler.impl;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.auth.Authenticator;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
