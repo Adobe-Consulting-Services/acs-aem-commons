@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 
+- #3448 - Adding support for paths that should not use ErrorHandlerService
 - #3415 - Allow Robots.txt generation to serve different file by requested resource path
 - #3426 - Content Sync: view history of completed jobs
 - #3417 - Configurable recursion in Content Sync
