@@ -12,14 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 
-- #3448 - Adding support for paths that should not use ErrorHandlerService
+- #3448 - Adding support for URIs that should not use ErrorHandlerService using regex
 - #3415 - Allow Robots.txt generation to serve different file by requested resource path
 - #3426 - Content Sync: view history of completed jobs
 - #3417 - Configurable recursion in Content Sync
 
 ### Changed
 
-- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
+  CS release version, TBA)
 - #3429 - UI Widgets - add uniq function to embedded lodash library to resolve issue with composite multifield widget
 - #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
 - #3417 - Configurable recursion in Content Sync
@@ -33,16 +34,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3380 - Remove forced red theme from system notification text body
-- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than
+  expected
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 - #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
-- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than
+  expected
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 
 ### Changed
 
-- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by SlingHttpServletRequestBuilder 
+- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by
+  SlingHttpServletRequestBuilder
 - #3376 - Redirect Manager: refactor code to not require service user
 - #3408 - Reduce usage of Apache Commons Lang 2
 - #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.

@@ -17,16 +17,19 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import org.apache.sling.api.SlingHttpServletRequest;
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.adobe.acs.commons.wcm.vanity.impl.VanityURLServiceImpl;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.auth.Authenticator;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashSet;
@@ -42,6 +45,9 @@ public class ErrorPageHandlerImplTest {
     @Rule
     public final SlingContext context = new SlingContext();
 
+    @Mock
+    Authenticator authenticator;
+
     private MockSlingHttpServletRequest request;
     private ResourceResolver resourceResolver;
 
@@ -50,6 +56,10 @@ public class ErrorPageHandlerImplTest {
         context.load().json(getClass().getResourceAsStream("ErrorPageHandlerImplTest.json"), "/content/project");
         resourceResolver = context.resourceResolver();
         request = context.request();
+
+
+        context.registerService(VanityURLService.class, new VanityURLServiceImpl());
+        context.registerService(Authenticator.class, authenticator);
     }
 
     /**
@@ -129,22 +139,53 @@ public class ErrorPageHandlerImplTest {
     }
 
     @Test
-    public void testPathExclusion_true() {
-        SlingHttpServletRequest request = Mockito.mock(SlingHttpServletRequest.class);
-        Mockito.when(request.getRequestURI()).thenReturn("/content");
+    public void testUriExclusion_defaults_true() {
+        context.registerInjectActivateService(new ErrorPageHandlerImpl());
+        ErrorPageHandlerImpl errorPageHandlerService = (ErrorPageHandlerImpl) context.getService(ErrorPageHandlerService.class);
 
-        ErrorPageHandlerImpl errorPageHandlerService = new ErrorPageHandlerImpl();
-        errorPageHandlerService.excludedPaths = new String[]{"/content/test-page"};
-        assertTrue(errorPageHandlerService.shouldRequestUseErrorPageHandler(request));
+        context.request().setPathInfo("/content");
+
+        assertTrue(errorPageHandlerService.shouldRequestUseErrorPageHandler(context.request()));
     }
 
     @Test
-    public void testPathExclusion_false() {
-        SlingHttpServletRequest request = Mockito.mock(SlingHttpServletRequest.class);
-        Mockito.when(request.getRequestURI()).thenReturn("/content/test-page/test1234");
+    public void testUriExclusion_defaults_site_false() {
+        context.registerInjectActivateService(new ErrorPageHandlerImpl());
+        ErrorPageHandlerImpl errorPageHandlerService = (ErrorPageHandlerImpl) context.getService(ErrorPageHandlerService.class);
 
-        ErrorPageHandlerImpl errorPageHandlerService = new ErrorPageHandlerImpl();
-        errorPageHandlerService.excludedPaths = new String[]{"/content/test-page"};
-        assertFalse(errorPageHandlerService.shouldRequestUseErrorPageHandler(request));
+        context.request().setPathInfo("/content/test-site/home.html");
+
+        assertFalse(errorPageHandlerService.shouldRequestUseErrorPageHandler(context.request()));
+    }
+
+    @Test
+    public void testUriExclusion_defaults_dam_false() {
+        context.registerInjectActivateService(new ErrorPageHandlerImpl(), "error-page.uri-exclusions", new String[]{"^/whatever(/.*)?"});
+        ;
+        ErrorPageHandlerImpl errorPageHandlerService = (ErrorPageHandlerImpl) context.getService(ErrorPageHandlerService.class);
+
+        context.request().setPathInfo("/content/dam/test/file.png");
+
+        assertFalse(errorPageHandlerService.shouldRequestUseErrorPageHandler(context.request()));
+
+    }
+
+    @Test
+    public void testUrihExclusion_true() {
+        context.registerInjectActivateService(new ErrorPageHandlerImpl(), "error-page.uri-exclusions", new String[]{"^/whatever(/.*)?"});
+        ErrorPageHandlerImpl errorPageHandlerService = (ErrorPageHandlerImpl) context.getService(ErrorPageHandlerService.class);
+
+        context.request().setPathInfo("/content");
+
+        assertTrue(errorPageHandlerService.shouldRequestUseErrorPageHandler(context.request()));
+    }
+
+    @Test
+    public void testUriExclusion_false() {
+        context.registerInjectActivateService(new ErrorPageHandlerImpl(), "error-page.uri-exclusions", new String[]{"^/whatever(/.*)?", "^/content/(.*)/foo/(.*)?"});
+        ErrorPageHandlerImpl errorPageHandlerService = (ErrorPageHandlerImpl) context.getService(ErrorPageHandlerService.class);
+
+        context.request().setPathInfo("/content/whatever/foo/bar.html");
+        assertFalse(errorPageHandlerService.shouldRequestUseErrorPageHandler(context.request()));
     }
 }
