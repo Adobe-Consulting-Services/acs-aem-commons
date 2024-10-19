@@ -84,6 +84,9 @@ public class TestLastModifiedStrategy {
         assertFalse(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
     }
 
+    /**
+     * isModified() returns true if the resource is newer
+     */
     @Test
     public void testPageModified() {
         String pagePath = "/content/wknd/page";
@@ -237,4 +240,5 @@ public class TestLastModifiedStrategy {
         List<CatalogItem> items = updateStrategy.getItems(request);
         assertEquals(1, items.size());
     }
+
 }
