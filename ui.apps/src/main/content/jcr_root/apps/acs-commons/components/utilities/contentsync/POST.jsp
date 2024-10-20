@@ -70,6 +70,7 @@
 	boolean incremental = request.getParameter("incremental") != null;
 	boolean createVersion = request.getParameter("createVersion") != null;
 	boolean delete = request.getParameter("delete") != null;
+    boolean recursive = request.getParameter("recursive") != null;
 
     ValueMap generalSettings = ConfigurationUtils.getSettingsResource(resourceResolver).getValueMap();
 
@@ -96,10 +97,10 @@
         ContentSync contentSync = new ContentSync(remoteInstance, resourceResolver, importer);
         ContentCatalog contentCatalog = new ContentCatalog(remoteInstance, catalogServlet);
 
-        println(printWriter, "building catalog from " + contentCatalog.getFetchURI(root, strategyPid) );
+        println(printWriter, "building catalog from " + contentCatalog.getFetchURI(root, strategyPid, recursive) );
         out.flush();
         List<CatalogItem> catalog;
-        List<CatalogItem> remoteItems = contentCatalog.fetch(root, strategyPid);
+        List<CatalogItem> remoteItems = contentCatalog.fetch(root, strategyPid, recursive);
         long t0 = System.currentTimeMillis();
         println(printWriter, remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
         if(incremental){
