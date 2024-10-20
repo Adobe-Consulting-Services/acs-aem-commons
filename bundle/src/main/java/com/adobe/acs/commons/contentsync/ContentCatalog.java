@@ -50,6 +50,9 @@ public class ContentCatalog {
         this.catalogServlet = catalogServlet;
     }
 
+    /**
+     * @deprecated use {@link #getFetchURI(String, String, boolean)}
+     */
     @Deprecated
     public URI getFetchURI(String path, String updateStrategy) throws URISyntaxException {
         return getFetchURI(path, updateStrategy, true);
@@ -69,6 +72,9 @@ public class ContentCatalog {
                 updateStrategy, "recursive", String.valueOf(recursive));
     }
 
+    /**
+     * @deprecated use {@link #fetch(String, String, boolean)}
+     */
     @Deprecated
     public List<CatalogItem> fetch(String path, String updateStrategy) throws IOException, URISyntaxException {
         return fetch(path, updateStrategy, true);

@@ -203,8 +203,7 @@ public class TestLastModifiedStrategy {
         assertEquals(customExporter, item.getCustomExporter());
     }
 
-    @Test
-    public void testRecursive()  {
+    void sync(String ... requestParams)  {
         doAnswer(invocation -> {
             GenericServlet servlet = mock(GenericServlet.class);
             doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
@@ -216,28 +215,34 @@ public class TestLastModifiedStrategy {
         context.create().page("/content/wknd/en/home");
         MockSlingHttpServletRequest request = context.request();
 
-        request.addRequestParameter("root", "/content/wknd");
-        request.addRequestParameter("recursive", "true");
+        for(int i = 0; i < requestParams.length; i += 2){
+            request.addRequestParameter(requestParams[i], requestParams[i + 1]);
+        }
+    }
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+    @Test
+    public void testRecursive()  {
+        sync("root", "/content/wknd",
+                "recursive", "true");
+
+        List<CatalogItem> items = updateStrategy.getItems(context.request());
+        assertEquals(3, items.size());
+    }
+
+    @Test
+    public void testRecursiveDefault()  {
+        sync("root", "/content/wknd");
+
+        List<CatalogItem> items = updateStrategy.getItems(context.request());
         assertEquals(3, items.size());
     }
 
     @Test
     public void testNonRecursive()  {
-        doAnswer(invocation -> {
-            GenericServlet servlet = mock(GenericServlet.class);
-            doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
-            return servlet;
-        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
+        sync("root", "/content/wknd",
+                "recursive", "false");
 
-        context.create().page("/content/wknd");
-        context.create().page("/content/wknd/en");
-        context.create().page("/content/wknd/en/home");
-        MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", "/content/wknd");
-
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(context.request());
         assertEquals(1, items.size());
     }
 
