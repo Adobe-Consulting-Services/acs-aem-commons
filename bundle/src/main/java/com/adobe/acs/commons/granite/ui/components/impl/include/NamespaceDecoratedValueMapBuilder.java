@@ -50,10 +50,10 @@ public class NamespaceDecoratedValueMapBuilder {
     static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(\\$\\{\\{([a-zA-Z0-9]+?)(:(.+?))??\\}\\})+?");
     static final Pattern PLACEHOLDER_TYPE_HINTED_PATTERN = Pattern.compile("(.*)\\$\\{\\{(\\(([a-zA-Z]+)\\)){1}([a-zA-Z0-9]+)(:(.+))?\\}\\}(.*)?");
 
-    public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties) {
+    public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties, boolean copyToplevelProperties) {
         this.request = request;
         this.copyMap = new HashMap<>();
-        if(request.getResourceResolver().isResourceType(resource, RESOURCE_TYPE)){
+        if(copyToplevelProperties && request.getResourceResolver().isResourceType(resource, RESOURCE_TYPE)){
             // if the node is the include node, we have to preload the properties from the snippet root level
             preloadPropsOnRootLevel(request, resource);
         }
