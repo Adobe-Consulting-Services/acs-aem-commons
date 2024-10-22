@@ -22,5 +22,5 @@
     NamespacedTransformedResourceProvider transformedResourceProvider = sling.getService(NamespacedTransformedResourceProvider.class);
     Resource resourceWrapper = transformedResourceProvider.transformResourceWithNameSpacing(slingRequest, targetResource);
 
-    cmp.include(resourceWrapper, cfg.get("resourceType", String.class), cmp.getOptions());
+    cmp.include(resourceWrapper, cfg.get("resourceType", "granite/ui/components/coral/foundation/container"), cmp.getOptions());
 %>
