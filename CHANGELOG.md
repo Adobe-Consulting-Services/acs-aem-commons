@@ -10,6 +10,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Changed
+
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
+  CS release version, TBA)
+
+## 6.8.0 - 2024-10-17
+
+### Added
+
+- #3448 - Adding support for URIs that should not use ErrorHandlerService using regex
+
+## 6.7.0 - 2024-10-01
+
 ### Added
 
 - #3415 - Allow Robots.txt generation to serve different file by requested resource path
@@ -19,7 +32,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
-- #3421 - Remove dependency on Apache Commons Lang 2 for Cloud Service
 - #3429 - UI Widgets - add uniq function to embedded lodash library to resolve issue with composite multifield widget
 - #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
 - #3417 - Configurable recursion in Content Sync
@@ -33,16 +45,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3380 - Remove forced red theme from system notification text body
-- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than
+  expected
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 - #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
-- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than expected
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than
+  expected
 - #3275 - CCVAR: Fixed Same Attribute not updating correctly.
 - #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
 
 ### Changed
 
-- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by SlingHttpServletRequestBuilder 
+- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by
+  SlingHttpServletRequestBuilder
 - #3376 - Redirect Manager: refactor code to not require service user
 - #3408 - Reduce usage of Apache Commons Lang 2
 - #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
