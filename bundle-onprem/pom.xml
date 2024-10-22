@@ -72,6 +72,12 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
         <!-- ======================== -->
         <!-- START build dependencies -->
         <dependency>
+            <groupId>com.adobe.acs</groupId>
+            <artifactId>acs-aem-commons-bundle</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.annotation.versioning</artifactId>
             <scope>provided</scope>

@@ -86,7 +86,7 @@
         <!-- the minimum AEM 6.5 version being supported -->
         <aem.classic.api.version>6.5.21.0000</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
-        <aem.sdk.api.version>2023.11.14227.20231108T162349Z-231100</aem.sdk.api.version>
+        <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
 
         <jacoco.version>0.8.11</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
