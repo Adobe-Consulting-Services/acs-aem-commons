@@ -29,8 +29,7 @@ import java.util.TimeZone;
 import javax.jcr.RepositoryException;
 import javax.jcr.UnsupportedRepositoryOperationException;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -101,16 +100,16 @@ public class AuditLogSearchRequest {
         List<String> expressions = new ArrayList<String>();
 
         if (!StringUtils.isEmpty(type)) {
-            expressions.add("[cq:type]='" + StringEscapeUtils.escapeSql(type) + "'");
+            expressions.add("[cq:type]='" + StringUtils.replace(type, "'", "''") + "'");
         }
         if (!StringUtils.isEmpty(user)) {
-            expressions.add("[cq:userid]='" + StringEscapeUtils.escapeSql(user) + "'");
+            expressions.add("[cq:userid]='" + StringUtils.replace(user, "'", "''") + "'");
         }
         if (StringUtils.isNotEmpty(contentRoot)) {
             if (includeChildren) {
-                expressions.add("[cq:path] LIKE '" + StringEscapeUtils.escapeSql(contentRoot) + "%'");
+                expressions.add("[cq:path] LIKE '" + StringUtils.replace(contentRoot, "'", "''") + "%'");
             } else {
-                expressions.add("[cq:path]='" + StringEscapeUtils.escapeSql(contentRoot) + "'");
+                expressions.add("[cq:path]='" + StringUtils.replace(contentRoot, "'", "''") + "'");
             }
         }
         if (startDate != null) {

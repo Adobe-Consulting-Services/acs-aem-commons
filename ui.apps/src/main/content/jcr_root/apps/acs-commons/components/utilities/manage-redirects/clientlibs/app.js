@@ -115,15 +115,18 @@
       $.ajax({
         url: redirectPath + ".html"
       }).done(function (trHtml) {
+        var tr;
         if (response.isCreate) {
           var editRedirectTable = $(TABLE_SELECTOR);
-          var tr = editRedirectTable
+          tr = editRedirectTable
             .find("tbody")[0]
             .appendChild(document.createElement("tr"));
-          $(tr).replaceWith(trHtml);
+          tr.id = redirectId;
+          tr.dataset.path = redirectPath;
         } else {
-          $("#" + redirectId).replaceWith(trHtml);
+          tr = $("#" + redirectId)[0];
         }
+        tr.innerHTML = trHtml;
         var ui = $(window).adaptTo("foundation-ui");
         ui.clearWait();
       });
@@ -194,7 +197,7 @@
         .adaptTo("foundation-field")
         .setValues(tags.split(","));
     var select = $("#status-code-select-box").get(0);
-    select.value = statusCode;
+    select.value = "" + statusCode;
     form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
     form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
     form.find('input[name="./note"]').val(note);

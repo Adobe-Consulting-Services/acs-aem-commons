@@ -39,8 +39,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -101,6 +102,16 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
+
+    /* Excluded URI patterns */
+    protected ArrayList<Pattern> excludedUriPatterns = new ArrayList<>();
+
+    @Property(
+            label = "Excluded URI patterns from handler",
+            description = "Regex URI patterns that are excluded from the error page handler. [Optional] [Default: None] [Forces: ^/content/test-site(/.*)?, ^/content/dam/test(/.*)?] ",
+            cardinality = Integer.MAX_VALUE)
+    private static final String EXCLUDED_URIS_FROM_HANDLER = "error-page.uri-exclusions";
+
 
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
@@ -174,7 +185,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Not Found Path Patterns */
     private static final String[] DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS = {};
-    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<Pattern>();
+    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<>();
 
     @Property(
             label = "Not Found Exclusions",
@@ -239,12 +250,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             value = {"png", "jpeg", "jpg", "gif"})
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
 
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     private Authenticator authenticator;
-    
+
     @Reference
     private VanityURLService vanityUrlService;
 
@@ -865,11 +877,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         String[] tmpNotFoundExclusionPatterns = PropertiesUtil.toStringArray(
                 config.get(PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS), DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS);
 
-        this.notFoundExclusionPatterns = new ArrayList<Pattern>();
+        this.notFoundExclusionPatterns = new ArrayList<>();
         for (final String tmpPattern : tmpNotFoundExclusionPatterns) {
             this.notFoundExclusionPatterns.add(Pattern.compile(tmpPattern));
         }
 
+        String[] tmpExcludedUriPatterns = ArrayUtils.addAll(PropertiesUtil.toStringArray(config.get(EXCLUDED_URIS_FROM_HANDLER)),
+                "^/content/test-site(/.*)?", "^/content/dam/test(/.*)?");
+        // The above patterns are the default patterns that are always excluded from the error page handler due to a requirement by AEM Cloud Manager
+        for (final String tmpPattern : tmpExcludedUriPatterns) {
+            this.excludedUriPatterns.add(Pattern.compile(tmpPattern));
+        }
 
         /** Error Page Cache **/
 
@@ -935,6 +953,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         pw.printf("System Error Page Path: %s", this.systemErrorPagePath).println();
         pw.printf("Error Page Extension: %s", this.errorPageExtension).println();
         pw.printf("Fallback Error Page Name: %s", fallbackErrorName).println();
+        pw.printf("Excluded URI Patterns: %s", Arrays.toString(excludedUriPatterns.toArray())).println();
 
         pw.printf("Resource Not Found - Behavior: %s", this.notFoundBehavior).println();
         pw.printf("Resource Not Found - Exclusion Path Patterns %s", Arrays.toString(tmpNotFoundExclusionPatterns)).println();
@@ -1036,4 +1055,20 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         return this.vanityDispatchCheckEnabled;
     }
 
+    @Override
+    public boolean shouldRequestUseErrorPageHandler(SlingHttpServletRequest request) {
+        if (CollectionUtils.isEmpty(this.excludedUriPatterns)) {
+            return true;
+        }
+
+        String requestURI = request.getRequestURI();
+
+        for (Pattern excludedPattern : this.excludedUriPatterns) {
+            if (excludedPattern.matcher(requestURI).matches()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

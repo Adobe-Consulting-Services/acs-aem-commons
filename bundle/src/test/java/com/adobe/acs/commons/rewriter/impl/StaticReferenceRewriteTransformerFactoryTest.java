@@ -20,9 +20,7 @@ package com.adobe.acs.commons.rewriter.impl;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 
@@ -124,6 +122,12 @@ public class StaticReferenceRewriteTransformerFactoryTest {
 
     @Test
     public void test_with_prefix_and_matching_pattern_and_single_host_and_replace_host() throws Exception {
+        test_with_prefix_and_matching_pattern_and_single_host_and_replace_host_custom_scheme(null);
+        test_with_prefix_and_matching_pattern_and_single_host_and_replace_host_custom_scheme("https");
+        test_with_prefix_and_matching_pattern_and_single_host_and_replace_host_custom_scheme("http");
+    }
+
+    private void test_with_prefix_and_matching_pattern_and_single_host_and_replace_host_custom_scheme(String scheme) throws Exception {
         MockBundle bundle = new MockBundle(-1);
         MockComponentContext ctx = new MockComponentContext(bundle);
         ctx.setProperty("prefixes", new String[] { "/content/dam" });
@@ -131,21 +135,27 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         ctx.setProperty("host.pattern", "static.host.com");
         ctx.setProperty("matchingPatterns", "img:src;(\\/content\\/dam\\/.+?\\.(png|jpg))");
         ctx.setProperty("replaceHost", true);
+        if (scheme != null) {
+            ctx.setProperty("host.scheme", scheme);
+        }
 
         StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
         factory.activate(ctx);
 
+        reset(handler);
         Transformer transformer = factory.createTransformer();
         transformer.setContentHandler(handler);
 
         AttributesImpl imageWithJustSrc = new AttributesImpl();
-        imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "https://www.host.com/content/dam/flower.jpg");
+        String inputUrl = "https://www.host.com/content/dam/flower.jpg";
+        imageWithJustSrc.addAttribute(null, "src", null, "CDATA", inputUrl);
         transformer.startElement(null, "img", null, imageWithJustSrc);
 
         verify(handler, only()).startElement(isNull(), eq("img"), isNull(),
                 attributesCaptor.capture());
         List<Attributes> values = attributesCaptor.getAllValues();
-        assertEquals("https://static.host.com/content/dam/flower.jpg", values.get(0).getValue(0));
+        String expectedScheme = scheme  == null ? inputUrl.substring(0, inputUrl.indexOf("://")) : scheme;
+        assertEquals(expectedScheme + "://static.host.com/content/dam/flower.jpg", values.get(values.size() - 1).getValue(0));
     }
 
     @Test

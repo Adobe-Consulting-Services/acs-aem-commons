@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.6.2</version>
+        <version>6.8.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -408,7 +408,6 @@
             <artifactId>javax.mail-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- for com.adobe.acs.commons.logging.impl.SyslogAppender  -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

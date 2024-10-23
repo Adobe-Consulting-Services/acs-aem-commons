@@ -31,7 +31,7 @@ import java.util.Collections;
 import javax.jcr.Node;
 import javax.jcr.Session;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.NonExistingResource;

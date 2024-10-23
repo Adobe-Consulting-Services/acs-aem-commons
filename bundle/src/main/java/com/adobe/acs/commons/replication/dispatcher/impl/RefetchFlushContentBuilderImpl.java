@@ -25,7 +25,7 @@ import com.day.cq.replication.ReplicationContent;
 import com.day.cq.replication.ReplicationContentFactory;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationLog;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;

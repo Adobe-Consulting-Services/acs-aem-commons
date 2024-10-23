@@ -33,7 +33,7 @@ import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.AbstractNode;
 import org.apache.jackrabbit.value.BinaryImpl;
