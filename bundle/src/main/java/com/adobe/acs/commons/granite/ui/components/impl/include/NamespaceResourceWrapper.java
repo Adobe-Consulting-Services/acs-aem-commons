@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
 
-import org.apache.commons.collections.iterators.FilterIterator;
-import org.apache.commons.collections.iterators.TransformIterator;
+import org.apache.commons.collections4.iterators.FilterIterator;
+import org.apache.commons.collections4.iterators.TransformIterator;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;

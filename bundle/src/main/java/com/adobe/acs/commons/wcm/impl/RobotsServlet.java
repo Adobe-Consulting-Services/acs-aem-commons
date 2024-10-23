@@ -52,6 +52,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,6 +80,8 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     private String robotsContentsPropertyPath;
 
+    private final Map<String, String> robotsContentsPropertyPathMap = new HashMap<>();
+
     private boolean printGroupingComments;
 
     private int crawlDelay;
@@ -95,6 +98,16 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     protected void activate(RobotsServletConfig config) {
         externalizerDomain = config.externalizer_domain();
         robotsContentsPropertyPath = config.robots_content_property_path();
+        for (String mapping : config.robots_content_property_pathMappings()) {
+            if (StringUtils.isNotBlank(mapping)) {
+                String[] mappingParts = mapping.split("=");
+                if (mappingParts.length == 2) {
+                    robotsContentsPropertyPathMap.put(mappingParts[0], mappingParts[1]);
+                } else {
+                    log.warn("Invalid robots_content_property_path mapping: {}", mapping);
+                }
+            }
+        }
         printGroupingComments = config.print_grouping_comments();
         crawlDelay = config.crawl_delay();
 
@@ -111,7 +124,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     }
 
     private void write(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        if (StringUtils.isNotBlank(robotsContentsPropertyPath)) {
+        if (StringUtils.isNotBlank(robotsContentsPropertyPath) || !robotsContentsPropertyPathMap.isEmpty()) {
             writeFromBinaryProperty(request, response);
         } else {
             writeFromOsgiConfig(request, response);
@@ -211,9 +224,18 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeFromBinaryProperty(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        String absoluteRobotsContentsPropertyPath = robotsContentsPropertyPath;
+        String absoluteRobotsContentsPropertyPath = robotsContentsPropertyPathMap.get(request.getResource().getPath());
+        if (StringUtils.isBlank(absoluteRobotsContentsPropertyPath)) {
+            if (StringUtils.isNotBlank(robotsContentsPropertyPath)) {
+                absoluteRobotsContentsPropertyPath = robotsContentsPropertyPath;
+            } else {
+                log.error("robots file requested but resource path {} not found in mappings", request.getResource().getPath());
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        }
         if (!absoluteRobotsContentsPropertyPath.startsWith("/")) {
-            absoluteRobotsContentsPropertyPath = request.getResource().getPath() + "/" + robotsContentsPropertyPath;
+            absoluteRobotsContentsPropertyPath = request.getResource().getPath() + "/" + absoluteRobotsContentsPropertyPath;
         }
 
         boolean written = false;
@@ -333,6 +355,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
         @AttributeDefinition(name = "Robots Content Property", description = "Path (either relative or absolute) to a String or Binary property containing the entire robots.txt contents. This could be a page property (e.g. robotsTxtContents) or the contents of a file within the DAM (e.g. /content/dam/my-site/seo/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data). If this is specified, all other configurations are effectively ignored.")
         String robots_content_property_path();
+
+        @AttributeDefinition(name = "Robots Content Property Map", description = "Overrides Robots Content Property with mappings of <resource path>=<Robots Content Property> such that only a resource matching the exact <resource path> will honor the Robots Content Property. If a valid mapping is not found for the current resource path, Robots Content Property will be used as a fallback if specified.")
+        String[] robots_content_property_pathMappings() default {};
 
         @AttributeDefinition(name = "User Agent Directives", description = "A set of User-agent directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<user agent name>")
         String[] user_agent_directives() default {};

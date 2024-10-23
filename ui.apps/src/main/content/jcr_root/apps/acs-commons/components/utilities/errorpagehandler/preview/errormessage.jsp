@@ -20,16 +20,16 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
           import="com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService,
-                org.apache.commons.lang.StringEscapeUtils,
+                org.apache.commons.lang3.StringEscapeUtils,
                 javax.servlet.http.HttpServletResponse" %><%
 
     final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
-    if (errorPageHandlerService == null || !errorPageHandlerService.isEnabled()) {
+    if (errorPageHandlerService == null || !errorPageHandlerService.isEnabled() || !errorPageHandlerService.shouldRequestUseErrorPageHandler(slingRequest)) {
         return;
     }
 
-    final String stackTrace = StringEscapeUtils.escapeHtml(errorPageHandlerService.getException(slingRequest));
-    final String requestProgress = StringEscapeUtils.escapeHtml(errorPageHandlerService.getRequestProgress(slingRequest));
+    final String stackTrace = StringEscapeUtils.escapeHtml4(errorPageHandlerService.getException(slingRequest));
+    final String requestProgress = StringEscapeUtils.escapeHtml4(errorPageHandlerService.getRequestProgress(slingRequest));
     final String path = errorPageHandlerService.findErrorPage(slingRequest, resource);
 
     final String erroringTitle = currentPage == null ? resource.getName() : currentPage.getTitle();

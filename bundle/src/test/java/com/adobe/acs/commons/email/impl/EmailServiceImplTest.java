@@ -17,11 +17,16 @@
  */
 package com.adobe.acs.commons.email.impl;
 
+import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 import junitx.util.PrivateAccessor;
+
+import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.ByteArrayDataSource;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -37,7 +42,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.activation.DataSource;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
+
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,6 +93,13 @@ public class EmailServiceImplTest {
         when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
 
         context.registerService(MessageGatewayService.class, messageGatewayService);
+        context.registerService(MailTemplateManager.class, new MailTemplateManager() {
+            @Override
+            public <T extends Email> T getEmail(MailTemplate template, Map<String, String> params, Class<T> mailType)
+            throws IOException, EmailException, MessagingException {
+                return template.getEmail(StrLookup.mapLookup(params), mailType) ;
+            }
+        });
         context.registerInjectActivateService(emailService);
     }
 

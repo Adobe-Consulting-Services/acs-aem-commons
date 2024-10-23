@@ -220,6 +220,21 @@ public class ContentVariableTransformerFactoryTest {
         assertEquals("/content/page.html?title=inheritedValue", out.getValue(0));
     }
 
+    @Test
+    public void testMultipleAttributeReplacement() throws Exception {
+        reinitTransformer(true);
+
+        AttributesImpl attributes = new AttributesImpl();
+        attributes.addAttribute(null, "title", null, "CDATA", "((page_properties.jcr:title)) and ((inherited_page_properties.inheritedProperty))");
+        transformer.startElement(null, "a", null, attributes);
+
+        ArgumentCaptor<AttributesImpl> attributesCaptor = ArgumentCaptor.forClass(AttributesImpl.class);
+        verify(handler, atLeast(1)).startElement(isNull(String.class), eq("a"), isNull(String.class), attributesCaptor.capture());
+
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("Arctic Surfing In Lofoten and inheritedValue", out.getValue(0));
+    }
+
     private void reinitTransformer(boolean defaultService) throws Exception {
         if (defaultService) {
             defaultService(context);
