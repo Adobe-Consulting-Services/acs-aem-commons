@@ -27,9 +27,9 @@ import org.apache.commons.lang3.StringUtils;
 public class StringUtil {
 
     public static String getFriendlyName(String orig) {
-        String[] parts = org.apache.commons.lang.StringUtils.split(orig, "._-");
+        String[] parts = org.apache.commons.lang3.StringUtils.split(orig, "._-");
         if (parts.length == 1) {
-            parts = org.apache.commons.lang.StringUtils.splitByCharacterTypeCamelCase(orig);
+            parts = org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(orig);
         }
        return Stream.of(parts).map(String::toLowerCase).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }    

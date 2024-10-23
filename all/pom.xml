@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.6.2</version>
+        <version>6.8.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -35,7 +35,7 @@
     <artifactId>acs-aem-commons-all</artifactId>
     <name>ACS AEM Commons Container Package (All)</name>
     <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps,
-        acs-aem-commons-ui.content, the OSGi bundle and configuration.
+        acs-aem-commons-ui.content, acs-aem-commons-ui.config and the OSGi bundle.
     </description>
     <packaging>content-package</packaging>
 
@@ -47,6 +47,7 @@
                 <inherited>false</inherited>
                 <configuration>
                     <packageType>container</packageType>
+                    <excludes>**/META-INF/*,**/thumbnail.png</excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -66,6 +67,13 @@
                                 </embedded>
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle-onprem</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.apps</artifactId>
                                     <classifier>~cloud</classifier>
                                     <target>/apps/acs-commons/install</target>
@@ -75,6 +83,13 @@
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
+                                    <target>/apps/acs-commons/install</target>
+                                    <filter>true</filter>
+                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.config</artifactId>
                                     <target>/apps/acs-commons/install</target>
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
@@ -203,6 +218,13 @@
             <type>zip</type>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.config</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -285,6 +307,13 @@
                                             <filter>true</filter>
                                             <isAllVersionsFilter>true</isAllVersionsFilter>
                                         </embedded>
+                                        <embedded>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>acs-aem-commons-ui.config</artifactId>
+                                            <target>/apps/acs-commons/install</target>
+                                            <filter>true</filter>
+                                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                                        </embedded>
                                     </embeddeds>
                                 </configuration>
                             </execution>
@@ -312,7 +341,7 @@
                     <plugin>
                         <groupId>com.adobe.aem</groupId>
                         <artifactId>aemanalyser-maven-plugin</artifactId>
-                        <version>1.5.8</version>
+                        <version>1.6.4</version>
                         <executions>
                             <execution>
                                 <id>aem-analyser</id>

@@ -26,6 +26,13 @@
                     icon="gear"
                     text="Configure"
                     variant="primary"/>
+                <history
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        href="/apps/acs-commons/content/contentsync/history.html"
+                        icon="stopwatch"
+                        text="History"
+                        variant="primary"/>
             </secondary>
         </actions>
         <content
@@ -106,6 +113,13 @@
                                     name="delete"
                                     text="Delete resources that exist in the destination but not in the source"
                                     value="true"/>
+                                <recursive
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                        name="recursive"
+                                        text="Recursive"
+                                        checked="{Boolean}true"
+                                        value="true"/>
                             </items>
                         </checkboxes>
                         <submit
