@@ -10,10 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-### Changed
-
+### Fixed
 - #3385 Made nesting parameterized includes inside a multi field (ignored resource types) possible
 
+### Changed
 - #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
   CS release version, TBA)
 
