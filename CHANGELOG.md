@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+- #3459 - Top level properties in parameterized include are now respected.
+
 ### Changed
 
 - #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
@@ -64,9 +67,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3390 - Remove usage of commons collections 3
 
 ## 6.6.2 - 2024-06-25
-
-### Fixed 
-- #3459 - Top level properties in parameterized include are now respected.
 
 ### Fixed
 
