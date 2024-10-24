@@ -65,6 +65,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 6.6.2 - 2024-06-25
 
+### Fixed 
+- #3459 - Top level properties in parameterized include are now respected.
+
 ### Fixed
 
 - #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
