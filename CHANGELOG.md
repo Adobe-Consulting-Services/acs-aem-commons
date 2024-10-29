@@ -11,17 +11,28 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 - #3443 - Content Sync: don't drill down into content tree if recursion is off
 
+### Changed
+
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
+  CS release version, TBA)
+
+## 6.8.0 - 2024-10-17
+
 ### Added
 
 - #3448 - Adding support for URIs that should not use ErrorHandlerService using regex
+
+## 6.7.0 - 2024-10-01
+
+### Added
+
 - #3415 - Allow Robots.txt generation to serve different file by requested resource path
 - #3426 - Content Sync: view history of completed jobs
 - #3417 - Configurable recursion in Content Sync
 
 ### Changed
 
-- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
-  CS release version, TBA)
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM CS release version, TBA)
 - #3429 - UI Widgets - add uniq function to embedded lodash library to resolve issue with composite multifield widget
 - #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
 - #3417 - Configurable recursion in Content Sync

@@ -78,14 +78,6 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
         </dependency>
         <!-- Start Test dependencies -->
         <dependency>
-            <groupId>com.adobe.acs</groupId>
-            <artifactId>acs-aem-commons-bundle</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
