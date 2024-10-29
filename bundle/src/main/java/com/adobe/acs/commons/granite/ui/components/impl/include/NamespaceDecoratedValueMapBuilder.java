@@ -47,8 +47,7 @@ public class NamespaceDecoratedValueMapBuilder {
     private final Map<String,Object> copyMap;
     private final String[] namespacedProperties;
 
-    static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(\\$\\{\\{([a-zA-Z0-9]+?)(:(.+?))??\\}\\})+?");
-    static final Pattern PLACEHOLDER_TYPE_HINTED_PATTERN = Pattern.compile("(.*)\\$\\{\\{(\\(([a-zA-Z]+)\\)){1}([a-zA-Z0-9]+)(:(.+))?\\}\\}(.*)?");
+    static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{\\{(?:\\(([a-zA-Z]+)\\))?([a-zA-Z0-9]+)(:(.*?))?\\}\\}");
 
     public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties, boolean copyToplevelProperties) {
         this.request = request;
@@ -154,59 +153,34 @@ public class NamespaceDecoratedValueMapBuilder {
 
 
     private Object filter(String value, SlingHttpServletRequest request) {
-        Object filtered = applyTypeHintedPlaceHolders(value, request);
-
-        if(filtered != null){
-            return filtered;
-        }
-
-        return applyPlaceHolders(value, request);
-    }
-
-    private Object applyTypeHintedPlaceHolders(String value, SlingHttpServletRequest request) {
-        Matcher matcher = PLACEHOLDER_TYPE_HINTED_PATTERN.matcher(value);
-
-        if (matcher.find()) {
-
-            String prefix = matcher.group(1);
-            String typeHint = matcher.group(3);
-            String paramKey = matcher.group(4);
-            String defaultValue = matcher.group(6);
-            String suffix = matcher.group(7);
-
-            String requestParamValue = (request.getAttribute(PREFIX + paramKey) != null) ? request.getAttribute(PREFIX + paramKey).toString() : null;
-            String chosenValue = defaultString(requestParamValue, defaultValue);
-            String finalValue = defaultIfEmpty(prefix, EMPTY) + chosenValue + defaultIfEmpty(suffix, EMPTY);
-
-            return isNotEmpty(typeHint) ? castTypeHintedValue(typeHint, finalValue) : finalValue;
-        }
-
-        return null;
-    }
-
-    private String applyPlaceHolders(String value, SlingHttpServletRequest request) {
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(value);
-        StringBuffer buffer = new StringBuffer();
+
+        // Replace all occurrences
+        StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
+            // Retrieve groups for Typecast, paramKey, and default value
 
+            String typeHint = matcher.group(1);
             String paramKey = matcher.group(2);
             String defaultValue = matcher.group(4);
 
             String requestParamValue = (request.getAttribute(PREFIX + paramKey) != null) ? request.getAttribute(PREFIX + paramKey).toString() : null;
             String chosenValue = defaultString(requestParamValue, defaultValue);
 
-            if(chosenValue == null){
-                chosenValue = StringUtils.EMPTY;
+            String replacement =  isNotEmpty(typeHint) ? castTypeHintedValue(typeHint, chosenValue).toString() : chosenValue;
+
+            if(replacement == null){
+                replacement = "";
             }
-
-            matcher.appendReplacement(buffer, chosenValue);
-
+            // Append the replacement to the result
+            matcher.appendReplacement(result, replacement);
         }
 
-        matcher.appendTail(buffer);
+        // Append the remaining text
+        matcher.appendTail(result);
 
-        return buffer.toString();
+        return result.toString();
     }
 
     private Object castTypeHintedValue(String typeHint, String chosenValue) {
