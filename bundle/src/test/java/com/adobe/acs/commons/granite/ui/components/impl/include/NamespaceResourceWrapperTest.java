@@ -74,13 +74,16 @@ public class NamespaceResourceWrapperTest {
         parameters.put("doubleFieldDefaultValue", 11.34d);
         parameters.put("hideAField", Boolean.TRUE);
         parameters.put("fieldLabelText", "Some Text from parameters");
+        parameters.put("fieldDescriptionText", "someFieldDescription");
+        parameters.put("suffixText", "SuffixTextTest");
 
         setParameters(parameters);
 
         systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(), properties,true);
 
-
-
+        Resource someMultiExpressionField = systemUnderTest.getChild("someMultiExpressionField");
+        String multiExpressionValue = someMultiExpressionField.getValueMap().get("fieldDescription", "");
+        assertEquals("someFieldDescription otherText someFieldDescription evenMoreText SuffixTextTest", multiExpressionValue);
 
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
         Double doubleDefaultValue = someDoubleField.getValueMap().get("defaultValue", Double.class);
@@ -119,6 +122,11 @@ public class NamespaceResourceWrapperTest {
         Resource regularTextField = systemUnderTest.getChild("someRegularField");
         String fieldLabelValue = regularTextField.getValueMap().get("fieldLabel", "");
         assertEquals("defaultText", fieldLabelValue);
+
+        Resource someMultiExpressionField = systemUnderTest.getChild("someMultiExpressionField");
+        String multiExpressionValue = someMultiExpressionField.getValueMap().get("fieldDescription", "");
+        assertEquals("defaultDescription otherText otherDefaultDescription evenMoreText ", multiExpressionValue);
+
     }
 
 
