@@ -104,30 +104,39 @@ public class IncludeDecoratorFilterImpl implements Filter {
 
         ValueMap parameters = ValueMap.EMPTY;
 
-        if(servletRequest instanceof SlingHttpServletRequest){
+        if(!(servletRequest instanceof SlingHttpServletRequest)){
+            chain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+        SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
 
-            SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
+        Predicate<String> typeCheckFn = (resourceType) -> request.getResourceResolver().isResourceType(request.getResource(), resourceType);
 
-            Predicate<String> typeCheckFn = (resourceType) -> request.getResourceResolver().isResourceType(request.getResource(), resourceType);
-
-            if(typeCheckFn.test(RESOURCE_TYPE)){
-                performFilter(request, servletResponse, chain, parameters);
-                return;
-            }else if(resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn)){
-                boolean ignoreChildren = resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn);
-                if(ignoreChildren){
-                    request.setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, request.getResource().getResourceType());
-                }
-                chain.doFilter(servletRequest, servletResponse);
-                if(ignoreChildren){
-                    request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
-                }
-                return;
+        if(typeCheckFn.test(RESOURCE_TYPE)){
+            Object ignoreResourceType = request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
+            Object namespace = request.getAttribute(REQ_ATTR_NAMESPACE);
+            //if children ignore is active, but we have a new include, we de-activate the ignore children.
+            if(ignoreResourceType != null){
+                request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
+                request.removeAttribute(REQ_ATTR_NAMESPACE);
             }
-
+            performFilter(request, servletResponse, chain, parameters);
+            // we are now out of the nested include context. re-activate the ignore children if it was active before.
+            if(ignoreResourceType != null){
+                request.setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, ignoreResourceType);
+                request.setAttribute(REQ_ATTR_NAMESPACE, namespace);
+            }
+        }else if(resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn)){
+            boolean ignoreChildren = resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn);
+            if(ignoreChildren){
+                request.setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, request.getResource().getResourceType());
+            }
+            chain.doFilter(servletRequest, servletResponse);
+            if(ignoreChildren){
+                request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
+            }
         }
 
-        chain.doFilter(servletRequest, servletResponse);
     }
 
     private void performFilter(SlingHttpServletRequest request, ServletResponse servletResponse, FilterChain chain, ValueMap parameters) throws IOException, ServletException {

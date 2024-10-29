@@ -11,10 +11,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 - #3443 - Content Sync: don't drill down into content tree if recursion is off
 
-### Changed
+### Fixed
+- #3459 - Top level properties in parameterized include are now respected.
+- #3460 - Fixes issue where double parameters were not working for the parameterized include
 
-- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (would require a specific - not public yet - AEM
-  CS release version, TBA)
+### Changed
+- #3385 Made nesting parameterized includes inside a multi-field (ignored resource types) possible
 
 ## 6.8.0 - 2024-10-17
 
