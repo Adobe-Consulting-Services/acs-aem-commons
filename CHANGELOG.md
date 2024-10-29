@@ -9,11 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
-- #3443 - Content Sync: don't drill down into content tree if recursion is off
+
+## 6.9.0 - 2024-10-29
 
 ### Fixed
 - #3459 - Top level properties in parameterized include are now respected.
 - #3460 - Fixes issue where double parameters were not working for the parameterized include
+- #3443 - Content Sync: don't drill down into content tree if recursion is off
 
 ### Changed
 - #3385 Made nesting parameterized includes inside a multi-field (ignored resource types) possible
