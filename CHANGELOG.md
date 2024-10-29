@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+- #3443 - Content Sync: don't drill down into content tree if recursion is off
 
 ### Fixed
 - #3459 - Top level properties in parameterized include are now respected.

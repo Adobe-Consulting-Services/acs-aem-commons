@@ -36,6 +36,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+/**
+ * The ContentCatalog class provides methods to fetch and process content catalogs
+ * from a remote instance.
+ */
 public class ContentCatalog {
 
     private RemoteInstance remoteInstance;
@@ -46,12 +50,48 @@ public class ContentCatalog {
         this.catalogServlet = catalogServlet;
     }
 
+    /**
+     * @deprecated use {@link #getFetchURI(String, String, boolean)}
+     */
+    @Deprecated
     public URI getFetchURI(String path, String updateStrategy) throws URISyntaxException {
-        return remoteInstance.toURI(catalogServlet, "root", path, "strategy", updateStrategy);
+        return getFetchURI(path, updateStrategy, true);
     }
 
+    /**
+     * Gets the URI to fetch the catalog.
+     *
+     * @param path the path to fetch the catalog for
+     * @param updateStrategy the update strategy to use
+     * @param recursive whether to fetch recursively
+     * @return the URI to fetch the catalog
+     * @throws URISyntaxException if the URI syntax is incorrect
+     */
+    public URI getFetchURI(String path, String updateStrategy, boolean recursive) throws URISyntaxException {
+        return remoteInstance.toURI(catalogServlet, "root", path, "strategy",
+                updateStrategy, "recursive", String.valueOf(recursive));
+    }
+
+    /**
+     * @deprecated use {@link #fetch(String, String, boolean)}
+     */
+    @Deprecated
     public List<CatalogItem> fetch(String path, String updateStrategy) throws IOException, URISyntaxException {
-        URI uri = getFetchURI(path, updateStrategy);
+        return fetch(path, updateStrategy, true);
+    }
+
+    /**
+     * Fetches the catalog items from the remote instance.
+     *
+     * @param path the path to fetch the catalog for
+     * @param updateStrategy the update strategy to use
+     * @param recursive whether to fetch recursively
+     * @return a list of catalog items
+     * @throws IOException if an I/O error occurs
+     * @throws URISyntaxException if the URI syntax is incorrect
+     */
+    public List<CatalogItem> fetch(String path, String updateStrategy, boolean recursive) throws IOException, URISyntaxException {
+        URI uri = getFetchURI(path, updateStrategy, recursive);
 
         String json = remoteInstance.getString(uri);
 
@@ -70,6 +110,14 @@ public class ContentCatalog {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets the delta between the catalog items and the resources in the resource resolver.
+     *
+     * @param catalog the list of catalog items
+     * @param resourceResolver the resource resolver to check against
+     * @param updateStrategy the update strategy to use
+     * @return a list of catalog items that are modified or not present in the resource resolver
+     */
     public List<CatalogItem> getDelta(List<CatalogItem> catalog, ResourceResolver resourceResolver, UpdateStrategy updateStrategy) {
         List<CatalogItem> lst = new ArrayList<>();
         for(CatalogItem item : catalog){

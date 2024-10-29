@@ -54,33 +54,50 @@ public class LastModifiedStrategy implements UpdateStrategy {
     @Reference
     private ServletResolver servletResolver;
 
+    /**
+     * The ContentCatalog class provides methods to fetch and process content catalogs
+     * from a remote instance.
+     */
     @Override
     public List<CatalogItem> getItems(SlingHttpServletRequest request) {
         String rootPath = request.getParameter("root");
         if (rootPath == null) {
             throw new IllegalArgumentException("root request parameter is required");
         }
-        boolean recursive = "true".equals(request.getParameter("recursive"));
+        boolean nonRecursive = "false".equals(request.getParameter("recursive"));
 
         Resource root = request.getResourceResolver().getResource(rootPath);
         if (root == null) {
             return Collections.emptyList();
         }
         List<CatalogItem> items = new ArrayList<>();
-        new AbstractResourceVisitor() {
-            @Override
-            public void visit(Resource res) {
-                if ((!recursive && !res.getPath().equals(root.getPath())) || !accepts(res)) {
-                    return;
+        if (nonRecursive) {
+            JsonObjectBuilder json = Json.createObjectBuilder();
+            writeMetadata(json, root, request);
+            items.add(new CatalogItem(json.build()));
+        } else {
+            new AbstractResourceVisitor() {
+                @Override
+                public void visit(Resource res) {
+                    if (!accepts(res)) {
+                        return;
+                    }
+                    JsonObjectBuilder json = Json.createObjectBuilder();
+                    writeMetadata(json, res, request);
+                    items.add(new CatalogItem(json.build()));
                 }
-                JsonObjectBuilder json = Json.createObjectBuilder();
-                writeMetadata(json, res, request);
-                items.add(new CatalogItem(json.build()));
-            }
-        }.accept(root);
+            }.accept(root);
+        }
         return items;
     }
 
+    /**
+     * Checks if the remote resource is modified compared to the local resource.
+     *
+     * @param remoteResource the remote catalog item
+     * @param localResource the local resource
+     * @return true if the remote resource is modified, false otherwise
+     */
     @Override
     public boolean isModified(CatalogItem remoteResource, Resource localResource) {
         LastModifiedInfo remoteLastModified = getLastModified(remoteResource);
@@ -89,6 +106,13 @@ public class LastModifiedStrategy implements UpdateStrategy {
         return remoteLastModified.getLastModified() > localLastModified.getLastModified();
     }
 
+    /**
+     * Generates a message indicating the modification status of the resource.
+     *
+     * @param remoteResource the remote catalog item
+     * @param localResource the local resource
+     * @return a message indicating the modification status
+     */
     @Override
     @SuppressWarnings("squid:S2583")
     public String getMessage(CatalogItem remoteResource, Resource localResource) {
