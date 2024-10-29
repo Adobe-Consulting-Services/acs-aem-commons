@@ -79,7 +79,7 @@ public class NamespaceResourceWrapperTest {
 
         setParameters(parameters);
 
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(), properties);
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(), properties,true);
 
         Resource someMultiExpressionField = systemUnderTest.getChild("someMultiExpressionField");
         String multiExpressionValue = someMultiExpressionField.getValueMap().get("fieldDescription", "");
@@ -106,7 +106,7 @@ public class NamespaceResourceWrapperTest {
     @Test
     public void test_default_values() {
 
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties);
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties, true);
 
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
         Double doubleDefaultValue = someDoubleField.getValueMap().get("defaultValue", Double.class);
@@ -134,7 +134,7 @@ public class NamespaceResourceWrapperTest {
     public void test_namespacing() {
 
         context.request().setAttribute(REQ_ATTR_NAMESPACE, "block1");
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties);
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties,true);
 
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
 
@@ -148,7 +148,7 @@ public class NamespaceResourceWrapperTest {
         context.request().setAttribute(REQ_ATTR_NAMESPACE, "block1");
         context.request().setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, "ignore/children/resource/type");
         context.request().setAttribute(REQ_ATTR_TEST_FLAG, true);
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties);
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties,true);
 
         Resource shouldIgnoreChildrenField = systemUnderTest.getChild("fieldWithChildrenThatShouldBeIgnored");
 

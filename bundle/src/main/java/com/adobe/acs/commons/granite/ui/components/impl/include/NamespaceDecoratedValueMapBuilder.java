@@ -49,15 +49,40 @@ public class NamespaceDecoratedValueMapBuilder {
 
     static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{\\{(?:\\(([a-zA-Z]+)\\))?([a-zA-Z0-9]+)(:(.*?))?\\}\\}");
 
-    public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties) {
+    public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties, boolean copyToplevelProperties) {
         this.request = request;
-        this.copyMap = new HashMap<>(resource.getValueMap());
+        this.copyMap = new HashMap<>();
+        if(copyToplevelProperties && request.getResourceResolver().isResourceType(resource, RESOURCE_TYPE)){
+            // if the node is the include node, we have to preload the properties from the snippet root level
+            preloadPropsOnRootLevel(request, resource);
+        }
+        this.copyMap.putAll(resource.getValueMap());
+
         this.namespacedProperties = Optional.ofNullable(namespacedProperties)
                 .map(array -> Arrays.copyOf(array, array.length))
                 .orElse(new String[0]);
 
         this.applyDynamicVariables();
         this.applyNameSpacing();
+    }
+
+    private void preloadPropsOnRootLevel(SlingHttpServletRequest request, Resource resource) {
+        String path = resource.getValueMap().get("path", "");
+
+        if(StringUtils.isNotBlank(path)){
+            Resource snippetResource = request.getResourceResolver().getResource(path);
+
+            if(snippetResource != null){
+                ValueMap inclProps = snippetResource.getValueMap();
+                this.copyMap.putAll(inclProps);
+
+                // if we have sling resourceType on the snippet, we have to put it in front as resourceType.
+                if(inclProps.containsKey("sling:resourceType")){
+                    this.copyMap.put("resourceType", inclProps.get("sling:resourceType"));
+                }
+            }
+
+        }
     }
 
     /**

@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ### Fixed
-
+- #3459 - Top level properties in parameterized include are now respected.
 - #3460 - Fixes issue where double parameters were not working for the parameterized include
 
 ### Changed
