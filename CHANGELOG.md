@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.9.2 - 2024-11-04
+
+### Fixed
+
+- #3464 - Fixed issue with IncludeDecoratorFilter not proceeding with chain
+
 ## 6.9.0 - 2024-10-29
 
 ### Fixed
