@@ -135,6 +135,8 @@ public class IncludeDecoratorFilterImpl implements Filter {
             if(ignoreChildren){
                 request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
             }
+        }else{
+            chain.doFilter(servletRequest, servletResponse);
         }
 
     }
