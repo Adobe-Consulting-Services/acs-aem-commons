@@ -25,7 +25,7 @@
 
     final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
 
-    if (errorPageHandlerService != null && errorPageHandlerService.isEnabled() && && errorPageHandlerService.shouldRequestUseErrorPageHandler(slingRequest)) {
+    if (errorPageHandlerService != null && errorPageHandlerService.isEnabled() && errorPageHandlerService.shouldRequestUseErrorPageHandler(slingRequest)) {
         final int status = errorPageHandlerService.getStatusCode(slingRequest);
 
         if (status >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR &&

@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+- #3463 - Fixed syntax error in errorpagehandler default.jsp file
+
 ## 6.9.2 - 2024-11-04
 
 ### Fixed
