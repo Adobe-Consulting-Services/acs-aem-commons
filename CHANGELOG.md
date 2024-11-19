@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+- #3473 - Fix Broken Styling when the notification is active
+
 ## 6.9.4 - 2024-11-07
 
 ### Fixed
