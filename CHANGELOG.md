@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #3474 - Reintroduction of dependency to outdated Apache Commons Collections 3
+
 ## 6.9.4 - 2024-11-07
 
 ### Fixed
