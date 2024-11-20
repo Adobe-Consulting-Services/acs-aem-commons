@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## 6.9.6 - 2024-11-20
+
 ### Fixed
 - #3473 - Fix Broken Styling when the notification is active
 - #3474 - Fixed reintroduction of dependency to outdated Apache Commons Collections 3
