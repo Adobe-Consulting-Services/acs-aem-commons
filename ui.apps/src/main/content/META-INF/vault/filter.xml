@@ -49,16 +49,24 @@
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1"/>
-        <include
-                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items"/>
-        <include
-                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
     </filter>
     <filter root="/apps/settings">
         <include pattern="/apps/settings"/>
         <include pattern="/apps/settings/dam"/>
         <include pattern="/apps/settings/dam/indesign"/>
         <include pattern="/apps/settings/dam/indesign/scripts(/.*)?"/>
+    </filter>
+    <filter root="/apps/wcm">
+        <include pattern="/apps/wcm/core"/>
+        <include pattern="/apps/wcm/core/content"/>
+        <include pattern="/apps/wcm/core/content/editor"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header(/.*)?"/>
     </filter>
 </workspaceFilter>

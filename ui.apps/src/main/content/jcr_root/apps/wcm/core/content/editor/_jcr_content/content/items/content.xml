@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:mixinTypes="[vlt:FullCoverage]"
+    jcr:primaryType="sling:OrderedFolder"
+    sling:resourceType="cq/gui/components/authoring/editorpanel"
+    default="{Boolean}true"
+    id="Content"
+    role="main">
+    <header
+        jcr:primaryType="nt:unstructured"
+        class="editor-GlobalBar js-editor-PanelHeader">
+        <items jcr:primaryType="nt:unstructured">
+            <headerbar
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="cq/gui/components/authoring/headerbar"
+                class="header-main">
+                <items jcr:primaryType="nt:unstructured">
+                    <pageinfopopover
+                        granite:class="pageinfo"
+                        granite:id="pageinfo-popover"
+                        granite:title="Page Information"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/popover">
+                        <items jcr:primaryType="nt:unstructured">
+                            <list
+                                granite:id="pageinfo-data"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="cq/gui/components/authoring/pageinfo/list">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <copypublishurl
+                                        granite:class="foundation-toggleable-control"
+                                        granite:id="sites-publishurl-button"
+                                        granite:title="Copy Publish URL"
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                                        text="Copy Publish URL">
+                                        <granite:data
+                                            jcr:primaryType="nt:unstructured"
+                                            foundation-toggleable-control-target="#aem-sites-show-publish-url"/>
+                                        <granite:rendercondition
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/renderconditions/and">
+                                            <condition1
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
+                                                expression="${empty paramValues['item'][1] ? 'true' : 'false'}"/>
+                                            <condition2
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="acs-commons/renderconditons/ispublished"
+                                                resourcePath="${requestPathInfo.suffix}"/>
+                                            <condition3
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/foundation/renderconditions/feature"
+                                                feature="com.adobe.acs.commons.wcm.impl.copysitespublishurlfeature.feature.flag"/>
+                                        </granite:rendercondition>
+                                    </copypublishurl>
+                                </items>
+                            </list>
+                        </items>
+                    </pageinfopopover>
+                </items>
+            </headerbar>
+            <dialogpublishurl
+                granite:id="aem-sites-show-publish-url"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Publish URL"
+                sling:resourceType="granite/ui/components/coral/foundation/dialog"
+                closable="{Boolean}true">
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    assetpath="${empty requestPathInfo.suffix ? paramValues[&quot;item&quot;][0] : requestPathInfo.suffix}"/>
+                <items jcr:primaryType="nt:unstructured">
+                    <textarea
+                        granite:rel="acs-aem-commons__sites-copy-published-url__text"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/textarea"/>
+                </items>
+                <footer jcr:primaryType="nt:unstructured">
+                    <dismiss
+                        granite:rel="foundation-toggleable"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                        text="Dismiss"
+                        variant="minimal">
+                        <parentConfig
+                            jcr:primaryType="nt:unstructured"
+                            close="{Boolean}true"/>
+                    </dismiss>
+                    <copy
+                        granite:id="sites-publishurl-copy-cmd"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                        icon="attach"
+                        iconSize="XS"
+                        text="Copy"
+                        variant="primary">
+                        <granite:rendercondition
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
+                            expression="${!granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPad&quot;) &amp;&amp; !granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPhone&quot;)}"/>
+                    </copy>
+                </footer>
+            </dialogpublishurl>
+        </items>
+    </header>
+</jcr:root>
