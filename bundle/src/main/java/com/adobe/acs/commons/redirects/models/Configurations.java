@@ -43,7 +43,6 @@ import java.util.List;
  */
 @Model(adaptables = SlingHttpServletRequest.class)
 public class Configurations {
-    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @SlingObject
     private SlingHttpServletRequest request;
@@ -54,21 +53,24 @@ public class Configurations {
     private static final String REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects/redirects";
 
     public Collection<RedirectConfiguration> getConfigurations() {
-        String sql = "SELECT * FROM [nt:unstructured] AS s WHERE ISDESCENDANTNODE([/conf]) "
-                + "AND s.[sling:resourceType]='" + REDIRECTS_RESOURCE_TYPE + "'";
-        log.debug(sql);
-        Iterator<Resource> it = request.getResourceResolver().findResources(sql, Query.JCR_SQL2);
-        List<RedirectConfiguration> lst = new ArrayList<>();
-        String bucketName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_BUCKET : redirectFilter.getBucket();
-        String configName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_NAME : redirectFilter.getConfigName();
+        List<RedirectConfiguration> configurations = new ArrayList<>();
 
-        while (it.hasNext()) {
-            Resource resource = it.next();
-            String storageSuffix = bucketName + "/" + configName;
-            RedirectConfiguration cfg = new RedirectConfiguration(resource, storageSuffix);
-            lst.add(cfg);
+        String bucketName = redirectFilter != null ? redirectFilter.getBucket() : RedirectFilter.DEFAULT_CONFIG_BUCKET;
+        String configName = redirectFilter != null ? redirectFilter.getConfigName() : RedirectFilter.DEFAULT_CONFIG_NAME;
+        String storageSuffix = bucketName + "/" + configName;
+
+        Resource confRoot = request.getResourceResolver().getResource("/conf");
+
+        for (Resource child : confRoot.getChildren()) {
+            Resource res = child.getChild(storageSuffix);
+            if (res != null && res.isResourceType(REDIRECTS_RESOURCE_TYPE)) {
+                configurations.add(new RedirectConfiguration(res, storageSuffix));
+            }
         }
-        lst.sort(Comparator.comparing(RedirectConfiguration::getName));
-        return lst;
+
+        configurations.sort(Comparator.comparing(RedirectConfiguration::getName));
+        return configurations;
     }
+
+
 }

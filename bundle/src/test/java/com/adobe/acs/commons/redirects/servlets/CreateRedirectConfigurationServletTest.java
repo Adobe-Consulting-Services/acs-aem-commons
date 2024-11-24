@@ -18,9 +18,11 @@
 package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
-import org.apache.sling.api.resource.Resource;
+import com.adobe.acs.commons.redirects.models.Configurations;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,9 +30,9 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,22 +45,28 @@ public class CreateRedirectConfigurationServletTest {
 
     @Before
     public void setUp() {
+        context.addModelsForClasses(Configurations.class);
         servlet = new CreateRedirectConfigurationServlet();
         RedirectFilterMBean redirectFilter = mock(RedirectFilterMBean.class);
         when(redirectFilter.getBucket()).thenReturn("settings");
         when(redirectFilter.getConfigName()).thenReturn("redirects");
+        context.registerService(RedirectFilterMBean.class, redirectFilter);
         servlet.redirectFilter = redirectFilter;
     }
 
     @Test
-    public void createConfig() throws ServletException, IOException   {
+    public void createConfig() throws ServletException, IOException {
         context.build().resource("/conf/global");
         context.request().addRequestParameter("path", "/conf/global");
         servlet.doPost(context.request(), context.response());
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        Resource cfg = context.resourceResolver().getResource("/conf/global/settings/redirects");
-        assertNotNull(cfg);
+
+        // Read configurations via Model
+        Configurations confModel = context.request().adaptTo(Configurations.class);
+        Collection<RedirectConfiguration> configurations = confModel.getConfigurations();
+        RedirectConfiguration cfg = configurations.iterator().next();
+        assertEquals("/conf/global/settings/redirects", cfg.getPath());
 
         // return 409 if already exists
         servlet.doPost(context.request(), context.response());
@@ -66,19 +74,24 @@ public class CreateRedirectConfigurationServletTest {
     }
 
     @Test
-    public void createConfigWithContextPrefix() throws ServletException, IOException   {
+    public void createConfigWithContextPrefix() throws ServletException, IOException {
         context.build().resource("/conf/global");
-        context.request().addRequestParameter("path", "/conf/global");
-        context.request().addRequestParameter("contextPrefix", "/content/mysite");
-        servlet.doPost(context.request(), context.response());
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter("path", "/conf/global");
+        request.addRequestParameter("contextPrefix", "/content/mysite");
+        servlet.doPost(request, context.response());
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        Resource cfg = context.resourceResolver().getResource("/conf/global/settings/redirects");
-        assertNotNull(cfg);
-        assertEquals("/content/mysite", cfg.getValueMap().get("contextPrefix"));
+
+        // Read configurations via Model
+        Configurations confModel = request.adaptTo(Configurations.class);
+        Collection<RedirectConfiguration> configurations = confModel.getConfigurations();
+        RedirectConfiguration cfg = configurations.iterator().next();
+        assertEquals("/conf/global/settings/redirects", cfg.getPath());
+        assertEquals("/content/mysite", request.getResourceResolver().getResource(cfg.getPath()).getValueMap().get("contextPrefix"));
 
         // return 409 if already exists
-        servlet.doPost(context.request(), context.response());
+        servlet.doPost(request, context.response());
         assertEquals(HttpServletResponse.SC_CONFLICT, context.response().getStatus());
     }
 }
