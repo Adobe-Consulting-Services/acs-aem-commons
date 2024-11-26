@@ -1,5 +1,5 @@
 /*
- * ACS AEM Commons
+ * ACS AEM Commons Bundle
  *
  * Copyright (C) 2024 Adobe
  *
