@@ -52,6 +52,7 @@ public class CopySitesPublishUrlFeature implements Feature {
         boolean feature_flag_active_status() default false;
     }
 
+    @SuppressWarnings("ClassEscapesDefinedScope")
     @Activate
     protected final void activate(Config config) {
         this.config = config;
