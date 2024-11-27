@@ -33,6 +33,7 @@
                                         granite:title="Copy Publish URL"
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="granite/ui/components/coral/foundation/button"
+                                        sling:orderBefore="viewinadmin"
                                         text="Copy Publish URL">
                                         <granite:data
                                             jcr:primaryType="nt:unstructured"
@@ -63,7 +64,7 @@
             <dialogpublishurl
                 granite:id="aem-sites-show-publish-url"
                 jcr:primaryType="nt:unstructured"
-                jcr:title="Publish URL"
+                jcr:title="Publish URLs"
                 sling:resourceType="granite/ui/components/coral/foundation/dialog"
                 closable="{Boolean}true">
                 <granite:data
@@ -75,31 +76,6 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/form/textarea"/>
                 </items>
-                <footer jcr:primaryType="nt:unstructured">
-                    <dismiss
-                        granite:rel="foundation-toggleable"
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/button"
-                        text="Dismiss"
-                        variant="minimal">
-                        <parentConfig
-                            jcr:primaryType="nt:unstructured"
-                            close="{Boolean}true"/>
-                    </dismiss>
-                    <copy
-                        granite:id="sites-publishurl-copy-cmd"
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/button"
-                        icon="attach"
-                        iconSize="XS"
-                        text="Copy"
-                        variant="primary">
-                        <granite:rendercondition
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
-                            expression="${!granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPad&quot;) &amp;&amp; !granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPhone&quot;)}"/>
-                    </copy>
-                </footer>
             </dialogpublishurl>
         </items>
     </header>

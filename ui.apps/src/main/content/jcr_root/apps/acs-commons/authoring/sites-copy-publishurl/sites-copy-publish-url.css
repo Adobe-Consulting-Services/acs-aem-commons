@@ -33,3 +33,25 @@
     color: #EA7B6F;
     min-width: 30rem;
 }
+
+.copy-publish-url-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.copy-publish-url-group .coral-Form-field,
+.copy-publish-url-group .sites-publishurl-copy-cmd {
+    margin-right: 10px;
+}
+
+.copy-publish-url-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.copy-publish-url-group .coral-Form-field,
+.copy-publish-url-group .sites-publishurl-copy-cmd {
+    margin-right: 10px;
+}
