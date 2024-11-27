@@ -86,12 +86,18 @@ public class PublishUrlServlet extends SlingSafeMethodsServlet implements Serial
         response.getWriter().write(jsonResponse.toString());
     }
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Publish URL Servlet Configuration",
-        description = "Configuration for the Publish URL Servlet")
+    @ObjectClassDefinition(
+        name = "ACS AEM Commons - Publish URL Servlet Configuration",
+        description = "Configuration for the Publish URL Servlet"
+    )
     public @interface PublishUrlServletConfig {
 
-        @AttributeDefinition(name = "Externalizer Environment Keys", description = "Externalizer Environment Keys. They " +
-            "need to match the environment keys configured in the Externalizer configuration.", type = AttributeType.STRING)
+        @AttributeDefinition(
+            name = "Externalizer Environment Keys",
+            description = "Externalizer Environment Keys. They need to match the environment keys configured in"
+                + " the Externalizer configuration.",
+            type = AttributeType.STRING
+        )
         String[] externalizerKeys() default {};
     }
 }
