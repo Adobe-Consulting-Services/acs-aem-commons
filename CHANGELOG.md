@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+- # - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
 
 ## 6.9.6 - 2024-11-20
 
