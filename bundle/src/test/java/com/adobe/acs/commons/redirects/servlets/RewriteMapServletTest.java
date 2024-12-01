@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2024 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,7 @@
 package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
-import com.adobe.acs.commons.redirects.filter.RedirectFilter;
-import com.adobe.acs.commons.redirects.models.RedirectRule;
 import org.apache.http.entity.ContentType;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -35,17 +30,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Collection;
 
-import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
-import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.SPREADSHEETML_SHEET;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Yegor Kozlov
@@ -97,7 +85,8 @@ public class RewriteMapServletTest {
 
         assertEquals(ContentType.TEXT_PLAIN.getMimeType(), response.getContentType());
         String[] lines = response.getOutputAsString().split("\n");
-        assertEquals("# Redirect Map File", lines[0]);
+        assertEquals(4, lines.length); // header + 2 rules
+        assertEquals("# All Redirects", lines[0]);
         assertEquals("# note-1", lines[1]);
 
         String[] rule1 = lines[2].split(" ");
@@ -107,5 +96,40 @@ public class RewriteMapServletTest {
         String[] rule2 = lines[3].split(" ");
         assertEquals("/content/three", rule2[0]);
         assertEquals("/content/four", rule2[1]);
+    }
+
+    @Test
+    public void test301Selector() throws ServletException, IOException {
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        context.requestPathInfo().setSelectorString("301");
+        servlet.doGet(request, response);
+
+        assertEquals(ContentType.TEXT_PLAIN.getMimeType(), response.getContentType());
+        String[] lines = response.getOutputAsString().split("\n");
+        assertEquals(2, lines.length); // header + 1 rule
+        assertEquals("# 301 Redirects", lines[0]);
+        String[] rule1 = lines[1].split(" ");
+        assertEquals("/content/three", rule1[0]);
+        assertEquals("/content/four", rule1[1]);
+    }
+
+    @Test
+    public void test302Selector() throws ServletException, IOException {
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        context.requestPathInfo().setSelectorString("302");
+        servlet.doGet(request, response);
+
+        assertEquals(ContentType.TEXT_PLAIN.getMimeType(), response.getContentType());
+        String[] lines = response.getOutputAsString().split("\n");
+        assertEquals(3, lines.length); // header + notes + 1st rule
+        assertEquals("# 302 Redirects", lines[0]);
+
+        String[] rule1 = lines[2].split(" ");
+        assertEquals("/content/one", rule1[0]);
+        assertEquals("/content/two", rule1[1]);
     }
 }

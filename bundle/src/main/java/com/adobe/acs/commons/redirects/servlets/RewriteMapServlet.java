@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2024 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import com.google.common.net.MediaType;
 import org.apache.http.entity.ContentType;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -56,10 +55,18 @@ public class RewriteMapServlet extends SlingSafeMethodsServlet {
             throws ServletException, IOException {
         response.setContentType(ContentType.TEXT_PLAIN.getMimeType());
 
+        String[] selectors = request.getRequestPathInfo().getSelectors();
+        int statusCode = 0;
+        if(selectors != null && selectors.length > 0) {
+            statusCode = Integer.parseInt(selectors[0]);
+        }
         Collection<RedirectRule> rules = RedirectFilter.getRules(request.getResource());
         PrintWriter out = response.getWriter();
-        out.print("# Redirect Map File\n");
+        out.printf("# %s Redirects\n", statusCode == 0 ? "All" : "" + statusCode);
         for (RedirectRule rule : rules) {
+            if(statusCode != 0 && rule.getStatusCode() != statusCode) {
+                continue;
+            }
             String note = rule.getNote();
             if(note != null && !note.isEmpty()) {
                 out.printf("# %s\n", note);
