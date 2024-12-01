@@ -1,5 +1,5 @@
 /*
- * ACS AEM Commons
+ * ACS AEM Commons Bundle
  *
  * Copyright (C) 2013 - 2024 Adobe
  *
@@ -62,16 +62,16 @@ public class RewriteMapServlet extends SlingSafeMethodsServlet {
         }
         Collection<RedirectRule> rules = RedirectFilter.getRules(request.getResource());
         PrintWriter out = response.getWriter();
-        out.printf("# %s Redirects\n", statusCode == 0 ? "All" : "" + statusCode);
+        out.printf("# %s Redirects%n", statusCode == 0 ? "All" : "" + statusCode);
         for (RedirectRule rule : rules) {
             if(statusCode != 0 && rule.getStatusCode() != statusCode) {
                 continue;
             }
             String note = rule.getNote();
             if(note != null && !note.isEmpty()) {
-                out.printf("# %s\n", note);
+                out.printf("# %s%n", note);
             }
-            out.printf("%s %s\n", rule.getSource(), rule.getTarget());
+            out.printf("%s %s%n", rule.getSource(), rule.getTarget());
         }
     }
 }
