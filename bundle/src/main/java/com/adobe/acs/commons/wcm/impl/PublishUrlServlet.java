@@ -44,6 +44,13 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+
+/**
+ *  This servlet generates a JSON response with the externalized URLs for the given path using configured keys in its
+ *  configuration. They keys need to match the environment keys configured in the Externalizer configuration. The servlet
+ *  uses Externalizer service to generate the externalized URLs via Externalizer.externalLink() method. The response is
+ *  in format {"Author": "Author URL", "Publish": "Publish URL", ...}.
+ */
 @Component(service = Servlet.class)
 @SlingServletResourceTypes(
     resourceTypes = PublishUrlServlet.RESOURCE_TYPE,
@@ -65,6 +72,13 @@ public class PublishUrlServlet extends SlingSafeMethodsServlet implements Serial
         this.externalizerKeys = config.externalizerKeys();
     }
 
+    /**
+     * Gets the path parameter from the request and generates the externalized URLs for the given path using the
+     * Externalizer service. Writes the JSON response with the externalized URLs to the response.
+     * @param request SlingHttpServletRequest
+     * @param response SlingHttpServletResponse
+     * @throws IOException if response.getWriter() fails
+     */
     @Override
     protected void doGet(SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws IOException {
         String path = request.getParameter(PATH);

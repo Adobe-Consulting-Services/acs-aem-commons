@@ -28,6 +28,10 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+
+/**
+ * OSGi Feature flag to enable or disable the copy publish URLs dropdown field in the Sites Editor.
+ */
 @Component(
         property = {
                 "service.ranking=200"
