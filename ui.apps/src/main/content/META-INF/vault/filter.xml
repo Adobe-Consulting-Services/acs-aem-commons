@@ -38,6 +38,11 @@
         <include pattern="/apps/cq/core/content/nav/tools/acs-commons(/.*)?"/>
         <include pattern="/apps/cq/core/content/nav/tools/cloudservices"/>
         <include pattern="/apps/cq/core/content/nav/tools/cloudservices/marketo(/.*)?"/>
+        <include pattern="/apps/cq/experience-fragments" />
+        <include pattern="/apps/cq/experience-fragments/content" />
+        <include pattern="/apps/cq/experience-fragments/content/experience-fragments" />
+        <include pattern="/apps/cq/experience-fragments/content/experience-fragments/jcr:content" />
+        <include pattern="/apps/cq/experience-fragments/content/experience-fragments/jcr:content/actions(/.*)?" />
     </filter>
     <filter root="/apps/dam">
         <include pattern="/apps/dam"/>
@@ -60,5 +65,14 @@
         <include pattern="/apps/settings/dam"/>
         <include pattern="/apps/settings/dam/indesign"/>
         <include pattern="/apps/settings/dam/indesign/scripts(/.*)?"/>
+    </filter>
+    <filter root="/apps/wcm">
+        <include pattern="/apps/wcm/core" />
+        <include pattern="/apps/wcm/core/content" />
+        <include pattern="/apps/wcm/core/content/coral" />
+        <include pattern="/apps/wcm/core/content/coral/common" />
+        <include pattern="/apps/wcm/core/content/coral/common/createxffolderdialog" />
+        <include pattern="/apps/wcm/core/content/coral/common/createxffolderdialog/items(/.*)?" />
+        <include pattern="/apps/wcm/core/content/coral/common/createxffolderdialog/footer(/.*)?" />
     </filter>
 </workspaceFilter>

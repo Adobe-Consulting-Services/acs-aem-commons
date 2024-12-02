@@ -497,6 +497,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2704 - Fixed issue with MCP report generation throwing an exception, and fixed some minor UI issues on AEM SDK (added
   BG color)
 - #2716 - Fixed issue with Shared Component Properties Bindings Values Provider facing lock contention
+- #2715 - Fixed issue with Shared Component Properties working with Experience Fragments
 - #2718 - Fixes CM Code Quality Pipeline failure caused by TestMarketoInterfaces and Jacoco instrumentation
 - #2713 - Marketo form/cloud config root missing
 - #2714 - Implemented shared and global component properties to work in experience fragments.
