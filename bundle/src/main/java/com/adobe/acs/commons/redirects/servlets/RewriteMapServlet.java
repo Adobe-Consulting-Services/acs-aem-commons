@@ -40,6 +40,9 @@ import static com.adobe.acs.commons.redirects.servlets.CreateRedirectConfigurati
  * Servlet for generating an Apache RewriteMap text file to use with
  * he Pipeline-free URL Redirects feature in AEM as a Cloud Service
  *
+ * Usage: http://localhost:4502/conf/my-site/settings/redirects.txt
+ * To filter by status code: http://localhost:4502/conf/my-site/settings/redirects.301.txt
+ *
  * See https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/content-delivery/pipeline-free-url-redirects
  *
  */
