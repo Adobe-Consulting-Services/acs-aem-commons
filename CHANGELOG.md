@@ -10,9 +10,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #3471 - Make MailTemplateManager interface public so it can be used by other bundles
+
 ## 6.9.6 - 2024-11-20
 
 ### Fixed
+
 - #3473 - Fix Broken Styling when the notification is active
 - #3474 - Fixed reintroduction of dependency to outdated Apache Commons Collections 3
 
@@ -31,11 +36,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 6.9.0 - 2024-10-29
 
 ### Fixed
+
 - #3459 - Top level properties in parameterized include are now respected.
 - #3460 - Fixes issue where double parameters were not working for the parameterized include
 - #3443 - Content Sync: don't drill down into content tree if recursion is off
 
 ### Changed
+
 - #3385 Made nesting parameterized includes inside a multi-field (ignored resource types) possible
 
 ## 6.8.0 - 2024-10-17

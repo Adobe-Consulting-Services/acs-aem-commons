@@ -25,7 +25,7 @@ import java.util.Map;
 
 import javax.mail.MessagingException;
 
-import com.adobe.acs.commons.email.impl.MailTemplateManager;
+import com.adobe.acs.commons.email.MailTemplateManager;
 import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.impl.RequireAemImpl;
 import com.day.cq.commons.mail.MailTemplate;
@@ -36,7 +36,6 @@ import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
-import org.apache.poi.ss.formula.functions.T;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.junit.Before;
@@ -66,8 +65,8 @@ public class SMTPMailServiceHealthCheckTest {
         ctx.registerService(MailTemplateManager.class, new MailTemplateManager() {
             @Override
             public <T extends Email> T getEmail(MailTemplate template, Map<String, String> params, Class<T> mailType)
-            throws IOException, EmailException, MessagingException {
-                return template.getEmail(StrLookup.mapLookup(params), mailType) ;
+                    throws IOException, EmailException, MessagingException {
+                return template.getEmail(StrLookup.mapLookup(params), mailType);
             }
         });
     }
