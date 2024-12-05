@@ -219,14 +219,8 @@
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
-                    <executions>
-                        <execution>
-                            <id>bnd-process</id>
-                            <goals>
-                                <goal>bnd-process</goal>
-                            </goals>
-                            <configuration>
-                                <bnd><![CDATA[
+                    <configuration>
+                        <bnd><![CDATA[
 # a lot of bundle header are generated from pom elements by default: https://github.com/bndtools/bnd/tree/master/maven/bnd-maven-plugin#default-bundle-headers
 Bundle-Category: acs-aem-commons
 # export all versioned packages except for conditional ones (https://github.com/bndtools/bnd/issues/3721#issuecomment-579026778)
@@ -248,8 +242,14 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
-                                ]]></bnd>
-                            </configuration>
+                        ]]></bnd>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>bnd-process</id>
+                            <goals>
+                                <goal>bnd-process</goal>
+                            </goals>
                         </execution>
                     </executions>
                     <dependencies>
