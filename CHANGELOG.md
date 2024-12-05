@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 - #3484 - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
 
+### Fixed
+- #3479 - Fixed Configurations Model for Redirect Manager after change in "redirect" resource as "sling:Folder"
+
 ## 6.9.6 - 2024-11-20
 
 ### Fixed
