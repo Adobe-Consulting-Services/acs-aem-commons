@@ -17,7 +17,7 @@
  */
 package com.adobe.acs.commons.hc.impl;
 
-import com.adobe.acs.commons.email.impl.MailTemplateManager;
+import com.adobe.acs.commons.email.MailTemplateManager;
 import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import javax.mail.internet.InternetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

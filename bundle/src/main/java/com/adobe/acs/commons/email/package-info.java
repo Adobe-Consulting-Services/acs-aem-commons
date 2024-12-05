@@ -18,5 +18,5 @@
 /**
  * Email Service.
  */
-@org.osgi.annotation.versioning.Version("1.3.0")
+@org.osgi.annotation.versioning.Version("1.4.0")
 package com.adobe.acs.commons.email;

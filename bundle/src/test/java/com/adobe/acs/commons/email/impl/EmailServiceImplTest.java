@@ -17,6 +17,7 @@
  */
 package com.adobe.acs.commons.email.impl;
 
+import com.adobe.acs.commons.email.MailTemplateManager;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
@@ -85,7 +86,7 @@ public class EmailServiceImplTest {
     private static final String EMAIL_TEMPLATE_ATTACHMENT = "emailTemplateAttachment.html";
 
     @Before
-    public final void setUp() throws Exception  {
+    public final void setUp() throws Exception {
         context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE), emailTemplatePath);
         context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE_ATTACHMENT), emailTemplateAttachmentPath);
 
@@ -96,8 +97,8 @@ public class EmailServiceImplTest {
         context.registerService(MailTemplateManager.class, new MailTemplateManager() {
             @Override
             public <T extends Email> T getEmail(MailTemplate template, Map<String, String> params, Class<T> mailType)
-            throws IOException, EmailException, MessagingException {
-                return template.getEmail(StrLookup.mapLookup(params), mailType) ;
+                    throws IOException, EmailException, MessagingException {
+                return template.getEmail(StrLookup.mapLookup(params), mailType);
             }
         });
         context.registerInjectActivateService(emailService);
@@ -118,10 +119,10 @@ public class EmailServiceImplTest {
         params.put("senderName", expectedSenderName);
         params.put("senderEmailAddress", expectedSenderEmailAddress);
 
-        final String[] recipients = new String[] {"upasanac@acs.com",
-                                                  "david@acs.com",
-                                                  "justin@acs.com"
-                                                 };
+        final String[] recipients = new String[]{"upasanac@acs.com",
+                "david@acs.com",
+                "justin@acs.com"
+        };
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
         final List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipients);
@@ -154,7 +155,7 @@ public class EmailServiceImplTest {
         params.put("senderName", expectedSenderName);
         params.put("senderEmailAddress", expectedSenderEmailAddress);
 
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
 
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
@@ -187,7 +188,7 @@ public class EmailServiceImplTest {
         params.put("senderName", expectedSenderName);
         params.put("senderEmailAddress", expectedSenderEmailAddress);
 
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
 
         Map<String, DataSource> attachments = new HashMap();
         attachments.put(attachmentName, new ByteArrayDataSource(attachment, "text/plain"));
@@ -216,7 +217,7 @@ public class EmailServiceImplTest {
     public final void testSendEmailNoRecipients() {
         final String templatePath = emailTemplatePath;
         final Map<String, String> params = new HashMap<String, String>();
-        final String[] recipients = new String[] {};
+        final String[] recipients = new String[]{};
 
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Invalid Recipients");
@@ -225,29 +226,29 @@ public class EmailServiceImplTest {
     }
 
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public final void testBlankTemplatePath() {
         final String templatePath = null;
         final Map<String, String> params = new HashMap<String, String>();
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
 
         emailService.sendEmail(templatePath, params, recipient);
-     }
+    }
 
     @Test
     public final void testInValidTemplatePath() {
         final String templatePath = "/invalidTemplatePath.txt";
         final Map<String, String> params = new HashMap<String, String>();
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Mail template path [ /invalidTemplatePath.txt ] could not resolve to a valid template");
 
         emailService.sendEmail(templatePath, params, recipient);
-     }
+    }
 
     @Test
     public void testDefaultTimeouts() {
-        context.registerInjectActivateService(emailService,Collections.emptyMap());
+        context.registerInjectActivateService(emailService, Collections.emptyMap());
         SimpleEmail email = sendTestEmail();
         assertEquals(30000, email.getSocketConnectionTimeout());
         assertEquals(30000, email.getSocketTimeout());
@@ -270,7 +271,7 @@ public class EmailServiceImplTest {
         params.put("senderName", "John Smith");
         params.put("senderEmailAddress", "john@smith.com");
 
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
 
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
@@ -288,7 +289,7 @@ public class EmailServiceImplTest {
         final Map<String, String> params = new HashMap<String, String>();
         params.put("subject", expectedSubject);
 
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
 
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
@@ -305,7 +306,7 @@ public class EmailServiceImplTest {
         final Map<String, String> params = new HashMap<String, String>();
         params.put("bounceAddress", expectedBounceAddress);
 
-        final String recipient =  "upasanac@acs.com";
+        final String recipient = "upasanac@acs.com";
 
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
