@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- #3471 - Make MailTemplateManager interface public so it can be used by other bundles
+- #3471 - Make MailTemplateManager interface public so it can be used by other bundles, and add onprem jar to the
+  all.zip.
 
 ## 6.9.6 - 2024-11-20
 
