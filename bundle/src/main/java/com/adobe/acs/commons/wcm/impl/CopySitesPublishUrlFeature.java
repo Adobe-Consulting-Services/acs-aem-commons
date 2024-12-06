@@ -32,12 +32,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 /**
  * OSGi Feature flag to enable or disable the copy publish URLs dropdown field in the Sites Editor.
  */
-@Component(
-        property = {
-                "service.ranking=200"
-        },
-        service = Feature.class
-)
+@Component(service = Feature.class)
 @Designate(ocd = CopySitesPublishUrlFeature.Config.class)
 public class CopySitesPublishUrlFeature implements Feature {
     static final String FEATURE_FLAG_PID = "com.adobe.acs.commons.wcm.impl.copysitespublishurlfeature.feature.flag";
