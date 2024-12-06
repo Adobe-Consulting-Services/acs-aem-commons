@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+- #3480 - Sites Copy Publish URLs
 
 ### Fixed
 - #3479 - Fixed Configurations Model for Redirect Manager after change in "redirect" resource as "sling:Folder"
