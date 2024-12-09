@@ -24,7 +24,7 @@
         var modalBody = $(e.target).find('coral-dialog-content'),
             failureMessage = Granite.I18n.get('An error occurred determining the page\'s publish URLs.'),
             missingConfigMessage = Granite.I18n.get('Missing configs for the Publish URL servlet or Externalizer.'),
-            publishUrl = Granite.HTTP.externalize('/apps/acs-commons/components/utilities/sites-publish-url.txt'),
+            publishUrl = Granite.HTTP.externalize('/apps/acs-commons/components/utilities/sites-publish-url.json'),
             path = $(e.target).data('assetpath');
 
         var result =
@@ -69,14 +69,8 @@
                 button.addEventListener('click', function() {
                     var key = this.getAttribute('data-copy-target');
                     var inputField = this.previousElementSibling;
-                    var textToCopy = inputField.value;
                     inputField.select();
-                    try {
-                        navigator.clipboard.writeText(textToCopy);
-                        console.log("Text copied to clipboard");
-                    } catch (err) {
-                        console.error("Failed to copy: ", err);
-                    }
+                    document.execCommand("copy");
                 });
             });
         });

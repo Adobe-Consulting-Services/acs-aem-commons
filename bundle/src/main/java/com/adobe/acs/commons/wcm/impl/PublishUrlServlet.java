@@ -55,14 +55,14 @@ import java.util.Arrays;
 @SlingServletResourceTypes(
     resourceTypes = PublishUrlServlet.RESOURCE_TYPE,
     methods = HttpConstants.METHOD_GET,
-    extensions = PublishUrlServlet.TXT_EXTENSION
+    extensions = PublishUrlServlet.JSON_EXTENSION
 )
 @Designate(ocd = PublishUrlServlet.PublishUrlServletConfig.class)
 public class PublishUrlServlet extends SlingSafeMethodsServlet implements Serializable {
 
     private static final long serialVersionUID = 1L;
     protected static final String RESOURCE_TYPE = "acs-commons/components/utilities/publish-url";
-    protected static final String TXT_EXTENSION = "txt";
+    protected static final String JSON_EXTENSION = "json";
     private static final String PATH = "path";
     private static final String JSON_TYPE = "application/json";
     private String[] externalizerKeys;
