@@ -58,7 +58,7 @@
             inputWidth = inputWidth > 0 ? inputWidth - 10 : 0;
 
             Object.keys(jsonResponse).forEach(function(key) {
-                content += '<div class="coral-Form-fieldwrapper copy-publish-url-group">' +
+                content += '<div class="coral-Form-fieldwrapper acs-aem-commons__copy-publish-url-group">' +
                     '<label class="coral-Form-fieldlabel" style="width: ' + labelWidth + 'ch; display: inline-block">' + key + ' : </label>' +
                     '<input type="text" class="coral-Form-field" value="' + jsonResponse[key] + '" readonly style="width: ' + inputWidth + 'ch;" />' +
                     '<button type="button" class="sites-publishurl-copy-cmd coral3-Button coral3-Button--primary" data-copy-target="' + key + '"><coral-icon class="coral3-Icon coral3-Icon--attach coral3-Icon--sizeXS" icon="attach" size="XS" autoarialabel="off" alt=""></coral-icon><coral-button-label>Copy</coral-button-label></button>' +
