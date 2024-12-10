@@ -33,6 +33,7 @@ import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.Designate;
@@ -51,7 +52,7 @@ import java.util.Arrays;
  *  uses Externalizer service to generate the externalized URLs via Externalizer.externalLink() method. The response is
  *  in format {"Author": "Author URL", "Publish": "Publish URL", ...}.
  */
-@Component(service = Servlet.class)
+@Component(service = Servlet.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @SlingServletResourceTypes(
     resourceTypes = PublishUrlServlet.RESOURCE_TYPE,
     methods = HttpConstants.METHOD_GET,
