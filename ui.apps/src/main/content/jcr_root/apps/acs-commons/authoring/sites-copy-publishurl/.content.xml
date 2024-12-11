@@ -7,13 +7,6 @@
 
         <!--
 
-        Wrapper Client Library definition:
+        Traditional ACS AEM Commons client library wrapper not needed; This clientlib is conditionally included via Granite UI client library includes.
 
-        <?xml version="1.0" encoding="UTF-8"?>
-        <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-            jcr:primaryType="cq:ClientLibraryFolder"
-                  jsProcessor="[default:none,min:gcc]"
-                  allowProxy="{Boolean}true"
-                  categories="[cq.authoring.editor]"
-                  embed="[acs-commons.authoring.sites.copy-publish-url]"/>
         -->
