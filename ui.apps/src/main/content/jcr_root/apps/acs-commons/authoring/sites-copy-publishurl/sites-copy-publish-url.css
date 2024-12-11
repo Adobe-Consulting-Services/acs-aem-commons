@@ -17,7 +17,17 @@
  * limitations under the License.
  * #L%
  */
-.acs-aem-commons__sites-copy-published-url__text {
+
+#acs-aem-commons__aem-sites-copy-publish-url {
+}
+
+#acs-aem-commons__aem-sites-copy-publish-url .coral3-Dialog-wrapper {
+    width: 1000px !important;
+    left: 50% !important;
+    margin-left: -500px !important;
+}
+
+.acs-aem-commons__aem-sites-copy-publish-url__text {
     min-width: 30rem;
     min-height: 5rem;
     padding: 1rem;
@@ -26,7 +36,7 @@
     border-color: #ccc;
  }
 
-.acs-aem-commons__sites-copy-published-url__text--failure {
+.acs-aem-commons__aem-sites-copy-publish-url__text--failure {
     padding: 1rem;
     font-size: 1.1rem;
     text-align: center;
@@ -34,24 +44,22 @@
     min-width: 30rem;
 }
 
-.acs-aem-commons__copy-publish-url-group {
+.acs-aem-commons__aem-sites-copy-publish-url__group {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 1rem;
+}
+.acs-aem-commons__aem-sites-copy-publish-url__group .coral-Form-field {
+    padding: .6rem;
+    width: calc(100% - 170px) !important;
 }
 
-.acs-aem-commons__copy-publish-url-group .coral-Form-field,
-.acs-aem-commons__copy-publish-url-group .sites-publishurl-copy-cmd {
+.acs-aem-commons__aem-sites-copy-publish-url__group .coral-Form-field,
+.acs-aem-commons__aem-sites-copy-publish-url__group .acs-aem-commons__aem-sites-copy-publish-url__copy-cmd {
     margin-right: 10px;
 }
 
-.acs-aem-commons__copy-publish-url-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.acs-aem-commons__copy-publish-url-group .coral-Form-field,
-.acs-aem-commons__copy-publish-url-group .sites-publishurl-copy-cmd {
+.acs-aem-commons__aem-sites-copy-publish-url__group .coral-Form-field,
+.acs-aem-commons__aem-sites-copy-publish-url__group .acs-aem-commons__aem-sites-copy-publish-url__copy-cmd {
     margin-right: 10px;
 }

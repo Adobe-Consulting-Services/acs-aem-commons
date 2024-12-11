@@ -2,7 +2,7 @@
 <!--
   ~ ACS AEM Commons
   ~
-  ~ Copyright (C) 2013 - 2024 Adobe
+  ~ Copyright (C) 2013 - 2023 Adobe
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,6 +17,4 @@
   ~ limitations under the License.
   -->
 
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0"
-          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
-          jcr:primaryType="sling:OrderedFolder"/>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" jcr:primaryType="nt:folder"/>

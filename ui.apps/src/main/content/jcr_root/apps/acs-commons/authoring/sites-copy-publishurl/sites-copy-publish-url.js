@@ -17,10 +17,13 @@
  * limitations under the License.
  * #L%
  */
+
 (function(document, $) {
     "use strict";
 
-    $( document ).one('foundation-toggleable-show', '#aem-sites-show-publish-url', function(e) {
+    var GRANITE_ID = "acs-aem-commons__aem-sites-copy-publish-url";
+
+    $( document ).one('foundation-toggleable-show', '#' + GRANITE_ID, function(e) {
         var modalBody = $(e.target).find('coral-dialog-content'),
             failureMessage = Granite.I18n.get('An error occurred determining the page\'s publish URLs.'),
             missingConfigMessage = Granite.I18n.get('Missing configs for the Publish URL servlet or Externalizer.'),
@@ -43,7 +46,7 @@
             var labelWidth = 0;
             var inputWidth = 0;
             if (jsonResponse.size === 0) {
-                modalBody.html('<p class="acs-aem-commons__sites-copy-published-url__text--failure">' + missingConfigMessage + '</p>');
+                modalBody.html('<p class="acs-aem-commons__aem-sites-copy-publish-url__text--failure">' + missingConfigMessage + '</p>');
                 return;
             }
 
@@ -58,14 +61,22 @@
             inputWidth = inputWidth > 0 ? inputWidth - 10 : 0;
 
             Object.keys(jsonResponse).forEach(function(key) {
-                content += '<div class="coral-Form-fieldwrapper acs-aem-commons__copy-publish-url-group">' +
+                content += '<div class="coral-Form-fieldwrapper acs-aem-commons__aem-sites-copy-publish-url__group">' +
                     '<label class="coral-Form-fieldlabel" style="width: ' + labelWidth + 'ch; display: inline-block">' + key + ' : </label>' +
                     '<input type="text" class="coral-Form-field" value="' + jsonResponse[key] + '" readonly style="width: ' + inputWidth + 'ch;" />' +
-                    '<button type="button" class="sites-publishurl-copy-cmd coral3-Button coral3-Button--primary" data-copy-target="' + key + '"><coral-icon class="coral3-Icon coral3-Icon--attach coral3-Icon--sizeXS" icon="attach" size="XS" autoarialabel="off" alt=""></coral-icon><coral-button-label>Copy</coral-button-label></button>' +
+                    '<button type="button" class="acs-aem-commons__aem-sites-copy-publish-url__copy-cmd coral3-Button coral3-Button--primary" data-copy-target="' + key + '"><coral-icon class="coral3-Icon coral3-Icon--attach coral3-Icon--sizeXS" icon="attach" size="XS" autoarialabel="off" alt=""></coral-icon><coral-button-label>Copy</coral-button-label></button>' +
                     '</div>';
             });
+
+            // if this is loaded via the Dailog's extra client libs, the CSS is lost so it has to be re-added here.
+            content += '<link rel="stylesheet" href="/etc.clientlibs/acs-commons/authoring/sites-copy-publishurl.css"/>';
             modalBody.html(content);
-            document.querySelectorAll('.sites-publishurl-copy-cmd').forEach(function(button) {
+
+            setTimeout(function() {
+                window.dispatchEvent(new Event('resize'));
+            }, 50);
+
+            document.querySelectorAll('.acs-aem-commons__aem-sites-copy-publish-url__copy-cmd').forEach(function(button) {
                 button.addEventListener('click', function() {
                     var key = this.getAttribute('data-copy-target');
                     var inputField = this.previousElementSibling;
@@ -74,17 +85,19 @@
                 });
             });
         });
+
         result.fail(function() {
-            modalBody.html('<p class="acs-aem-commons__sites-copy-published-url__text--failure">' + failureMessage + '</p>');
+            modalBody.html('<p class="acs-aem-commons__aem-sites-copy-publish-url__text--failure">' + failureMessage + '</p>');
         });
     });
 
     $( document ).one('foundation-contentloaded', function(e) {
         if (!document.execCommand && !document.queryCommandSupported) {
-            $('#sites-publishurl-copy-cmd').hide();
+            $('.acs-aem-commons__aem-sites-copy-publish-url__copy-cmd').hide();
         }
         if (!document.queryCommandSupported('copy')) {
-            $('#sites-publishurl-copy-cmd').hide();
+            $('.acs-aem-commons__aem-sites-copy-publish-url__copy-cmd').hide();
         }
     });
+
 })(document, Granite.$);
