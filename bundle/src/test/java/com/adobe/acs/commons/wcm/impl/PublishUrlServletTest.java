@@ -23,24 +23,18 @@ package com.adobe.acs.commons.wcm.impl;
 import com.day.cq.commons.Externalizer;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
+import javax.servlet.Servlet;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.servlet.Servlet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -65,7 +59,6 @@ class PublishUrlServletTest {
         requestParams.put("path", "/content/we-retail/us/en/experience");
         ctx.request().setParameterMap(requestParams);
 
-        //when(config.externalizerKeys()).thenReturn(new String[]{"local", "author", "publish", "dispatcher"});
         when(externalizer.externalLink(any(ResourceResolver.class), any(String.class), any(String.class), any(String.class)))
                 .thenReturn("http://localhost:4502/content/we-retail/us/en/experience.html")
                 .thenReturn("https://aem.author.someorganization.com/content/we-retail/us/en/experience.html")
@@ -73,7 +66,7 @@ class PublishUrlServletTest {
                 .thenReturn("https://www.someorganization.com/experience");
 
         ctx.registerInjectActivateService(new PublishUrlServlet(), params);
-        
+
         PublishUrlServlet servlet = (PublishUrlServlet) ctx.getServices(Servlet.class,
                 "(sling.servlet.resourceTypes=acs-commons/components/utilities/publish-url)")[0];
 
