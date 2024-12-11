@@ -73,7 +73,7 @@ class PublishUrlServletTest {
                 .thenReturn("https://www.someorganization.com/experience");
 
         ctx.registerInjectActivateService(new PublishUrlServlet(), params);
-        //
+        
         PublishUrlServlet servlet = (PublishUrlServlet) ctx.getServices(Servlet.class,
                 "(sling.servlet.resourceTypes=acs-commons/components/utilities/publish-url)")[0];
 
