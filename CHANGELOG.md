@@ -9,14 +9,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+
 - #3484 - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
+- #3480 - AEM Sites Copy Publish URLs
 
 ### Fixed
 - #3479 - Fixed Configurations Model for Redirect Manager after change in "redirect" resource as "sling:Folder"
 
+### Fixed
+
+- #3483 - Fixed issue with genericlist/body.jsp importing a class from an impl package.
+
 ## 6.9.6 - 2024-11-20
 
 ### Fixed
+
 - #3473 - Fix Broken Styling when the notification is active
 - #3474 - Fixed reintroduction of dependency to outdated Apache Commons Collections 3
 
@@ -35,11 +42,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 6.9.0 - 2024-10-29
 
 ### Fixed
+
 - #3459 - Top level properties in parameterized include are now respected.
 - #3460 - Fixes issue where double parameters were not working for the parameterized include
 - #3443 - Content Sync: don't drill down into content tree if recursion is off
 
 ### Changed
+
 - #3385 Made nesting parameterized includes inside a multi-field (ignored resource types) possible
 
 ## 6.8.0 - 2024-10-17
