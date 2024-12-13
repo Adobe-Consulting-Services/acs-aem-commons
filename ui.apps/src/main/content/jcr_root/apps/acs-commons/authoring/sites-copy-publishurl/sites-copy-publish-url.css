@@ -1,0 +1,62 @@
+/*
+ * #%L
+ * ACS AEM Commons Package
+ * %%
+ * Copyright (C) 2024 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+#acs-aem-commons__aem-sites-copy-publish-url .coral3-Dialog-wrapper {
+    width: 1000px !important;
+    left: 50% !important;
+    margin-left: -500px !important;
+}
+
+.acs-aem-commons__aem-sites-copy-publish-url__text {
+    min-width: 30rem;
+    min-height: 5rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.25rem;
+    border-color: #ccc;
+ }
+
+.acs-aem-commons__aem-sites-copy-publish-url__text--failure {
+    padding: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #EA7B6F;
+    min-width: 30rem;
+}
+
+.acs-aem-commons__aem-sites-copy-publish-url__group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.acs-aem-commons__aem-sites-copy-publish-url__group .coral-Form-field {
+    padding: .6rem;
+    width: calc(100% - 170px) !important;
+}
+
+.acs-aem-commons__aem-sites-copy-publish-url__group .coral-Form-field,
+.acs-aem-commons__aem-sites-copy-publish-url__group .acs-aem-commons__aem-sites-copy-publish-url__copy-cmd {
+    margin-right: 10px;
+}
+
+.acs-aem-commons__aem-sites-copy-publish-url__group .coral-Form-field,
+.acs-aem-commons__aem-sites-copy-publish-url__group .acs-aem-commons__aem-sites-copy-publish-url__copy-cmd {
+    margin-right: 10px;
+}
