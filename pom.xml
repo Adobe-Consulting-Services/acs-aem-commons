@@ -88,7 +88,7 @@
         <!-- the minimum AEMaaCS version being supported -->
         <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
 
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
@@ -794,38 +794,78 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
         <profile>
             <id>coverage</id>
             <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <argLine>@{jacoco.command}</argLine>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <configuration>
+                                <!-- 
+                                for IT where you need a forked JVM to run the tests you can use this system property to make sure that
+                                the JaCoCo agent correctly instruments your code
+                                set system property also via argLine as only that allows late evaluation -->
+                                <argLine>@{jacoco.command} -Djacoco.command=@{jacoco.command}</argLine>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
                 <plugins>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
+                        <configuration>
+                            <propertyName>jacoco.command</propertyName>
+                        </configuration>
                         <executions>
                             <execution>
-                                <id>default-prepare-agent</id>
+                                <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
                                 <configuration>
-                                    <excludes>
-                                        <exclude>*</exclude>
-                                    </excludes>
+                                    <destFile>${project.build.directory}/jacoco-unit.exec</destFile>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>jacoco-instrument</id>
+                                <id>prepare-agent-integration</id>
                                 <goals>
-                                    <goal>instrument</goal>
+                                    <goal>prepare-agent-integration</goal>
                                 </goals>
+                                <configuration>
+                                    <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                                     <!-- potentially ITs fork Java again (e.g. for testing Maven plugins), therefore always append to destFile as multiple VMs would then write to the same file -->
+                                    <append>true</append>
+                                </configuration>
                             </execution>
                             <execution>
-                                <id>jacoco-restore-instrumented-classes</id>
+                                <id>merge-unit-and-it</id>
+                                <phase>post-integration-test</phase>
                                 <goals>
-                                    <goal>restore-instrumented-classes</goal>
+                                    <goal>merge</goal>
                                 </goals>
+                                <configuration>
+                                    <fileSets>
+                                        <fileSet>
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                                <include>jacoco-unit.exec</include>
+                                                <include>jacoco-it.exec</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                </configuration>
                             </execution>
                             <execution>
-                                <id>report</id>
-                                <phase>prepare-package</phase>
+                                <id>report-merged</id>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
