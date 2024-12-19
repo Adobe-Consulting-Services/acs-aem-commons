@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3480 - AEM Sites Copy Publish URLs
 
 ### Fixed
+
+- #3471 - Make MailTemplateManager interface public so it can be used by other bundles, and add onprem jar to the
+  all.zip.
 - #3479 - Fixed Configurations Model for Redirect Manager after change in "redirect" resource as "sling:Folder"
 
 ### Fixed

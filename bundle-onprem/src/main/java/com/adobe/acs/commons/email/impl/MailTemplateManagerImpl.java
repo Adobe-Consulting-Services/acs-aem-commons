@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.mail.MessagingException;
 
+import com.adobe.acs.commons.email.MailTemplateManager;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -36,8 +37,8 @@ public class MailTemplateManagerImpl implements MailTemplateManager {
 
     @Override
     public <T extends Email> T getEmail(final MailTemplate template,
-        final Map<String, String> params,
-        final Class<T> mailType)
+                                        final Map<String, String> params,
+                                        final Class<T> mailType)
             throws IOException, EmailException, MessagingException {
         return template.getEmail(StrLookup.mapLookup(params), mailType);
     }
