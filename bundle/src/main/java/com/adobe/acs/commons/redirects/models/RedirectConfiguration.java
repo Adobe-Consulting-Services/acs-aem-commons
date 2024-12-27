@@ -64,23 +64,27 @@ public class RedirectConfiguration {
         this(resource, storageSuffix, true);
     }
 
-    RedirectConfiguration(Resource resource, String storageSuffix, boolean loadRules) {
+    RedirectConfiguration(Resource configResource, String storageSuffix, boolean loadRules) {
         this();
-        path = resource.getPath();
+        path = configResource.getPath();
         name = path.replace("/" + storageSuffix, "");
         if(loadRules){
-            Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
-            for (RedirectRule rule : rules) {
-                if (rule.getRegex() != null) {
-                    patternRules.put(rule.getRegex(), rule);
+            loadRules(configResource);
+        }
+    }
+
+    void loadRules(Resource configResource) {
+        Collection<RedirectRule> rules = RedirectFilter.getRules(configResource);
+        for (RedirectRule rule : rules) {
+            if (rule.getRegex() != null) {
+                patternRules.put(rule.getRegex(), rule);
+            } else {
+                Map<String, RedirectRule> map = rule.isCaseInsensitive() ? caseInsensitiveRules : pathRules;
+                if(rule.getEvaluateURI()){
+                    nonRegexRequestURIRules = true;
+                    map.put(rule.getSource(), rule);
                 } else {
-                    Map<String, RedirectRule> map = rule.isCaseInsensitive() ? caseInsensitiveRules : pathRules;
-                    if(rule.getEvaluateURI()){
-                        nonRegexRequestURIRules = true;
-                        map.put(rule.getSource(), rule);
-                    } else {
-                        map.put(normalizePath(rule.getSource()), rule);
-                    }
+                    map.put(normalizePath(rule.getSource()), rule);
                 }
             }
         }
