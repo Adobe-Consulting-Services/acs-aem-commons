@@ -207,6 +207,14 @@ public class RedirectFilterTest {
         assertEquals("12345", header.getValue());
     }
 
+    /**
+     * Read rules as direct children of the configuration, e.g.
+     *
+     * /conf/global/settings/redirects
+     *      + rule1
+     *      + rule2
+     *      + rule3
+     */
     @Test
     public void testReadRules() throws PersistenceException {
         withRules(
@@ -251,6 +259,69 @@ public class RedirectFilterTest {
         assertEquals(301, rule3.getStatusCode());
         assertNotNull(rule3.getRegex());
         assertTrue(rule3.getEvaluateURI());
+    }
+
+    /**
+     * Read sharded rules, e.g.
+     *
+     * /conf/global/settings/redirects
+     *  + shard1
+     *      + rule1
+     *      + rule2
+     *  + shard2
+     *      + rule3
+     *      + rule4
+     */
+    @Test
+    public void testReadShardedRules() throws PersistenceException {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/one")
+                        .setTarget("/content/we-retail/en/two")
+                        .setShardName("shard1")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/three")
+                        .setTarget("/content/we-retail/en/four")
+                        .setShardName("shard1")
+                        .setStatusCode(301).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/1")
+                        .setTarget("/content/we-retail/en/2")
+                        .setShardName("shard2")
+                        .setStatusCode(301).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/3")
+                        .setTarget("/content/we-retail/en/4")
+                        .setShardName("shard2")
+                        .setStatusCode(302).build()
+        );
+
+        Resource resource = context.resourceResolver().getResource(redirectStoragePath);
+        Collection<RedirectRule> rules = getRules(resource);
+        assertEquals(4, rules.size());
+        Iterator<RedirectRule> it = rules.iterator();
+        RedirectRule rule1 = it.next();
+        assertEquals("/content/we-retail/en/one", rule1.getSource());
+        assertEquals("/content/we-retail/en/two", rule1.getTarget());
+        assertEquals(302, rule1.getStatusCode());
+        assertFalse(rule1.getEvaluateURI());
+
+        RedirectRule rule2 = it.next();
+        assertEquals("/content/we-retail/en/three", rule2.getSource());
+        assertEquals("/content/we-retail/en/four", rule2.getTarget());
+        assertEquals(301, rule2.getStatusCode());
+        assertFalse(rule2.getEvaluateURI());
+
+        RedirectRule rule3 = it.next();
+        assertEquals("/content/we-retail/en/1", rule3.getSource());
+        assertEquals("/content/we-retail/en/2", rule3.getTarget());
+        assertEquals(301, rule3.getStatusCode());
+
+        RedirectRule rule4 = it.next();
+        assertEquals("/content/we-retail/en/3", rule4.getSource());
+        assertEquals("/content/we-retail/en/4", rule4.getTarget());
+        assertEquals(302, rule4.getStatusCode());
     }
 
     @Test

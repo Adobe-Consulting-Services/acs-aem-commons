@@ -60,27 +60,32 @@ public class RedirectConfiguration {
     }
 
     public RedirectConfiguration(Resource resource, String storageSuffix) {
+        this(resource, storageSuffix, true);
+    }
+
+    RedirectConfiguration(Resource resource, String storageSuffix, boolean loadRules) {
         pathRules = new LinkedHashMap<>();
         caseInsensitiveRules = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         patternRules = new LinkedHashMap<>();
         path = resource.getPath();
         name = path.replace("/" + storageSuffix, "");
-        Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
-        for (RedirectRule rule : rules) {
-            if (rule.getRegex() != null) {
-                patternRules.put(rule.getRegex(), rule);
-            } else {
-                Map<String, RedirectRule> map = rule.isCaseInsensitive() ? caseInsensitiveRules : pathRules;
-                if(rule.getEvaluateURI()){
-                    nonRegexRequestURIRules = true;
-                    map.put(rule.getSource(), rule);
+        if(loadRules){
+            Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
+            for (RedirectRule rule : rules) {
+                if (rule.getRegex() != null) {
+                    patternRules.put(rule.getRegex(), rule);
                 } else {
-                    map.put(normalizePath(rule.getSource()), rule);
+                    Map<String, RedirectRule> map = rule.isCaseInsensitive() ? caseInsensitiveRules : pathRules;
+                    if(rule.getEvaluateURI()){
+                        nonRegexRequestURIRules = true;
+                        map.put(rule.getSource(), rule);
+                    } else {
+                        map.put(normalizePath(rule.getSource()), rule);
+                    }
                 }
             }
         }
     }
-
     /**
      * @return resource path without .html extension
      */

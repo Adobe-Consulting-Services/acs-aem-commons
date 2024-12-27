@@ -24,6 +24,7 @@ import org.apache.sling.testing.mock.sling.builder.ContentBuilder;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public class RedirectResourceBuilder {
     private final String configPath;
     private final Map<String, Object> props;
     private String nodeName;
+    private String shardName;
 
     public RedirectResourceBuilder(SlingContext context, String configPath) {
         this.context = context;
@@ -134,13 +136,25 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setShardName(String name) {
+        this.shardName = name;
+        return this;
+    }
+
     public Resource build() throws PersistenceException {
         ContentBuilder cb = context.create();
         Resource configResource = ResourceUtil.getOrCreateResource(
                 context.resourceResolver(), configPath, REDIRECT_RULE_RESOURCE_TYPE, null, true);
-        if(nodeName == null) {
-            nodeName = ResourceUtil.createUniqueChildName(configResource, "rule");
+        Resource redirectParent;
+        if(shardName != null) {
+            redirectParent = ResourceUtil.getOrCreateResource(
+                    context.resourceResolver(), configResource.getPath() + "/" + shardName, Collections.emptyMap(), null, true);
+        } else {
+            redirectParent = configResource;
         }
-        return cb.resource(configResource, nodeName, props);
+        if(nodeName == null) {
+            nodeName = ResourceUtil.createUniqueChildName(redirectParent, "rule");
+        }
+        return cb.resource(redirectParent, nodeName, props);
     }
 }

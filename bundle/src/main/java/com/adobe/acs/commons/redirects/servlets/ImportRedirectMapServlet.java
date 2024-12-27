@@ -20,6 +20,7 @@ package com.adobe.acs.commons.redirects.servlets;
 import com.adobe.acs.commons.redirects.models.ImportLog;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.ExportColumn;
+import com.day.text.csv.Csv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.poi.ss.usermodel.CellType;
@@ -33,6 +34,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -67,6 +69,8 @@ import static com.adobe.acs.commons.redirects.filter.RedirectFilter.ACS_REDIRECT
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.SOURCE_PROPERTY_NAME;
 import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
 import static org.apache.sling.api.resource.ResourceResolver.PROPERTY_RESOURCE_TYPE;
 
 /**
@@ -86,6 +90,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     private static final String MIX_CREATED = "mix:created";
     private static final String MIX_LAST_MODIFIED = "mix:lastModified";
     private static final String AUDIT_LOG_FOLDER = "/var/acs-commons/redirects";
+    private int shardSize = 1000;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -94,14 +99,24 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         response.setContentType("application/json");
 
         String path = request.getParameter("path");
+        boolean replace = request.getParameter("replace") != null;
         Resource storageRoot = request.getResourceResolver().getResource(path);
         log.debug("Updating redirect maps at {}", storageRoot.getPath());
-        Map<String, Resource> jcrRules = getRules(storageRoot); // rules stored in crx
+        Map<String, Resource> jcrRules;
+        if(replace){
+            jcrRules = Collections.emptyMap();
+            for(Resource ch : storageRoot.getChildren()){
+                ch.getResourceResolver().delete(ch);
+            }
+        } else {
+            jcrRules = getRules(storageRoot); // rules stored in crx
+        }
         ImportLog auditLog = new ImportLog();
         Collection<Map<String, Object>> xlsRules;
         try (InputStream is = getFile(request)) {
             xlsRules = readEntries(is, auditLog); // rules read from excel
         }
+
         if (!xlsRules.isEmpty()) {
             update(storageRoot, xlsRules, jcrRules);
         }
@@ -115,12 +130,15 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
      */
     Map<String, Resource> getRules(Resource resource) {
         Map<String, Resource> rules = new LinkedHashMap<>();
-        for (Resource res : resource.getChildren()) {
-            if (res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
-                String src = res.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
-                rules.put(src, res);
+        new AbstractResourceVisitor() {
+            @Override
+            public void visit(Resource res) {
+                if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
+                    String src = res.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
+                    rules.put(src, res);
+                }
             }
-        }
+        }.accept(resource);
         return rules;
     }
 
@@ -132,18 +150,37 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
      */
     void update(Resource root, Collection<Map<String, Object>> xlsRules, Map<String, Resource> jcrRedirects) throws PersistenceException {
         ResourceResolver resolver = root.getResourceResolver();
-        for (Map<String, Object> props : xlsRules) {
-            String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
-            Resource redirect = getOrCreateRedirect(root, sourcePath, props, jcrRedirects);
-            log.debug("rule: {}", redirect.getPath());
+
+        if(xlsRules.size() > shardSize){
+            int count = 0;
+            for (Map<String, Object> props : xlsRules) {
+                count++;
+
+                String shardName = "shard-" + count / shardSize;
+                String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
+                Resource shard = root.getChild(shardName);
+                if(shard == null){
+                    shard = resolver.create(root, shardName, Collections.singletonMap(JCR_PRIMARYTYPE, NT_UNSTRUCTURED));
+                }
+                Resource redirect = getOrCreateRedirect(shard, sourcePath, props, jcrRedirects);
+                log.debug("rule[{}]: {}", count, redirect.getPath());
+                if(count % shardSize == 0) resolver.commit();
+            }
+        } else {
+            for (Map<String, Object> props : xlsRules) {
+                String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
+                Resource redirect = getOrCreateRedirect(root, sourcePath, props, jcrRedirects);
+                log.debug("rule: {}", redirect.getPath());
+            }
+            resolver.commit();
         }
-        resolver.commit();
     }
 
     private Resource getOrCreateRedirect(Resource root, String sourcePath, Map<String, Object> props, Map<String, Resource> jcrRedirects) throws PersistenceException {
         Resource redirect = jcrRedirects.get(sourcePath);
         if (redirect == null) {
             // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
+            props.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
             props.put(JCR_MIXINTYPES, MIX_CREATED);
             String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
             redirect = root.getResourceResolver().create(root, nodeName, props);
