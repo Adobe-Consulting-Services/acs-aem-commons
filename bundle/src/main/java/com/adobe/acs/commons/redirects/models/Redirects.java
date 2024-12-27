@@ -32,7 +32,6 @@ import javax.jcr.Session;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -41,7 +40,6 @@ import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.jetbrains.annotations.NotNull;
 
-import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
 
 /**
@@ -87,14 +85,7 @@ public class Redirects {
             if (pg != null) {
                 pageNumber = Integer.parseInt(pg);
             }
-            new AbstractResourceVisitor() {
-                @Override
-                public void visit(Resource res) {
-                    if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                        all.add(res);
-                    }
-                }
-            }.accept(configResource);
+            configResource.listChildren().forEachRemaining(all::add);
             pages = Lists.partition(all, pageSize);
         }
     }

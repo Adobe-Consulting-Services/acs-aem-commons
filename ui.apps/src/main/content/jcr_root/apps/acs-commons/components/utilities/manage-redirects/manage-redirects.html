@@ -142,9 +142,9 @@
                             </thead>
 
                             <tbody is="coral-table-body" id="redirect-rows" divider="cell">
-                            <sly data-sly-list.item="${pg.items}">
-                                <sly data-sly-call="${redirectsTemplate.row @ redirectResource = item, allowRearrange = true}"/>
-                            </sly>
+                                <sly data-sly-list.item="${pg.items}">
+                                    <sly data-sly-call="${redirectsTemplate.row @ redirectResource = item, allowRearrange = true}"/>
+                                </sly>
                             </tbody>
 
                         </table>
@@ -176,7 +176,7 @@
                 <coral-panel class="coral-Well">
                     <section>
                         <h2 class="coral-Heading coral-Heading--2">Import Redirect Map</h2>
-                        <p>This file should be a spreadsheet file with the first column containing the source path, the second column containing the redirect destination and the third column containing the redirect status code.</p>
+                        <p>The redirect map file will be combined with the redirects configured in AEM to create the final set of redirects. This file should be a spreadsheet file with the first column containing the source path, the second column containing the redirect destination and the third column containing the redirect status code.</p>
                         <form action="${resource.path}.import.html" method="post" class="coral-Form--aligned" enctype="multipart/form-data" >
                             <input type="hidden" name="path" value="${context.redirectResource.path}" />
                             <div class="coral-Form-fieldwrapper">
@@ -184,11 +184,6 @@
                                 <div class="coral-InputGroup coral-Form-field">
                                     <input is="coral-Textfield" class="coral-InputGroup-input coral3-Textfield" id="acs-redirect-import-ctrl" type="file" name="./redirects.redirectmap.xlsx" accept=".xlsx" />
                                 </div>
-                            </div>
-                            <div class="coral-Form-fieldwrapper">
-                                <coral-checkbox name="replace" value="true" class="coral-Form-field">
-                                    Replace Mode. If unchecked then the redirect map file will be combined with the redirects configured in AEM to create the final set of redirects.
-                                </coral-checkbox>
                             </div>
                             <div class="coral-Form-fieldwrapper">
                                 <button class="coral-Button  acs-redirects-form-import" icon="fileExcel" is="coral-button" variant="primary">Import Redirect Map</button>
