@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+
+## 6.10.0 - 2024-12-13
+
 - #3484 - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
 - #3480 - AEM Sites Copy Publish URLs
 

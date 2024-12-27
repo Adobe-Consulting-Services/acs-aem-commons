@@ -31,6 +31,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -71,6 +73,29 @@ public class CreateRedirectConfigurationServletTest {
         // return 409 if already exists
         servlet.doPost(context.request(), context.response());
         assertEquals(HttpServletResponse.SC_CONFLICT, context.response().getStatus());
+    }
+
+    @Test
+    public void createDeepHierarchies() throws ServletException, IOException {
+        context.build().resource("/conf/level0/level1/level2");
+
+        context.request().setParameterMap(Collections.singletonMap("path", "/conf/level0"));
+        servlet.doPost(context.request(), context.response());
+
+        context.request().setParameterMap(Collections.singletonMap("path", "/conf/level0/level1"));
+        servlet.doPost(context.request(), context.response());
+
+        context.request().setParameterMap(Collections.singletonMap("path", "/conf/level0/level1/level2"));
+        servlet.doPost(context.request(), context.response());
+
+        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
+
+        // Read configurations via Model
+        Configurations confModel = context.request().adaptTo(Configurations.class);
+        Iterator<RedirectConfiguration> configurations = confModel.getConfigurations().iterator();
+        assertEquals("/conf/level0/settings/redirects", configurations.next().getPath());
+        assertEquals("/conf/level0/level1/settings/redirects", configurations.next().getPath());
+        assertEquals("/conf/level0/level1/level2/settings/redirects", configurations.next().getPath());
     }
 
     @Test
