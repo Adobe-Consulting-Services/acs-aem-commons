@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3494 - Remove offline instrumentation with Jacoco
 
+### Fixed
+
+- #3471 - EmailService not working due to unsatisfied reference to MailTemplateManager in AEM on prem
+
 ## 6.9.10 - 2024-12-13
 
 ### Added 
