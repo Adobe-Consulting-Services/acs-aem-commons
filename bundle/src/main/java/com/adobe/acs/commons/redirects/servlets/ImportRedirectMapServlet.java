@@ -161,7 +161,9 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
                 }
                 Resource redirect = getOrCreateRedirect(shard, sourcePath, props, jcrRedirects);
                 log.trace("rule[{}]: {}", count, redirect.getPath());
-                if(count % SHARD_SIZE == 0) resolver.commit();
+                if(count % SHARD_SIZE == 0) {
+                    resolver.commit();
+                }
             }
         } else {
             for (Map<String, Object> props : xlsRedirects) {

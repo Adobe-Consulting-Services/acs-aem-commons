@@ -482,16 +482,14 @@ public class ImportRedirectMapServletTest {
     }
 
     private byte[] createMockExcelFile() throws IOException {
-        List<RedirectRule> rules = new ArrayList<>();
         RedirectRule rule = spy(new RedirectRule());
         doReturn("/old").when(rule).getSource();
         doReturn("/new").when(rule).getTarget();
         doReturn(301).when(rule).getStatusCode();
         doReturn(null).when(rule).getCreatedBy();
         doReturn(null).when(rule).getModifiedBy();
-        rules.add(rule);
 
-        Workbook wb = export(rules);
+        Workbook wb = export(Collections.singletonList(rule));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         wb.write(out);
