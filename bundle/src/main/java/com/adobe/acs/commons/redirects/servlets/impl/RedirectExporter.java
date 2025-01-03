@@ -1,8 +1,9 @@
-/*
- * ACS AEM Commons
- *
- * Copyright (C) 2013 - 2023 Adobe
- *
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2024 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +15,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
-@org.osgi.annotation.versioning.Version("6.11.0")
-package com.adobe.acs.commons.redirects.models;
+package com.adobe.acs.commons.redirects.servlets.impl;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+
+import com.adobe.acs.commons.redirects.models.RedirectRule;
+
+public interface RedirectExporter {
+
+  void export(Collection<RedirectRule> rules, OutputStream outputStream) throws IOException;
+}

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
+import static com.adobe.acs.commons.redirects.servlets.CreateRedirectConfigurationServlet.REDIRECTS_RESOURCE_PATH;
 
 public class RedirectResourceBuilder {
     public static final String DEFAULT_CONF_PATH = "/conf/global/settings/redirects";
@@ -137,7 +138,7 @@ public class RedirectResourceBuilder {
     public Resource build() throws PersistenceException {
         ContentBuilder cb = context.create();
         Resource configResource = ResourceUtil.getOrCreateResource(
-                context.resourceResolver(), configPath, REDIRECT_RULE_RESOURCE_TYPE, null, true);
+                context.resourceResolver(), configPath, REDIRECTS_RESOURCE_PATH, null, true);
         if(nodeName == null) {
             nodeName = ResourceUtil.createUniqueChildName(configResource, "rule");
         }
