@@ -334,16 +334,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     public static Collection<RedirectRule> getRules(Resource resource) {
-        long t0 = System.currentTimeMillis();
         List<Resource> resources = readRedirects(resource);
-        log.info("read {} redirect rules in {} ms", resources.size(), System.currentTimeMillis() - t0);
-        t0 = System.currentTimeMillis();
+        long t0 = System.currentTimeMillis();
         Collection<RedirectRule> rules = resources
             .stream()
             .map(res -> res.adaptTo(RedirectRule.class))
             .filter(res -> res != null)
             .collect(Collectors.toList());
-        log.info("mapped {} models in {} ms", resources.size(), System.currentTimeMillis() - t0);
+        log.trace("mapped {} models in {} ms", resources.size(), System.currentTimeMillis() - t0);
         return rules;
     }
 

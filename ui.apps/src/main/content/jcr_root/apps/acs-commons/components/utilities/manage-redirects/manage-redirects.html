@@ -164,7 +164,7 @@
                 <coral-panel class="coral-Well">
                     <section>
                         <h2 class="coral-Heading coral-Heading--2">Export Redirect Map</h2>
-                        <p>Export redirects to CSV for offline editing. Use the Import option to upload modified redirect configurations.</p>
+                        <p>Export redirects to Excel for offline editing. Use the Import option to upload modified redirect configurations.</p>
                         <form action="${resource.path}.export.csv" method="get" class="coral-Form--aligned">
                             <input type="hidden" name="path" value="${context.redirectResource.path}" />
                             <div class="coral-Form-fieldwrapper">
@@ -176,7 +176,7 @@
                 <coral-panel class="coral-Well">
                     <section>
                         <h2 class="coral-Heading coral-Heading--2">Import Redirect Map</h2>
-                        <p>Excel Spreadsheet or CSV must include three columns: source path, destination path, and HTTP status code.</p>
+                        <p>Excel Spreadsheet must include three columns: source path, destination path, and HTTP status code.</p>
                         <form action="${resource.path}.import.html" method="post" class="coral-Form--aligned" enctype="multipart/form-data" >
                             <input type="hidden" name="path" value="${context.redirectResource.path}" />
                             <div class="coral-Form-fieldwrapper">

@@ -28,6 +28,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Component;
@@ -62,7 +63,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(CreateRedirectConfigurationServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL) 
     transient RedirectFilterMBean redirectFilter;
 
     @Override
@@ -97,7 +98,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             if (config == null) {
                 String contextPrefix = StringUtils.defaultString(request.getParameter(REQ_PARAM_CTX_PREFIX));
                 config = resolver.create(bucket, configName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
+                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER,
                                 ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH,
                                 REQ_PARAM_CTX_PREFIX, contextPrefix));
                 log.info("created {} with context prefix '{}'", config.getPath(), contextPrefix);

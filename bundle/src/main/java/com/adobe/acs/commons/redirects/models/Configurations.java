@@ -17,11 +17,9 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
-import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -31,8 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.query.Query;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,14 +61,12 @@ public class Configurations {
 
         Resource confRoot = request.getResourceResolver().getResource("/conf");
 
-        new AbstractResourceVisitor() {
-            @Override
-            public void visit(Resource res) {
-                if (res.getPath().endsWith(storageSuffix) && res.isResourceType(REDIRECTS_RESOURCE_TYPE)) {
-                    configurations.add(new RedirectConfiguration(res, storageSuffix, false));
-                }
+        for (Resource child : confRoot.getChildren()) {
+            Resource res = child.getChild(storageSuffix);
+            if (res != null && res.isResourceType(REDIRECTS_RESOURCE_TYPE)) {
+                configurations.add(new RedirectConfiguration(res, storageSuffix));
             }
-        }.accept(confRoot);
+        }
 
         configurations.sort(Comparator.comparing(RedirectConfiguration::getName));
         return configurations;

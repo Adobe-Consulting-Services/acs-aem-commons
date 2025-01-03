@@ -21,7 +21,6 @@ import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 
-import com.adobe.acs.commons.redirects.servlets.impl.ExcelRedirectExporter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -43,7 +42,7 @@ import java.util.Calendar;
 import java.util.Collection;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
-import static com.adobe.acs.commons.redirects.servlets.ImportRedirectMapServlet.CONTENT_TYPE_EXCEL;
+import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.CONTENT_TYPE_EXCEL;
 import static org.junit.Assert.*;
 
 /**
@@ -104,7 +103,7 @@ public class ExportRedirectMapServletTest {
         Resource resource = context.resourceResolver().getResource(redirectStoragePath);
         Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
 
-        Workbook wb = new ExcelRedirectExporter().build(rules);
+        Workbook wb = ExportRedirectMapServlet.export(rules);
         assertSpreadsheet(wb);
     }
 
