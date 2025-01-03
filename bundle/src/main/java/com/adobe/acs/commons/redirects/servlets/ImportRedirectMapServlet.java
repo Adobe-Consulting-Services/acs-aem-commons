@@ -146,6 +146,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
      */
     void update(Resource root, Collection<Map<String, Object>> xlsRedirects, Map<String, Resource> jcrRedirects) throws PersistenceException {
         ResourceResolver resolver = root.getResourceResolver();
+        long t0 = System.currentTimeMillis();
 
         if(xlsRedirects.size() > SHARD_SIZE){
             int count = 0;
@@ -170,6 +171,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             }
             resolver.commit();
         }
+        log.debug("{} rules imported in {}ms", xlsRedirects.size(), System.currentTimeMillis() - t0);
     }
 
     private Resource getOrCreateRedirect(Resource root, String sourcePath, Map<String, Object> props, Map<String, Resource> jcrRedirects) throws PersistenceException {
