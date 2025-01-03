@@ -276,13 +276,18 @@
 
     var $form = $(this).closest("form");
     var data = new FormData($form[0]);
+    var ui = $(window).adaptTo("foundation-ui");
+    ui.wait();
     $.ajax({
       url: $form.attr("action"),
       type: "POST",
       data: new FormData($form[0]),
       processData: false,
       contentType: false
+    }).fail(function (response) {
+        ui.clearWait();
     }).done(function (response) {
+        ui.clearWait();
       var isErr = response.log.length;
       if (response.log.length) {
         var maxItems = 10;
