@@ -21,6 +21,7 @@
           import="
     javax.jcr.Session,
     javax.jcr.Node,
+    javax.jcr.nodetype.NodeType,
 	java.util.*,
 	java.io.PrintWriter,
     com.day.cq.replication.Replicator,
@@ -28,11 +29,19 @@
     com.day.cq.replication.ReplicationActionType" %><pre><%
 
     String path = request.getParameter("path");
+    Resource configResource = resourceResolver.getResource(path);
 
     Replicator replicator = sling.getService(Replicator.class);
     ReplicationOptions opts = new ReplicationOptions();
     opts.setSuppressVersions(true);
-    replicator.replicate(resourceResolver.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path, null);
+    Session session = resourceResolver.adaptTo(Session.class);
+    replicator.replicate(session, ReplicationActionType.ACTIVATE, path, null);
 	out.println("Replicating: " + path);
 
-%></pre>
+    if(!configResource.adaptTo(Node.class).isNodeType(NodeType.NT_HIERARCHY_NODE)){
+        for(Resource res : configResource.getChildren()){
+	        replicator.replicate(session, ReplicationActionType.ACTIVATE, res.getPath(), null);
+    	    out.println("Replicating: " + res.getPath());
+        }
+    }
+%>
