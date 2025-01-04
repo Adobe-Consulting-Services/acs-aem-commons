@@ -1,8 +1,9 @@
-/*
- * ACS AEM Commons
- *
- * Copyright (C) 2013 - 2023 Adobe
- *
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2024 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +15,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.redirects.models;
 
-import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -27,18 +28,10 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.jcr.query.Query;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -75,6 +68,7 @@ public class Configurations {
                     }
                 }
             }
+
             @Override
             public void visit(Resource res) {
                 if (res.isResourceType(REDIRECTS_RESOURCE_TYPE)) {
