@@ -67,8 +67,17 @@ public class Configurations {
 
         new AbstractResourceVisitor() {
             @Override
+            public void accept(Resource res) {
+                if (res != null) {
+                    this.visit(res);
+                    if(!res.getPath().endsWith(storageSuffix)){
+                        this.traverseChildren(res.listChildren());
+                    }
+                }
+            }
+            @Override
             public void visit(Resource res) {
-                if (res.getPath().endsWith(storageSuffix) && res.isResourceType(REDIRECTS_RESOURCE_TYPE)) {
+                if (res.isResourceType(REDIRECTS_RESOURCE_TYPE)) {
                     configurations.add(new RedirectConfiguration(res, storageSuffix, false));
                 }
             }
