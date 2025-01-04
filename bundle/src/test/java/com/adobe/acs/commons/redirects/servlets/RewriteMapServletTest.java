@@ -23,6 +23,7 @@ import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
@@ -45,7 +46,7 @@ public class RewriteMapServletTest {
     public SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private RewriteMapServlet servlet;
-    private final String redirectStoragePath = "/conf/acs-commons/redirects";
+    private final String redirectStoragePath = "/conf/acs-commons/settings/redirects";
 
     @Before
     public void setUp() throws PersistenceException {
@@ -73,13 +74,13 @@ public class RewriteMapServletTest {
                 .build();
 
         Resource redirects = context.resourceResolver().getResource(redirectStoragePath);
-        context.request().setResource(redirects);
+         context.request().setResource(redirects);
         servlet = new RewriteMapServlet();
     }
 
 
     @Test
-    public void testGet() throws ServletException, IOException {
+    public void testDoGetWithNoSelector() throws ServletException, IOException {
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
 
@@ -101,7 +102,7 @@ public class RewriteMapServletTest {
     }
 
     @Test
-    public void test301Selector() throws ServletException, IOException {
+    public void testDoGetWithStatusCodeSelector() throws ServletException, IOException {
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
 
@@ -117,21 +118,13 @@ public class RewriteMapServletTest {
         assertEquals("/content/four", rule1[1]);
     }
 
-    @Test
-    public void test302Selector() throws ServletException, IOException {
+    @Test(expected = NumberFormatException.class)
+    public void testDoGetWithInvalidStatusCodeSelector() throws ServletException, IOException {
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
 
-        context.requestPathInfo().setSelectorString("302");
+        context.requestPathInfo().setSelectorString("NA");
         servlet.doGet(request, response);
 
-        assertEquals(ContentType.TEXT_PLAIN.getMimeType(), response.getContentType());
-        String[] lines = response.getOutputAsString().split("\n");
-        assertEquals(3, lines.length); // header + notes + 1st rule
-        assertEquals("# 302 Redirects", lines[0]);
-
-        String[] rule1 = lines[2].split(" ");
-        assertEquals("/content/one", rule1[0]);
-        assertEquals("/content/two", rule1[1]);
     }
 }
