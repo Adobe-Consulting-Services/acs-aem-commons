@@ -181,6 +181,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         if (redirect == null) {
             // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
             props.put(JCR_MIXINTYPES, MIX_CREATED);
+            props.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
             String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
             redirect = root.getResourceResolver().create(root, nodeName, props);
         } else {
