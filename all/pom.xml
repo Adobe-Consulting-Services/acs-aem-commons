@@ -48,6 +48,7 @@
                 <configuration>
                     <packageType>container</packageType>
                     <excludes>**/META-INF/*,**/thumbnail.png</excludes>
+                    <embeddedTarget>/apps/acs-commons/install</embeddedTarget>
                 </configuration>
                 <executions>
                     <execution>
@@ -59,40 +60,14 @@
                             <name>acs-aem-commons-all</name>
                             <embeddeds>
                                 <embedded>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>acs-aem-commons-bundle</artifactId>
-                                    <target>/apps/acs-commons/install</target>
-                                    <filter>true</filter>
-                                    <isAllVersionsFilter>true</isAllVersionsFilter>
-                                </embedded>
-                                <embedded>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>acs-aem-commons-bundle-onprem</artifactId>
-                                    <target>/apps/acs-commons/install</target>
-                                    <filter>true</filter>
-                                    <isAllVersionsFilter>true</isAllVersionsFilter>
-                                </embedded>
-                                <embedded>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                    <!-- exclude cloud specific dependencies -->
+                                    <artifactId>~acs-aem-commons-bundle-cloud</artifactId>
                                     <classifier>~cloud</classifier>
-                                    <target>/apps/acs-commons/install</target>
+                                    <type>jar,zip</type>
                                     <filter>true</filter>
                                     <isAllVersionsFilter>true</isAllVersionsFilter>
-                                </embedded>
-                                <embedded>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>acs-aem-commons-ui.content</artifactId>
-                                    <target>/apps/acs-commons/install</target>
-                                    <filter>true</filter>
-                                    <isAllVersionsFilter>true</isAllVersionsFilter>
-                                </embedded>
-                                <embedded>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>acs-aem-commons-ui.config</artifactId>
-                                    <target>/apps/acs-commons/install</target>
-                                    <filter>true</filter>
-                                    <isAllVersionsFilter>true</isAllVersionsFilter>
+                                    <!-- only consider direct dependencies -->
+                                    <excludeTransitive>true</excludeTransitive>
                                 </embedded>
                             </embeddeds>
                         </configuration>
@@ -206,10 +181,29 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-bundle-onprem</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.acs</groupId>
+            <artifactId>acs-aem-commons-bundle-cloud</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-ui.apps</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.acs</groupId>
+            <artifactId>acs-aem-commons-ui.apps</artifactId>
+            <classifier>cloud</classifier>
+            <version>${project.version}</version>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -278,39 +272,17 @@
                                         <cloudManagerTarget>all</cloudManagerTarget>
                                     </properties>
                                     <embeddeds>
+                                        <!-- exclude onprem/classic specific artifacts-->
                                         <embedded>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>acs-aem-commons-bundle</artifactId>
-                                            <target>/apps/acs-commons/install</target>
+                                            <artifactId>~acs-aem-commons-bundle-onprem,~acs-aem-commons-ui.apps</artifactId>
                                             <filter>true</filter>
                                             <isAllVersionsFilter>true</isAllVersionsFilter>
+                                            <!-- only consider direct dependencies -->
+                                            <excludeTransitive>true</excludeTransitive>
                                         </embedded>
                                         <embedded>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>acs-aem-commons-bundle-cloud</artifactId>
-                                            <target>/apps/acs-commons/install</target>
-                                            <filter>true</filter>
-                                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                                        </embedded>
-                                        <embedded>
-                                            <groupId>${project.groupId}</groupId>
                                             <artifactId>acs-aem-commons-ui.apps</artifactId>
                                             <classifier>cloud</classifier>
-                                            <target>/apps/acs-commons/install</target>
-                                            <filter>true</filter>
-                                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                                        </embedded>
-                                        <embedded>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>acs-aem-commons-ui.content</artifactId>
-                                            <target>/apps/acs-commons/install</target>
-                                            <filter>true</filter>
-                                            <isAllVersionsFilter>true</isAllVersionsFilter>
-                                        </embedded>
-                                        <embedded>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>acs-aem-commons-ui.config</artifactId>
-                                            <target>/apps/acs-commons/install</target>
                                             <filter>true</filter>
                                             <isAllVersionsFilter>true</isAllVersionsFilter>
                                         </embedded>
@@ -348,26 +320,14 @@
                                 <goals>
                                     <goal>project-analyse</goal>
                                 </goals>
+                                <configuration>
+                                    <classifier>cloud</classifier>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
-            <dependencies>
-                <dependency>
-                    <groupId>com.adobe.acs</groupId>
-                    <artifactId>acs-aem-commons-bundle-cloud</artifactId>
-                    <version>${project.version}</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.adobe.acs</groupId>
-                    <artifactId>acs-aem-commons-ui.apps</artifactId>
-                    <classifier>cloud</classifier>
-                    <version>${project.version}</version>
-                    <type>zip</type>
-                </dependency>
-            </dependencies>
         </profile>
     </profiles>
 </project>

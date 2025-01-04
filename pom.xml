@@ -88,7 +88,7 @@
         <!-- the minimum AEMaaCS version being supported -->
         <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
 
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
@@ -219,14 +219,8 @@
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
-                    <executions>
-                        <execution>
-                            <id>bnd-process</id>
-                            <goals>
-                                <goal>bnd-process</goal>
-                            </goals>
-                            <configuration>
-                                <bnd><![CDATA[
+                    <configuration>
+                        <bnd><![CDATA[
 # a lot of bundle header are generated from pom elements by default: https://github.com/bndtools/bnd/tree/master/maven/bnd-maven-plugin#default-bundle-headers
 Bundle-Category: acs-aem-commons
 # export all versioned packages except for conditional ones (https://github.com/bndtools/bnd/issues/3721#issuecomment-579026778)
@@ -248,8 +242,14 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
-                                ]]></bnd>
-                            </configuration>
+                        ]]></bnd>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>bnd-process</id>
+                            <goals>
+                                <goal>bnd-process</goal>
+                            </goals>
                         </execution>
                     </executions>
                     <dependencies>
@@ -794,38 +794,48 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
         <profile>
             <id>coverage</id>
             <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <argLine>@{jacoco.command}</argLine>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <configuration>
+                                <!-- 
+                                for IT where you need a forked JVM to run the tests you can use this system property to make sure that
+                                the JaCoCo agent correctly instruments your code
+                                set system property also via argLine as only that allows late evaluation -->
+                                <argLine>@{jacoco.command} -Djacoco.command=@{jacoco.command}</argLine>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
                 <plugins>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
+                        
                         <executions>
                             <execution>
-                                <id>default-prepare-agent</id>
+                                <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
+                                <!-- the same execution data file is used for both IT and UT-->
                                 <configuration>
-                                    <excludes>
-                                        <exclude>*</exclude>
-                                    </excludes>
+                                    <propertyName>jacoco.command</propertyName>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>jacoco-instrument</id>
-                                <goals>
-                                    <goal>instrument</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>jacoco-restore-instrumented-classes</id>
-                                <goals>
-                                    <goal>restore-instrumented-classes</goal>
-                                </goals>
-                            </execution>
-                            <execution>
                                 <id>report</id>
-                                <phase>prepare-package</phase>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
