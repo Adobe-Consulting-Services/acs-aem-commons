@@ -334,18 +334,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     public static Collection<RedirectRule> getRules(Resource resource) {
         Collection<RedirectRule> rules = new ArrayList<>();
-        new AbstractResourceVisitor() {
-            @Override
-            public void visit(Resource res) {
-                if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                    RedirectRule rule = res.adaptTo(RedirectRule.class);
-                    if(rule != null) {
-                        rules.add(rule);
-                    }
+        for (Resource res : resource.getChildren()) {
+            if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
+                RedirectRule rule = res.adaptTo(RedirectRule.class);
+                if(rule != null) {
+                    rules.add(rule);
                 }
             }
-        }.accept(resource);
-
+        }
         return rules;
     }
 
