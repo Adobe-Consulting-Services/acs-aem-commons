@@ -35,6 +35,7 @@ import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -243,8 +244,14 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         List<ArchivedProcessFailure> archivedFailures = failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toList());
         infoBean.setReportedErrors(archivedFailures);
         try {
+            ResourceUtil.getOrCreateResource(rr, BASE_PATH,
+                    Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER), null, false);
+            ResourceUtil.getOrCreateResource(rr, getPath(),
+                    Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, "cq:Page"), null, false);
+
             String errFolder = getPath() + "/jcr:content/failures/step" + (step + 1);
-            JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));
+            ResourceUtil.getOrCreateResource(rr, errFolder,
+                    Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED), "nt:unstructured", false);
             if (rr.hasChanges()) {
                 rr.commit();
             }
@@ -261,7 +268,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 });
             }
             batch.commitBatch();
-        } catch (RepositoryException | PersistenceException | LoginException | NullPointerException ex) {
+        } catch (PersistenceException | LoginException | NullPointerException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }

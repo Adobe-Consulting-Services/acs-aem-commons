@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3471 - EmailService not working due to unsatisfied reference to MailTemplateManager in AEM on prem
+- #3499 - MCP reports are not shown if the initial MCP job failed
 
 ## 6.9.10 - 2024-12-13
 
