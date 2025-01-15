@@ -98,7 +98,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             if (config == null) {
                 String contextPrefix = StringUtils.defaultString(request.getParameter(REQ_PARAM_CTX_PREFIX));
                 config = resolver.create(bucket, configName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER,
+                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
                                 ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH,
                                 REQ_PARAM_CTX_PREFIX, contextPrefix));
                 log.info("created {} with context prefix '{}'", config.getPath(), contextPrefix);
