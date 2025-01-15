@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3471 - EmailService not working due to unsatisfied reference to MailTemplateManager in AEM on prem
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
 
 ## 6.9.10 - 2024-12-13
 
