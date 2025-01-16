@@ -95,10 +95,10 @@ jobs:
         with:
           name: Test Results (${{ matrix.os }}, JDK ${{ matrix.jdk }}))
           path: |
-            target/surefire-reports/TEST*.xml
-            target/failsafe-reports/TEST*.xml
-            target/invoker-reports/TEST*.xml
-            target/it/**/build.log
+            **/target/surefire-reports/TEST*.xml
+            **/target/failsafe-reports/TEST*.xml
+            **/target/invoker-reports/TEST*.xml
+            **/target/it/**/build.log
 
       # https://about.codecov.io/blog/javascript-code-coverage-using-github-actions-and-codecov/
       - name: Upload code coverage to CodeCov (Main build)
