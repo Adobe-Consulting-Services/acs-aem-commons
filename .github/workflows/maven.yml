@@ -96,6 +96,7 @@ jobs:
           name: Test Results (${{ matrix.os }}, JDK ${{ matrix.jdk }}))
           path: |
             target/surefire-reports/TEST*.xml
+            target/failsafe-reports/TEST*.xml
             target/invoker-reports/TEST*.xml
             target/it/**/build.log
 
