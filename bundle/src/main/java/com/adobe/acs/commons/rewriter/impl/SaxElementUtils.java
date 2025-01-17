@@ -33,23 +33,32 @@ public class SaxElementUtils {
     public static final String STYLESHEET_REL="stylesheet";
 
     public static boolean isCss(final String elementName, final Attributes attrs) {
+        if (!StringUtils.equals(elementName, "link")) {
+            return false;
+        }
         final String type = attrs.getValue("", "type");
         final String href = attrs.getValue("", "href");
         final String rel = attrs.getValue("","rel");
 
-        return StringUtils.equals("link", elementName)
-                && (StringUtils.equals(type, CSS_TYPE) || StringUtils.equals(rel,STYLESHEET_REL))
+        return (StringUtils.equals(type, CSS_TYPE) || StringUtils.equals(rel,STYLESHEET_REL))
                 && StringUtils.startsWith(href, "/")
                 && !StringUtils.startsWith(href, "//")
                 && StringUtils.endsWith(href, LibraryType.CSS.extension);
     }
 
     public static boolean isJavaScript(final String elementName, final Attributes attrs) {
+        if (!StringUtils.equalsAny(elementName, "script", "link")) {
+            return false;
+        }
         final String type = attrs.getValue("", "type");
-        final String src = attrs.getValue("", "src");
+        final String src;
+        if (StringUtils.equals(elementName, "script")) {
+            src = attrs.getValue("", "src");
+        } else {
+            src = attrs.getValue("", "href");
+        }
 
-        return StringUtils.equals("script", elementName)
-                && (type == null || StringUtils.equals(type, JS_TYPE) || StringUtils.equals(type, JS_MODULE_TYPE))
+        return (type == null || StringUtils.equals(type, JS_TYPE) || StringUtils.equals(type, JS_MODULE_TYPE))
                 && StringUtils.startsWith(src, "/")
                 && !StringUtils.startsWith(src, "//")
                 && StringUtils.endsWith(src, LibraryType.JS.extension);
