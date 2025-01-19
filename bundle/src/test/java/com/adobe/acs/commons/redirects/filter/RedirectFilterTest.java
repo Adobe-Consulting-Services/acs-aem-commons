@@ -305,6 +305,7 @@ public class RedirectFilterTest {
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
+
     @Test
     public void testNavigate301() throws Exception {
         withRules(
@@ -432,17 +433,17 @@ public class RedirectFilterTest {
                         .setTarget("/content/we-retail/en/target")
                         .setStatusCode(302).build(),
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.ignore.name())
+                        .setPreserveQueryString(HandleQueryString.IGNORE.name())
                         .setSource("/test2")
                         .setTarget("/content/we-retail/en/target")
                         .setStatusCode(302).build(),
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.replace.name())
+                        .setPreserveQueryString(HandleQueryString.REPLACE.name())
                         .setSource("/test3")
                         .setTarget("/content/we-retail/en/target")
                         .setStatusCode(302).build(),
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.combine.name())
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
                         .setSource("/test4")
                         .setTarget("/content/we-retail/en/target")
                         .setStatusCode(302).build()
@@ -454,11 +455,11 @@ public class RedirectFilterTest {
 
         assertEquals(true, filter.getConfiguration().preserveQueryString());
         // inherited from the OSGi configuration, see the assert above
-        assertEquals(HandleQueryString.replace, filter.getPreserveQueryString(rules.get("/test1")));
+        assertEquals(HandleQueryString.REPLACE, filter.getPreserveQueryString(rules.get("/test1")));
 
-        assertEquals(HandleQueryString.ignore, filter.getPreserveQueryString(rules.get("/test2")));
-        assertEquals(HandleQueryString.replace, filter.getPreserveQueryString(rules.get("/test3")));
-        assertEquals(HandleQueryString.combine, filter.getPreserveQueryString(rules.get("/test4")));
+        assertEquals(HandleQueryString.IGNORE, filter.getPreserveQueryString(rules.get("/test2")));
+        assertEquals(HandleQueryString.REPLACE, filter.getPreserveQueryString(rules.get("/test3")));
+        assertEquals(HandleQueryString.COMBINE, filter.getPreserveQueryString(rules.get("/test4")));
     }
 
 
@@ -467,7 +468,7 @@ public class RedirectFilterTest {
         when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
         withRules(
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.combine.name())
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
                         .setSource("/content/we-retail/source")
                         .setTarget("/target/?source=acs-commons&release=6.11")
                         .setStatusCode(302).build()
@@ -483,7 +484,7 @@ public class RedirectFilterTest {
         when(configuration.preserveExtension()).thenReturn(true);
         withRules(
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.combine.name())
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
                         .setSource("/content/we-retail/source")
                         .setTarget("/target?source=acs-commons&release=6.11")
                         .setStatusCode(302).build()
@@ -499,7 +500,7 @@ public class RedirectFilterTest {
         when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
         withRules(
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.replace.name())
+                        .setPreserveQueryString(HandleQueryString.REPLACE.name())
                         .setSource("/content/we-retail/source")
                         .setTarget("/target/?source=acs-commons&release=6.11")
                         .setStatusCode(302).build()
@@ -515,7 +516,7 @@ public class RedirectFilterTest {
         when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
         withRules(
                 new RedirectResourceBuilder(context)
-                        .setPreserveQueryString(HandleQueryString.ignore.name())
+                        .setPreserveQueryString(HandleQueryString.IGNORE.name())
                         .setSource("/content/we-retail/source")
                         .setTarget("/target/?source=acs-commons&release=6.11")
                         .setStatusCode(302).build()

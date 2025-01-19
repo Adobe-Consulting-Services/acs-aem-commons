@@ -424,8 +424,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         HandleQueryString pqs = getPreserveQueryString(match.getRule());
         String queryString = slingRequest.getQueryString();
-        if (pqs != HandleQueryString.ignore && queryString != null) {
-            location = preserveQueryString(location, queryString, pqs == HandleQueryString.combine);
+        if (pqs != HandleQueryString.IGNORE && queryString != null) {
+            location = preserveQueryString(location, queryString, pqs == HandleQueryString.COMBINE);
         }
         return location;
     }
@@ -433,7 +433,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     HandleQueryString getPreserveQueryString(RedirectRule rule){
         HandleQueryString mode;
         if(rule.getPreserveQueryString() == null) {
-            mode = config.preserveQueryString() ? HandleQueryString.replace : HandleQueryString.ignore;
+            mode = config.preserveQueryString() ? HandleQueryString.REPLACE : HandleQueryString.IGNORE;
         } else {
             mode = HandleQueryString.valueOf(rule.getPreserveQueryString());
         }
@@ -489,7 +489,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         // Handle query parameters based on combine flag
         StringBuilder finalQuery = new StringBuilder();
-
         if (combine) {
             // Add location query parameters first
             if (locationQuery != null && !locationQuery.isEmpty()) {

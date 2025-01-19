@@ -307,15 +307,15 @@
                                                         <replace
                                                                 jcr:primaryType="nt:unstructured"
                                                                 text="Replace query string in the target with query string in the request"
-                                                                value="replace"/>
+                                                                value="REPLACE"/>
                                                         <combine
                                                                 jcr:primaryType="nt:unstructured"
                                                                 text="Combine query string in the target with query string in the request"
-                                                                value="combine"/>
+                                                                value="COMBINE"/>
                                                         <ignore
                                                                 jcr:primaryType="nt:unstructured"
                                                                 text="Ignore query string in the request"
-                                                                value="ignore"/>
+                                                                value="IGNORE"/>
                                                      </items>
                                                 </preserveQueryString>
                                             </items>

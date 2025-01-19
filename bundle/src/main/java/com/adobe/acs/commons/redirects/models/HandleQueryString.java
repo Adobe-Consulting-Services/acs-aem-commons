@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 - 2025 Adobe
+ * Copyright (C) 2013 - 2024 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ public enum HandleQueryString {
   /**
    * ignore, i.e. don't append query string from the request
    */
-  ignore,
+  IGNORE,
 
   /**
    * Replace query string in the target with query string in the request
    */
-  replace,
+  REPLACE,
 
   /**
    * Combine query string in the target with query string in the request
    */
-  combine
+  COMBINE
 }
