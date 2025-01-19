@@ -9,6 +9,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
 
 ## Unreleased ([details][unreleased changes details])
+ 
+- ### Added
+#3501 Redirect Manager: Large-Scale Import Optimization
+
+### Fixed
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+
+## 6.10.0 - 2024-12-13
+
+### Fixed
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+
+## 6.10.0 - 2024-12-13
 
 ### Changed
 

@@ -20,8 +20,10 @@ package com.adobe.acs.commons.redirects.servlets;
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -40,7 +42,7 @@ import java.util.Calendar;
 import java.util.Collection;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
-import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.SPREADSHEETML_SHEET;
+import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.CONTENT_TYPE_EXCEL;
 import static org.junit.Assert.*;
 
 /**
@@ -90,7 +92,7 @@ public class ExportRedirectMapServletTest {
 
         servlet.doGet(request, response);
 
-        assertEquals(SPREADSHEETML_SHEET, response.getContentType());
+        assertEquals(CONTENT_TYPE_EXCEL, response.getContentType());
         // read the generated spreadsheet
         XSSFWorkbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getOutput()));
         assertSpreadsheet(wb);
@@ -101,14 +103,14 @@ public class ExportRedirectMapServletTest {
         Resource resource = context.resourceResolver().getResource(redirectStoragePath);
         Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
 
-        XSSFWorkbook wb = servlet.export(rules);
+        Workbook wb = ExportRedirectMapServlet.export(rules);
         assertSpreadsheet(wb);
     }
 
-    public void assertSpreadsheet(XSSFWorkbook wb) {
-        XSSFSheet sheet = wb.getSheet("Redirects");
+    public void assertSpreadsheet(Workbook wb) {
+        Sheet sheet = wb.getSheet("Redirects");
         assertNotNull(sheet);
-        XSSFRow row1 = sheet.getRow(1);
+        Row row1 = sheet.getRow(1);
         assertEquals("/content/one", row1.getCell(0).getStringCellValue());
         assertEquals("/content/two", row1.getCell(1).getStringCellValue());
         assertEquals(302, (int) row1.getCell(2).getNumericCellValue());
@@ -123,7 +125,7 @@ public class ExportRedirectMapServletTest {
         assertDateEquals("22 November 1976", new Calendar.Builder().setInstant(row1.getCell(11).getDateCellValue()).build());
         assertEquals("jane.doe", row1.getCell(12).getStringCellValue());
 
-        XSSFRow row2 = sheet.getRow(2);
+        Row row2 = sheet.getRow(2);
         assertEquals("/content/three", row2.getCell(0).getStringCellValue());
         assertEquals("/content/four", row2.getCell(1).getStringCellValue());
         assertEquals(301, (int) row2.getCell(2).getNumericCellValue());

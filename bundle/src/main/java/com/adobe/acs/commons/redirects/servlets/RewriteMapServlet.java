@@ -19,11 +19,11 @@
  */
 package com.adobe.acs.commons.redirects.servlets;
 
-import com.adobe.acs.commons.redirects.filter.RedirectFilter;
-import com.adobe.acs.commons.redirects.models.RedirectRule;
 import org.apache.http.entity.ContentType;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 
@@ -33,6 +33,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 
+import static com.adobe.acs.commons.redirects.models.RedirectRule.NOTE_PROPERTY_NAME;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.SOURCE_PROPERTY_NAME;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.STATUS_CODE_PROPERTY_NAME;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.TARGET_PROPERTY_NAME;
+import static com.adobe.acs.commons.redirects.models.Redirects.readRedirects;
 import static com.adobe.acs.commons.redirects.servlets.CreateRedirectConfigurationServlet.REDIRECTS_RESOURCE_PATH;
 
 
@@ -62,22 +67,27 @@ public class RewriteMapServlet extends SlingSafeMethodsServlet {
         response.setContentType(ContentType.TEXT_PLAIN.getMimeType());
 
         String[] selectors = request.getRequestPathInfo().getSelectors();
-        int statusCode = 0;
+        int statusCodeSelector = 0;
         if(selectors != null && selectors.length > 0) {
-            statusCode = Integer.parseInt(selectors[0]);
+            statusCodeSelector = Integer.parseInt(selectors[0]);
         }
-        Collection<RedirectRule> rules = RedirectFilter.getRules(request.getResource());
+        Collection<Resource> rules = readRedirects(request.getResource());
         PrintWriter out = response.getWriter();
-        out.printf("# %s Redirects\n", statusCode == 0 ? "All" : "" + statusCode);
-        for (RedirectRule rule : rules) {
-            if(statusCode != 0 && rule.getStatusCode() != statusCode) {
+        out.printf("# %s Redirects\n", statusCodeSelector == 0 ? "All" : "" + statusCodeSelector);
+        for (Resource resource : rules) {
+            ValueMap props = resource.getValueMap();
+            String source = props.get(SOURCE_PROPERTY_NAME, String.class);
+            String target = props.get(TARGET_PROPERTY_NAME, String.class);
+            int statusCode = props.get(STATUS_CODE_PROPERTY_NAME, Integer.class);
+            String note = props.get(NOTE_PROPERTY_NAME, String.class);
+
+            if(statusCodeSelector != 0 && statusCodeSelector != statusCode) {
                 continue;
             }
-            String note = rule.getNote();
             if(note != null && !note.isEmpty()) {
                 out.printf("# %s\n", note);
             }
-            out.printf("%s %s\n", rule.getSource(), rule.getTarget());
+            out.printf("%s %s\n", source.trim(), target.trim());
         }
     }
 }

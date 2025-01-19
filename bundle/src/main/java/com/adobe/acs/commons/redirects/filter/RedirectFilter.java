@@ -102,6 +102,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.redirects.models.Redirects.CFG_PROP_IGNORE_SELECTORS;
+import static com.adobe.acs.commons.redirects.models.Redirects.readRedirects;
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
 import static org.osgi.framework.Constants.SERVICE_ID;
@@ -333,15 +334,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
     }
 
     public static Collection<RedirectRule> getRules(Resource resource) {
-        Collection<RedirectRule> rules = new ArrayList<>();
-        for (Resource res : resource.getChildren()) {
-            if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                RedirectRule rule = res.adaptTo(RedirectRule.class);
-                if(rule != null) {
-                    rules.add(rule);
-                }
-            }
-        }
+        List<Resource> resources = readRedirects(resource);
+        long t0 = System.currentTimeMillis();
+        Collection<RedirectRule> rules = resources
+            .stream()
+            .map(res -> res.adaptTo(RedirectRule.class))
+            .filter(res -> res != null)
+            .collect(Collectors.toList());
+        log.trace("mapped {} models in {} ms", resources.size(), System.currentTimeMillis() - t0);
         return rules;
     }
 
