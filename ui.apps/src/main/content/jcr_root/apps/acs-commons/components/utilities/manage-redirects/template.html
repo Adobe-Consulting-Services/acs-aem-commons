@@ -29,7 +29,8 @@
             data-case-insensitive="${redirect.caseInsensitive ? 'true' : 'false'}">
             ${redirect.source}
         </td>
-        <td is="coral-table-cell" class="target" data-value="${redirect.target}">
+        <td is="coral-table-cell" class="target" data-value="${redirect.target}"
+            data-preserve-query-string="${redirect.preserveQueryString}">
             ${redirect.target}
         </td>
         <td is="coral-table-cell" class="statusCode" data-value="${redirect.statusCode}" style="width:50px;">

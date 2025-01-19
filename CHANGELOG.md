@@ -6,13 +6,14 @@ in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-<!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
 
 ### Changed
 
 - #3494 - Remove offline instrumentation with Jacoco
+- #3509 - Redirect Manager: support combining query string in the target with query string in the request
 
 ### Fixed
 
@@ -20,7 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 6.9.10 - 2024-12-13
 
-### Added 
+### Added
 - #3484 - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
 - #3480 - AEM Sites Copy Publish URLs
 

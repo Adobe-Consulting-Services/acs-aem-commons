@@ -369,20 +369,55 @@ public class RedirectFilterTest {
     }
 
     @Test
-    public void testPreserveQueryString() throws Exception {
-        withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build()
-        );
+    public void testPreserveQueryString() {
 
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2");
+        // Test combining query strings (combine = true)
+        assertEquals("/path?a=1&b=2",
+            filter.preserveQueryString("/path?a=1", "b=2", true));
 
-        assertEquals(302, response.getStatus());
-        assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+        // Test replacing query strings (combine = false)
+        assertEquals("/path?b=2",
+            filter.preserveQueryString("/path?a=1", "b=2", false));
+
+        // Test with fragment - combining
+        assertEquals("/path?a=1&b=2#section",
+            filter.preserveQueryString("/path?a=1#section", "b=2", true));
+
+        // Test with fragment - replacing
+        assertEquals("/path?b=2#section",
+            filter.preserveQueryString("/path?a=1#section", "b=2", false));
+
+        // Test empty request query - combining
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", "", true));
+
+        // Test empty request query - replacing (should keep original)
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", "", false));
+
+        // Test null request query - combining
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", null, true));
+
+        // Test null request query - replacing (should keep original)
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", null, false));
+
+        // Test complex combining
+        assertEquals("/path?a=1&b=2&c=3&d=4",
+            filter.preserveQueryString("/path?a=1&b=2", "c=3&d=4", true));
+
+        // Test complex replacing
+        assertEquals("/path?c=3&d=4",
+            filter.preserveQueryString("/path?a=1&b=2", "c=3&d=4", false));
+
+        // Test with fragment and multiple parameters - combining
+        assertEquals("/path?a=1&b=2&c=3#section",
+            filter.preserveQueryString("/path?a=1&b=2#section", "c=3", true));
+
+        // Test with fragment and multiple parameters - replacing
+        assertEquals("/path?c=3#section",
+            filter.preserveQueryString("/path?a=1&b=2#section", "c=3", false));
     }
 
     @Test

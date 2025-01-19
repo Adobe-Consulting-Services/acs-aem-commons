@@ -62,6 +62,7 @@ public class RedirectRule {
     public static final String CACHE_CONTROL_HEADER_NAME = "cacheControlHeader";
     public static final String CASE_INSENSITIVE_PROPERTY_NAME = "caseInsensitive";
     public static final String REDIRECT_RESOURCE_REQUEST_ATTRIBUTE = "redirectResource";
+    public static final String PRESERVE_QUERY_STRING = "preserveQueryString";
 
     @ValueMapValue
     private String source;
@@ -108,6 +109,9 @@ public class RedirectRule {
     @ValueMapValue(name = CASE_INSENSITIVE_PROPERTY_NAME)
     private boolean caseInsensitive;
 
+    @ValueMapValue(name = PRESERVE_QUERY_STRING)
+    private String preserveQueryString;
+
     @Self
     private Resource resource;
 
@@ -140,6 +144,7 @@ public class RedirectRule {
             created = resource.getValueMap().get(CREATED_PROPERTY_NAME, Calendar.class);
             cacheControlHeader = resource.getValueMap().get(CACHE_CONTROL_HEADER_NAME, String.class);
             caseInsensitive = resource.getValueMap().get(CASE_INSENSITIVE_PROPERTY_NAME, false);
+            preserveQueryString = resource.getValueMap().get(PRESERVE_QUERY_STRING, String.class);
         }
 
         if (StringUtils.isBlank(source) || StringUtils.isBlank(target) || statusCode == null) {
@@ -336,4 +341,9 @@ public class RedirectRule {
                 && ((modified != null && modified.after(lastReplicated)) || (created != null && created.after(lastReplicated)));
         return isPublished && !modifiedAfterPublication;
     }
+
+    public String getPreserveQueryString() {
+        return preserveQueryString;
+    }
+
 }
