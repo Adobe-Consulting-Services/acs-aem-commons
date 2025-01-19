@@ -56,16 +56,25 @@ public class RedirectConfiguration {
 
     private RedirectConfiguration(){
         pathRules = new LinkedHashMap<>();
+        caseInsensitiveRules = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         patternRules = new LinkedHashMap<>();
     }
 
     public RedirectConfiguration(Resource resource, String storageSuffix) {
-        pathRules = new LinkedHashMap<>();
-        caseInsensitiveRules = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        patternRules = new LinkedHashMap<>();
-        path = resource.getPath();
+        this(resource, storageSuffix, true);
+    }
+
+    RedirectConfiguration(Resource configResource, String storageSuffix, boolean loadRules) {
+        this();
+        path = configResource.getPath();
         name = path.replace("/" + storageSuffix, "");
-        Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
+        if(loadRules){
+            loadRules(configResource);
+        }
+    }
+
+    void loadRules(Resource configResource) {
+        Collection<RedirectRule> rules = RedirectFilter.getRules(configResource);
         for (RedirectRule rule : rules) {
             if (rule.getRegex() != null) {
                 patternRules.put(rule.getRegex(), rule);
@@ -84,7 +93,6 @@ public class RedirectConfiguration {
     /**
      * @return resource path without .html extension
      */
-
     public static String normalizePath(String resourcePath) {
         int sep = resourcePath.lastIndexOf('.');
         if (sep != -1 && !resourcePath.startsWith("/content/dam/")) {
