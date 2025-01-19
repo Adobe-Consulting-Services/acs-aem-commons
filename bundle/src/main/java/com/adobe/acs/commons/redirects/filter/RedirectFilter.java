@@ -413,7 +413,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
             if (ext != null && config.preserveExtension() && !location.endsWith(ext)) {
-                location += "." + ext;
+                location = preserveExtension(location, ext);
             }
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
@@ -423,11 +423,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
             }
         }
         HandleQueryString pqs = getPreserveQueryString(match.getRule());
-        if (pqs != HandleQueryString.ignore) {
-            String queryString = slingRequest.getQueryString();
-            if (queryString != null) {
-                location = preserveQueryString(location, queryString, pqs == HandleQueryString.combine);
-            }
+        String queryString = slingRequest.getQueryString();
+        if (pqs != HandleQueryString.ignore && queryString != null) {
+            location = preserveQueryString(location, queryString, pqs == HandleQueryString.combine);
         }
         return location;
     }
@@ -441,6 +439,25 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
 
         return mode;
+    }
+
+    String preserveExtension(String location, String ext) {
+        int locationQueryIndex = location.indexOf('?');
+        String baseLocation;
+        String locationQuery;
+        if (locationQueryIndex != -1) {
+            baseLocation = location.substring(0, locationQueryIndex);
+            locationQuery = location.substring(locationQueryIndex + 1);
+        } else {
+            baseLocation = location;
+            locationQuery = null;
+        }
+        StringBuilder finalUrl = new StringBuilder(baseLocation);
+        finalUrl.append('.').append(ext);
+        if(locationQuery != null){
+            finalUrl.append('?').append(locationQuery);
+        }
+        return finalUrl.toString();
     }
 
     /**
