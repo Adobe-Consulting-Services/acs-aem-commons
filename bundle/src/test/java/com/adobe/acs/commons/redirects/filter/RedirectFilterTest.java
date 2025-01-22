@@ -19,6 +19,7 @@ package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
+import com.adobe.acs.commons.redirects.models.HandleQueryString;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.Redirects;
@@ -35,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.management.openmbean.TabularData;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -66,6 +68,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class RedirectFilterTest {
@@ -145,10 +149,10 @@ public class RedirectFilterTest {
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
         MockSlingHttpServletRequest request = context.request();
         int idx = resourcePath.lastIndexOf('.');
-        if (idx > 0) {
-            context.requestPathInfo().setExtension(resourcePath.substring(idx + 1));
-        }
         int qs = resourcePath.lastIndexOf('?');
+        if (idx > 0) {
+            context.requestPathInfo().setExtension(resourcePath.substring(idx + 1, qs == -1 ? resourcePath.length() : qs));
+        }
         if (qs > 0) {
             request.setQueryString(resourcePath.substring(qs + 1));
         }
@@ -369,20 +373,172 @@ public class RedirectFilterTest {
     }
 
     @Test
-    public void testPreserveQueryString() throws Exception {
-        withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build()
-        );
+    public void testPreserveQueryString() {
 
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2");
+        // Test combining query strings (combine = true)
+        assertEquals("/path?a=1&b=2",
+            filter.preserveQueryString("/path?a=1", "b=2", true));
+
+        // Test replacing query strings (combine = false)
+        assertEquals("/path?b=2",
+            filter.preserveQueryString("/path?a=1", "b=2", false));
+
+        // Test with fragment - combining
+        assertEquals("/path?a=1&b=2#section",
+            filter.preserveQueryString("/path?a=1#section", "b=2", true));
+
+        // Test with fragment - replacing
+        assertEquals("/path?b=2#section",
+            filter.preserveQueryString("/path?a=1#section", "b=2", false));
+
+        // Test empty request query - combining
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", "", true));
+
+        // Test empty request query - replacing (should keep original)
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", "", false));
+
+        // Test null request query - combining
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", null, true));
+
+        // Test null request query - replacing (should keep original)
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", null, false));
+
+        // Test complex combining
+        assertEquals("/path?a=1&b=2&c=3&d=4",
+            filter.preserveQueryString("/path?a=1&b=2", "c=3&d=4", true));
+
+        // Test complex replacing
+        assertEquals("/path?c=3&d=4",
+            filter.preserveQueryString("/path?a=1&b=2", "c=3&d=4", false));
+
+        // Test with fragment and multiple parameters - combining
+        assertEquals("/path?a=1&b=2&c=3#section",
+            filter.preserveQueryString("/path?a=1&b=2#section", "c=3", true));
+
+        // Test with fragment and multiple parameters - replacing
+        assertEquals("/path?c=3#section",
+            filter.preserveQueryString("/path?a=1&b=2#section", "c=3", false));
+    }
+
+    @Test
+    public void testPreserveQueryStringConfiguration() throws Exception{
+        withRules(
+                new RedirectResourceBuilder(context)
+                        // preserve query string is not set and inherited from the OSGi configuration
+                        .setSource("/test1")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.IGNORE.name())
+                        .setSource("/test2")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.REPLACE.name())
+                        .setSource("/test3")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
+                        .setSource("/test4")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build()
+
+        );
+        Resource resource = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, RedirectRule> rules = getRules(resource).stream()
+                .collect(Collectors.toMap(RedirectRule::getSource, r -> r));
+
+        assertEquals(true, filter.getConfiguration().preserveQueryString());
+        // inherited from the OSGi configuration, see the assert above
+        assertEquals(HandleQueryString.COMBINE, filter.getPreserveQueryString(rules.get("/test1")));
+
+        assertEquals(HandleQueryString.IGNORE, filter.getPreserveQueryString(rules.get("/test2")));
+        assertEquals(HandleQueryString.REPLACE, filter.getPreserveQueryString(rules.get("/test3")));
+        assertEquals(HandleQueryString.COMBINE, filter.getPreserveQueryString(rules.get("/test4")));
+    }
+
+
+    @Test
+    public void testCombineQueryString() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target/?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
 
         assertEquals(302, response.getStatus());
-        assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+        assertEquals("/target/?source=acs-commons&release=6.11&fbclid=blah&timestamp=12345", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testCombineQueryStringAndPreserveExtension() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(true);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/target.html?source=acs-commons&release=6.11&fbclid=blah&timestamp=12345", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testReplaceQueryString() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.REPLACE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target/?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/target/?fbclid=blah&timestamp=12345", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testIgnoreQueryString() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.IGNORE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target/?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/target/?source=acs-commons&release=6.11", response.getHeader("Location"));
+    }
+
+
+    @Test
+    public void testPreserveExtensionMethod() {
+
+        // Basic extension preservation
+        assertEquals("/content/page.html",
+            filter.preserveExtension("/content/page", "html"));
+
+        // With query string
+        assertEquals("/content/page.html?param=value",
+            filter.preserveExtension("/content/page?param=value", "html"));
+
     }
 
     @Test

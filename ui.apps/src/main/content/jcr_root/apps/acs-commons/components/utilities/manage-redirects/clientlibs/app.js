@@ -184,6 +184,7 @@
     var tags = tr.find(".tags").data("value");
     var cacheControlHeader = tr.find(".cacheControlHeader").data("value");
     var caseInsensitive = tr.find(".source").data("case-insensitive");
+    var preserveQueryString = tr.find(".target").data("preserve-query-string");
 
     var form = $("#editRuleDialog").find("form");
     form[0].reset();
@@ -217,6 +218,7 @@
     evalURI.click(function () {
       evalURI.val(evalURI.is(":checked"));
     });
+    $("#preserve-query-string-select-box").get(0).value = preserveQueryString;
 
     cpi.click(function () {
       cpi.val(cpi.is(":checked"));
@@ -501,4 +503,3 @@
     }
   );
 }($, $(document)));
-
