@@ -150,7 +150,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed", type = AttributeType.STRING)
         String[] paths() default {"/content"};
 
-        @AttributeDefinition(name = "Preserve Query String", description = "Deprecated. Since v6.11 you can manage handling query string in Redirect Properties.", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects. Since v6.11 you can manage handling query string in Redirect Properties.", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
         @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions. "
@@ -434,7 +434,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     HandleQueryString getPreserveQueryString(RedirectRule rule){
         HandleQueryString mode;
         if(rule.getPreserveQueryString() == null) {
-            mode = config.preserveQueryString() ? HandleQueryString.REPLACE : HandleQueryString.IGNORE;
+            mode = config.preserveQueryString() ? HandleQueryString.COMBINE : HandleQueryString.IGNORE;
         } else {
             mode = HandleQueryString.valueOf(rule.getPreserveQueryString());
         }

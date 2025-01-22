@@ -455,7 +455,7 @@ public class RedirectFilterTest {
 
         assertEquals(true, filter.getConfiguration().preserveQueryString());
         // inherited from the OSGi configuration, see the assert above
-        assertEquals(HandleQueryString.REPLACE, filter.getPreserveQueryString(rules.get("/test1")));
+        assertEquals(HandleQueryString.COMBINE, filter.getPreserveQueryString(rules.get("/test1")));
 
         assertEquals(HandleQueryString.IGNORE, filter.getPreserveQueryString(rules.get("/test2")));
         assertEquals(HandleQueryString.REPLACE, filter.getPreserveQueryString(rules.get("/test3")));
