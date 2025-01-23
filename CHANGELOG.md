@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- # - Redirect Manager: ensure redirect configurations are orderable
+
+## 6.10.0 - 2024-12-13
+
 ### Changed
 
 - #3494 - Remove offline instrumentation with Jacoco
