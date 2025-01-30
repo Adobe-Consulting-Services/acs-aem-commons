@@ -49,6 +49,7 @@ import java.util.Collection;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.*;
 
 public class ImportRedirectMapServletTest {
@@ -116,11 +117,13 @@ public class ImportRedirectMapServletTest {
         assertEquals("/content/1", rule1.getSource());
         assertEquals("/en/we-retail", rule1.getTarget());
         assertEquals(301, rule1.getStatusCode());
+        assertEquals("nt:unstructured", rules.get("/content/1").getValueMap().get(JCR_PRIMARYTYPE));
 
         RedirectRule rule2 = rules.get("/content/2").adaptTo(RedirectRule.class);
         assertEquals("/content/2", rule2.getSource());
         assertEquals("/en/we-retail", rule2.getTarget());
         assertEquals(302, rule2.getStatusCode());
+        assertEquals("nt:unstructured", rules.get("/content/2").getValueMap().get(JCR_PRIMARYTYPE));
 
         // read ImportLog from the output json and assert there were no issues
         ImportLog importLog = new ObjectMapper().readValue(response.getOutputAsString(), ImportLog.class);

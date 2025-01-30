@@ -67,6 +67,8 @@ import static com.adobe.acs.commons.redirects.filter.RedirectFilter.ACS_REDIRECT
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.SOURCE_PROPERTY_NAME;
 import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
 import static org.apache.sling.api.resource.ResourceResolver.PROPERTY_RESOURCE_TYPE;
 
 /**
@@ -145,6 +147,8 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         if (redirect == null) {
             // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
             props.put(JCR_MIXINTYPES, MIX_CREATED);
+            props.put(JCR_MIXINTYPES, MIX_CREATED);
+            props.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
             String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
             redirect = root.getResourceResolver().create(root, nodeName, props);
         } else {
