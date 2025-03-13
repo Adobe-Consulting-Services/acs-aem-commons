@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -79,6 +78,8 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
             + ".csv");
 
     Writer writer = null;
+    Csv csv = null;
+
     try {
       writer = response.getWriter();
 
@@ -86,7 +87,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       writer.write("\uFEFF");
 
       // initialize the csv
-      final Csv csv = new Csv();
+      csv = new Csv();
       csv.setFieldSeparatorWrite(delimiterConfiguration.getFieldDelimiter());
       csv.writeInit(writer);
 
@@ -106,14 +107,15 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
             log.warn("Unable to export report for configuration: {}", config);
           }
         }
-        csv.close();
       } else {
         throw new IOException("No configurations found for " + request.getResource());
       }
     } catch (ReportException e) {
       throw new ServletException("Exception extracting report to CSV", e);
     } finally {
-      IOUtils.closeQuietly(writer);
+      if (csv != null) {
+        csv.close();
+      }
     }
   }
 
