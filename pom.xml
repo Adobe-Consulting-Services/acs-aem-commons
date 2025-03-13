@@ -472,7 +472,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>10.0.2</version>
+                    <version>12.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -870,6 +870,9 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <suppressionFiles>
                                 <suppressionFile>dependency-check-maven-plugin-suppression.xml</suppressionFile>
                             </suppressionFiles>
+                            <!-- use the mirror provided by https://github.com/dependency-check/DependencyCheck_Builder which is updated daily -->
+                            <!-- compare with https://jeremylong.github.io/DependencyCheck/data/mirrornvd.html -->
+                            <nvdDatafeedUrl>https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/</nvdDatafeedUrl>
                         </configuration>
                     </plugin>
                 </plugins>
