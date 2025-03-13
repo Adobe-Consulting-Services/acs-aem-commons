@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3507 - Rewrite javascript clientlibs when used in link tags for preloading.
+
 ### Changed
 
 - #3494 - Remove offline instrumentation with Jacoco

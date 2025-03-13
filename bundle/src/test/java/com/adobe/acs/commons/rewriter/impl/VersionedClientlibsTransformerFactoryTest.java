@@ -323,6 +323,25 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testJavaScriptClientLibraryInLink() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testJavaScriptClientLibraryWithDot() throws Exception {
         final String path = PATH + ".foo";
 
