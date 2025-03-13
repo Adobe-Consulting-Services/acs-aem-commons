@@ -148,8 +148,6 @@ public class RedirectRule {
 
         source = source.trim();
         target = target.trim();
-        createdBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
-        modifiedBy = AuthorizableUtil.getFormattedName(resource.getResourceResolver(), modifiedBy);
 
         String regex = source;
         if (regex.endsWith("*")) {
@@ -187,11 +185,11 @@ public class RedirectRule {
     }
 
     public String getCreatedBy() {
-        return createdBy;
+        return AuthorizableUtil.getFormattedName(resource.getResourceResolver(), createdBy);
     }
 
     public String getModifiedBy() {
-        return modifiedBy;
+        return AuthorizableUtil.getFormattedName(resource.getResourceResolver(), modifiedBy);
     }
 
     public boolean getContextPrefixIgnored() {

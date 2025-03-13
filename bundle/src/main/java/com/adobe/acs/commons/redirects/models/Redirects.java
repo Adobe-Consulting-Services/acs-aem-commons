@@ -32,6 +32,7 @@ import javax.jcr.Session;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -39,7 +40,10 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
 
 /**
@@ -50,6 +54,8 @@ public class Redirects {
 
     public static final String CFG_PROP_CONTEXT_PREFIX = "contextPrefix";
     public static final String CFG_PROP_IGNORE_SELECTORS = "ignoreSelectors";
+    public static final String CFG_PROP_PAGE_SIZE = "pageSize";
+    private static final Logger log = LoggerFactory.getLogger(Redirects.class);
 
     @SlingObject
     private SlingHttpServletRequest request;
@@ -72,8 +78,7 @@ public class Redirects {
         ValueMap properties = configResource.getValueMap();
         contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
         ignoreSelectors = properties.get(Redirects.CFG_PROP_IGNORE_SELECTORS, false);
-
-        List<Resource> all = new ArrayList<>();
+        pageSize = properties.get(Redirects.CFG_PROP_PAGE_SIZE, 100);
 
         if (ArrayUtils.contains(request.getRequestPathInfo().getSelectors(), "search")) {
             // Search
@@ -85,9 +90,30 @@ public class Redirects {
             if (pg != null) {
                 pageNumber = Integer.parseInt(pg);
             }
-            configResource.listChildren().forEachRemaining(all::add);
+            List<Resource> all = readRedirects(configResource);
             pages = Lists.partition(all, pageSize);
         }
+    }
+
+    /**
+     * Read redirects stored in AEM
+     *
+     * @param configResource    the configuration resource, e.g. /conf/my-site/settings/redirects
+     * @return list of collected redirect resources
+     */
+    public static List<Resource> readRedirects(Resource configResource) {
+        long t0 = System.currentTimeMillis();
+        List<Resource> redirects = new ArrayList<>();
+        new AbstractResourceVisitor() {
+            @Override
+            public void visit(Resource res) {
+                if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
+                    redirects.add(res);
+                }
+            }
+        }.accept(configResource);
+        log.debug("Read {} redirects from {} in {}ms", redirects.size(), configResource.getPath(), System.currentTimeMillis() - t0);
+        return redirects;
     }
 
     public List<Resource> getItems() {

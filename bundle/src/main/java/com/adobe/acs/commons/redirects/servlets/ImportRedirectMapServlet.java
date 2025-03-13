@@ -54,9 +54,10 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -66,7 +67,10 @@ import java.util.UUID;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.ACS_REDIRECTS_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.SOURCE_PROPERTY_NAME;
+import static com.adobe.acs.commons.redirects.models.Redirects.readRedirects;
 import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
 import static org.apache.sling.api.resource.ResourceResolver.PROPERTY_RESOURCE_TYPE;
 
 /**
@@ -86,6 +90,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     private static final String MIX_CREATED = "mix:created";
     private static final String MIX_LAST_MODIFIED = "mix:lastModified";
     private static final String AUDIT_LOG_FOLDER = "/var/acs-commons/redirects";
+    private static final int SHARD_SIZE = 1000;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -94,13 +99,23 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         response.setContentType("application/json");
 
         String path = request.getParameter("path");
+        boolean replace = request.getParameter("replace") != null;
         Resource storageRoot = request.getResourceResolver().getResource(path);
         log.debug("Updating redirect maps at {}", storageRoot.getPath());
-        Map<String, Resource> jcrRules = getRules(storageRoot); // rules stored in crx
+        Map<String, Resource> jcrRules;
+        if(replace){
+            jcrRules = Collections.emptyMap();
+            for(Resource ch : storageRoot.getChildren()){
+                ch.getResourceResolver().delete(ch);
+            }
+        } else {
+            jcrRules = getRules(storageRoot); // rules stored in crx
+        }
+
         ImportLog auditLog = new ImportLog();
         Collection<Map<String, Object>> xlsRules;
         try (InputStream is = getFile(request)) {
-            xlsRules = readEntries(is, auditLog); // rules read from excel
+            xlsRules = readEntries(is, auditLog); // rules read from Excel
         }
         if (!xlsRules.isEmpty()) {
             update(storageRoot, xlsRules, jcrRules);
@@ -114,30 +129,51 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
      * @return redirect nodes keyed by source path
      */
     Map<String, Resource> getRules(Resource resource) {
-        Map<String, Resource> rules = new LinkedHashMap<>();
-        for (Resource res : resource.getChildren()) {
-            if (res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
-                String src = res.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
-                rules.put(src, res);
-            }
+        List<Resource> redirects = readRedirects(resource);
+        Map<String, Resource> rulesByPathMap = new LinkedHashMap<>();
+        for(Resource res : redirects){
+            String src = res.getValueMap().get(SOURCE_PROPERTY_NAME, String.class);
+            rulesByPathMap.put(src, res);
         }
-        return rules;
+        return rulesByPathMap;
     }
 
     /**
-     * @param root         root resource, e.g. /conf/global/settings/redirects
-     * @param xlsRules     redirects read from an Excel spreadsheet
-     * @param jcrRedirects existing redirect nodes keyed by the source path.
-     *                     We assume that the source path is unique.
+     * @param root              root resource, e.g. /conf/global/settings/redirects
+     * @param xlsRedirects      redirects read from an Excel spreadsheet
+     * @param jcrRedirects      existing redirect nodes keyed by the source path.
+     *   We assume that the source path is unique.
      */
-    void update(Resource root, Collection<Map<String, Object>> xlsRules, Map<String, Resource> jcrRedirects) throws PersistenceException {
+    void update(Resource root, Collection<Map<String, Object>> xlsRedirects, Map<String, Resource> jcrRedirects) throws PersistenceException {
         ResourceResolver resolver = root.getResourceResolver();
-        for (Map<String, Object> props : xlsRules) {
-            String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
-            Resource redirect = getOrCreateRedirect(root, sourcePath, props, jcrRedirects);
-            log.debug("rule: {}", redirect.getPath());
+        long t0 = System.currentTimeMillis();
+
+        if(xlsRedirects.size() > SHARD_SIZE){
+            int count = 0;
+            for (Map<String, Object> props : xlsRedirects) {
+                count++;
+
+                String shardName = "shard-" + count / SHARD_SIZE;
+                String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
+                Resource shard = root.getChild(shardName);
+                if(shard == null){
+                    shard = resolver.create(root, shardName, Collections.singletonMap(JCR_PRIMARYTYPE, NT_UNSTRUCTURED));
+                }
+                Resource redirect = getOrCreateRedirect(shard, sourcePath, props, jcrRedirects);
+                log.trace("rule[{}]: {}", count, redirect.getPath());
+                if(count % SHARD_SIZE == 0) {
+                    resolver.commit();
+                }
+            }
+        } else {
+            for (Map<String, Object> props : xlsRedirects) {
+                String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
+                Resource redirect = getOrCreateRedirect(root, sourcePath, props, jcrRedirects);
+                log.trace("rule: {}", redirect.getPath());
+            }
+            resolver.commit();
         }
-        resolver.commit();
+        log.debug("{} rules imported in {}ms", xlsRedirects.size(), System.currentTimeMillis() - t0);
     }
 
     private Resource getOrCreateRedirect(Resource root, String sourcePath, Map<String, Object> props, Map<String, Resource> jcrRedirects) throws PersistenceException {
@@ -145,6 +181,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         if (redirect == null) {
             // add mix:created, AEM will initialize jcr:created and jcr:createdBy from the current session
             props.put(JCR_MIXINTYPES, MIX_CREATED);
+            props.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
             String nodeName = ResourceUtil.createUniqueChildName(root, "redirect-rule-");
             redirect = root.getResourceResolver().create(root, nodeName, props);
         } else {
@@ -225,21 +262,21 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         Map<String, Object> props = new HashMap<>();
         props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
         Cell c0 = row.getCell(0);
-        if (c0 == null || c0.getCellType() != CellType.STRING) {
+        if (c0 == null || c0.getCellType() != CellType.STRING || c0.toString().isEmpty()) {
             auditLog.warn(new CellReference(row.getRowNum(), 0).formatAsString(),
-                    "Cells A is required and should contain redirect source");
+                    "Cell A is required and should contain redirect source");
             return null;
         }
         Cell c1 = row.getCell(1);
-        if (c1 == null || c1.getCellType() != CellType.STRING) {
+        if (c1 == null || c1.getCellType() != CellType.STRING || c1.toString().isEmpty()) {
             auditLog.warn(new CellReference(row.getRowNum(), 1).formatAsString(),
-                    "Cells B is required and should contain redirect source");
+                    "Cell B is required and should contain redirect source");
             return null;
         }
         Cell c2 = row.getCell(2);
         if (c2 == null || c2.getCellType() != CellType.NUMERIC) {
             auditLog.warn(new CellReference(row.getRowNum(), 2).formatAsString(),
-                    "Cells C is required and should contain redirect status code");
+                    "Cell C is required and should contain redirect status code");
             return null;
         }
         String source = c0.getStringCellValue();

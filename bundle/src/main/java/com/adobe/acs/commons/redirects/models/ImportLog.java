@@ -80,7 +80,7 @@ public class ImportLog {
         }
     }
 
-    enum Level {
+    public enum Level {
         WARN,
         INFO
     }
