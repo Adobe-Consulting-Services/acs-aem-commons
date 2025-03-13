@@ -25,6 +25,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3507 - Rewrite javascript clientlibs when used in link tags for preloading.
 
+### Fixed
+
+- # - Redirect Manager: ensure redirect configurations are orderable
+
+## 6.10.0 - 2024-12-13
+
 ### Changed
 
 - #3494 - Remove offline instrumentation with Jacoco
