@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+- #3539 - Fixed NPE issue in AcsCommonsConsoleAuthoringUIModeFilter, if cq-authoring-mode cookie is missing
+
 ### Changed
 
 - #3494 - Remove offline instrumentation with Jacoco
@@ -21,11 +23,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 6.9.10 - 2024-12-13
 
-### Added 
+### Added
+
 - #3484 - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
 - #3480 - AEM Sites Copy Publish URLs
 
 ### Fixed
+
 - #3479 - Fixed Configurations Model for Redirect Manager after change in "redirect" resource as "sling:Folder"
 - #3483 - Fixed issue with genericlist/body.jsp importing a class from an impl package.
 
