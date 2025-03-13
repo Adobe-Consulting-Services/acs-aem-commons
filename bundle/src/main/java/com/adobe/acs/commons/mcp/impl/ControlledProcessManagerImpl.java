@@ -209,7 +209,10 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
             TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
             visitor.setLeafVisitor((r, l) -> {
                 if (!activeProcesses.containsKey(r.getName())) {
-                    processes.add(r.adaptTo(ArchivedProcessInstance.class));
+                    ArchivedProcessInstance inst = r.adaptTo(ArchivedProcessInstance.class);
+                    if (inst != null) {
+                        processes.add(inst);
+                    }
                 }
             });
             visitor.accept(tree);
