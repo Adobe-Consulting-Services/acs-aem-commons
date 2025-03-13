@@ -79,7 +79,7 @@ public class AcsCommonsConsoleAuthoringUIModeFilter implements Filter {
 
                 // Add cookie if not existing (or forced) for performance reason,
                 // as it will avoid to look for user preferences next time
-                if ((authoringModeCookie == null || !authoringModeCookie.getValue().equals(AuthoringUIMode.TOUCH.name())) && !slingResponse.isCommitted()) {
+                if ((authoringModeCookie == null || authoringModeCookie.getValue() == null || !authoringModeCookie.getValue().equals(AuthoringUIMode.TOUCH.name())) && !slingResponse.isCommitted()) {
                     authoringModeCookie = new Cookie(WCM_AUTHORING_MODE_COOKIE, AuthoringUIMode.TOUCH.name());
                     authoringModeCookie.setPath(slingRequest.getContextPath() + "/etc/acs-commons");
                     authoringModeCookie.setMaxAge(60 * 60 * 24 * 7); // 7 days
