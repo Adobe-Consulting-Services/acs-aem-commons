@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
- ## 6.10.2 - 2025-03-14
+ ## 6.11.0 - 2025-03-14
 
 ### Changed
 - #3501 Redirect Manager: Large-Scale Import Optimization
