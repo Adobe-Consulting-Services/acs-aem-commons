@@ -9,29 +9,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
- 
-- ### Added
-#3501 Redirect Manager: Large-Scale Import Optimization
 
-### Fixed
-- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+ ## 6.10.2 - 2025-03-14
 
-## 6.10.0 - 2024-12-13
-
-### Fixed
-- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
-
-## 6.10.0 - 2024-12-13
-
+### Changed
+- #3501 Redirect Manager: Large-Scale Import Optimization
 - #3507 - Rewrite javascript clientlibs when used in link tags for preloading.
 
 ### Fixed
-
-- # - Redirect Manager: ensure redirect configurations are orderable
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+- #3539 - Fixed NPE issue in AcsCommonsConsoleAuthoringUIModeFilter, if cq-authoring-mode cookie is missing
+- Redirect Manager: ensure redirect configurations are orderable
 
 ## 6.10.0 - 2024-12-13
-
-- #3539 - Fixed NPE issue in AcsCommonsConsoleAuthoringUIModeFilter, if cq-authoring-mode cookie is missing
 
 ### Changed
 
