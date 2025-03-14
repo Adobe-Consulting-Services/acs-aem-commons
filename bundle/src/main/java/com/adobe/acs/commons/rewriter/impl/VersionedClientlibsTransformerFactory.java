@@ -127,8 +127,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         boolValue = DEFAULT_ENFORCE_MD5)
     private static final String PROP_ENFORCE_MD5 = "enforce.md5";
 
-    private static final String ATTR_JS_PATH = "src";
-    private static final String ATTR_CSS_PATH = "href";
+    private static final String ATTR_SRC = "src";
+    private static final String ATTR_HREF = "href";
 
     private static final String MIN_SELECTOR = "min";
     private static final String MIN_SELECTOR_SEGMENT = "." + MIN_SELECTOR;
@@ -197,12 +197,13 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private Attributes versionClientLibs(final String elementName, final Attributes attrs, final SlingHttpServletRequest request) {
         if (SaxElementUtils.isCss(elementName, attrs)) {
-            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
-                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, request);
+            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_HREF),
+                    attrs.getValue("", ATTR_HREF), LibraryType.CSS, request);
 
         } else if (SaxElementUtils.isJavaScript(elementName, attrs)) {
-            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
-                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, request);
+            String attributeName = StringUtils.equals(elementName, "script") ? ATTR_SRC : ATTR_HREF;
+            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", attributeName),
+                    attrs.getValue("", attributeName), LibraryType.JS, request);
 
         } else {
             return attrs;

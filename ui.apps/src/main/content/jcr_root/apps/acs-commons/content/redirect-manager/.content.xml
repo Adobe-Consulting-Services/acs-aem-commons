@@ -398,6 +398,12 @@
                             name="./fulltextSearchEnabled"
                             uncheckedValue="{Boolean}false"
                             value="{Boolean}true"/>
+                    <pageSize
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/numberfield"
+                        emptyText="100"
+                        fieldLabel="Number of redirects to display per page"
+                        name="./pageSize"/>
                     <cache-control-headers
                             jcr:primaryType="nt:unstructured"
                             jcr:title="Default Cache Control Headers"

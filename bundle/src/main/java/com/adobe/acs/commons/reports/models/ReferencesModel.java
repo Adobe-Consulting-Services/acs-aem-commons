@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 public class ReferencesModel implements ReportCellCSVExporter {
     private static final Logger log = LoggerFactory.getLogger(ReferencesModel.class);
 
-    @ValueMapValue
     @OSGiService
     private ReferenceAggregator aggregator;
 

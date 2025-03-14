@@ -164,8 +164,8 @@
                 <coral-panel class="coral-Well">
                     <section>
                         <h2 class="coral-Heading coral-Heading--2">Export Redirect Map</h2>
-                        <p>Export combined redirect map into Excel spreadsheet. You can edit it offline and upload the redirect configurations using the Import option.</p>
-                        <form action="${resource.path}.export.html" method="get" class="coral-Form--aligned">
+                        <p>Export redirects to Excel for offline editing. Use the Import option to upload modified redirect configurations.</p>
+                        <form action="${resource.path}.export.csv" method="get" class="coral-Form--aligned">
                             <input type="hidden" name="path" value="${context.redirectResource.path}" />
                             <div class="coral-Form-fieldwrapper">
                                 <button class="coral-Button coral-Button--primary  cq-dialog-download" icon="fileExcel" is="coral-button" variant="primary">Export Redirect Map</button>
@@ -176,14 +176,19 @@
                 <coral-panel class="coral-Well">
                     <section>
                         <h2 class="coral-Heading coral-Heading--2">Import Redirect Map</h2>
-                        <p>The redirect map file will be combined with the redirects configured in AEM to create the final set of redirects. This file should be a spreadsheet file with the first column containing the source path, the second column containing the redirect destination and the third column containing the redirect status code.</p>
+                        <p>Excel Spreadsheet must include three columns: source path, destination path, and HTTP status code.</p>
                         <form action="${resource.path}.import.html" method="post" class="coral-Form--aligned" enctype="multipart/form-data" >
                             <input type="hidden" name="path" value="${context.redirectResource.path}" />
                             <div class="coral-Form-fieldwrapper">
-                                <label class="coral-Form-fieldlabel" id="label-vertical-inputgroup-2"> Excel Spreadsheet With Redirects * </label>
+                                <label class="coral-Form-fieldlabel" id="label-vertical-inputgroup-2"> Excel Spreadsheet or CSV file with Redirects * </label>
                                 <div class="coral-InputGroup coral-Form-field">
-                                    <input is="coral-Textfield" class="coral-InputGroup-input coral3-Textfield" id="acs-redirect-import-ctrl" type="file" name="./redirects.redirectmap.xlsx" accept=".xlsx" />
+                                    <input is="coral-Textfield" class="coral-InputGroup-input coral3-Textfield" id="acs-redirect-import-ctrl" type="file" name="./redirects.redirectmap.xlsx" accept=".xlsx,.csv" />
                                 </div>
+                            </div>
+                            <div class="coral-Form-fieldwrapper">
+                                <coral-checkbox name="replace" value="true" class="coral-Form-field">
+                                    Replace Mode. When enabled, overwrites existing redirects in AEM. When disabled, combines with AEM's existing redirects.
+                                </coral-checkbox>
                             </div>
                             <div class="coral-Form-fieldwrapper">
                                 <button class="coral-Button  acs-redirects-form-import" icon="fileExcel" is="coral-button" variant="primary">Import Redirect Map</button>

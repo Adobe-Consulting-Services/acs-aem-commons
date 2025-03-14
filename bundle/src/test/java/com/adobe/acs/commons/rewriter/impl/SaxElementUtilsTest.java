@@ -95,6 +95,12 @@ public class SaxElementUtilsTest {
                         makeAtts(
                                 "src", "/js.js")));
 
+        assertTrue("JS in link Happy Path",
+                SaxElementUtils.isJavaScript("link",
+                        makeAtts(
+                                "href", "/js.js",
+                                "type", SaxElementUtils.JS_TYPE)));
+
         assertFalse("JS - not a link",
                 SaxElementUtils.isJavaScript("notscript",
                         makeAtts(

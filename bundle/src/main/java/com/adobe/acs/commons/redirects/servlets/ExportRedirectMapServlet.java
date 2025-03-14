@@ -27,9 +27,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -61,7 +61,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(ExportRedirectMapServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
 
-    static final String SPREADSHEETML_SHEET = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    static final String CONTENT_TYPE_EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -72,16 +72,17 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         log.debug("Requesting redirect maps from {}", path);
 
         Collection<RedirectRule> rules = RedirectFilter.getRules(root);
-        XSSFWorkbook wb = export(rules);
+        Workbook wb = export(rules);
 
-        response.setContentType(SPREADSHEETML_SHEET);
-        response.setHeader("Content-Disposition", "attachment;filename=\"acs-redirects.xlsx\" ");
+        response.setContentType(CONTENT_TYPE_EXCEL);
+        String fileName = root.getParent().getParent().getName() + "-redirects";
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + ".xlsx\" ");
         wb.write(response.getOutputStream());
     }
 
-    static XSSFWorkbook export(Collection<RedirectRule> rules) {
-        XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFCellStyle headerStyle = wb.createCellStyle();
+    static Workbook export(Collection<RedirectRule> rules) {
+        Workbook wb = new SXSSFWorkbook();
+        CellStyle headerStyle = wb.createCellStyle();
         headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         Font headerFont = wb.createFont();
