@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
+import com.adobe.acs.commons.redirects.models.HandleQueryString;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
@@ -150,7 +151,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed", type = AttributeType.STRING)
         String[] paths() default {"/content"};
 
-        @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects. Since v6.11 you can manage handling query string in Redirect Properties.", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
         @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions. "
@@ -185,7 +186,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
-    private boolean preserveQueryString;
     private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
     private Collection<String> exts = Collections.emptySet();
@@ -230,8 +230,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 String value = kv.substring(idx + 1).trim();
                 onDeliveryHeaders.add(new BasicHeader(name, value));
             }
-            preserveQueryString = config.preserveQueryString();
-            log.debug("exts: {}, paths: {}, rewriteUrls: {}",
+             log.debug("exts: {}, paths: {}, rewriteUrls: {}",
                     exts, paths, mapUrls);
             executor = Executors.newSingleThreadExecutor();
 
@@ -415,7 +414,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
             if (ext != null && config.preserveExtension() && !location.endsWith(ext)) {
-                location += "." + ext;
+                location = preserveExtension(location, ext);
             }
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
@@ -424,27 +423,104 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 location = urlAdjuster.adjust(slingRequest, location);
             }
         }
-        if (preserveQueryString) {
-            String queryString = slingRequest.getQueryString();
-            if (queryString != null) {
-                location = preserveQueryString(location, queryString);
-            }
+        HandleQueryString pqs = getPreserveQueryString(match.getRule());
+        String queryString = slingRequest.getQueryString();
+        if (pqs != HandleQueryString.IGNORE && queryString != null) {
+            location = preserveQueryString(location, queryString, pqs == HandleQueryString.COMBINE);
         }
         return location;
     }
 
-    String preserveQueryString(String location, String queryString){
-        int idx = location.indexOf('?');
-        if (idx == -1) {
-            idx = location.indexOf('#');
-        }
-        if (idx != -1) {
-            location = location.substring(0, idx);
+    HandleQueryString getPreserveQueryString(RedirectRule rule){
+        HandleQueryString mode;
+        if(rule.getPreserveQueryString() == null) {
+            mode = config.preserveQueryString() ? HandleQueryString.COMBINE : HandleQueryString.IGNORE;
+        } else {
+            mode = HandleQueryString.valueOf(rule.getPreserveQueryString());
         }
 
-        location += "?" + queryString;
+        return mode;
+    }
 
-        return location;
+    String preserveExtension(String location, String ext) {
+        int locationQueryIndex = location.indexOf('?');
+        String baseLocation;
+        String locationQuery;
+        if (locationQueryIndex != -1) {
+            baseLocation = location.substring(0, locationQueryIndex);
+            locationQuery = location.substring(locationQueryIndex + 1);
+        } else {
+            baseLocation = location;
+            locationQuery = null;
+        }
+        StringBuilder finalUrl = new StringBuilder(baseLocation);
+        finalUrl.append('.').append(ext);
+        if(locationQuery != null){
+            finalUrl.append('?').append(locationQuery);
+        }
+        return finalUrl.toString();
+    }
+
+    /**
+     * Handles query string preservation in redirects
+     * @param location The target location URL
+     * @param queryString The request's query string
+     * @param combine If true, combines query parameters from both sources; if false, request query string replaces target's query string
+     * @return The final URL with processed query string
+     */
+    String preserveQueryString(String location, String queryString, boolean combine) {
+        // Split location into base URL and query string (if any)
+        String baseLocation;
+        String locationQuery;
+        int locationQueryIndex = location.indexOf('?');
+        int fragmentIndex = location.indexOf('#');
+        if (locationQueryIndex != -1) {
+            baseLocation = location.substring(0, locationQueryIndex);
+            locationQuery = location.substring(locationQueryIndex + 1, fragmentIndex == -1 ? location.length() : fragmentIndex);
+        } else {
+            baseLocation = location;
+            locationQuery = null;
+        }
+
+        // Remove any fragment, store it for later
+        String fragment = "";
+        if (fragmentIndex != -1) {
+            fragment = location.substring(fragmentIndex);
+        }
+
+        // Handle query parameters based on combine flag
+        StringBuilder finalQuery = new StringBuilder();
+        if (combine) {
+            // Add location query parameters first
+            if (locationQuery != null && !locationQuery.isEmpty()) {
+                finalQuery.append(locationQuery);
+            }
+
+            // Add request query parameters
+            if (queryString != null && !queryString.isEmpty()) {
+                if (finalQuery.length() > 0) {
+                    finalQuery.append('&');
+                }
+                finalQuery.append(queryString);
+            }
+        } else {
+            // Replace with request query string if it exists
+            if (queryString != null && !queryString.isEmpty()) {
+                finalQuery.append(queryString);
+            } else if (locationQuery != null && !locationQuery.isEmpty()) {
+                // Keep location query if request query is empty
+                finalQuery.append(locationQuery);
+            }
+        }
+
+        // Build final URL
+        StringBuilder finalUrl = new StringBuilder(baseLocation);
+        if (finalQuery.length() > 0) {
+            finalUrl.append('?').append(finalQuery);
+        }
+        finalUrl.append(fragment);
+
+        return finalUrl.toString();
     }
 
     String mapUrl(String url, SlingHttpServletRequest slingRequest) {

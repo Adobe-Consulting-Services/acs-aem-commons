@@ -296,6 +296,28 @@
                                                         emptyText="Cache-Control header to return for this redirect, e.g. max-age=3600"
                                                         fieldLabel="Cache-Control Header "
                                                         name="./cacheControlHeader"/>
+                                                <preserveQueryString
+                                                        granite:class="preserveQueryString"
+                                                        granite:id="preserve-query-string-select-box"
+                                                        jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                        fieldLabel="How to handle query string in the request"
+                                                        name="./preserveQueryString">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <replace
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="Replace query string in the target with query string in the request"
+                                                                value="REPLACE"/>
+                                                        <combine
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="Combine query string in the target with query string in the request"
+                                                                value="COMBINE"/>
+                                                        <ignore
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="Ignore query string in the request"
+                                                                value="IGNORE"/>
+                                                     </items>
+                                                </preserveQueryString>
                                             </items>
                                         </column>
                                     </items>

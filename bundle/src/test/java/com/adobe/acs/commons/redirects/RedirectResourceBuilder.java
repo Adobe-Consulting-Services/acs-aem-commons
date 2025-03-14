@@ -135,6 +135,11 @@ public class RedirectResourceBuilder {
         return this;
     }
 
+    public RedirectResourceBuilder setPreserveQueryString(String value) {
+        props.put(PRESERVE_QUERY_STRING, value);
+        return this;
+    }
+
     public Resource build() throws PersistenceException {
         ContentBuilder cb = context.create();
         Resource configResource = ResourceUtil.getOrCreateResource(
