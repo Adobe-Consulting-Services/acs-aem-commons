@@ -34,6 +34,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
@@ -45,6 +46,7 @@ import java.util.List;
 
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
 
 @Component
 public class LastModifiedStrategy implements UpdateStrategy {
@@ -198,6 +200,15 @@ public class LastModifiedStrategy implements UpdateStrategy {
     void writeMetadata(JsonObjectBuilder jw, Resource res, SlingHttpServletRequest request) {
         jw.add("path", res.getPath());
         jw.add(JCR_PRIMARYTYPE, res.getValueMap().get(JCR_PRIMARYTYPE, String.class));
+
+        String[] mixins = res.getValueMap().get(JCR_MIXINTYPES, String[].class);
+        if(mixins != null){
+            JsonArrayBuilder mx = Json.createArrayBuilder();
+            for(String mixin : mixins){
+                mx.add(mixin);
+            }
+            jw.add(JCR_MIXINTYPES, mx.build());
+        }
 
         Resource jcrContent = res.getChild(JCR_CONTENT);
         String exportUri;
