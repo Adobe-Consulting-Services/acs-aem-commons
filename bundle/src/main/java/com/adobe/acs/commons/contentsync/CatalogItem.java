@@ -20,9 +20,11 @@
 package com.adobe.acs.commons.contentsync;
 
 
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
+import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
 
 /**
  * A Json object describing a resource to sync.
@@ -71,4 +73,17 @@ public class CatalogItem {
     public JsonObject getJsonObject(){
         return object;
     }
+
+    public String[] getMixins(){
+        JsonArray mixins = object.getJsonArray(JCR_MIXINTYPES);
+        if(mixins == null){
+            return new String[0];
+        }
+        String[] mixinArray = new String[mixins.size()];
+        for(int i = 0; i < mixins.size(); i++){
+            mixinArray[i] = mixins.getString(i);
+        }
+        return mixinArray;
+    }
+
 }

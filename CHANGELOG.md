@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
+- #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
 
  ## 6.11.0 - 2025-03-14
 
