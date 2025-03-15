@@ -256,7 +256,7 @@ public class ContentSync {
                 contentNode = parentNode.getNode(nodeName);
             } else {
                 contentNode = parentNode.addNode(nodeName, primaryType);
-                String mixins[] = catalogItem.getMixins();
+                String[] mixins = catalogItem.getMixins();
                 for (String mx : mixins) {
                     contentNode.addMixin(mx);
                 }
