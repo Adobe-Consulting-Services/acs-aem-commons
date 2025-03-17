@@ -63,6 +63,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockConstructionWithAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -280,6 +281,7 @@ public class TestContentSync {
         JsonObject catalogItem = Json.createObjectBuilder()
                 .add("path", "/content/dam/asset")
                 .add("exportUri", "/content/dam/asset/jcr:content.infinity.json")
+                .add("jcr:mixinTypes", Json.createArrayBuilder().add("mix:referenceable").build() )
                 .add("jcr:primaryType", "dam:Asset")
                 .build();
 
@@ -288,6 +290,7 @@ public class TestContentSync {
         contentSync.importData(new CatalogItem(catalogItem), sanitizedJson);
 
         Asset asset = context.resourceResolver().getResource("/content/dam/asset").adaptTo(Asset.class);
+        assertArrayEquals(new String[]{"mix:referenceable"}, asset.adaptTo(Resource.class).getValueMap().get("jcr:mixinTypes", String[].class));
 
         byte[] data = IOUtils.toByteArray(
                 asset.getOriginal().getStream()
@@ -299,6 +302,7 @@ public class TestContentSync {
         assertEquals("Adobe PDF library 15.00", asset.getMetadata("pdf:Producer"));
         assertEquals((long) 657, asset.getMetadata("tiff:ImageWidth"));
     }
+
 
     @Test
     public void testUpdateExistingAsset() throws Exception {
