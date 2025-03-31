@@ -32,12 +32,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import java.lang.invoke.MethodHandles;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -63,6 +63,7 @@ public class RedirectRule {
     public static final String CASE_INSENSITIVE_PROPERTY_NAME = "caseInsensitive";
     public static final String REDIRECT_RESOURCE_REQUEST_ATTRIBUTE = "redirectResource";
     public static final String PRESERVE_QUERY_STRING = "preserveQueryString";
+    public static final String SHARD_NAME_PREFIX = "shard-";
 
     @ValueMapValue
     private String source;
@@ -333,7 +334,9 @@ public class RedirectRule {
      * @return whether the redirect is published
      */
     public boolean isPublished() {
-        Calendar lastReplicated = resource.getParent().getValueMap().get("cq:lastReplicated", Calendar.class);
+        Calendar lastReplicated = isSharded()
+                ? Objects.requireNonNull(Objects.requireNonNull(resource.getParent()).getParent()).getValueMap().get("cq:lastReplicated", Calendar.class)
+                : Objects.requireNonNull(resource.getParent()).getValueMap().get("cq:lastReplicated", Calendar.class);
         boolean isPublished = lastReplicated != null;
         boolean modifiedAfterPublication = isPublished
                 && ((modified != null && modified.after(lastReplicated)) || (created != null && created.after(lastReplicated)));
@@ -342,6 +345,13 @@ public class RedirectRule {
 
     public String getPreserveQueryString() {
         return preserveQueryString;
+    }
+
+    /**
+     * @return whether the resource path contains {@link RedirectRule#SHARD_NAME_PREFIX}
+     */
+    public boolean isSharded() {
+        return resource.getPath().contains(SHARD_NAME_PREFIX);
     }
 
 }
