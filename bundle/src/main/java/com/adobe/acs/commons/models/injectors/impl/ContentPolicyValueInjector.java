@@ -34,7 +34,11 @@ import org.apache.sling.models.spi.Injector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +53,20 @@ import static com.adobe.acs.commons.util.impl.ReflectionUtil.convertValueMapValu
                 Constants.SERVICE_RANKING + ":Integer=5500"
         },
         service = Injector.class
-)
+        )
+@Designate(ocd=ContentPolicyValueInjector.Configuration.class)
 public class ContentPolicyValueInjector  implements Injector {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ContentPolicyValueInjector.class);
+
+    Configuration config;
+
+    @Activate
+    public void activate (Configuration c) {
+        this.config = c;
+        LOG.info("ContentPolicyValueInjector {}", config.enabled() ? "enabled": "disabled");
+    }
+
 
     @NotNull
     @Override
@@ -61,15 +77,25 @@ public class ContentPolicyValueInjector  implements Injector {
     @Nullable
     @Override
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element,
-                           DisposalCallbackRegistry callbackRegistry) {
-        ContentPolicy policy = getContentPolicy(adaptable);
+            DisposalCallbackRegistry callbackRegistry) {
+        if (!config.enabled()) {
+            return null;
+        }
 
+        ContentPolicy policy = getContentPolicy(adaptable);
         if(policy != null){
             return convertValueMapValue(policy.getProperties(), name, declaredType);
         }
-
         return null;
     }
 
+
+    @ObjectClassDefinition(name="ACS AEM Commons ContentPolicyValueInjector")
+    public @interface Configuration {
+
+        @AttributeDefinition(name="enabled")
+        public boolean enabled() default true;
+
+    }
 
 }
