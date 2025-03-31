@@ -32,7 +32,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import java.lang.invoke.MethodHandles;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -329,9 +334,9 @@ public class RedirectRule {
      * @return whether the redirect is published
      */
     public boolean isPublished() {
-        Calendar lastReplicated = isSharded() ?
-                Objects.requireNonNull(Objects.requireNonNull(resource.getParent()).getParent()).getValueMap().get("cq:lastReplicated", Calendar.class) :
-                Objects.requireNonNull(resource.getParent()).getValueMap().get("cq:lastReplicated", Calendar.class);
+        Calendar lastReplicated = isSharded()
+                ? Objects.requireNonNull(Objects.requireNonNull(resource.getParent()).getParent()).getValueMap().get("cq:lastReplicated", Calendar.class)
+                : Objects.requireNonNull(resource.getParent()).getValueMap().get("cq:lastReplicated", Calendar.class);
         boolean isPublished = lastReplicated != null;
         boolean modifiedAfterPublication = isPublished
                 && ((modified != null && modified.after(lastReplicated)) || (created != null && created.after(lastReplicated)));
