@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 - #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
+- #3536 Granite Include Obscures included Resource Type
 
  ## 6.11.0 - 2025-03-14
 
