@@ -22,6 +22,9 @@ package com.adobe.acs.commons.contentsync.servlet;
 import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
@@ -36,14 +39,20 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TOPIC;
+import static com.adobe.acs.commons.contentsync.TestUtils.getParameters;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestContentCatalogServlet {
     @Rule
@@ -51,19 +60,28 @@ public class TestContentCatalogServlet {
 
     private ContentCatalogServlet servlet;
     private UpdateStrategy updateStrategy;
+    private JobManager jobManager;
+    private Job job;
 
     @Before
     public void setUp() {
+
         updateStrategy = mock(UpdateStrategy.class);
+        jobManager = mock(JobManager.class);
+        job = mock(Job.class);
+        doReturn(UUID.randomUUID().toString()).when(job).getId();
+        doReturn(Job.JobState.QUEUED).when(job).getJobState();
+        doReturn(job).when(jobManager).addJob(eq(JOB_TOPIC), anyMap());
         context.registerService(UpdateStrategy.class, updateStrategy);
+        context.registerService(JobManager.class, jobManager);
         servlet = context.registerInjectActivateService(new ContentCatalogServlet());
     }
 
     @Test
-    public void testMissingRequiredParameters() throws IOException {
+    public void testMissingRequiredParameters() throws IOException, LoginException {
         doAnswer(invocation -> {
             throw new IllegalArgumentException("root request parameter is required");
-        }).when(updateStrategy).getItems(eq(context.request()));
+        }).when(updateStrategy).getItems(eq(getParameters(context.request())));
 
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
@@ -95,7 +113,7 @@ public class TestContentCatalogServlet {
     }
 
     @Test
-    public void testPageTree() throws IOException {
+    public void testPageTree() throws IOException, LoginException {
         doAnswer(invocation -> {
             List<CatalogItem> items = new ArrayList<>();
             JsonObject o1 = Json.createObjectBuilder()
@@ -109,7 +127,7 @@ public class TestContentCatalogServlet {
             items.add(new CatalogItem(o1));
             items.add(new CatalogItem(o2));
             return items;
-        }).when(updateStrategy).getItems(eq(context.request()));
+        }).when(updateStrategy).getItems(eq(getParameters(context.request())));
 
         MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("root", "/content/wknd");

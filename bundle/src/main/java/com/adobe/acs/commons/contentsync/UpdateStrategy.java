@@ -20,19 +20,25 @@
 package com.adobe.acs.commons.contentsync;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UpdateStrategy {
+
+    default List<CatalogItem> getItems(SlingHttpServletRequest request) {
+        throw new IllegalArgumentException("not implemented");
+    }
 
     /**
      * This method is called on the remote instance when Content Sync requests the list of resources to sync
      *
-     * @param request   the request from the Content Sync UI
+     * @param params   map with request parameters
      * @return  the list of resources to sync
      */
-    List<CatalogItem> getItems(SlingHttpServletRequest request);
+    List<CatalogItem> getItems(Map<String, Object> params) throws LoginException;
 
 
     /**

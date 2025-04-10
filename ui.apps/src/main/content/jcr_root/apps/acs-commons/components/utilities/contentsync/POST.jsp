@@ -19,6 +19,7 @@
 %><%@page session="false" contentType="text/html; charset=utf-8"
 	pageEncoding="UTF-8"
     import="
+    java.net.URI,
     java.util.List,
     java.util.Arrays,
     java.util.ArrayList,
@@ -35,6 +36,7 @@
     javax.jcr.Session,
 	javax.json.Json,
  	javax.json.JsonArray,
+ 	javax.json.JsonValue,
  	javax.json.JsonObject,
     org.apache.sling.jcr.contentloader.ContentImporter,
 	org.apache.sling.api.resource.ResourceUtil,
@@ -99,8 +101,21 @@
 
         println(printWriter, "building catalog from " + contentCatalog.getFetchURI(root, strategyPid, recursive) );
         out.flush();
+
+        String jobId = contentCatalog.startCatalogJob(root, strategyPid, recursive);
+
+        for( ;; ){
+            println(printWriter, "waiting for catalog to be ready...");
+            out.flush();
+            Thread.sleep(3000L);
+
+            if(contentCatalog.isComplete(jobId)){
+                break;
+            }
+        }
+        List<CatalogItem> remoteItems = contentCatalog.getResults();
         List<CatalogItem> catalog;
-        List<CatalogItem> remoteItems = contentCatalog.fetch(root, strategyPid, recursive);
+
         long t0 = System.currentTimeMillis();
         println(printWriter, remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
         if(incremental){

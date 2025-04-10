@@ -22,15 +22,20 @@ package com.adobe.acs.commons.contentsync.impl;
 import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.day.cq.dam.api.Asset;
-import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
@@ -38,6 +43,9 @@ import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 @Component
 public class AssetChecksumStrategy implements UpdateStrategy {
     private static final String DAM_SHA1 = "dam:sha1";
+
+    @Reference
+    ResourceResolverFactory resourceResolverFactory;
 
     @Override
     public boolean isModified(CatalogItem remoteResource, Resource localResource) {
@@ -48,25 +56,29 @@ public class AssetChecksumStrategy implements UpdateStrategy {
     }
 
     @Override
-    public List<CatalogItem> getItems(SlingHttpServletRequest request) {
-        String rootPath = request.getParameter("root");
+    public List<CatalogItem> getItems(Map<String, Object> request) throws LoginException {
+        String rootPath = (String)request.get("root");
         if (rootPath == null) {
             throw new IllegalArgumentException("root request parameter is required");
         }
-        String query = "SELECT * FROM [dam:Asset] AS s WHERE ISDESCENDANTNODE([" + rootPath + "]) ORDER BY s.[jcr:path]";
-        Iterator<Resource> it = request.getResourceResolver().findResources(query, "JCR-SQL2");
-        List<CatalogItem> items = new ArrayList<>();
-        while (it.hasNext()) {
-            Resource res = it.next();
-            Asset asset = res.adaptTo(Asset.class);
-            if(asset == null){
-                continue;
+        Map<String, Object> AUTH_INFO = new HashMap<>();
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+
+            String query = "SELECT * FROM [dam:Asset] AS s WHERE ISDESCENDANTNODE([" + rootPath + "]) ORDER BY s.[jcr:path]";
+            Iterator<Resource> it = resolver.findResources(query, "JCR-SQL2");
+            List<CatalogItem> items = new ArrayList<>();
+            while (it.hasNext()) {
+                Resource res = it.next();
+                Asset asset = res.adaptTo(Asset.class);
+                if (asset == null) {
+                    continue;
+                }
+                JsonObjectBuilder json = Json.createObjectBuilder();
+                writeMetadata(json, res);
+                items.add(new CatalogItem(json.build()));
             }
-            JsonObjectBuilder json = Json.createObjectBuilder();
-            writeMetadata(json, res);
-            items.add(new CatalogItem(json.build()));
+            return items;
         }
-        return items;
     }
 
     @Override
