@@ -131,9 +131,7 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
     Job submitJob(SlingHttpServletRequest request){
         Map<String, Object> jobProps = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> jobProps.put(key, value[0]));
-        return jobManager.createJob(JOB_TOPIC)
-                .properties(jobProps)
-                .add();
+        return jobManager.addJob(JOB_TOPIC, jobProps);
     }
 
     /**

@@ -32,14 +32,18 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TOPIC;
@@ -49,10 +53,12 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class TestContentCatalogServlet {
@@ -62,20 +68,39 @@ public class TestContentCatalogServlet {
     private ContentCatalogServlet servlet;
     private UpdateStrategy updateStrategy;
     private JobManager jobManager;
-    private Job job;
 
     @Before
     public void setUp() {
 
         updateStrategy = mock(UpdateStrategy.class);
         jobManager = mock(JobManager.class);
-        job = mock(Job.class);
-        doReturn(UUID.randomUUID().toString()).when(job).getId();
-        doReturn(Job.JobState.QUEUED).when(job).getJobState();
-        doReturn(job).when(jobManager).addJob(eq(JOB_TOPIC), anyMap());
         context.registerService(UpdateStrategy.class, updateStrategy);
         context.registerService(JobManager.class, jobManager);
         servlet = context.registerInjectActivateService(new ContentCatalogServlet());
+    }
+
+    @Test
+    public void testSubmitNewJob() throws Exception {
+
+        String jobId = "2025/4/10/test-job";
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.QUEUED);
+        when(jobManager.addJob(eq(JOB_TOPIC), anyMap())).thenReturn(job);
+
+        // Execute
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter("root", "/content/test");
+        MockSlingHttpServletResponse response = context.response();
+        servlet.doGet(request, response);
+
+        // Verify
+        assertEquals("application/json", response.getContentType());
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("QUEUED", result.getString("status"));
     }
 
     @Test

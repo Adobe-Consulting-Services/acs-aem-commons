@@ -496,9 +496,9 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                                 <requireMavenVersion>
                                     <version>3.6.3</version><!-- maven-shade-plugin 3.5.2 requires 3.6.3 -->
                                 </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>11</version>
-                                </requireJavaVersion>
+<!--                                <requireJavaVersion>-->
+<!--                                    <version>11</version>-->
+<!--                                </requireJavaVersion>-->
                             </rules>
                         </configuration>
                     </execution>
