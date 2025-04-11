@@ -23,6 +23,7 @@ import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -38,6 +39,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -101,6 +103,63 @@ public class TestContentCatalogServlet {
 
         assertEquals(jobId, result.getString("jobId"));
         assertEquals("QUEUED", result.getString("status"));
+    }
+
+    @Test
+    public void testGetActiveJobStatus() throws Exception {
+
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        // Setup
+        String jobId = "2025/4/10/test-job";
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.QUEUED);
+        when(jobManager.getJobById(jobId)).thenReturn(job);
+
+        request.addRequestParameter("jobId", jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.ACTIVE);
+
+        // Execute
+        servlet.doGet(request, response);
+
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("ACTIVE", result.getString("status"));
+    }
+
+    @Test
+    public void testGetCompletedJobResults() throws Exception {
+        MockSlingHttpServletRequest request = context.request();
+        MockSlingHttpServletResponse response = context.response();
+
+        // Setup
+        String jobId = "2025/4/10/test-job";
+        when(jobManager.getJobById(jobId)).thenReturn(null);
+
+        String resultsJson = "{\"resources\":[{\"path\":\"/content/test\",\"lastModified\":1234567890}]}";
+        request.addRequestParameter("jobId", jobId);
+
+        when(request.getParameter("jobId")).thenReturn(jobId);
+        when(jobManager.getJobById(jobId)).thenReturn(null); // Job completed
+
+        String resultsPath = ContentCatalogServlet.getJobResultsPath(jobId);
+        context.build().file(resultsPath, new ByteArrayInputStream(resultsJson.getBytes())).;
+
+        // Execute
+        servlet.doGet(request, response);
+
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("SUCCEEDED", result.getString("status"));
+        assertTrue(result.containsKey("resources"));
     }
 
     @Test
