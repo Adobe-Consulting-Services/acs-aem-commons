@@ -48,6 +48,7 @@ import javax.json.JsonWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -137,8 +138,9 @@ public class ContentCatalogJobConsumer implements JobExecutor {
      * Save results of a completed job into a nt:file node
      *
      * The path is determined by {@link ContentCatalogServlet#getJobResultsPath(String jobId)}
-      */
-    void save(JsonObject result, Job job) throws RepositoryException, LoginException, PersistenceException {
+     * @return  the path of the created nt:file node
+     */
+    String save(JsonObject result, Job job) throws RepositoryException, LoginException, PersistenceException {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try(JsonWriter out = Json.createWriter(bout)){
             out.writeObject(result);
@@ -149,8 +151,9 @@ public class ContentCatalogJobConsumer implements JobExecutor {
             String resultsParent = ResourceUtil.getParent(resultsPath);
             String resultsNode = ResourceUtil.getName(resultsPath);
             Node parentNode = JcrUtils.getOrCreateByPath(resultsParent, JcrConstants.NT_FOLDER, JcrConstants.NT_FOLDER, resolver.adaptTo(Session.class), false);
-            JcrUtils.putFile(parentNode, resultsNode, "application/json", new ByteArrayInputStream(bout.toByteArray()), null);
+            Node ntFile = JcrUtils.putFile(parentNode, resultsNode, "application/json", new ByteArrayInputStream(bout.toByteArray()), Calendar.getInstance());
             resolver.commit();
+            return ntFile.getPath();
         }
     }
 }

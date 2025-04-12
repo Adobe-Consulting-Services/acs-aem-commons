@@ -102,10 +102,10 @@
         println(printWriter, "building catalog from " + contentCatalog.getFetchURI(root, strategyPid, recursive) );
         out.flush();
 
+        long t0 = System.currentTimeMillis();
         String jobId = contentCatalog.startCatalogJob(root, strategyPid, recursive);
-
         for( ;; ){
-            println(printWriter, "waiting for catalog to be ready...");
+            println(printWriter, "collecting resources on the remote instance...");
             out.flush();
             Thread.sleep(3000L);
 
@@ -114,10 +114,9 @@
             }
         }
         List<CatalogItem> remoteItems = contentCatalog.getResults();
-        List<CatalogItem> catalog;
-
-        long t0 = System.currentTimeMillis();
         println(printWriter, remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
+
+        List<CatalogItem> catalog;
         if(incremental){
             catalog = contentCatalog.getDelta(remoteItems, resourceResolver, updateStrategy);
             println(printWriter, catalog.size() + " resource"+(catalog.size() == 1 ? "" : "s")+" modified");

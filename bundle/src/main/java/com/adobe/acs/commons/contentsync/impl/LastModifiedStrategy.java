@@ -196,6 +196,16 @@ public class LastModifiedStrategy implements UpdateStrategy {
         return servletName;
     }
 
+    /**
+     * Creates a fake SlingHttpServletRequest to pass to {@link  ServletResolver#resolveServlet(SlingHttpServletRequest)} .
+     *
+     * This trick is fine, as {@link  ServletResolver#resolveServlet(SlingHttpServletRequest)} only needs
+     * RequestPathInfo and request method and this data can be passed via a mocked request.
+     *
+     * @param resource  the .resource to export
+     * @param urlPath   the .json url to export the resource, e.g. /content/wknd/page/jcr:content.infinity.json
+     * @return fake http GET request
+     */
     SlingHttpServletRequest createFakeRequest(Resource resource, String urlPath){
         RequestProgressTracker progressTracker = (RequestProgressTracker) Proxy.newProxyInstance(
                 RequestProgressTracker.class.getClassLoader(),
