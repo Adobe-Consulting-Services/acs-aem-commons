@@ -91,8 +91,9 @@ import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TO
 })
 public class ContentCatalogServlet extends SlingSafeMethodsServlet {
 
-    static final String JOB_ID = "jobId";
-    static final String JOB_STATUS = "status";
+    public static final String JOB_ID = "jobId";
+    public static final String JOB_STATUS = "status";
+    public static final String JOB_RESOURCES = "resources";
 
     @Reference
     private JobManager jobManager;
@@ -120,7 +121,7 @@ public class ContentCatalogServlet extends SlingSafeMethodsServlet {
                 // finished job
                 result.add(JOB_STATUS, Job.JobState.SUCCEEDED.toString());
                 JsonObject results = getJobResults(request.getResourceResolver(), jobId);
-                result.add("resources", results.getJsonArray("resources"));
+                result.add(JOB_RESOURCES, results.getJsonArray(JOB_RESOURCES));
             }
         }
 

@@ -32,11 +32,12 @@ import org.osgi.service.component.annotations.Reference;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.SERVICE_NAME;
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
@@ -61,8 +62,8 @@ public class AssetChecksumStrategy implements UpdateStrategy {
         if (rootPath == null) {
             throw new IllegalArgumentException("root request parameter is required");
         }
-        Map<String, Object> AUTH_INFO = new HashMap<>();
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
 
             String query = "SELECT * FROM [dam:Asset] AS s WHERE ISDESCENDANTNODE([" + rootPath + "]) ORDER BY s.[jcr:path]";
             Iterator<Resource> it = resolver.findResources(query, "JCR-SQL2");

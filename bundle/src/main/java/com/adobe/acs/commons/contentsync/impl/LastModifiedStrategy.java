@@ -76,8 +76,8 @@ public class LastModifiedStrategy implements UpdateStrategy {
         }
         boolean nonRecursive = "false".equals(request.get("recursive"));
 
-        Map<String, Object> AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
 
             Resource root = resolver.getResource(rootPath);
             if (root == null) {

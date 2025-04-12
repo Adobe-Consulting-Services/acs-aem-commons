@@ -123,10 +123,6 @@ public class TestContentCatalogServlet {
 
     @Test
     public void testGetActiveJobStatus() throws Exception {
-
-        MockSlingHttpServletRequest request = context.request();
-        MockSlingHttpServletResponse response = context.response();
-
         // Setup
         String jobId = "2025/4/10/test-job";
         Job job = mock(Job.class);
@@ -134,10 +130,12 @@ public class TestContentCatalogServlet {
         when(job.getJobState()).thenReturn(Job.JobState.QUEUED);
         when(jobManager.getJobById(jobId)).thenReturn(job);
 
+        MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("jobId", jobId);
         when(job.getJobState()).thenReturn(Job.JobState.ACTIVE);
 
         // Execute
+        MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
         // Verify
@@ -150,14 +148,12 @@ public class TestContentCatalogServlet {
 
     @Test
     public void testGetCompletedJobResults() throws Exception {
-        MockSlingHttpServletRequest request = context.request();
-        MockSlingHttpServletResponse response = context.response();
-
         // Setup
         String jobId = "2025/4/10/test-job";
         when(jobManager.getJobById(jobId)).thenReturn(null);
 
         String resultsJson = "{\"resources\":[{\"path\":\"/content/test\",\"lastModified\":1234567890}]}";
+        MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("jobId", jobId);
 
         when(jobManager.getJobById(jobId)).thenReturn(null); // Job completed
@@ -168,6 +164,7 @@ public class TestContentCatalogServlet {
                 .file(ResourceUtil.getName(resultsPath), new ByteArrayInputStream(resultsJson.getBytes()));
 
         // Execute
+        MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
         // Verify

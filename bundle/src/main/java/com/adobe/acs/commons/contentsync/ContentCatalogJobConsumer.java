@@ -57,6 +57,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TOPIC;
+import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_RESOURCES;
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.getJobResultsPath;
 
 @Component(
@@ -105,7 +106,7 @@ public class ContentCatalogJobConsumer implements JobExecutor {
             }
 
             JsonObjectBuilder result = Json.createObjectBuilder();
-            result.add("resources", resources);
+            result.add(JOB_RESOURCES, resources);
             save(result.build(), job);
         } catch (Exception e) {
             log.error("content-sync job failed: {}", job.getId(), e);
@@ -113,6 +114,7 @@ public class ContentCatalogJobConsumer implements JobExecutor {
         }
         return context.result().succeeded();
     }
+
     /**
      * Get the strategy to build catalog.
      * If pid is null, the first available strategy is used.
@@ -146,8 +148,8 @@ public class ContentCatalogJobConsumer implements JobExecutor {
         try(JsonWriter out = Json.createWriter(bout)){
             out.writeObject(result);
         }
-        Map<String, Object> AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
             String resultsPath = getJobResultsPath(job.getId());
             String resultsParent = ResourceUtil.getParent(resultsPath);
             String resultsNode = ResourceUtil.getName(resultsPath);
