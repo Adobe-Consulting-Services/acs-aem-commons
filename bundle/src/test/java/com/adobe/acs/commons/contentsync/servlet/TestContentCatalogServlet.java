@@ -92,10 +92,6 @@ public class TestContentCatalogServlet {
 
     @Test
     public void testFailedJobHaveErrorMessage() throws Exception {
-
-        MockSlingHttpServletRequest request = context.request();
-        MockSlingHttpServletResponse response = context.response();
-
         // Setup
         String jobId = "2025/4/10/test-job";
         when(jobManager.getJobById(jobId)).thenReturn(null);
@@ -106,10 +102,12 @@ public class TestContentCatalogServlet {
         when(jobManager.getJobById(jobId)).thenReturn(job);
         when(jobManager.getJobById(jobId)).thenReturn(job);
 
+        MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("jobId", jobId);
         when(job.getJobState()).thenReturn(Job.JobState.ERROR);
 
         // Execute
+        MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
         // Verify
