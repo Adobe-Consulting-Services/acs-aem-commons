@@ -95,6 +95,7 @@ public class ContentCatalogJobConsumer implements JobExecutor {
         String pid = (String)job.getProperty("strategy");
         UpdateStrategy updateStrategy = getStrategy(pid);
         try {
+            log.debug("processing {}, pid: {}", job.getId(), pid);
             Map<String, Object> jobProperties = job.getPropertyNames().stream().collect(Collectors.toMap(Function.identity(), job::getProperty));
 
             List<CatalogItem> items = updateStrategy.getItems(jobProperties); // this can take time
@@ -152,6 +153,7 @@ public class ContentCatalogJobConsumer implements JobExecutor {
             String resultsNode = ResourceUtil.getName(resultsPath);
             Node parentNode = JcrUtils.getOrCreateByPath(resultsParent, JcrConstants.NT_FOLDER, JcrConstants.NT_FOLDER, resolver.adaptTo(Session.class), false);
             Node ntFile = JcrUtils.putFile(parentNode, resultsNode, "application/json", new ByteArrayInputStream(bout.toByteArray()), Calendar.getInstance());
+            log.debug(ntFile.getPath());
             resolver.commit();
             return ntFile.getPath();
         }

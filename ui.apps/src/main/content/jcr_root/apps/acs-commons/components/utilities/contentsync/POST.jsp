@@ -19,7 +19,6 @@
 %><%@page session="false" contentType="text/html; charset=utf-8"
 	pageEncoding="UTF-8"
     import="
-    java.net.URI,
     java.util.List,
     java.util.Arrays,
     java.util.ArrayList,
@@ -27,23 +26,17 @@
     java.util.Set,
     java.util.LinkedHashSet,
     java.util.stream.Collectors,
-    java.io.InputStream,
     java.io.IOException,
     java.io.Writer,
     java.io.StringWriter,
     java.io.PrintWriter,
-    java.io.ByteArrayInputStream,
     javax.jcr.Session,
-	javax.json.Json,
- 	javax.json.JsonArray,
- 	javax.json.JsonValue,
  	javax.json.JsonObject,
     org.apache.sling.jcr.contentloader.ContentImporter,
 	org.apache.sling.api.resource.ResourceUtil,
 	org.apache.commons.lang3.time.DurationFormatUtils,
     org.apache.commons.io.output.TeeWriter,
 	com.adobe.acs.commons.contentsync.*
-
 "%><%
 %>
 <html>

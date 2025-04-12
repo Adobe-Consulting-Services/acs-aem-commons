@@ -54,15 +54,19 @@ import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TO
  *    "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
  *    "status": "QUEUED"
  *  }
+ * </pre>
  *
  *  If jobId is provided, the status of the job is returned, and results if the job finished.
+ * <pre>
  *  {
  *    "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
  *    "status": "ACTIVE"
  *  }
+ * </pre>
  *
  *  or
  *
+ * <pre>
  *  {
  *   "jobId": "2025/4/10/16/20/6162a8e9-2f19-49d4-b733-9db7849e2b2d_127",
  *   "status": "SUCCEEDED",
@@ -76,6 +80,7 @@ import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TO
  *      }
  *    ]
  *  }
+ * </pre>
  *
  * </pre>
  */

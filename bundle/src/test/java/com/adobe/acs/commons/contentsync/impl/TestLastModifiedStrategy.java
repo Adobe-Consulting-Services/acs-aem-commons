@@ -36,13 +36,15 @@ import org.junit.Test;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.GenericServlet;
+import javax.servlet.ServletRequest;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.adobe.acs.commons.contentsync.TestUtils.getParameters;
 import static com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy.DEFAULT_GET_SERVLET;
 import static com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy.REDIRECT_SERVLET;
 import static org.junit.Assert.assertEquals;
@@ -246,6 +248,12 @@ public class TestLastModifiedStrategy {
 
         List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
+    }
+
+    private static Map<String, Object> getParameters(ServletRequest request){
+        Map<String, Object> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        return params;
     }
 
 }
