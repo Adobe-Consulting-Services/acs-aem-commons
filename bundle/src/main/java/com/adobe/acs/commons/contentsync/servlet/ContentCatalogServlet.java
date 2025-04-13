@@ -46,43 +46,47 @@ import java.util.Map;
 import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TOPIC;
 
 /**
- * Submits a catalog job or retrieve the results
+ * Submits a catalog job or retrieves job status and results.
  *
- * If jobId request parameter is not provided, a new job is submitted and the jobId is returned.
- * <pre>
- *  {
- *    "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
- *    "status": "QUEUED"
- *  }
- * </pre>
+ * This endpoint supports two modes of operation:
  *
- *  If jobId is provided, the status of the job is returned, and results if the job finished.
- * <pre>
- *  {
- *    "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
- *    "status": "ACTIVE"
- *  }
- * </pre>
+ * 1. Job Submission: When the 'jobId' request parameter is not provided, a new catalog
+ *    job is submitted to the queue and a response containing the new jobId is returned.
+ *    Example response:
+ *    <pre>
+ *    {
+ *      "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
+ *      "status": "QUEUED"
+ *    }
+ *    </pre>
  *
- *  or
+ * 2. Job Status/Results Retrieval: When a 'jobId' parameter is provided, the current
+ *    status of the job is returned. If the job is still processing, only status information
+ *    is included:
+ *    <pre>
+ *    {
+ *      "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
+ *      "status": "ACTIVE"
+ *    }
+ *    </pre>
  *
- * <pre>
- *  {
- *   "jobId": "2025/4/10/16/20/6162a8e9-2f19-49d4-b733-9db7849e2b2d_127",
- *   "status": "SUCCEEDED",
- *   "resources": [
- *     {
- *       "path": "/content/test",
- *       "jcr:primaryType": "cq:Page",
- *        "exportUri": "/content/test/jcr:content.infinity.json",
- *       "lastModified": 1735828312154,
- *       "lastModifiedBy": "john.doe@test.com"
- *      }
- *    ]
- *  }
- * </pre>
+ *    If the job has completed successfully, the response includes the job results:
+ *    <pre>
+ *    {
+ *      "jobId": "2025/4/10/16/20/6162a8e9-2f19-49d4-b733-9db7849e2b2d_127",
+ *      "status": "SUCCEEDED",
+ *      "resources": [
+ *        {
+ *          "path": "/content/test",
+ *          "jcr:primaryType": "cq:Page",
+ *          "exportUri": "/content/test/jcr:content.infinity.json",
+ *          "lastModified": 1735828312154,
+ *          "lastModifiedBy": "john.doe@test.com"
+ *        }
+ *      ]
+ *    }
+ *    </pre>
  *
- * </pre>
  */
 @Component(service = Servlet.class, immediate = true, property = {
         "sling.servlet.extensions=json",

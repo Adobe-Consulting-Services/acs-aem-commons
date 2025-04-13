@@ -60,6 +60,10 @@ import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TO
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_RESOURCES;
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.getJobResultsPath;
 
+/**
+ * Execute a Sling job to build a content catalog.
+ * The jobs are created by {@link ContentCatalogServlet}
+ */
 @Component(
         service = JobExecutor.class,
         property = {

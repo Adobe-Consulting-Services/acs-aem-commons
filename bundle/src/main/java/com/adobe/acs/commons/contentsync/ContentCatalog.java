@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -56,7 +57,7 @@ public class ContentCatalog {
     }
 
     /**
-     * Gets the URI to fetch the catalog.
+     * Gets the URI to {@link ContentCatalogServlet} to submit a catalog job.
      *
      * @param path the path to fetch the catalog for
      * @param updateStrategy the update strategy to use
@@ -69,6 +70,12 @@ public class ContentCatalog {
                 updateStrategy, "recursive", String.valueOf(recursive));
     }
 
+    /**
+     * Gets the URI to {@link ContentCatalogServlet} to check the status of a catalog job.
+     *
+     * @param jobId the job ID to check the status for
+     * @return  whether the job is complete
+     */
     public URI getStatusCatalogJobURI(String jobId) throws URISyntaxException {
         return remoteInstance.toURI(catalogServlet, JOB_ID, jobId);
     }
@@ -87,6 +94,14 @@ public class ContentCatalog {
         }
     }
 
+    /**
+     * Send a request to to {@link ContentCatalogServlet} to start a catalog job.
+     *
+     * @param path the path to fetch the catalog for
+     * @param updateStrategy the update strategy to use
+     * @param recursive whether to fetch recursively
+     * @return jobId
+     */
     public String startCatalogJob(String path, String updateStrategy, boolean recursive) throws IOException, URISyntaxException {
         URI uri = getStartCatalogJobURI(path, updateStrategy, recursive);
         JsonObject json = remoteInstance.getJson(uri);
@@ -94,6 +109,14 @@ public class ContentCatalog {
         return json.containsKey(JOB_ID) ? json.getString(JOB_ID) : null;
     }
 
+    /**
+     * Send a request to to {@link ContentCatalogServlet} to check the status of a catalog job.
+     * If the job is complete, the results are saved in the internal state and can be further
+     * obtained nu {@link #getResults()}.
+     *
+     * @param jobId jobId returned by {@link #startCatalogJob(String, String, boolean)}
+     * @return  whether the job is complete
+     */
     public boolean isComplete(String jobId) throws IOException, URISyntaxException {
         if(results != null) {
             return true;
@@ -105,8 +128,30 @@ public class ContentCatalog {
         return results != null;
     }
 
+    /**
+      * @return  results of the completed catalog job
+     */
     public List<CatalogItem> getResults() {
         return results;
+    }
+
+    /**
+     * Gets the delta between the catalog items and the resources in the resource resolver.
+     *
+     * @param catalog the list of catalog items
+     * @param resourceResolver the resource resolver to check against
+     * @param updateStrategy the update strategy to use
+     * @return a list of catalog items that are modified or not present in the resource resolver
+     */
+    public List<CatalogItem> getDelta(List<CatalogItem> catalog, ResourceResolver resourceResolver, UpdateStrategy updateStrategy) {
+        List<CatalogItem> lst = new ArrayList<>();
+        for(CatalogItem item : catalog){
+            Resource resource = resourceResolver.getResource(item.getPath());
+            if(resource == null || updateStrategy.isModified(item, resource)){
+                lst.add(item);
+            }
+        }
+        return lst;
     }
 
     /**
@@ -171,25 +216,6 @@ public class ContentCatalog {
                 .map(JsonValue::asJsonObject)
                 .map(CatalogItem::new)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Gets the delta between the catalog items and the resources in the resource resolver.
-     *
-     * @param catalog the list of catalog items
-     * @param resourceResolver the resource resolver to check against
-     * @param updateStrategy the update strategy to use
-     * @return a list of catalog items that are modified or not present in the resource resolver
-     */
-    public List<CatalogItem> getDelta(List<CatalogItem> catalog, ResourceResolver resourceResolver, UpdateStrategy updateStrategy) {
-        List<CatalogItem> lst = new ArrayList<>();
-        for(CatalogItem item : catalog){
-            Resource resource = resourceResolver.getResource(item.getPath());
-            if(resource == null || updateStrategy.isModified(item, resource)){
-                lst.add(item);
-            }
-        }
-        return lst;
     }
 
 }
