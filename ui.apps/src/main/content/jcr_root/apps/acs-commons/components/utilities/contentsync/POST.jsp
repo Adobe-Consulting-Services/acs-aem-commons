@@ -160,8 +160,13 @@
                     }
 
                     println(printWriter, "\timporting data");
-                    contentSync.importData(item, sanitizedJson);
-
+                    try {
+                        contentSync.importData(item, sanitizedJson);
+                    } catch (RepositoryException e){
+                        error(out, e);
+                        resourceResolver.revert();
+                        continue;
+                    }
                     if(!binaryProperties.isEmpty()){
                         println(printWriter, "\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
                         boolean contentResource = item.hasContentResource();
