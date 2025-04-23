@@ -120,7 +120,7 @@
                 }
             }
         } catch (Exception ignored) {
-            log.debug("Ignored exception occurred while checking iscurrentusermemberof.jsp isUserMemberOf(authorizable, groups)", ignored.getMessage());
+            // log.debug("Ignored exception occurred while checking iscurrentusermemberof.jsp isUserMemberOf(authorizable, groups)", ignored.getMessage());
         }
 
         return false;
