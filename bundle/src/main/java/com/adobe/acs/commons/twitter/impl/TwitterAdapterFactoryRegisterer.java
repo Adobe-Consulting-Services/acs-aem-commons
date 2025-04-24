@@ -17,10 +17,7 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
@@ -33,7 +30,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 @Component(metatype = true, label = "ACS AEM Commons - Twitter Client Adapter Factory",
-    description = "Adapter Factory to generate TwitterClient objects.", configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory")
+    description = "Adapter Factory to generate TwitterClient objects.", configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory",
+    policy = ConfigurationPolicy.REQUIRE)
 public class TwitterAdapterFactoryRegisterer {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
