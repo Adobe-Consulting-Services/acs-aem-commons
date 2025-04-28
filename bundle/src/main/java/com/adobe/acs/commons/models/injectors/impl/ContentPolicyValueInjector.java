@@ -62,7 +62,7 @@ public class ContentPolicyValueInjector  implements Injector {
     Configuration config;
 
     @Activate
-    public void activate (Configuration c) {
+    public void activate(Configuration c) {
         this.config = c;
         LOG.info("ContentPolicyValueInjector {}", config.enabled() ? "enabled": "disabled");
     }
