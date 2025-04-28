@@ -378,7 +378,7 @@
                   searching = true; // Set searching flag to true
                   table.removeAttr("orderable");
 
-                   var url = "/apps/acs-commons/content/redirect-manager.search.html" + caconfig + "?term=" + searchText;
+                   var url = "/apps/acs-commons/content/redirect-manager.search.html" + caconfig + "?term=" + encodeURIComponent(searchText);
                   // Perform AJAX request for search
                   $.ajax(url).done(function (response) {
                       searching = false; // Reset searching flag once search is complete

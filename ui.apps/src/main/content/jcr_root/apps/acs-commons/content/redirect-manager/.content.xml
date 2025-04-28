@@ -440,7 +440,6 @@
                             text="Save"
                             type="submit"
                             variant="primary"/>
-                    <footer jcr:primaryType="nt:unstructured"/>
                 </items>
                 <successresponse
                         jcr:primaryType="nt:unstructured"
