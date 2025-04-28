@@ -9,8 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
+
+- #3536 Granite Include Obscures included Resource Type
 - #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
 - #3551 Redirect Manager: correctly determine the redirect rules publication status for sharded and non-sharded redirects.
+- #3555 Content Sync: prevent timeout errors when sync-ing AEM cloud instances with large volumes of data
+- #3560 Redirect Manager: url-encode search terms in Full Text search mode
+- #3562 Fixed compilation errors in iscurrentusermemberof render condition
 
  ## 6.11.0 - 2025-03-14
 

@@ -48,8 +48,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +100,10 @@ public class RemoteInstance implements Closeable {
             builder.setSSLSocketFactory(sslsf);
         }
         return builder.build();
+    }
+
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
     }
 
     public InputStream getStream(String path) throws IOException, URISyntaxException {

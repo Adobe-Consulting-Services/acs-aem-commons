@@ -26,22 +26,17 @@
     java.util.Set,
     java.util.LinkedHashSet,
     java.util.stream.Collectors,
-    java.io.InputStream,
     java.io.IOException,
     java.io.Writer,
     java.io.StringWriter,
     java.io.PrintWriter,
-    java.io.ByteArrayInputStream,
     javax.jcr.Session,
-	javax.json.Json,
- 	javax.json.JsonArray,
  	javax.json.JsonObject,
     org.apache.sling.jcr.contentloader.ContentImporter,
 	org.apache.sling.api.resource.ResourceUtil,
 	org.apache.commons.lang3.time.DurationFormatUtils,
     org.apache.commons.io.output.TeeWriter,
 	com.adobe.acs.commons.contentsync.*
-
 "%><%
 %>
 <html>
@@ -99,10 +94,22 @@
 
         println(printWriter, "building catalog from " + contentCatalog.getFetchURI(root, strategyPid, recursive) );
         out.flush();
-        List<CatalogItem> catalog;
-        List<CatalogItem> remoteItems = contentCatalog.fetch(root, strategyPid, recursive);
+
         long t0 = System.currentTimeMillis();
+        String jobId = contentCatalog.startCatalogJob(root, strategyPid, recursive);
+        for( ;; ){
+            println(printWriter, "collecting resources on the remote instance...");
+            out.flush();
+            Thread.sleep(3000L);
+
+            if(contentCatalog.isComplete(jobId)){
+                break;
+            }
+        }
+        List<CatalogItem> remoteItems = contentCatalog.getResults();
         println(printWriter, remoteItems.size() + " resource"+(remoteItems.size() == 1 ? "" : "s")+" fetched in " + (System.currentTimeMillis() - t0) + " ms");
+
+        List<CatalogItem> catalog;
         if(incremental){
             catalog = contentCatalog.getDelta(remoteItems, resourceResolver, updateStrategy);
             println(printWriter, catalog.size() + " resource"+(catalog.size() == 1 ? "" : "s")+" modified");
@@ -153,8 +160,13 @@
                     }
 
                     println(printWriter, "\timporting data");
-                    contentSync.importData(item, sanitizedJson);
-
+                    try {
+                        contentSync.importData(item, sanitizedJson);
+                    } catch (RepositoryException e){
+                        error(out, e);
+                        resourceResolver.revert();
+                        continue;
+                    }
                     if(!binaryProperties.isEmpty()){
                         println(printWriter, "\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
                         boolean contentResource = item.hasContentResource();
