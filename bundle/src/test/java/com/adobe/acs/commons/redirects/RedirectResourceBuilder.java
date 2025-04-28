@@ -38,16 +38,22 @@ public class RedirectResourceBuilder {
     private final String configPath;
     private final Map<String, Object> props;
     private String nodeName;
+    private boolean sharded;
 
-    public RedirectResourceBuilder(SlingContext context, String configPath) {
+    public RedirectResourceBuilder(SlingContext context, String configPath, boolean sharded) {
         this.context = context;
         this.configPath = configPath;
         this.props = new HashMap<>();
+        this.sharded = sharded;
         this.props.put("sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE);
     }
 
+    public RedirectResourceBuilder(SlingContext context, String configPath) {
+        this(context, configPath, false);
+    }
+
     public RedirectResourceBuilder(SlingContext context) {
-        this(context, DEFAULT_CONF_PATH);
+        this(context, DEFAULT_CONF_PATH, false);
     }
 
     public RedirectResourceBuilder setSource(String source) {
@@ -144,6 +150,11 @@ public class RedirectResourceBuilder {
         ContentBuilder cb = context.create();
         Resource configResource = ResourceUtil.getOrCreateResource(
                 context.resourceResolver(), configPath, REDIRECTS_RESOURCE_PATH, null, true);
+        if (sharded) {
+            configResource = ResourceUtil.getOrCreateResource(
+                    context.resourceResolver(), configPath + "/shard-0", (String) null, null, true
+            );
+        }
         if(nodeName == null) {
             nodeName = ResourceUtil.createUniqueChildName(configResource, "rule");
         }

@@ -153,7 +153,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             for (Map<String, Object> props : xlsRedirects) {
                 count++;
 
-                String shardName = "shard-" + count / SHARD_SIZE;
+                String shardName = RedirectRule.SHARD_NAME_PREFIX + count / SHARD_SIZE;
                 String sourcePath = (String) props.get(SOURCE_PROPERTY_NAME);
                 Resource shard = root.getChild(shardName);
                 if(shard == null){

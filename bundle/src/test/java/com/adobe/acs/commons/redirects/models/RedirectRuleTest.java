@@ -207,6 +207,7 @@ public class RedirectRuleTest {
         Calendar dateInPast = GregorianCalendar.from(ZonedDateTime.now().minusDays(1));
         res1.getParent().adaptTo(ModifiableValueMap.class).put("cq:lastReplicated", dateInPast);
         assertTrue(rule1.isPublished());
+        assertFalse(rule1.isSharded());
 
         Resource res2 = new RedirectResourceBuilder(context)
                 .setSource("/content/geometrixx/en/1")
@@ -216,6 +217,7 @@ public class RedirectRuleTest {
                 .build();
         RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
         assertFalse(rule2.isPublished()); // jcr:created after lastReplicated
+        assertFalse(rule1.isSharded());
 
         Resource res3 = new RedirectResourceBuilder(context)
                 .setSource("/content/geometrixx/en/1")
@@ -226,9 +228,53 @@ public class RedirectRuleTest {
                 .build();
         RedirectRule rule3 = res3.adaptTo(RedirectRule.class);
         assertFalse(rule3.isPublished()); // jcr:lastModified after lastReplicated
+        assertFalse(rule1.isSharded());
 
         // update cq:lastReplicated, all child redirects should become active
         res1.getParent().adaptTo(ModifiableValueMap.class).put("cq:lastReplicated", Calendar.getInstance());
+        assertTrue(rule1.isPublished());
+        assertTrue(rule2.isPublished());
+        assertTrue(rule3.isPublished());
+    }
+
+    @Test
+    public void testIsPublishedUnderShard() throws PersistenceException {
+        Resource res1 = new RedirectResourceBuilder(context, RedirectResourceBuilder.DEFAULT_CONF_PATH, true)
+                .setSource("/content/geometrixx/en/contact-us")
+                .setTarget("/content/geometrixx/en/contact-them")
+                .setStatusCode(302).build();
+
+        RedirectRule rule1 = res1.adaptTo(RedirectRule.class);
+        assertFalse(rule1.isPublished()); // never published
+
+        Calendar dateInPast = GregorianCalendar.from(ZonedDateTime.now().minusDays(1));
+        res1.getParent().getParent().adaptTo(ModifiableValueMap.class).put("cq:lastReplicated", dateInPast);
+        assertTrue(rule1.isPublished());
+        assertTrue(rule1.isSharded());
+
+        Resource res2 = new RedirectResourceBuilder(context, RedirectResourceBuilder.DEFAULT_CONF_PATH, true)
+                .setSource("/content/geometrixx/en/1")
+                .setTarget("/content/geometrixx/en/2")
+                .setStatusCode(302)
+                .setCreated(GregorianCalendar.from(ZonedDateTime.now().minusMinutes(60)))
+                .build();
+        RedirectRule rule2 = res2.adaptTo(RedirectRule.class);
+        assertFalse(rule2.isPublished()); // jcr:created after lastReplicated
+        assertTrue(rule1.isSharded());
+
+        Resource res3 = new RedirectResourceBuilder(context, RedirectResourceBuilder.DEFAULT_CONF_PATH, true)
+                .setSource("/content/geometrixx/en/1")
+                .setTarget("/content/geometrixx/en/2")
+                .setStatusCode(302)
+                .setCreated(GregorianCalendar.from(ZonedDateTime.now().minusMinutes(120)))
+                .setModified(GregorianCalendar.from(ZonedDateTime.now().minusMinutes(60)))
+                .build();
+        RedirectRule rule3 = res3.adaptTo(RedirectRule.class);
+        assertFalse(rule3.isPublished()); // jcr:lastModified after lastReplicated
+        assertTrue(rule1.isSharded());
+
+        // update cq:lastReplicated, all child redirects should become active
+        res1.getParent().getParent().adaptTo(ModifiableValueMap.class).put("cq:lastReplicated", Calendar.getInstance());
         assertTrue(rule1.isPublished());
         assertTrue(rule2.isPublished());
         assertTrue(rule3.isPublished());

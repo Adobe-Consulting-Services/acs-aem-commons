@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -35,6 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_ID;
+import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_RESOURCES;
+import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_STATUS;
+
 
 /**
  * The ContentCatalog class provides methods to fetch and process content catalogs
@@ -44,10 +49,109 @@ public class ContentCatalog {
 
     private RemoteInstance remoteInstance;
     private final String catalogServlet;
+    private List<CatalogItem> results;
 
     public ContentCatalog(RemoteInstance remoteInstance, String catalogServlet) {
         this.remoteInstance = remoteInstance;
         this.catalogServlet = catalogServlet;
+    }
+
+    /**
+     * Gets the URI to {@link ContentCatalogServlet} to submit a catalog job.
+     *
+     * @param path the path to fetch the catalog for
+     * @param updateStrategy the update strategy to use
+     * @param recursive whether to fetch recursively
+     * @return the URI to fetch the catalog
+     * @throws URISyntaxException if the URI syntax is incorrect
+     */
+    public URI getStartCatalogJobURI(String path, String updateStrategy, boolean recursive) throws URISyntaxException {
+        return remoteInstance.toURI(catalogServlet, "root", path, "strategy",
+                updateStrategy, "recursive", String.valueOf(recursive));
+    }
+
+    /**
+     * Gets the URI to {@link ContentCatalogServlet} to check the status of a catalog job.
+     *
+     * @param jobId the job ID to check the status for
+     * @return  whether the job is complete
+     */
+    public URI getStatusCatalogJobURI(String jobId) throws URISyntaxException {
+        return remoteInstance.toURI(catalogServlet, JOB_ID, jobId);
+    }
+
+    void checkStatus(JsonObject json ){
+        JsonArray resources = json.getJsonArray(JOB_RESOURCES);
+        String status = json.containsKey(JOB_STATUS) ? json.getString(JOB_STATUS) : null;
+        if("SUCCEEDED".equals(status) || resources != null){
+            results = resources.stream()
+                    .map(JsonValue::asJsonObject)
+                    .map(CatalogItem::new)
+                    .collect(Collectors.toList());
+        } else if ("ERROR".equals(status) || "GIVEN_UP".equals(status)){
+            String resultMessage = json.containsKey("message") ? json.getString("message") : "";
+            throw new IllegalStateException("Error fetching catalog: " + resultMessage);
+        }
+    }
+
+    /**
+     * Send a request to to {@link ContentCatalogServlet} to start a catalog job.
+     *
+     * @param path the path to fetch the catalog for
+     * @param updateStrategy the update strategy to use
+     * @param recursive whether to fetch recursively
+     * @return jobId
+     */
+    public String startCatalogJob(String path, String updateStrategy, boolean recursive) throws IOException, URISyntaxException {
+        URI uri = getStartCatalogJobURI(path, updateStrategy, recursive);
+        JsonObject json = remoteInstance.getJson(uri);
+        checkStatus(json);
+        return json.containsKey(JOB_ID) ? json.getString(JOB_ID) : null;
+    }
+
+    /**
+     * Send a request to to {@link ContentCatalogServlet} to check the status of a catalog job.
+     * If the job is complete, the results are saved in the internal state and can be further
+     * obtained nu {@link #getResults()}.
+     *
+     * @param jobId jobId returned by {@link #startCatalogJob(String, String, boolean)}
+     * @return  whether the job is complete
+     */
+    public boolean isComplete(String jobId) throws IOException, URISyntaxException {
+        if(results != null) {
+            return true;
+        }
+
+        URI uri = getStatusCatalogJobURI(jobId);
+        JsonObject json = remoteInstance.getJson(uri);
+        checkStatus(json);
+        return results != null;
+    }
+
+    /**
+      * @return  results of the completed catalog job
+     */
+    public List<CatalogItem> getResults() {
+        return results;
+    }
+
+    /**
+     * Gets the delta between the catalog items and the resources in the resource resolver.
+     *
+     * @param catalog the list of catalog items
+     * @param resourceResolver the resource resolver to check against
+     * @param updateStrategy the update strategy to use
+     * @return a list of catalog items that are modified or not present in the resource resolver
+     */
+    public List<CatalogItem> getDelta(List<CatalogItem> catalog, ResourceResolver resourceResolver, UpdateStrategy updateStrategy) {
+        List<CatalogItem> lst = new ArrayList<>();
+        for(CatalogItem item : catalog){
+            Resource resource = resourceResolver.getResource(item.getPath());
+            if(resource == null || updateStrategy.isModified(item, resource)){
+                lst.add(item);
+            }
+        }
+        return lst;
     }
 
     /**
@@ -66,7 +170,9 @@ public class ContentCatalog {
      * @param recursive whether to fetch recursively
      * @return the URI to fetch the catalog
      * @throws URISyntaxException if the URI syntax is incorrect
+     * @deprecated
      */
+    @Deprecated
     public URI getFetchURI(String path, String updateStrategy, boolean recursive) throws URISyntaxException {
         return remoteInstance.toURI(catalogServlet, "root", path, "strategy",
                 updateStrategy, "recursive", String.valueOf(recursive));
@@ -89,7 +195,9 @@ public class ContentCatalog {
      * @return a list of catalog items
      * @throws IOException if an I/O error occurs
      * @throws URISyntaxException if the URI syntax is incorrect
+     * @deprecated
      */
+    @Deprecated
     public List<CatalogItem> fetch(String path, String updateStrategy, boolean recursive) throws IOException, URISyntaxException {
         URI uri = getFetchURI(path, updateStrategy, recursive);
 
@@ -99,34 +207,15 @@ public class ContentCatalog {
         try(JsonReader reader = Json.createReader(new StringReader(json))) {
             response = reader.readObject();
         }
-        if (!response.containsKey("resources")) {
+        if (!response.containsKey(JOB_RESOURCES)) {
             throw new IOException("Failed to fetch content catalog from " + uri + ", Response: " + json);
         }
-        JsonArray catalog = response.getJsonArray("resources");
+        JsonArray catalog = response.getJsonArray(JOB_RESOURCES);
 
         return catalog.stream()
                 .map(JsonValue::asJsonObject)
                 .map(CatalogItem::new)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Gets the delta between the catalog items and the resources in the resource resolver.
-     *
-     * @param catalog the list of catalog items
-     * @param resourceResolver the resource resolver to check against
-     * @param updateStrategy the update strategy to use
-     * @return a list of catalog items that are modified or not present in the resource resolver
-     */
-    public List<CatalogItem> getDelta(List<CatalogItem> catalog, ResourceResolver resourceResolver, UpdateStrategy updateStrategy) {
-        List<CatalogItem> lst = new ArrayList<>();
-        for(CatalogItem item : catalog){
-            Resource resource = resourceResolver.getResource(item.getPath());
-            if(resource == null || updateStrategy.isModified(item, resource)){
-                lst.add(item);
-            }
-        }
-        return lst;
     }
 
 }
