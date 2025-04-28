@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
 - #3560 Redirect Manager: url-encode search terms in Full Text search mode
+- #3536 Granite Include Obscures included Resource Type
 - #3562 Fixed compilation errors in iscurrentusermemberof render condition
 
  ## 6.11.0 - 2025-03-14
