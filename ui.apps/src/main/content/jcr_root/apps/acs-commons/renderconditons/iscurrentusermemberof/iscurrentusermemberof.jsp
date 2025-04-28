@@ -74,7 +74,7 @@
             final Authorizable authorizable = resourceResolver.adaptTo(Authorizable.class);
             final List<String> groupsList = Arrays.asList(groups);
             isAdmin = isUserAdmin(authorizable);
-            if (isUserMemberOf(authorizable, groupsList)) {
+            if (isUserMemberOf(authorizable, groupsList, log)) {
                 testcondition = true;
             }
         } catch (Exception ex) {
@@ -110,7 +110,7 @@
         return false;
     }
 
-    public static boolean isUserMemberOf(Authorizable authorizable, List<String> groups) {
+    public static boolean isUserMemberOf(Authorizable authorizable, List<String> groups, org.slf4j.Logger log) {
         try {
             Iterator<Group> groupIt = authorizable.memberOf();
             while (groupIt.hasNext()) {
