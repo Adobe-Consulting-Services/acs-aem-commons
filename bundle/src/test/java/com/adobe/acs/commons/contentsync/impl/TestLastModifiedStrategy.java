@@ -24,6 +24,7 @@ import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -35,11 +36,14 @@ import org.junit.Test;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.GenericServlet;
+import javax.servlet.ServletRequest;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy.DEFAULT_GET_SERVLET;
 import static com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy.REDIRECT_SERVLET;
@@ -125,7 +129,7 @@ public class TestLastModifiedStrategy {
 
 
     @Test
-    public void testForwardRedirectServletToDefaultGetServlet() {
+    public void testForwardRedirectServletToDefaultGetServlet() throws LoginException {
         doAnswer(invocation -> {
             GenericServlet servlet = mock(GenericServlet.class);
             doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
@@ -138,7 +142,7 @@ public class TestLastModifiedStrategy {
         MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("root", path);
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
         CatalogItem item = items.iterator().next();
         assertEquals("/content/cq:tags.json", item.getContentUri());
@@ -150,7 +154,7 @@ public class TestLastModifiedStrategy {
      * + jcr:content - export json rendered by ContentPolicyMappingServlet
      */
     @Test
-    public void testCustomRendererUseParent() throws IOException {
+    public void testCustomRendererUseParent() throws IOException, LoginException {
         String path = "/conf/wknd/settings/wcm/templates/article-page-template/policies";
         doAnswer(invocation -> {
             SlingHttpServletRequest request = invocation.getArgument(0, SlingHttpServletRequest.class);
@@ -170,7 +174,7 @@ public class TestLastModifiedStrategy {
         request.addRequestParameter("root", path);
         request.addRequestParameter("strategy", updateStrategy.getClass().getName());
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
         CatalogItem item = items.iterator().next();
         assertEquals("cq:Page", item.getPrimaryType());
@@ -180,7 +184,7 @@ public class TestLastModifiedStrategy {
     }
 
     @Test
-    public void testCustomExporter() {
+    public void testCustomExporter() throws LoginException {
         String path = "/content/wknd/page";
         String customExporter = "com.adobe.CustomJsonExporter";
         doAnswer(invocation -> {
@@ -195,7 +199,7 @@ public class TestLastModifiedStrategy {
         request.addRequestParameter("root", path);
         request.addRequestParameter("strategy", updateStrategy.getClass().getName());
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
         CatalogItem item = items.iterator().next();
         assertEquals("cq:Page", item.getPrimaryType());
@@ -221,29 +225,35 @@ public class TestLastModifiedStrategy {
     }
 
     @Test
-    public void testRecursive()  {
+    public void testRecursive() throws LoginException {
         sync("root", "/content/wknd",
                 "recursive", "true");
 
-        List<CatalogItem> items = updateStrategy.getItems(context.request());
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(3, items.size());
     }
 
     @Test
-    public void testRecursiveDefault()  {
+    public void testRecursiveDefault() throws LoginException {
         sync("root", "/content/wknd");
 
-        List<CatalogItem> items = updateStrategy.getItems(context.request());
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(3, items.size());
     }
 
     @Test
-    public void testNonRecursive()  {
+    public void testNonRecursive() throws LoginException {
         sync("root", "/content/wknd",
                 "recursive", "false");
 
-        List<CatalogItem> items = updateStrategy.getItems(context.request());
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
+    }
+
+    private static Map<String, Object> getParameters(ServletRequest request){
+        Map<String, Object> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        return params;
     }
 
 }

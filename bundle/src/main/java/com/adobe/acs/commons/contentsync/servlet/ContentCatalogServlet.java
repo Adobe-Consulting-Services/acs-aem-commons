@@ -19,30 +19,75 @@
  */
 package com.adobe.acs.commons.contentsync.servlet;
 
-import com.adobe.acs.commons.contentsync.CatalogItem;
-import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceNotFoundException;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import javax.json.JsonWriter;
 import javax.servlet.Servlet;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TOPIC;
 
+/**
+ * Submits a catalog job or retrieves job status and results.
+ *
+ * This endpoint supports two modes of operation:
+ *
+ * 1. Job Submission: When the 'jobId' request parameter is not provided, a new catalog
+ *    job is submitted to the queue and a response containing the new jobId is returned.
+ *    Example response:
+ *    <pre>
+ *    {
+ *      "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
+ *      "status": "QUEUED"
+ *    }
+ *    </pre>
+ *
+ * 2. Job Status/Results Retrieval: When a 'jobId' parameter is provided, the current
+ *    status of the job is returned. If the job is still processing, only status information
+ *    is included:
+ *    <pre>
+ *    {
+ *      "jobId": "2025/4/10/18/13/a6943a19-0136-46a4-99fa-a5fd2fef8a3a_196",
+ *      "status": "ACTIVE"
+ *    }
+ *    </pre>
+ *
+ *    If the job has completed successfully, the response includes the job results:
+ *    <pre>
+ *    {
+ *      "jobId": "2025/4/10/16/20/6162a8e9-2f19-49d4-b733-9db7849e2b2d_127",
+ *      "status": "SUCCEEDED",
+ *      "resources": [
+ *        {
+ *          "path": "/content/test",
+ *          "jcr:primaryType": "cq:Page",
+ *          "exportUri": "/content/test/jcr:content.infinity.json",
+ *          "lastModified": 1735828312154,
+ *          "lastModifiedBy": "john.doe@test.com"
+ *        }
+ *      ]
+ *    }
+ *    </pre>
+ *
+ */
 @Component(service = Servlet.class, immediate = true, property = {
         "sling.servlet.extensions=json",
         "sling.servlet.selectors=catalog",
@@ -50,60 +95,76 @@ import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 })
 public class ContentCatalogServlet extends SlingSafeMethodsServlet {
 
-    private final transient Map<String, UpdateStrategy> updateStrategies = Collections.synchronizedMap(new LinkedHashMap<>());
+    public static final String JOB_ID = "jobId";
+    public static final String JOB_STATUS = "status";
+    public static final String JOB_RESOURCES = "resources";
 
-    @Reference(service = UpdateStrategy.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC)
-    protected void bindDeltaStrategy(UpdateStrategy strategy) {
-        if (strategy != null) {
-            String key = strategy.getClass().getName();
-            updateStrategies.put(key, strategy);
-        }
-    }
-
-    protected void unbindDeltaStrategy(UpdateStrategy strategy) {
-        String key = strategy.getClass().getName();
-        updateStrategies.remove(key);
-    }
+    @Reference
+    private JobManager jobManager;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         response.setContentType("application/json");
 
         JsonObjectBuilder result = Json.createObjectBuilder();
-        try {
-            JsonArrayBuilder resources = Json.createArrayBuilder();
-            String pid = request.getParameter("strategy");
-            UpdateStrategy updateStrategy = getStrategy(pid);
-            List<CatalogItem> items = updateStrategy.getItems(request);
-
-            for (CatalogItem item : items) {
-                resources.add(item.getJsonObject());
+        String jobId = request.getParameter(JOB_ID);
+        if (jobId == null) {
+            Job job = submitJob(request);
+            result.add(JOB_ID, job.getId());
+            result.add(JOB_STATUS, job.getJobState().toString());
+        } else {
+            Job job = jobManager.getJobById(jobId);
+            result.add(JOB_ID, jobId);
+            if(job != null){
+                result.add(JOB_STATUS, job.getJobState().toString());
+                String resultMessage = (String)job.getProperty("slingevent:resultMessage");
+                if(resultMessage != null){
+                    result.add("error", resultMessage);
+                }
+            } else {
+                // finished job
+                result.add(JOB_STATUS, Job.JobState.SUCCEEDED.toString());
+                JsonObject results = getJobResults(request.getResourceResolver(), jobId);
+                result.add(JOB_RESOURCES, results.getJsonArray(JOB_RESOURCES));
             }
-            result.add("resources", resources);
-        } catch (Exception e){
-            result.add("error", e.getMessage());
-            response.setStatus(SC_INTERNAL_SERVER_ERROR);
         }
 
-        try(JsonWriter out = Json.createWriter(response.getWriter())){
+        try (JsonWriter out = Json.createWriter(response.getWriter())) {
             out.writeObject(result.build());
         }
     }
 
-    UpdateStrategy getStrategy(String pid) {
-        UpdateStrategy strategy;
-        if(pid == null){
-            strategy = updateStrategies.values().iterator().next();
-        } else {
-            strategy = updateStrategies.get(pid);
-            if(strategy == null){
-                throw new IllegalArgumentException("Cannot find UpdateStrategy for pid " + pid + "."
-                        + " Available strategies: " + updateStrategies.values()
-                        .stream().map(s -> s.getClass().getName()).collect(Collectors.toList()));
-            }
+    /**
+     * create a job to build catalog of resources.
+     * All request parameters are passed to the job properties.
+     */
+    Job submitJob(SlingHttpServletRequest request){
+        Map<String, Object> jobProps = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> jobProps.put(key, value[0]));
+        return jobManager.addJob(JOB_TOPIC, jobProps);
+    }
+
+    /**
+     * Read results of a completed job and returned parse it as JSON
+     *
+     */
+    JsonObject getJobResults(ResourceResolver resourceResolver, String jobId) throws IOException {
+        String resultsPath = getJobResultsPath(jobId);
+        Resource resultsNode = resourceResolver.getResource(resultsPath);
+        if(resultsNode == null) {
+            throw new ResourceNotFoundException(resultsPath);
         }
-        return strategy;
+        try(InputStream inputStream = resultsNode.adaptTo(InputStream.class);
+            JsonReader reader = Json.createReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+        ){
+            return reader.readObject();
+        }
+    }
+
+    /**
+     * @return  the path to an nt:file resource with the job results as JSON
+     */
+    public static String getJobResultsPath(String jobId) {
+        return "/var/acs-commons/contentsync/jobs/" + jobId + "/results";
     }
 }
