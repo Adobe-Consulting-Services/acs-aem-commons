@@ -359,7 +359,7 @@
   $("#redirect-search-box").on("input", function (e) {
       var searchText = $(this).val().trim();
       var caconfig = $("input[name='caconfig']").val();
-      var supportsFulltextSearch = $("input[name='fulltextSearchEnabled']").val() || false;
+      var supportsFulltextSearch = $("input[name='fulltextSearchEnabled']").val() === "true";
 
       if (supportsFulltextSearch) {
           var swap = $("#swap");
