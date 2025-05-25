@@ -165,8 +165,10 @@ public class LastModifiedStrategy implements UpdateStrategy {
         if (
             // don't drill down into jcr:content. The entire content will be grabbed by jcr:content.infinity.json
                 resource.getPath().contains("/" + JCR_CONTENT)
-                        // ignore rep:policy, rep:cugPolicy, rep:restrictions and such
-                        || resource.getPath().contains("/rep:")
+                // ignore rep:policy, rep:cugPolicy, rep:restrictions and such
+                || resource.getPath().contains("/rep:")
+                // skip non-jcr resources
+                || resource.getValueMap().get(JCR_PRIMARYTYPE, String.class) == null
         ) {
             return false;
         }

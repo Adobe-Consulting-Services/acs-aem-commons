@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
+- #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
+
+## 6.12.0 - 2025-04-28
 
 - #3536 Granite Include Obscures included Resource Type
 - #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
