@@ -18,18 +18,13 @@
 package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -37,7 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import java.io.IOException;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -104,13 +101,9 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     @Reference
     private Scheduler scheduler;
-    
-    @Reference(
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            policyOption = ReferencePolicyOption.GREEDY
-    )
-    private volatile EnsureOakIndexManager indexManager;
+
+    @Reference
+    private ConfigurationAdmin configurationAdmin;
 
     private String ensureDefinitionsPath;
     private String oakIndexesPath;
@@ -135,10 +128,18 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         }
 
         this.immediate = config.immediate();
-        
+
         String[] ignoredProps = config.properties_ignore();
-        String[] indexManagerIgnoredProps = getIndexManagerConfiguredIgnoreProperties();
-        
+        String[] indexManagerConfiguredIgnoreProperties = getIndexManagerConfiguredIgnoreProperties();
+
+        setIgnoredProperties(ignoredProps, indexManagerConfiguredIgnoreProperties);
+
+        if (this.immediate) {
+            apply(false);
+        }
+    }
+
+    private void setIgnoredProperties(String[] ignoredProps, String[] indexManagerIgnoredProps) {
         if (ignoredProps.length == 0) {
             // Legacy: check if EnsureOakIndexManagerImpl has this property configured -- https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1966
             if (indexManagerIgnoredProps.length != 0) {
@@ -155,18 +156,33 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
                         + "; please delete it");
             }
         }
-        if (this.immediate) {
-            apply(false);
-        }
     }
 
-    
+    /**
+     * @return the ignore properties, using the ConfigurationAdmin to avoid having a circular reference between EnsureOakIndexManagerImpl and EnsureOakIndex OSGi services
+     */
     private String[] getIndexManagerConfiguredIgnoreProperties() {
-        if (indexManager instanceof EnsureOakIndexManagerImpl) {
-            EnsureOakIndexManagerImpl impl = (EnsureOakIndexManagerImpl) indexManager;
-            return impl.getIgnoredProperties();
+        try {
+             Configuration configuration = configurationAdmin.getConfiguration(EnsureOakIndexManagerImpl.class.getName());
+            if (configuration != null && configuration.getProperties() != null) {
+                return getIndexManagerConfiguredIgnoreProperties(configuration.getProperties());
+            }
+        } catch (IOException e) {
+            log.warn("Could not get ignored properties from index manager configuration", e);
         }
-        return new String[] {};
+        return new String[]{};
+    }
+
+    private static String[] getIndexManagerConfiguredIgnoreProperties(Dictionary properties) {
+        Object indexManagerIgnoredProps = properties.get(PROP_ADDITIONAL_IGNORE_PROPERTIES);
+        if (indexManagerIgnoredProps != null) {
+            if (indexManagerIgnoredProps instanceof String[]) {
+                return (String[]) indexManagerIgnoredProps;
+            } else if (indexManagerIgnoredProps instanceof String) {
+                return new String[]{(String) indexManagerIgnoredProps};
+            }
+        }
+        return new String[]{};
     }
 
     /**

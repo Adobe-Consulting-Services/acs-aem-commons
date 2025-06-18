@@ -74,10 +74,12 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
 
     //@formatter:off
-    private static final String[] DEFAULT_ADDITIONAL_IGNORE_PROPERTIES = new String[]{};
-    private String[] additionalIgnoreProperties = DEFAULT_ADDITIONAL_IGNORE_PROPERTIES;
     public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
 
+    /**
+     * The OSGi configuration is only used by the EnsureOakIndex OSGi services and would have ideally been a separate OSGi service,
+     * but we can't migrate this easily without losing the PID for existing implementations.
+     */
     @ObjectClassDefinition(
             name = "ACS AEM Commons - Ensure Oak Index Manager",
             description = "Manage for ensuring oak indexes."
@@ -91,8 +93,6 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
                 cardinality = Integer.MAX_VALUE
         )
         String[] properties_ignore() default {};
-
-        String webconsole_configurationFactory_nameHint() default "Additional Ignore properties: {properties.ignore}";
 
     }
 
@@ -206,16 +206,4 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         return tabularData;
     }
 
-
-    @Activate
-    protected void activate(Config config) {
-        additionalIgnoreProperties = config.properties_ignore();
-    }
-    
-    
-    protected String[] getIgnoredProperties() {
-        return Optional.ofNullable(this.additionalIgnoreProperties)
-                .map(array -> Arrays.copyOf(array, array.length))
-                .orElse(DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
-    }
 }
