@@ -157,7 +157,7 @@
                         <configuration>
                             <rules>
                                 <bannedDependencies>
-                                    <!-- here we need to explicitly list the set of dependencies which 
+                                    <!-- here we need to explicitly list the set of dependencies which
                                     are allowed with scope=compile -->
                                     <includes>
                                         <include>com.google.guava:*</include>
@@ -504,8 +504,8 @@
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
-        <!-- Due to the split of the JJWT library we need  
-                  - the api for compilation 
+        <!-- Due to the split of the JJWT library we need
+                  - the api for compilation
                   - and the impl for embedding together with
                   - the extension for serialization/deserialization support -->
         <dependency>
@@ -559,12 +559,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-            <version>5.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
