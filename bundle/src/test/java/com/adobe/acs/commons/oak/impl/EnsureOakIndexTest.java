@@ -17,6 +17,7 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -74,10 +75,12 @@ public class EnsureOakIndexTest {
         ensureOakIndexProperties.put(EnsureOakIndex.PROP_OAK_INDEXES_PATH, "/oak:index");
     }
 
-    private void setupIndexManager(String[] ignoreProperties) throws NotCompliantMBeanException, IOException {
+    private void setupIndexManager(Object ignoreProperties) throws NotCompliantMBeanException, IOException {
         EnsureOakIndexManagerImpl indexManager = new EnsureOakIndexManagerImpl();
         Map<String,Object> props = new HashMap<>();
-        props.put(EnsureOakIndexManagerImpl.PROP_ADDITIONAL_IGNORE_PROPERTIES, ignoreProperties);
+        if (ignoreProperties != null) {
+            props.put(EnsureOakIndexManagerImpl.PROP_ADDITIONAL_IGNORE_PROPERTIES, ignoreProperties);
+        }
         context.registerInjectActivateService(indexManager, props );
         ConfigurationAdmin configurationAdmin = context.getService(ConfigurationAdmin.class);
         Configuration configuration = configurationAdmin.getConfiguration(indexManager.getClass().getName());
@@ -114,6 +117,31 @@ public class EnsureOakIndexTest {
         List<String> ignoreProperties = eoi.getIgnoreProperties();
         assertTrue(ignoreProperties.size() == 1);
         assertTrue(ignoreProperties.contains("localProp"));
+    }
+
+    @Test
+    public void testIndexManagerConfigurationSingleString() throws NotCompliantMBeanException, IOException {
+        setupIndexManager("globalSetting");
+        ensureOakIndexProperties.put(EnsureOakIndex.PROP_IMMEDIATE, false);
+        context.registerInjectActivateService(eoi, ensureOakIndexProperties);
+        assertTrue(eoi.getIgnoreProperties().contains("globalSetting"));
+    }
+
+    @Test
+    public void testIndexManagerConfigurationAsMultiString() throws NotCompliantMBeanException, IOException {
+        setupIndexManager(new String[] {"globalSetting"});
+        ensureOakIndexProperties.put(EnsureOakIndex.PROP_IMMEDIATE, false);
+        context.registerInjectActivateService(eoi, ensureOakIndexProperties);
+        assertTrue(eoi.getIgnoreProperties().contains("globalSetting"));
+    }
+
+    @Test
+    public void testIndexManagerConfigurationNotSet() throws NotCompliantMBeanException, IOException {
+        setupIndexManager(null);
+        ensureOakIndexProperties.put(EnsureOakIndex.PROP_IMMEDIATE, false);
+        ensureOakIndexProperties.put(EnsureOakIndex.PROP_ADDITIONAL_IGNORE_PROPERTIES, new String[] {"localProp"});
+        context.registerInjectActivateService(eoi, ensureOakIndexProperties);
+        assertTrue(eoi.getIgnoreProperties().contains("localProp"));
     }
 
 }
