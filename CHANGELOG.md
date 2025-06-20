@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3555 Content Sync: prevent timeout errors when sync-ing AEM cloud instances with large volumes of data
 - #3560 Redirect Manager: url-encode search terms in Full Text search mode
 - #3562 Fixed compilation errors in iscurrentusermemberof render condition
+- #2745 Fixed circular dependency in EnsureOakIndex
 
  ## 6.11.0 - 2025-03-14
 
