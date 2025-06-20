@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3560 Redirect Manager: url-encode search terms in Full Text search mode
 - #3562 Fixed compilation errors in iscurrentusermemberof render condition
 - #2745 Fixed circular dependency in EnsureOakIndex
+- #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
 
  ## 6.11.0 - 2025-03-14
 
