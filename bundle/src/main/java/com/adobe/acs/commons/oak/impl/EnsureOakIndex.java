@@ -24,7 +24,10 @@ import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -173,7 +176,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         return new String[]{};
     }
 
-    private static String[] getIndexManagerConfiguredIgnoreProperties(Dictionary properties) {
+    private static String[] getIndexManagerConfiguredIgnoreProperties(Dictionary<String, Object> properties) {
         Object indexManagerIgnoredProps = properties.get(PROP_ADDITIONAL_IGNORE_PROPERTIES);
         if (indexManagerIgnoredProps != null) {
             if (indexManagerIgnoredProps instanceof String[]) {
