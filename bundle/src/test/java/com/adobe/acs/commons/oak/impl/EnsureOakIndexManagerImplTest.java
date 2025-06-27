@@ -50,28 +50,29 @@ public class EnsureOakIndexManagerImplTest {
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
-    
+
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
-    
+
     @Mock
     Scheduler scheduler;
-    
+
     @Mock
     RequireAem requireAem;
-    
-    
+
+
     private static final String OAK_INDEX = "/oak:index";
-    
+
     Map<String,Object> ensureOakIndexManagerProperties;
 
-    
-    
+
+
     @Before
     public void setup() {
         // setup test content in the repo
         context.build().resource(OAK_INDEX).commit();
         context.registerService(Scheduler.class,scheduler);
+        context.registerInjectActivateService(new EnsureOakIndexExecutor());
         context.registerService(RequireAem.class,requireAem,"distribution","classic");
 
         ScheduleOptions options = mock(ScheduleOptions.class);
@@ -83,43 +84,43 @@ public class EnsureOakIndexManagerImplTest {
         });
 
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
-       
+
         ensureOakIndexManagerProperties = new HashMap<>();
         ensureOakIndexManagerProperties.put("properties.ignore", null);
-        
+
     }
-    
+
     private EnsureOakIndex createAndRegisterEnsureOakIndexDefinition(String definitionPath, String indexPropertyName) {
-        
+
 
         Map<String,Object> ensureIndexProperties;
         ensureIndexProperties = new HashMap<>();
         ensureIndexProperties.put("jcr:primaryType",EnsureOakIndexJobHandler.NT_OAK_UNSTRUCTURED);
         ensureIndexProperties.put("type","property");
         ensureIndexProperties.put("propertyNames",indexPropertyName);
-        
+
         context.build().resource(definitionPath, ensureIndexProperties).commit();
         Map<String,Object> props = new HashMap<>();
         props.put("oak.indexes.path", OAK_INDEX);
         props.put("ensure-definitions.path",definitionPath);
         props.put("immediate", "false");
-        
+
 
         EnsureOakIndex eoi = new EnsureOakIndex();
         return context.registerInjectActivateService(eoi, props);
     }
-    
-    @Test 
+
+    @Test
     public void testNoEoiRegistered() throws NotCompliantMBeanException {
         EnsureOakIndexManagerImpl impl = new EnsureOakIndexManagerImpl();
         context.registerInjectActivateService(impl,ensureOakIndexManagerProperties);
         assertEquals(0,impl.ensureAll(true));
     }
-    
+
     @Test
     public void testWithIndexRegistrations() throws NotCompliantMBeanException {
-        
-        
+
+
         EnsureOakIndexManagerImpl impl = new EnsureOakIndexManagerImpl();
         context.registerInjectActivateService(impl,ensureOakIndexManagerProperties);
         EnsureOakIndex eoi1 = createAndRegisterEnsureOakIndexDefinition("/apps/my/index1", "abc");
@@ -128,15 +129,15 @@ public class EnsureOakIndexManagerImplTest {
         assertEquals(0,impl.ensureAll(false));
         assertEquals(1,impl.ensure(true,"/apps/my/index1"));
         assertEquals(0,impl.ensure(false,"/apps/my/index1"));
-        
+
         EnsureOakIndex eoi2 = createAndRegisterEnsureOakIndexDefinition("/apps/my/index2", "abcd");
         assertFalse(eoi2.isApplied());
         assertEquals(1,impl.ensure(false,"/apps/my/index2"));
         assertTrue(eoi2.isApplied());
-        
-    }
-    
 
-    
+    }
+
+
+
 
 }

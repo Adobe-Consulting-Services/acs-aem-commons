@@ -43,40 +43,40 @@ public class EnsureOakIndexTest {
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
-    
+
     @Rule
     public SlingContext context = new SlingContext();
-    
+
     @Mock
     Scheduler scheduler;
-    
+
     @Mock
     RequireAem requireAem;
-    
+
     String[] indexManagerProps = {"managerProp1"};
-    
+
     Map<String,Object> ensureOakIndexProperties = new HashMap<>();
-    
+
     EnsureOakIndex eoi = new EnsureOakIndex();
-    
-    
+
+
     @Before
     public void setup() {
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
-        
+        context.registerService(EnsureOakIndexExecutor.class, new EnsureOakIndexExecutor());
         context.registerService(Scheduler.class, scheduler);
         context.registerService(RequireAem.class, requireAem,"distribution","classic");
         ensureOakIndexProperties.put(EnsureOakIndex.PROP_ENSURE_DEFINITIONS_PATH, "/apps/com/indexes");
         ensureOakIndexProperties.put(EnsureOakIndex.PROP_OAK_INDEXES_PATH, "/oak:index");
     }
-    
+
     private void setupIndexManager(String[] ignoreProperties) throws NotCompliantMBeanException {
         EnsureOakIndexManagerImpl indexManager = new EnsureOakIndexManagerImpl();
         Map<String,Object> props = new HashMap<>();
         props.put(EnsureOakIndexManagerImpl.PROP_ADDITIONAL_IGNORE_PROPERTIES, ignoreProperties);
         context.registerInjectActivateService(indexManager, props );
     }
-    
+
     @Test
     public void testWithLocalIgnoredProperties() throws NotCompliantMBeanException {
         setupIndexManager(new String[] {});
@@ -87,7 +87,7 @@ public class EnsureOakIndexTest {
         assertTrue(ignoreProperties.size() == 1);
         assertTrue(ignoreProperties.contains("localProp"));
     }
-    
+
     @Test
     public void testLegacyMode() throws NotCompliantMBeanException {
         setupIndexManager(new String[] {"globalSetting"});
@@ -97,7 +97,7 @@ public class EnsureOakIndexTest {
         assertTrue(ignoreProperties.size() == 1);
         assertTrue(ignoreProperties.contains("globalSetting"));
     }
-    
+
     @Test
     public void testMixedMode() throws NotCompliantMBeanException {
         setupIndexManager(new String[] {"globalSetting"});
@@ -107,6 +107,15 @@ public class EnsureOakIndexTest {
         List<String> ignoreProperties = eoi.getIgnoreProperties();
         assertTrue(ignoreProperties.size() == 1);
         assertTrue(ignoreProperties.contains("localProp"));
+    }
+
+    @Test
+    public void testIndexManagerConfigurationNotSet() throws NotCompliantMBeanException {
+        setupIndexManager(null);
+        ensureOakIndexProperties.put(EnsureOakIndex.PROP_IMMEDIATE, false);
+        ensureOakIndexProperties.put(EnsureOakIndex.PROP_ADDITIONAL_IGNORE_PROPERTIES, new String[] {"localProp"});
+        context.registerInjectActivateService(eoi, ensureOakIndexProperties);
+        assertTrue(eoi.getIgnoreProperties().contains("localProp"));
     }
 
 }

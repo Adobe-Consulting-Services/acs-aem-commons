@@ -673,13 +673,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.11.0</version><!-- >= 5.x requires Java 11 -->
+                <version>5.16.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
-                <version>4.11.0</version><!-- >= 5.x requires Java 11 -->
+                <version>5.16.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -807,7 +807,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-failsafe-plugin</artifactId>
                             <configuration>
-                                <!-- 
+                                <!--
                                 for IT where you need a forked JVM to run the tests you can use this system property to make sure that
                                 the JaCoCo agent correctly instruments your code
                                 set system property also via argLine as only that allows late evaluation -->
@@ -821,7 +821,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
-                        
+
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
