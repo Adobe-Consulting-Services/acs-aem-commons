@@ -79,10 +79,6 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     private String[] additionalIgnoreProperties = DEFAULT_ADDITIONAL_IGNORE_PROPERTIES;
     public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
 
-    /**
-     * The OSGi configuration is only used by the EnsureOakIndex OSGi services and would have ideally been a separate OSGi service,
-     * but we can't migrate this easily without losing the PID for existing implementations.
-     */
     @ObjectClassDefinition(
             name = "ACS AEM Commons - Ensure Oak Index Manager",
             description = "Manage for ensuring oak indexes."
