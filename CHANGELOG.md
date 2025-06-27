@@ -11,9 +11,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ### Changed
+
 - #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
 
 ### Fixed
+
 - #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
