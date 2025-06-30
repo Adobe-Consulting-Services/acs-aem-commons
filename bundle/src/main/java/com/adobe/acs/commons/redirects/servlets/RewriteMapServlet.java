@@ -25,10 +25,12 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.servlets.post.HtmlResponse;
 import org.osgi.service.component.annotations.Component;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -64,30 +66,36 @@ public class RewriteMapServlet extends SlingSafeMethodsServlet {
     @SuppressWarnings("java:S3457")
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+        try {
+            response.setContentType(ContentType.TEXT_PLAIN.getMimeType());
 
-        String[] selectors = request.getRequestPathInfo().getSelectors();
-        int statusCodeSelector = 0;
-        if(selectors != null && selectors.length > 0) {
-            statusCodeSelector = Integer.parseInt(selectors[0]);
-        }
-        Collection<Resource> rules = readRedirects(request.getResource());
-        PrintWriter out = response.getWriter();
-        out.printf("# %s Redirects\n", statusCodeSelector == 0 ? "All" : "" + statusCodeSelector);
-        for (Resource resource : rules) {
-            ValueMap props = resource.getValueMap();
-            String source = props.get(SOURCE_PROPERTY_NAME, String.class);
-            String target = props.get(TARGET_PROPERTY_NAME, String.class);
-            int statusCode = props.get(STATUS_CODE_PROPERTY_NAME, Integer.class);
-            String note = props.get(NOTE_PROPERTY_NAME, String.class);
+            String[] selectors = request.getRequestPathInfo().getSelectors();
+            int statusCodeSelector = 0;
+            if(selectors != null && selectors.length > 0) {
+                statusCodeSelector = Integer.parseInt(selectors[0]);
+            }
+            Collection<Resource> rules = readRedirects(request.getResource());
+            PrintWriter out = response.getWriter();
+            out.printf("# %s Redirects\n", statusCodeSelector == 0 ? "All" : "" + statusCodeSelector);
+            for (Resource resource : rules) {
+                ValueMap props = resource.getValueMap();
+                String source = props.get(SOURCE_PROPERTY_NAME, String.class);
+                String target = props.get(TARGET_PROPERTY_NAME, String.class);
+                int statusCode = props.get(STATUS_CODE_PROPERTY_NAME, Integer.class);
+                String note = props.get(NOTE_PROPERTY_NAME, String.class);
 
-            if(statusCodeSelector != 0 && statusCodeSelector != statusCode) {
-                continue;
+                if(statusCodeSelector != 0 && statusCodeSelector != statusCode) {
+                    continue;
+                }
+                if(note != null && !note.isEmpty()) {
+                    out.printf("# %s\n", note);
+                }
+                out.printf("%s %s\n", source.trim(), target.trim());
             }
-            if(note != null && !note.isEmpty()) {
-                out.printf("# %s\n", note);
-            }
-            out.printf("%s %s\n", source.trim(), target.trim());
+        } catch (IOException e) {
+            HtmlResponse htmlResponse = new HtmlResponse();
+            htmlResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to export redirects: " + e.getMessage());
+            htmlResponse.send(response, true);
         }
     }
 }
