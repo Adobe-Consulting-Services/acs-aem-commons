@@ -87,7 +87,7 @@
     TeeWriter printWriter = new TeeWriter(Arrays.asList(new PrintWriter(out), new PrintWriter(tempWriter)));
 
     UpdateStrategy updateStrategy = sling.getServices(UpdateStrategy.class, "(component.name=" + strategyPid + ")")[0];
-    try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig, generalSettings)){
+    try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig, generalSettings, sling, resourceResolver)){
         ContentImporter importer = sling.getService(ContentImporter.class);
         ContentSync contentSync = new ContentSync(remoteInstance, resourceResolver, importer);
         ContentCatalog contentCatalog = new ContentCatalog(remoteInstance, catalogServlet);

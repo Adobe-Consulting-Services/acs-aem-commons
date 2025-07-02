@@ -19,31 +19,31 @@
 %><%@page session="false" import="
         org.apache.sling.api.resource.ValueMap,
         com.adobe.granite.ui.components.Tag,
-        com.adobe.granite.ui.components.AttrBuilder" %><%
+        com.adobe.granite.ui.components.AttrBuilder,
+        com.fasterxml.jackson.databind.ObjectMapper,
+        com.fasterxml.jackson.databind.MapperFeature" %><%
 
     String contextPath = request.getContextPath();
     ValueMap valueMap = resource.adaptTo(ValueMap.class);
-	String username = valueMap.get("username", "");
-	String password = valueMap.get("password", "");
-	String url = valueMap.get("host", "");
 	String icon = "viewList";
 	String smallIcon = "search";
 	String path =  resource.getPath();
 	String href = "/apps/acs-commons/content/contentsync.html" + path;
+	String url = valueMap.get("host", "");
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
     Tag tag = cmp.consumeTag();
     AttrBuilder attrs = tag.getAttrs();
 
+    attrs.add("data-properties", mapper.writeValueAsString(valueMap));
     attrs.addClass("foundation-collection-navigator");
+    attrs.add("data-foundation-collection-navigator-href", href);
+    attrs.add("data-path", path);
     attrs.addClass("whitecard");
 %>
-<coral-card assetwidth="400" assetheight="380" <%= attrs %>
-    data-foundation-collection-navigator-href="<%= href %>"
-	data-host="<%=url%>"
-	data-username="<%=username%>"
-	data-password="<%=password%>"
-	data-path="<%=path%>"
-    colorhint="#FFFFFF">
+<coral-card assetwidth="400" assetheight="380" <%= attrs %> colorhint="#FFFFFF">
     <coral-card-asset class="whitecard">
         <coral-icon icon="<%= icon %>" class="largeIcon centerText">
         </coral-icon>
@@ -68,6 +68,4 @@
 </coral-card>
 <coral-quickactions target="_prev">
     <coral-quickactions-item icon="check" class="foundation-collection-item-activator">Select</coral-quickactions-item>
-    <coral-quickactions-item icon="gears" class="configureQuickAction"
-    data-editpath="<%=path%>">Configure</coral-quickactions-item>
 </coral-quickactions>

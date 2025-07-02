@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.granite.auth.oauth.AccessTokenProvider;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -34,9 +37,12 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -67,15 +73,38 @@ public class RemoteInstance implements Closeable {
 
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
+    private AccessTokenProvider tokenProvider;
 
-    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException{
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
         this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient(hostConfiguration, generalSettings);
+        this.httpClient = createHttpClient(hostConfiguration, generalSettings, null);
+    }
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, SlingScriptHelper sling, ResourceResolver resourceResolver) throws GeneralSecurityException, IOException {
+        if(hostConfiguration.isOAuthEnabled()){
+            String providerName = hostConfiguration.getAccessTokenProviderName();
+            AccessTokenProvider[] tokenProviders = sling.getServices(AccessTokenProvider.class, "(name="+providerName+")");
+            if(tokenProviders != null && tokenProviders.length > 0) tokenProvider = tokenProviders[0];
+        }
+        this.hostConfiguration = hostConfiguration;
+        this.httpClient = createHttpClient(hostConfiguration, generalSettings,  resourceResolver);
     }
 
-    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings)
-            throws GeneralSecurityException{
+    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, ResourceResolver resourceResolver)
+            throws GeneralSecurityException, IOException {
         BasicCredentialsProvider provider = new BasicCredentialsProvider();
+        HttpClientBuilder builder = HttpClients.custom();
+        if (hostConfiguration.isOAuthEnabled()) {
+            // If OAuth is enabled, use the AccessTokenProvider to get the token
+            String accessToken = tokenProvider.getAccessToken(resourceResolver, hostConfiguration.getAgentUserId(), null);
+            builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                request.addHeader("Authorization", "Bearer " + accessToken);
+            });
+        } else {
+            // If username and password are set, use them for basic authentication
+            provider.setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+        }
         provider.setCredentials(
                 AuthScope.ANY,
                 new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
@@ -87,7 +116,6 @@ public class RemoteInstance implements Closeable {
                 .setConnectTimeout(connTimeout)
                 .setSocketTimeout(soTimeout)
                 .setCookieSpec(CookieSpecs.STANDARD).build();
-        HttpClientBuilder builder = HttpClients.custom();
         builder.setDefaultRequestConfig(requestConfig)
                 .setDefaultCredentialsProvider(provider);
         if (disableCertCheck) {

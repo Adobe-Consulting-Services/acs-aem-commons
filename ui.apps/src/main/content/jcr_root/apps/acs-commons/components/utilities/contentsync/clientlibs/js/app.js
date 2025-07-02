@@ -54,19 +54,57 @@
         }
     });
 
-    $(document).on("click", ".configureQuickAction", function(e) {
-		var form = $(this).closest("coral-masonry-item").find("coral-card");
-        var host = $(form).data("host");
-        var username = $(form).data("username");
-        var password = $(form).data("password");
-        var action = $(form).data("path");
-        var  dlg = document.querySelector('#modalConfigureHost');
-         $("#configureHost-host").val(host);
-         $("#configureHost-username").val(username);
-         $("#configureHost-password").val(password);
-         $(dlg).find("#createHostForm").attr("action", action);
-         dlg.show();
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+        name: "acs-commons.contentsync.host.create",
+        handler: function(name, el, config, collection, selections) {
+            var dlg = document.getElementById("modalConfigureHost");
+            var form = dlg.querySelector("form");
+            form.action = "/etc/replication/agents.author/*";
+            form.reset();
+            dlg.show();
+        }
+    });
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+        name: "acs-commons.contentsync.host.edit",
+        handler: function(name, el, config, collection, selections) {
+			var card = $(selections).find("coral-card");
+            var properties = card.data("properties");
+            var dlg = document.getElementById("modalConfigureHost");
+            var form = dlg.querySelector("form");
+            form.action = card.data("path");
+            var select = dlg.querySelector("coral-select[name=\"./authType\"]");
+			select.value = properties.authType;
+            select.trigger("change");
+            for(var i=0; i<form.elements.length;i++){
+                var e = form.elements[i];
+                var prefix = "./";
+                if(e.name.startsWith(prefix)){
+                    var key = e.name.substring(prefix.length); // remove leading './'
+                    var value = properties[key];
+                    if(value) e.value = value;
+                }
+            }
+            dlg.show();
+        }
     });
 
+	document.addEventListener("DOMContentLoaded", function() {
+        var dlg = document.getElementById("modalConfigureHost");
+    	dlg.querySelector("coral-select[name=\"./authType\"]")
+            .addEventListener("change", function(e) {
+            	var authType = e.target.value;
+            	dlg.querySelectorAll(".list-option-showhide-target").forEach(function(c){
+                    if(authType === c.dataset.showhidetargetvalue){
+                        c.classList.remove("hidden");
+                    } else {
+                        c.classList.add("hidden");
+                    }
+                });
+        	}	
+        );
+        
+    });
+    
 
+    
 })(document, Granite.$);

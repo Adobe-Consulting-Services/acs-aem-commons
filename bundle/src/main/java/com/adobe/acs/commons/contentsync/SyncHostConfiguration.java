@@ -26,6 +26,7 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +49,20 @@ public class SyncHostConfiguration {
     @ValueMapValue
     private String password;
 
+    @ValueMapValue
+    private String authType;
+
+    @ValueMapValue
+    private String agentId;
+
+    @ValueMapValue
+    private String accessTokenProviderName;
+
     @OSGiService
     private CryptoSupport crypto;
+
+    @Self
+    private Resource resource;
 
     public String getHost() {
         return host;
@@ -68,5 +81,17 @@ public class SyncHostConfiguration {
             }
         }
         return password;
+    }
+
+    public boolean isOAuthEnabled(){
+        return "oauth".equals(authType);
+    }
+
+    public String getAccessTokenProviderName(){
+        return accessTokenProviderName;
+    }
+
+    public String getAgentUserId(){
+        return agentId == null ? resource.getResourceResolver().getUserID() : agentId;
     }
 }
