@@ -165,15 +165,10 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                             fieldLabel="Access Token Provider Name"
                                             name="./accessTokenProviderName"/>
-                                        <agentId
-                                            jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                            fieldLabel="Agent User ID"
-                                            name="./agentId"/>
                                         <warning
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="acs-commons/components/utilities/contentsync/configure/warn"
-                                            text="The name of the token provider must match the name property in your OAuth Access Token Provider configuration, see &quot;&#x9;Adobe Granite Access Token provider using Client Credentials/JWT Credential flow&quot; in the OSGi console&lt;p>The Agent User must have the private key from the AEMaaCS technical account installed in the user key store&lt;/p>"/>
+                                            text="The name of the token provider must match the name property in your OAuth Access Token Provider configuration, see &quot;&#x9;Adobe Granite Access Token provider using Client Credentials/JWT Credential flow&quot; in the OSGi console&lt;p>The user running sync must have the private key from the AEMaaCS technical account installed in the user key store&lt;/p>"/>
                                     </items>
                                     <granite:data
                                         jcr:primaryType="nt:unstructured"

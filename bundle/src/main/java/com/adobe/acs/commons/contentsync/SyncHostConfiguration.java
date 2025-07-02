@@ -53,9 +53,6 @@ public class SyncHostConfiguration {
     private String authType;
 
     @ValueMapValue
-    private String agentId;
-
-    @ValueMapValue
     private String accessTokenProviderName;
 
     @OSGiService
@@ -91,7 +88,4 @@ public class SyncHostConfiguration {
         return accessTokenProviderName;
     }
 
-    public String getAgentUserId(){
-        return agentId == null ? resource.getResourceResolver().getUserID() : agentId;
-    }
 }

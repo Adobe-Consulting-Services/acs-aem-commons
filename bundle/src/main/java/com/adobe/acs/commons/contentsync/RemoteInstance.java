@@ -95,7 +95,7 @@ public class RemoteInstance implements Closeable {
         HttpClientBuilder builder = HttpClients.custom();
         if (hostConfiguration.isOAuthEnabled()) {
             // If OAuth is enabled, use the AccessTokenProvider to get the token
-            String accessToken = tokenProvider.getAccessToken(resourceResolver, hostConfiguration.getAgentUserId(), null);
+            String accessToken = tokenProvider.getAccessToken(resourceResolver, resourceResolver.getUserID(), null);
             builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
                 request.addHeader("Authorization", "Bearer " + accessToken);
             });
