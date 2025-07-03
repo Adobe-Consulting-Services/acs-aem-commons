@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
-import com.adobe.granite.auth.oauth.AccessTokenProvider;
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
@@ -38,9 +38,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.scripting.SlingScriptHelper;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -71,29 +69,21 @@ public class RemoteInstance implements Closeable {
 
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
-    private AccessTokenProvider tokenProvider;
 
+    @Deprecated
     public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
-        this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient(hostConfiguration, generalSettings, null);
-    }
-    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, SlingScriptHelper sling, ResourceResolver resourceResolver) throws GeneralSecurityException, IOException {
-        if(hostConfiguration.isOAuthEnabled()){
-            String providerName = hostConfiguration.getAccessTokenProviderName();
-            AccessTokenProvider[] tokenProviders = sling.getServices(AccessTokenProvider.class, "(name="+providerName+")");
-            if(tokenProviders != null && tokenProviders.length > 0) tokenProvider = tokenProviders[0];
-            else {
-                throw new IllegalArgumentException("Access Token Provider with name '" + providerName + "' not found. ");
-            }
-        }
-        this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient(hostConfiguration, generalSettings,  resourceResolver);
+        this(hostConfiguration, generalSettings, null);
     }
 
-    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, ResourceResolver resourceResolver)
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        this.hostConfiguration = hostConfiguration;
+        this.httpClient = createHttpClient(hostConfiguration, generalSettings,  integrationService);
+    }
+
+    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService)
             throws GeneralSecurityException {
         HttpClientBuilder builder = HttpClients.custom();
-        setAuthentication(hostConfiguration, builder, resourceResolver);
+        setAuthentication(hostConfiguration, builder, integrationService);
         int soTimeout = generalSettings.get(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
         int connTimeout = generalSettings.get(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
         boolean disableCertCheck = generalSettings.get(DISABLE_CERT_CHECK_KEY, false);
@@ -115,20 +105,18 @@ public class RemoteInstance implements Closeable {
         return builder.build();
     }
 
-    void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, ResourceResolver resourceResolver){
+    void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, IntegrationService integrationService){
         if (hostConfiguration.isOAuthEnabled()) {
             // If OAuth is enabled, use the AccessTokenProvider to get the token
             // The session user must have the private key from the Adobe technical account installed in the user key store
-            String agentUserID = resourceResolver.getUserID();
             try {
                 // the lifetime of Adobe's tokens is 24 hours, enough to request once and re-use across all the calls
-                String accessToken = tokenProvider.getAccessToken(resourceResolver, agentUserID, null);
+                String accessToken = integrationService.getAccessToken();
                 builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
                     request.addHeader("Authorization", "Bearer " + accessToken);
                 });
             } catch (Exception e) {
-                String msg = String.format("Failed to get an access token for user: %s %s. " +
-                        "Ensure that the Access Token Provider is configured correctly and the user has the necessary permissions.", agentUserID, e.getMessage());
+                String msg = String.format("Failed to get an access token: %s. ", e.getMessage());
                 throw new IllegalArgumentException(msg);
             }
         } else {

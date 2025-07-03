@@ -36,7 +36,8 @@
 	org.apache.sling.api.resource.ResourceUtil,
 	org.apache.commons.lang3.time.DurationFormatUtils,
     org.apache.commons.io.output.TeeWriter,
-	com.adobe.acs.commons.contentsync.*
+	com.adobe.acs.commons.contentsync.*,
+	com.adobe.acs.commons.adobeio.service.IntegrationService
 "%><%
 %>
 <html>
@@ -86,8 +87,9 @@
 	StringWriter tempWriter = new StringWriter();
     TeeWriter printWriter = new TeeWriter(Arrays.asList(new PrintWriter(out), new PrintWriter(tempWriter)));
 
+    IntegrationService integrationService = sling.getService(IntegrationService.class);
     UpdateStrategy updateStrategy = sling.getServices(UpdateStrategy.class, "(component.name=" + strategyPid + ")")[0];
-    try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig, generalSettings, sling, resourceResolver)){
+    try(RemoteInstance remoteInstance = new RemoteInstance(hostConfig, generalSettings, integrationService)){
         ContentImporter importer = sling.getService(ContentImporter.class);
         ContentSync contentSync = new ContentSync(remoteInstance, resourceResolver, importer);
         ContentCatalog contentCatalog = new ContentCatalog(remoteInstance, catalogServlet);

@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
-import com.adobe.granite.auth.oauth.AccessTokenProvider;
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.adobe.granite.crypto.CryptoSupport;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.wcm.api.Page;
@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.CONNECT_TIMEOUT_KEY;
@@ -65,8 +64,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -83,7 +80,6 @@ public class TestContentSync {
     ContentReader reader;
     RemoteInstance remoteInstance;
     CryptoSupport crypto;
-
 
 
     @Before
@@ -104,7 +100,7 @@ public class TestContentSync {
                 context.getService(ModelFactory.class)
                         .createModel(context.resourceResolver().getResource(configPath), SyncHostConfiguration.class);
         ContentImporter contentImporter = context.registerInjectActivateService(new DefaultContentImporter());
-        remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings, null, context.resourceResolver()));
+        remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings, null));
 
         contentSync = new ContentSync(remoteInstance, context.resourceResolver(), contentImporter);
 
@@ -439,8 +435,7 @@ public class TestContentSync {
     public void testSetupOauthInstance() throws Exception {
         String configPath =  HOSTS_PATH + "/oauthHost";
 
-        AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
-        context.registerService(AccessTokenProvider.class, accessTokenProvider, Collections.singletonMap("name", "publish-cloud"));
+        IntegrationService integrationService = mock(IntegrationService.class);
 
         Resource configResource = context.create().resource(configPath,
                         "host", "http://localhost:4502", "authType", "oauth", "accessTokenProviderName", "publish-cloud");
@@ -448,19 +443,16 @@ public class TestContentSync {
         SyncHostConfiguration hostConfiguration =
                 context.getService(ModelFactory.class).createModel(configResource, SyncHostConfiguration.class);
 
-        remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), context.slingScriptHelper(), context.resourceResolver());
-        verify(accessTokenProvider, atLeastOnce()).getAccessToken(eq(context.resourceResolver()), eq(context.resourceResolver().getUserID()), isNull()); // no need to call the remote instance
+        remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), integrationService);
+        verify(integrationService, atLeastOnce()).getAccessToken();
     }
 
     @Test
     public void testErrorGettingAccessToken() throws Exception {
         String configPath =  HOSTS_PATH + "/oauthHost";
 
-        AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
-        doThrow(new RuntimeException("user key store is not initialized")).when(accessTokenProvider).getAccessToken(
-                eq(context.resourceResolver()), eq(context.resourceResolver().getUserID()), isNull());
-
-        context.registerService(AccessTokenProvider.class, accessTokenProvider, Collections.singletonMap("name", "publish-cloud"));
+        IntegrationService integrationService = mock(IntegrationService.class);
+        doThrow(new RuntimeException("unauthorized client")).when(integrationService).getAccessToken();
 
         Resource configResource = context.create().resource(configPath,
                 "host", "http://localhost:4502", "authType", "oauth", "accessTokenProviderName", "publish-cloud");
@@ -469,12 +461,10 @@ public class TestContentSync {
                 context.getService(ModelFactory.class).createModel(configResource, SyncHostConfiguration.class);
 
         try {
-            remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), context.slingScriptHelper(), context.resourceResolver());
+            remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), integrationService);
             fail("Expected exception");
         } catch (IllegalArgumentException e) {
-            String expectedMsg = "Failed to get an access token for user: admin user key store is not initialized. " +
-                    "Ensure that the Access Token Provider is configured correctly and the user has the necessary permissions.";
-            assertEquals(expectedMsg, e.getMessage());
+            assertEquals("Failed to get an access token: unauthorized client.", e.getMessage());
         }
     }
 }
