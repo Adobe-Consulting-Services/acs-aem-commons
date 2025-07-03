@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.contentsync;
 
 import com.adobe.granite.auth.oauth.AccessTokenProvider;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
@@ -37,7 +36,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -84,30 +82,18 @@ public class RemoteInstance implements Closeable {
             String providerName = hostConfiguration.getAccessTokenProviderName();
             AccessTokenProvider[] tokenProviders = sling.getServices(AccessTokenProvider.class, "(name="+providerName+")");
             if(tokenProviders != null && tokenProviders.length > 0) tokenProvider = tokenProviders[0];
+            else {
+                throw new IllegalArgumentException("Access Token Provider with name '" + providerName + "' not found. ");
+            }
         }
         this.hostConfiguration = hostConfiguration;
         this.httpClient = createHttpClient(hostConfiguration, generalSettings,  resourceResolver);
     }
 
     private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, ResourceResolver resourceResolver)
-            throws GeneralSecurityException, IOException {
-        BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            throws GeneralSecurityException {
         HttpClientBuilder builder = HttpClients.custom();
-        if (hostConfiguration.isOAuthEnabled()) {
-            // If OAuth is enabled, use the AccessTokenProvider to get the token
-            String accessToken = tokenProvider.getAccessToken(resourceResolver, resourceResolver.getUserID(), null);
-            builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                request.addHeader("Authorization", "Bearer " + accessToken);
-            });
-        } else {
-            // If username and password are set, use them for basic authentication
-            provider.setCredentials(
-                    AuthScope.ANY,
-                    new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
-        }
-        provider.setCredentials(
-                AuthScope.ANY,
-                new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+        setAuthentication(hostConfiguration, builder, resourceResolver);
         int soTimeout = generalSettings.get(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
         int connTimeout = generalSettings.get(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
         boolean disableCertCheck = generalSettings.get(DISABLE_CERT_CHECK_KEY, false);
@@ -116,8 +102,7 @@ public class RemoteInstance implements Closeable {
                 .setConnectTimeout(connTimeout)
                 .setSocketTimeout(soTimeout)
                 .setCookieSpec(CookieSpecs.STANDARD).build();
-        builder.setDefaultRequestConfig(requestConfig)
-                .setDefaultCredentialsProvider(provider);
+        builder.setDefaultRequestConfig(requestConfig);
         if (disableCertCheck) {
             // Disable hostname verification and allow self-signed certificates
             SSLContextBuilder sslbuilder = new SSLContextBuilder();
@@ -128,6 +113,33 @@ public class RemoteInstance implements Closeable {
             builder.setSSLSocketFactory(sslsf);
         }
         return builder.build();
+    }
+
+    void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, ResourceResolver resourceResolver){
+        if (hostConfiguration.isOAuthEnabled()) {
+            // If OAuth is enabled, use the AccessTokenProvider to get the token
+            // The session user must have the private key from the Adobe technical account installed in the user key store
+            String agentUserID = resourceResolver.getUserID();
+            try {
+                // the lifetime of Adobe's tokens is 24 hours, enough to request once and re-use across all the calls
+                String accessToken = tokenProvider.getAccessToken(resourceResolver, agentUserID, null);
+                builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    request.addHeader("Authorization", "Bearer " + accessToken);
+                });
+            } catch (Exception e) {
+                String msg = String.format("Failed to get an access token for user: %s %s. " +
+                        "Ensure that the Access Token Provider is configured correctly and the user has the necessary permissions.", agentUserID, e.getMessage());
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            // If username and password are set, use them for basic authentication
+            BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            provider.setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+            builder.setDefaultCredentialsProvider(provider);
+        }
+
     }
 
     public CloseableHttpClient getHttpClient() {

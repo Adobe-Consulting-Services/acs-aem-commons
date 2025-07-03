@@ -69,4 +69,15 @@ public class TestSyncHostConfiguration {
         verify(crypto, times(1)).isProtected(captor.capture());
         verify(crypto, times(1)).unprotect(captor.capture());
     }
+
+    @Test
+    public void testIsAuthEnabled() {
+        configPath = HOSTS_PATH + "/host2";
+        SyncHostConfiguration oauthConfiguration = getConfiguration("host", "http://localhost:4502", "authType", "oauth");
+        assertEquals(true, oauthConfiguration.isOAuthEnabled());
+
+        configPath = HOSTS_PATH + "/host3";
+        SyncHostConfiguration basicConfiguration = getConfiguration("host", "http://localhost:4502", "authType", "basic");
+        assertEquals(false, basicConfiguration.isOAuthEnabled());
+    }
 }
