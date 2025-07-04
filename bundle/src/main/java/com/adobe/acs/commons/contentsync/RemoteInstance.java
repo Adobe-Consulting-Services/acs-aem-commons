@@ -70,6 +70,10 @@ public class RemoteInstance implements Closeable {
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
 
+    /**
+     *
+     * @deprecated
+     */
     @Deprecated
     public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
         this(hostConfiguration, generalSettings, null);
