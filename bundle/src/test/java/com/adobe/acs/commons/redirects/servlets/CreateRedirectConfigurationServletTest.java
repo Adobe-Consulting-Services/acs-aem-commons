@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -118,5 +119,27 @@ public class CreateRedirectConfigurationServletTest {
         // return 409 if already exists
         servlet.doPost(request, context.response());
         assertEquals(HttpServletResponse.SC_CONFLICT, context.response().getStatus());
+    }
+
+    /**
+     * #3594 create new configurations ad hoc
+     */
+    @Test
+    public void createCreateParentFolders() throws ServletException, IOException {
+        MockSlingHttpServletRequest request = context.request();
+        String path = "/conf/one/two/three";
+        request.addRequestParameter("path", path);
+        servlet.doPost(request, context.response());
+
+        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
+
+        assertNotNull(context.resourceResolver().getResource(path));
+
+        // Read configurations via Model
+        Configurations confModel = request.adaptTo(Configurations.class);
+        Collection<RedirectConfiguration> configurations = confModel.getConfigurations();
+        RedirectConfiguration cfg = configurations.iterator().next();
+        assertEquals("/conf/one/two/three/settings/redirects", cfg.getPath());
+
     }
 }
