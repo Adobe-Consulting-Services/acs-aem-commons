@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -68,17 +70,24 @@ public class RemoteInstance implements Closeable {
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
 
-    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException{
-        this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient(hostConfiguration, generalSettings);
+    /**
+     *
+     * @deprecated
+     */
+    @Deprecated
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
+        this(hostConfiguration, generalSettings, null);
     }
 
-    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings)
-            throws GeneralSecurityException{
-        BasicCredentialsProvider provider = new BasicCredentialsProvider();
-        provider.setCredentials(
-                AuthScope.ANY,
-                new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        this.hostConfiguration = hostConfiguration;
+        this.httpClient = createHttpClient(hostConfiguration, generalSettings,  integrationService);
+    }
+
+    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService)
+            throws GeneralSecurityException {
+        HttpClientBuilder builder = HttpClients.custom();
+        setAuthentication(hostConfiguration, builder, integrationService);
         int soTimeout = generalSettings.get(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
         int connTimeout = generalSettings.get(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
         boolean disableCertCheck = generalSettings.get(DISABLE_CERT_CHECK_KEY, false);
@@ -87,9 +96,7 @@ public class RemoteInstance implements Closeable {
                 .setConnectTimeout(connTimeout)
                 .setSocketTimeout(soTimeout)
                 .setCookieSpec(CookieSpecs.STANDARD).build();
-        HttpClientBuilder builder = HttpClients.custom();
-        builder.setDefaultRequestConfig(requestConfig)
-                .setDefaultCredentialsProvider(provider);
+        builder.setDefaultRequestConfig(requestConfig);
         if (disableCertCheck) {
             // Disable hostname verification and allow self-signed certificates
             SSLContextBuilder sslbuilder = new SSLContextBuilder();
@@ -100,6 +107,31 @@ public class RemoteInstance implements Closeable {
             builder.setSSLSocketFactory(sslsf);
         }
         return builder.build();
+    }
+
+    void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, IntegrationService integrationService){
+        if (hostConfiguration.isOAuthEnabled()) {
+            // If OAuth is enabled, use the AccessTokenProvider to get the token
+            // The session user must have the private key from the Adobe technical account installed in the user key store
+            try {
+                // the lifetime of Adobe's tokens is 24 hours, enough to request once and re-use across all the calls
+                String accessToken = integrationService.getAccessToken();
+                builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    request.addHeader("Authorization", "Bearer " + accessToken);
+                });
+            } catch (Exception e) {
+                String msg = String.format("Failed to get an access token: %s.", e.getMessage());
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            // If username and password are set, use them for basic authentication
+            BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            provider.setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+            builder.setDefaultCredentialsProvider(provider);
+        }
+
     }
 
     public CloseableHttpClient getHttpClient() {
