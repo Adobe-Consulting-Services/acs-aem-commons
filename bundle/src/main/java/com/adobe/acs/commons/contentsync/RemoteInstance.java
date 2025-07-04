@@ -116,7 +116,7 @@ public class RemoteInstance implements Closeable {
                     request.addHeader("Authorization", "Bearer " + accessToken);
                 });
             } catch (Exception e) {
-                String msg = String.format("Failed to get an access token: %s. ", e.getMessage());
+                String msg = String.format("Failed to get an access token: %s.", e.getMessage());
                 throw new IllegalArgumentException(msg);
             }
         } else {
