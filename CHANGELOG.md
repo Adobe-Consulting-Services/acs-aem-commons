@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 
 ## Unreleased ([details][unreleased changes details])
-- # Content Sync: in case of an error print the exception and continue instead of aborting
+- #3601 Content Sync: in case of an error print the exception and continue instead of aborting
 
 ## 6.12.0 - 2025-04-28
 
