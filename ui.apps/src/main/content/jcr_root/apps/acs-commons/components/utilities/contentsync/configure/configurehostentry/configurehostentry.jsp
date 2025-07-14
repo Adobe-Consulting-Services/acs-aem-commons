@@ -30,6 +30,7 @@
 	String path =  resource.getPath();
 	String href = "/apps/acs-commons/content/contentsync.html" + path;
 	String url = valueMap.get("host", "");
+	String name = valueMap.get("name", "");
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
@@ -49,6 +50,7 @@
         </coral-icon>
     </coral-card-asset>
     <coral-card-content class="customCardContent">
+        <coral-card-title class="foundation-collection-item-title"><h4><%=name%></h4></coral-card-title>
         <coral-card-title class="customCardTitle">
             <table>
                 <tr>

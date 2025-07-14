@@ -109,13 +109,20 @@
                             method="POST"
                             style="vertical">
                             <items jcr:primaryType="nt:unstructured">
-                                <host
+                                <name
                                     granite:id="configureHost-host"
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    emptyText="http://localhost:4502"
+                                    emptyText="name, e.g. aem-cloud-dev"
                                     required="true"
-                                    name="./host"/>
+                                    name="./name"/>
+                                <host
+                                        granite:id="configureHost-host"
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                        emptyText="http://localhost:4502"
+                                        required="true"
+                                        name="./host"/>
                                 <authType
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/select"
@@ -164,7 +171,7 @@
                                         <warning
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="acs-commons/components/utilities/contentsync/configure/warn"
-                                            text="To use OAuth you need to configure &lt;code>ACS AEM Commons - Adobe I/O Integration Configuration&lt;/code> via &lt;a href=&quot;http://localhost:4504/system/console/configMgr/com.adobe.acs.commons.adobeio.service.impl.IntegrationServiceImpl&quot;>/system/console/configMgr&lt;/a>&#xa;&lt;p>&#xa;References:&#xa;&lt;ul>&#xa;&lt;li>&lt;a href=&quot;https://adobe-consulting-services.github.io/acs-aem-commons/features/adobe-io-apis/index.html&quot;>https://adobe-consulting-services.github.io/acs-aem-commons/features/adobe-io-apis/index.html&lt;/a>&lt;/li>&#xa;&lt;li>&lt;a href=&quot;https://adobe-consulting-services.github.io/acs-aem-commons/features/contentsync/index.html&quot;>https://adobe-consulting-services.github.io/acs-aem-commons/features/contentsync/index.html&lt;/a>&lt;/li>&#xa;&lt;/ul>&#xa;&lt;/p>&#xa;"/>
+                                            text="To use OAuth you need to configure &lt;code>ACS AEM Commons - Adobe I/O Integration Configuration&lt;/code> via &lt;a href=&quot;http://localhost:4502/system/console/configMgr/com.adobe.acs.commons.adobeio.service.impl.IntegrationServiceImpl&quot;>/system/console/configMgr&lt;/a>&#xa;&lt;p>&#xa;References:&#xa;&lt;ul>&#xa;&lt;li>&lt;a href=&quot;https://adobe-consulting-services.github.io/acs-aem-commons/features/adobe-io-apis/index.html&quot;>https://adobe-consulting-services.github.io/acs-aem-commons/features/adobe-io-apis/index.html&lt;/a>&lt;/li>&#xa;&lt;li>&lt;a href=&quot;https://adobe-consulting-services.github.io/acs-aem-commons/features/contentsync/index.html&quot;>https://adobe-consulting-services.github.io/acs-aem-commons/features/contentsync/index.html&lt;/a>&lt;/li>&#xa;&lt;/ul>&#xa;&lt;/p>&#xa;"/>
                                     </items>
                                     <granite:data
                                         jcr:primaryType="nt:unstructured"
