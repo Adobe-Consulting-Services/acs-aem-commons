@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
@@ -44,73 +44,42 @@
         </views>
         <actions jcr:primaryType="nt:unstructured">
             <primary jcr:primaryType="nt:unstructured">
-                <configure
+                <general
                     granite:class="foundation-toggleable-control"
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"
-                    href="#"
                     icon="gear"
                     text="General Settings"
-                    variant="actionBar"
-                    x-cq-linkchecker="skip">
+                    variant="actionBar">
                     <granite:data
                         jcr:primaryType="nt:unstructured"
                         foundation-toggleable-control-action="show"
                         foundation-toggleable-control-target="#modalGeneralSettings"/>
-                </configure>
-                <back
-                    granite:hidden="{Boolean}true"
-                    granite:id="backButton"
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                    href="/libs/granite/operations/content/healthreports/healthreportlist.html"
-                    icon="chevronLeft"
-                    variant="actionBar"/>
+                </general>
                 <add
                     granite:class="foundation-toggleable-control"
                     jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                    href="#"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="acs-commons.contentsync.host.create"
                     icon="addCircle"
                     text="Add Host"
-                    variant="actionBar"
-                    x-cq-linkchecker="skip">
-                    <granite:data
-                        jcr:primaryType="nt:unstructured"
-                        foundation-toggleable-control-action="show"
-                        foundation-toggleable-control-target="#modalConfigureHost"/>
-                </add>
+                    variant="actionBar"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured"/>
             <selection jcr:primaryType="nt:unstructured">
                 <configure
-                    granite:hidden="{Boolean}true"
-                    granite:id="configureHealthCheckButton"
                     jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                    foundation-collection-action="\{&quot;target&quot;:&quot;.granite-health-reports-collection&quot;, &quot;activeSelectionCount&quot;:&quot;single&quot;}"
-                    href="/system/console/configMgr"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="acs-commons.contentsync.host.edit"
                     icon="gear"
-                    target="_blank"
                     text="Configure"
-                    variant="actionBar"
-                    x-cq-linkchecker="skip"/>
-                <view
-                    granite:hidden="{Boolean}true"
-                    granite:id="viewHealthCheckDetailsButton"
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                    href="/system/console/configMgr"
-                    icon="browse"
-                    text="View"
-                    variant="actionBar"
-                    x-cq-linkchecker="skip"/>
+                    variant="actionBar"/>
                 <delete
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                    action="acs-commons.dashboard.task.delete"
+                    action="acs-commons.contentsync.host.delete"
                     activeSelectionCount="single"
-                    href=""
+                    href="\0"
                     icon="delete"
                     target=".contentsync-hosts-task-collection"
                     text="Delete"
@@ -140,24 +109,74 @@
                             method="POST"
                             style="vertical">
                             <items jcr:primaryType="nt:unstructured">
-                                <host
+                                <name
                                     granite:id="configureHost-host"
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    emptyText="http://localhost:4502"
-                                    name="./host"/>
-                                <username
-                                    granite:id="configureHost-username"
+                                    emptyText="name, e.g. aem-cloud-dev"
+                                    required="true"
+                                    name="./name"/>
+                                <host
+                                        granite:id="configureHost-host"
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                        emptyText="http://localhost:4502"
+                                        required="true"
+                                        name="./host"/>
+                                <authType
                                     jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                    emptyText="username"
-                                    name="./username"/>
-                                <password
-                                    granite:id="configureHost-password"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Auth Type"
+                                    name="./authType">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <basic
+                                            jcr:primaryType="nt:unstructured"
+                                            text="Basic Auth"
+                                            value="basic"/>
+                                        <oauth
+                                            jcr:primaryType="nt:unstructured"
+                                            text="OAuth 2.0"
+                                            value="oauth"/>
+                                    </items>
+                                </authType>
+                                <basic
+                                    granite:class="list-option-showhide-target"
                                     jcr:primaryType="nt:unstructured"
-                                    sling:resourceType="granite/ui/components/coral/foundation/form/password"
-                                    emptyText="password"
-                                    name="./password"/>
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <username
+                                            granite:id="configureHost-username"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            emptyText="username"
+                                            fieldLabel="User"
+                                            name="./username"/>
+                                        <password
+                                            granite:id="configureHost-password"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/password"
+                                            emptyText="password"
+                                            fieldLabel="Password"
+                                            name="./password"/>
+                                    </items>
+                                    <granite:data
+                                        jcr:primaryType="nt:unstructured"
+                                        showhidetargetvalue="basic"/>
+                                </basic>
+                                <oauth
+                                    granite:class="hidden list-option-showhide-target"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <warning
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="acs-commons/components/utilities/contentsync/configure/warn"
+                                            text="To use OAuth you need to configure &lt;code>ACS AEM Commons - Adobe I/O Integration Configuration&lt;/code> via &lt;a href=&quot;http://localhost:4502/system/console/configMgr/com.adobe.acs.commons.adobeio.service.impl.IntegrationServiceImpl&quot;>/system/console/configMgr&lt;/a>&#xa;&lt;p>&#xa;References:&#xa;&lt;ul>&#xa;&lt;li>&lt;a href=&quot;https://adobe-consulting-services.github.io/acs-aem-commons/features/adobe-io-apis/index.html&quot;>https://adobe-consulting-services.github.io/acs-aem-commons/features/adobe-io-apis/index.html&lt;/a>&lt;/li>&#xa;&lt;li>&lt;a href=&quot;https://adobe-consulting-services.github.io/acs-aem-commons/features/contentsync/index.html&quot;>https://adobe-consulting-services.github.io/acs-aem-commons/features/contentsync/index.html&lt;/a>&lt;/li>&#xa;&lt;/ul>&#xa;&lt;/p>&#xa;"/>
+                                    </items>
+                                    <granite:data
+                                        jcr:primaryType="nt:unstructured"
+                                        showhidetargetvalue="oauth"/>
+                                </oauth>
                                 <resourceType
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
@@ -257,12 +276,12 @@
                                             name="./connTimeout"
                                             value="5000"/>
                                         <disable-cert-check
-                                                jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                                text="Disable SSL Certificate Check"
-                                                fieldDescription="If selected it will disable certificate check for the SSL connection."
-                                                name="./disableCertCheck"
-                                                value="true"/>
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                            fieldDescription="If selected it will disable certificate check for the SSL connection."
+                                            name="./disableCertCheck"
+                                            text="Disable SSL Certificate Check"
+                                            value="true"/>
                                     </items>
                                 </fieldset>
                             </items>

@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.adobe.granite.crypto.CryptoSupport;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.wcm.api.Page;
@@ -61,9 +62,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mockConstructionWithAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -76,7 +80,6 @@ public class TestContentSync {
     ContentReader reader;
     RemoteInstance remoteInstance;
     CryptoSupport crypto;
-
 
 
     @Before
@@ -97,7 +100,7 @@ public class TestContentSync {
                 context.getService(ModelFactory.class)
                         .createModel(context.resourceResolver().getResource(configPath), SyncHostConfiguration.class);
         ContentImporter contentImporter = context.registerInjectActivateService(new DefaultContentImporter());
-        remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings));
+        remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings, null));
 
         contentSync = new ContentSync(remoteInstance, context.resourceResolver(), contentImporter);
 
@@ -426,5 +429,42 @@ public class TestContentSync {
         ValueMap vm = context.resourceResolver().getResource(path + "/jcr:content").getValueMap();
         assertEquals("FAQs", vm.get("jcr:title"));
         assertEquals(true, vm.get("jcr:isCheckedOut"));
+    }
+
+    @Test
+    public void testSetupOauthInstance() throws Exception {
+        String configPath =  HOSTS_PATH + "/oauthHost";
+
+        IntegrationService integrationService = mock(IntegrationService.class);
+
+        Resource configResource = context.create().resource(configPath,
+                        "host", "http://localhost:4502", "authType", "oauth", "accessTokenProviderName", "publish-cloud");
+        Resource generalSettings = context.resourceResolver().getResource(SETTINGS_PATH);
+        SyncHostConfiguration hostConfiguration =
+                context.getService(ModelFactory.class).createModel(configResource, SyncHostConfiguration.class);
+
+        remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), integrationService);
+        verify(integrationService, atLeastOnce()).getAccessToken();
+    }
+
+    @Test
+    public void testErrorGettingAccessToken() throws Exception {
+        String configPath =  HOSTS_PATH + "/oauthHost";
+
+        IntegrationService integrationService = mock(IntegrationService.class);
+        doThrow(new RuntimeException("unauthorized client")).when(integrationService).getAccessToken();
+
+        Resource configResource = context.create().resource(configPath,
+                "host", "http://localhost:4502", "authType", "oauth", "accessTokenProviderName", "publish-cloud");
+        Resource generalSettings = context.resourceResolver().getResource(SETTINGS_PATH);
+        SyncHostConfiguration hostConfiguration =
+                context.getService(ModelFactory.class).createModel(configResource, SyncHostConfiguration.class);
+
+        try {
+            remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), integrationService);
+            fail("Expected exception");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Failed to get an access token: unauthorized client.", e.getMessage());
+        }
     }
 }

@@ -17,5 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@org.osgi.annotation.versioning.Version("6.12.0")
+@org.osgi.annotation.versioning.Version("6.13.0")
 package com.adobe.acs.commons.contentsync;
