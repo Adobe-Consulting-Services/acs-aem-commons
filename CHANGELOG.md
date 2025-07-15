@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
+- #3579 Redirect manager: fulltext search toggle doesn't work
 - #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
