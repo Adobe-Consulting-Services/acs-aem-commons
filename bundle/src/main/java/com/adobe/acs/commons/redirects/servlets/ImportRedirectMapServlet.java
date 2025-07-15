@@ -41,12 +41,14 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.apache.sling.servlets.post.HtmlResponse;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,31 +98,37 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
-        response.setContentType("application/json");
+        try {
+            response.setContentType("application/json");
 
-        String path = request.getParameter("path");
-        boolean replace = request.getParameter("replace") != null;
-        Resource storageRoot = request.getResourceResolver().getResource(path);
-        log.debug("Updating redirect maps at {}", storageRoot.getPath());
-        Map<String, Resource> jcrRules;
-        if(replace){
-            jcrRules = Collections.emptyMap();
-            for(Resource ch : storageRoot.getChildren()){
-                ch.getResourceResolver().delete(ch);
+            String path = request.getParameter("path");
+            boolean replace = request.getParameter("replace") != null;
+            Resource storageRoot = request.getResourceResolver().getResource(path);
+            log.debug("Updating redirect maps at {}", storageRoot.getPath());
+            Map<String, Resource> jcrRules;
+            if (replace) {
+                jcrRules = Collections.emptyMap();
+                for (Resource ch : storageRoot.getChildren()) {
+                    ch.getResourceResolver().delete(ch);
+                }
+            } else {
+                jcrRules = getRules(storageRoot); // rules stored in crx
             }
-        } else {
-            jcrRules = getRules(storageRoot); // rules stored in crx
-        }
 
-        ImportLog auditLog = new ImportLog();
-        Collection<Map<String, Object>> xlsRules;
-        try (InputStream is = getFile(request)) {
-            xlsRules = readEntries(is, auditLog); // rules read from Excel
+            ImportLog auditLog = new ImportLog();
+            Collection<Map<String, Object>> xlsRules;
+            try (InputStream is = getFile(request)) {
+                xlsRules = readEntries(is, auditLog); // rules read from Excel
+            }
+            if (!xlsRules.isEmpty()) {
+                update(storageRoot, xlsRules, jcrRules);
+            }
+            persistAuditLog(request.getResourceResolver(), auditLog, response.getWriter());
+        } catch (IOException e) {
+            HtmlResponse htmlResponse = new HtmlResponse();
+            htmlResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to import redirects: " + e.getMessage());
+            htmlResponse.send(response, true);
         }
-        if (!xlsRules.isEmpty()) {
-            update(storageRoot, xlsRules, jcrRules);
-        }
-        persistAuditLog(request.getResourceResolver(), auditLog, response.getWriter());
     }
 
     /**
