@@ -34,11 +34,13 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.servlets.post.HtmlResponse;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
@@ -66,18 +68,23 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException {
+        try {
+            String path = request.getParameter("path");
+            Resource root = request.getResourceResolver().getResource(path);
+            log.debug("Requesting redirect maps from {}", path);
 
-        String path = request.getParameter("path");
-        Resource root = request.getResourceResolver().getResource(path);
-        log.debug("Requesting redirect maps from {}", path);
+            Collection<RedirectRule> rules = RedirectFilter.getRules(root);
+            Workbook wb = export(rules);
 
-        Collection<RedirectRule> rules = RedirectFilter.getRules(root);
-        Workbook wb = export(rules);
-
-        response.setContentType(CONTENT_TYPE_EXCEL);
-        String fileName = root.getParent().getParent().getName() + "-redirects";
-        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + ".xlsx\" ");
-        wb.write(response.getOutputStream());
+            response.setContentType(CONTENT_TYPE_EXCEL);
+            String fileName = root.getParent().getParent().getName() + "-redirects";
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + ".xlsx\" ");
+            wb.write(response.getOutputStream());
+        } catch (IOException e){
+            HtmlResponse htmlResponse = new HtmlResponse();
+            htmlResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to export redirects: " + e.getMessage());
+            htmlResponse.send(response, true);
+        }
     }
 
     static Workbook export(Collection<RedirectRule> rules) {

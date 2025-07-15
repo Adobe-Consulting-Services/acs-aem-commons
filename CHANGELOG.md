@@ -10,13 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 
 ## Unreleased ([details][unreleased changes details])
-- #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
-
-## 6.12.0 - 2025-04-28
 
 ### Changed
 
 - #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
+- #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.* should expose error messages to end users
+- #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
 
 ### Fixed
 
