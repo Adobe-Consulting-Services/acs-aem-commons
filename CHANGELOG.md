@@ -8,17 +8,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
-## Unreleased ([details][unreleased changes details])
-- #3600 Content Sync: support OAuth authentication
 
-## 6.12.0 - 2025-04-28
+## Unreleased ([details][unreleased changes details])
 
 ### Changed
 
+- #3600 Content Sync: support OAuth authentication
+- #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
 - #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
 
 ### Fixed
 
+- #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
+- #3579 Redirect manager: fulltext search toggle doesn't work
 - #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
