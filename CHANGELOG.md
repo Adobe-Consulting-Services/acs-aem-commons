@@ -9,9 +9,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
-- #3579 Redirect manager: fulltext search toggle doesn't work
-
-## 6.12.0 - 2025-04-28
 
 ### Changed
 
@@ -19,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
+- #3579 Redirect manager: fulltext search toggle doesn't work
 - #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
