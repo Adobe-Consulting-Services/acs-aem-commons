@@ -164,29 +164,30 @@
                     println(printWriter, "\timporting data");
                     try {
                         contentSync.importData(item, sanitizedJson);
+                        if(!binaryProperties.isEmpty()){
+                            println(printWriter, "\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
+                            boolean contentResource = item.hasContentResource();
+                            String basePath = path + (contentResource ? "/jcr:content" : "");
+                            List<String> propertyPaths = binaryProperties.stream().map(p -> basePath + p).collect(Collectors.toList());
+                            contentSync.copyBinaries(propertyPaths);
+                        }
+
+                        String parentPath = ResourceUtil.getParent(path);
+                        if(parentPath.startsWith(root)){
+                            sortedNodes.add(parentPath);
+                        }
+
+                        if(observationData != null){
+                            session.getWorkspace().getObservationManager().setUserData(observationData);
+                        }
+
+                        session.save();
+                        updatedResources.add(path);
                     } catch (RepositoryException e){
                         error(out, e);
                         resourceResolver.revert();
                         continue;
                     }
-                    if(!binaryProperties.isEmpty()){
-                        println(printWriter, "\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
-                        boolean contentResource = item.hasContentResource();
-                        String basePath = path + (contentResource ? "/jcr:content" : "");
-                        List<String> propertyPaths = binaryProperties.stream().map(p -> basePath + p).collect(Collectors.toList());
-                        contentSync.copyBinaries(propertyPaths);
-                    }
-
-			        String parentPath = ResourceUtil.getParent(path);
-                    if(parentPath.startsWith(root)){
-                        sortedNodes.add(parentPath);
-                    }
-
-                    if(observationData != null){
-                        session.getWorkspace().getObservationManager().setUserData(observationData);
-                    }
-
-                    session.save();
 
                     // print ETA every 5 seconds
                     if(System.currentTimeMillis() - t00 > 5000L){
@@ -199,8 +200,6 @@
                         t00 = System.currentTimeMillis();
                         println(printWriter, etaMsg);
                     }
-
-                    updatedResources.add(path);
 
                     out.flush();
                 }
