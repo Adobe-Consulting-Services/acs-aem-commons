@@ -9,9 +9,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
+
+### Changed
+
+- #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
+
+### Fixed
+
 - #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
+- #3579 Redirect manager: fulltext search toggle doesn't work
+- #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
+
+### Changed
 
 - #3536 Granite Include Obscures included Resource Type
 - #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
@@ -19,6 +30,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3555 Content Sync: prevent timeout errors when sync-ing AEM cloud instances with large volumes of data
 - #3560 Redirect Manager: url-encode search terms in Full Text search mode
 - #3562 Fixed compilation errors in iscurrentusermemberof render condition
+- #3457 Allow disabling the ContentPolicyValueInjector
 
  ## 6.11.0 - 2025-03-14
 
