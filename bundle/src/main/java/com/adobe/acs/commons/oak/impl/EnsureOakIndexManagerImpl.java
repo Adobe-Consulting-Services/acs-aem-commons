@@ -1,8 +1,9 @@
-/*
- * ACS AEM Commons
- *
- * Copyright (C) 2013 - 2023 Adobe
- *
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2025 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.oak.impl;
 
@@ -71,7 +73,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Designate(ocd = EnsureOakIndexManagerImpl.Config.class)
 //@formatter:on
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
-    private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerImpl.class);
 
     //@formatter:off
     private static final String[] DEFAULT_ADDITIONAL_IGNORE_PROPERTIES = new String[]{};
@@ -95,21 +96,14 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         String webconsole_configurationFactory_nameHint() default "Additional Ignore properties: {properties.ignore}";
 
     }
+    //@formatter:on
 
     // Disable this feature on AEM as a Cloud Service
     @Reference(target="(distribution=classic)")
     RequireAem requireAem;
 
-    @Reference(
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policyOption = ReferencePolicyOption.GREEDY,
-            policy = ReferencePolicy.DYNAMIC,
-            fieldOption = FieldOption.UPDATE
-    )
-    // Thread-safe ArrayList to track EnsureIndex service registrations
-    private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
-            new CopyOnWriteArrayList<AppliableEnsureOakIndex>();
-    //@formatter:on
+    @Reference
+    EnsureOakIndexExecutor ensureOakIndexExecutor;
 
     public EnsureOakIndexManagerImpl() throws NotCompliantMBeanException {
         super(EnsureOakIndexManagerMBean.class);
@@ -120,20 +114,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
      */
     @Override
     public final int ensureAll(boolean force) {
-        log.info("Applying all un-applied ensure index definitions");
-
-        int count = 0;
-        for (AppliableEnsureOakIndex index : this.ensureIndexes) {
-            if (!index.isApplied() || force) {
-                index.apply(force);
-                count++;
-                log.debug("Started applying index definition on [ {} ]", index);
-            } else {
-                log.debug("Skipping... [ {} ] is already applied.", index);
-            }
-        }
-
-        return count;
+        return ensureOakIndexExecutor.ensureAll(force);
     }
 
     /**
@@ -142,30 +123,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     @Override
     public final int ensure(final boolean force,
                             final String ensureDefinitionPath) {
-        int count = 0;
-        for (AppliableEnsureOakIndex index : this.ensureIndexes) {
-            if ((!index.isApplied() || force)
-                    && StringUtils.equals(ensureDefinitionPath, index.getEnsureDefinitionsPath())) {
-                index.apply(force);
-                count++;
-                log.debug("Started async job applying index definition for {}", index);
-            } else {
-                log.debug("Skipping... [ {} ] is already applied.", index);
-            }
-        }
-        return count;
-    }
-
-    protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
-        if (index != null && !this.ensureIndexes.contains(index)) {
-            this.ensureIndexes.add(index);
-        }
-    }
-
-    protected final void unbindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
-        if (index != null && this.ensureIndexes.contains(index)) {
-            this.ensureIndexes.remove(index);
-        }
+       return ensureOakIndexExecutor.ensure(force, ensureDefinitionPath);
     }
 
     /**
@@ -177,45 +135,19 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     @Override
     @SuppressWarnings("squid:S1192")
     public final TabularData getEnsureOakIndexes() throws OpenDataException {
-
-        final CompositeType configType = new CompositeType(
-                "Ensure Oak Index Configurations",
-                "Ensure Oak Index Configurations",
-                new String[]{"Ensure Definitions Path", "Oak Indexes Path", "Applied", "Immediate"},
-                new String[]{"Ensure Definitions Path", "Oak Indexes Path", "Applied", "Immediate"},
-                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.BOOLEAN});
-
-        final TabularDataSupport tabularData = new TabularDataSupport(new TabularType(
-                "Ensure Oak Index Configuration",
-                "Ensure Oak Index Configuration",
-                configType,
-                new String[]{"Ensure Definitions Path", "Oak Indexes Path"}));
-
-
-        for (final AppliableEnsureOakIndex index : this.ensureIndexes) {
-            final Map<String, Object> data = new HashMap<String, Object>();
-
-            data.put("Ensure Definitions Path", index.getEnsureDefinitionsPath());
-            data.put("Oak Indexes Path", index.getOakIndexesPath());
-            data.put("Applied", index.isApplied());
-            data.put("Immediate", index.isImmediate());
-
-            tabularData.put(new CompositeDataSupport(configType, data));
-        }
-
-        return tabularData;
+        return ensureOakIndexExecutor.getEnsureOakIndexes();
     }
-
 
     @Activate
     protected void activate(Config config) {
         additionalIgnoreProperties = config.properties_ignore();
     }
-    
-    
+
+
     protected String[] getIgnoredProperties() {
         return Optional.ofNullable(this.additionalIgnoreProperties)
                 .map(array -> Arrays.copyOf(array, array.length))
                 .orElse(DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
     }
+
 }
