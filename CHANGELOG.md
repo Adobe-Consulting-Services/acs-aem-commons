@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3692 Redirect Manager: prevent java.lang.IllegalStateException in author logs when publishing redirects
 - #3683 RedirectFilter: Ignore Case value not showing in export
+- #3604 ClassCastException with org.apache.sling.distribution.DistributionRequestType in CloudDispatcherFlushRulesExecutor.handleEvent
 - #2524 Add dependency to enable PathField as report parameter. 
 
 ## 6.15.4 - 2025-11-19
