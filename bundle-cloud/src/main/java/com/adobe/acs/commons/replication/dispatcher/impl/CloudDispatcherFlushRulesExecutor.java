@@ -52,11 +52,10 @@ public class CloudDispatcherFlushRulesExecutor implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CloudDispatcherFlushRulesExecutor.class);
 
-    @Reference
-    private DiscoveryService discoveryService;
+    @Reference DiscoveryService discoveryService;
 
     @Reference
-    private volatile List<DispatcherFlushRules> dispatcherFlushRules;
+    volatile List<DispatcherFlushRules> dispatcherFlushRules;
 
     @Override
     public void handleEvent(Event event) {
