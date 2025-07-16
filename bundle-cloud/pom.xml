@@ -34,6 +34,10 @@
     <artifactId>acs-aem-commons-bundle-cloud</artifactId>
     <name>ACS AEM Commons Bundle - Core Cloud Fragment</name>
     <description>OSGi Core bundle fragment for ACS AEM Commons (only AEMaaCS)</description>
+    <properties>
+         <!-- the Cloud dependencies require Java 11 anyhow, therefore we can target 11 as well for this fragment -->
+         <maven.compiler.release>11</maven.compiler.release>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -50,9 +54,6 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-baseline-maven-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip><!-- temporarily ignore due to empty interface being exported in 6.3.x -->
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
@@ -78,8 +79,8 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
         </dependency>
         <!-- Start Test dependencies -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,18 +89,28 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+            <artifactId>org.apache.sling.testing.osgi-mock.junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.wcm</groupId>
-            <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
+            <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- End Test dependencies -->

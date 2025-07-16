@@ -667,6 +667,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.osgi-mock.junit5</artifactId>
+                <version>3.3.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
                 <version>3.3.6</version>
                 <scope>test</scope>
@@ -675,6 +681,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+                <version>3.4.4</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
                 <version>3.4.4</version>
                 <scope>test</scope>
             </dependency>
