@@ -106,7 +106,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     private Scheduler scheduler;
 
     @Reference
-    private EnsureOakIndexManager indexManager;
+    private EnsureOakIndexManagerProperties indexManager;
 
     private String ensureDefinitionsPath;
     private String oakIndexesPath;
@@ -133,7 +133,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         this.immediate = config.immediate();
 
         String[] ignoredProps = config.properties_ignore();
-        String[] indexManagerIgnoredProps = getIndexManagerConfiguredIgnoreProperties();
+        String[] indexManagerIgnoredProps = indexManager.getIgnoredProperties();
 
         if (ignoredProps.length == 0) {
             // Legacy: check if EnsureOakIndexManagerImpl has this property configured -- https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1966
@@ -156,14 +156,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         }
     }
 
-
-    private String[] getIndexManagerConfiguredIgnoreProperties() {
-        if (indexManager instanceof EnsureOakIndexManagerImpl) {
-            EnsureOakIndexManagerImpl impl = (EnsureOakIndexManagerImpl) indexManager;
-            return impl.getIgnoredProperties();
-        }
-        return new String[] {};
-    }
 
     /**
      * {@inheritDoc}
