@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 
 ## Unreleased ([details][unreleased changes details])
+- # Content Sync: Fixed js errors when deleting configurations
 
 ### Changed
 
