@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+- #3616 Content Sync: Fixed js errors when deleting configurations
+
+## 6.14.0 - 2025-07-15
+
 ### Changed
 
 - #3600 Content Sync: support OAuth authentication
