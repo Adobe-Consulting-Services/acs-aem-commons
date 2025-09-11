@@ -84,6 +84,7 @@
     Session session = resourceResolver.adaptTo(Session.class);
     ContentReader contentReader = new ContentReader(session);
 
+    long count = 0;
 	StringWriter tempWriter = new StringWriter();
     TeeWriter printWriter = new TeeWriter(Arrays.asList(new PrintWriter(out), new PrintWriter(tempWriter)));
 
@@ -119,7 +120,6 @@
             catalog = remoteItems;
         }
 
-        long count = 0;
         t0 = System.currentTimeMillis();
         long t00 = System.currentTimeMillis();
         List<String> updatedResources = new ArrayList<>();
@@ -145,24 +145,24 @@
                 String msg = updateStrategy.getMessage(item, targetResource);
                 println(printWriter, "\t" + msg);
                 if(!dryRun) {
-                    String reqPath = item.getContentUri() ;
-                    JsonObject json = remoteInstance.getJson(reqPath);
-
-                    List<String> binaryProperties = contentReader.collectBinaryProperties(json);
-                    JsonObject sanitizedJson = contentReader.sanitize(json);
-
-                    if(targetResource != null && createVersion) {
-                        String revisionId = contentSync.createVersion(targetResource);
-                        if(revisionId != null) {
-                            println(printWriter, "\tcreated revision: " + revisionId);
-                        }
-                    }
-                    if(observationData != null){
-                        session.getWorkspace().getObservationManager().setUserData(observationData);
-                    }
-
-                    println(printWriter, "\timporting data");
                     try {
+                        String reqPath = item.getContentUri() ;
+                        JsonObject json = remoteInstance.getJson(reqPath);
+
+                        List<String> binaryProperties = contentReader.collectBinaryProperties(json);
+                        JsonObject sanitizedJson = contentReader.sanitize(json);
+
+                        if(targetResource != null && createVersion) {
+                            String revisionId = contentSync.createVersion(targetResource);
+                            if(revisionId != null) {
+                                println(printWriter, "\tcreated revision: " + revisionId);
+                            }
+                        }
+                        if(observationData != null){
+                            session.getWorkspace().getObservationManager().setUserData(observationData);
+                        }
+
+                        println(printWriter, "\timporting data");
                         contentSync.importData(item, sanitizedJson);
                         if(!binaryProperties.isEmpty()){
                             println(printWriter, "\tcopying " + binaryProperties.size() + " binary propert" + (binaryProperties.size() > 1 ? "ies" : "y"));
@@ -183,8 +183,8 @@
 
                         session.save();
                         updatedResources.add(path);
-                    } catch (RepositoryException e){
-                        error(out, e);
+                    } catch (Exception e){
+                        error(printWriter, e);
                         resourceResolver.revert();
                         continue;
                     }
@@ -244,15 +244,16 @@
             contentSync.runWorkflows(workflowModel, updatedResources);
 	        println(printWriter, "started " + updatedResources.size() + " workflows, in " + (System.currentTimeMillis() - t1) + " ms");
         }
-        if(!dryRun){
-            ConfigurationUtils.persistAuditLog(resourceResolver, root, count, tempWriter.toString());
-        }
     } catch(Exception e){
         if(e.getMessage() != null && e.getMessage().startsWith("Not a date string:")){
             error(out, "It appears Sling GET Servlet on " + hostConfig.getHost() + " is configured to use the legacy ECMA date format.\n" +
                   "Please edit configuration for PID org.apache.sling.servlets.get.DefaultGetServlet and make sure 'Enable legacy Sling ECMA format for dates' is unchecked.");
         }
         error(out, e);
+    } finally {
+        if(!dryRun){
+            ConfigurationUtils.persistAuditLog(resourceResolver, root, count, tempWriter.toString());
+        }
     }
 
 
@@ -267,16 +268,16 @@
     	out.write('\n');
     }
 
-    void error(JspWriter out, String msg) throws IOException {
-        out.print("<span class=\"error\">");
-        out.print(msg);
-        out.println("</span>");
+    void error(Writer out, String msg) throws IOException {
+        out.write("<span class=\"error\">");
+        out.write(msg);
+        out.write("</span>");
     }
 
-    void error(JspWriter out, Throwable e) throws IOException {
-        out.print("<span class=\"error\">");
+    void error(Writer out, Throwable e) throws IOException {
+        out.write("<span class=\"error\">");
         e.printStackTrace(new PrintWriter(out));
-        out.println("</span>");
+        out.write("</span>");
     }
 
 %>
