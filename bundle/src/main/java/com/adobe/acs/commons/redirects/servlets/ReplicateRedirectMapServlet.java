@@ -63,6 +63,7 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
 
     static final String PACKAGE_GROUP = "com.adobe.acs.commons.redirects";
     static final String PACKAGE_VERSION = "1.0";
+    static final String PACKAGE_THUMBNAIL_RESOURCE_PATH = "/apps/acs-commons/components/utilities/manage-redirects/thumbnail.png";
 
     @Reference
     private transient Replicator replicator;
@@ -132,6 +133,9 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
                 PackageHelper.ConflictResolution.IncrementVersion,
                 packageDefinitionProperties
         );
+
+        packageHelper.addThumbnail(jcrPackage,
+                resourceResolver.getResource(PACKAGE_THUMBNAIL_RESOURCE_PATH));
 
         log.debug("package built in {} ms", (System.currentTimeMillis() - t0));
         log.debug("package size: {} MB", String.format("%.2f", (float) jcrPackage.getSize() / (1024 * 1024)));
