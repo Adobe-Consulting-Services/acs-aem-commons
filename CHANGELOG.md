@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #3623 Content Sync: improve error handling
+- #3627 Redirect Manager: use bulk activation
 
 ## 6.14.0 - 2025-07-15
 
