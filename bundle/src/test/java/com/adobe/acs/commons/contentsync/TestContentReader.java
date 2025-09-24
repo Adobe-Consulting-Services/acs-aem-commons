@@ -33,9 +33,7 @@ import javax.json.JsonObject;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestContentReader {
     @Rule
@@ -218,4 +216,23 @@ public class TestContentReader {
         JsonObject sanitizedContent = reader.sanitize(node);
 
     }
-}
+
+    @Test
+    public void testToISO8601_ValidEcmaDate() {
+        // Example ECMA date: "Tue Jan 01 2019 12:34:56 GMT+0000"
+        String ecmaDate = "Tue Jan 01 2019 12:34:56 GMT+0000";
+        String iso = ContentReader.toISO8601(ecmaDate);
+        // Should be ISO8601 format, e.g. "2019-01-01T12:34:56.000Z" or similar
+        assertTrue("Should convert to ISO8601", iso.startsWith("2019-01-01T12:34:56"));
+    }
+
+    @Test
+    public void testToISO8601_InvalidDateReturnsInput() {
+        String invalid = "not a date";
+        assertEquals("not a date", ContentReader.toISO8601(invalid));
+    }
+
+    @Test
+    public void testToISO8601_NullInput() {
+         assertNull(ContentReader.toISO8601(null));
+    }}

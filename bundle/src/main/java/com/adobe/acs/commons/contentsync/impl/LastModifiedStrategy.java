@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.contentsync.impl;
 
 import com.adobe.acs.commons.contentsync.CatalogItem;
+import com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer;
+import com.adobe.acs.commons.contentsync.ContentReader;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.adobe.granite.security.user.util.AuthorizableUtil;
 import com.day.cq.commons.PathInfo;
@@ -34,6 +36,8 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -57,6 +61,7 @@ import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 public class LastModifiedStrategy implements UpdateStrategy {
     public static final String DEFAULT_GET_SERVLET = "org.apache.sling.servlets.get.DefaultGetServlet";
     public static final String REDIRECT_SERVLET = "org.apache.sling.servlets.get.impl.RedirectServlet";
+    private static final Logger log = LoggerFactory.getLogger(LastModifiedStrategy.class);
 
     @Reference
     private ServletResolver servletResolver;
@@ -76,8 +81,7 @@ public class LastModifiedStrategy implements UpdateStrategy {
         }
         boolean nonRecursive = "false".equals(request.get("recursive"));
 
-        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(ContentCatalogJobConsumer.AUTH_INFO)) {
 
             Resource root = resolver.getResource(rootPath);
             if (root == null) {
@@ -300,21 +304,34 @@ public class LastModifiedStrategy implements UpdateStrategy {
             if (contentResource == null) {
                 contentResource = targetResource;
             }
-            ValueMap vm = contentResource.getValueMap();
-            Calendar c = (Calendar) vm.get("cq:lastModified", (Class) Calendar.class);
-            if (c == null) {
-                c = (Calendar) vm.get("jcr:lastModified", (Class) Calendar.class);
+            try {
+                ValueMap vm = contentResource.getValueMap();
+                Calendar c = getDate(vm, "cq:lastModified");
+                if (c == null) {
+                    c = getDate(vm, "jcr:lastModified");
+                }
+                if (c != null) {
+                    lastModified = c.getTime().getTime();
+                }
+                String modifiedBy = (String) vm.get("cq:lastModifiedBy", (Class) String.class);
+                if (modifiedBy == null) {
+                    modifiedBy = (String) vm.get("jcr:lastModifiedBy", (Class) String.class);
+                }
+                lastModifiedBy = AuthorizableUtil.getFormattedName(targetResource.getResourceResolver(), modifiedBy);
+            } catch (Exception e){
+                log.error(targetResource.getPath(), e);
             }
-            if (c != null) {
-                lastModified = c.getTime().getTime();
-            }
-            String modifiedBy = (String) vm.get("cq:lastModifiedBy", (Class) String.class);
-            if (modifiedBy == null) {
-                modifiedBy = (String) vm.get("jcr:lastModifiedBy", (Class) String.class);
-            }
-            lastModifiedBy = AuthorizableUtil.getFormattedName(targetResource.getResourceResolver(), modifiedBy);
         }
         return new LastModifiedInfo(lastModified, lastModifiedBy);
+    }
+
+    Calendar getDate(ValueMap vm, String property) {
+        String s = vm.get(property, "");
+        if(ContentReader.isECMADate(s)){
+            return ContentReader.parseEcmaDate(s);
+        } else {
+            return (Calendar) vm.get(property, (Class) Calendar.class);
+        }
     }
 
     private static class LastModifiedInfo {

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ### Changed
+- #3631 Content Sync: refactor to use Sling Jobs
 - #3623 Content Sync: improve error handling
 
 ## 6.14.0 - 2025-07-15

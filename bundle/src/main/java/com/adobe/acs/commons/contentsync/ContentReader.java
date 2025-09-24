@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import org.apache.jackrabbit.util.ISO8601;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,18 +36,22 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 public class ContentReader {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final DateTimeFormatter ECMA_DATE_FORMAT = DateTimeFormatter.ofPattern("EEE MMM dd yyyy HH:mm:ss 'GMT'Z");
+
+    private static final Pattern ECMA_REGEX = Pattern.compile(
+            "^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d{2}) \\d{4} ([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d) GMT[+-]\\d{4}");
 
     static final String BINARY_DATA_PLACEHOLDER = "0";
 
@@ -104,6 +109,13 @@ public class ContentReader {
                     JsonArray array = (JsonArray) value;
                     out.add(name, array);
                     break;
+                case STRING:
+                    String str = ((JsonString)value).getString();
+                    if(ECMA_REGEX.matcher(str).matches()){
+                        // convert to legacy ECMA dates to ISO8601
+                        String isoDate = toISO8601(str);
+                        value = Json.createValue(isoDate);
+                    }
                 default:
                     if (colonIdx == 0) {
                         // Leading colon in Sling GET Servlet JSON designates binary data, e.g. :jcr:data
@@ -210,5 +222,23 @@ public class ContentReader {
         List<String> binaryProperties = new ArrayList<>();
         collectBinaryProperties(node, "", binaryProperties);
         return binaryProperties;
+    }
+
+    public static boolean isECMADate(String str) {
+        return ECMA_REGEX.matcher(str).matches();
+    }
+
+    public static Calendar parseEcmaDate(String ecmaDate){
+        try {
+            ZonedDateTime zonedDateTime = ZonedDateTime.parse(ecmaDate, ECMA_DATE_FORMAT);
+            return GregorianCalendar.from(zonedDateTime);
+        } catch(Exception e){
+            return null;
+        }
+    }
+
+    public static String toISO8601(String ecmaDate){
+        Calendar calendar = parseEcmaDate(ecmaDate);
+        return calendar == null ? ecmaDate : ISO8601.format(calendar);
     }
 }

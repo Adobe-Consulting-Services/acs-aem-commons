@@ -4,6 +4,7 @@
     <jcr:content
         jcr:primaryType="cq:PageContent"
         jcr:title="Content Sync History"
+        sling:vanityPath="/contentsync/history"
         sling:resourceType="granite/ui/components/shell/page">
         <head jcr:primaryType="nt:unstructured">
             <clientlibs
@@ -15,6 +16,17 @@
             jcr:primaryType="nt:unstructured"
             sling:resourceType="granite/ui/components/coral/foundation/text"
             text="Content Sync History"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <secondary jcr:primaryType="nt:unstructured">
+                <history
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/contentsync"
+                    icon="sync"
+                    text="Content Sync"
+                    variant="primary"/>
+            </secondary>
+        </actions>
         <content
             granite:class="diagnosis-panel-with-margin"
             jcr:primaryType="nt:unstructured"

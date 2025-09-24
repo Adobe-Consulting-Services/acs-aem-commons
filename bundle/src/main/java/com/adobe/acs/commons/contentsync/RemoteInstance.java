@@ -45,14 +45,13 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.CONNECT_TIMEOUT_KEY;
@@ -155,6 +154,8 @@ public class RemoteInstance implements Closeable {
                 msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
                         "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
                 throw new IOException(msg);
+            case HttpStatus.SC_NOT_FOUND:
+                throw new FileNotFoundException("Not found: " + uri);
             default:
                 msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + EntityUtils.toString(response.getEntity()));
                 throw new IOException(msg);
@@ -198,6 +199,8 @@ public class RemoteInstance implements Closeable {
                     .filter(entry -> entry.getValue().getValueType() == JsonValue.ValueType.OBJECT)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
+        } catch (FileNotFoundException e){
+            children = Collections.emptyList();
         }
         return children;
     }
@@ -230,5 +233,9 @@ public class RemoteInstance implements Closeable {
     @Override
     public void close() throws IOException {
         httpClient.close();
+    }
+
+    public SyncHostConfiguration getHostConfiguration(){
+        return hostConfiguration;
     }
 }

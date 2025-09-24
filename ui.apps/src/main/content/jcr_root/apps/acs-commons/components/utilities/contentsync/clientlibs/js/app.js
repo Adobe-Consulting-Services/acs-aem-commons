@@ -90,7 +90,7 @@
 
 	document.addEventListener("DOMContentLoaded", function() {
         var dlg = document.getElementById("modalConfigureHost");
-    	dlg.querySelector("coral-select[name=\"./authType\"]")
+    	if(dlg) dlg.querySelector("coral-select[name=\"./authType\"]")
             .addEventListener("change", function(e) {
             	var authType = e.target.value;
             	dlg.querySelectorAll(".list-option-showhide-target").forEach(function(c){
@@ -103,8 +103,22 @@
         	}	
         );
         
+        var workflowModelSelect = $("coral-select[name=workflowModel]");
+        if(workflowModelSelect) {
+	    	workflowModelSelect.get(0).value = $("input[name=defaultWorkflow]").get(0).value;
+        }
     });
     
 
-    
+    $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.error", {
+        name: "foundation.default",
+        handler: function(a, g, e, b, d) {
+            a = "Error";
+            d = "Fail to submit the form. Make sure you have permissions to run content sync.";
+            ui.alert(a, d, "error");
+        }
+    });
+
+
+
 })(document, Granite.$);
