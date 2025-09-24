@@ -132,7 +132,7 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     * Wait till the job is available to display in the UI.
+     * Wait until the job is available to display in the UI.
      *
      * It can take a few seconds between calling jobManager.addJob(...)
      * and availability of the created job in jobManager.findJobs (...)

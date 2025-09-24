@@ -77,7 +77,7 @@ public class ContentCatalogJobConsumer implements JobExecutor {
 
     public static final String SERVICE_NAME = "content-sync-reader";
     public static final Map<String, Object> AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-    public static final String JOB_TOPIC = "acs-commons/contentsync/catalog";
+    public static final String JOB_TOPIC = "acs-commons/contentsync";
 
     @Reference
     ResourceResolverFactory resourceResolverFactory;
