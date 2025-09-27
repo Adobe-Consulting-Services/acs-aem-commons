@@ -257,4 +257,5 @@ public class TestContentCatalogServlet {
         assertEquals(1, filtered.size());
         assertEquals("/content/exists", filtered.getJsonObject(0).getString("path"));
     }
+
 }
