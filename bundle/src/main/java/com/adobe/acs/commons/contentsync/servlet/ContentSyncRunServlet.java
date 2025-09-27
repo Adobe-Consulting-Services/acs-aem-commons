@@ -30,12 +30,17 @@ import java.io.StringWriter;
 import java.util.*;
 
 import static com.adobe.acs.commons.contentsync.ContentSyncJobConsumer.JOB_TOPIC;
-import static com.adobe.acs.commons.contentsync.ContentSyncService.JOB_RESULTS_BASE_PATH;
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_ID;
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_STATUS;
 
 /**
- * The UI form submits to this servlet to start content-sync jobs
+ * Servlet for starting ACS Commons Content Sync jobs via the UI.
+ * <p>
+ * Handles POST requests to initiate content-sync jobs, checks user/group permissions,
+ * and returns job status as JSON. Optionally waits for job availability for UI display.
+ * <p>
+ * The servlet is registered for resource type {@code acs-commons/components/utilities/contentsync}
+ * with selector {@code run} and extension {@code json}.
  */
 @Component(service = Servlet.class, property = {
         "sling.servlet.extensions=json",
@@ -46,21 +51,49 @@ import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JO
 @Designate(ocd = ContentSyncRunServlet.Config.class)
 public class ContentSyncRunServlet extends SlingAllMethodsServlet {
 
+    /**
+     * OSGi configuration for allowed groups.
+     */
     @ObjectClassDefinition()
     @interface Config {
+        /**
+         * Principal names allowed to run content-sync.
+         */
         @AttributeDefinition(name = "Allowed Groups", description = "Principal names allowed run content-sync", type = AttributeType.STRING)
         String[] allowedGroups() default {};
     }
 
+    /**
+     * The Sling JobManager service.
+     */
     @Reference
     private JobManager jobManager;
+
+    /**
+     * The servlet configuration.
+     */
     private Config config;
 
+    /**
+     * Activates the servlet with the given configuration.
+     *
+     * @param config the OSGi configuration
+     */
     @Activate
     void activate(Config config) {
         this.config = config;
     }
 
+    /**
+     * Handles POST requests to start a content-sync job.
+     * <p>
+     * Checks access, submits the job, optionally waits for job availability,
+     * and returns job status as JSON. On error, returns a JSON error response.
+     *
+     * @param slingRequest  the Sling HTTP request
+     * @param slingResponse the Sling HTTP response
+     * @throws IOException if writing the response fails
+     */
     @Override
     protected void doPost(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse) throws IOException {
         try {
@@ -68,14 +101,14 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
 
             Job job = submitJob(slingRequest);
             boolean ensureAvailable = slingRequest.getParameter("ensureAvailable") != null;
-            if(ensureAvailable) {
+            if (ensureAvailable) {
                 ensureAvailable(job.getId(), 500L, 5000L);
             }
 
             JsonObjectBuilder result = Json.createObjectBuilder();
             result.add(JOB_ID, job.getId());
             result.add(JOB_STATUS, job.getJobState().toString());
-            for(String name : job.getPropertyNames()){
+            for (String name : job.getPropertyNames()) {
                 result.add(name, job.getProperty(name, String.class));
             }
 
@@ -95,8 +128,11 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     * Start a content-sync job.
+     * Submits a content-sync job using request parameters.
      * All request parameters are passed to the job properties.
+     *
+     * @param slingRequest the Sling HTTP request
+     * @return the created Job
      */
     Job submitJob(SlingHttpServletRequest slingRequest) {
         Map<String, Object> jobProps = new HashMap<>();
@@ -108,8 +144,12 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     * Check if the request is allowed to start content-sync jobs and throw IllegalAccessException if it isn't
-     * See {@link Config#allowedGroups()}
+     * Checks if the request is allowed to start content-sync jobs.
+     * Throws IllegalAccessException if the user is not an admin or not in an allowed group.
+     *
+     * @param request the Sling HTTP request
+     * @throws IllegalAccessException if access is denied
+     * @throws RepositoryException    if user/group lookup fails
      */
     void checkAccess(SlingHttpServletRequest request) throws IllegalAccessException, RepositoryException {
         Set<String> groupIds = new HashSet<>();
@@ -132,17 +172,22 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     * Wait until the job is available to display in the UI.
-     *
+     * Waits until the job is available to display in the UI.
+     * <p>
      * It can take a few seconds between calling jobManager.addJob(...)
-     * and availability of the created job in jobManager.findJobs (...)
+     * and availability of the created job in jobManager.findJobs(...).
+     *
+     * @param jobId   the job ID to wait for
+     * @param pollMs  polling interval in milliseconds
+     * @param maxWait maximum wait time in milliseconds
+     * @return the Job if found, or null if not available within maxWait
+     * @throws InterruptedException if interrupted while waiting
      */
     Job ensureAvailable(String jobId, long pollMs, long maxWait) throws InterruptedException {
         Job job = null;
-
         long t0 = System.currentTimeMillis();
-        for(;;){
-            if(System.currentTimeMillis() - t0 > maxWait){
+        for (;;) {
+            if (System.currentTimeMillis() - t0 > maxWait) {
                 break;
             }
             job = jobManager.findJobs(JobManager.QueryType.ACTIVE, JOB_TOPIC, 10, null)
@@ -150,7 +195,7 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
                     .filter(j -> jobId.equals(j.getId()))
                     .findAny()
                     .orElse(null);
-            if(job != null){
+            if (job != null) {
                 break;
             }
             Thread.sleep(pollMs);

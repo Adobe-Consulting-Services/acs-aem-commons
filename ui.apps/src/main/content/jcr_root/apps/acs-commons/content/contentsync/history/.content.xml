@@ -35,8 +35,8 @@
                 <table
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/include"
-                    path="/var/acs-commons/contentsync/audit"
-                    resourceType="/apps/acs-commons/components/utilities/contentsync/history/table"/>
+                    path="/var/eventing/jobs"
+                    resourceType="acs-commons/components/utilities/contentsync/history/table"/>
             </items>
         </content>
     </jcr:content>

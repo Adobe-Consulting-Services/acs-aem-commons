@@ -1,6 +1,6 @@
 {
   "queue.name": "Content Sync Queue",
-  "queue.topics": [ "acs-commons/contentsync/job", "acs-commons/contentsync/catalog"],
+  "queue.topics": [ "acs-commons/contentsync/job", "acs-commons/contentsync"],
   "queue.keepJobs": true,
   "queue.retries": 0
 }

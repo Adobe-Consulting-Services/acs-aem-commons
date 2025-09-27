@@ -39,6 +39,7 @@ import static com.adobe.acs.commons.contentsync.ContentSyncJobConsumer.JOB_TOPIC
 
 /**
  * Job consumer for the ACS Commons Content Sync jobs.
+ * The jobs are created by {@link com.adobe.acs.commons.contentsync.servlet.ContentSyncRunServlet}.
  * <p>
  * This class listens for jobs on the {@link #JOB_TOPIC} and coordinates the synchronization
  * of content between local and remote AEM instances. It manages the full sync lifecycle,

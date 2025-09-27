@@ -56,8 +56,9 @@ public class ContentSyncServiceImpl implements ContentSyncService {
     @Reference
     ContentImporter importer;
 
-    @Reference
-    IntegrationService integrationService;
+    @Reference (cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC)
+    volatile IntegrationService integrationService;
 
     @Reference
     ResourceResolverFactory resourceResolverFactory;

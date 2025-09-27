@@ -39,6 +39,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ValueMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -48,6 +50,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -63,6 +66,8 @@ import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
  * HTTP connection to a remote AEM instance + some sugar methods to fetch data
  */
 public class RemoteInstance implements Closeable {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     static final int CONNECT_TIMEOUT = 5000;
     static final int SOCKET_TIMEOUT = 300000;
 
@@ -144,28 +149,36 @@ public class RemoteInstance implements Closeable {
     }
 
     public InputStream getStream(URI uri ) throws IOException {
+        log.debug("getStream: {}", uri);
         HttpGet request = new HttpGet(uri);
         CloseableHttpResponse response = httpClient.execute(request);
-        String msg;
-        switch (response.getStatusLine().getStatusCode()){
-            case HttpStatus.SC_OK:
-                return response.getEntity().getContent();
-            case HttpStatus.SC_MULTIPLE_CHOICES:
-                msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
-                        "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
-                throw new IOException(msg);
-            case HttpStatus.SC_NOT_FOUND:
-                throw new FileNotFoundException("Not found: " + uri);
-            default:
-                msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + EntityUtils.toString(response.getEntity()));
-                throw new IOException(msg);
+        int statusCode = response.getStatusLine().getStatusCode();
+        log.debug("getStream() statusCode: {}", response.getStatusLine().getStatusCode());
+        if (statusCode == HttpStatus.SC_OK){
+            return response.getEntity().getContent();
+        } else {
+            EntityUtils.consumeQuietly(response.getEntity());
+            String msg;
+            switch (statusCode){
+                case HttpStatus.SC_MULTIPLE_CHOICES:
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
+                            "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
+                    throw new IOException(msg);
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new FileNotFoundException("Not found: " + uri);
+                default:
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + EntityUtils.toString(response.getEntity()));
+                    throw new IOException(msg);
+            }
         }
     }
 
     public String getString(URI uri) throws IOException {
+        log.debug("getString: {}", uri);
         HttpGet request = new HttpGet(uri);
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             String str = EntityUtils.toString(response.getEntity());
+            log.debug("getString() statusCode: {}", response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 return str;
             } else {
@@ -191,6 +204,7 @@ public class RemoteInstance implements Closeable {
 
     public List<String> listChildren(String path) throws IOException, URISyntaxException {
         List<String> children;
+        log.debug("listChildren: {}", path);
         try (InputStream is = getStream(path + ".1.json"); JsonReader reader = Json.createReader(is)) {
             children = reader
                     .readObject()

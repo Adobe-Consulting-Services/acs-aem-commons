@@ -23,38 +23,71 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Generate shards based on an incremental counter.
- * Shards a separated by slashes, e.g.
+ * Utility for generating hierarchical shard paths based on an incremental counter.
+ * <p>
+ * Shards are split from the counter value into segments of configurable size,
+ * separated by slashes. For example, with a shard size of 2:
  * <pre>
- *     3     -> 3
- *     33    -> 33
- *     333   -> 33/3
- *     3333  -> 33/33
- *     33333 -> 33/33/3
+ *   counter = 3     -> "3"
+ *   counter = 33    -> "33"
+ *   counter = 333   -> "33/3"
+ *   counter = 3333  -> "33/33"
+ *   counter = 33333 -> "33/33/3"
  * </pre>
+ * The full path is constructed by appending the shard string to the parent path.
  */
 public class ShardGenerator {
+    /**
+     * Default number of characters per shard segment.
+     */
     public static int DEFAULT_SHARD_SIZE = 2;
 
+    /**
+     * The parent path to which shards are appended.
+     */
     private final String parentPath;
-    private final int shardSize; //  characters per level, e.g. 1/2/3 vs 10/21/33
+
+    /**
+     * Number of characters per shard segment.
+     */
+    private final int shardSize;
+
+    /**
+     * Internal counter used to generate shard values.
+     */
     private int counter;
 
+    /**
+     * Constructs a ShardGenerator with the default shard size.
+     *
+     * @param parentPath the base path for shards
+     */
     public ShardGenerator(String parentPath){
         this(parentPath, DEFAULT_SHARD_SIZE);
     }
 
+    /**
+     * Constructs a ShardGenerator with a custom shard size.
+     *
+     * @param parentPath the base path for shards
+     * @param shardSize  the number of characters per shard segment
+     */
     public ShardGenerator(String parentPath, int shardSize){
         this.parentPath = parentPath;
         this.shardSize = shardSize;
     }
 
+    /**
+     * Advances the internal counter to the next shard.
+     */
     public void nextShard(){
         counter++;
     }
 
     /**
-     * split the number string into shards of size {@link #shardSize} from left to right
+     * Splits the current counter value into shard segments of size {@link #shardSize}.
+     *
+     * @return the shard string (e.g. "33/3" for counter=333 and shardSize=2)
      */
     public String getShard(){
         String numStr = String.valueOf(counter);
@@ -68,7 +101,9 @@ public class ShardGenerator {
     }
 
     /**
-     * @return  path to the current nshard
+     * Returns the full path to the current shard, combining the parent path and shard string.
+     *
+     * @return the full path to the current shard
      */
     public String getPath() {
         return parentPath + "/" + getShard();

@@ -33,11 +33,11 @@
 
         <tbody is="coral-table-body" divider="cell">
         <sly
-                data-sly-use.defs="com.adobe.acs.commons.contentsync.ContentSyncHistory"
+                data-sly-use.defs="com.adobe.acs.commons.contentsync.ContentSyncHistoryModel"
                 data-sly-list="${defs.jobs}">
             <tr is="coral-table-row">
                 <td is="coral-table-cell">${item.startedBy}</td>
-                <td is="coral-table-cell">${'dd-MM-yyyy hh:mm:ss' @ format=item.jcr:created}</td>
+                <td is="coral-table-cell">${'dd-MM-yyyy hh:mm:ss' @ format=item.slingevent:created}</td>
                 <td is="coral-table-cell" data-sly-test="${item.slingevent:finishedDate}">${'dd-MM-yyyy hh:mm:ss' @ format=item.slingevent:finishedDate}</coral-progress></td>
                 <td is="coral-table-cell" data-sly-test="${!item.slingevent:finishedDate}"><coral-progress class='process-progress' value="${item.progress}" showpercent>${item.progressMessage}</coral-progress></td>
                 <td is="coral-table-cell">${item.root}</td>
