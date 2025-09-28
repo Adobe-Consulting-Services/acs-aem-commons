@@ -75,7 +75,7 @@
         pw.println("</div></body></html>");
         return;
     }
-
+	Thread.sleep(1000L);
     AgentManager mgr = sling.getService(AgentManager.class);
     Agent agent = mgr.getAgents().get(agentId);
 	if(agent == null){

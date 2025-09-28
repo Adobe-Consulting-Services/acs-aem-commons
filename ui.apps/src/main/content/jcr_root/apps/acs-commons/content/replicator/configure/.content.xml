@@ -192,23 +192,23 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/container">
                                     <items jcr:primaryType="nt:unstructured">
                                         <accessTokenProviderName
-                                                jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                                fieldLabel="Access Token Provider Name"
-                                                name="./jcr:content/accessTokenProviderName">
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            fieldLabel="Access Token Provider Name"
+                                            name="./jcr:content/accessTokenProviderName">
                                             <datasource
-                                                    jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="acs-commons/components/utilities/replicator/oauthdatasource"/>
-                                         </accessTokenProviderName>
-                                         <userId
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="acs-commons/components/utilities/replicator/oauthdatasource"/>
+                                        </accessTokenProviderName>
+                                        <userId
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                            fieldLabel="Agent User Id"
                                             emptyText="replication-service"
+                                            fieldLabel="Agent User Id"
                                             name="./jcr:content/userId"/>
                                         <warning
-                                            jcr:primaryType="nt:unstructured"
                                             granite:class="warn narrow"
+                                            jcr:primaryType="nt:unstructured"
                                             sling:resourceType="acs-commons/components/utilities/warn"
                                             text="The name of the token provider must match the name property in your OAuth Access Token Provider configuration, see &quot;&#x9;Adobe Granite Access Token provider using Client Credentials/JWT Credential flow&quot; in the OSGi console&lt;p>The agent user must have the private key from the AEMaaCS technical account installed in the user key store&lt;/p>"/>
                                     </items>
@@ -232,10 +232,10 @@
                                     name="./jcr:content/triggerSpecific"
                                     value="true"/>
                                 <noVersioning
-                                        jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
-                                        name="./jcr:content/noVersioning"
-                                        value="true"/>
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/noVersioning"
+                                    value="true"/>
                                 <enabled
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
@@ -291,8 +291,7 @@
                             sling:resourceType="granite/ui/components/coral/foundation/button"
                             formId="createAgentForm"
                             text="Submit"
-                            type="submit">
-                        </submit>
+                            type="submit"/>
                     </footer>
                 </create>
             </items>

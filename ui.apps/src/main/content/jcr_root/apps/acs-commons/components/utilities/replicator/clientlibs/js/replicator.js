@@ -1,9 +1,10 @@
 (function(document, $, Granite) {
     "use strict";
 
+ 	var registry = $(window).adaptTo("foundation-registry");
     var ui = $(window).adaptTo("foundation-ui");
     
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+    registry.register("foundation.collection.action.action", {
         name: "acs-commons.replicator.agent.delete",
         handler: function(name, el, config, collection, selections) {	
             if (selections.length === 1) {
@@ -38,7 +39,7 @@
         }
     });
 
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+    registry.register("foundation.collection.action.action", {
         name: "acs-commons.replicator.agent.edit",
         handler: function(name, el, config, collection, selections) {
             if (selections.length === 1) {
@@ -71,7 +72,7 @@
         }
     });
 
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+    registry.register("foundation.collection.action.action", {
         name: "acs-commons.replicator.agent.create",
         handler: function(name, el, config, collection, selections) {
             var dlg = document.getElementById('configureAgentDialog');
@@ -116,7 +117,7 @@
         }
     });
 
-	$(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
+	registry.register("foundation.validation.validator", {
         selector: "input[name=\"./jcr:content/transportUri\"]",
         validate: function(el) {
 
@@ -126,4 +127,13 @@
             }
         }
    });
+    
+   registry.register("foundation.form.response.ui.success", {
+        name: "redirect.form.submitted",
+        handler: function (form, config, response, textStatus, xhr) {
+            var iframe = document.getElementById("replication_status_iframe");
+            iframe.srcdoc = "<pre>" + response.trim() + "</pre>";
+        }
+    });
+     
 })(document, Granite.$);
