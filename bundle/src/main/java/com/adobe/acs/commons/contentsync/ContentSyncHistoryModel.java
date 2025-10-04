@@ -131,6 +131,7 @@ public class ContentSyncHistoryModel {
             String color;
             switch (job.getJobState()) {
                 case ACTIVE:
+                case QUEUED:
                     color = "yellow";
                     break;
                 case SUCCEEDED:

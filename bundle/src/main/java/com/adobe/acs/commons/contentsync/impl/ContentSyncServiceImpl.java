@@ -24,8 +24,8 @@ import com.adobe.acs.commons.contentsync.*;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.model.WorkflowModel;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.api.resource.*;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.jcr.contentloader.ContentImporter;
 import org.osgi.service.component.annotations.Component;
@@ -43,6 +43,10 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SETTINGS_PATH;
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.UPDATE_STRATEGY_KEY;
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.DEFAULT_STRATEGY_PID;
 
 @Component
 public class ContentSyncServiceImpl implements ContentSyncService {
@@ -62,6 +66,9 @@ public class ContentSyncServiceImpl implements ContentSyncService {
 
     @Reference
     ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    HttpClientBuilderFactory clientBuilderFactory;
 
     @Reference(service = UpdateStrategy.class,
             cardinality = ReferenceCardinality.MULTIPLE,
@@ -89,14 +96,7 @@ public class ContentSyncServiceImpl implements ContentSyncService {
         String root = (String) job.getProperty("root");
         boolean recursive = job.getProperty("recursive") != null;
         String catalogServlet = (String) job.getProperty("catalogServlet");
-
-        ValueMap generalSettings;
-        String strategyPid;
-
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
-            generalSettings = ConfigurationUtils.getSettingsResource(resourceResolver).getValueMap();
-            strategyPid = generalSettings.get(ConfigurationUtils.UPDATE_STRATEGY_KEY, String.class);
-        }
+        String strategyPid = job.getProperty(UPDATE_STRATEGY_KEY, DEFAULT_STRATEGY_PID);
 
         long t0 = System.currentTimeMillis();
         ContentCatalog contentCatalog = new ContentCatalog(remoteInstance, catalogServlet);
@@ -125,6 +125,7 @@ public class ContentSyncServiceImpl implements ContentSyncService {
     @Override
     public List<CatalogItem> getItemsToSync(ExecutionContext context) throws Exception, GeneralSecurityException, URISyntaxException, InterruptedException {
         boolean incremental = context.getJob().getProperty("incremental") != null;
+        String strategyPid = context.getJob().getProperty(UPDATE_STRATEGY_KEY, DEFAULT_STRATEGY_PID);
 
         // call the remote AEM instance, block until complete
         List<CatalogItem> remoteItems = getRemoteItems(context);
@@ -133,9 +134,6 @@ public class ContentSyncServiceImpl implements ContentSyncService {
 
         // compare the list of items fetched from remote with the local and figure out which ones need sync-ing
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
-            ValueMap generalSettings = ConfigurationUtils.getSettingsResource(resourceResolver).getValueMap();
-
-            String strategyPid = generalSettings.get(ConfigurationUtils.UPDATE_STRATEGY_KEY, String.class);
             UpdateStrategy updateStrategy = getStrategy(strategyPid);
             context.put(ExecutionContext.UPDATE_STRATEGY, updateStrategy);
             for (CatalogItem item : remoteItems) {
@@ -177,6 +175,11 @@ public class ContentSyncServiceImpl implements ContentSyncService {
                 List<String> binaryProperties = contentReader.collectBinaryProperties(json);
                 JsonObject sanitizedJson = contentReader.sanitize(json);
 
+                String observationData = context.getJob().getProperty(ConfigurationUtils.EVENT_USER_DATA_KEY, String.class);
+                if(observationData != null){
+                    session.getWorkspace().getObservationManager().setUserData(observationData);
+                }
+
                 context.log("\timporting data");
                 contentSync.importData(item, sanitizedJson);
                 if (!binaryProperties.isEmpty()) {
@@ -195,6 +198,23 @@ public class ContentSyncServiceImpl implements ContentSyncService {
                 e.printStackTrace(new PrintWriter(sw));
                 context.log("{0}", sw.toString());
                 resourceResolver.revert();
+            }
+        }
+    }
+
+    public void createVersion(CatalogItem item, ExecutionContext context) throws Exception {
+        boolean createVersion = context.getJob().getProperty("createVersion") != null;
+        if (!createVersion || context.dryRun()) {
+            return;
+        }
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+            Resource targetResource = resourceResolver.getResource(item.getPath());
+            ContentSync contentSync = new ContentSync(context.getRemoteInstance(), resourceResolver, importer);
+            if (targetResource != null) {
+                String revisionId = contentSync.createVersion(targetResource);
+                if (revisionId != null) {
+                    context.log("{0}", "\tcreated revision: " + revisionId);
+                }
             }
         }
     }
@@ -229,18 +249,11 @@ public class ContentSyncServiceImpl implements ContentSyncService {
     public RemoteInstance createRemoteInstance(Job job) throws Exception {
         String cfgPath = (String) job.getProperty("source");
 
-        ValueMap generalSettings;
-        SyncHostConfiguration hostConfig;
-
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
-            generalSettings = new ValueMapDecorator(
-                    new HashMap<>(ConfigurationUtils.getSettingsResource(resourceResolver).getValueMap())
-            );
-            hostConfig = resourceResolver.getResource(cfgPath).adaptTo(SyncHostConfiguration.class);
+            GeneralSettingsModel generalSettings = resourceResolver.resolve(SETTINGS_PATH).adaptTo(GeneralSettingsModel.class);
+            SyncHostConfiguration hostConfig = resourceResolver.getResource(cfgPath).adaptTo(SyncHostConfiguration.class);
+            return new RemoteInstance(clientBuilderFactory, hostConfig, generalSettings, integrationService);
         }
-
-        return new RemoteInstance(hostConfig, generalSettings, integrationService);
-
     }
 
     /**

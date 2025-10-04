@@ -23,6 +23,7 @@ import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -60,6 +61,7 @@ public class TestContentCatalogService {
     private JobExecutionResult jobResult;
 
     private UpdateStrategy updateStrategy;
+    private HttpClientBuilderFactory clientBuilderFactory;
 
     private ContentSyncServiceImpl contentSyncService;
 
@@ -68,6 +70,9 @@ public class TestContentCatalogService {
         resourceResolverFactory = mock(ResourceResolverFactory.class);
         when(resourceResolverFactory.getResourceResolver(anyMap())).thenReturn(context.resourceResolver());
         context.registerService(resourceResolverFactory);
+
+        clientBuilderFactory = mock(HttpClientBuilderFactory.class);
+        context.registerService(HttpClientBuilderFactory.class, clientBuilderFactory);
 
         updateStrategy = mock(UpdateStrategy.class);
         context.registerService(updateStrategy);

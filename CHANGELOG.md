@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ### Changed
+- #3636 Content Sync: support dedicated egress IP address
 - #3631 Content Sync: refactor to use Sling Jobs
 - #3623 Content Sync: improve error handling
 

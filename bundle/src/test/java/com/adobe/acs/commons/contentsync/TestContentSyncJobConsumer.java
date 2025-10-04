@@ -22,6 +22,8 @@ package com.adobe.acs.commons.contentsync;
 import com.adobe.acs.commons.contentsync.io.JobLogIterator;
 import com.adobe.granite.crypto.CryptoSupport;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
@@ -55,6 +57,7 @@ public class TestContentSyncJobConsumer {
     private ContentSyncJobConsumer consumer;
 
     private ContentSyncService syncService;
+    private HttpClientBuilderFactory clientBuilderFactory;
 
     @Before
     public void setUp() throws Exception {
@@ -62,19 +65,24 @@ public class TestContentSyncJobConsumer {
         when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(context.resourceResolver());
         context.registerService(resourceResolverFactory);
 
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        clientBuilderFactory = mock(HttpClientBuilderFactory.class);
+        when(clientBuilderFactory.newBuilder()).thenReturn(httpClientBuilder);
+        context.registerService(HttpClientBuilderFactory.class, clientBuilderFactory);
+
         CryptoSupport crypto = MockCryptoSupport.getInstance();
         context.registerService(CryptoSupport.class, crypto);
+        context.addModelsForClasses(SyncHostConfiguration.class, GeneralSettingsModel.class);
 
         String configPath = "/var/acs-commons/contentsync/hosts/test";
         context.build().resource(configPath, "host", "http://localhost:4502", "username", "", "password", "");
         context.build().resource(SETTINGS_PATH, SO_TIMEOUT_STRATEGY_KEY, 1000, CONNECT_TIMEOUT_KEY, "1000");
-        ValueMap generalSettings = context.resourceResolver().getResource(configPath).getValueMap();
-        SyncHostConfiguration hostConfiguration =
-                context.getService(ModelFactory.class)
-                        .createModel(context.resourceResolver().getResource(configPath), SyncHostConfiguration.class);
+
+        GeneralSettingsModel generalSettings = context.resourceResolver().getResource(SETTINGS_PATH).adaptTo(GeneralSettingsModel.class);
+        SyncHostConfiguration hostConfiguration = context.resourceResolver().getResource(configPath).adaptTo(SyncHostConfiguration.class);
 
         syncService = mock(ContentSyncService.class);
-        RemoteInstance remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings));
+        RemoteInstance remoteInstance = spy(new RemoteInstance(clientBuilderFactory, hostConfiguration, generalSettings, null));
         when(syncService.createRemoteInstance(any(Job.class))).thenReturn(remoteInstance);
         when(syncService.getResourceResolverFactory()).thenReturn(resourceResolverFactory);
         context.registerService(ContentSyncService.class, syncService);

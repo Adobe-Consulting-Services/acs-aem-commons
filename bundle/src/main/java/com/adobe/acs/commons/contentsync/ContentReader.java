@@ -29,12 +29,7 @@ import javax.jcr.Workspace;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeManager;
 import javax.jcr.nodetype.PropertyDefinition;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import javax.json.*;
 import java.lang.invoke.MethodHandles;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -107,6 +102,9 @@ public class ContentReader {
                     break;
                 case ARRAY:
                     JsonArray array = (JsonArray) value;
+                    if(name.equals(JCR_MIXINTYPES)){
+                        array = sanitizeMixins((JsonArray) value);
+                    }
                     out.add(name, array);
                     break;
                 case STRING:
@@ -163,7 +161,10 @@ public class ContentReader {
         JsonArray mixins = node.getJsonArray(JCR_MIXINTYPES);
         if (mixins != null) {
             for (JsonValue item : mixins) {
-                checkTypes.add(((JsonString) item).getString());
+                String mixin = ((JsonString) item).getString();
+                if(nodeTypeManager.hasNodeType(mixin)){
+                    checkTypes.add(mixin);
+                }
             }
         }
         for (String typeName : checkTypes) {
@@ -176,6 +177,18 @@ public class ContentReader {
         }
 
         return props;
+    }
+
+    JsonArray sanitizeMixins(JsonArray remoteMixins) throws RepositoryException {
+        JsonArrayBuilder mixinTypes = Json.createArrayBuilder();
+        for(JsonValue v : remoteMixins){
+            if(nodeTypeManager.hasNodeType(((JsonString)v).getString())){
+                mixinTypes.add(v);
+            } else {
+                log.debug("skipping unknown mixin: {}", v);
+            }
+        }
+        return mixinTypes.build();
     }
 
     private void collectBinaryProperties(JsonObject node, String parent, List<String> binaryProperties) {

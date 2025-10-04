@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.contentsync;
 
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
@@ -35,7 +36,7 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ValueMap;
@@ -57,9 +58,6 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.adobe.acs.commons.contentsync.ConfigurationUtils.CONNECT_TIMEOUT_KEY;
-import static com.adobe.acs.commons.contentsync.ConfigurationUtils.DISABLE_CERT_CHECK_KEY;
-import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SO_TIMEOUT_STRATEGY_KEY;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
@@ -68,45 +66,47 @@ import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 public class RemoteInstance implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    static final int CONNECT_TIMEOUT = 5000;
-    static final int SOCKET_TIMEOUT = 300000;
-
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
 
-    /**
-     *
-     * @deprecated
-     */
     @Deprecated
     public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
-        this(hostConfiguration, generalSettings, null);
+        throw new RuntimeException("@Deprecated");
     }
 
+    @Deprecated
     public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
-        this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient(hostConfiguration, generalSettings,  integrationService);
+        throw new RuntimeException("@Deprecated");
     }
 
-    private CloseableHttpClient createHttpClient(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService)
+    public RemoteInstance(HttpClientBuilderFactory builderFactory, SyncHostConfiguration hostConfiguration, GeneralSettingsModel generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        this.hostConfiguration = hostConfiguration;
+        this.httpClient = createHttpClient(builderFactory.newBuilder(), hostConfiguration, generalSettings,  integrationService);
+    }
+
+    private CloseableHttpClient createHttpClient(HttpClientBuilder builder, SyncHostConfiguration hostConfiguration, GeneralSettingsModel generalSettings, IntegrationService integrationService)
             throws GeneralSecurityException {
-        HttpClientBuilder builder = HttpClients.custom();
         setAuthentication(hostConfiguration, builder, integrationService);
-        int soTimeout = generalSettings.get(SO_TIMEOUT_STRATEGY_KEY, SOCKET_TIMEOUT);
-        int connTimeout = generalSettings.get(CONNECT_TIMEOUT_KEY, CONNECT_TIMEOUT);
-        boolean disableCertCheck = generalSettings.get(DISABLE_CERT_CHECK_KEY, false);
-        RequestConfig requestConfig = RequestConfig
+        int soTimeout = generalSettings.getSocketTimeout();
+        int connTimeout = generalSettings.getConnectTimeout();
+        boolean disableCertCheck = generalSettings.isDisableCertCheck();
+        RequestConfig.Builder requestConfig = RequestConfig
                 .custom()
                 .setConnectTimeout(connTimeout)
                 .setSocketTimeout(soTimeout)
-                .setCookieSpec(CookieSpecs.STANDARD).build();
-        builder.setDefaultRequestConfig(requestConfig);
+                .setCookieSpec(CookieSpecs.STANDARD);
+        String proxyHost = System.getenv("AEM_PROXY_HOST");
+        if (proxyHost != null) {
+            int proxyPort = Integer.parseInt(System.getenv().getOrDefault("AEM_HTTPS_PROXY_PORT", "3128"));
+            log.debug("AEM_PROXY_HOST: {}, AEM_HTTPS_PROXY_PORT: {}", proxyHost, proxyPort);
+            requestConfig.setProxy(new HttpHost(proxyHost, proxyPort));
+        }
+        builder.setDefaultRequestConfig(requestConfig.build());
         if (disableCertCheck) {
             // Disable hostname verification and allow self-signed certificates
             SSLContextBuilder sslbuilder = new SSLContextBuilder();
             sslbuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
-            SSLConnectionSocketFactory sslsf = null;
-            sslsf = new SSLConnectionSocketFactory(
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
                     sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
             builder.setSSLSocketFactory(sslsf);
         }
@@ -116,7 +116,6 @@ public class RemoteInstance implements Closeable {
     void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, IntegrationService integrationService){
         if (hostConfiguration.isOAuthEnabled()) {
             // If OAuth is enabled, use the AccessTokenProvider to get the token
-            // The session user must have the private key from the Adobe technical account installed in the user key store
             try {
                 // the lifetime of Adobe's tokens is 24 hours, enough to request once and re-use across all the calls
                 String accessToken = integrationService.getAccessToken();
@@ -157,7 +156,7 @@ public class RemoteInstance implements Closeable {
         if (statusCode == HttpStatus.SC_OK){
             return response.getEntity().getContent();
         } else {
-            EntityUtils.consumeQuietly(response.getEntity());
+            String textResponse = response.getEntity() == null ? "" : EntityUtils.toString(response.getEntity());
             String msg;
             switch (statusCode){
                 case HttpStatus.SC_MULTIPLE_CHOICES:
@@ -167,7 +166,7 @@ public class RemoteInstance implements Closeable {
                 case HttpStatus.SC_NOT_FOUND:
                     throw new FileNotFoundException("Not found: " + uri);
                 default:
-                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + EntityUtils.toString(response.getEntity()));
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + textResponse);
                     throw new IOException(msg);
             }
         }

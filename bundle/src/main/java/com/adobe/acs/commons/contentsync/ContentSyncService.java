@@ -130,4 +130,6 @@ public interface ContentSyncService {
      * @throws LoginException if the factory cannot be obtained
      */
     ResourceResolverFactory getResourceResolverFactory() throws LoginException;
+
+    void createVersion(CatalogItem item, ExecutionContext context) throws Exception;
 }

@@ -89,6 +89,7 @@ public class ContentSyncJobConsumer implements JobExecutor {
             long syncStarted = System.currentTimeMillis();
             for (CatalogItem item : items) {
                 context.log( "[{0}] {1}",count, item.getPath());
+                syncService.createVersion(item, context);
                 syncService.syncItem(item, context);
 
                 updateProgress(count++, items.size(), syncStarted, jobContext, context);

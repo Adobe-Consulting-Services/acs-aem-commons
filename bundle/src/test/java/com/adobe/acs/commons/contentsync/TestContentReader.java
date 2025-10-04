@@ -28,8 +28,8 @@ import org.junit.Test;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
-import javax.json.Json;
-import javax.json.JsonObject;
+import javax.json.*;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -214,7 +214,21 @@ public class TestContentReader {
 
 
         JsonObject sanitizedContent = reader.sanitize(node);
+    }
 
+    @Test
+    public void sanitizeMixins() throws Exception {
+        JsonObject node = Json.createObjectBuilder()
+                .add("jcr:primaryType", "nt:unstructured")
+                .add("jcr:mixinTypes", Json.createArrayBuilder()
+                        .add("mix:versionable")
+                        .add("aem:unknown") // should be sanitized
+                        .build())
+                .build();
+
+        JsonArray  sanitizedMixins = reader.sanitize(node).getJsonArray("jcr:mixinTypes");
+        assertEquals(1, sanitizedMixins.size());
+        assertEquals("mix:versionable", ((JsonString)sanitizedMixins.get(0)).getString());
     }
 
     @Test

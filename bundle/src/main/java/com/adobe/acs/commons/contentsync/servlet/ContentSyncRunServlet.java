@@ -1,11 +1,14 @@
 package com.adobe.acs.commons.contentsync.servlet;
 
+import com.adobe.acs.commons.contentsync.GeneralSettingsModel;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
@@ -29,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
+import static com.adobe.acs.commons.contentsync.ConfigurationUtils.*;
 import static com.adobe.acs.commons.contentsync.ContentSyncJobConsumer.JOB_TOPIC;
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_ID;
 import static com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet.JOB_STATUS;
@@ -140,6 +144,13 @@ public class ContentSyncRunServlet extends SlingAllMethodsServlet {
         jobProps.put("catalogServlet", catalogServlet);
         jobProps.put("cq:startedBy", slingRequest.getResourceResolver().getUserID());
         slingRequest.getParameterMap().forEach((key, value) -> jobProps.put(key, value[0]));
+
+        Resource settingsResource = slingRequest.getResourceResolver().getResource(SETTINGS_PATH);
+        if(settingsResource != null){
+            GeneralSettingsModel generalSettings = settingsResource.adaptTo(GeneralSettingsModel.class);
+            jobProps.put(UPDATE_STRATEGY_KEY, generalSettings.getStrategyPid());
+        }
+
         return jobManager.addJob(JOB_TOPIC, jobProps);
     }
 
