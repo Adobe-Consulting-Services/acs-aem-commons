@@ -3,12 +3,12 @@
 ## Prerequistes
 
 * You must have commit rights on this repository.
-* You must have deploy rights to [Sonatype's OSS Repository Hosting (OSSRH)][OSSRH].
+* You must have an account with deploy rights to [Sonatype's Central Portal][central-portal] for namespace `com.adobe.acs`.
 
 ### Setup
 
-In your Maven settings.xml file (~/.m2/settings.xml), add a server entry with the id `ossrh`. The username is your [OSSRH][OSSRH] username/Sonatype JIRA ID.
-The password should only be [stored encryptedly](http://maven.apache.org/guides/mini/guide-encryption.html#How_to_encrypt_server_passwords):
+In your Maven settings.xml file (~/.m2/settings.xml), add a server entry with the id `ossrh`. The credentials are your [Central Portal User Token][central-portal-token].
+The password should only be [stored in encrypted form](http://maven.apache.org/guides/mini/guide-encryption.html#How_to_encrypt_server_passwords):
 
     <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -17,15 +17,21 @@ The password should only be [stored encryptedly](http://maven.apache.org/guides/
         ...
         <servers>
             <server>
-                <id>ossrh</id>
-                <username>kwin</username>
-                <password>*****</password>
+                <id>sonatype-central-portal</id>
+                <username>central-portal-token-user</username>
+                <password>central-portal-token-password</password>
+                <configuration>
+                    <!-- njord publisher id for central portal, https://maveniverse.eu/docs/njord/using-it/ -->
+                    <njord.publisher>sonatype-cp</njord.publisher>
+                    <!-- the njord validation template to use, https://maveniverse.eu/docs/njord/what-is-it/ -->
+                    <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
+                </configuration>
             </server>
         </servers>
         ...
     </settings>
 
-These credentials are used to deploy to [OSSRH][OSSRH].
+These credentials are used to deploy to [Sonatype's Central Portal][central-portal].
 
 In addition you need to setup [GPG](https://central.sonatype.org/pages/working-with-pgp-signatures.html) to create OpenPGP signatures. After installing https://www.gnupg.org/download/ you need to create key pair (if you don't have one yet) and make sure that the public key is distributed via hkp://pool.sks-keyservers.net.
 e.g. `gpg2 --keyserver hkp://pool.sks-keyservers.net --send-keys YOUR_KEY_ID_HERE` -- OSSRH also checks hkp://keys.openpgp.org and hkp://keyserver.ubuntu.com as backups so it might be a good idea to upload there.
@@ -59,16 +65,19 @@ if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 
 6. Ensure **Java 8** is active (Java 11 breaks on the JavaDocs build in `mvn release:perform`)
 
-7. Run the release: `mvn release:prepare` followed by `git checkout master`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`
+7. Run the release: `mvn release:prepare` followed by `mvn release:perform`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`
 
-8. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
+8. Check and validate the stage repositories content as outlined in <https://maveniverse.eu/docs/njord/using-it/#using-it>. If everything is fine publish the stage repository via [`mvn njord:publish`](https://maveniverse.eu/docs/njord/plugin-documentation/publish-mojo.html)
 
-9. Log into https://oss.sonatype.org/ and close the staging repository. Closing the staging repo will automatically push the artifacts to Maven Central after a small delay (4 hours for all mirrors to catch up)
+9. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
+
+10. Publish the remote bundle in https://central.sonatype.com/publishing/deployments to Maven Central. Publishing the remote bundle automatically pushes the artifacts to Maven Central after a small delay (usually some minutes).
 
 10. Add a release announcement (and any other docs) to the documentation site.
 
 11. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`
 
 
-[OSSRH]: https://central.sonatype.org/pages/ossrh-guide.html
+[central-portal]: https://central.sonatype.org/register/central-portal/
+[central-portal-token]: https://central.sonatype.org/publish/generate-portal-token/
 
