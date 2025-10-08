@@ -62,7 +62,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-id: sonatype-central-portal # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_USERNAME # env variable for username in deploy
           server-password: MAVEN_PASSWORD # env variable for token in deploy
 
@@ -74,8 +74,8 @@ jobs:
             echo "NVD_API_KEY=${{ secrets.NVD_API_KEY }}" >> $GITHUB_ENV
             echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check,cloud -DnvdApiKeyEnvironmentVariable=NVD_API_KEY" >> $GITHUB_ENV
             if [ "${{github.ref}}" = "refs/heads/master" ] && [ "${{github.event_name}}" = "push" ]; then
-              echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
-              echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
+              echo "MAVEN_USERNAME=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}" >> $GITHUB_ENV
+              echo "MAVEN_PASSWORD=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}" >> $GITHUB_ENV
               echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
               echo "STEP_NAME_SUFFIX=(Deploys to OSSRH)" >> $GITHUB_ENV
             else
