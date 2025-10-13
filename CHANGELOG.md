@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 6.14.0 - 2025-07-15
 
 ### Changed
+- #3623 Content Sync: improve error handling
+- #3638 Redirect Manager: fix search in tags property
+
+## 6.14.0 - 2025-07-15
+
+### Changed
 
 - #3600 Content Sync: support OAuth authentication
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.

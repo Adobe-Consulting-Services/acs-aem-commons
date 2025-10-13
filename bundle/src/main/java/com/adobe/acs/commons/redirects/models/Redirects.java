@@ -176,7 +176,7 @@ public class Redirects {
         map.put("1_group.3_fulltext", term);
         map.put("1_group.4_fulltext.relPath", "@" + CACHE_CONTROL_HEADER_NAME);
         map.put("1_group.4_fulltext", term);
-        map.put("1_group.f5_ulltext.relPath", "@cq:tags");
+        map.put("1_group.5_fulltext.relPath", "@cq:tags");
         map.put("1_group.5_fulltext", term);
         map.put("1_group.6_fulltext.relPath", "@statusCode");
         map.put("1_group.6_fulltext", term);
