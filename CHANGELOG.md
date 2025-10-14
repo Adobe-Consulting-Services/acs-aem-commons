@@ -11,8 +11,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #2745 Fixed circular dependency in EnsureOakIndex
+
+## 6.14.0 - 2025-07-15
+
 ### Changed
 - #3623 Content Sync: improve error handling
+- #3638 Redirect Manager: fix search in tags property
 
 ## 6.14.0 - 2025-07-15
 
@@ -29,7 +36,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
 - #3579 Redirect manager: fulltext search toggle doesn't work
-- #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
 
