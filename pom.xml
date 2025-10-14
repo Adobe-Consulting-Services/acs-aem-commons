@@ -91,10 +91,17 @@
         <jacoco.version>0.8.12</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
         <njord.version>0.8.4</njord.version>
+        <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
+        <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
+        <njord.publisher>sonatype-cp</njord.publisher>
+        <njord.autoPublish>true</njord.autoPublish>
+        <njord.publishingType>automatic</njord.publishingType>
+        <njord.waitForStates>true</njord.waitForStates>
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
         <project.build.outputTimestamp>1752594312</project.build.outputTimestamp>
+        
     </properties>
 
     <build>

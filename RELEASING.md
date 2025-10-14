@@ -3,11 +3,11 @@
 ## Prerequistes
 
 * You must have commit rights on this repository.
-* You must have an account with deploy rights to [Sonatype's Central Portal][central-portal] for namespace `com.adobe.acs`.
+* You must have an account at [Sonatype's Central Portal][central-portal] with deploy rights for namespace/groupId `com.adobe.acs`.
 
 ### Setup
 
-In your Maven settings.xml file (~/.m2/settings.xml), add a server entry with the id `ossrh`. The credentials are your [Central Portal User Token][central-portal-token].
+In your Maven settings.xml file (`~/.m2/settings.xml`), add a server entry with the id `sonatype-central-portal`. The credentials must be a [Central Portal User Token][central-portal-token].
 The password should only be [stored in encrypted form](http://maven.apache.org/guides/mini/guide-encryption.html#How_to_encrypt_server_passwords):
 
     <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
@@ -20,12 +20,6 @@ The password should only be [stored in encrypted form](http://maven.apache.org/g
                 <id>sonatype-central-portal</id>
                 <username>central-portal-token-user</username>
                 <password>central-portal-token-password</password>
-                <configuration>
-                    <!-- njord publisher id for central portal, https://maveniverse.eu/docs/njord/using-it/ -->
-                    <njord.publisher>sonatype-cp</njord.publisher>
-                    <!-- the njord validation template to use, https://maveniverse.eu/docs/njord/what-is-it/ -->
-                    <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
-                </configuration>
             </server>
         </servers>
         ...
@@ -65,17 +59,13 @@ if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 
 6. Ensure **Java 8** is active (Java 11 breaks on the JavaDocs build in `mvn release:perform`)
 
-7. Run the release: `mvn release:prepare` followed by `mvn release:perform`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`
+7. Run the release: `mvn release:prepare` followed by `mvn release:perform`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`. This will automatically publish the release artifacts to Sonatype's Central Portal and from there publish further to Maven Central. The build waits for the deploy to finish therefore might take a bit.
 
-8. Check and validate the stage repositories content as outlined in <https://maveniverse.eu/docs/njord/using-it/#using-it>. If everything is fine publish the stage repository via [`mvn njord:publish`](https://maveniverse.eu/docs/njord/plugin-documentation/publish-mojo.html)
+8. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
 
-9. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
+9. Add a release announcement (and any other docs) to the documentation site.
 
-10. Publish the remote bundle in https://central.sonatype.com/publishing/deployments to Maven Central. Publishing the remote bundle automatically pushes the artifacts to Maven Central after a small delay (usually some minutes).
-
-10. Add a release announcement (and any other docs) to the documentation site.
-
-11. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`
+10. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`
 
 
 [central-portal]: https://central.sonatype.org/register/central-portal/
