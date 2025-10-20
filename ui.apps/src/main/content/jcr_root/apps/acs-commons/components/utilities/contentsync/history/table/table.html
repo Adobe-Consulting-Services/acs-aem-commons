@@ -18,37 +18,44 @@
 <section class="coral-Form coral-Form--vertical">
 
     <table is="coral-table">
-        <colgroup>
-            <col is="coral-table-column"/>
-            <col is="coral-table-column"/>
-            <col is="coral-table-column"/>
-            <col is="coral-table-column"/>
-            <col is="coral-table-column"/>
-            <col is="coral-table-column"/>
-        </colgroup>
         <thead is="coral-table-head">
-            <tr is="coral-table-row">
-                <th is="coral-table-headercell">Initiator</th>
-                <th is="coral-table-headercell">Start Time</th>
-                <th is="coral-table-headercell">Path</th>
-                <th is="coral-table-headercell">Resources Updated</th>
-                <th is="coral-table-headercell">Log</th>
-            </tr>
+        <tr is="coral-table-row">
+            <th is="coral-table-headercell">Initiator</th>
+            <th is="coral-table-headercell">Start Time</th>
+            <th is="coral-table-headercell">Finish Time</th>
+            <th is="coral-table-headercell">Path</th>
+            <th is="coral-table-headercell"># Resources</th>
+            <th is="coral-table-headercell">Status</th>
+            <th is="coral-table-headercell">Logs</th>
+            <th is="coral-table-headercell">Re-Run</th>
+        </tr>
         </thead>
 
         <tbody is="coral-table-body" divider="cell">
-            <sly
-                data-sly-list="${resource.getChildren}">
-                <tr is="coral-table-row">
-                    <td is="coral-table-cell">${item.jcr:createdBy}</td>
-                    <td is="coral-table-cell">${'dd-MM-yyyy hh:mm:ss' @ format=item.jcr:created}</td>
-                    <td is="coral-table-cell">${item.syncPath}</td>
-                    <td is="coral-table-cell">${item.count}</td>
-                    <td is="coral-table-cell">
-						<a title="view log in a new tab" href="${item.path @ context='unsafe'}/log" target="_blank"><coral-icon icon="download" size="XS"></coral-icon></a>
-                    </td>
-                </tr>
-            </sly>
+        <sly
+                data-sly-use.defs="com.adobe.acs.commons.contentsync.ContentSyncHistoryModel"
+                data-sly-list="${defs.jobs}">
+            <tr is="coral-table-row">
+                <td is="coral-table-cell">${item.startedBy}</td>
+                <td is="coral-table-cell">${'dd-MM-yyyy hh:mm:ss' @ format=item.slingevent:created}</td>
+                <td is="coral-table-cell" data-sly-test="${item.slingevent:finishedDate}">${'dd-MM-yyyy hh:mm:ss' @ format=item.slingevent:finishedDate}</coral-progress></td>
+                <td is="coral-table-cell" data-sly-test="${!item.slingevent:finishedDate}"><coral-progress class='process-progress' value="${item.progress}" showpercent>${item.progressMessage}</coral-progress></td>
+                <td is="coral-table-cell">${item.root}</td>
+                <td is="coral-table-cell">${item.numberOfSteps}</td>
+                <td is="coral-table-cell">
+                    <coral-tag color="${item.statusColor}">${item.jobState}</coral-tag>
+                    <coral-tag color="${item.statusColor}" data-sly-test="${item.dryRun}">DRY RUN</coral-tag>
+                </td>
+                <td is="coral-table-cell">
+                    <a title="view log in a new tab" href="/contentsync/jcr:content/sync.log.txt/${item.slingevent:eventId}" target="_blank"
+                       is="coral-anchorbutton" variant="quiet" icon="download" iconsize="S"></a>
+                </td>
+                <td is="coral-table-cell">
+                    <a title="re-run" href="/contentsync.html/var/eventing/jobs/finished/acs-commons.contentsync.job/${item.slingevent:eventId}"
+                       is="coral-anchorbutton" variant="quiet" icon="redo" iconsize="S"></a>
+                </td>
+            </tr>
+        </sly>
         </tbody>
 
     </table>

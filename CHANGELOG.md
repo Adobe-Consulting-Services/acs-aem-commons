@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 6.14.0 - 2025-07-15
 
 ### Changed
+- #3636 Content Sync: support dedicated egress IP address
+- #3631 Content Sync: refactor to use Sling Jobs
 - #3623 Content Sync: improve error handling
 - #3627 Redirect Manager: Use bulk activation
 - #3638 Redirect Manager: Fix search in tags property
