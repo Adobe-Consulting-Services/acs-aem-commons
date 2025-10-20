@@ -86,13 +86,29 @@
 
         <jacoco.version>0.8.13</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
+        <njord.version>0.8.4</njord.version>
+        <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
+        <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
+        <njord.publisher>sonatype-cp</njord.publisher>
+        <njord.autoPublish>true</njord.autoPublish>
+        <njord.publishingType>automatic</njord.publishingType>
+        <njord.waitForStates>true</njord.waitForStates>
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
         <project.build.outputTimestamp>1752594312</project.build.outputTimestamp>
+        
     </properties>
 
     <build>
+        <extensions>
+            <!-- deploys during m-deploy-p:deploy to a local staging repository (https://maveniverse.eu/docs/njord/what-is-it/)-->
+            <extension>
+                <groupId>eu.maveniverse.maven.njord</groupId>
+                <artifactId>extension3</artifactId>
+                <version>${njord.version}</version>
+            </extension>
+        </extensions>
         <pluginManagement>
             <plugins>
                 <!-- all standard Maven plugins (in group org.apache.maven.plugins) -->
@@ -433,10 +449,11 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     <artifactId>dependency-check-maven</artifactId>
                     <version>12.1.6</version>
                 </plugin>
+                <!-- used to validate/publish from a stage repository to Maven Central (https://maveniverse.eu/docs/njord/plugin-documentation/index.html) -->
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
+                    <groupId>eu.maveniverse.maven.plugins</groupId>
+                    <artifactId>njord</artifactId>
+                    <version>${njord.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -453,7 +470,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.6.3</version><!-- maven-shade-plugin 3.5.2 requires 3.6.3 -->
+                                    <version>3.9.0</version><!-- njord requires Maven 3.9.0 -->
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>11</version>
@@ -480,19 +497,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <!-- use https://help.sonatype.com/repomanager2/staging-releases/configuring-your-project-for-deployment#ConfiguringYourProjectforDeployment-DeploymentwiththeNexusStagingMavenPlugin
-            instead of maven-deploy-plugin -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <!-- manually release in https://oss.sonatype.org/#stagingRepositories after the Maven release build -->
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -878,10 +882,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
     </profiles>
 
     <distributionManagement>
-        <!-- the nexus-staging-maven-plugin only needs a snapshot repository -->
+        <repository>
+            <id>sonatype-central-portal</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>sonatype-central-portal</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
