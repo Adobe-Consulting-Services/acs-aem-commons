@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3601 Content Sync: in case of an error print the exception and continue instead of aborting
 - #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.* should expose error messages to end users
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
+- #3626 Redirect Manager: Fix Replace Mode issue, delete only 'redirect-row' nodes
 
 ### Fixed
 
