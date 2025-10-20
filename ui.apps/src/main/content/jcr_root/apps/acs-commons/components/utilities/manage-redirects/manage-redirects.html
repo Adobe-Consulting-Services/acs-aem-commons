@@ -20,6 +20,7 @@
 <html  lang="en" >
 <head>
     <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
+    <title>Redirect Manager</title>
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
 <sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'acs-commons.manage-redirects.app']}"
@@ -142,9 +143,9 @@
                             </thead>
 
                             <tbody is="coral-table-body" id="redirect-rows" divider="cell">
-                                <sly data-sly-list.item="${pg.items}">
-                                    <sly data-sly-call="${redirectsTemplate.row @ redirectResource = item, allowRearrange = true}"/>
-                                </sly>
+                            <sly data-sly-list.item="${pg.items}">
+                                <sly data-sly-call="${redirectsTemplate.row @ redirectResource = item, allowRearrange = true}"/>
+                            </sly>
                             </tbody>
 
                         </table>
@@ -198,16 +199,15 @@
                 </coral-panel>
                 <coral-panel class="coral-Well">
                     <section>
-                        <form action="${resource.path}.replicate.html" method="post" class="coral-Form--aligned">
-                            <input type="hidden" name="cmd" value="Activate" />
-                            <input type="hidden" name="path" value="${context.redirectResource.path}" />
-                            <input type="hidden" name="_charset_" value="utf-8" />
-                            <div class="coral-Form-fieldwrapper">
-                                <button class="coral-Button cq-dialog-publish" icon="publish" is="coral-button" variant="primary" alert="Redirects have been published">Publish Redirect Configurations
-                                </button>
-                                <p>Last Published: ${'dd-MMMM-yyyy hh:mm:ss' @ format=context.redirectResource.valueMap['cq:lastReplicated'], timezone='EST'} by ${context.redirectResource.valueMap['cq:lastReplicatedBy']}
-                                </p>
-                            </div>
+                        <form action="${context.redirectResource.path}.replicate.json" enctype="application/x-www-form-urlencoded" method="POST" class="coral-Form foundation-form"
+                              data-foundation-form-ajax="true" data-foundation-form-loadingmask="true">
+                            <meta class="foundation-form-response-ui-success" data-foundation-form-response-ui-success="{&quot;name&quot;:&quot;foundation.reload&quot;,&quot;message&quot;:&quot;redirects published&quot;}">
+                            <button icon="publish" is="coral-button" variant="primary" type="submit">
+                                Publish Redirect Configurations
+                            </button>
+                            <p>
+                                Last Published: ${'dd-MMMM-yyyy hh:mm:ss' @ format=context.redirectResource.valueMap['cq:lastReplicated'], timezone='EST'} by ${context.redirectResource.valueMap['cq:lastReplicatedBy']}
+                            </p>
                         </form>
                     </section>
                 </coral-panel>
