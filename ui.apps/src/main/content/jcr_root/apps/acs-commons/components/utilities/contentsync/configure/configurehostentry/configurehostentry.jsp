@@ -28,7 +28,7 @@
 	String icon = "viewList";
 	String smallIcon = "search";
 	String path =  resource.getPath();
-	String href = "/apps/acs-commons/content/contentsync.html" + path;
+	String href = "/contentsync.html" + path;
 	String url = valueMap.get("host", "");
 	String name = valueMap.get("name", "");
 

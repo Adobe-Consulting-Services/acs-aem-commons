@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.contentsync.impl;
 
 import com.adobe.acs.commons.contentsync.CatalogItem;
+import com.adobe.acs.commons.contentsync.ContentReader;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -107,6 +108,29 @@ public class TestLastModifiedStrategy {
         Resource pageResource = page.adaptTo(Resource.class);
 
         assertTrue(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
+    }
+
+    /**
+     * local dates can be in the legacy ecma format and ValueMap won't cast those to Calendar.
+     * Assert that we fall back to parsing ecma dates and return a valid Calendar instance
+     */
+    @Test
+    public void testLastModifiedInEcmaFormat() {
+        String pagePath = "/content/wknd/page";
+        String remoteTimestamp = "Tue Jan 01 2019 12:34:56 GMT+0000";
+        String localTimestamp = "Wed Jan 02 2019 12:34:56 GMT+0000"; // younger than remote
+
+        JsonObject catalogItem = Json.createObjectBuilder()
+                .add("path", pagePath)
+                .add("jcr:primaryType", "cq:Page")
+                .add("lastModified", ContentReader.parseEcmaDate(remoteTimestamp).toInstant().toEpochMilli())
+                .build();
+
+        Page page = context.create().page(pagePath, null,
+                Collections.singletonMap("cq:lastModified", localTimestamp));
+        Resource pageResource = page.adaptTo(Resource.class);
+
+        assertFalse(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
     }
 
     @Test

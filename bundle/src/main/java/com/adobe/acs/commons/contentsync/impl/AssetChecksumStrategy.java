@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.contentsync.impl;
 
 import com.adobe.acs.commons.contentsync.CatalogItem;
+import com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.day.cq.dam.api.Asset;
 import org.apache.sling.api.resource.LoginException;
@@ -62,8 +63,7 @@ public class AssetChecksumStrategy implements UpdateStrategy {
         if (rootPath == null) {
             throw new IllegalArgumentException("root request parameter is required");
         }
-        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(ContentCatalogJobConsumer.AUTH_INFO)) {
 
             String query = "SELECT * FROM [dam:Asset] AS s WHERE ISDESCENDANTNODE([" + rootPath + "]) ORDER BY s.[jcr:path]";
             Iterator<Resource> it = resolver.findResources(query, "JCR-SQL2");

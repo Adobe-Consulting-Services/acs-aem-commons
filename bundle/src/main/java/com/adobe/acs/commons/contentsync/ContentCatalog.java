@@ -22,14 +22,13 @@ package com.adobe.acs.commons.contentsync;
 import com.adobe.acs.commons.contentsync.servlet.ContentCatalogServlet;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.event.jobs.Job;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
+import javax.json.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -81,7 +80,7 @@ public class ContentCatalog {
     }
 
     void checkStatus(JsonObject json ){
-        JsonArray resources = json.getJsonArray(JOB_RESOURCES);
+        JsonArray resources = json.containsKey(JOB_RESOURCES) ? json.getJsonArray(JOB_RESOURCES) : null;
         String status = json.containsKey(JOB_STATUS) ? json.getString(JOB_STATUS) : null;
         if("SUCCEEDED".equals(status) || resources != null){
             results = resources.stream()
@@ -89,8 +88,11 @@ public class ContentCatalog {
                     .map(CatalogItem::new)
                     .collect(Collectors.toList());
         } else if ("ERROR".equals(status) || "GIVEN_UP".equals(status)){
-            String resultMessage = json.containsKey("message") ? json.getString("message") : "";
-            throw new IllegalStateException("Error fetching catalog: " + resultMessage);
+            StringWriter sw = new StringWriter();
+            try(JsonWriter out = Json.createWriter(sw)){
+                out.writeObject(json);
+            }
+            throw new IllegalStateException("Error fetching catalog: " + sw);
         }
     }
 
