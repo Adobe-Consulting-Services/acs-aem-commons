@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
+import com.adobe.acs.commons.util.RequireAem;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.FieldOption;
@@ -29,6 +32,8 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -41,10 +46,31 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Component(service = EnsureOakIndexExecutor.class)
-public class EnsureOakIndexExecutor {
+/**
+ * This implementation of the OakIndexManager also provides a small
+ * interface via the OSGI console to check the status of all
+ * of EnsureOakIndex instances.
+ */
 
-    private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexExecutor.class);
+//@formatter:off
+@Component(
+        service = {DynamicMBean.class, EnsureOakIndexManager.class},
+        immediate = true,
+        property = {
+                "felix.webconsole.title=Ensure Oak Index",
+                "felix.webconsole.label=ensureOakIndex",
+                "felix.webconsole.category=Sling",
+                "jmx.objectname=com.adobe.acs.commons.oak:type=Ensure Oak Index"
+        }
+)
+//@formatter:on
+public class EnsureOakIndexManagerExecutor extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
+
+    private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexManagerExecutor.class);
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target = "(distribution=classic)")
+    RequireAem requireAem;
 
     @Reference(
             cardinality = ReferenceCardinality.MULTIPLE,
@@ -55,6 +81,14 @@ public class EnsureOakIndexExecutor {
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes = new CopyOnWriteArrayList<>();
 
+    public EnsureOakIndexManagerExecutor() throws NotCompliantMBeanException {
+        super(EnsureOakIndexManagerMBean.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final int ensureAll(boolean force) {
         log.info("Applying all un-applied ensure index definitions");
 
@@ -72,6 +106,10 @@ public class EnsureOakIndexExecutor {
         return count;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final int ensure(final boolean force,
                             final String ensureDefinitionPath) {
         int count = 0;
@@ -108,6 +146,7 @@ public class EnsureOakIndexExecutor {
      * @return the Ensure Oak Index data in a Tabular Format for the MBean
      * @throws OpenDataException
      */
+    @Override
     @SuppressWarnings("squid:S1192")
     public final TabularData getEnsureOakIndexes() throws OpenDataException {
 
