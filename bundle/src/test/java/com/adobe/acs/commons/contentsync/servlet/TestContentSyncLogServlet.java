@@ -124,6 +124,6 @@ public class TestContentSyncLogServlet {
         String output = context.response().getOutputAsString();
         assertEquals(
                 "progress1" + System.lineSeparator() +
-                "progress2" + System.lineSeparator());
+                        "progress2" + System.lineSeparator(), output);
     }
 }
