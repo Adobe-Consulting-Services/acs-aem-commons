@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3616 Content Sync: Fixed js errors when deleting configurations
 - #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.14.0 - 2025-07-15
