@@ -116,6 +116,12 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlusherImpl:service.ranking");
 
+        // These properties are not configurable OSGi config properties, they have been moved to EnsureOakIndexManagerExecutor
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.title");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.label");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.category");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:jmx.objectname");
+
         // Property port on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Integer})
         // Property password on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Password})
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
@@ -215,12 +221,12 @@ public class ScrMetadataIT {
     private DescriptorList getDescriptorsFromLatestRelease() throws Exception {
         // https://central.sonatype.org/search/rest-api-guide/
         HttpClientBuilder builder = HttpClientBuilder.create().setServiceUnavailableRetryStrategy( new ServiceUnavailableRetryStrategy() {
-            
+
             @Override
             public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
                 return executionCount < 5 && TRANSIENT_ERROR_STATUS_CODES.contains(response.getStatusLine().getStatusCode());
             }
-            
+
             @Override
             public long getRetryInterval() {
                 return 5000; // in milliseconds
@@ -238,7 +244,7 @@ public class ScrMetadataIT {
             } else {
                 String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
                 System.out.printf("Fetching %s\n", url);
-    
+
                 client.execute(new HttpGet(url), new ResponseHandler<Void>() {
 
                     @Override
@@ -315,7 +321,7 @@ public class ScrMetadataIT {
                 }
                 return super.visitFile(file, attrs);
             }
-            
+
         });
         // metatype descriptors must come last (after component descriptions)
         for (Descriptor metatypeDescriptor : metatypeDescriptors) {
