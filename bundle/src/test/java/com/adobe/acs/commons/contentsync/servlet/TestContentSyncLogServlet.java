@@ -107,7 +107,7 @@ public class TestContentSyncLogServlet {
                 "log line 1\n" +
                         "log line 2\n" +
                         "progress1\n" +
-                        "progress2\n", output);
+                        "progress2", output);
     }
 
     @Test
@@ -124,6 +124,6 @@ public class TestContentSyncLogServlet {
         String output = context.response().getOutputAsString();
         assertEquals(
                 "progress1\n" +
-                        "progress2\n", output);
+                        "progress2", output);
     }
 }
