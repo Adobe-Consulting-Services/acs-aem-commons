@@ -21,12 +21,12 @@
     var ui = $(window).adaptTo("foundation-ui");
     
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
-        name: "acs-commons.dashboard.task.delete",
+        name: "acs-commons.contentsync.host.delete",
         handler: function(name, el, config, collection, selections) {	
             if (selections.length === 1) {
 				var card = $(selections).find("coral-card");
                 if(card.length > 0) {
-					var taskName = card.data("host");
+                    var taskName = card.data("properties").name;
                     var message = "You are going to delete the following item:" +
                     "<p><b>" + taskName + "</b></p>";
 
@@ -59,7 +59,7 @@
         handler: function(name, el, config, collection, selections) {
             var dlg = document.getElementById("modalConfigureHost");
             var form = dlg.querySelector("form");
-            form.action = "/etc/replication/agents.author/*";
+            form.action = "/var/acs-commons/contentsync/hosts/*";
             form.reset();
             dlg.show();
         }

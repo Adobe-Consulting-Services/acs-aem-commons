@@ -53,7 +53,9 @@ import static com.adobe.acs.commons.redirects.models.RedirectRule.TAGS_PROPERTY_
 import static com.adobe.acs.commons.redirects.models.RedirectRule.TARGET_PROPERTY_NAME;
 import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.CONTENT_TYPE_EXCEL;
 import static com.adobe.acs.commons.redirects.servlets.ExportRedirectMapServlet.export;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -333,6 +335,7 @@ public class ImportRedirectMapServletTest {
         byte[] excelBytes = createMockExcelFile();
         setupFileUpload(excelBytes, CONTENT_TYPE_EXCEL );
         context.request().addRequestParameter("replace", "true");
+        context.create().resource(redirectStoragePath + "/rep:policy", JCR_PRIMARYTYPE, "rep:ACL" );
 
         new RedirectResourceBuilder(context, redirectStoragePath)
                 .setSource("/content/one")
@@ -349,6 +352,9 @@ public class ImportRedirectMapServletTest {
         Map<String, Resource> rules = servlet.getRules(storageRoot); // rules keyed by source
         assertEquals("number of redirects after import ", 1, rules.size());
         assertNotNull(rules.get("/old"));
+
+        Resource repPolicy = context.resourceResolver().getResource(redirectStoragePath + "/rep:policy");
+        assertNotNull(repPolicy);
     }
 
     @Test
