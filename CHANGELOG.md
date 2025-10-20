@@ -13,13 +13,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3616 Content Sync: Fixed js errors when deleting configurations
 - #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.14.0 - 2025-07-15
 
 ### Changed
+- #3636 Content Sync: support dedicated egress IP address
+- #3631 Content Sync: refactor to use Sling Jobs
 - #3623 Content Sync: improve error handling
-- #3638 Redirect Manager: fix search in tags property
+- #3627 Redirect Manager: Use bulk activation
+- #3638 Redirect Manager: Fix search in tags property
 
 ## 6.14.0 - 2025-07-15
 
@@ -31,6 +35,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3601 Content Sync: in case of an error print the exception and continue instead of aborting
 - #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.* should expose error messages to end users
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
+- #3626 Redirect Manager: Fix Replace Mode issue, delete only 'redirect-row' nodes
 
 ### Fixed
 

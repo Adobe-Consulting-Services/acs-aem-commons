@@ -43,8 +43,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -73,47 +71,15 @@ public class TestContentCatalogJobConsumer {
         updateStrategy = mock(UpdateStrategy.class);
         context.registerService(updateStrategy);
 
+        context.registerService(ContentSyncService.class, mock(ContentSyncService.class));
+
         consumer = context.registerInjectActivateService(new ContentCatalogJobConsumer());
-        consumer.bindDeltaStrategy(updateStrategy);
 
         jobContext = mock(JobExecutionContext.class);
         JobExecutionContext.ResultBuilder resultBuilder = mock(JobExecutionContext.ResultBuilder.class);
         when(jobContext.result()).thenReturn(resultBuilder);
     }
 
-    @Test
-    public void testGetStrategy_InvalidStrategy() {
-        // Setup
-        String invalidStrategy = "invalid.strategy";
-
-        // Verify
-        assertThrows(IllegalArgumentException.class, () -> {
-            consumer.getStrategy(invalidStrategy);
-        });
-    }
-
-    @Test
-    public void testBindUnbindStrategy() {
-        // Setup
-        UpdateStrategy strategy = mock(UpdateStrategy.class);
-        String strategyName = strategy.getClass().getName();
-
-        // Execute bind
-        consumer.bindDeltaStrategy(strategy);
-        UpdateStrategy boundStrategy = consumer.getStrategy(strategyName);
-
-        // Verify bind
-        assertNotNull(boundStrategy);
-        assertEquals(strategy, boundStrategy);
-
-        // Execute unbind
-        consumer.unbindDeltaStrategy(strategy);
-
-        // Verify unbind
-        assertThrows(IllegalArgumentException.class, () -> {
-            consumer.getStrategy(strategyName);
-        });
-    }
 
     @Test
     public void testSave() throws IOException, LoginException, RepositoryException {
