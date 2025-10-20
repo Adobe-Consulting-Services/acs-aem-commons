@@ -104,10 +104,10 @@ public class TestContentSyncLogServlet {
         String output = context.response().getOutputAsString();
         // Since we can't inject our iterator, just check progress log output
         assertEquals(
-                "log line 1\n" +
-                        "log line 2\n" +
-                        "progress1\n" +
-                        "progress2", output.trim());
+                "log line 1" + System.lineSeparator() +
+                        "log line 2" + System.lineSeparator() +
+                        "progress1" + System.lineSeparator() +
+                        "progress2" + System.lineSeparator(), output);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class TestContentSyncLogServlet {
 
         String output = context.response().getOutputAsString();
         assertEquals(
-                "progress1\n" +
-                "progress2", output.trim());
+                "progress1" + System.lineSeparator() +
+                "progress2" + System.lineSeparator());
     }
 }
