@@ -89,6 +89,7 @@
         <njord.version>0.8.4</njord.version>
         <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
         <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
+        <njord.snapshotUrl>njord:template:snapshot</njord.snapshotUrl>
         <njord.publisher>sonatype-cp</njord.publisher>
         <njord.autoPublish>true</njord.autoPublish>
         <njord.publishingType>automatic</njord.publishingType>
