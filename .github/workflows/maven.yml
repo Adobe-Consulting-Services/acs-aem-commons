@@ -77,7 +77,7 @@ jobs:
               echo "MAVEN_USERNAME=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}" >> $GITHUB_ENV
               echo "MAVEN_PASSWORD=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}" >> $GITHUB_ENV
               echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
-              echo "STEP_NAME_SUFFIX=(Deploys to OSSRH)" >> $GITHUB_ENV
+              echo "STEP_NAME_SUFFIX=(Deploys to Sonatype Central Portal)" >> $GITHUB_ENV
             else
               echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
             fi
