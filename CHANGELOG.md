@@ -11,7 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
-### Fixed
+## 6.15.0 - 2025-10-21
+
+### Changed
 
 - #3616 Content Sync: Fixed js errors when deleting configurations
 - #2745 Fixed circular dependency in EnsureOakIndex
