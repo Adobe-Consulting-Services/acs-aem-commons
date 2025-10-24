@@ -145,10 +145,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + "Use if Location header should be rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
         boolean mapUrls() default true;
 
-        @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
-        String[] extensions() default {};
+        @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed. If empty there is no extension restriction! Requests without an extension are always allowed to be redirected.", type = AttributeType.STRING)
+        String[] extensions();
 
-        @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed", type = AttributeType.STRING)
+        @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed. If empty there is no path restriction!", type = AttributeType.STRING)
         String[] paths() default {"/content"};
 
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects. Since v6.11 you can manage handling query string in Redirect Properties.", type = AttributeType.BOOLEAN)
@@ -161,7 +161,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
-        String[] additionalHeaders() default {};
+        String[] additionalHeaders();
 
         @AttributeDefinition(name = "Configuration bucket name", description = "name of the parent folder where to store redirect rules."
                 + " Default is settings. ", type = AttributeType.STRING)
