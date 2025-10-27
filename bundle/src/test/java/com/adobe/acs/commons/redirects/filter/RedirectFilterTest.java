@@ -47,7 +47,6 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
@@ -55,8 +54,9 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -95,7 +95,7 @@ public class RedirectFilterTest {
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
-        when(configuration.additionalHeaders()).thenReturn(new String[]{"Expires: 12345", "Invalid"});
+        when(configuration.additionalHeaders()).thenReturn(new String[]{"Expires: 12345", "Cache-Control: max-age=1", "Invalid"});
         when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
         when(configuration.preserveExtension()).thenReturn(true);
@@ -205,7 +205,7 @@ public class RedirectFilterTest {
         assertEquals(new HashSet<>(Arrays.asList(contentRoots)), new HashSet<>(filter.getPaths()));
         assertEquals(Arrays.asList("GET", "HEAD"), new ArrayList<>(filter.getMethods()));
         List<Header> headers = filter.getOnDeliveryHeaders();
-        assertEquals(1, headers.size());
+        assertEquals(2, headers.size());
         Header header = headers.iterator().next();
         assertEquals("Expires", header.getName());
         assertEquals("12345", header.getValue());
@@ -1426,7 +1426,7 @@ public class RedirectFilterTest {
     }
 
     /**
-     * Cache-Control header is configured in the contextual configuration
+     * Cache-Control header is configured in the contextual configuration (and also in the additionalHeaders)
      */
     @Test
     public void testCacheControlHeadersDefault() throws Exception {
@@ -1442,7 +1442,8 @@ public class RedirectFilterTest {
 
         MockSlingHttpServletResponse response = navigateToURI("/content/we-retail/en/page.html");
         assertEquals("/content/we-retail/en/target", response.getHeader("Location"));
-        assertEquals("no-cache", response.getHeader("Cache-Control"));
+        // the cache-control header from the additionalHeaders must be overwritten!
+        MatcherAssert.assertThat(response.getHeaders("Cache-Control"), Matchers.contains("no-cache"));
     }
 
     @Test
