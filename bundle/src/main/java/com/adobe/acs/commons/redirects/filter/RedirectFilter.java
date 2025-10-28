@@ -392,6 +392,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 slingResponse.setStatus(redirectRule.getStatusCode());
                 redirected = true;
             }
+        } else {
+            log.trace("No redirect rule found for request {}", slingRequest.getRequestPathInfo() );
         }
         return redirected;
     }
@@ -620,6 +622,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         String configPath = configResource.getPath();
         try {
+            log.trace("Loading redirect rules from caconfig {} mapped to resource path {}", configResource.getPath(), resource.getPath());
             RedirectConfiguration rules = rulesCache.get(configPath, () -> loadRules(configResource));
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
@@ -634,6 +637,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
+                    log.trace("No redirect rule found for resource path {}, trying mapped url {}");
                     String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
                     m = rules.match(mappedPath, "", slingRequest);
                 }

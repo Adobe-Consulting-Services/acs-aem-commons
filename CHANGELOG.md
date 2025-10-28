@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Changed
+
+- #3654 RedirectFilter should always emit a trace log if no entry was found
+
 ## 6.15.0 - 2025-10-21
 
 ### Changed
