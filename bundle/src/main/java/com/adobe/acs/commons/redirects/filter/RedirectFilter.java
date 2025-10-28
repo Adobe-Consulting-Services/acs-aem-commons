@@ -763,7 +763,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
             ccHeader = redirectRule.getDefaultCacheControlHeader();
         }
         if(!StringUtils.isEmpty(ccHeader)){
-            response.addHeader("Cache-Control", ccHeader);
+            // overwrite any previously set header with that name
+            response.setHeader("Cache-Control", ccHeader);
         }
     }
 }

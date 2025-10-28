@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3654 RedirectFilter should always emit a trace log if no entry was found
 - #3650 Clarify description of com.adobe.acs.commons.redirects.filter.RedirectFilter -> Request Extensions/Request Paths with regards to no values
 
+### Fixed
+
+- #3653 RedirectFilter.additionalHeaders() may duplicate Cache-Control headers
+
 ## 6.15.0 - 2025-10-21
 
 ### Changed
