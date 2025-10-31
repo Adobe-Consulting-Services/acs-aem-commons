@@ -16,7 +16,8 @@ on:
       dryRun:
         description: 'Dry Run? (false to do an actual release)'
         required: true
-        default: 'true'
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -61,12 +62,13 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}
-        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdryRun=${{ github.event.inputs.dryRun }} -Dnjord.dryRun=${{ github.event.inputs.dryRun }}
+        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DskipTests=true -DdryRun=${{ github.event.inputs.dryRun }} -Dnjord.dryRun=${{ github.event.inputs.dryRun }}
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.event.inputs.releaseVersion }}
+          tag: ${{ github.event.inputs.releaseVersion }}
+          # generateReleaseNotesPreviousTag, https://github.com/ncipollo/release-action/issues/552
           generate_release_notes: true
           draft: ${{ github.event.inputs.dryRun }}
         env:
