@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
 #      - name: Enforce master branch
