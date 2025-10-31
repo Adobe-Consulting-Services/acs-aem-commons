@@ -26,16 +26,18 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Enforce master branch
-        if: github.ref != 'refs/heads/master'
-        uses: actions/github-script@v8
-        with:
-          script: |
-              core.setFailed('Releases can only be triggered from master branch!')
+#      - name: Enforce master branch
+#        if: github.ref != 'refs/heads/master'
+#        uses: actions/github-script@v8
+#        with:
+#          script: |
+#              core.setFailed('Releases can only be triggered from master branch!')
 
       # Check out Git repository
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: 'refs/heads/master'
 
       # Set up environment with Java and Maven
       - name: Set up JDK
@@ -62,14 +64,14 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}
-        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DskipTests=true -DdryRun=${{ github.event.inputs.dryRun }} -Dnjord.dryRun=${{ github.event.inputs.dryRun }}
+        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdryRun=${{ github.event.inputs.dryRun }} -Darguments="-DskipTests=true -Dnjord.dryRun=true"
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.inputs.releaseVersion }}
           # generateReleaseNotesPreviousTag, https://github.com/ncipollo/release-action/issues/552
-          generate_release_notes: true
+          generateReleaseNotes: true
           draft: ${{ github.event.inputs.dryRun }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
