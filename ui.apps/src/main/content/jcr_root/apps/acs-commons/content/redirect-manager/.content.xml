@@ -167,13 +167,14 @@
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
                                                         emptyText="Select/Enter source path"
                                                         fieldLabel="Source Path"
+                                                        fieldDescription="This is either a literal path or a regular expression (matched against the request's resource path or the request URI). The context prefix is prepended if the path does not yet start with it."
                                                         name="./source"
                                                         required="{Boolean}true"
                                                         rootPath="/content"/>
                                                 <evaluateURI
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                                        fieldDescription="Checking this box will allow the Redirect Manager to evaluate the request URI instead of the resource path, and take into account other URI parts (like suffix, ...)"
+                                                        fieldDescription="Checking this box will match the source against the request URI (instead of the request's resource path), and take into account other URI parts (like suffix, ...). The request URI consists of path, query and fragment"
                                                         fieldLabel="Evaluate request URI"
                                                         name="./evaluateURI"
                                                         text="Evaluate request URI"
@@ -192,6 +193,7 @@
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
                                                         emptyText="Select/Enter target path"
                                                         fieldLabel="Target Path"
+                                                        fieldDescription="The context prefix is prepended if the path does not yet start with it. May contain backreferences in the form ${name} or $groupindex, all literal dollar characters ('$') must be escaped with '\'."
                                                         name="./target"
                                                         required="{Boolean}true"
                                                         rootPath="/content"/>
