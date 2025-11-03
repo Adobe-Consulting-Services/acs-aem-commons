@@ -49,8 +49,8 @@
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
         <!-- use HTTPS to allow pushes in GitHub Action for Release -->
         <developerConnection>scm:git:https://github.com/Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
-        <tag>acs-aem-commons-6.11.0</tag>
+        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/${project.scm.tag}</url>
+        <tag>HEAD</tag>
     </scm>
 
     <!-- Do not remove developers section - this is required to release to maven central -->
