@@ -13,6 +13,9 @@ on:
         description: 'Email Release Manager'
         required: true
         default: ''
+      pat:
+        description: 'Personal Access Token (https://github.com/settings/personal-access-tokens) for writing to Git repository. Requires administration rights for bypassing branch protection of the default branch'
+        required: false
       skipTests:
         description: 'Skip tests (both ITs/UTs)?'
         required: true
@@ -42,6 +45,8 @@ jobs:
       # Check out Git repository
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          token: ${{ github.event.inputs.pat }}
 
       # Set up environment with Java and Maven
       - name: Set up JDK
@@ -79,3 +84,4 @@ jobs:
           draft: ${{ github.event.inputs.dryRun }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
