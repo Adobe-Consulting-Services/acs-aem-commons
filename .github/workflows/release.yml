@@ -1,0 +1,81 @@
+# Automates the release steps outlined at https://github.com/Adobe-Consulting-Services/acs-aem-commons/blob/master/RELEASING.md
+name: Release to GitHub and Maven Central
+
+# Only support manual trigger (https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Release version (major.minor.patch)'
+        required: false
+        default: ''
+      email:
+        description: 'Email Release Manager'
+        required: true
+        default: ''
+      skipTests:
+        description: 'Skip tests (both ITs/UTs)?'
+        required: true
+        default: false
+        type: boolean
+      dryRun:
+        description: 'Dry Run? (false to do an actual release)'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce master branch
+        if: github.ref != 'refs/heads/master'
+        uses: actions/github-script@v8
+        with:
+          script: |
+              core.setFailed('Releases can only be triggered from master branch!')
+
+      # Check out Git repository
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Set up environment with Java and Maven
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          cache: 'maven'
+          distribution: 'temurin'
+          java-version: 21
+          # generate settings.xml with the correct values
+          server-id: sonatype-central-portal # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username in deploy
+          server-password: MAVEN_PASSWORD # env variable for token in deploy
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }} # Value of the GPG private key to import
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE # env variable for GPG private key passphrase
+
+      - name: Configure git user for release commits
+        run: |
+          git config user.email "${{ github.event.inputs.email }}"
+          git config user.name "${{ github.actor }}"
+
+      # Build and deploy to OSSRH, which will automatically sync to Central Repository
+      - name: Build and Deploy ${{ github.event.inputs.releaseVersion }} to Central Repository
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}
+        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdryRun=${{ github.event.inputs.dryRun }} -Darguments="-DskipTests=${{ github.event.inputs.skipTests }} -Dnjord.dryRun=${{ github.event.inputs.dryRun }}"
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.releaseVersion }}
+          # generateReleaseNotesPreviousTag, https://github.com/ncipollo/release-action/issues/552
+          generateReleaseNotes: true
+          draft: ${{ github.event.inputs.dryRun }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.14.1-SNAPSHOT</version>
+        <version>6.15.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -62,71 +62,6 @@
                                     <version>[6.5.10,)</version><!-- version shipped with AEM 6.5.0 GA -->
                                 </dependency>
                             </dependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>net.adamcin.oakpal</groupId>
-                <artifactId>oakpal-maven-plugin</artifactId>
-                <configuration>
-                    <deferBuildFailure>true</deferBuildFailure>
-                    <checklists>
-                        <checklist>acs-internal</checklist>
-                    </checklists>
-
-                    <!-- Enforce separation of content and code (CODE ONLY) -->
-                    <checks>
-                        <check>
-                            <name>basic/paths</name>
-                            <config>
-                                <rules>
-                                    <rule>
-                                        <pattern>/apps(/.*)?</pattern>
-                                        <type>allow</type>
-                                    </rule>
-                                </rules>
-                            </config>
-                        </check>
-                        <!-- Removed verify-acls-on-apps as ACLs have been moved to repo init, which OakPal does not see -->
-                    </checks>
-
-                    <websterTargets>
-                        <nodetypes />
-                        <privileges />
-                    </websterTargets>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>oakpal-scan</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>oakpal-scan-content-class-aem65</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
-                            </summaryFile>
-                            <checklists>
-                                <checklist>content-class-aem65</checklist>
-                            </checklists>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>oakpal-verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
-                                </summaryFile>
-                            </summaryFiles>
                         </configuration>
                     </execution>
                 </executions>
@@ -179,11 +114,6 @@
             <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.adobe.acs</groupId>
-            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>

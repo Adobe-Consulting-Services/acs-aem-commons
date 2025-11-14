@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.management.NotCompliantMBeanException;
 
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
@@ -61,9 +62,9 @@ public class EnsureOakIndexTest {
 
 
     @Before
-    public void setup() {
+    public void setup() throws NotCompliantMBeanException {
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
-        context.registerService(EnsureOakIndexExecutor.class, new EnsureOakIndexExecutor());
+        context.registerService(EnsureOakIndexManager.class, new EnsureOakIndexManagerExecutor());
         context.registerService(Scheduler.class, scheduler);
         context.registerService(RequireAem.class, requireAem,"distribution","classic");
         ensureOakIndexProperties.put(EnsureOakIndex.PROP_ENSURE_DEFINITIONS_PATH, "/apps/com/indexes");

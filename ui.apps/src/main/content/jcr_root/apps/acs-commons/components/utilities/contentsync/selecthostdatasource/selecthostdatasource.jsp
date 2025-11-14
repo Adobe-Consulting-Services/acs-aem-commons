@@ -29,7 +29,7 @@
 
             " %><%
 
-    Resource hostsResource = ConfigurationUtils.getHostsResource(resourceResolver);
+    Resource hostsResource = resourceResolver.getResource(ConfigurationUtils.HOSTS_PATH);
 	Resource suffixResource = slingRequest.getRequestPathInfo().getSuffixResource();
 
     List<Resource> lst = new ArrayList<Resource>();

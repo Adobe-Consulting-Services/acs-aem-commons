@@ -12,7 +12,7 @@
     column-width: 400px;
 }
 
-#modalConfigureHost ._coral-Dialog-content {
+coral-dialog-content {
     column-width: 600px;
 }
 

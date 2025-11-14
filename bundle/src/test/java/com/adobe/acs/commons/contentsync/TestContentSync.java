@@ -25,6 +25,8 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -64,13 +66,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class TestContentSync {
     @Rule
@@ -80,6 +76,7 @@ public class TestContentSync {
     ContentReader reader;
     RemoteInstance remoteInstance;
     CryptoSupport crypto;
+    HttpClientBuilderFactory clientBuilderFactory;
 
 
     @Before
@@ -89,18 +86,23 @@ public class TestContentSync {
         crypto = MockCryptoSupport.getInstance();
         context.registerService(CryptoSupport.class, crypto);
 
-        context.addModelsForClasses(SyncHostConfiguration.class);
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        clientBuilderFactory = mock(HttpClientBuilderFactory.class);
+        when(clientBuilderFactory.newBuilder()).thenReturn(httpClientBuilder);
+        context.registerService(HttpClientBuilderFactory.class, clientBuilderFactory);
+
+        context.addModelsForClasses(SyncHostConfiguration.class, GeneralSettingsModel.class);
         reader = new ContentReader(context.resourceResolver().adaptTo(Session.class));
 
         String configPath = HOSTS_PATH + "/host1";
         context.build().resource(configPath, "host", "http://localhost:4502", "username", "", "password", "");
         context.build().resource(SETTINGS_PATH, SO_TIMEOUT_STRATEGY_KEY, 1000, CONNECT_TIMEOUT_KEY, "1000");
-        ValueMap generalSettings = context.resourceResolver().getResource(configPath).getValueMap();
+        GeneralSettingsModel generalSettings = context.resourceResolver().getResource(configPath).adaptTo(GeneralSettingsModel.class);
         SyncHostConfiguration hostConfiguration =
                 context.getService(ModelFactory.class)
                         .createModel(context.resourceResolver().getResource(configPath), SyncHostConfiguration.class);
         ContentImporter contentImporter = context.registerInjectActivateService(new DefaultContentImporter());
-        remoteInstance = spy(new RemoteInstance(hostConfiguration, generalSettings, null));
+        remoteInstance = spy(new RemoteInstance(clientBuilderFactory, hostConfiguration, generalSettings, null));
 
         contentSync = new ContentSync(remoteInstance, context.resourceResolver(), contentImporter);
 
@@ -439,11 +441,9 @@ public class TestContentSync {
 
         Resource configResource = context.create().resource(configPath,
                         "host", "http://localhost:4502", "authType", "oauth", "accessTokenProviderName", "publish-cloud");
-        Resource generalSettings = context.resourceResolver().getResource(SETTINGS_PATH);
-        SyncHostConfiguration hostConfiguration =
-                context.getService(ModelFactory.class).createModel(configResource, SyncHostConfiguration.class);
-
-        remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), integrationService);
+        SyncHostConfiguration hostConfiguration = configResource.adaptTo(SyncHostConfiguration.class);
+        GeneralSettingsModel generalSettings = context.resourceResolver().getResource(SETTINGS_PATH).adaptTo(GeneralSettingsModel.class);
+        remoteInstance = new RemoteInstance(clientBuilderFactory, hostConfiguration, generalSettings, integrationService);
         verify(integrationService, atLeastOnce()).getAccessToken();
     }
 
@@ -456,12 +456,11 @@ public class TestContentSync {
 
         Resource configResource = context.create().resource(configPath,
                 "host", "http://localhost:4502", "authType", "oauth", "accessTokenProviderName", "publish-cloud");
-        Resource generalSettings = context.resourceResolver().getResource(SETTINGS_PATH);
-        SyncHostConfiguration hostConfiguration =
-                context.getService(ModelFactory.class).createModel(configResource, SyncHostConfiguration.class);
+        SyncHostConfiguration hostConfiguration = configResource.adaptTo(SyncHostConfiguration.class);
+        GeneralSettingsModel generalSettings = context.resourceResolver().getResource(SETTINGS_PATH).adaptTo(GeneralSettingsModel.class);
 
         try {
-            remoteInstance = new RemoteInstance(hostConfiguration, generalSettings.getValueMap(), integrationService);
+            remoteInstance = new RemoteInstance(clientBuilderFactory, hostConfiguration, generalSettings, integrationService);
             fail("Expected exception");
         } catch (IllegalArgumentException e) {
             assertEquals("Failed to get an access token: unauthorized client.", e.getMessage());

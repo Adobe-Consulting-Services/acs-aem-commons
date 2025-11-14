@@ -145,10 +145,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + "Use if Location header should be rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
         boolean mapUrls() default true;
 
-        @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
-        String[] extensions() default {};
+        @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed. If empty there is no extension restriction! Requests without an extension are always allowed to be redirected.", type = AttributeType.STRING)
+        String[] extensions();
 
-        @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed", type = AttributeType.STRING)
+        @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed. If empty there is no path restriction!", type = AttributeType.STRING)
         String[] paths() default {"/content"};
 
         @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects. Since v6.11 you can manage handling query string in Redirect Properties.", type = AttributeType.BOOLEAN)
@@ -161,7 +161,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
-        String[] additionalHeaders() default {};
+        String[] additionalHeaders();
 
         @AttributeDefinition(name = "Configuration bucket name", description = "name of the parent folder where to store redirect rules."
                 + " Default is settings. ", type = AttributeType.STRING)
@@ -392,6 +392,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 slingResponse.setStatus(redirectRule.getStatusCode());
                 redirected = true;
             }
+        } else {
+            log.trace("No redirect rule found for request {}", slingRequest.getRequestPathInfo() );
         }
         return redirected;
     }
@@ -620,6 +622,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         String configPath = configResource.getPath();
         try {
+            log.trace("Loading redirect rules from caconfig {} mapped to resource path {}", configResource.getPath(), resource.getPath());
             RedirectConfiguration rules = rulesCache.get(configPath, () -> loadRules(configResource));
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
@@ -634,6 +637,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
+                    log.trace("No redirect rule found for resource path {}, trying mapped url {}");
                     String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
                     m = rules.match(mappedPath, "", slingRequest);
                 }
@@ -759,7 +763,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
             ccHeader = redirectRule.getDefaultCacheControlHeader();
         }
         if(!StringUtils.isEmpty(ccHeader)){
-            response.addHeader("Cache-Control", ccHeader);
+            // overwrite any previously set header with that name
+            response.setHeader("Cache-Control", ccHeader);
         }
     }
 }

@@ -18,18 +18,45 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- #3654 RedirectFilter should always emit a trace log if no entry was found
+- #3650 Clarify description of com.adobe.acs.commons.redirects.filter.RedirectFilter -> Request Extensions/Request Paths with regards to no values
+
+### Fixed
+
+- #3653 RedirectFilter.additionalHeaders() may duplicate Cache-Control headers
+
+## 6.15.0 - 2025-10-21
+
+### Changed
+
+- #3616 Content Sync: Fixed js errors when deleting configurations
+- #2745 Fixed circular dependency in EnsureOakIndex
+- #3631 Content Sync: refactor to use Sling Jobs
+- #3638 Redirect Manager: Fix search in tags property
+- #3627 Redirect Manager: Use bulk activation
+
+## 6.14.0 - 2025-07-15
+
+### Changed
+- #3636 Content Sync: support dedicated egress IP address
+- #3623 Content Sync: improve error handling
+
+## 6.14.0 - 2025-07-15
+
+### Changed
+
 - #3600 Content Sync: support OAuth authentication
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
 - #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
 - #3601 Content Sync: in case of an error print the exception and continue instead of aborting
 - #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.* should expose error messages to end users
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
+- #3626 Redirect Manager: Fix Replace Mode issue, delete only 'redirect-row' nodes
 
 ### Fixed
 
 - #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
 - #3579 Redirect manager: fulltext search toggle doesn't work
-- #2745 Fixed circular dependency in EnsureOakIndex
 
 ## 6.12.0 - 2025-04-28
 

@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.14.1-SNAPSHOT</version>
+        <version>6.15.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -54,102 +54,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>net.adamcin.oakpal</groupId>
-                <artifactId>oakpal-maven-plugin</artifactId>
-                <configuration>
-                    <deferBuildFailure>true</deferBuildFailure>
-                    <checklists>
-                        <checklist>acs-internal</checklist>
-                    </checklists>
-                    <checks>
-                        <!-- Enforce separation of content and code (CONTENT ONLY) -->
-                        <check>
-                            <name>basic/paths</name>
-                            <config>
-                                <rules>
-                                    <rule>
-                                        <pattern>/apps(/.*)?</pattern>
-                                        <type>deny</type>
-                                    </rule>
-                                </rules>
-                                <denyAllDeletes>true</denyAllDeletes>
-                            </config>
-                        </check>
-                    </checks>
-
-                    <!-- assume that we are installing into an instance where utility pages and configs have already
-                    been created for prior versions -->
-                    <forcedRoots>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/bulk-workflow-manager/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/dispatcher-flush/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/exporters/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/instant-package/jcr:content/config/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/lists/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/notifications/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/packagers/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/qr-code/jcr:content/config/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/redirect-maps/default</path>
-                        </forcedRoot>
-                    </forcedRoots>
-
-                    <websterTargets>
-                        <nodetypes />
-                        <privileges />
-                    </websterTargets>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>oakpal-scan</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>oakpal-scan-content-class-aem65</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
-                            </summaryFile>
-                            <checklists>
-                                <checklist>content-class-aem65</checklist>
-                            </checklists>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>oakpal-verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json
-                                </summaryFile>
-                            </summaryFiles>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
@@ -166,12 +70,6 @@
             <artifactId>acs-aem-commons-ui.apps</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.adobe.aem</groupId>

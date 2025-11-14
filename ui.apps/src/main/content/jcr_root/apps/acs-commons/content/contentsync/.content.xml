@@ -7,6 +7,7 @@
         jcr:primaryType="cq:PageContent"
         jcr:title="Content Sync"
         sling:resourceType="granite/ui/components/shell/page"
+        sling:vanityPath="/contentsync"
         recurse="true">
         <head jcr:primaryType="nt:unstructured">
             <clientlibs
@@ -23,14 +24,14 @@
                 <configure
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                    href="/apps/acs-commons/content/contentsync/configure.html"
+                    href="/contentsync/configure.html"
                     icon="gear"
                     text="Configure"
                     variant="primary"/>
                 <history
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                    href="/apps/acs-commons/content/contentsync/history.html"
+                    href="/contentsync/history.html"
                     icon="stopwatch"
                     text="History"
                     variant="primary"/>
@@ -42,15 +43,17 @@
             sling:resourceType="granite/ui/components/coral/foundation/container">
             <items jcr:primaryType="nt:unstructured">
                 <form
-                    granite:class="transform-form"
                     granite:id="transform-form"
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/form"
-                    action="/apps/acs-commons/content/contentsync/jcr:content/sync.html"
-                    foundation-form="{Boolean}true"
+                    action="/contentsync/jcr:content/sync.run.json"
+                    async="{Boolean}true"
+                    dataPath="${requestPathInfo.suffix}"
+                    enctype="application/x-www-form-urlencoded"
+                    foundationForm="{Boolean}true"
+                    loadingMask="{Boolean}true"
                     method="POST"
-                    style="vertical"
-                    target="replication_status_iframe">
+                    style="vertical">
                     <items jcr:primaryType="nt:unstructured">
                         <path
                             jcr:primaryType="nt:unstructured"
@@ -75,6 +78,7 @@
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/form/select"
                             emptyText="Select one"
+                            emptyOption="{Boolean}true"
                             fieldLabel="On-complete workflow "
                             ignoreData="{Boolean}true"
                             name="workflowModel">
@@ -93,7 +97,9 @@
                                     checked="{Boolean}true"
                                     name="incremental"
                                     text="Incremental update. Will only copy new and changed resources"
-                                    value="true"/>
+                                    value="true"
+                                    uncheckedValue="false"
+                                />
                                 <dryRun
                                     granite:class="notice-wide"
                                     jcr:primaryType="nt:unstructured"
@@ -101,28 +107,41 @@
                                     checked="{Boolean}true"
                                     name="dryRun"
                                     text="Dry Run"
-                                    value="false"/>
+                                    value="true"
+                                    uncheckedValue="false"
+                                />
                                 <revision
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
                                     name="createVersion"
                                     text="Create revision before update"
-                                    value="true"/>
+                                    value="true"
+                                    uncheckedValue="false"
+                                />
                                 <delete
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
                                     name="delete"
                                     text="Delete resources that exist in the destination but not in the source"
-                                    value="true"/>
+                                    value="true"
+                                    uncheckedValue="false"
+                                />
                                 <recursive
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
                                     checked="{Boolean}true"
                                     name="recursive"
                                     text="Recursive"
-                                    value="true"/>
+                                    value="true"
+                                    uncheckedValue="false"
+                                />
                             </items>
                         </checkboxes>
+                        <resourceType
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                name="ensureAvailable"
+                                value="true"/>
                         <submit
                             granite:id="executeQueryButton"
                             jcr:primaryType="nt:unstructured"
@@ -130,16 +149,28 @@
                             text="Submit"
                             type="submit"
                             variant="primary"/>
-                        <iframe
-                            granite:id="replication_status_iframe"
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="acs-commons/components/utilities/contentsync/iframe"/>
                     </items>
+                    <successresponse
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="/libs/granite/ui/components/coral/foundation/form/responses/redirect"
+                        href="/contentsync/history.html"/>
                 </form>
+                <settings
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    dataPath="/var/acs-commons/contentsync/settings">
+                    <items jcr:primaryType="nt:unstructured">
+                        <defaultWorkflow
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="defaultWorkflow"/>
+                    </items>
+                </settings>
             </items>
         </content>
         <sync
             jcr:primaryType="nt:unstructured"
+            sling:vanityPath="/contentsync/jcr:content/sync"
             sling:resourceType="acs-commons/components/utilities/contentsync"/>
     </jcr:content>
 </jcr:root>

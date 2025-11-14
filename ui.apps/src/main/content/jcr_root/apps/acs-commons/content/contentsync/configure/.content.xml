@@ -6,6 +6,7 @@
         jcr:title="Content Sync - Configure AEM Environments"
         sling:resourceType="granite/ui/components/shell/collectionpage"
         consoleId="contentsyncHosts"
+        sling:vanityPath="/contentsync/configure"
         contentPath="/content"
         currentView="${state[&quot;shell.collectionpage.layoutId&quot;].string}"
         modeGroup="contentsync-hosts-task-collection"
@@ -114,15 +115,15 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                     emptyText="name, e.g. aem-cloud-dev"
-                                    required="true"
-                                    name="./name"/>
+                                    name="./name"
+                                    required="true"/>
                                 <host
-                                        granite:id="configureHost-host"
-                                        jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                        emptyText="http://localhost:4502"
-                                        required="true"
-                                        name="./host"/>
+                                    granite:id="configureHost-host"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    emptyText="http://localhost:4502"
+                                    name="./host"
+                                    required="true"/>
                                 <authType
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/select"
@@ -242,17 +243,32 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                     fieldDescription="Optional string to pass to the ObservationManager API before changes are committed. This feature can be used to suppress DAM workflows that start when an asset is updated."
                                     fieldLabel="ObservationManager User Data"
-                                    name="./event-user-data"/>
+                                    name="./event-user-data"
+                                    value="changedByPageManagerCopy"
+                                />
                                 <update-strategy
                                     granite:id="general-strategy"
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/select"
                                     fieldLabel="Update Strategy"
-                                    name="./update-strategy">
+                                    name="./update-strategy"
+                                    value="com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy"
+                                >
                                     <datasource
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="acs-commons/components/utilities/contentsync/strategydatasource"/>
                                 </update-strategy>
+                                <defaultWorkflow
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    emptyText="Select one"
+                                    fieldLabel="Default Workflow "
+                                    emptyOption="{Boolean}true"
+                                    name="./defaultWorkflow">
+                                    <datasource
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="cq/gui/components/coral/common/admin/timeline/events/workflow/datasources/models"/>
+                                </defaultWorkflow>
                                 <primaryType
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/hidden"

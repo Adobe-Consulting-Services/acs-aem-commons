@@ -47,7 +47,7 @@ public class Configurations {
     @OSGiService(injectionStrategy= InjectionStrategy.OPTIONAL)
     private RedirectFilterMBean redirectFilter;
 
-    private static final String REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects/redirects";
+    public static final String REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects/redirects";
 
     public Collection<RedirectConfiguration> getConfigurations() {
         List<RedirectConfiguration> configurations = new ArrayList<>();
