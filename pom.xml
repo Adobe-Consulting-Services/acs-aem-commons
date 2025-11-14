@@ -87,11 +87,17 @@
 
         <jacoco.version>0.8.13</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
-        <njord.version>0.8.6</njord.version>
+        <!-- temporarily stick with 0.8.4 until https://github.com/maveniverse/njord/issues/209 & https://github.com/maveniverse/njord/issues/218 are fixed-->
+        <njord.version>0.8.4</njord.version>
         <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
+        <!-- the following three properties are
+             currently not evaluated, therefore needs to be duplicated in settings.xml, as outlined in 
+             https://maveniverse.eu/docs/njord/configuration/#njord-server-configurations
+         -->
         <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
         <njord.snapshotUrl>njord:template:snapshot</njord.snapshotUrl>
         <njord.publisher>sonatype-cp</njord.publisher>
+        
         <njord.autoPublish>true</njord.autoPublish>
         <njord.publishingType>automatic</njord.publishingType>
         <njord.waitForStates>true</njord.waitForStates>
