@@ -87,7 +87,7 @@
 
         <jacoco.version>0.8.13</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
-        <njord.version>0.8.4</njord.version>
+        <njord.version>0.8.6</njord.version>
         <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
         <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
         <njord.snapshotUrl>njord:template:snapshot</njord.snapshotUrl>
