@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3653 RedirectFilter.additionalHeaders() may duplicate Cache-Control headers
+- #3605 ACS Commons system notification page editor UI is broken
 
 ## 6.15.0 - 2025-10-21
 
