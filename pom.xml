@@ -47,9 +47,10 @@
 
     <scm>
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
-        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
-        <tag>acs-aem-commons-6.11.0</tag>
+        <!-- use HTTPS to allow pushes in GitHub Action for Release -->
+        <developerConnection>scm:git:https://github.com/Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
+        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/${project.scm.tag}</url>
+        <tag>HEAD</tag>
     </scm>
 
     <!-- Do not remove developers section - this is required to release to maven central -->
@@ -865,15 +866,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.central</groupId>
-                        <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.9.0</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <publishingServerId>sonatype-central-portal</publishingServerId>
-                        </configuration>
-                    </plugin>  
                 </plugins>
             </build>
         </profile>

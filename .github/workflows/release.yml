@@ -13,16 +13,23 @@ on:
         description: 'Email Release Manager'
         required: true
         default: ''
+      skipTests:
+        description: 'Skip tests (both ITs/UTs)?'
+        required: true
+        default: false
+        type: boolean
       dryRun:
         description: 'Dry Run? (false to do an actual release)'
         required: true
-        default: 'true'
+        default: true
+        type: boolean
 
 permissions:
   contents: write
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Enforce master branch
@@ -61,13 +68,14 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}
-        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdryRun=${{ github.event.inputs.dryRun }} -Dnjord.dryRun=${{ github.event.inputs.dryRun }}
+        run: mvn -B clean release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdryRun=${{ github.event.inputs.dryRun }} -Darguments="-DskipTests=${{ github.event.inputs.skipTests }} -Dnjord.dryRun=${{ github.event.inputs.dryRun }}"
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.event.inputs.releaseVersion }}
-          generate_release_notes: true
+          tag: ${{ github.event.inputs.releaseVersion }}
+          # generateReleaseNotesPreviousTag, https://github.com/ncipollo/release-action/issues/552
+          generateReleaseNotes: true
           draft: ${{ github.event.inputs.dryRun }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
