@@ -193,7 +193,7 @@
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
                                                         emptyText="Select/Enter target path"
                                                         fieldLabel="Target Path"
-                                                        fieldDescription="The context prefix is prepended if the path does not yet start with it. May contain backreferences in the form ${name} or $groupindex, all literal dollar characters ('$') must be escaped with '\'."
+                                                        fieldDescription="The context prefix is prepended if the path does not yet start with it. May contain backreferences in the form ${name} or $groupindex, all literal dollar characters (&quot;$&quot;) must be escaped with a backslash (&quot;\\$\&quot;)."
                                                         name="./target"
                                                         required="{Boolean}true"
                                                         rootPath="/content"/>
