@@ -54,7 +54,10 @@ import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
  * CQ DAM FFmpeg Audio Encode Process
  * Workflow process that transcodes audio files into different formats
  */
-@Component(service = WorkflowProcess.class)
+@Component(
+    service = WorkflowProcess.class,
+    property = "process.label=Encode Audio"
+)
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHelper.AudioProcessor<MetaDataMap, Void> {
 

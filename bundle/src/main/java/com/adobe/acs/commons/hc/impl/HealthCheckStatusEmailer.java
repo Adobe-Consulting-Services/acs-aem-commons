@@ -48,7 +48,7 @@ import java.util.Scanner;
 @Component(service = Runnable.class,
     property = {
         "scheduler.expression=0 0 8 ? * MON-FRI *",
-        "scheduler.concurrent=",
+        "scheduler.concurrent:Boolean=false",
         "scheduler.runOn=LEADER"
     },
     configurationPolicy = ConfigurationPolicy.REQUIRE)

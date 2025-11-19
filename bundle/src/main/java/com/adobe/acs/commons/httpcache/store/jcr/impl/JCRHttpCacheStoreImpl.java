@@ -78,9 +78,13 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
 @Component(
     service = {HttpCacheStore.class, Runnable.class},
     property = {
+        "httpcache.cachestore.jcr.rootpath=/var/acs-commons/httpcache",
+        "httpcache.cachestore.jcr.bucketdepth:Integer=10",
+        "httpcache.cachestore.jcr.savedelta:Integer=500",
+        "httpcache.cachestore.jcr.expiretimeinseconds:Integer=604800",
         "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - JCR Cache Store",
         "scheduler.expression=0 0 12 1/1 * ? *",
-        "scheduler.concurrent="
+        "scheduler.concurrent:Boolean=false"
     }
 )
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {

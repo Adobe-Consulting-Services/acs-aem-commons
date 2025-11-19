@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
     service = Runnable.class,
     property = {
         "scheduler.expression=0 1 0 ? * *",
-        "scheduler.concurrent=",
+        "scheduler.concurrent:Boolean=false",
         "webconsole.configurationFactory.nameHint=Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
     },
     configurationPolicy = ConfigurationPolicy.REQUIRE)
