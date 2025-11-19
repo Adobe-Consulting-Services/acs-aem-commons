@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.Page;
 
-@Component
+@Component(service = AdapterFactory.class)
 public class GenericListAdapterFactory implements AdapterFactory {
 
     @SuppressWarnings("unchecked")

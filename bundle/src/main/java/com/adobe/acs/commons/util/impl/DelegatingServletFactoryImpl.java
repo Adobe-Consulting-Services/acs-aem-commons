@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(configurationFactory = true,
+@Component(service = Servlet.class, configurationFactory = true,
         immediate = false)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);

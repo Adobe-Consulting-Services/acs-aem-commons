@@ -48,7 +48,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-@Component
+@Component(service = BulkWorkflowRunner.class)
 public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AEMWorkflowRunnerImpl.class);
 

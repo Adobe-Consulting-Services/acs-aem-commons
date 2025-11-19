@@ -24,7 +24,7 @@ import org.apache.sling.api.resource.Resource;
 
 import javax.jcr.RepositoryException;
 
-@Component
+@Component(service = PageCompareDataLoader.class)
 public class PageCompareDataLoaderImpl implements PageCompareDataLoader {
 
     @Override

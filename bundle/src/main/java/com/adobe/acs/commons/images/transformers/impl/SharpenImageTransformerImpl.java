@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * radius: filter kernel radius in pixels (real 0…250)
  *
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class SharpenImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(SharpenImageTransformerImpl.class);
 

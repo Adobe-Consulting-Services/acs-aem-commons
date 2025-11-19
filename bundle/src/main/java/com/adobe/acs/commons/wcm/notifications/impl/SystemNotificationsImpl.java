@@ -65,7 +65,7 @@ import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(immediate = true)
+@Component(service = SystemNotifications.class, immediate = true)
 public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, ResourceChangeListener, ExternalResourceChangeListener {
     private static final Logger log = LoggerFactory.getLogger(SystemNotificationsImpl.class);
 

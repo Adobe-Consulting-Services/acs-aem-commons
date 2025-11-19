@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ACS AEM Commons - Image Transformer - Greyscale
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class GreyscaleImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(GreyscaleImageTransformerImpl.class);
 

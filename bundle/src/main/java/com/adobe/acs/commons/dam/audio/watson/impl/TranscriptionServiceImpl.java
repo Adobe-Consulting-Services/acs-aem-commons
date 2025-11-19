@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 
-@Component
+@Component(service = TranscriptionService.class)
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionServiceImpl.class);

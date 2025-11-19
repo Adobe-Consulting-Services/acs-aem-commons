@@ -55,7 +55,7 @@ import java.util.Map;
  * nodeExists.1_notexists=jcr:content/renditions/cq5dam.web.1280.1280.png
  * nodeExists.2_notexists=jcr:content/renditions/cq5dam.web.600.400.png
  */
-@Component
+@Component(service = PredicateEvaluator.class)
 public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator implements PredicateEvaluator {
 
     private static final Logger log = LoggerFactory.getLogger(NodeExistsPredicateEvaluator.class);

@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component(
+    service = Servlet.class,
+    
     property = {
         "sling.servlet.methods=GET",
         "sling.servlet.resourceTypes=acs-commons/components/utilities/qr-code/config",

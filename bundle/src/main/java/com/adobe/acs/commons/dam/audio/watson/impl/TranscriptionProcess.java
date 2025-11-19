@@ -48,7 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.Map;
 
-@Component
+@Component(service = WorkflowExternalProcess.class)
 public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelper.AudioProcessor<MetaDataMap, Serializable> {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionProcess.class);

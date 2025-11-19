@@ -52,7 +52,7 @@ import com.day.cq.wcm.api.PageManager;
  * ACS AEM Commons - Replication Status Manager
  * OSGi Service for changing the replication status of resources.
  */
-@Component
+@Component(service = ReplicationStatusManager.class)
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 

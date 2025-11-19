@@ -56,6 +56,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Concrete implementation of cache config for http cache. Modelled as OSGi config factory.
  */
 @Component(
+    service = HttpCacheConfig.class,
+    
     property = "webconsole.configurationFactory.nameHint=Order: {httpcache.config.order}, ",
     configurationPolicy = ConfigurationPolicy.REQUIRE
 )

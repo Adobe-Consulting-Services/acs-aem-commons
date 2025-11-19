@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.granite.ui.components.ELVariableProvider;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 
-@Component()
+@Component(service = ELVariableProvider.class)
 public class ContextualPageRootELVariableProvider implements ELVariableProvider {
     
     @Reference

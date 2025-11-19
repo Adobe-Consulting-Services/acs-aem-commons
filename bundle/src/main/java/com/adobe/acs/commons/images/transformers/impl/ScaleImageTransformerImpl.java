@@ -38,7 +38,7 @@ import java.util.HashMap;
  * "round" being the default
  *
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class ScaleImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ScaleImageTransformerImpl.class);
 

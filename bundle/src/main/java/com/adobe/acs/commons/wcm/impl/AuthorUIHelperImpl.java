@@ -26,7 +26,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;
 
-@Component(description = "Helper service to maintain a central configuration related to which authoring environment is being used (touch vs classic).", metatype = true)
+@Component(service = AuthorUIHelper.class, description = "Helper service to maintain a central configuration related to which authoring environment is being used (touch vs classic).", metatype = true)
 public class AuthorUIHelperImpl implements AuthorUIHelper {
 
     @Reference

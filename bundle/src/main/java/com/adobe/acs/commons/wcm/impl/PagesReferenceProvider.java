@@ -43,7 +43,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * ACS AEM Commons - Pages Reference Provider
  * Reference provider that searches for  pages referenced inside any given page resource
  */
-@Component
+@Component(service = ReferenceProvider.class)
 public final class PagesReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_PAGE = "page";

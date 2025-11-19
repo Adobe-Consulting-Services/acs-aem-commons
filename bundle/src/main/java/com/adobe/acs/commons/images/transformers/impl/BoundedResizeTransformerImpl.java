@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * The other dimension scale automatically to maintain the original aspect ratio
  * If the original image is smaller than the configured dimensions the image won't be resized
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class BoundedResizeTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(BoundedResizeTransformerImpl.class);
 

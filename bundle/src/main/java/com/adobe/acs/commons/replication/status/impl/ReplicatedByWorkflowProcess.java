@@ -50,7 +50,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * ACS AEM Commons - Workflow Process - Replicated By Workflow Initiator
  * Assigns the replicatedBy property to the Workflow Initiator
  */
-@Component
+@Component(service = WorkflowProcess.class)
 public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicatedByWorkflowProcess.class);
 

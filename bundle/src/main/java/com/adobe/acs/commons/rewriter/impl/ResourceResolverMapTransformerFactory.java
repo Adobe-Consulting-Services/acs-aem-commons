@@ -43,7 +43,7 @@ import java.util.Map;
 /**
  * Rewriter pipeline component which maps attribute values.
  */
-@Component(configurationFactory = true)
+@Component(service = TransformerFactory.class, configurationFactory = true)
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceResolverMapTransformerFactory.class);

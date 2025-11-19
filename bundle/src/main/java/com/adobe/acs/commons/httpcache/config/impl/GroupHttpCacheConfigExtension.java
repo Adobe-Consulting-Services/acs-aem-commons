@@ -53,7 +53,9 @@ import java.util.Map;
  * config extension accepts the http request only if at least one of the configured groups is present in the request
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
-@Component(property = "webconsole.configurationFactory.nameHint=Allowed user groups: [ {httpcache.config.extension.user-groups.allowed} ] Config name: [ config.name ]",
+@Component(
+    service = HttpCacheConfigExtension.class,
+    property = "webconsole.configurationFactory.nameHint=Allowed user groups: [ {httpcache.config.extension.user-groups.allowed} ] Config name: [ config.name ]",
     configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);

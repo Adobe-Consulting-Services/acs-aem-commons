@@ -33,7 +33,7 @@ import com.day.image.Layer;
  * ACS AEM Commons - Image Transformer - RGB Shift
  */
 //@formatter:off
-@Component
+@Component(service = ImageTransformer.class)
 //@formatter:on
 public class RGBShiftImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(RGBShiftImageTransformerImpl.class);

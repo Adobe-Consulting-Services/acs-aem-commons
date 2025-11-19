@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
+@Component(service = ResourceDefinitionBuilder.class)
 public class TitleAndNodeNameDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "TITLE_AND_NODE_NAME";
 

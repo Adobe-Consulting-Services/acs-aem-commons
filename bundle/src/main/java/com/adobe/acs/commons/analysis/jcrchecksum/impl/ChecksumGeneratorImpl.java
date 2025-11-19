@@ -53,7 +53,7 @@ import java.util.TreeMap;
  * and calculates an aggregate checksum on the nodes with the specified node types
  * (via {@link ChecksumGeneratorOptions}).
  */
-@Component
+@Component(service = ChecksumGenerator.class)
 @SuppressWarnings("squid:S2070") // SHA1 not used cryptographically
 public class ChecksumGeneratorImpl implements ChecksumGenerator {
     private static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorImpl.class);

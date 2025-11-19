@@ -60,7 +60,9 @@ import com.google.common.io.BaseEncoding;
 
 /** Generates the ETag response header from a message digest of the response. This header is supposed to be cached also on the
  * dispatcher! */
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = EngineConstants.SLING_FILTER_SCOPE + "="
+@Component(
+    service = Filter.class,
+    configurationPolicy = ConfigurationPolicy.REQUIRE, property = EngineConstants.SLING_FILTER_SCOPE + "="
         + EngineConstants.FILTER_SCOPE_REQUEST)
 @Designate(ocd = Config.class)
 public class EtagMessageDigestServletFilter implements Filter {

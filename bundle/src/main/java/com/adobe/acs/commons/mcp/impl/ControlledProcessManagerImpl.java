@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of ControlProcessManager service
  */
-@Component
+@Component(service = ControlledProcessManager.class)
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerImpl.class);

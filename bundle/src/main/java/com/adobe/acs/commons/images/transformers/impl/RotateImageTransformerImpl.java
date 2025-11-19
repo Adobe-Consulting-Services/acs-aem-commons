@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ACS AEM Commons - Image Transformer - Rotate
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class RotateImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(RotateImageTransformerImpl.class);
 

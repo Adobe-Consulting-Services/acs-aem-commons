@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 /**
  * Rewriter pipeline component which rewrites static references.
  */
-@Component(+ "for cookie-less domain support", configurationFactory = true)
+@Component(service = TransformerFactory.class, + "for cookie-less domain support", configurationFactory = true)
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
 
     public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {

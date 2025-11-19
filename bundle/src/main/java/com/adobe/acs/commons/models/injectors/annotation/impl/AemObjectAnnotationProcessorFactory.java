@@ -32,7 +32,7 @@ import com.adobe.acs.commons.models.injectors.annotation.AemObject;
  *
  * Note: This can only be used together with Sling Models API bundle in version 1.2.0 (due to the dependency on InjectionStrategy)
  */
-@Component
+@Component(service = StaticInjectAnnotationProcessorFactory.class)
 public class AemObjectAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory{
 
     @Override

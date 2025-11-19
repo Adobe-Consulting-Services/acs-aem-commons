@@ -48,7 +48,7 @@ import javax.script.Bindings;
  * to instance-level values, then shared values, and finally global
  * values when properties exist at multiple levels with the same name.
  */
-@Component
+@Component(service = BindingsValuesProvider.class)
 public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesBindingsValuesProvider.class);
 

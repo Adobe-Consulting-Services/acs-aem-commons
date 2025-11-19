@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.version.EvolutionAnalyser;
 import com.adobe.acs.commons.version.EvolutionContext;
 
-@Component
+@Component(service = EvolutionAnalyser.class)
 public class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionAnalyserImpl.class);

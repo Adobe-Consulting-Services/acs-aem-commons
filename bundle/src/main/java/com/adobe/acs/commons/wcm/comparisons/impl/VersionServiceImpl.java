@@ -32,7 +32,7 @@ import javax.jcr.version.Version;
 import javax.jcr.version.VersionManager;
 import java.util.Iterator;
 
-@Component
+@Component(service = VersionService.class)
 public class VersionServiceImpl implements VersionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionServiceImpl.class);

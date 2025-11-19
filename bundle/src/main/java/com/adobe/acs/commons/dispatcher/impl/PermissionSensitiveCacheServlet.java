@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
+    service = Servlet.class,
+    
     property = "sling.servlet.paths=",
     immediate = true
 )

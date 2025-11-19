@@ -40,7 +40,7 @@ import com.day.image.Layer;
  * original dimensions, this will create a background layer
  */
 //@formatter:off
-@Component
+@Component(service = ImageTransformer.class)
 //@formatter:on
 public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(LetterPillarBoxImageTransformerImpl.class);

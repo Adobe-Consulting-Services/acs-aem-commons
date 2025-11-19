@@ -32,7 +32,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 // TODO - Placeholder component. To be implemented.
 /*
-@Component
+@Component(service = HttpCacheStore.class)
 */
 public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     @Override

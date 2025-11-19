@@ -74,7 +74,7 @@ import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericPa
  * Note: This Injector requires at least org.apache.sling.models.impl version 1.0.2
  *
  */
-@Component
+@Component(service = Injector.class)
 /*
  * SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
  * otherwise the generic XSSAPI service would be injected from the OSGi Service Registry instead of the

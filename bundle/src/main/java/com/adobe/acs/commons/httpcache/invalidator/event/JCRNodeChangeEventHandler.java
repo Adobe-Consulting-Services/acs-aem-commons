@@ -52,7 +52,7 @@ import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants
  * invalidated. </p>
  */
 // @formatter:off
-@Component
+@Component(service = EventHandler.class)
 // We do _not_ register as a service. We register ourselves manually as either an EventHandler or
 // a ResourceChangeListener based on what config we have.
 // @formatter:on

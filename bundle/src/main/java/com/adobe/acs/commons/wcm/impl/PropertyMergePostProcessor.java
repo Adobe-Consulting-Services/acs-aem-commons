@@ -55,7 +55,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * ACS AEM Commons - Property Merge Sling POST Processor
  */
-@Component
+@Component(service = SlingPostProcessor.class)
 public class PropertyMergePostProcessor implements SlingPostProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PropertyMergePostProcessor.class);

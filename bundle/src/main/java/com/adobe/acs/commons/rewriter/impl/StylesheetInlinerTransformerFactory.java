@@ -50,7 +50,7 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
  * them as <style> elements. Links found in <head> are added to the beginning of
  * <body>, whereas those in <body> are included where they're found.
  */
-@Component
+@Component(service = TransformerFactory.class)
 public final class StylesheetInlinerTransformerFactory implements TransformerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(StylesheetInlinerTransformerFactory.class);

@@ -59,7 +59,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(configurationFactory = true)
+@Component(service = Servlet.class, configurationFactory = true)
 @SuppressWarnings("serial")
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
 

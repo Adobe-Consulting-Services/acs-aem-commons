@@ -36,7 +36,7 @@ import com.day.image.Layer;
  * ACS AEM Commons - Image Transformer - Multiply Color Blend
  */
 //@formatter:off
-@Component
+@Component(service = ImageTransformer.class)
 //@formatter:on
 public class MultiplyBlendImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(MultiplyBlendImageTransformerImpl.class);

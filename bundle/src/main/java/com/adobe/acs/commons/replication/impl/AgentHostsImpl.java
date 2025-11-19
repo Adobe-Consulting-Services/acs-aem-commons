@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component(service = AgentHosts.class)
 public class AgentHostsImpl implements AgentHosts {
     private static final Logger log = LoggerFactory.getLogger(AgentHostsImpl.class);
 

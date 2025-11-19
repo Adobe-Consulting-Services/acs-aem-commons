@@ -29,7 +29,7 @@ import com.adobe.acs.commons.util.ClusterLeader;
 import java.util.Collections;
 import java.util.Map;
 
-@Component(immediate = true)
+@Component(service = Runnable.class, immediate = true)
 public final class TwitterFeedScheduler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedScheduler.class);

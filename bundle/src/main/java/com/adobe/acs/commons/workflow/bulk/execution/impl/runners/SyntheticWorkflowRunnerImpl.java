@@ -44,7 +44,7 @@ import javax.jcr.Session;
 import java.util.Collections;
 import java.util.List;
 
-@Component
+@Component(service = BulkWorkflowRunner.class)
 public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);
 

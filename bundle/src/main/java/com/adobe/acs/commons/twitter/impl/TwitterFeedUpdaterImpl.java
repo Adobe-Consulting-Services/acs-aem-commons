@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component(service = TwitterFeedUpdater.class)
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);

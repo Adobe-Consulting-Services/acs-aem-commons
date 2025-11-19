@@ -25,7 +25,7 @@ import org.apache.sling.rewriter.GeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
+@Component(service = GeneratorFactory.class)
 public final class XMLParserGeneratorFactory implements GeneratorFactory {
 
     private static final Logger log = LoggerFactory.getLogger(XMLParserGeneratorFactory.class);

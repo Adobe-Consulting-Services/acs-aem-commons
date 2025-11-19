@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Component;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import org.apache.commons.lang3.StringUtils;
 
-@Component
+@Component(service = ResourceDefinitionBuilder.class)
 public class LowercaseWithDashesDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "LOWERCASE_WITH_DASHES";
 

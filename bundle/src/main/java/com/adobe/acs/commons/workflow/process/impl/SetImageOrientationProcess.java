@@ -48,7 +48,9 @@ import java.util.Collections;
 import java.util.List;
 
 
-@Component(property = {
+@Component(
+    service = WorkflowProcess.class,
+    property = {
                 "process.label=ACS AEM Commons - Workflow Process - Set Image Orientation",
         })
 public class SetImageOrientationProcess implements WorkflowProcess {

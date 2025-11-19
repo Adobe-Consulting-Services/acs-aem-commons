@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ACS AEM Commons - Image Transformer - Adjust Brightness and Contrast
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class AdjustImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(AdjustImageTransformerImpl.class);
 

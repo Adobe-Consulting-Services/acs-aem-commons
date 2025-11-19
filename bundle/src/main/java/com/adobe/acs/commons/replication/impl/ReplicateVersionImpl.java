@@ -55,7 +55,7 @@ import com.day.cq.wcm.api.NameConstants;
  * Service used to replicate specific version of a resource tree through a
  * specific replication agent
  */
-@Component
+@Component(service = ReplicateVersion.class)
 public class ReplicateVersionImpl implements
         ReplicateVersion {
 

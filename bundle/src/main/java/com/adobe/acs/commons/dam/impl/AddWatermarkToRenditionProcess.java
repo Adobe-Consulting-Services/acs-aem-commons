@@ -49,7 +49,7 @@ import com.day.image.Layer;
  * <li>watermark - The repository path of the watermark.</li>
  * </ul>
  */
-@Component
+@Component(service = WorkflowProcess.class)
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();

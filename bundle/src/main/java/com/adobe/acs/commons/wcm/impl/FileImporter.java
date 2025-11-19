@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.polling.importer.ImportException;
 import com.day.cq.polling.importer.Importer;
 
-@Component
+@Component(service = Importer.class)
 public final class FileImporter implements Importer {
 
     private static final Logger log = LoggerFactory.getLogger(FileImporter.class);

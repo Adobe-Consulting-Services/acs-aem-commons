@@ -48,7 +48,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-@Component(property = {
+@Component(
+    service = ComponentErrorHandler.class,
+    property = {
         "sling.filter.scope=component",
         "filter.order="
     },

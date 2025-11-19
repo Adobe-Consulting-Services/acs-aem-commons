@@ -45,7 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component(service = BulkWorkflowEngine.class)
 public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 

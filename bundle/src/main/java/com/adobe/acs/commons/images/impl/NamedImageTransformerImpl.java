@@ -40,7 +40,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Component(property = "webconsole.configurationFactory.nameHint=Transformer: {name}",
+@Component(
+    service = NamedImageTransformer.class,
+    property = "webconsole.configurationFactory.nameHint=Transformer: {name}",
     configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Reference(
         name = "imageTransformers",

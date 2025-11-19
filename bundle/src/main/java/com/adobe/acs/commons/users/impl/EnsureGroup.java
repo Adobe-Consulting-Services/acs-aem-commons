@@ -38,7 +38,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - Ensure Group",
+@Component(service = EnsureAuthorizable.class, label = "ACS AEM Commons - Ensure Group",
            configurationFactory = true,
            metatype = true,
            immediate = true,

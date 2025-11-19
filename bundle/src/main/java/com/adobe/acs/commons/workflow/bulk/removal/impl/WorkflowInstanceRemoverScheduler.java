@@ -46,7 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-@Component(property = {
+@Component(
+    service = Runnable.class,
+    property = {
         "scheduler.expression=0 1 0 ? * *",
         "scheduler.concurrent=",
         "webconsole.configurationFactory.nameHint=Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"

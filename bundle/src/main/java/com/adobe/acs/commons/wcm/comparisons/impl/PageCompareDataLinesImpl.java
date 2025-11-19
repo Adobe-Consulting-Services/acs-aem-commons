@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.List;
 
-@Component
+@Component(service = PageCompareDataLines.class)
 public class PageCompareDataLinesImpl implements PageCompareDataLines {
 
     @Override

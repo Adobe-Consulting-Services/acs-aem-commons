@@ -37,7 +37,7 @@ import javax.management.openmbean.TabularDataSupport;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
-@Component
+@Component(service = ActionManagerFactory.class)
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
 

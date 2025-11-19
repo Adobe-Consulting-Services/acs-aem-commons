@@ -49,7 +49,7 @@ import java.util.function.Supplier;
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
  * objects.
  */
-@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
+@Component(service = EventHandler.class, metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
         label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
 @SuppressWarnings("PMD.MoreThanOneLogger")
 public class JsonEventLogger implements EventHandler {

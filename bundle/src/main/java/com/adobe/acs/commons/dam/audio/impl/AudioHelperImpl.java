@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-@Component
+@Component(service = AudioHelper.class)
 public class AudioHelperImpl implements AudioHelper {
 
     private static final Logger log = LoggerFactory.getLogger(AudioHelperImpl.class);

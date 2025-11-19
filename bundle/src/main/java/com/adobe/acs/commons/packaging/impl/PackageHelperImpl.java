@@ -54,7 +54,7 @@ import java.util.Map;
  * ACS AEM Commons - Package Helper Helper utility for creating CRX Packages and
  * using the ACS AEM Commons packager.
  */
-@Component
+@Component(service = PackageHelper.class)
 public final class PackageHelperImpl implements PackageHelper {
 
     private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);

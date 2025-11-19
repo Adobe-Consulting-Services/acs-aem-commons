@@ -74,7 +74,7 @@ import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 
-@Component(
+@Component(service = ErrorPageHandlerService.class, 
         label = "ACS AEM Commons - Error Page Handler",
         description = "Error Page Handling module which facilitates the resolution of errors "
                 + "against author-able pages for discrete content trees.",

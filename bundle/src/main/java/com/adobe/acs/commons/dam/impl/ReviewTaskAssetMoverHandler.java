@@ -59,7 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-@Component(
+@Component(service = EventHandler.class, 
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE
 )

@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(service = HealthCheck.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final Logger log = LoggerFactory.getLogger(SMTPMailServiceHealthCheck.class);

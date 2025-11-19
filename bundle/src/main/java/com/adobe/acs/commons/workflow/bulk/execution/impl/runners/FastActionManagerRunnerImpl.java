@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.sling.api.resource.LoginException;
 
-@Component
+@Component(service = BulkWorkflowRunner.class)
 public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(FastActionManagerRunnerImpl.class);
 

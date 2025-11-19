@@ -47,7 +47,9 @@ import java.util.regex.Pattern;
  * config extension accepts the http request only if at least one of the configured patterns matches the resource type
  * of the request's resource.
  */
-@Component(property = "webconsole.configurationFactory.nameHint=Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]",
+@Component(
+    service = HttpCacheConfigExtension.class,
+    property = "webconsole.configurationFactory.nameHint=Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]",
     configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeHttpCacheConfigExtension.class);

@@ -36,7 +36,7 @@ import com.day.cq.wcm.api.PageInfoProvider;
  * 
  * Must run <b>after</b> <code>com.day.cq.wcm.core.impl.DefaultPageStatusProvider</code>
  */
-@Component
+@Component(service = PageInfoProvider.class)
 @SuppressWarnings( "deprecation" )
 public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 

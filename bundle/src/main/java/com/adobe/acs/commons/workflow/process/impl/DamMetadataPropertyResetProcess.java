@@ -47,7 +47,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component(property = "process.label=DAM Metadata Property Reset")
+@Component(
+    service = WorkflowProcess.class,
+    property = "process.label=DAM Metadata Property Reset")
 public class DamMetadataPropertyResetProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(DamMetadataPropertyResetProcess.class);
 

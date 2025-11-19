@@ -27,7 +27,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
+@Component(service = ResourceDefinitionBuilder.class)
 public class LocalizedTitleDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "LOCALIZED_TITLE";
 

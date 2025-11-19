@@ -24,7 +24,7 @@ import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang3.StringUtils;
 
-@Component
+@Component(service = ResourceDefinitionBuilder.class)
 public class JcrValidNameDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "TITLE_TO_NODE_NAME";
 

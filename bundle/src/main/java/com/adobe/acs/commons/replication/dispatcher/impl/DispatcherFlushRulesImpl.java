@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component(
+@Component(service = Preprocessor.class, 
         label = "ACS AEM Commons - Dispatcher Flush Rules",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
                 + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."

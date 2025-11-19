@@ -35,7 +35,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @SlingServlet(paths = "/bin/acs-commons/dam/custom-components.json", generateComponent = false)
-@Component
+@Component(service = Servlet.class)
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
 
     private static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";

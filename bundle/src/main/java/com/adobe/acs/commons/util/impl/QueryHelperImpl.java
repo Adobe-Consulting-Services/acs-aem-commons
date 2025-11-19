@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component(service = QueryHelper.class)
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference

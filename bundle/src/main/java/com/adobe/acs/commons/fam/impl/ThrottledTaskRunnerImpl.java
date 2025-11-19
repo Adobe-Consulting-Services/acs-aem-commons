@@ -49,7 +49,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@Component
+@Component(service = ThrottledTaskRunner.class)
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);

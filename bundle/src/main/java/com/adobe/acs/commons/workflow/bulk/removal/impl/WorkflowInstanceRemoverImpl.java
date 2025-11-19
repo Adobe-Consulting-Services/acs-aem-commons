@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
 /**
  * ACS AEM Commons - Workflow Instance Remover
  */
-@Component
+@Component(service = WorkflowInstanceRemover.class)
 public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemover {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverImpl.class);
 

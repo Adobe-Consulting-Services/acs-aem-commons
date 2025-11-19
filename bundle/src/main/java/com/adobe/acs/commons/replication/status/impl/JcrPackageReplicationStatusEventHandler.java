@@ -65,7 +65,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Component(
+@Component(service = JobConsumer.class, 
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE
 )

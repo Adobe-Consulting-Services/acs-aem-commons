@@ -56,7 +56,7 @@ import java.util.Map;
  * Manager for creating and working with Workflow Packages.
  *
  */
-@Component
+@Component(service = WorkflowPackageManager.class)
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 

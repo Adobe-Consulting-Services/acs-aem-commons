@@ -50,7 +50,7 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
  * {@link com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider}
  * is able to provide SlingBindings on a request adaptable.
  */
-@Component
+@Component(service = Injector.class)
 public class SharedValueMapValueInjector implements Injector {
     private static final Logger LOG = LoggerFactory.getLogger(SharedValueMapValueInjector.class);
 

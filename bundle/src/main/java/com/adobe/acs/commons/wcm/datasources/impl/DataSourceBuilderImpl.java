@@ -44,7 +44,7 @@ import java.util.Map;
 /**
  * ACS AEM Commons - WCM DataSource Builder
  */
-@Component
+@Component(service = DataSourceBuilder.class)
 public class DataSourceBuilderImpl implements DataSourceBuilder {
 
     @Override

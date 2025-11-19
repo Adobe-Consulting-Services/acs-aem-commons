@@ -63,7 +63,7 @@ import java.util.Map;
  *      ...
  *      List<String> participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
  */
-@Component
+@Component(service = EmailService.class)
 public final class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);

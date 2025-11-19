@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Component
+@Component(service = SharedComponentProperties.class)
 public class SharedComponentPropertiesImpl implements SharedComponentProperties, AdapterFactory {
     private static final Logger LOG = LoggerFactory.getLogger(SharedComponentPropertiesImpl.class);
     private static final String INFIX_JCR_CONTENT = "/jcr:content/";

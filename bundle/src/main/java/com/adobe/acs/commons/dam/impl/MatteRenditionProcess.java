@@ -38,7 +38,7 @@ import com.day.image.Layer;
 /**
  * Workflow process which mattes an image against a solid background to the specified size.
  */
-@Component
+@Component(service = WorkflowProcess.class)
 @SuppressWarnings({"squid:S00115", "checkstyle:localvariablename"})
 public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 

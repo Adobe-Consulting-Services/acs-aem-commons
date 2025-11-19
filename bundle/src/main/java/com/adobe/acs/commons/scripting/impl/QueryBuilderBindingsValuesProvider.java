@@ -25,7 +25,7 @@ import org.apache.sling.scripting.api.BindingsValuesProvider;
 
 import com.day.cq.search.QueryBuilder;
 
-@Component
+@Component(service = BindingsValuesProvider.class)
 public class QueryBuilderBindingsValuesProvider implements BindingsValuesProvider {
 
     @Reference

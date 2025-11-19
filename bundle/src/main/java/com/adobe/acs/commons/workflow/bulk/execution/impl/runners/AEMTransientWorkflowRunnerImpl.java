@@ -45,7 +45,7 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Component(service = BulkWorkflowRunner.class)
 public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AEMTransientWorkflowRunnerImpl.class);
 

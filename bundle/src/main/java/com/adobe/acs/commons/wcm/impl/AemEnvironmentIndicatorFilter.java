@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 
 
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(service = Filter.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);
 

@@ -36,7 +36,7 @@ import org.osgi.framework.Constants;
  * 
  * Details are here: https://community.okta.com/community/okta/blog/2014/01/31/logout-and-redirect-to-an-url
  */
-@Component
+@Component(service = AuthenticationHandler.class)
 public class OktaLogoutHandler implements AuthenticationHandler {
 
     @Property

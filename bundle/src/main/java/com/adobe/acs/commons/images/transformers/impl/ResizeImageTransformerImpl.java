@@ -35,7 +35,7 @@ import java.util.Map;
  * If either is left blank the missing dimension will be computed based on the original layer's
  * aspect ratio
  */
-@Component
+@Component(service = ImageTransformer.class)
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 

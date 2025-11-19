@@ -66,7 +66,7 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
  * <p>
  * If a Workflow Model Id can be resolved, via the content hierarchy (directly) or the the default workflow id param (fallback) but that Workflow Model cannot be resolved, then a WorkflowException is thrown.
  */
-@Component
+@Component(service = WorkflowProcess.class)
 public class WorkflowDelegationStep implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(WorkflowDelegationStep.class);
 

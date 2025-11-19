@@ -45,7 +45,7 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component
+@Component(service = WorkflowProcess.class)
 public class SetReplicationStatusProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(SetReplicationStatusProcess.class);

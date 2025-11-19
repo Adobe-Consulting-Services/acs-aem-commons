@@ -25,7 +25,7 @@ import org.apache.sling.rewriter.SerializerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
+@Component(service = SerializerFactory.class)
 public class PlainXMLSerializerFactory implements SerializerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(PlainXMLSerializerFactory.class);

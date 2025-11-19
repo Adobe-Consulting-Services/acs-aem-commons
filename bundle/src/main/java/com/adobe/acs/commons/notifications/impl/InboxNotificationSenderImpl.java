@@ -37,7 +37,7 @@ import java.util.List;
     ACS AEM Commons - AEM Inbox Notification Sender
     Service for sending AEM Inbox Notification
  */
-@Component
+@Component(service = InboxNotificationSender.class)
 public class InboxNotificationSenderImpl implements InboxNotificationSender {
     private static final Logger log = LoggerFactory.getLogger(InboxNotificationSenderImpl.class);
 
