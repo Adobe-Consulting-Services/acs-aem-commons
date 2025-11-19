@@ -18,18 +18,13 @@
 package com.adobe.acs.commons.logging.impl;
 
 import com.adobe.acs.commons.util.RequireAem;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
@@ -56,11 +51,6 @@ import java.util.function.Supplier;
  */
 @Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
         label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
-@Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'")
-})
 @SuppressWarnings("PMD.MoreThanOneLogger")
 public class JsonEventLogger implements EventHandler {
 

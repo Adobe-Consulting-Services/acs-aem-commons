@@ -18,6 +18,9 @@
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
@@ -33,12 +36,6 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,19 +58,6 @@ import java.util.concurrent.TimeUnit;
 @Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store",
            description = "Cache data store implementation for in-memory storage.",
            metatype = true)
-@Properties({
-        @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                    value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
-                    propertyPrivate = true),
-        @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - In-Memory Cache Store",
-                    propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                    value = "TTL: {httpcache.cachestore.memcache.ttl}, "
-                            + "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
-                    propertyPrivate = true)
-})
-@Service(HttpCacheStore.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 

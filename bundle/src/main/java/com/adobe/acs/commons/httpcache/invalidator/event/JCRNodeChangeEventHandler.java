@@ -18,18 +18,15 @@
 package com.adobe.acs.commons.httpcache.invalidator.event;
 
 import java.util.Collections;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
 import org.apache.sling.api.resource.observation.ResourceChange;
@@ -59,25 +56,6 @@ import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants
            description = "Watches for the configured JCR paths and triggers cache invalidation job.",
            metatype = true,
            policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-        @Property(label = "JCR paths to watch for changes. (legacy)",
-                  description = "Paths expressed in LDAP syntax. Example: (|(path=/content*)(path=/etc*))"
-                          + " - Watches for changes under /content or /etc. This is deprecated - consider "
-                          + "using " + ResourceChangeListener.PATHS + " instead for better performance.",
-                  name = EventConstants.EVENT_FILTER),
-        @Property(label = "JCR paths to watch for changes.",
-                  value = {"/content", "/etc"},
-                  description = "List of paths to watch. Entries with the 'glob:' prefix are interpreted as globs, "
-                          + "i.e. the * and ** wildcards are supported.",
-                  name = ResourceChangeListener.PATHS),
-        @Property(label = "Type of change to listen to",
-        value = {"ADDED", "REMOVED","CHANGED"},
-        name = ResourceChangeListener.CHANGES),
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                    value = "JCR paths to watch for changes: {" + EventConstants.EVENT_FILTER + "} "
-                            + "{" + ResourceChangeListener.PATHS + "}",
-                    propertyPrivate = true)
-})
 // We do _not_ register as a service. We register ourselves manually as either an EventHandler or
 // a ResourceChangeListener based on what config we have.
 // @formatter:on

@@ -18,12 +18,10 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.util.Calendar;
+import org.osgi.service.component.annotations.Component;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -40,7 +38,6 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * Reference provider that searches for design pages for any given page resource.
  */
 @Component(policy = ConfigurationPolicy.REQUIRE)
-@Service
 public final class DesignReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_DESIGN_PAGE = "designpage";

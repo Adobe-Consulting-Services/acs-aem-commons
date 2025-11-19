@@ -19,10 +19,8 @@
 package com.adobe.acs.commons.images.transformers.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
+import org.osgi.service.component.annotations.Component;
 import com.day.image.Layer;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +31,6 @@ import org.slf4j.LoggerFactory;
 @Component
 @Property(name = ImageTransformer.PROP_TYPE,
           value = AdjustImageTransformerImpl.TYPE)
-@Service
 public class AdjustImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(AdjustImageTransformerImpl.class);
 

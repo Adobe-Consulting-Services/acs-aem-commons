@@ -19,10 +19,9 @@
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.wcm.comparisons.VersionService;
+import org.osgi.service.component.annotations.Component;
 import com.day.cq.wcm.api.NameConstants;
 import com.google.common.collect.Iterators;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,6 @@ import javax.jcr.version.VersionManager;
 import java.util.Iterator;
 
 @Component
-@Service
 public class VersionServiceImpl implements VersionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionServiceImpl.class);

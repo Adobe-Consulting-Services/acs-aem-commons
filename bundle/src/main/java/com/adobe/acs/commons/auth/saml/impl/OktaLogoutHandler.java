@@ -18,17 +18,13 @@
 package com.adobe.acs.commons.auth.saml.impl;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.auth.core.spi.AuthenticationHandler;
 import org.apache.sling.auth.core.spi.AuthenticationInfo;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -43,12 +39,6 @@ import org.osgi.framework.Constants;
 @Component(label = "ACS AEM Commons - Okta Logout Handler",
         description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout",
         metatype = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "ACS AEM Commons Okta Logout Handler", propertyPrivate = true),
-    @Property(name = Constants.SERVICE_RANKING, intValue = 5003, propertyPrivate = false),
-    @Property(name = AuthenticationHandler.PATH_PROPERTY, value = "/", propertyPrivate = false)
-})
 public class OktaLogoutHandler implements AuthenticationHandler {
 
     @Property

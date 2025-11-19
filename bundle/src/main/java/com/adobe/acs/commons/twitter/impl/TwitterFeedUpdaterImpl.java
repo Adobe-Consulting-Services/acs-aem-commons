@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.twitter.impl;
 
 import com.adobe.acs.commons.cqsearch.QueryUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
@@ -28,11 +30,6 @@ import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -58,7 +55,6 @@ import java.util.Map;
 
 @Component(label = "ACS AEM Commons - Twitter Feed Update Service",
         metatype = true, description = "Service to update Twitter Feed components.")
-@Service
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);

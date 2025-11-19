@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.email.process.impl;
 
 import java.text.SimpleDateFormat;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +29,6 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.LoginException;
@@ -95,7 +93,6 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  */
 @Component
 @Property(label = "Workflow Label", name = "process.label", value = "Send Templated Email", description = "Sends a templated email using the ACS Commons Email Service")
-@Service
 public class SendTemplatedEmailProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailProcess.class);

@@ -18,17 +18,12 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
@@ -53,16 +48,6 @@ import java.util.regex.Pattern;
         description = "Rewriter pipeline component which rewrites host name on static references "
                 + "for cookie-less domain support",
         metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-        @Property(
-                name = "pipeline.type", label = "Rewriter Pipeline Type",
-                description = "Type identifier to be referenced in rewriter pipeline configuration."),
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Pipeline: {pipeline.type}")
-})
-
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
 
     public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {

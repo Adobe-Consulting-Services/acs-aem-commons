@@ -18,18 +18,15 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.util.Map;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;
 
 @Component(label = "ACS AEM Commons - Author UI Helper", description = "Helper service to maintain a central configuration related to which authoring environment is being used (touch vs classic).", metatype = true)
-@Service
 public class AuthorUIHelperImpl implements AuthorUIHelper {
 
     @Reference

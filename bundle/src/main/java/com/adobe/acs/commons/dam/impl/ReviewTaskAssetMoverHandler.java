@@ -20,6 +20,10 @@ package com.adobe.acs.commons.dam.impl;
 
 
 import com.adobe.acs.commons.cqsearch.QueryUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.granite.asset.api.Asset;
 import com.adobe.granite.asset.api.AssetManager;
 import com.adobe.granite.asset.api.AssetVersionManager;
@@ -30,14 +34,6 @@ import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -64,33 +60,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Review Task Move Handler",
-        description = "Create an OSGi configuration to enable this feature.",
-        metatype = true,
-        immediate = true,
-        policy = ConfigurationPolicy.REQUIRE
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(
-                label = "Event Topics",
-                value = {ReviewTaskAssetMoverHandler.DEFAULT_TOPIC},
-                description = "[Required] Event Topics this event handler will to respond to. Defaults to: com/adobe/granite/taskmanagement/event",
-                name = EventConstants.EVENT_TOPIC,
-                propertyPrivate = true
-        ),
-
-        /* Event filters support LDAP filter syntax and have access to event.getProperty(..) values */
-        /* LDAP Query syntax: https://goo.gl/MCX2or */
-        @Property(
-                label = "Event Filters",
-                // Only listen on events associated with nodes that end with /jcr:content
-                value = "(&(TaskTypeName=dam:review)(EventType=TASK_COMPLETED))",
-                description = "Event Filters used to further restrict this event handler; Uses LDAP expression against event properties. Defaults to: (&(TaskTypeName=dam:review)(EventType=TASK_COMPLETED))",
-                name = EventConstants.EVENT_FILTER,
-                propertyPrivate = true
-        )
-})
-@Service
 public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoverHandler.class);
 

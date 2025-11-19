@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.DynamicScriptResolverService;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -41,12 +45,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -59,7 +57,6 @@ import org.slf4j.LoggerFactory;
  * Implementation of ControlProcessManager service
  */
 @Component
-@Service(ControlledProcessManager.class)
 @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Manage Controlled Processes")
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
 

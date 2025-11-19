@@ -19,20 +19,17 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.util.InfoWriter;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -50,32 +47,13 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component(
-        label = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service",
-        metatype = true,
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE
+    property = {
+        "scheduler.expression=0 1 0 ? * *",
+        "scheduler.concurrent=",
+        "webconsole.configurationFactory.nameHint=Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
+    },
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(
-                label = "Cron expression defining when this Scheduled Service will run",
-                description = "[12:01am daily = 0 1 0 ? * *]; see www.cronmaker.com",
-                name = "scheduler.expression",
-                value = "0 1 0 ? * *"
-        ),
-        @Property(
-                label = "Allow concurrent executions",
-                description = "Allow concurrent executions of this Scheduled Service",
-                name = "scheduler.concurrent",
-                boolValue = false,
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                propertyPrivate = true,
-                value = "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
-        )
-})
-@Service
 public class WorkflowInstanceRemoverScheduler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverScheduler.class);
 

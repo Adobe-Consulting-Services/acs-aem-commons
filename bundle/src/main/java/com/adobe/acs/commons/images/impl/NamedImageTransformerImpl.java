@@ -19,20 +19,17 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.TypeUtil;
 import com.day.image.Layer;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -44,12 +41,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Named Image Transformer Factory",
-        description = "Instances of this factory define registered Named Image transformers which are comprised of "
-                + "ordered, parameter-ized image transformers.",
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+    property = "webconsole.configurationFactory.nameHint=Transformer: {name}",
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
 @Reference(
         name = "imageTransformers",
@@ -57,12 +50,6 @@ import java.util.Map;
         policy = ReferencePolicy.DYNAMIC,
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
 )
-@Service
-@Properties({
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Transformer: {name}")
-})
 public class NamedImageTransformerImpl implements NamedImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(NamedImageTransformerImpl.class);
 

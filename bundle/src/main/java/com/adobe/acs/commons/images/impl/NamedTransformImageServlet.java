@@ -18,6 +18,11 @@
 package com.adobe.acs.commons.images.impl;
 
 import com.adobe.acs.commons.dam.RenditionPatternPicker;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
@@ -35,15 +40,6 @@ import com.day.image.Layer;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -74,39 +70,13 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 @Component(
-        label = "ACS AEM Commons - Named Transform Image Servlet",
-        description = "Transform images programatically by applying a named transform to the requested Image.",
-        metatype = true
+    service = Servlet.class,
+    property = {
+        "sling.servlet.resourceTypes=",
+        "sling.servlet.extensions=",
+        "sling.servlet.methods="
+    }
 )
-@Properties({
-        @Property(
-                label = "Resource Types",
-                description = "Resource Types and Node Types to bind this servlet to.",
-                name = "sling.servlet.resourceTypes",
-                value = { "nt/file", "nt/resource", "dam/Asset", "cq/Page", "cq/PageContent", "nt/unstructured",
-                        "foundation/components/image", "foundation/components/parbase", "foundation/components/page" },
-                propertyPrivate = false
-        ),
-        @Property(
-            label = "Allows Suffix Patterns",
-            description = "Regex pattern to filter allowed file names. Defaults to [ "
-                    + NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN + " ]",
-            name = NamedTransformImageServlet.NAMED_IMAGE_FILENAME_PATTERN,
-            value = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN
-        ),
-        @Property(
-                label = "Extension",
-                description = "",
-                name = "sling.servlet.extensions",
-                value = { "transform" },
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "sling.servlet.methods",
-                value = { "GET" },
-                propertyPrivate = true
-        )
-})
 @References({
         @Reference(
                 name = "namedImageTransformers",
@@ -121,7 +91,6 @@ import java.util.regex.Pattern;
                 cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
         )
 })
-@Service(Servlet.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
 
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);

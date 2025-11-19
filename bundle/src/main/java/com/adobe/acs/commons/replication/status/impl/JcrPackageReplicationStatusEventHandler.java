@@ -19,6 +19,10 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.ClusterLeader;
 import com.adobe.acs.commons.util.ParameterUtil;
@@ -28,14 +32,6 @@ import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.PackageException;
@@ -70,34 +66,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component(
-        label = "ACS AEM Commons - Package Replication Status Updater",
-        description = "Event handler that listens for Jcr Package replications and updates the Replication Status of "
-                + "its content accordingly.",
-        metatype = true,
-        immediate = true,
-        policy = ConfigurationPolicy.REQUIRE
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(
-                label = "Event Topics",
-                value = {ReplicationAction.EVENT_TOPIC, ReplicationEvent.EVENT_TOPIC},
-                description = "[Required] Event Topics this event handler will to respond to.",
-                name = EventConstants.EVENT_TOPIC,
-                propertyPrivate = true
-        ),
-        @Property(
-                label = "Event Filters",
-                value = "(" + ReplicationAction.PROPERTY_TYPE + "=ACTIVATE)",
-                name = EventConstants.EVENT_FILTER,
-                propertyPrivate = true
-        ),
-        @Property(
-                name = JobConsumer.PROPERTY_TOPICS,
-                value = JcrPackageReplicationStatusEventHandler.JOB_TOPIC,
-                propertyPrivate = true
-        )
-})
-@Service
 public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 

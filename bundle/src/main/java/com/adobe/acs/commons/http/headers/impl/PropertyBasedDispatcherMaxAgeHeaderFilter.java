@@ -19,10 +19,7 @@
 package com.adobe.acs.commons.http.headers.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
+import org.osgi.service.component.annotations.Component;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -43,16 +40,6 @@ import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHea
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Property name: {property.name}. Fallback Max Age: {max.age} ",
-                propertyPrivate = true),
-        @Property(
-                name = PROP_DISPATCHER_FILTER_ENGINE,
-                value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
-                propertyPrivate = true)
-})
 public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
 
     private static final Logger log = LoggerFactory.getLogger(PropertyBasedDispatcherMaxAgeHeaderFilter.class);

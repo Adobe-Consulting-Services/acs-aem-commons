@@ -18,19 +18,16 @@
 package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.EmailService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
@@ -49,31 +46,14 @@ import java.util.Map;
 import java.util.Scanner;
 
 @Component(
-        label = "ACS AEM Commons - Health Check Status E-mailer",
-        description = "Scheduled Service that runs specified Health Checks and e-mails the results",
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+    service = Runnable.class,
+    property = {
+        "scheduler.expression=0 0 8 ? * MON-FRI *",
+        "scheduler.concurrent=",
+        "scheduler.runOn=LEADER"
+    },
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(
-                label = "Cron expression defining when this Scheduled Service will run",
-                name = "scheduler.expression",
-                description = "Every weekday @ 8am = [ 0 0 8 ? * MON-FRI * ] Visit www.cronmaker.com to generate cron expressions.",
-                value = "0 0 8 ? * MON-FRI *"
-        ),
-        @Property(
-                name = "scheduler.concurrent",
-                boolValue = false,
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "scheduler.runOn",
-                value = "LEADER",
-                propertyPrivate = true
-        )
-})
-@Service(value = Runnable.class)
 public class HealthCheckStatusEmailer implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 

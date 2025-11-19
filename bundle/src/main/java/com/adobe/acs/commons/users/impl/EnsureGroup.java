@@ -19,6 +19,9 @@
 package com.adobe.acs.commons.users.impl;
 
 import java.security.Principal;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -27,14 +30,6 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -48,11 +43,6 @@ import org.slf4j.LoggerFactory;
            metatype = true,
            immediate = true,
            policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-                    @Property(name = "webconsole.configurationFactory.nameHint",
-                              value = "Ensure Group: {operation} {principalName}")
-})
-@Service(value = { EnsureGroup.class, EnsureAuthorizable.class })
 public final class EnsureGroup implements EnsureAuthorizable {
 
     @Property(label = "Ensure immediately", boolValue = true,

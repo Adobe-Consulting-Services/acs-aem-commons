@@ -18,6 +18,9 @@
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
 import com.adobe.acs.commons.dam.audio.impl.AudioException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import com.adobe.acs.commons.dam.audio.impl.AudioHelper;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
@@ -30,11 +33,6 @@ import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FFMpegWrapper;
 import com.day.cq.dam.video.VideoProfile;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -52,7 +50,6 @@ import java.util.Map;
 
 @Component(metatype = true, label = "ACS AEM Commons - Watson Transcription Workflow Process",
            description = "ACS AEM Commons - Watson Transcription Workflow Process")
-@Service(WorkflowExternalProcess.class)
 @Property(name = "process.name", value = "Generate Audio Transcript with IBM Watson", propertyPrivate = true)
 public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelper.AudioProcessor<MetaDataMap, Serializable> {
 

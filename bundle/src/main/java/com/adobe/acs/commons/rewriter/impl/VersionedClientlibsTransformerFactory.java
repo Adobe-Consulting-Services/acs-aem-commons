@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -45,13 +49,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -98,15 +95,6 @@ import com.google.common.cache.CacheBuilder;
  */
 @Component(metatype = true, label = "ACS AEM Commons - Versioned Clientlibs Transformer Factory",
     description = "Sling Rewriter Transformer Factory to add auto-generated checksums to client library references")
-@Properties({
-    @Property(name = "pipeline.type",
-        value = "versioned-clientlibs", propertyPrivate = true),
-    @Property(name = EventConstants.EVENT_TOPIC,
-        value = "com/adobe/granite/ui/librarymanager/INVALIDATED", propertyPrivate = true),
-    @Property(name = "jmx.objectname",
-        value = "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache", propertyPrivate = true)
-})
-@Service(value = {DynamicMBean.class, TransformerFactory.class, EventHandler.class})
 public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, CacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);

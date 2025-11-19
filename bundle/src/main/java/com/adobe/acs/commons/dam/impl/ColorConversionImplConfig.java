@@ -26,7 +26,7 @@ import org.osgi.service.metatype.annotations.Option;
     name = "ACS AEM Commons - Color Conversion",
     description = "ACS AEM Commons - Color Conversion"
 )
-public @interface ColorConversionConfig {
+public @interface ColorConversionImplConfig {
     
     @AttributeDefinition(
         name = "CMYK ICC Profile",

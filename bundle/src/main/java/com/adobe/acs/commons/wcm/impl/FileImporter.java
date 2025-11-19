@@ -18,6 +18,9 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.File;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,11 +31,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
@@ -47,7 +45,6 @@ import com.day.cq.polling.importer.Importer;
 @Component(label = "ACS AEM Commons - File Importer",
     description = "Importer which can import a file from the file system into the content repository.",
     metatype = true)
-@Service
 @Property(label = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
         name = "displayName", value = "File")
 public final class FileImporter implements Importer {

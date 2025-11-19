@@ -19,12 +19,11 @@
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import org.osgi.service.component.annotations.Component;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.vault.util.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,6 @@ import java.util.TreeMap;
  * (via {@link ChecksumGeneratorOptions}).
  */
 @Component
-@Service
 @SuppressWarnings("squid:S2070") // SHA1 not used cryptographically
 public class ChecksumGeneratorImpl implements ChecksumGenerator {
     private static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorImpl.class);

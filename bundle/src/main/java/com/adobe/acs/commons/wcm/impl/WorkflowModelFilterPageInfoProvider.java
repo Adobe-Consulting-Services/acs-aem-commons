@@ -19,8 +19,7 @@ package com.adobe.acs.commons.wcm.impl;
 
 import java.util.Iterator;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -38,7 +37,6 @@ import com.day.cq.wcm.api.PageInfoProvider;
  * Must run <b>after</b> <code>com.day.cq.wcm.core.impl.DefaultPageStatusProvider</code>
  */
 @Component
-@Service
 @SuppressWarnings( "deprecation" )
 public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 

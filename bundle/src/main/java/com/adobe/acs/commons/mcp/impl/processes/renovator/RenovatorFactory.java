@@ -18,15 +18,13 @@
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.day.cq.audit.AuditLog;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 
 @Component
-@Service(ProcessDefinitionFactory.class)
 public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
 
     @Reference

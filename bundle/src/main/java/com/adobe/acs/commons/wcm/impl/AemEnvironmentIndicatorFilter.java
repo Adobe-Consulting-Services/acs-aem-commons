@@ -18,6 +18,11 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
@@ -43,7 +48,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.engine.EngineConstants;
@@ -67,11 +71,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Component(
-        label = "ACS AEM Commons - AEM Environment Indicator",
-        description = "Adds a visual cue to the AEM WebUI indicating which environment is being access "
-                + "(localdev, dev, qa, staging)",
-        metatype = true,
-        policy = ConfigurationPolicy.REQUIRE
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
 public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);

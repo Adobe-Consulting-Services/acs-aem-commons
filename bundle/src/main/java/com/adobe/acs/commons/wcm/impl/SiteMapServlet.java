@@ -19,6 +19,9 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -36,14 +39,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -65,14 +60,7 @@ import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
 @Component(metatype = true, label = "ACS AEM Commons - Site Map Servlet", description = "Page and Asset Site Map Servlet", configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
 @SuppressWarnings("serial")
-@Properties({
-        @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY, label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
-        @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
-        @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
-        @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint", value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]") })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(SiteMapServlet.class);

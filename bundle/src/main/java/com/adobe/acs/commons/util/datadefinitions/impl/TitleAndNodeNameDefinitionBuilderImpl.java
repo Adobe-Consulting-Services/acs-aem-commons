@@ -19,24 +19,14 @@ package com.adobe.acs.commons.util.datadefinitions.impl;
 
 
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
+import org.osgi.service.component.annotations.Component;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-@Properties({
-        @Property(
-                name = ResourceDefinitionBuilder.PROP_NAME,
-                value = TitleAndNodeNameDefinitionBuilderImpl.NAME
-        )
-})
-@Service
 public class TitleAndNodeNameDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "TITLE_AND_NODE_NAME";
 

@@ -19,6 +19,9 @@
 package com.adobe.acs.commons.workflow.bulk.execution.impl;
 
 import com.adobe.acs.commons.util.QueryHelper;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Deactivate;
 import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
@@ -26,11 +29,6 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -48,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@Service
 public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
     private static final Logger log = LoggerFactory.getLogger(BulkWorkflowEngineImpl.class);
 

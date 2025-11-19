@@ -17,13 +17,8 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
@@ -37,22 +32,6 @@ import java.util.Dictionary;
     metatype = true,
     configurationFactory = true,
     policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-  @Property(label = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE,
-      name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-      propertyPrivate = false,
-      value = { }),
-  @Property(label = "Expires Time",
-      description = "Time of day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.",
-      name = AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME,
-      propertyPrivate = false),
-  @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Each week on day {expires.day-of-week} at {expires.time} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
-})
 //@formatter:on
 public class WeeklyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 

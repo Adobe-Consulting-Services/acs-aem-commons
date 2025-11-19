@@ -18,6 +18,13 @@
 package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
@@ -38,18 +45,6 @@ import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -76,18 +71,12 @@ import java.util.regex.Pattern;
  */
 // @formatter:off
 @Component(
-        label = "ACS AEM Commons - HTTP Cache - Engine",
-        description = "Controlling service for http cache implementation.",
-        metatype = true
+    service = {DynamicMBean.class, HttpCacheEngine.class},
+    property = {
+        "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
+        "webconsole.configurationFactory.nameHint=Global handling rules: {httpcache.engine.cache-handling-rules.global}"
+    }
 )
-@Properties({
-        @Property(name = "jmx.objectname",
-                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
-                propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Global handling rules: {httpcache.engine.cache-handling-rules.global}",
-                propertyPrivate = true)
-})
 @References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
                 referenceInterface = HttpCacheConfig.class,
@@ -107,7 +96,6 @@ import java.util.regex.Pattern;
                 policyOption = ReferencePolicyOption.GREEDY,
                 cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 })
-@Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheEngineImpl.class);

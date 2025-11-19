@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
@@ -38,8 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;

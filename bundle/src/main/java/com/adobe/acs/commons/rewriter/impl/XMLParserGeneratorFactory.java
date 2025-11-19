@@ -19,16 +19,13 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
 import org.apache.sling.rewriter.Generator;
 import org.apache.sling.rewriter.GeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
-@Service
 @Property(name = "pipeline.type", value = "acs-aem-commons-xml-generator")
 public final class XMLParserGeneratorFactory implements GeneratorFactory {
 

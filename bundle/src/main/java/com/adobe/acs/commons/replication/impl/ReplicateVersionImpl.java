@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.replication.impl;
 
 import java.util.ArrayList;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,9 +34,6 @@ import javax.jcr.Session;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionIterator;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -57,7 +56,6 @@ import com.day.cq.wcm.api.NameConstants;
  * specific replication agent
  */
 @Component
-@Service
 public class ReplicateVersionImpl implements
         ReplicateVersion {
 

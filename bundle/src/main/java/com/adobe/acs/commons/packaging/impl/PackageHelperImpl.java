@@ -18,14 +18,13 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -56,7 +55,6 @@ import java.util.Map;
  * using the ACS AEM Commons packager.
  */
 @Component
-@Service
 public final class PackageHelperImpl implements PackageHelper {
 
     private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);

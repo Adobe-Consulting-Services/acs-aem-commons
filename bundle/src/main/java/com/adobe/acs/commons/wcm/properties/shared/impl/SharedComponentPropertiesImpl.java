@@ -18,17 +18,14 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.adobe.acs.commons.wcm.properties.shared.SharedValueMapResourceAdapter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -44,7 +41,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component(policy = ConfigurationPolicy.REQUIRE)
-@Service(value = {SharedComponentProperties.class, AdapterFactory.class})
 @Properties(value = {
         @Property(name = SlingConstants.PROPERTY_ADAPTABLE_CLASSES, classValue = Resource.class),
         @Property(name = SlingConstants.PROPERTY_ADAPTER_CLASSES, classValue = SharedValueMapResourceAdapter.class),

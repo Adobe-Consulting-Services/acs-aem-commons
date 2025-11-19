@@ -19,18 +19,15 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ModeUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -52,25 +49,12 @@ import java.util.Collections;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Component-Level Error Handler",
-        description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
-                + "components based on WCM Mode collections (Edit, Preview, Publish).",
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+    property = {
+        "sling.filter.scope=component",
+        "filter.order="
+    },
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(
-                name = "sling.filter.scope",
-                value = "component",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "filter.order",
-                intValue = ComponentErrorHandlerImpl.FILTER_ORDER,
-                propertyPrivate = true
-        )
-})
-@Service
 public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 

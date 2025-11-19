@@ -18,15 +18,13 @@
 package com.adobe.acs.commons.dam.audio.impl;
 
 import com.day.cq.dam.api.Asset;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FfmpegNotFoundException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -39,7 +37,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 
 @Component(metatype = true, label = "ACS Commons - Audio Processor", description = "ACS Commons - Audio Processor")
-@Service
 public class AudioHelperImpl implements AudioHelper {
 
     private static final Logger log = LoggerFactory.getLogger(AudioHelperImpl.class);

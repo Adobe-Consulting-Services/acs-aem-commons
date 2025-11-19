@@ -17,11 +17,8 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
+import org.osgi.service.component.annotations.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,9 +26,6 @@ import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.Page;
 
 @Component
-@Service
-@Properties({ @Property(name = AdapterFactory.ADAPTABLE_CLASSES, value = "com.day.cq.wcm.api.Page"),
-        @Property(name = AdapterFactory.ADAPTER_CLASSES, value = "com.adobe.acs.commons.genericlists.GenericList") })
 public class GenericListAdapterFactory implements AdapterFactory {
 
     @SuppressWarnings("unchecked")
