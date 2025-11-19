@@ -36,9 +36,7 @@ import org.osgi.framework.Constants;
  * 
  * Details are here: https://community.okta.com/community/okta/blog/2014/01/31/logout-and-redirect-to-an-url
  */
-@Component(label = "ACS AEM Commons - Okta Logout Handler",
-        description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout",
-        metatype = true, policy = ConfigurationPolicy.REQUIRE)
+@Component
 public class OktaLogoutHandler implements AuthenticationHandler {
 
     @Property

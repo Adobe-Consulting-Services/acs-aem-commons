@@ -44,9 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Component(
-    property = "process.label=Synthetic Workflow Wrapper"
-)
+@Component(property = "process.label=Synthetic Workflow Wrapper")
 public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWrapperWorkflowProcess.class);
     private static final String ARG_TRAVERSE_TREE = "traverseTree";

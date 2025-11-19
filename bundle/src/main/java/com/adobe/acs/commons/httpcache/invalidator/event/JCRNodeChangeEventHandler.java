@@ -52,10 +52,7 @@ import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants
  * invalidated. </p>
  */
 // @formatter:off
-@Component(label = "ACS AEM Commons - HTTP Cache - JCR node change invalidator",
-           description = "Watches for the configured JCR paths and triggers cache invalidation job.",
-           metatype = true,
-           policy = ConfigurationPolicy.REQUIRE)
+@Component
 // We do _not_ register as a service. We register ourselves manually as either an EventHandler or
 // a ResourceChangeListener based on what config we have.
 // @formatter:on

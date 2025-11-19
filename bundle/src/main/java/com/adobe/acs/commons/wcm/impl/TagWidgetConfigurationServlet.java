@@ -70,8 +70,7 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
 
     private static final String DEFAULT_ROOT_PATH = "/etc/tagconfig";
 
-    @Property(value = DEFAULT_ROOT_PATH)
-    private static final String PROP_ROOT_PATH = "root.path";
+        private static final String PROP_ROOT_PATH = "root.path";
 
     private String rootPath;
 

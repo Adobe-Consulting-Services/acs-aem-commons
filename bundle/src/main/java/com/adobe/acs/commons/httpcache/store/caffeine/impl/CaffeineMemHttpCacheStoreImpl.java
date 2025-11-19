@@ -55,30 +55,21 @@ import java.util.concurrent.ConcurrentMap;
  */
 
 
-@Component(
-    service = HttpCacheStore.class,
+@Component(service = HttpCacheStore.class,
     property = {
         "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - Caffeine Cache Store",
         "webconsole.configurationFactory.nameHint=TTL: {httpcache.cachestore.caffeine.ttl}, Max size in MB: {httpcache.cachestore.caffeine.maxsize}"
     },
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, CaffeineCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
 
     private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
-    @Property(label = "TTL",
-            description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
-            longValue = DEFAULT_TTL)
-    private static final String PROP_TTL = "httpcache.cachestore.caffeine.ttl";
+        private static final String PROP_TTL = "httpcache.cachestore.caffeine.ttl";
     private long ttl;
 
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
-    @Property(label = "Maximum size of this store in MB",
-            description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
-                    + "from the cache",
-            longValue = DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.caffeine.maxsize";
+        private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.caffeine.maxsize";
     private long maxSizeInMb;
 
 

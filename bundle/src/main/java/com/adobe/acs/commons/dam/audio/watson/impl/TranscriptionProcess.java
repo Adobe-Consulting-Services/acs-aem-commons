@@ -48,9 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.Map;
 
-@Component(metatype = true, label = "ACS AEM Commons - Watson Transcription Workflow Process",
-           description = "ACS AEM Commons - Watson Transcription Workflow Process")
-@Property(name = "process.name", value = "Generate Audio Transcript with IBM Watson", propertyPrivate = true)
+@Component
 public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelper.AudioProcessor<MetaDataMap, Serializable> {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionProcess.class);
@@ -63,9 +61,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
 
     private static final String DEFAULT_PROFILE = "flacmono";
 
-    @Property(label = "Trancode Profile", description = "Profile name for audio transcoding. Must be a format acceptable to Watson",
-              value = DEFAULT_PROFILE)
-    private static final String PROP_PROFILE = "profile";
+        private static final String PROP_PROFILE = "profile";
 
     private String profileName;
 

@@ -53,8 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Twitter Feed Update Service",
-        metatype = true, description = "Service to update Twitter Feed components.")
+@Component
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);
@@ -65,9 +64,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     @Reference
     private QueryBuilder queryBuilder;
 
-    @Property(value = "acs-commons/components/content/twitter-feed", unbounded = PropertyUnbounded.ARRAY,
-            label = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
-    private static final String TWITTER_COMPONENT_PATHS = "twitter.component.paths";
+        private static final String TWITTER_COMPONENT_PATHS = "twitter.component.paths";
 
     private String[] twitterComponentPaths = null;
 

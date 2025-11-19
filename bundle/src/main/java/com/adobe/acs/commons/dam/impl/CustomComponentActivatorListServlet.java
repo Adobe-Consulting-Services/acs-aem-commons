@@ -35,8 +35,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @SlingServlet(paths = "/bin/acs-commons/dam/custom-components.json", generateComponent = false)
-@Component(metatype = true, policy = ConfigurationPolicy.REQUIRE, label = "ACS AEM Commons - Custom DAM Component List Servlet",
-    description = "Servlet to list custom component paths to automatically replace in metadata editor.")
+@Component
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
 
     private static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";
@@ -46,13 +45,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
 
     private static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
 
-    @Property(label = "Components", description = "Map in the form <propertyName>=<replacement path>", value = {
-            HISTORY,
-            FONTS,
-            COLORANTS,
-            LOCATION
-        })
-    public static final String PROP_COMPONENTS = "components";
+        public static final String PROP_COMPONENTS = "components";
 
     private transient JsonObject json;
 

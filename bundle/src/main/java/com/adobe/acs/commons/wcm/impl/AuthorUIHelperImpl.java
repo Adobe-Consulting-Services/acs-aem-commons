@@ -26,7 +26,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;
 
-@Component(label = "ACS AEM Commons - Author UI Helper", description = "Helper service to maintain a central configuration related to which authoring environment is being used (touch vs classic).", metatype = true)
+@Component(description = "Helper service to maintain a central configuration related to which authoring environment is being used (touch vs classic).", metatype = true)
 public class AuthorUIHelperImpl implements AuthorUIHelper {
 
     @Reference
@@ -54,24 +54,19 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
 
     private static final boolean DEFAULT_TOUCH_UI = true;
 
-    @Property(label = "Touch UI Authoring", description = "Indicates whether the touch UI is being used as the primary authoring environment", boolValue = DEFAULT_TOUCH_UI)
-    private static final String TOUCH_UI = "isTouch";
+        private static final String TOUCH_UI = "isTouch";
     private boolean isTouch = DEFAULT_TOUCH_UI;
 
-    @Property(label = "Touch UI Page Editor", description = "URL of the page editor used when authoring UI mode is Touch-Optimized", value = WCM_EDITOR_URL_TOUCH_DEFAULT)
-    public static final String WCM_EDITOR_URL_TOUCH = "wcmEditorTouchURL";
+        public static final String WCM_EDITOR_URL_TOUCH = "wcmEditorTouchURL";
     private String wcmEditorTouchUrl = WCM_EDITOR_URL_TOUCH_DEFAULT;
 
-    @Property(label = "Classic UI Page Editor", description = "URL of the page editor used when authoring UI mode is Classic", value = WCM_EDITOR_URL_CLASSIC_DEFAULT)
-    public static final String WCM_EDITOR_URL_CLASSIC = "wcmEditorClassicURL";
+        public static final String WCM_EDITOR_URL_CLASSIC = "wcmEditorClassicURL";
     private String wcmEditorClassicUrl = WCM_EDITOR_URL_CLASSIC_DEFAULT;
 
-    @Property(label = "Touch UI Asset Editor", description = "URL of the asset editor used when authoring UI mode is Touch-Optimized", value = DAM_EDITOR_URL_TOUCH_DEFAULT)
-    public static final String DAM_EDITOR_URL_TOUCH = "damEditorTouchURL";
+        public static final String DAM_EDITOR_URL_TOUCH = "damEditorTouchURL";
     private String damEditorTouchUrl = DAM_EDITOR_URL_TOUCH_DEFAULT;
 
-    @Property(label = "Classic UI Asset Editor", description = "URL of the asset editor used when authoring UI mode is Classic", value = DAM_EDITOR_URL_CLASSIC_DEFAULT)
-    public static final String DAM_EDITOR_URL_CLASSIC = "damEditorClassicURL";
+        public static final String DAM_EDITOR_URL_CLASSIC = "damEditorClassicURL";
     private String damEditorClassicUrl = DAM_EDITOR_URL_CLASSIC_DEFAULT;
 
     @Override

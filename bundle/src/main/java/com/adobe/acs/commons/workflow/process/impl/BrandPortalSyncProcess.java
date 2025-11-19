@@ -42,9 +42,7 @@ import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component(
-    property = "process.label=Brand Portal Sync"
-)
+@Component(property = "process.label=Brand Portal Sync")
 public class BrandPortalSyncProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
 

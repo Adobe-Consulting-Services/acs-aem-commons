@@ -34,20 +34,12 @@ import java.util.Dictionary;
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE;
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE_SLING;
 
-@Component(
-        label = "ACS AEM Commons - Dispacher Cache Control Header Resource Type Based - Max Age",
-        description = "Adds a Cache-Control max-age header to content based on resource type to enable Dispatcher TTL support.",
-        metatype = true,
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE)
+@Component(configurationFactory = true)
 public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeBasedDispatcherMaxAgeHeaderFilter.class);
 
-    @Property(label = "Resource types",
-            description = "Resource types the page should have to use this filter.",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_RESOURCE_TYPES = "resource.types";
+        public static final String PROP_RESOURCE_TYPES = "resource.types";
 
     private String[] resourceTypes;
 

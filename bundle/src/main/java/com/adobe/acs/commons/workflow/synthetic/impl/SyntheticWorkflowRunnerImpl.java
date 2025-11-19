@@ -67,10 +67,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * ACS AEM Commons - Synthetic Workflow Runner
  * Facilitates the execution of synthetic workflow.
  */
-@Component(
-    service = SyntheticWorkflowRunner.class,
-    immediate = true
-)
+@Component(service = SyntheticWorkflowRunner.class,
+    immediate = true)
 // Explicitly register to the SyntheticWorkflowRunner interface (as this extends WorkflowService, which we do not want to register a service against)
 public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);

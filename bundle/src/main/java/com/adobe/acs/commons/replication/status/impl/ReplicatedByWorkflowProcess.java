@@ -51,12 +51,6 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * Assigns the replicatedBy property to the Workflow Initiator
  */
 @Component
-@Property(
-        label = "Workflow Label",
-        name = "process.label",
-        value = "Set Replicated By Property to Workflow Initiator",
-        description = "Sets the Replicated By Property on the payload to the Workflow Initiator"
-)
 public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicatedByWorkflowProcess.class);
 

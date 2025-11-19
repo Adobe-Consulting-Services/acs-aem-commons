@@ -40,11 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Component(policy = ConfigurationPolicy.REQUIRE)
-@Properties(value = {
-        @Property(name = SlingConstants.PROPERTY_ADAPTABLE_CLASSES, classValue = Resource.class),
-        @Property(name = SlingConstants.PROPERTY_ADAPTER_CLASSES, classValue = SharedValueMapResourceAdapter.class),
-})
+@Component
 public class SharedComponentPropertiesImpl implements SharedComponentProperties, AdapterFactory {
     private static final Logger LOG = LoggerFactory.getLogger(SharedComponentPropertiesImpl.class);
     private static final String INFIX_JCR_CONTENT = "/jcr:content/";

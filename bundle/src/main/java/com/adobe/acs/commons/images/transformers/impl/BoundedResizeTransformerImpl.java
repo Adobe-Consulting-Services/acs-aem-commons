@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
  * If the original image is smaller than the configured dimensions the image won't be resized
  */
 @Component
-@Property(name = ImageTransformer.PROP_TYPE,
-          value = BoundedResizeTransformerImpl.TYPE)
 public class BoundedResizeTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(BoundedResizeTransformerImpl.class);
 

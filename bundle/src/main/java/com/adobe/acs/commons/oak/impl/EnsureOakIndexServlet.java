@@ -38,8 +38,7 @@ import java.io.IOException;
  * path = /abs/path/to/ensure/definition (optional; when blank indicates all)
  */
 //@formatter:off
-@Component(
-        service = Servlet.class,
+@Component(service = Servlet.class,
         property = {
                 "felix.webconsole.title=Ensure Oak Index (ACS AEM Commons)",
                 "felix.webconsole.label=ensure-oak-index",

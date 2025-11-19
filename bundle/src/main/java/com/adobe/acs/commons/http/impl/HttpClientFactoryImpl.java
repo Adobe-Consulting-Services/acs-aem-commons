@@ -46,7 +46,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import com.adobe.acs.commons.http.HttpClientFactory;
 
-@Component()
+@Component
 public class HttpClientFactoryImpl implements HttpClientFactory {
 
     @ObjectClassDefinition(factoryPid = "com.adobe.acs.commons.http.impl.HttpClientFactoryImpl",

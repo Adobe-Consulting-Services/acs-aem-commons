@@ -23,12 +23,7 @@ import java.util.Calendar;
 
 //@formatter:off
 import org.osgi.service.component.annotations.Component;
-@Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Daily",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    metatype = true,
-    configurationFactory = true,
-    policy = ConfigurationPolicy.REQUIRE)
+@Component(configurationFactory = true)
 //@formatter:on
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 

@@ -43,11 +43,9 @@ import java.util.UUID;
  * This extension on the HTTP cache allows for specific HTTP Request parameter combinations to create separate cache entries.
  * </p>
  */
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
         service = {HttpCacheConfigExtension.class, CacheKeyFactory.class},
-        property = {Constants.SERVICE_RANKING + ":Integer=10" }
-)
+        property = {Constants.SERVICE_RANKING + ":Integer=10" })
 @Designate(
         ocd = RequestParameterHttpCacheConfigExtension.Config.class,
         factory = true

@@ -91,10 +91,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @Property(label = "Workflow Package Types",
-            description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
-            value = { "cq:Page", "cq:PageContent", "dam:Asset" })
-    public static final String PROP_WF_PACKAGE_TYPES = "wf-package.types";
+        public static final String PROP_WF_PACKAGE_TYPES = "wf-package.types";
 
 
     @Reference

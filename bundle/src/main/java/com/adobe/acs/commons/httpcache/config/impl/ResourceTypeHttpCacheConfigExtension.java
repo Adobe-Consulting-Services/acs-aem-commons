@@ -47,42 +47,26 @@ import java.util.regex.Pattern;
  * config extension accepts the http request only if at least one of the configured patterns matches the resource type
  * of the request's resource.
  */
-@Component(
-    property = "webconsole.configurationFactory.nameHint=Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]",
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(property = "webconsole.configurationFactory.nameHint=Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]",
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeHttpCacheConfigExtension.class);
 
     // Custom cache config attributes
-    @Property(label = "Allowed paths",
-            description = "Regex of content paths that can be cached.",
-            unbounded = PropertyUnbounded.ARRAY)
-    static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
+        static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
     private List<Pattern> pathPatterns;
 
-    @Property(label = "Allowed resource types",
-            description = "Regex of resource types that can be cached.",
-            unbounded = PropertyUnbounded.ARRAY)
-    static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
+        static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
     private List<Pattern> resourceTypePatterns;
 
-    @Property(label = "Check RT of ./jcr:content?",
-            description = "Should the resourceType check be applied to ./jcr:content ?",
-            boolValue = false)
-    public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
+        public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
     private boolean checkContentResourceType;
 
 
-    @Property(label = "Check resourceSuperType",
-            description = "Should the resourceType check check super Types?",
-            boolValue = false)
-    static final String PROP_CHECK_RESOURCE_SUPER_TYPE = "httpcache.config.extension.resource-types.superType";
+        static final String PROP_CHECK_RESOURCE_SUPER_TYPE = "httpcache.config.extension.resource-types.superType";
     private boolean checkResourceSuperType;
 
-    @Property(label = "Config Name",
-            description = "")
-    static final String PROP_CONFIG_NAME = "config.name";
+        static final String PROP_CONFIG_NAME = "config.name";
     private String configName;
 
     //-------------------------<HttpCacheConfigExtension methods>

@@ -80,7 +80,6 @@ import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericPa
  * otherwise the generic XSSAPI service would be injected from the OSGi Service Registry instead of the
  * pre-configured from the current request.
  */
-@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
 public final class AemObjectInjector implements Injector {
 
     @Reference

@@ -32,10 +32,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-    service = PageRootProviderConfig.class,
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(service = PageRootProviderConfig.class,
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 /**
  * Configuration instance for Page Root Provider.
  * Use service.ranking to guarantee priority between conflicting configurations.
@@ -47,12 +45,7 @@ public class PageRootProviderConfig {
     /* Default root. */
     static final String DEFAULT_PAGE_ROOT_PATH = "/content";
 
-    @Property(
-            label = "Root page path pattern",
-            description = "Regex(es) used to select the root page root path. Regex must contain at least one group (with index 1) which is used as page root. It is matched against the given path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
-            cardinality = Integer.MAX_VALUE,
-            value = { DEFAULT_PAGE_ROOT_PATH })
-    /* Page root property. */
+        /* Page root property. */
     static final String PAGE_ROOT_PATH = "page.root.path";
 
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderConfig.class);

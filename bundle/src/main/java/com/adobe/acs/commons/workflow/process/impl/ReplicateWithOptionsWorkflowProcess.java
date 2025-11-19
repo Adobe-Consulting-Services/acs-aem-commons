@@ -49,9 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Component(
-    property = "process.label=Replicate with Options"
-)
+@Component(property = "process.label=Replicate with Options")
 public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicateWithOptionsWorkflowProcess.class);
 

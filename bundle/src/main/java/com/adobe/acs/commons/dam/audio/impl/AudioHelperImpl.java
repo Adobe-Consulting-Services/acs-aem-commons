@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-@Component(metatype = true, label = "ACS Commons - Audio Processor", description = "ACS Commons - Audio Processor")
+@Component
 public class AudioHelperImpl implements AudioHelper {
 
     private static final Logger log = LoggerFactory.getLogger(AudioHelperImpl.class);
@@ -44,8 +44,7 @@ public class AudioHelperImpl implements AudioHelper {
     /**
      * FFmpeg working directory. If relative, relative to sling.home.
      */
-    @Property(value = "./logs/ffmpeg")
-    public static final String PROP_WORKING_DIR = "ffmpeg.workingdir";
+        public static final String PROP_WORKING_DIR = "ffmpeg.workingdir";
 
     @Reference(policy = ReferencePolicy.STATIC)
     private ExecutableLocator locator;

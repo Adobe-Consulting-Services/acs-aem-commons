@@ -44,16 +44,11 @@ import java.util.Map;
  * Sling job consumer consuming the job created for invalidating cache. For creating an invalidation job for this
  * consumer, make use of the topic and associated constants defined at {@link CacheInvalidationJobConstants}
  */
-@Component(
-    immediate = true
-)
+@Component(immediate = true)
 public class HttpCacheInvalidationJobConsumer implements JobConsumer {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheInvalidationJobConsumer.class);
 
-    @Property(label = "Invalidate references",
-            description = "Whether to search for references and invalidate them in the cache.",
-            boolValue = HttpCacheInvalidationJobConsumer.DEFAULT_REFERENCES)
-    private static final String PROP_REFERENCES = "httpcache.config.invalidation.references";
+        private static final String PROP_REFERENCES = "httpcache.config.invalidation.references";
     private static final boolean DEFAULT_REFERENCES = false;
     private boolean invalidateRefs;
 

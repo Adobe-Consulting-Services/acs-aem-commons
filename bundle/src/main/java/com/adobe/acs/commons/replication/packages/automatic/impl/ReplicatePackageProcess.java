@@ -37,7 +37,6 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * Workflow process for kicking off an AutomaticPackageReplicatorJob
  */
 @Component
-@Property(label = "Workflow Label", name = "process.label", value = "Build and Replicate Package", description = "Builds and Replicates a Package of Content, set the path of the package to replicate as the argument.")
 public class ReplicatePackageProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(ReplicatePackageProcess.class);

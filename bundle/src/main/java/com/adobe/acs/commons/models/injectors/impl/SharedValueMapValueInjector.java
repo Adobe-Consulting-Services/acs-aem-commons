@@ -51,7 +51,6 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
  * is able to provide SlingBindings on a request adaptable.
  */
 @Component
-@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
 public class SharedValueMapValueInjector implements Injector {
     private static final Logger LOG = LoggerFactory.getLogger(SharedValueMapValueInjector.class);
 

@@ -33,9 +33,6 @@ import org.apache.commons.lang3.NotImplementedException;
 // TODO - Placeholder component. To be implemented.
 /*
 @Component
-@Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-          value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
-          propertyPrivate = true)
 */
 public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     @Override

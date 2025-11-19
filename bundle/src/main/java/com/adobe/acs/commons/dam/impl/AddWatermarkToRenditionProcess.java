@@ -50,7 +50,6 @@ import com.day.image.Layer;
  * </ul>
  */
 @Component
-@Property(name = "process.label", value = "Add Watermark to Rendition")
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();

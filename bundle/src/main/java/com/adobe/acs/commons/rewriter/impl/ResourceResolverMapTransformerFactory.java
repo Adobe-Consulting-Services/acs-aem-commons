@@ -43,23 +43,14 @@ import java.util.Map;
 /**
  * Rewriter pipeline component which maps attribute values.
  */
-@Component(
-        label = "ACS AEM Commons - Resource Resolver Map Rewriter",
-        description = "Rewriter pipeline component which resourceResolver.map's any element/attribute.",
-        metatype = true,
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE)
+@Component(configurationFactory = true)
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceResolverMapTransformerFactory.class);
 
     private static final String[] DEFAULT_ATTRIBUTES = new String[]{"img:src"};
     private Map<String, String[]> attributes;
-    @Property(label = "Rewrite Attributes",
-            description = "List of element/attribute pairs to rewrite",
-            cardinality = Integer.MAX_VALUE,
-            value = {"img:src"})
-    private static final String PROP_ATTRIBUTES = "attributes";
+        private static final String PROP_ATTRIBUTES = "attributes";
 
     public Transformer createTransformer() {
         return new ResourceResolverMapTransformer();

@@ -42,11 +42,7 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.polling.importer.ImportException;
 import com.day.cq.polling.importer.Importer;
 
-@Component(label = "ACS AEM Commons - File Importer",
-    description = "Importer which can import a file from the file system into the content repository.",
-    metatype = true)
-@Property(label = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
-        name = "displayName", value = "File")
+@Component
 public final class FileImporter implements Importer {
 
     private static final Logger log = LoggerFactory.getLogger(FileImporter.class);
@@ -56,10 +52,7 @@ public final class FileImporter implements Importer {
     @Reference
     private MimeTypeService mimeTypeService;
 
-    @Property(label = "Importer Scheme",
-            description = "Scheme value that will be used for this importer. Must be unique across importers.",
-            value = DEFAULT_SCHEME)
-    private static final String PROP_SCHEME = Importer.SCHEME_PROPERTY;
+        private static final String PROP_SCHEME = Importer.SCHEME_PROPERTY;
 
     private String scheme;
 

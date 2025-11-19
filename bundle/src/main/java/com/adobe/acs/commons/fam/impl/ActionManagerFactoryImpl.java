@@ -38,7 +38,6 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 @Component
-@Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
 

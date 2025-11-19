@@ -46,12 +46,6 @@ import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
 @Component
-@Property(
-        label = "Workflow Label",
-        name = "process.label",
-        value = "Set Replication Status",
-        description = "Sets the cq:lastReplicated, cq:lastReplicateBy and cq:lastReplicatedAction on the payload to the values provided"
-)
 public class SetReplicationStatusProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(SetReplicationStatusProcess.class);

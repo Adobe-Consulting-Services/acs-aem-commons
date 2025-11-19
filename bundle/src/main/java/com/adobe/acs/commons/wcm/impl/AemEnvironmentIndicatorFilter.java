@@ -70,9 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 
 
-@Component(
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);
 
@@ -103,30 +101,17 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     /* Property: Default Color */
 
-    @Property(label = "Color",
-            description = "The color of the indicator bar; takes any valid value"
-                    + " for CSS's 'background-color' attribute."
-                    + " This is only effective if no 'CSS Override' is provided or 'Always Include Color CSS' is set to true.",
-            value = "")
-    public static final String PROP_COLOR = "css-color";
+        public static final String PROP_COLOR = "css-color";
 
     /* Property: CSS Override */
 
-    @Property(label = "CSS Override",
-            description = "Accepts any valid CSS to style the AEM indicator div. All CSS rules must only be "
-                    + "scoped to #" + DIV_ID + " { .. }",
-            value = "")
-    public static final String PROP_CSS_OVERRIDE = "css-override";
+        public static final String PROP_CSS_OVERRIDE = "css-override";
 
     /* Property: Inner HTML */
 
     private String innerHTML = "";
 
-    @Property(label = "Inner HTML",
-            description = "Any additional HTML required; Will be injected into a div with"
-                    + " id='" + DIV_ID + "'",
-            value = "")
-    public static final String PROP_INNER_HTML = "inner-html";
+        public static final String PROP_INNER_HTML = "inner-html";
 
 
     /* Property: Browser Title Prefix */
@@ -137,35 +122,20 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     /* Property: Always Include Base CSS */
 
-    @Property(label = "Always Include Base CSS",
-            description = "Always include the base CSS scoped to #" + DIV_ID + " { .. }",
-            boolValue = false)
-    public static final String PROP_ALWAYS_INCLUDE_BASE_CSS = "always-include-base-css";
+        public static final String PROP_ALWAYS_INCLUDE_BASE_CSS = "always-include-base-css";
 
     /* Property: Always Include Color CSS */
 
-    @Property(label = "Always Include Color CSS",
-            description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
-            boolValue = false)
-    public static final String PROP_ALWAYS_INCLUDE_COLOR_CSS = "always-include-color-css";
+        public static final String PROP_ALWAYS_INCLUDE_COLOR_CSS = "always-include-color-css";
 
-    @Property(label = "Browser Title",
-            description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
-            value = DEFAULT_TITLE_PREFIX)
-    public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
+        public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
 
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
-    @Property(label = "Excluded WCM modes",
-            description = "Do not display the indicator when these WCM modes are active",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
+        public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
 
 
     private static final String[] DEFAULT_ALLOWED_EXTENSIONS = {"html", "htm", "jsp", NO_EXTENSION_PLACEHOLDER};
-    @Property(label = "Allowed URI extensions",
-            description = "Only inject the environment indicator on URI that use these extensions. Use '" + NO_EXTENSION_PLACEHOLDER + "' to match on no extension.",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_ALLOWED_EXTENSIONS = "allowed-extensions";
+        public static final String PROP_ALLOWED_EXTENSIONS = "allowed-extensions";
     private String[] allowedExtensions;
 
     private String css = "";

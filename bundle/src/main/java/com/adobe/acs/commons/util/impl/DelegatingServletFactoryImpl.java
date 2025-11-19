@@ -38,12 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(
-        label = "ACS AEM Commons - Delegating Servlet",
-        description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.",
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true,
+@Component(configurationFactory = true,
         immediate = false)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);
@@ -52,10 +47,7 @@ public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
 
     private static final String DEFAULT_TARGET_RESOURCE_TYPE = "";
     private String targetResourceType = DEFAULT_TARGET_RESOURCE_TYPE;
-    @Property(label = "Target Resource Type",
-            description = "The resource type to proxy requests to.",
-            value = DEFAULT_TARGET_RESOURCE_TYPE)
-    public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
+        public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
 
     /** Safe HTTP Methods **/
 

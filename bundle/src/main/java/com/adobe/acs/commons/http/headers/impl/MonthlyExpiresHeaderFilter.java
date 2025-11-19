@@ -27,20 +27,13 @@ import java.util.Calendar;
 import java.util.Dictionary;
 
 //@formatter:off
-@Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Monthly",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    metatype = true,
-    configurationFactory = true,
-    policy = ConfigurationPolicy.REQUIRE)
+@Component(configurationFactory = true)
 //@formatter:on
 public class MonthlyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 
     private static final String LAST = "LAST";
 
-    @Property(label = "Expires Day", description = "Day of month on which content expires. "
-            + "Use keyword 'LAST' to enable last day of month, as setting to 31 will generate errors in February.")
-    static final String PROP_EXPIRES_DAY_OF_MONTH = "expires.day-of-month";
+        static final String PROP_EXPIRES_DAY_OF_MONTH = "expires.day-of-month";
 
     private String dayOfMonth;
 

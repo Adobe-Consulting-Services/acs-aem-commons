@@ -92,7 +92,6 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  *
  */
 @Component
-@Property(label = "Workflow Label", name = "process.label", value = "Send Templated Email", description = "Sends a templated email using the ACS Commons Email Service")
 public class SendTemplatedEmailProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(SendTemplatedEmailProcess.class);

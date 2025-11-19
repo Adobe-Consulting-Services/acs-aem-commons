@@ -30,9 +30,7 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
 //@formatter:off
-@Component(
-    property = "process.label=Parameterized Deactivate Resource Process"
-)
+@Component(property = "process.label=Parameterized Deactivate Resource Process")
 //@formatter:on
 public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
 

@@ -93,8 +93,7 @@ import com.google.common.cache.CacheBuilder;
  * selector; in the form: /path/to/clientlib.123456789.css or /path/to/clientlib.min.1234589.css (if minification is enabled)
  * If the Enforce MD5 filter is enabled, the paths will be like /path/to/clientlib.ACSHASH123456789.css or /path/to/clientlib.min.ACSHASH1234589.css (if minification is enabled)
  */
-@Component(metatype = true, label = "ACS AEM Commons - Versioned Clientlibs Transformer Factory",
-    description = "Sling Rewriter Transformer Factory to add auto-generated checksums to client library references")
+@Component
 public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, CacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
@@ -105,15 +104,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private static final boolean DEFAULT_ENFORCE_MD5 = false;
 
-    @Property(label="MD5 Cache Size", description="Maximum size of the md5 cache.", intValue = DEFAULT_MD5_CACHE_SIZE)
-    private static final String PROP_MD5_CACHE_SIZE = "md5cache.size";
+        private static final String PROP_MD5_CACHE_SIZE = "md5cache.size";
 
-    @Property(label="Disable Versioning", description="Should versioning of clientlibs be disabled", boolValue = DEFAULT_DISABLE_VERSIONING)
-    private static final String PROP_DISABLE_VERSIONING = "disable.versioning";
+        private static final String PROP_DISABLE_VERSIONING = "disable.versioning";
 
-    @Property(label="Enforce MD5", description="Enables a filter which returns a 404 error if the MD5 in the request does not match the expected value",
-        boolValue = DEFAULT_ENFORCE_MD5)
-    private static final String PROP_ENFORCE_MD5 = "enforce.md5";
+        private static final String PROP_ENFORCE_MD5 = "enforce.md5";
 
     private static final String ATTR_SRC = "src";
     private static final String ATTR_HREF = "href";

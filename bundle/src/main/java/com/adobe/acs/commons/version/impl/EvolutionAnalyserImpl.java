@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.version.EvolutionAnalyser;
 import com.adobe.acs.commons.version.EvolutionContext;
 
-@Component(label = "ACS AEM Commons - Resource Evolution Analyser",
-        description = "Have a look at the evolution of a resource on a property/resource level.", metatype = true)
+@Component
 public class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionAnalyserImpl.class);

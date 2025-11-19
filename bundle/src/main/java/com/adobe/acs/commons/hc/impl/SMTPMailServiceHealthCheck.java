@@ -48,9 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component(
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final Logger log = LoggerFactory.getLogger(SMTPMailServiceHealthCheck.class);
@@ -63,19 +61,11 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     + "Sling Health Check for AEM E-mail Service connectivity";
 
     private static final String DEFAULT_EMAIL = "healthcheck@example.com";
-    @Property(
-            label = "Test E-mail Address",
-            description = "E-mail address to send test message to.",
-            value = DEFAULT_EMAIL)
-    private static final String PROP_EMAIL = "email";
+        private static final String PROP_EMAIL = "email";
     private String toEmail;
 
     private static final int DEFAULT_MAX_EMAILS_PER_DAY = 24;
-    @Property(
-            label = "Maximum e-mails pings per day",
-            description = "Maximum number of e-mail pings this service attempts per day. Once this limit is met, this service will wait until tomorrow, or until this service is",
-            intValue = DEFAULT_MAX_EMAILS_PER_DAY)
-    private static final String PROP_MAX_EMAILS_PER_DAY = "max.emails.per.day";
+        private static final String PROP_MAX_EMAILS_PER_DAY = "max.emails.per.day";
     private int maxEmailsPerDay = DEFAULT_MAX_EMAILS_PER_DAY;
 
     // Disable this feature on AEM as a Cloud Service

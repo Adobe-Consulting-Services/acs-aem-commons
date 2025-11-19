@@ -46,8 +46,7 @@ import org.slf4j.LoggerFactory;
  * Resource provider which makes Generic Lists available as JSON String resources
  * for use with the Touch UI Metadata Asset Editor.
  */
-@Component(metatype = true, label = "ACS AEM Commons - Generic List JSON Resource Provider",
-    description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
+@Component
 //TODO: Confirm this works considering that spi Resource Provider is not an interface!
 public final class GenericListJsonResourceProvider extends ResourceProvider {
 
@@ -61,8 +60,7 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
 
     private static final int EXTENSION_LENGTH = EXTENSION.length();
 
-    @Property(label = "Generic List Root", description = "Root path under which generic lists can be found", value = DEFAULT_LIST_ROOT)
-    private static final String PROP_LIST_ROOT = "list.root";
+        private static final String PROP_LIST_ROOT = "list.root";
 
     private String listRoot;
 

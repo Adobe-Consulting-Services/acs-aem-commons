@@ -63,7 +63,7 @@ import java.util.Map;
  *      ...
  *      List<String> participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
  */
-@Component(metatype = true, label = "ACS AEM Commons - Email Service", description = "ACS AEM Commons - Email Service")
+@Component
 public final class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
@@ -82,11 +82,9 @@ public final class EmailServiceImpl implements EmailService {
 
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 
-    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
-    private static final String PROP_SO_TIMEOUT = "so.timeout";
+        private static final String PROP_SO_TIMEOUT = "so.timeout";
 
-    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
-    private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
+        private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
 
     private static String SERVICE_NAME = "email-service";
 

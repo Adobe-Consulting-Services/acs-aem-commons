@@ -45,15 +45,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-@Component(
-    service = Runnable.class,
+@Component(service = Runnable.class,
     property = {
         "scheduler.expression=0 0 8 ? * MON-FRI *",
         "scheduler.concurrent=",
         "scheduler.runOn=LEADER"
     },
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class HealthCheckStatusEmailer implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 
@@ -70,75 +68,41 @@ public class HealthCheckStatusEmailer implements Runnable {
 
     private static final String DEFAULT_EMAIL_TEMPLATE_PATH = "/etc/notification/email/acs-commons/health-check-status-email.txt";
     private String emailTemplatePath = DEFAULT_EMAIL_TEMPLATE_PATH;
-    @Property(label = "E-mail Template Path",
-            description = "The absolute JCR path to the e-mail template",
-            value = DEFAULT_EMAIL_TEMPLATE_PATH)
-    public static final String PROP_TEMPLATE_PATH = "email.template.path";
+        public static final String PROP_TEMPLATE_PATH = "email.template.path";
 
     private static final String DEFAULT_EMAIL_SUBJECT_PREFIX = "AEM Health Check report";
     private String emailSubject = DEFAULT_EMAIL_SUBJECT_PREFIX;
-    @Property(label = "E-mail Subject Prefix",
-            description = "The e-mail subject prefix. E-mail subject format is: <E-mail Subject Prefix> [ # Failures ] [ # Success ] [ <AEM Instance Name> ]",
-            value = DEFAULT_EMAIL_SUBJECT_PREFIX)
-    public static final String PROP_EMAIL_SUBJECT = "email.subject";
+        public static final String PROP_EMAIL_SUBJECT = "email.subject";
 
     private static final boolean DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE = true;
     private boolean sendEmailOnlyOnFailure = DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE;
-    @Property(label = "Send e-mail only on failure",
-            description = "If true, an e-mail is ONLY sent if at least 1 Health Check failure occurs. [ Default: true ]",
-            boolValue = DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE)
-    public static final String PROP_SEND_EMAIL_ONLY_ON_FAILURE = "email.send-only-on-failure";
+        public static final String PROP_SEND_EMAIL_ONLY_ON_FAILURE = "email.send-only-on-failure";
 
     private static final String[] DEFAULT_RECIPIENT_EMAIL_ADDRESSES = new String[]{};
     private String[] recipientEmailAddresses = DEFAULT_RECIPIENT_EMAIL_ADDRESSES;
-    @Property(label = "Recipient E-mail Addresses",
-            description = "A list of e-mail addresses to send this e-mail to.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
-    public static final String PROP_RECIPIENTS_EMAIL_ADDRESSES = "recipients.email-addresses";
+        public static final String PROP_RECIPIENTS_EMAIL_ADDRESSES = "recipients.email-addresses";
 
     private static final String[] DEFAULT_HEALTH_CHECK_TAGS = new String[]{"system"};
     private String[] healthCheckTags = DEFAULT_HEALTH_CHECK_TAGS;
-    @Property(label = "Health Check Tags",
-            description = "The AEM Health Check Tag names to execute. [ Default: system ]",
-            cardinality = Integer.MAX_VALUE,
-            value = {"system"})
-    public static final String PROP_HEALTH_CHECK_TAGS = "hc.tags";
+        public static final String PROP_HEALTH_CHECK_TAGS = "hc.tags";
 
     private static final int DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE = -1;
     private int healthCheckTimeoutOverride = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE;
-    @Property(label = "Health Check Timeout Override",
-            description = "The AEM Health Check timeout override in milliseconds. Set < 1 to disable. [ Default: -1 ]",
-            intValue = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
-    public static final String PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE = "hc.timeout.override";
+        public static final String PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE = "hc.timeout.override";
 
     private static final boolean DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR = true;
     private boolean healthCheckTagsOptionsOr = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR;
-    @Property(label = "'OR' Health Check Tags",
-            description = "When set to true, all Health Checks that are in any of the Health Check Tags (hc.tags) are executed. If false, then the Health Check must be in ALL of the Health Check tags (hc.tags). [ Default: true ]",
-            boolValue = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR)
-    public static final String PROP_HEALTH_CHECK_TAGS_OPTIONS_OR = "hc.tags.options.or";
+        public static final String PROP_HEALTH_CHECK_TAGS_OPTIONS_OR = "hc.tags.options.or";
 
     private static final String DEFAULT_FALLBACK_HOSTNAME = "Unknown AEM Instance";
     private String fallbackHostname = DEFAULT_FALLBACK_HOSTNAME;
-    @Property(label = "Hostname Fallback",
-            description = "The value used to identify this AEM instance if the programmatic hostname look-up fails to produce results..",
-            value = DEFAULT_FALLBACK_HOSTNAME)
-    public static final String PROP_FALLBACK_HOSTNAME = "hostname.fallback";
+        public static final String PROP_FALLBACK_HOSTNAME = "hostname.fallback";
 
     private static final int DEFAULT_THROTTLE_IN_MINS = 15;
     private int throttleInMins = DEFAULT_THROTTLE_IN_MINS;
-    @Property(label = "Quiet Period in Minutes",
-            description = "Defines a time span that prevents this service from sending more than 1 e-mail per quiet period. This prevents e-mail spamming for frequent checks that only e-mail on failure. Default: [ 15 mins ]",
-            intValue = DEFAULT_THROTTLE_IN_MINS)
-    public static final String PROP_THROTTLE = "quiet.minutes";
+        public static final String PROP_THROTTLE = "quiet.minutes";
 
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Health Check Status E-mailer running every [ {scheduler.expression} ] using Health Check Tags [ {hc.tags} ] to [ {recipients.email-addresses} ]"
-    )
-
-    @Reference
+        @Reference
     private ProductInfoService productInfoService;
 
     @Reference

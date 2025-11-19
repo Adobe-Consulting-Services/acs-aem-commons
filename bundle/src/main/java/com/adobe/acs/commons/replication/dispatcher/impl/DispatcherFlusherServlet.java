@@ -67,12 +67,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
 
-    @Property(label = "Flush with Admin Resource Resolver",
-            description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
-                    + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
-                    + "users JCR permissions. [ Default: true ]",
-            boolValue = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER)
-    public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
+        public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
 
     @Override
     @SuppressWarnings("squid:S3776")

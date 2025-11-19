@@ -29,14 +29,7 @@ import com.adobe.acs.commons.util.ClusterLeader;
 import java.util.Collections;
 import java.util.Map;
 
-@Component(immediate = true, metatype = true,
-    label = "ACS AEM Commons - Twitter Feed Refresh Scheduler",
-    description = "Schedule job which refreshes Twitter Feed components on a recurring basis",
-    policy = ConfigurationPolicy.REQUIRE)
-@Properties(value = {
-        @Property(name = "scheduler.expression", value = "0 0/15 * * * ?", label = "Refresh Interval",
-                description = "Twitter Feed Refresh interval (Quartz Cron Expression)"),
-        @Property(name = "scheduler.concurrent", boolValue = false, propertyPrivate = true) })
+@Component(immediate = true)
 public final class TwitterFeedScheduler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedScheduler.class);

@@ -35,7 +35,7 @@ import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype=false)
+@Component
 /**
  * Service to fetch the site root page (i.e. home page) for a given resource.
  * Supports multiple (independent) configurations.

@@ -48,11 +48,9 @@ import java.util.Collections;
 import java.util.List;
 
 
-@Component(
-        property = {
+@Component(property = {
                 "process.label=ACS AEM Commons - Workflow Process - Set Image Orientation",
-        }
-)
+        })
 public class SetImageOrientationProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(SetImageOrientationProcess.class);
 

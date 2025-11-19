@@ -70,13 +70,11 @@ import java.util.regex.Pattern;
  * HttpCacheStore} also get bound to this.
  */
 // @formatter:off
-@Component(
-    service = {DynamicMBean.class, HttpCacheEngine.class},
+@Component(service = {DynamicMBean.class, HttpCacheEngine.class},
     property = {
         "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
         "webconsole.configurationFactory.nameHint=Global handling rules: {httpcache.engine.cache-handling-rules.global}"
-    }
-)
+    })
 @References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
                 referenceInterface = HttpCacheConfig.class,
@@ -110,31 +108,14 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "httpCacheHandlingRule";
 
     // formatter:off
-    @Property(label = "Global HttpCacheHandlingRules",
-            description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
-            unbounded = PropertyUnbounded.ARRAY,
-            value = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                    "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                    "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                    "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-            })
-
-    static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
+        static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
-    @Property(label = "Globally ignored response headers",
-            description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output.",
-            unbounded = PropertyUnbounded.ARRAY
-    )
-    static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
+        static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
     private List<Pattern> globalHeaderExclusions;
 
 
-    @Property(label = "Globally ignored cookie keys",
-            description = "List of cookie keys of cookies that should NOT be put in the cached response, to be served to the output.",
-            unbounded = PropertyUnbounded.ARRAY
-    )
-    static final String PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS = "httpcache.engine.excluded.response.cookies.global";
+        static final String PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS = "httpcache.engine.excluded.response.cookies.global";
     private List<String> globalCookieExclusions;
 
     // formatter:on

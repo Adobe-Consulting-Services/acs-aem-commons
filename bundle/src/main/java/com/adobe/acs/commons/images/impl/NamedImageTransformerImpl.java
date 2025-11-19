@@ -40,10 +40,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Component(
-    property = "webconsole.configurationFactory.nameHint=Transformer: {name}",
-    configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(property = "webconsole.configurationFactory.nameHint=Transformer: {name}",
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Reference(
         name = "imageTransformers",
         referenceInterface = ImageTransformer.class,
@@ -58,20 +56,12 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
     /* Transformer Configuration Name */
     private static final String DEFAULT_TRANSFORM_NAME = "";
 
-    @Property(label = "Transform Name",
-            description = "Name of Transform.",
-            value = "")
-    private static final String PROP_NAME = "name";
+        private static final String PROP_NAME = "name";
 
     private String transformName = DEFAULT_TRANSFORM_NAME;
 
     /* Image Transform Configurations */
-    @Property(label = "Image Transformers",
-            description = "Transform in the format [ image-transformer-type:key1=val1&key2=val2 ]"
-                    + " Order of transform rules dictates order of application.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
-    private static final String PROP_TRANSFORMS = "transforms";
+        private static final String PROP_TRANSFORMS = "transforms";
 
     private Map<String, ValueMap> transforms =
             Collections.synchronizedMap(new LinkedHashMap<String, ValueMap>());

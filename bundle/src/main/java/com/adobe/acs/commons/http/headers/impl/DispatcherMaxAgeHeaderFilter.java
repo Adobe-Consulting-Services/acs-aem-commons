@@ -28,20 +28,13 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 //@formatter:off
-@Component(
-      label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
-      description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
-      metatype = true,
-      configurationFactory = true,
-      policy = ConfigurationPolicy.REQUIRE)
+@Component(configurationFactory = true)
 //@formatter:on
 public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
     protected static final String CACHE_CONTROL_NAME = "Cache-Control";
 
-    @Property(label = "Cache-Control Max Age",
-            description = "Max age value (in seconds) to put in Cache Control header.")
-    public static final String PROP_MAX_AGE = "max.age";
+        public static final String PROP_MAX_AGE = "max.age";
 
     protected static final String HEADER_PREFIX = "max-age=";
 

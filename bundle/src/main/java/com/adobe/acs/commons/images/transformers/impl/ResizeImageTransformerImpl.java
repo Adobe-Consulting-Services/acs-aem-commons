@@ -49,10 +49,7 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
-    @Property(label = "Max dimension in px",
-            description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
-            intValue = DEFAULT_MAX_DIMENSION)
-    public static final String PROP_MAX_DIMENSION = "max-dimension";
+        public static final String PROP_MAX_DIMENSION = "max-dimension";
 
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
