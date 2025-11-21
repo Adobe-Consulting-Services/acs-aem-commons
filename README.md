@@ -19,8 +19,8 @@ The prerequisites are listed in [Compatibility](https://adobe-consulting-service
 
 ### Distribution
 
-+ Maven artifact available from Maven central: [https://central.sonatype.com/artifact/com.adobe.acs/acs-aem-commons-all](https://central.sonatype.com/artifact/com.adobe.acs/acs-aem-commons-all)
-+ Github releases: [https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases](https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases)
++ Binaries (Maven artifacts) and source code are available from Maven central: [https://central.sonatype.com/artifact/com.adobe.acs/acs-aem-commons-all](https://central.sonatype.com/artifact/com.adobe.acs/acs-aem-commons-all)
++ Github releases contains only the source code: [https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases](https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases)
 
 
 ## Building
