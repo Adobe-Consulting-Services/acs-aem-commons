@@ -47,11 +47,9 @@ import java.util.UUID;
  * This extension on the HTTP cache allows for specific Resource Property combinations to create separate cache entries.
  * </p>
  */
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
         service = {HttpCacheConfigExtension.class, CacheKeyFactory.class},
-        property = {Constants.SERVICE_RANKING + ":Integer=50" }
-)
+        property = {Constants.SERVICE_RANKING + ":Integer=50" })
 @Designate(
         ocd = ResourcePropertiesHttpCacheConfigExtension.Config.class,
         factory = true

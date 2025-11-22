@@ -56,16 +56,14 @@ import java.util.regex.PatternSyntaxException;
  * Custom dispatcher flush content builder that sends a list of URIs to be re-fetched immediately upon flushing a page.
  */
 @Designate(ocd = RefetchFlushContentBuilderImpl.Config.class)
-@Component(
-        service = { ContentBuilder.class },
+@Component(service = { ContentBuilder.class },
         configurationPolicy = ConfigurationPolicy.OPTIONAL,
         property = {
             Constants.SERVICE_DESCRIPTION + "=ACS Commons Re-fetch Flush Content Builder",
             "webconsole.configurationFactory.nameHint=Extension Mapping: [{extension.pairs}] Match: [{match.paths}]",
             "name=" + RefetchFlushContentBuilderImpl.SERVICE_NAME
         },
-        immediate = true
-)
+        immediate = true)
 public class RefetchFlushContentBuilderImpl implements ContentBuilder {
     private static final Logger log = LoggerFactory.getLogger(RefetchFlushContentBuilderImpl.class);
 

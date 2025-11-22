@@ -19,14 +19,13 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Reference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;

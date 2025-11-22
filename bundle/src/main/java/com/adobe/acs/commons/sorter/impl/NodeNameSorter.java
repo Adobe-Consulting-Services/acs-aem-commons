@@ -28,7 +28,7 @@ import java.util.Comparator;
 import static com.adobe.acs.commons.sorter.impl.HierarchyNodeComparator.RP_NOT_HIERARCHY_FIRST;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 
-@Component
+@Component(service = NodeSorter.class)
 public class NodeNameSorter implements NodeSorter {
     public static final String SORTER_NAME = "byName";
     public static final String RP_CASE_SENSITIVE = ":caseSensitive";

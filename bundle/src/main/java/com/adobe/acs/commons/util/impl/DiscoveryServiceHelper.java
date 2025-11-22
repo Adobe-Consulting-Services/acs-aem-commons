@@ -35,7 +35,7 @@ import com.adobe.acs.commons.util.ClusterLeader;
  * Components which are only supposed to be executed on the cluster leader can depend on the 
  * service with marker interface {@link ClusterLeader}.
  */
-@Component
+@Component(service = TopologyEventListener.class)
 public class DiscoveryServiceHelper implements TopologyEventListener {
 
     private BundleContext bundleContext;

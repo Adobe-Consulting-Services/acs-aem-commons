@@ -60,15 +60,13 @@ import java.util.regex.PatternSyntaxException;
  * Filter used to look for and rewrite content variables present in JSON responses. By default only handles .model.json
  * requests.
  */
-@Component(
-        service = Filter.class,
+@Component(service = Filter.class,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
                 EngineConstants.SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
                 EngineConstants.SLING_FILTER_PATTERN + "=/content/.*"
         },
-        configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = ContentVariableJsonFilter.Config.class)
 public class ContentVariableJsonFilter implements Filter {
 

@@ -48,12 +48,10 @@ import java.lang.reflect.Type;
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.*;
 import static com.adobe.acs.commons.util.impl.ReflectionUtil.convertValueMapValue;
 
-@Component(
-        property = {
+@Component(property = {
                 Constants.SERVICE_RANKING + ":Integer=5500"
         },
-        service = Injector.class
-        )
+        service = Injector.class)
 @Designate(ocd=ContentPolicyValueInjector.Configuration.class)
 public class ContentPolicyValueInjector  implements Injector {
 

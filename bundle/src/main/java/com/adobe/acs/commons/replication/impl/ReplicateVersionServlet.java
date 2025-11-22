@@ -18,13 +18,12 @@
 package com.adobe.acs.commons.replication.impl;
 
 import com.adobe.acs.commons.replication.ReplicateVersion;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.replication.ReplicationResult;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;

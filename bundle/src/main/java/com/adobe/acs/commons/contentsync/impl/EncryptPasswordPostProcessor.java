@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Catch create/modify events under <code>/var/acs-commons/contentsync</code> and encrypt the <code>password</code> property
  */
-@Component
+@Component(service = SlingPostProcessor.class)
 public class EncryptPasswordPostProcessor implements SlingPostProcessor {
     static final String PASSWORD_PROPERTY = "password";
 

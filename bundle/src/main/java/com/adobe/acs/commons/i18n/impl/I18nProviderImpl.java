@@ -48,8 +48,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-@Component(
-        property= {
+@Component(property= {
             "jmx.objectname=com.adobe.acs.commons.i18n:type=I18N Provider Cache"
         },
         service = I18nProvider.class,
@@ -61,8 +60,7 @@ import java.util.concurrent.TimeUnit;
                     cardinality = ReferenceCardinality.AT_LEAST_ONE,
                     policy = ReferencePolicy.DYNAMIC,
                     bind="bindResourceBundleProvider",
-                    unbind="unbindResourceBundleProvider"
-            )
+                    unbind="unbindResourceBundleProvider")
         }
 )
 @Designate(ocd = Config.class)

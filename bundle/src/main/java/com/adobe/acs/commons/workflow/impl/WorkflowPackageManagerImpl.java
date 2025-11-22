@@ -19,6 +19,9 @@
 package com.adobe.acs.commons.workflow.impl;
 
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.wcm.api.Page;
@@ -28,11 +31,6 @@ import com.day.cq.workflow.collection.ResourceCollection;
 import com.day.cq.workflow.collection.ResourceCollectionManager;
 import com.day.cq.workflow.collection.ResourceCollectionUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.LoginException;
@@ -58,8 +56,7 @@ import java.util.Map;
  * Manager for creating and working with Workflow Packages.
  *
  */
-@Component
-@Service
+@Component(service = WorkflowPackageManager.class)
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 
@@ -94,10 +91,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @Property(label = "Workflow Package Types",
-            description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
-            value = { "cq:Page", "cq:PageContent", "dam:Asset" })
-    public static final String PROP_WF_PACKAGE_TYPES = "wf-package.types";
+        public static final String PROP_WF_PACKAGE_TYPES = "wf-package.types";
 
 
     @Reference

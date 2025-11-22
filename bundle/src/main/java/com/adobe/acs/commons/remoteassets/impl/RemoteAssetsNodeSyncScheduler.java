@@ -32,13 +32,11 @@ import org.slf4j.LoggerFactory;
  *
  * This job will sync asset nodes based on OSGi configuration.
  */
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
         service = Runnable.class,
         property = {
                 "scheduler.concurrent:Boolean=false"
-        }
-)
+        })
 @Designate(ocd = RemoteAssetsNodeSyncScheduler.Config.class)
 public class RemoteAssetsNodeSyncScheduler implements Runnable {
 

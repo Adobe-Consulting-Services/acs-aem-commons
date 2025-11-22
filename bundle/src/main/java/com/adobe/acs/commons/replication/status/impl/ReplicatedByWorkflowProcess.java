@@ -19,16 +19,14 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import java.util.HashMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.util.List;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -52,14 +50,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * ACS AEM Commons - Workflow Process - Replicated By Workflow Initiator
  * Assigns the replicatedBy property to the Workflow Initiator
  */
-@Component
-@Property(
-        label = "Workflow Label",
-        name = "process.label",
-        value = "Set Replicated By Property to Workflow Initiator",
-        description = "Sets the Replicated By Property on the payload to the Workflow Initiator"
-)
-@Service
+@Component(service = WorkflowProcess.class)
 public class ReplicatedByWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicatedByWorkflowProcess.class);
 

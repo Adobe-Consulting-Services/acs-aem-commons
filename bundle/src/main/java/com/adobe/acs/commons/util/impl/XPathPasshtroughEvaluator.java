@@ -17,9 +17,9 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.apache.felix.scr.annotations.Component;
 
 import com.day.cq.search.Predicate;
+import org.osgi.service.component.annotations.Component;
 import com.day.cq.search.eval.AbstractPredicateEvaluator;
 import com.day.cq.search.eval.EvaluationContext;
 import com.day.cq.search.eval.PredicateEvaluator;
@@ -30,7 +30,7 @@ import com.day.cq.search.eval.PredicateEvaluator;
  * xpath=sling:resourceType='foundation/components/parsys' will get transformed into the full
  * XPath query //*[sling:resourceType='foundation/components/parsys']
  */
-@Component(factory = "com.day.cq.search.eval.PredicateEvaluator/xpath")
+@Component(service = PredicateEvaluator.class, factory = "com.day.cq.search.eval.PredicateEvaluator/xpath")
 public class XPathPasshtroughEvaluator extends AbstractPredicateEvaluator implements PredicateEvaluator {
 
     @Override

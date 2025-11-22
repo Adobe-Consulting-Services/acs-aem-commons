@@ -18,11 +18,9 @@
 package com.adobe.acs.commons.httpcache.filter.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

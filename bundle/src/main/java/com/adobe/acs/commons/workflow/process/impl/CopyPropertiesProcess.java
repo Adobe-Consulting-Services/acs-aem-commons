@@ -41,10 +41,8 @@ import javax.jcr.Session;
 import java.util.List;
 import java.util.Map;
 
-@Component(
-        service = WorkflowProcess.class,
-        property = "process.label=Copy properties"
-)
+@Component(service = WorkflowProcess.class,
+        property = "process.label=Copy properties")
 public class CopyPropertiesProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(CopyPropertiesProcess.class);
     private static final String PN_PROPERTY_MAP = "PROPERTY_MAP";

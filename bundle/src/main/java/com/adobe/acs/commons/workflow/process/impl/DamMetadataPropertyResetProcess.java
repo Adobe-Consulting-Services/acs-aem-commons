@@ -19,6 +19,8 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -29,11 +31,6 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -51,19 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - DAM Metadata Property Reset",
-        description = "Replaces DAM Asset metadata properties with other values from the metadata node"
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "DAM Metadata Property Reset",
-                description = "Replaces DAM Asset metadata properties with other values from the metadata node"
-        )
-})
-@Service
+    service = WorkflowProcess.class,
+    property = "process.label=DAM Metadata Property Reset")
 public class DamMetadataPropertyResetProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(DamMetadataPropertyResetProcess.class);
 

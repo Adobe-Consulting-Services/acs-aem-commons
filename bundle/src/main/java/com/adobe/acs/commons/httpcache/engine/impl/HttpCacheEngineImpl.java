@@ -18,6 +18,13 @@
 package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
@@ -38,18 +45,6 @@ import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -75,19 +70,11 @@ import java.util.regex.Pattern;
  * HttpCacheStore} also get bound to this.
  */
 // @formatter:off
-@Component(
-        label = "ACS AEM Commons - HTTP Cache - Engine",
-        description = "Controlling service for http cache implementation.",
-        metatype = true
-)
-@Properties({
-        @Property(name = "jmx.objectname",
-                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
-                propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Global handling rules: {httpcache.engine.cache-handling-rules.global}",
-                propertyPrivate = true)
-})
+@Component(service = {DynamicMBean.class, HttpCacheEngine.class},
+    property = {
+        "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
+        "webconsole.configurationFactory.nameHint=Global handling rules: {httpcache.engine.cache-handling-rules.global}"
+    })
 @References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
                 referenceInterface = HttpCacheConfig.class,
@@ -107,7 +94,6 @@ import java.util.regex.Pattern;
                 policyOption = ReferencePolicyOption.GREEDY,
                 cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 })
-@Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheEngineImpl.class);
@@ -122,31 +108,14 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "httpCacheHandlingRule";
 
     // formatter:off
-    @Property(label = "Global HttpCacheHandlingRules",
-            description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
-            unbounded = PropertyUnbounded.ARRAY,
-            value = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                    "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                    "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                    "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-            })
-
-    static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
+        static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
-    @Property(label = "Globally ignored response headers",
-            description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output.",
-            unbounded = PropertyUnbounded.ARRAY
-    )
-    static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
+        static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
     private List<Pattern> globalHeaderExclusions;
 
 
-    @Property(label = "Globally ignored cookie keys",
-            description = "List of cookie keys of cookies that should NOT be put in the cached response, to be served to the output.",
-            unbounded = PropertyUnbounded.ARRAY
-    )
-    static final String PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS = "httpcache.engine.excluded.response.cookies.global";
+        static final String PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS = "httpcache.engine.excluded.response.cookies.global";
     private List<String> globalCookieExclusions;
 
     // formatter:on

@@ -50,10 +50,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Component(
-        service = WorkflowProcess.class,
-        property = "process.label=Synchronize Smart Tags to XMP Metadata Node"
-)
+@Component(service = WorkflowProcess.class,
+        property = "process.label=Synchronize Smart Tags to XMP Metadata Node")
 public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(SyncSmartTagsToXmpMetadataNodeProcess.class);
 

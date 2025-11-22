@@ -42,9 +42,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 //@formatter:off
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(service = AppliableEnsureOakIndex.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = EnsureOakIndex.Config.class, factory = true)
 //@formatter:on
 public class EnsureOakIndex implements AppliableEnsureOakIndex {

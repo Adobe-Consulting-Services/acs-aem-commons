@@ -19,11 +19,8 @@ package com.adobe.acs.commons.dispatcher.impl;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.service.component.annotations.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -34,19 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
-        label = "ACS AEM Commons - Permission Sensitive Cache Servlet",
-        description = "Servlet that checks if the current sessions has access to a cached object",
-        metatype = true, immediate = true
+    service = Servlet.class,
+    
+    property = "sling.servlet.paths=",
+    immediate = true
 )
-@Properties({
-        @Property(
-                name = "sling.servlet.paths",
-                cardinality = Integer.MAX_VALUE,
-                label = "Sling Servlet Paths",
-                description = "Paths that this servlet will resolve to"
-        )
-})
-@Service
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);

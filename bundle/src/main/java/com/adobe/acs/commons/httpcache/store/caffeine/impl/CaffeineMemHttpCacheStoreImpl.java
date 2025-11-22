@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.httpcache.store.caffeine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
@@ -32,13 +36,6 @@ import com.github.benmanes.caffeine.cache.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,46 +55,21 @@ import java.util.concurrent.ConcurrentMap;
  */
 
 
-@Component(
-        label = "ACS AEM Commons - HTTP Cache - Caffeine In-Memory cache store",
-        description = "Cache data store implementation for storage using Caffeine cache. The 3rd-party Caffeine OSGi bundle MUST be installed and active before the OSGi service is enabled.",
-        metatype = true,
-        policy = ConfigurationPolicy.REQUIRE
-)
-@Properties({
-        @Property(
-                name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                value = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "jmx.objectname",
-                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Caffeine Cache Store",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "TTL: {httpcache.cachestore.caffeine.ttl}, Max size in MB: {httpcache.cachestore.caffeine.maxsize}",
-                propertyPrivate = true
-        )
-})
-@Service(HttpCacheStore.class)
+@Component(service = HttpCacheStore.class,
+    property = {
+        "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - Caffeine Cache Store",
+        "webconsole.configurationFactory.nameHint=TTL: {httpcache.cachestore.caffeine.ttl}, Max size in MB: {httpcache.cachestore.caffeine.maxsize}"
+    },
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, CaffeineCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
 
     private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
-    @Property(label = "TTL",
-            description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
-            longValue = DEFAULT_TTL)
-    private static final String PROP_TTL = "httpcache.cachestore.caffeine.ttl";
+        private static final String PROP_TTL = "httpcache.cachestore.caffeine.ttl";
     private long ttl;
 
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
-    @Property(label = "Maximum size of this store in MB",
-            description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
-                    + "from the cache",
-            longValue = DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.caffeine.maxsize";
+        private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.caffeine.maxsize";
     private long maxSizeInMb;
 
 

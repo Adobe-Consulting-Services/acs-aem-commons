@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.GroupCacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
@@ -30,14 +34,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -57,32 +53,17 @@ import java.util.Map;
  * config extension accepts the http request only if at least one of the configured groups is present in the request
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Extension - Group",
-           description = "HttpCacheConfig custom extension for group based configuration and associated cache key creation (HttpCacheConfig and CacheKeyFactory).",
-           metatype = true,
-           configurationFactory = true,
-           policy = ConfigurationPolicy.REQUIRE
-)
-@Properties({
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                  value = "Allowed user groups: [ {httpcache.config.extension.user-groups.allowed} ] Config name: [ config.name ]"),
-        @Property(
-                name = Constants.SERVICE_RANKING,
-                intValue = 70
-        )
-})
-@Service
+@Component(
+    service = HttpCacheConfigExtension.class,
+    property = "webconsole.configurationFactory.nameHint=Allowed user groups: [ {httpcache.config.extension.user-groups.allowed} ] Config name: [ config.name ]",
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
 
     // Custom cache config attributes
-    @Property(label = "Allowed user groups",
-              description = "Users groups that are used to accept and create cache keys.",
-              unbounded = PropertyUnbounded.ARRAY)
-    private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups.allowed";
+        private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups.allowed";
 
-    @Property(label = "Config Name")
-    private static final String PROP_CONFIG_NAME = "config.name";
+        private static final String PROP_CONFIG_NAME = "config.name";
 
     private List<String> userGroups;
 

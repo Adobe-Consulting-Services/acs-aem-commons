@@ -28,7 +28,7 @@ import com.adobe.acs.commons.granite.ui.components.CustomELVariableInjector;
 import com.adobe.acs.commons.granite.ui.components.ELVariableProvider;
 import com.adobe.granite.ui.components.ExpressionCustomizer;
 
-@Component
+@Component(service = CustomELVariableInjector.class)
 public class CustomELVariableInjectorImpl implements CustomELVariableInjector {
 
     @Reference

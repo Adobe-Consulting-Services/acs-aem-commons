@@ -28,12 +28,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        property = {
+@Component(property = {
                 "service.ranking=200"
         },
-        service = Feature.class
-)
+        service = Feature.class)
 @Designate(ocd = CopyAssetPublishUrlFeature.Config.class)
 public class CopyAssetPublishUrlFeature implements Feature {
     static final String FEATURE_FLAG_PID = "com.adobe.acs.commons.dam.impl.copyassetpublishurlfeature.feature.flag";

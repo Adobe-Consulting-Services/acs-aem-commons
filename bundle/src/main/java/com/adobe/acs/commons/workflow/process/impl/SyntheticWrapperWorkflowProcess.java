@@ -19,6 +19,8 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.util.visitors.ContentVisitor;
@@ -32,11 +34,6 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -48,19 +45,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Synthetic Workflow Wrapper Process",
-        description = "Executes an AEM Workflow model as a Synthetic Workflow using FAM"
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Synthetic Workflow Wrapper",
-                description = "Executes an AEM Workflow model as a Synthetic Workflow (serial execution)"
-        )
-})
-@Service
+    service = WorkflowProcess.class,
+    property = "process.label=Synthetic Workflow Wrapper")
 public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWrapperWorkflowProcess.class);
     private static final String ARG_TRAVERSE_TREE = "traverseTree";

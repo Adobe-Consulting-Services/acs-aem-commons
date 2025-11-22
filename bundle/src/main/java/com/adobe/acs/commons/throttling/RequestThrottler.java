@@ -120,7 +120,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-@Component(property = { "sling.filter.scope=REQUEST" })
+@Component(
+    service = Filter.class,
+    property = { "sling.filter.scope=REQUEST" })
 @Designate(ocd = RequestThrottler.Config.class, factory = true)
 public class RequestThrottler implements Filter {
 

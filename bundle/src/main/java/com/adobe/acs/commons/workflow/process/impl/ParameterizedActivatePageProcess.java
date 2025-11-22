@@ -18,11 +18,8 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 
+import org.osgi.service.component.annotations.Component;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.ReplicationOptions;
@@ -34,19 +31,8 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 //@formatter:off
 @Component(
-      metatype = true,
-      label = "ACS AEM Commons - Workflow Process - Parameterized Activate Resource",
-      description = "Triggers an activation replication event, but only to specifically configured agents."
-)
-@Properties({
-      @Property(
-              label = "Workflow Label",
-              name = "process.label", 
-              value = "Parameterized Activate Resource Process",
-              description = "Triggers an activation replication event, but only to specifically configured agents."
-      )
-})
-@Service
+    service = WorkflowProcess.class,
+    property = "process.label=Parameterized Activate Resource Process")
 //@formatter:on
 public class ParameterizedActivatePageProcess extends ActivatePageProcess {
 

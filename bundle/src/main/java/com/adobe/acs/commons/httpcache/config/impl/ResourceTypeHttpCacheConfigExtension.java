@@ -18,6 +18,9 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.ResourcePathCacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
@@ -27,13 +30,6 @@ import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.commons.jcr.JcrConstants;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -51,52 +47,28 @@ import java.util.regex.Pattern;
  * config extension accepts the http request only if at least one of the configured patterns matches the resource type
  * of the request's resource.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Extension - ResourceType",
-        metatype = true,
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE
-)
-@Properties({
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]"),
-        @Property(
-                name = Constants.SERVICE_RANKING,
-                intValue = 60
-        )
-})
-@Service
+@Component(
+    service = HttpCacheConfigExtension.class,
+    property = "webconsole.configurationFactory.nameHint=Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]",
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeHttpCacheConfigExtension.class);
 
     // Custom cache config attributes
-    @Property(label = "Allowed paths",
-            description = "Regex of content paths that can be cached.",
-            unbounded = PropertyUnbounded.ARRAY)
-    static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
+        static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
     private List<Pattern> pathPatterns;
 
-    @Property(label = "Allowed resource types",
-            description = "Regex of resource types that can be cached.",
-            unbounded = PropertyUnbounded.ARRAY)
-    static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
+        static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
     private List<Pattern> resourceTypePatterns;
 
-    @Property(label = "Check RT of ./jcr:content?",
-            description = "Should the resourceType check be applied to ./jcr:content ?",
-            boolValue = false)
-    public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
+        public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
     private boolean checkContentResourceType;
 
 
-    @Property(label = "Check resourceSuperType",
-            description = "Should the resourceType check check super Types?",
-            boolValue = false)
-    static final String PROP_CHECK_RESOURCE_SUPER_TYPE = "httpcache.config.extension.resource-types.superType";
+        static final String PROP_CHECK_RESOURCE_SUPER_TYPE = "httpcache.config.extension.resource-types.superType";
     private boolean checkResourceSuperType;
 
-    @Property(label = "Config Name",
-            description = "")
-    static final String PROP_CONFIG_NAME = "config.name";
+        static final String PROP_CONFIG_NAME = "config.name";
     private String configName;
 
     //-------------------------<HttpCacheConfigExtension methods>

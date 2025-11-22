@@ -17,13 +17,9 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +29,7 @@ import com.adobe.acs.commons.util.ClusterLeader;
 import java.util.Collections;
 import java.util.Map;
 
-@Component(immediate = true, metatype = true,
-    label = "ACS AEM Commons - Twitter Feed Refresh Scheduler",
-    description = "Schedule job which refreshes Twitter Feed components on a recurring basis",
-    policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties(value = {
-        @Property(name = "scheduler.expression", value = "0 0/15 * * * ?", label = "Refresh Interval",
-                description = "Twitter Feed Refresh interval (Quartz Cron Expression)"),
-        @Property(name = "scheduler.concurrent", boolValue = false, propertyPrivate = true) })
+@Component(service = Runnable.class, immediate = true)
 public final class TwitterFeedScheduler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedScheduler.class);

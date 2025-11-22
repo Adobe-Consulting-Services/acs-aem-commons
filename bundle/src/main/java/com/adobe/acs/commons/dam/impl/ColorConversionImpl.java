@@ -18,43 +18,19 @@
 package com.adobe.acs.commons.dam.impl;
 
 import com.adobe.acs.commons.dam.ColorConversion;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.Designate;
 
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.io.InputStream;
-import java.util.Map;
 
-@Component(label = "ACS AEM Commons - Color Conversion", description = "ACS AEM Commons - Color Conversion", metatype = true)
-@Service
+@Component(service = ColorConversion.class)
+@Designate(ocd = ColorConversionImplConfig.class)
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "checkstyle:localvariablename"})
 public final class ColorConversionImpl implements ColorConversion { //nosonar
-
-    private static final String DEFAULT_CMYK_PROFILE = "JapanColor2001Coated";
-
-    @Property(label = "CMYK ICC Profile", description = "ICC Profile for CMYK to RGB Conversion",
-            value = DEFAULT_CMYK_PROFILE,
-            options = {
-            @PropertyOption(name = "CoatedFOGRA27", value = "CoatedFOGRA27"),
-            @PropertyOption(name = "CoatedFOGRA39", value = "CoatedFOGRA39"),
-            @PropertyOption(name = "JapanColor2001Coated", value = "JapanColor2001Coated"),
-            @PropertyOption(name = "JapanColor2001Uncoated", value = "JapanColor2001Uncoated"),
-            @PropertyOption(name = "JapanColor2002Newspaper", value = "JapanColor2002Newspaper"),
-            @PropertyOption(name = "JapanWebCoated", value = "JapanWebCoated"),
-            @PropertyOption(name = "UncoatedFOGRA29", value = "UncoatedFOGRA29"),
-            @PropertyOption(name = "USSheetfedCoated", value = "USSheetfedCoated"),
-            @PropertyOption(name = "USSheetfedUncoated", value = "USSheetfedUncoated"),
-            @PropertyOption(name = "USWebCoatedSWOP", value = "USWebCoatedSWOP"),
-            @PropertyOption(name = "USWebUncoated", value = "USWebUncoated"),
-            @PropertyOption(name = "WebCoatedFOGRA28", value = "WebCoatedFOGRA28")
-    })
-    private static final String PROP_CMKY_PROFILE = "cmyk.icc.profile";
 
     /**
      * XYZ to sRGB conversion matrix
@@ -64,8 +40,8 @@ public final class ColorConversionImpl implements ColorConversion { //nosonar
             { 0.0557, -0.2040,  1.0570}};
 
     @Activate
-    protected void activate(Map<String, Object> properties) throws Exception {
-        String profileName = PropertiesUtil.toString(properties.get(PROP_CMKY_PROFILE), DEFAULT_CMYK_PROFILE);
+    protected void activate(ColorConversionImplConfig config) throws Exception {
+        String profileName = config.cmyk_icc_profile();
 
         InputStream iccData = getClass().getClassLoader().getResourceAsStream("icc/cmyk/" + profileName + ".icc");
         ICC_Profile profile = ICC_Profile.getInstance(iccData);

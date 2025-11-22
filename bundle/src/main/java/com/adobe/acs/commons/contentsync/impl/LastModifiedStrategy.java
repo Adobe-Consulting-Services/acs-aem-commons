@@ -57,7 +57,7 @@ import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
 import static org.apache.jackrabbit.JcrConstants.JCR_MIXINTYPES;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
-@Component
+@Component(service = UpdateStrategy.class)
 public class LastModifiedStrategy implements UpdateStrategy {
     public static final String DEFAULT_GET_SERVLET = "org.apache.sling.servlets.get.DefaultGetServlet";
     public static final String REDIRECT_SERVLET = "org.apache.sling.servlets.get.impl.RedirectServlet";

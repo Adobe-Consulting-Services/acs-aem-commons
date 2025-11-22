@@ -17,10 +17,9 @@
  */package com.adobe.acs.commons.httpcache.rule.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import org.osgi.service.component.annotations.Component;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -29,7 +28,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
  * has no bytes.
  */
 @Component
-@Service
 public class DoNotCacheZeroSizeResponse extends AbstractHttpCacheHandlingRule {
 
     @Override

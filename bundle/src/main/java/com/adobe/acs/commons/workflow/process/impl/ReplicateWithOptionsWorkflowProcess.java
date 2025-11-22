@@ -19,6 +19,8 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.replication.AgentIdsAgentFilter;
 import com.adobe.acs.commons.replication.BrandPortalAgentFilter;
 import com.adobe.acs.commons.util.ParameterUtil;
@@ -35,11 +37,6 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -53,19 +50,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Replicate with Options",
-        description = "Replicates the content based on the process arg replication configuration using FAM,"
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Replicate with Options",
-                description = "Replicates the content based on the process arg replication configuration (serial execution)"
-        )
-})
-@Service
+    service = WorkflowProcess.class,
+    property = "process.label=Replicate with Options")
 public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(ReplicateWithOptionsWorkflowProcess.class);
 

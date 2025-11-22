@@ -18,12 +18,9 @@
 package com.adobe.acs.commons.util.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
@@ -41,44 +38,8 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(
-        label = "ACS AEM Commons - Delegating Servlet",
-        description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.",
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true,
+@Component(service = Servlet.class, configurationFactory = true,
         immediate = false)
-@Properties({
-        @Property(
-                label = "Source Resource Types",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                name = "sling.servlet.resourceTypes",
-                cardinality = Integer.MAX_VALUE,
-                value = {""}),
-        @Property(
-                label = "Source Selectors",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                name = "sling.servlet.selectors",
-                cardinality = Integer.MAX_VALUE,
-                value = {""}),
-        @Property(
-                label = "Source Extensions",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                name = "sling.servlet.extensions",
-                cardinality = Integer.MAX_VALUE,
-                value = {"html"}),
-        @Property(
-                label = "Source HTTP Methods",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                name = "sling.servlet.methods",
-                cardinality = Integer.MAX_VALUE,
-                value = {"GET"}
-        ),
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Target type: {prop.target-resource-type}")
-})
-@Service(Servlet.class)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);
     private static final String REQUEST_ATTR_DELEGATION_HISTORY = DelegatingServletFactoryImpl.class.getName() + "_History";
@@ -86,10 +47,7 @@ public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
 
     private static final String DEFAULT_TARGET_RESOURCE_TYPE = "";
     private String targetResourceType = DEFAULT_TARGET_RESOURCE_TYPE;
-    @Property(label = "Target Resource Type",
-            description = "The resource type to proxy requests to.",
-            value = DEFAULT_TARGET_RESOURCE_TYPE)
-    public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
+        public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
 
     /** Safe HTTP Methods **/
 

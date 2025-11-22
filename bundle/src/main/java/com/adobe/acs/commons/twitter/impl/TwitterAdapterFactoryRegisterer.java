@@ -17,12 +17,10 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.sling.api.adapter.AdapterFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -33,23 +31,18 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
-@Component(metatype = true, label = "ACS AEM Commons - Twitter Client Adapter Factory",
-    description = "Adapter Factory to generate TwitterClient objects.", configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory",
-    policy = ConfigurationPolicy.REQUIRE)
+@Component(configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory")
 public class TwitterAdapterFactoryRegisterer {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
 
     private static final boolean DEFAULT_USE_SSL = true;
 
-    @Property(label = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")
-    private static final String PROP_HTTP_PROXY_HOST = "http.proxy.host";
+        private static final String PROP_HTTP_PROXY_HOST = "http.proxy.host";
 
-    @Property(label = "HTTP Proxy Port", description = "HTTP Proxy Port, leave 0 for none", intValue = 0)
-    private static final String PROP_HTTP_PROXY_PORT = "http.proxy.port";
+        private static final String PROP_HTTP_PROXY_PORT = "http.proxy.port";
 
-    @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
-    private static final String PROP_USE_SSL = "use.ssl";
+        private static final String PROP_USE_SSL = "use.ssl";
 
     private ServiceRegistration<AdapterFactory> adapterFactoryServiceRegistration;
 

@@ -18,11 +18,11 @@
 package com.adobe.acs.commons.cqsearch.impl;
 
 import com.day.cq.search.Predicate;
+import org.osgi.service.component.annotations.Component;
 import com.day.cq.search.eval.AbstractPredicateEvaluator;
 import com.day.cq.search.eval.EvaluationContext;
 import com.day.cq.search.eval.PredicateEvaluator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +55,7 @@ import java.util.Map;
  * nodeExists.1_notexists=jcr:content/renditions/cq5dam.web.1280.1280.png
  * nodeExists.2_notexists=jcr:content/renditions/cq5dam.web.600.400.png
  */
-@Component(
-        factory = "com.day.cq.search.eval.PredicateEvaluator/nodeExists"
-)
+@Component(service = PredicateEvaluator.class)
 public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator implements PredicateEvaluator {
 
     private static final Logger log = LoggerFactory.getLogger(NodeExistsPredicateEvaluator.class);

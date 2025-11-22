@@ -42,7 +42,7 @@ import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.SERVIC
 import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
-@Component
+@Component(service = UpdateStrategy.class)
 public class AssetChecksumStrategy implements UpdateStrategy {
     private static final String DAM_SHA1 = "dam:sha1";
 

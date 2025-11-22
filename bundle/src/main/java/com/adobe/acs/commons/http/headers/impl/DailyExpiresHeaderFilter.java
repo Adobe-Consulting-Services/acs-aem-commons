@@ -17,38 +17,13 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 
 import java.util.Calendar;
 
 
 //@formatter:off
-@Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Daily",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    metatype = true,
-    configurationFactory = true,
-    policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-  @Property(label = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE,
-      name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-      propertyPrivate = false,
-      value = { }),
-  @Property(label = "Expires Time",
-      description = "Time each day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.",
-      name = AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME,
-      propertyPrivate = false),
-  @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
-})
+import org.osgi.service.component.annotations.Component;
+@Component(configurationFactory = true)
 //@formatter:on
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 

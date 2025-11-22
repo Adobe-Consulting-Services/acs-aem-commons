@@ -19,6 +19,9 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -36,14 +39,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -64,15 +59,8 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype = true, label = "ACS AEM Commons - Site Map Servlet", description = "Page and Asset Site Map Servlet", configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
+@Component(service = Servlet.class, configurationFactory = true)
 @SuppressWarnings("serial")
-@Properties({
-        @Property(name = "sling.servlet.resourceTypes", unbounded = PropertyUnbounded.ARRAY, label = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components."),
-        @Property(name = "sling.servlet.selectors", value = "sitemap", propertyPrivate = true),
-        @Property(name = "sling.servlet.extensions", value = "xml", propertyPrivate = true),
-        @Property(name = "sling.servlet.methods", value = "GET", propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint", value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]") })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(SiteMapServlet.class);
@@ -91,47 +79,33 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final boolean DEFAULT_USE_VANITY_URL = true;
 
-    @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component. If blank the externalization will prepend the current request's scheme combined with the current request's host header.")
-    private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
+        private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
 
-    @Property(boolValue = DEFAULT_INCLUDE_LAST_MODIFIED, label = "Include Last Modified", description = "If true, the last modified value will be included in the sitemap.")
-    private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
+        private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
 
-    @Property(label = "Change Frequency Properties", unbounded = PropertyUnbounded.ARRAY, description = "The set of JCR property names which will contain the change frequency value.")
-    private static final String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
+        private static final String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
 
-    @Property(label = "Priority Properties", unbounded = PropertyUnbounded.ARRAY, description = "The set of JCR property names which will contain the priority value.")
-    private static final String PROP_PRIORITY_PROPERTIES = "priority.properties";
+        private static final String PROP_PRIORITY_PROPERTIES = "priority.properties";
 
-    @Property(label = "DAM Folder Property", description = "The JCR property name which will contain DAM folders to include in the sitemap.")
-    private static final String PROP_DAM_ASSETS_PROPERTY = "damassets.property";
+        private static final String PROP_DAM_ASSETS_PROPERTY = "damassets.property";
 
-    @Property(label = "DAM Asset MIME Types", unbounded = PropertyUnbounded.ARRAY, description = "MIME types allowed for DAM assets.")
-    private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
+        private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
 
-    @Property(label = "Exclude Pages (by properties of boolean values) from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap.")
-    private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
+        private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
 
-    @Property(label = "URL Rewrites", unbounded = PropertyUnbounded.ARRAY, description = "Colon separated URL rewrites to adjust the <loc> to match your dispatcher's apache rewrites")
-    private static final String PROP_URL_REWRITES = "url.rewrites";
+        private static final String PROP_URL_REWRITES = "url.rewrites";
 
-    @Property(boolValue = DEFAULT_INCLUDE_INHERITANCE_VALUE, label = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
-    private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
+        private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
 
-    @Property(boolValue = DEFAULT_EXTENSIONLESS_URLS, label = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension and the path is included with a trailing slash, e.g. /content/geometrixx/en/.")
-    private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
+        private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
 
-    @Property(boolValue = DEFAULT_REMOVE_TRAILING_SLASH, label = "Remove Trailing Slash from Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, the trailing slash is removed from extensionless page links, e.g. /content/geometrixx/en.")
-    private static final String PROP_REMOVE_TRAILING_SLASH = "remove.slash";
+        private static final String PROP_REMOVE_TRAILING_SLASH = "remove.slash";
 
-    @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
-    private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
+        private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
-    @Property(label = "Exclude Pages (by Template) from Sitemap", description = "Excludes pages that have a matching value at [cq:Page]/jcr:content@cq:Template")
-    private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
+        private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
 
-    @Property(boolValue = DEFAULT_USE_VANITY_URL, label = "Use Vanity URLs", description = "Use the Vanity URL for generating the Page URL")
-    private static final String USE_VANITY_URL = "use.vanity";
+        private static final String USE_VANITY_URL = "use.vanity";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 

@@ -31,8 +31,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-    immediate = true,
+@Component(immediate = true,
     service = Servlet.class,
     property = {
         "sling.servlet.label=ACS AEM Commons - Tags to CSV - Export Servlet",
@@ -40,8 +39,7 @@ import org.slf4j.LoggerFactory;
         "sling.servlet.resourceTypes=acs-commons/components/utilities/exporters/tags-to-csv",
         "sling.servlet.selectors=export",
         "sling.servlet.extensions=csv"
-    }
-)
+    })
 public class TagsExportServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(TagsExportServlet.class);

@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.wcm.datasources.impl;
 
 import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
+import org.osgi.service.component.annotations.Component;
 import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.EmptyDataSource;
@@ -26,8 +27,6 @@ import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -45,8 +44,7 @@ import java.util.Map;
 /**
  * ACS AEM Commons - WCM DataSource Builder
  */
-@Component
-@Service
+@Component(service = DataSourceBuilder.class)
 public class DataSourceBuilderImpl implements DataSourceBuilder {
 
     @Override

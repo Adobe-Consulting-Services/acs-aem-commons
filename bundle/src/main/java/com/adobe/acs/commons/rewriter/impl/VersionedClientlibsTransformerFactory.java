@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -45,13 +49,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -96,17 +93,7 @@ import com.google.common.cache.CacheBuilder;
  * selector; in the form: /path/to/clientlib.123456789.css or /path/to/clientlib.min.1234589.css (if minification is enabled)
  * If the Enforce MD5 filter is enabled, the paths will be like /path/to/clientlib.ACSHASH123456789.css or /path/to/clientlib.min.ACSHASH1234589.css (if minification is enabled)
  */
-@Component(metatype = true, label = "ACS AEM Commons - Versioned Clientlibs Transformer Factory",
-    description = "Sling Rewriter Transformer Factory to add auto-generated checksums to client library references")
-@Properties({
-    @Property(name = "pipeline.type",
-        value = "versioned-clientlibs", propertyPrivate = true),
-    @Property(name = EventConstants.EVENT_TOPIC,
-        value = "com/adobe/granite/ui/librarymanager/INVALIDATED", propertyPrivate = true),
-    @Property(name = "jmx.objectname",
-        value = "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache", propertyPrivate = true)
-})
-@Service(value = {DynamicMBean.class, TransformerFactory.class, EventHandler.class})
+@Component
 public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, CacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
@@ -117,15 +104,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private static final boolean DEFAULT_ENFORCE_MD5 = false;
 
-    @Property(label="MD5 Cache Size", description="Maximum size of the md5 cache.", intValue = DEFAULT_MD5_CACHE_SIZE)
-    private static final String PROP_MD5_CACHE_SIZE = "md5cache.size";
+        private static final String PROP_MD5_CACHE_SIZE = "md5cache.size";
 
-    @Property(label="Disable Versioning", description="Should versioning of clientlibs be disabled", boolValue = DEFAULT_DISABLE_VERSIONING)
-    private static final String PROP_DISABLE_VERSIONING = "disable.versioning";
+        private static final String PROP_DISABLE_VERSIONING = "disable.versioning";
 
-    @Property(label="Enforce MD5", description="Enables a filter which returns a 404 error if the MD5 in the request does not match the expected value",
-        boolValue = DEFAULT_ENFORCE_MD5)
-    private static final String PROP_ENFORCE_MD5 = "enforce.md5";
+        private static final String PROP_ENFORCE_MD5 = "enforce.md5";
 
     private static final String ATTR_SRC = "src";
     private static final String ATTR_HREF = "href";

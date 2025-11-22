@@ -18,17 +18,13 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -47,35 +43,14 @@ import java.util.Map;
 /**
  * Rewriter pipeline component which maps attribute values.
  */
-@Component(
-        label = "ACS AEM Commons - Resource Resolver Map Rewriter",
-        description = "Rewriter pipeline component which resourceResolver.map's any element/attribute.",
-        metatype = true,
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE)
-@Properties({ 
-    @Property(
-            label = "Rewriter Pipeline Type",
-            description = "Type identifier to be referenced in rewriter pipeline configuration.",
-            name = "pipeline.type",
-            value = "resourceresolver-map",
-            propertyPrivate = true),
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Pipeline Type: {pipeline.type}, for element:attributes [{attributes}]")
-})
-@Service
+@Component(service = TransformerFactory.class, configurationFactory = true)
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceResolverMapTransformerFactory.class);
 
     private static final String[] DEFAULT_ATTRIBUTES = new String[]{"img:src"};
     private Map<String, String[]> attributes;
-    @Property(label = "Rewrite Attributes",
-            description = "List of element/attribute pairs to rewrite",
-            cardinality = Integer.MAX_VALUE,
-            value = {"img:src"})
-    private static final String PROP_ATTRIBUTES = "attributes";
+        private static final String PROP_ATTRIBUTES = "attributes";
 
     public Transformer createTransformer() {
         return new ResourceResolverMapTransformer();

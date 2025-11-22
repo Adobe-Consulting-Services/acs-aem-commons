@@ -19,15 +19,12 @@
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.slf4j.Logger;
@@ -43,17 +40,6 @@ import java.util.Set;
 
 @SuppressWarnings("serial")
 @Component
-@Properties({
-        @Property(
-                name="sling.servlet.paths",
-                value= ChecksumGeneratorServlet.SERVLET_PATH
-        ),
-        @Property(
-                name="sling.auth.requirements",
-                value= "-" + ChecksumGeneratorServlet.SERVLET_PATH
-        )
-})
-@Service
 public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 
