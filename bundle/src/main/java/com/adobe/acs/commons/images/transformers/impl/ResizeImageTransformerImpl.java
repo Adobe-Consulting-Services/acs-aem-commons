@@ -19,12 +19,9 @@
 package com.adobe.acs.commons.images.transformers.impl;
 
 import com.adobe.acs.commons.images.ImageTransformer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import com.day.image.Layer;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -38,14 +35,7 @@ import java.util.Map;
  * If either is left blank the missing dimension will be computed based on the original layer's
  * aspect ratio
  */
-@Component
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = ResizeImageTransformerImpl.TYPE
-        )
-})
-@Service
+@Component(service = ImageTransformer.class)
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 
@@ -59,10 +49,7 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
-    @Property(label = "Max dimension in px",
-            description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
-            intValue = DEFAULT_MAX_DIMENSION)
-    public static final String PROP_MAX_DIMENSION = "max-dimension";
+        public static final String PROP_MAX_DIMENSION = "max-dimension";
 
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {

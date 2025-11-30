@@ -19,6 +19,10 @@
 package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
@@ -32,11 +36,6 @@ import com.adobe.granite.workflow.exec.filter.WorkItemFilter;
 import com.day.cq.workflow.WorkflowService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -64,8 +63,7 @@ import java.util.regex.Pattern;
 /**
  * ACS AEM Commons - Workflow Instance Remover
  */
-@Component
-@Service
+@Component(service = WorkflowInstanceRemover.class)
 public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemover {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverImpl.class);
 

@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import java.util.Collections;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +28,6 @@ import javax.management.NotCompliantMBeanException;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -59,11 +56,6 @@ import com.day.cq.replication.Replicator;
  */
 @Component(immediate = true)
 // Note: We implement EventHandler because our superclass does, but we get notifications via the new ResourceChangeListener API
-@Service(value = { ResourceChangeListener.class, AutomaticPackageReplicatorMBean.class })
-@Properties({
-        @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Automatic Package Replicator"),
-        @Property(name=ResourceChangeListener.CHANGES, value= {"ADDED","CHANGED","REMOVED"}),
-        @Property(name = ResourceChangeListener.PATHS, value = "glob:/etc/acs-commons/automatic-package-replication/**/jcr:content") })
 public class ConfigurationUpdateListener extends ResourceServiceManager
         implements ResourceChangeListener, ExternalResourceChangeListener, AutomaticPackageReplicatorMBean {
 

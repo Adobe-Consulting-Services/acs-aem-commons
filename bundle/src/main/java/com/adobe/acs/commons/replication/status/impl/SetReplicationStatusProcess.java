@@ -19,6 +19,8 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import java.text.ParseException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -29,10 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -47,14 +45,7 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component
-@Property(
-        label = "Workflow Label",
-        name = "process.label",
-        value = "Set Replication Status",
-        description = "Sets the cq:lastReplicated, cq:lastReplicateBy and cq:lastReplicatedAction on the payload to the values provided"
-)
-@Service
+@Component(service = WorkflowProcess.class)
 public class SetReplicationStatusProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(SetReplicationStatusProcess.class);

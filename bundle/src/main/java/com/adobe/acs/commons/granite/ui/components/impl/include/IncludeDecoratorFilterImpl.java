@@ -42,13 +42,11 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@Component(
-        service = Filter.class,
+@Component(service = Filter.class,
         configurationPolicy = ConfigurationPolicy.OPTIONAL,
         property= {
                 EngineConstants.SLING_FILTER_SCOPE+"="+ EngineConstants.FILTER_SCOPE_INCLUDE
-        }
-)
+        })
 @Designate(ocd = IncludeDecoratorFilterImpl.Config.class)
 public class IncludeDecoratorFilterImpl implements Filter {
 

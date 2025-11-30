@@ -19,6 +19,7 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import java.text.SimpleDateFormat;
+import org.osgi.service.component.annotations.Component;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,8 +33,6 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -53,8 +52,7 @@ import com.day.cq.wcm.api.PageManager;
  * ACS AEM Commons - Replication Status Manager
  * OSGi Service for changing the replication status of resources.
  */
-@Component
-@Service
+@Component(service = ReplicationStatusManager.class)
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 

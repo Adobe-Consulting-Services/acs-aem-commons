@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.dam.audio.impl;
 
 import java.io.File;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,11 +34,6 @@ import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -57,9 +54,10 @@ import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
  * CQ DAM FFmpeg Audio Encode Process
  * Workflow process that transcodes audio files into different formats
  */
-@Component
-@Service(WorkflowProcess.class)
-@Properties({ @Property(name = "process.label", value = "Encode Audio") })
+@Component(
+    service = WorkflowProcess.class,
+    property = "process.label=Encode Audio"
+)
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHelper.AudioProcessor<MetaDataMap, Void> {
 

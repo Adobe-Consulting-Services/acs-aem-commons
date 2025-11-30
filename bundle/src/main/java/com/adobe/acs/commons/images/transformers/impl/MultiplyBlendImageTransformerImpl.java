@@ -19,14 +19,11 @@
 package com.adobe.acs.commons.images.transformers.impl;
 
 import java.awt.AlphaComposite;
+import org.osgi.service.component.annotations.Component;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +36,7 @@ import com.day.image.Layer;
  * ACS AEM Commons - Image Transformer - Multiply Color Blend
  */
 //@formatter:off
-@Component
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = MultiplyBlendImageTransformerImpl.TYPE
-        )
-})
-@Service
+@Component(service = ImageTransformer.class)
 //@formatter:on
 public class MultiplyBlendImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(MultiplyBlendImageTransformerImpl.class);

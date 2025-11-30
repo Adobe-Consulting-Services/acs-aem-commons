@@ -19,6 +19,10 @@
 package com.adobe.acs.commons.wcm.notifications.impl;
 
 import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 import java.io.PrintWriter;
@@ -38,11 +42,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.AbstractResourceVisitor;
@@ -66,8 +65,7 @@ import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(immediate = true)
-@Service(value = SystemNotifications.class)
+@Component(service = SystemNotifications.class, immediate = true)
 public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, ResourceChangeListener, ExternalResourceChangeListener {
     private static final Logger log = LoggerFactory.getLogger(SystemNotificationsImpl.class);
 

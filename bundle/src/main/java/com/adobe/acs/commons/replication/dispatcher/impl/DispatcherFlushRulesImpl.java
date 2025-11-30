@@ -19,6 +19,12 @@
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushRules;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
@@ -31,16 +37,6 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -55,7 +51,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component(
+@Component(service = Preprocessor.class, 
         label = "ACS AEM Commons - Dispatcher Flush Rules",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
                 + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent. "
@@ -66,12 +62,6 @@ import java.util.regex.Pattern;
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
-})
 public class DispatcherFlushRulesImpl implements Preprocessor, DispatcherFlushRules {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 

@@ -18,6 +18,13 @@
 package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.impl.MailTemplateManager;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
@@ -26,16 +33,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.SimpleEmail;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
@@ -51,33 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component(
-        metatype = true,
-        label = "ACS AEM Commons - Health Check - SMTP E-Mail Service",
-        description = "Checks if the AEM E-Mail Service can connect and send mail via the configured SMTP server.",
-        policy = ConfigurationPolicy.REQUIRE
-)
-@Properties({
-        @Property(
-                name = HealthCheck.NAME,
-                value = "SMTP Mail Service",
-                propertyPrivate = true),
-        @Property(
-                label = "Tags",
-                name = HealthCheck.TAGS,
-                unbounded = PropertyUnbounded.ARRAY,
-                value = {"integrations", "smtp", "email"},
-                description = "Tags for this check to be used by composite health checks."),
-        @Property(
-                name = HealthCheck.MBEAN_NAME,
-                value = "smtpMailService",
-                propertyPrivate = true),
-        @Property(
-                name = HealthCheck.ASYNC_CRON_EXPRESSION,
-                value = "0 0 12 1/1 * ? *", // Everyday at noon
-                propertyPrivate = true)
-})
-@Service
+@Component(service = HealthCheck.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final Logger log = LoggerFactory.getLogger(SMTPMailServiceHealthCheck.class);
@@ -90,19 +61,11 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                     + "Sling Health Check for AEM E-mail Service connectivity";
 
     private static final String DEFAULT_EMAIL = "healthcheck@example.com";
-    @Property(
-            label = "Test E-mail Address",
-            description = "E-mail address to send test message to.",
-            value = DEFAULT_EMAIL)
-    private static final String PROP_EMAIL = "email";
+        private static final String PROP_EMAIL = "email";
     private String toEmail;
 
     private static final int DEFAULT_MAX_EMAILS_PER_DAY = 24;
-    @Property(
-            label = "Maximum e-mails pings per day",
-            description = "Maximum number of e-mail pings this service attempts per day. Once this limit is met, this service will wait until tomorrow, or until this service is",
-            intValue = DEFAULT_MAX_EMAILS_PER_DAY)
-    private static final String PROP_MAX_EMAILS_PER_DAY = "max.emails.per.day";
+        private static final String PROP_MAX_EMAILS_PER_DAY = "max.emails.per.day";
     private int maxEmailsPerDay = DEFAULT_MAX_EMAILS_PER_DAY;
 
     // Disable this feature on AEM as a Cloud Service

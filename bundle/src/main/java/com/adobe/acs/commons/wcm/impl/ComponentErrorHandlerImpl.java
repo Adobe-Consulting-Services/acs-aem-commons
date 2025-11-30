@@ -19,18 +19,15 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.ModeUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -52,25 +49,12 @@ import java.util.Collections;
 import java.util.Map;
 
 @Component(
-        label = "ACS AEM Commons - Component-Level Error Handler",
-        description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
-                + "components based on WCM Mode collections (Edit, Preview, Publish).",
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
-)
-@Properties({
-        @Property(
-                name = "sling.filter.scope",
-                value = "component",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "filter.order",
-                intValue = ComponentErrorHandlerImpl.FILTER_ORDER,
-                propertyPrivate = true
-        )
-})
-@Service
+    service = ComponentErrorHandler.class,
+    property = {
+        "sling.filter.scope=component",
+        "filter.order="
+    },
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter {
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
@@ -102,20 +86,14 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private boolean editModeEnabled = DEFAULT_EDIT_ENABLED;
 
-    @Property(label = "Edit Error Handling",
-            description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
-            boolValue = DEFAULT_EDIT_ENABLED)
-    public static final String PROP_EDIT_ENABLED = "edit.enabled";
+        public static final String PROP_EDIT_ENABLED = "edit.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/component-error-handler/edit.html";
 
     private String editErrorHTMLPath = DEFAULT_EDIT_ERROR_HTML_PATH;
 
-    @Property(label = "Edit HTML Error Path",
-            description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
-            value = DEFAULT_EDIT_ERROR_HTML_PATH)
-    public static final String PROP_EDIT_ERROR_HTML_PATH = "edit.html";
+        public static final String PROP_EDIT_ERROR_HTML_PATH = "edit.html";
 
     /* Preview Mode */
 
@@ -123,20 +101,14 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private boolean previewModeEnabled = DEFAULT_PREVIEW_ENABLED;
 
-    @Property(label = "Preview Error Handling",
-            description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
-            boolValue = DEFAULT_PREVIEW_ENABLED)
-    public static final String PROP_PREVIEW_ENABLED = "preview.enabled";
+        public static final String PROP_PREVIEW_ENABLED = "preview.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
             "/apps/acs-commons/components/utilities/component-error-handler/preview.html";
 
     private String previewErrorHTMLPath = DEFAULT_PREVIEW_ERROR_HTML_PATH;
 
-    @Property(label = "Preview HTML Error Path",
-            description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
-            value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
-    public static final String PROP_PREVIEW_ERROR_HTML_PATH = "preview.html";
+        public static final String PROP_PREVIEW_ERROR_HTML_PATH = "preview.html";
 
 
     /* Publish Mode */
@@ -145,19 +117,13 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private boolean publishModeEnabled = DEFAULT_PUBLISH_ENABLED;
 
-    @Property(label = "Publish Error Handling",
-            description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
-            boolValue = DEFAULT_PUBLISH_ENABLED)
-    public static final String PROP_PUBLISH_ENABLED = "publish.enabled";
+        public static final String PROP_PUBLISH_ENABLED = "publish.enabled";
 
     private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH = BLANK_HTML;
 
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
 
-    @Property(label = "Publish HTML Error Path",
-            description = "Path to html file in JCR use to display an erring component in DISABLED mode.",
-            value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
-    public static final String PROP_PUBLISH_ERROR_HTML_PATH = "publish.html";
+        public static final String PROP_PUBLISH_ERROR_HTML_PATH = "publish.html";
 
     /* Suppressed Resource Types */
 
@@ -165,11 +131,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private String[] suppressedResourceTypes = DEFAULT_SUPPRESSED_RESOURCE_TYPES;
 
-    @Property(label = "Suppressed Resource Types",
-            description = "Resource types this Filter will ignore during Sling Includes.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
-    public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
+        public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
 
 
     @Override

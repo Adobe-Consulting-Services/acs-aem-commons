@@ -19,19 +19,14 @@
 package com.adobe.acs.commons.users.impl;
 
 import java.util.Collections;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -41,11 +36,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - Ensure Service User", configurationFactory = true, metatype = true,
+@Component(service = EnsureAuthorizable.class, label = "ACS AEM Commons - Ensure Service User", configurationFactory = true, metatype = true,
         immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Properties({ @Property(name = "webconsole.configurationFactory.nameHint",
-        value = "Ensure Service User: {operation} {principalName}") })
-@Service(value = { EnsureServiceUser.class, EnsureAuthorizable.class })
 public final class EnsureServiceUser implements EnsureAuthorizable {
 
     @Property(label = "Ensure immediately", boolValue = true,

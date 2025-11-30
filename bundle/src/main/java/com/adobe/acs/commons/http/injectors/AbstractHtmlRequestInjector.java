@@ -19,6 +19,7 @@
 package com.adobe.acs.commons.http.injectors;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Deactivate;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Dictionary;
@@ -35,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;

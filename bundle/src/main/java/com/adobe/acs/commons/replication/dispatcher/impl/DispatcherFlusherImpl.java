@@ -45,7 +45,7 @@ import java.util.Map;
  * ACS AEM Commons - Dispatcher Flusher
  * Service used to issue flush requests to enabled Dispatcher Flush Agents.
  */
-@Component
+@Component(service = DispatcherFlusher.class)
 @ServiceRanking(-10000)
 public class DispatcherFlusherImpl implements DispatcherFlusher {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherImpl.class);

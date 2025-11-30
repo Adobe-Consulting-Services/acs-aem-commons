@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.dam.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.util.concurrent.ConcurrentMap;
 
 import com.adobe.acs.commons.util.RequireAem;
@@ -26,10 +28,6 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -51,9 +49,7 @@ import com.day.image.Layer;
  * <li>watermark - The repository path of the watermark.</li>
  * </ul>
  */
-@Component
-@Service
-@Property(name = "process.label", value = "Add Watermark to Rendition")
+@Component(service = WorkflowProcess.class)
 public final class AddWatermarkToRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
     private static ConcurrentMap<String, Object> watermarkLogCache = new ConcurrentHashMap<String, Object>();

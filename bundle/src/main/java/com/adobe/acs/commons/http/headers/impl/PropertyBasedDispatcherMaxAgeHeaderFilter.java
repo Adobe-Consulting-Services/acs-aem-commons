@@ -19,10 +19,7 @@
 package com.adobe.acs.commons.http.headers.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
+import org.osgi.service.component.annotations.Component;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -37,33 +34,14 @@ import java.util.Dictionary;
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE;
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE_SLING;
 
-@Component(
-        label = "ACS AEM Commons - Dispacher Cache Control Header Property Based - Max Age",
-        description = "Adds a Cache-Control max-age header to content based on property value to enable Dispatcher TTL support.",
-        metatype = true,
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Property name: {property.name}. Fallback Max Age: {max.age} ",
-                propertyPrivate = true),
-        @Property(
-                name = PROP_DISPATCHER_FILTER_ENGINE,
-                value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
-                propertyPrivate = true)
-})
+@Component(configurationFactory = true)
 public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
 
     private static final Logger log = LoggerFactory.getLogger(PropertyBasedDispatcherMaxAgeHeaderFilter.class);
 
-    @Property(label = "Property name",
-            description = "Property to check on how long you want to cache this request")
-    public static final String PROP_PROPERTY_NAME = "property.name";
+        public static final String PROP_PROPERTY_NAME = "property.name";
 
-    @Property(label = "Inherit property value",
-            description = "Property value to skip this filter and inherit another lower service ranking dispatcher ttl filter")
-    public static final String PROP_INHERIT_PROPERTY_VALUE = "inherit.property.value";
+        public static final String PROP_INHERIT_PROPERTY_VALUE = "inherit.property.value";
 
     private String propertyName;
     private String inheritPropertyValue;

@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.granite.asset.api.AssetManager;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.day.cq.commons.Externalizer;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.tagging.TagManager;
@@ -29,10 +31,6 @@ import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.designer.Style;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -76,14 +74,12 @@ import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericPa
  * Note: This Injector requires at least org.apache.sling.models.impl version 1.0.2
  *
  */
-@Component
-@Service
+@Component(service = Injector.class)
 /*
  * SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
  * otherwise the generic XSSAPI service would be injected from the OSGi Service Registry instead of the
  * pre-configured from the current request.
  */
-@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
 public final class AemObjectInjector implements Injector {
 
     @Reference

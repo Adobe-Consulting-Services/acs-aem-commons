@@ -18,17 +18,12 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
@@ -48,21 +43,7 @@ import java.util.regex.Pattern;
 /**
  * Rewriter pipeline component which rewrites static references.
  */
-@Component(
-        label = "ACS AEM Commons - Static Reference Rewriter",
-        description = "Rewriter pipeline component which rewrites host name on static references "
-                + "for cookie-less domain support",
-        metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-        @Property(
-                name = "pipeline.type", label = "Rewriter Pipeline Type",
-                description = "Type identifier to be referenced in rewriter pipeline configuration."),
-        @Property(
-                name = "webconsole.configurationFactory.nameHint",
-                value = "Pipeline: {pipeline.type}")
-})
-
+@Component(service = TransformerFactory.class, + "for cookie-less domain support", configurationFactory = true)
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
 
     public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {
@@ -83,36 +64,23 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private static final int DEFAULT_HOST_COUNT = 1;
 
-    @Property(label = "Tag Attribute Separator", description = "Separator to split the tag name from the attribute name", value = ":")
-    private static final String PROP_TAG_ATTRIBUTE_SEPARATOR = "tag.attribute.separator";
+        private static final String PROP_TAG_ATTRIBUTE_SEPARATOR = "tag.attribute.separator";
 
-    @Property(label = "List Separator", description = "Separator to split the different tags", value = ",")
-    private static final String PROP_LIST_SEPARATOR = "list.separator";
+        private static final String PROP_LIST_SEPARATOR = "list.separator";
 
-    @Property(label = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", value = {
-            "img:src", "link:href", "script:src"})
-    private static final String PROP_ATTRIBUTES = "attributes";
+        private static final String PROP_ATTRIBUTES = "attributes";
 
-    @Property(label = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
-    private static final String PROP_MATCHING_PATTERNS = "matchingPatterns";
+        private static final String PROP_MATCHING_PATTERNS = "matchingPatterns";
 
-    @Property(intValue = DEFAULT_HOST_COUNT, label = "Static Host Count",
-            description = "Number of static hosts available.")
-    private static final String PROP_HOST_COUNT = "host.count";
+        private static final String PROP_HOST_COUNT = "host.count";
 
-    @Property(label = "Static Host Pattern", description = "Pattern for generating static host domain names. "
-            + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.", unbounded = PropertyUnbounded.ARRAY)
-    private static final String PROP_HOST_NAME_PATTERN = "host.pattern";
+        private static final String PROP_HOST_NAME_PATTERN = "host.pattern";
 
-    @Property(label = "Static Host Scheme", description = "(optional) Host scheme to use if you don't want to use the host scheme of the request")
-    private static final String PROP_HOST_SCHEME = "host.scheme";
+        private static final String PROP_HOST_SCHEME = "host.scheme";
 
-    @Property(unbounded = PropertyUnbounded.ARRAY, label = "Path Prefixes",
-            description = "Path prefixes to rewrite.")
-    private static final String PROP_PREFIXES = "prefixes";
+        private static final String PROP_PREFIXES = "prefixes";
 
-    @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten", boolValue = false)
-    private static final String PROP_REPLACE_HOST = "replaceHost";
+        private static final String PROP_REPLACE_HOST = "replaceHost";
 
     private Map<String, String[]> attributes;
 

@@ -18,6 +18,9 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.PageInfoProvider;
 import com.day.cq.wcm.api.components.Component;
@@ -26,10 +29,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -63,7 +62,6 @@ import java.util.Map;
  * https://docs.adobe.com/docs/en/cq/5-6-1/developing/pageinfo.html#Creating a Page Information Provider
  */
 @org.apache.felix.scr.annotations.Component
-@Service(PageInfoProvider.class)
 public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvider, EventListener {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesPageInfoProvider.class);
 

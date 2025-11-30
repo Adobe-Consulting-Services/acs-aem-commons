@@ -18,6 +18,13 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
@@ -29,18 +36,6 @@ import com.adobe.acs.commons.httpcache.util.UserUtils;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
@@ -60,23 +55,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * Concrete implementation of cache config for http cache. Modelled as OSGi config factory.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Cache config",
-           description = "Config for request URI patterns that have to be cached.",
-           configurationFactory = true,
-           metatype = true,
-           policy = ConfigurationPolicy.REQUIRE
+@Component(
+    service = HttpCacheConfig.class,
+    
+    property = "webconsole.configurationFactory.nameHint=Order: {httpcache.config.order}, ",
+    configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Properties({
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Order: {httpcache.config.order}, "
-                        + "Request URIs: {httpcache.config.requesturi.patterns}, "
-                        + "Request URIs blacklist: {httpcache.config.requesturi.patterns.blacklisted}, "
-                        + "Authentication: {httpcache.config.request.authentication}, "
-                        + "Invalidation paths: {httpcache.config.invalidation.oak.paths}, "
-                        + "Cache type: {httpcache.config.cachestore}",
-                propertyPrivate = true)
-})
-@Service
 public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
     static final String FILTER_SCOPE_REQUEST = "REQUEST";

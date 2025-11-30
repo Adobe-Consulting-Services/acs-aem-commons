@@ -48,11 +48,9 @@ import java.util.UUID;
  * This so we can present a different header based on cookie values, which tell us if a user is logged in and what type of user it is.
  * </p>
  */
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
         service = {HttpCacheConfigExtension.class, CacheKeyFactory.class},
-        property = {Constants.SERVICE_RANKING + ":Integer=30" }
-)
+        property = {Constants.SERVICE_RANKING + ":Integer=30" })
 @Designate(
         ocd = RequestCookieHttpCacheConfigExtension.Config.class,
         factory = true

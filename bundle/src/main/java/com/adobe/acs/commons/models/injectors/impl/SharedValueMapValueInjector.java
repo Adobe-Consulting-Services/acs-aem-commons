@@ -18,16 +18,15 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.adobe.acs.commons.wcm.properties.shared.SharedValueMapResourceAdapter;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -51,9 +50,7 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
  * {@link com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider}
  * is able to provide SlingBindings on a request adaptable.
  */
-@Component
-@Service
-@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
+@Component(service = Injector.class)
 public class SharedValueMapValueInjector implements Injector {
     private static final Logger LOG = LoggerFactory.getLogger(SharedValueMapValueInjector.class);
 

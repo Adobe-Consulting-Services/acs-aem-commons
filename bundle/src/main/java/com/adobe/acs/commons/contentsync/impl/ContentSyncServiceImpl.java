@@ -48,7 +48,7 @@ import static com.adobe.acs.commons.contentsync.ConfigurationUtils.SETTINGS_PATH
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.UPDATE_STRATEGY_KEY;
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.DEFAULT_STRATEGY_PID;
 
-@Component
+@Component(service = ContentSyncService.class)
 public class ContentSyncServiceImpl implements ContentSyncService {
     public static final int COMPLETION_CHECK_INTERVAL = 3000;
 

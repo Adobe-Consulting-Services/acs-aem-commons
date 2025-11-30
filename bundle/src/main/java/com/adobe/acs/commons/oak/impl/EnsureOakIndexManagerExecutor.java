@@ -53,16 +53,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 
 //@formatter:off
-@Component(
-        service = {DynamicMBean.class, EnsureOakIndexManager.class},
+@Component(service = {DynamicMBean.class, EnsureOakIndexManager.class},
         immediate = true,
         property = {
                 "felix.webconsole.title=Ensure Oak Index",
                 "felix.webconsole.label=ensureOakIndex",
                 "felix.webconsole.category=Sling",
                 "jmx.objectname=com.adobe.acs.commons.oak:type=Ensure Oak Index"
-        }
-)
+        })
 //@formatter:on
 public class EnsureOakIndexManagerExecutor extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
 

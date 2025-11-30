@@ -44,13 +44,11 @@ import java.util.regex.Pattern;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
         service = {HttpCacheConfigExtension.class, CacheKeyFactory.class},
         property = {
                 Constants.SERVICE_RANKING + ":Integer=40"
-        }
-)
+        })
 @Designate(ocd = RequestPathHttpCacheConfigExtension.Config.class, factory = true)
 public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 

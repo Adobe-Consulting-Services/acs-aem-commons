@@ -18,14 +18,11 @@
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManagerConstants;
+import org.osgi.service.component.annotations.Component;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -52,16 +49,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@Component(metatype = true,
-           label = "ACS AEM Commons - Throttled Task Runner Service")
-@Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
-@Properties({
-    @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
-    @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
-    @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", doubleValue = 0.75),
-    @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", doubleValue = 0.85),
-    @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100")
-})
+@Component(service = ThrottledTaskRunner.class)
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);

@@ -17,12 +17,8 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.service.component.annotations.Component;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -32,32 +28,13 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 //@formatter:off
-@Component(
-      label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
-      description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
-      metatype = true,
-      configurationFactory = true,
-      policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-    @Property(label = "Filter Patterns",
-        description = "Patterns on which to apply this Max Age cache-control rule.",
-        cardinality = Integer.MAX_VALUE,
-        name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-        propertyPrivate = false,
-        value = { }),
-    @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Max Age: {max.age} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
-})
+@Component(configurationFactory = true)
 //@formatter:on
 public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
     protected static final String CACHE_CONTROL_NAME = "Cache-Control";
 
-    @Property(label = "Cache-Control Max Age",
-            description = "Max age value (in seconds) to put in Cache Control header.")
-    public static final String PROP_MAX_AGE = "max.age";
+        public static final String PROP_MAX_AGE = "max.age";
 
     protected static final String HEADER_PREFIX = "max-age=";
 

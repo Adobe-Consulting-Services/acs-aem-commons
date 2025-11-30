@@ -57,8 +57,7 @@ import java.util.Map;
  *           "
  */
 
-@Component(
-        service = {CacheKeyFactory.class},
+@Component(service = {CacheKeyFactory.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MAX_VALUE,

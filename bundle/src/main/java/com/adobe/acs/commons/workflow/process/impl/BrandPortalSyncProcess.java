@@ -19,6 +19,8 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import com.adobe.acs.commons.util.RequireAem;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.adobe.cq.dam.mac.sync.api.DAMSyncService;
@@ -31,11 +33,6 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
@@ -46,19 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Brand Portal Sync",
-        description = "Syncs assets with AEM Assets Brand Portal."
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Brand Portal Sync",
-                description = "Syncs (publish/unpublish) assets with AEM Assets Brand Portal"
-        )
-})
-@Service
+    service = WorkflowProcess.class,
+    property = "process.label=Brand Portal Sync")
 public class BrandPortalSyncProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
 

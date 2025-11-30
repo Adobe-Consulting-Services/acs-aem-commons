@@ -35,10 +35,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(
-        immediate = true,
-        configurationPolicy = ConfigurationPolicy.REQUIRE
-)
+@Component(immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = PackageGarbageCollectionConfig.class, factory = true)
 public class PackageGarbageCollectionScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(PackageGarbageCollectionScheduler.class);

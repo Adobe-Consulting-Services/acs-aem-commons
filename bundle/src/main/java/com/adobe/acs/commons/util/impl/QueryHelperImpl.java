@@ -19,15 +19,14 @@
 package com.adobe.acs.commons.util.impl;
 
 import com.adobe.acs.commons.cqsearch.QueryUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -44,8 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Component
-@Service
+@Component(service = QueryHelper.class)
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference

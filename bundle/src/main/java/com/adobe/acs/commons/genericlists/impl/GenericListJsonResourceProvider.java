@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.genericlists.impl;
 
 import com.adobe.acs.commons.genericlists.GenericList;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import com.adobe.acs.commons.genericlists.GenericList.Item;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -29,11 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -49,11 +46,8 @@ import org.slf4j.LoggerFactory;
  * Resource provider which makes Generic Lists available as JSON String resources
  * for use with the Touch UI Metadata Asset Editor.
  */
-@Component(metatype = true, label = "ACS AEM Commons - Generic List JSON Resource Provider",
-    description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
+@Component
 //TODO: Confirm this works considering that spi Resource Provider is not an interface!
-@Service(ResourceProvider.class)
-@Properties({ @Property(name = ResourceProvider.PROPERTY_ROOT, value = GenericListJsonResourceProvider.ROOT) })
 public final class GenericListJsonResourceProvider extends ResourceProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericListJsonResourceProvider.class);
@@ -66,8 +60,7 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
 
     private static final int EXTENSION_LENGTH = EXTENSION.length();
 
-    @Property(label = "Generic List Root", description = "Root path under which generic lists can be found", value = DEFAULT_LIST_ROOT)
-    private static final String PROP_LIST_ROOT = "list.root";
+        private static final String PROP_LIST_ROOT = "list.root";
 
     private String listRoot;
 

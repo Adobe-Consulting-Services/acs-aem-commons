@@ -18,9 +18,8 @@
 package com.adobe.acs.commons.httpcache.rule.impl;
 
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
+import org.osgi.service.component.annotations.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
@@ -29,7 +28,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
  * Do not cache requests which has got query strings.
  */
 @Component
-@Service
 public class DoNotCacheRequestWithQueryString extends AbstractHttpCacheHandlingRule {
 
     @Override

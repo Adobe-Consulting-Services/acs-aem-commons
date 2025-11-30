@@ -18,8 +18,7 @@
 package com.adobe.acs.commons.httpcache.rule.impl;
 
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
@@ -28,7 +27,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
  * Process only Http GET requests.
  */
 @Component
-@Service
 public class CacheOnlyGetRequest extends AbstractHttpCacheHandlingRule {
     private static final String HTTP_GET_METHOD = "GET";
 

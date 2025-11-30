@@ -18,6 +18,10 @@
 package com.adobe.acs.commons.errorpagehandler.impl;
 
 import java.io.PrintWriter;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -42,13 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -77,12 +74,11 @@ import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 
-@Component(
+@Component(service = ErrorPageHandlerService.class, 
         label = "ACS AEM Commons - Error Page Handler",
         description = "Error Page Handling module which facilitates the resolution of errors "
                 + "against author-able pages for discrete content trees.",
         immediate = false, metatype = true)
-@Service
 public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorPageHandlerImpl.class);

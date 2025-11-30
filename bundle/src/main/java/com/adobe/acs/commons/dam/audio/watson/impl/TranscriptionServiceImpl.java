@@ -18,23 +18,21 @@
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
 import com.adobe.acs.commons.http.HttpClientFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.http.client.fluent.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 
-@Component
-@Service
+@Component(service = TranscriptionService.class)
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionServiceImpl.class);

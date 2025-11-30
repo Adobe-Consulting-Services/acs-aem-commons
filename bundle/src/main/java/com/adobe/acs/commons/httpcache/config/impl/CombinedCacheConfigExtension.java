@@ -55,8 +55,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  *             )
  *           "
  */
-@Component(
-        service = {HttpCacheConfigExtension.class},
+@Component(service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MAX_VALUE,

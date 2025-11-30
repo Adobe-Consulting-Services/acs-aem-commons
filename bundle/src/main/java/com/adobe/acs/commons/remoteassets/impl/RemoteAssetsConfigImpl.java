@@ -52,10 +52,8 @@ import com.adobe.acs.commons.util.RequireAem;
 /**
  * Configuration service for Remote Asset feature.
  */
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service = RemoteAssetsConfigImpl.class
-)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = RemoteAssetsConfigImpl.class)
 @Designate(ocd=RemoteAssetsConfigImpl.Config.class)
 public class RemoteAssetsConfigImpl {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsConfigImpl.class);

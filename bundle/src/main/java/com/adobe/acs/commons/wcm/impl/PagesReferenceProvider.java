@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import java.util.ArrayList;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,11 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -46,8 +43,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * ACS AEM Commons - Pages Reference Provider
  * Reference provider that searches for  pages referenced inside any given page resource
  */
-@Component(policy = ConfigurationPolicy.REQUIRE, metatype = true, label = "ACS AEM Commons - Pages Reference Provider", description = "ACS AEM Commons - Pages Reference Provider")
-@Service
+@Component(service = ReferenceProvider.class)
 public final class PagesReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_PAGE = "page";
@@ -55,9 +51,7 @@ public final class PagesReferenceProvider implements ReferenceProvider {
 
     private String pageRootPath = DEFAULT_PAGE_ROOT_PATH;
 
-    @Property(label = "page root path", description = "Page root path",
-            value = DEFAULT_PAGE_ROOT_PATH)
-    private static final String PAGE_ROOT_PATH = "page.root.path";
+        private static final String PAGE_ROOT_PATH = "page.root.path";
 
     // any text containing /content/
     private Pattern pattern = Pattern.compile("([\"']|^)("

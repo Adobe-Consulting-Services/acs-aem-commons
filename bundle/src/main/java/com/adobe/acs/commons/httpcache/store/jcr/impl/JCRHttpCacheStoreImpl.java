@@ -18,6 +18,9 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 import com.adobe.acs.commons.functions.CheckedFunction;
 
 import java.io.IOException;
@@ -39,12 +42,6 @@ import javax.management.openmbean.SimpleType;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -79,64 +76,17 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
  */
 @Component(
-        label = "ACS AEM Commons - HTTP Cache - JCR Cache Store",
-        description = "Cache data store implementation for JCR storage.",
-        metatype = true
+    service = {HttpCacheStore.class, Runnable.class},
+    property = {
+        "httpcache.cachestore.jcr.rootpath=/var/acs-commons/httpcache",
+        "httpcache.cachestore.jcr.bucketdepth:Integer=10",
+        "httpcache.cachestore.jcr.savedelta:Integer=500",
+        "httpcache.cachestore.jcr.expiretimeinseconds:Integer=604800",
+        "jmx.objectname=com.adobe.acs.commons.httpcache:type=HTTP Cache - JCR Cache Store",
+        "scheduler.expression=0 0 12 1/1 * ? *",
+        "scheduler.concurrent:Boolean=false"
+    }
 )
-@Properties({
-        @Property(
-                name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "jmx.objectname",
-                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - JCR Cache Store",
-                propertyPrivate = true
-        ),
-        @Property(
-                label = "Cache clean-up schedule",
-                description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
-                name = "scheduler.expression",
-                value = "0 0 12 1/1 * ? *"
-        ),
-        @Property(
-                label = "Allow concurrent executions",
-                description = "Allow concurrent executions of this Scheduled Service. This is almost always false.",
-                name = "scheduler.concurrent",
-                propertyPrivate = true,
-                boolValue = false
-        ),
-        @Property(
-                label = "Cache-root Parent Path location",
-                description = "Points to the location of the cache root parent node in the JCR repository",
-                name = JCRHttpCacheStoreImpl.PN_ROOTPATH,
-                value = JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH
-        ),
-        @Property(
-                label = "Cache bucketing tree depth",
-                description = "The depth the bucket tree goes. Minimum value is 1. "
-                        + "This value can be used for tweaking performance. "
-                        + "The more data cached, the higher this value should be. "
-                        + "Downside is that the higher the value, the longer the retrieval of cache entries takes if the buckets are relatively low on entries.",
-                name = JCRHttpCacheStoreImpl.PN_BUCKETDEPTH,
-                intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH,
-                propertyPrivate = true
-        ),
-        @Property(
-                label = "Save threshold",
-                description = "The threshold to add,remove and modify nodes when handling the cache",
-                name = JCRHttpCacheStoreImpl.PN_SAVEDELTA,
-                intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
-        ),
-        @Property(
-                label = "Expire time in seconds",
-                description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
-                name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINSECONDS,
-                intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
-        )
-})
-@Service(value = {HttpCacheStore.class, Runnable.class})
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
 
     //property keys

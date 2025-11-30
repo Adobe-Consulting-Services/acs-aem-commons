@@ -20,13 +20,12 @@ package com.adobe.acs.commons.packaging.impl;
 
 import java.io.IOException;
 
+import org.osgi.service.component.annotations.Reference;
 import javax.jcr.RepositoryException;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.packaging.util.AssetPackageUtil;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;

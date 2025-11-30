@@ -23,7 +23,7 @@ import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-@Component
+@Component(service = AdobeioHelper.class)
 public class AdobeioHelperImpl implements AdobeioHelper {
 
     @Reference

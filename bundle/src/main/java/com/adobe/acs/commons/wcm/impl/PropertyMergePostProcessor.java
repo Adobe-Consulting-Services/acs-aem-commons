@@ -18,9 +18,8 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.tagging.TagManager;
+import org.osgi.service.component.annotations.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
@@ -56,8 +55,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 /**
  * ACS AEM Commons - Property Merge Sling POST Processor
  */
-@Component
-@Service
+@Component(service = SlingPostProcessor.class)
 public class PropertyMergePostProcessor implements SlingPostProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PropertyMergePostProcessor.class);

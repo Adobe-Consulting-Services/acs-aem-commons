@@ -18,17 +18,14 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -53,10 +50,7 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
  * them as <style> elements. Links found in <head> are added to the beginning of
  * <body>, whereas those in <body> are included where they're found.
  */
-@Component(metatype = false)
-@Properties({
-    @Property(name = "pipeline.type", value = "inline-css")})
-@Service(value = {TransformerFactory.class})
+@Component(service = TransformerFactory.class)
 public final class StylesheetInlinerTransformerFactory implements TransformerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(StylesheetInlinerTransformerFactory.class);
