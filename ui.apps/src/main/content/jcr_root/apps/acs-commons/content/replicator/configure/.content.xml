@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Content Replicator"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        sling:vanityPath="/replicator/configure.html"
+        consoleId="configureReplicationAgents"
+        contentPath="/content"
+        currentView="${state[&quot;shell.collectionpage.layoutId&quot;].string}"
+        modeGroup="replicator-hosts-task-collection"
+        pageURITemplate="/libs/granite/operations/content/diagnosis.html"
+        targetCollection=".replicator-hosts-task-collection">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[coralui3,granite.ui.coral.foundation,acs-commons.utilities.replicator]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <card
+                granite:class="replicator-hosts-task-collection"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Card View"
+                sling:resourceType="granite/ui/components/coral/foundation/masonry"
+                icon="viewCard"
+                layoutId="card"
+                limit="{Long}20"
+                selectionCount="single"
+                selectionMode="{Boolean}false"
+                size="40"
+                stateId="shell.collectionpage">
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="acs-commons/components/utilities/replicator/agentdatasource"
+                    itemResourceType="acs-commons/components/utilities/replicator/agententry"
+                    limit="10"
+                    offset="0"
+                    path="${requestPathInfo.suffix}"/>
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    foundation-mode-group="replicator-hosts-task-collection"/>
+            </card>
+        </views>
+        <actions jcr:primaryType="nt:unstructured">
+            <primary jcr:primaryType="nt:unstructured">
+                <add
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="acs-commons.replicator.agent.create"
+                    icon="addCircle"
+                    text="Add Agent"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip">
+                    <granite:rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="/etc/replication/agents.author"
+                        privileges="jcr:addChildNodes"/>
+                </add>
+            </primary>
+            <secondary jcr:primaryType="nt:unstructured">
+                <back
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/replicator"
+                    icon="home"
+                    text="Back To Replicator"
+                    variant="primary"
+                    x-cq-linkchecker="skip"/>
+            </secondary>
+            <selection jcr:primaryType="nt:unstructured">
+                <configure
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="acs-commons.replicator.agent.edit"
+                    href="\0"
+                    icon="gear"
+                    text="Configure"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip">
+                    <granite:rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="/etc/replication/agents.author"
+                        privileges="jcr:addChildNodes"/>
+                </configure>
+                <delete
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="acs-commons.replicator.agent.delete"
+                    activeSelectionCount="single"
+                    href="\0"
+                    icon="delete"
+                    target=".replicator-hosts-task-collection"
+                    text="Delete"
+                    variant="actionBar"
+                    x-cq-linkchecker="skip">
+                    <granite:rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="/etc/replication/agents.author"
+                        privileges="jcr:removeNode"/>
+                </delete>
+            </selection>
+        </actions>
+        <footer
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+                <create
+                    granite:id="configureAgentDialog"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Configure Replication Agent"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <items jcr:primaryType="nt:unstructured">
+                        <form
+                            granite:id="createAgentForm"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form"
+                            action="/replicator/configure/resource"
+                            async="{Boolean}true"
+                            enctype="application/x-www-form-urlencoded"
+                            foundationForm="{Boolean}true"
+                            loadingMask="{Boolean}true"
+                            method="POST"
+                            style="vertical">
+                            <items jcr:primaryType="nt:unstructured">
+                                <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    emptyText="publish-cloud"
+                                    fieldLabel="Name"
+                                    name="./jcr:content/jcr:title"
+                                    required="{Boolean}true"/>
+                                <transportUri
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                    emptyText="https://author-xxxxxx-yyyyyy.adobeaemcloud.com/bin/receive"
+                                    fieldLabel="URI"
+                                    name="./jcr:content/transportUri"
+                                    required="{Boolean}true"/>
+                                <authType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Auth Type"
+                                    name="./jcr:content/authType">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <basic
+                                            jcr:primaryType="nt:unstructured"
+                                            text="Basic Auth"
+                                            value="basic"/>
+                                        <oauth
+                                            jcr:primaryType="nt:unstructured"
+                                            text="OAuth 2.0"
+                                            value="oauth"/>
+                                    </items>
+                                </authType>
+                                <basic
+                                    granite:class="list-option-showhide-target"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <transportUser
+                                            granite:id="configureHost-username"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            emptyText="username"
+                                            fieldLabel="User"
+                                            name="./jcr:content/transportUser"/>
+                                        <transportPassword
+                                            granite:id="configureHost-password"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/password"
+                                            emptyText="password"
+                                            fieldLabel="Password"
+                                            name="./jcr:content/transportPassword"/>
+                                        <transportPasswordEncrypted
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            name="./jcr:content/transportPassword@Encrypted"
+                                            value="true"/>
+                                    </items>
+                                    <granite:data
+                                        jcr:primaryType="nt:unstructured"
+                                        showhidetargetvalue="basic"/>
+                                </basic>
+                                <oauth
+                                    granite:class="hidden list-option-showhide-target"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <accessTokenProviderName
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            fieldLabel="Access Token Provider Name"
+                                            name="./jcr:content/accessTokenProviderName">
+                                            <datasource
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="acs-commons/components/utilities/replicator/oauthdatasource"/>
+                                        </accessTokenProviderName>
+                                        <userId
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            emptyText="replication-service"
+                                            fieldLabel="Agent User Id"
+                                            name="./jcr:content/userId"/>
+                                        <warning
+                                            granite:class="warn narrow"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="acs-commons/components/utilities/warn"
+                                            text="The name of the token provider must match the name property in your OAuth Access Token Provider configuration, see &quot;&#x9;Adobe Granite Access Token provider using Client Credentials/JWT Credential flow&quot; in the OSGi console&lt;p>The agent user must have the private key from the AEMaaCS technical account installed in the user key store&lt;/p>"/>
+                                    </items>
+                                    <granite:data
+                                        jcr:primaryType="nt:unstructured"
+                                        showhidetargetvalue="oauth"/>
+                                </oauth>
+                                <provisioner
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/provisioner"
+                                    value="content-replicator"/>
+                                <serializationType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/serializationType"
+                                    value="durbo"/>
+                                <triggerSpecific
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/triggerSpecific"
+                                    value="true"/>
+                                <noVersioning
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/noVersioning"
+                                    value="true"/>
+                                <enabled
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/enabled"
+                                    value="true"/>
+                                <resourceType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    ignoreData="{Boolean}true"
+                                    name="./jcr:content/sling:resourceType"
+                                    value="cq/replication/components/agent"/>
+                                <contentPrimaryType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/jcr:primaryType"
+                                    value="nt:unstructured"/>
+                                <primaryType
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:primaryType"
+                                    value="cq:Page"/>
+                                <nameHint
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name=":nameHint"
+                                    value="publish-cloud"/>
+                                <enableOauth
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name="./jcr:content/enableOauth"
+                                    value="false"/>
+                                <action
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    name=":action"/>
+                            </items>
+                            <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                foundation-form-response-ui-success="\{&quot;name&quot;: &quot;foundation.redirect&quot;, &quot;href&quot;: &quot;${header.Referer}&quot;}"/>
+                        </form>
+                    </items>
+                    <footer jcr:primaryType="nt:unstructured">
+                        <cancel
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Cancel">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </cancel>
+                        <submit
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            formId="createAgentForm"
+                            text="Submit"
+                            type="submit"/>
+                    </footer>
+                </create>
+            </items>
+        </footer>
+    </jcr:content>
+    <resource
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="acs-commons/components/utilities/replicator/configure"
+        sling:vanityPath="/replicator/configure/resource"/>
+</jcr:root>
