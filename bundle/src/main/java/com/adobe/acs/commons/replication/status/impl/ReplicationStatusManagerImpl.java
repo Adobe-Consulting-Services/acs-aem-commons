@@ -32,10 +32,9 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.ComponentContext;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -57,8 +56,7 @@ import org.osgi.framework.ServiceReference;
  * ACS AEM Commons - Replication Status Manager
  * OSGi Service for changing the replication status of resources.
  */
-@Component
-@Service
+@Component(service = ReplicationStatusManager.class)
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
@@ -68,8 +66,12 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
     private static final int SAVE_THRESHOLD = 1024;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-    private BundleContext bundleContext;
+    private volatile BundleContext bundleContext;
+
+    @Activate
+    protected void activate(final ComponentContext context) {
+        this.bundleContext = context.getBundleContext();
+    }
 
     /**
      * {@inheritDoc}
