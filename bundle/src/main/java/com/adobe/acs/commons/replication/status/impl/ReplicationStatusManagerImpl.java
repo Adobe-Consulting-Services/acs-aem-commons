@@ -33,6 +33,8 @@ import javax.jcr.nodetype.NodeType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -48,6 +50,8 @@ import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * ACS AEM Commons - Replication Status Manager
@@ -63,6 +67,9 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final String REP_STATUS_ACTIVATE = "Activate";
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
     private static final int SAVE_THRESHOLD = 1024;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    private BundleContext bundleContext;
 
     /**
      * {@inheritDoc}
@@ -201,12 +208,34 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     }
 
     private void setReplicationStatus(Node node, Collection<String> agentIds, Calendar replicatedAt, String replicatedBy, String replicationStatus) throws RepositoryException {
-        Set<String> propertyNameSuffixes = Stream.concat(Stream.of(""), agentIds.stream().map(s -> "_" + s)).collect(Collectors.toSet());
+        // Only include agent-specific suffixes if the Replicator service has replicationStatusPerAgent enabled
+        Stream<String> agentSuffixStream = (isReplicationStatusPerAgentEnabled() && agentIds != null)
+            ? agentIds.stream().map(s -> "_" + s) : Stream.empty();
+        Set<String> propertyNameSuffixes = Stream.concat(Stream.of(""), agentSuffixStream).collect(Collectors.toSet());
         for (String propertyNameSuffix : propertyNameSuffixes) {
             JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + propertyNameSuffix, replicatedAt);
             JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + propertyNameSuffix, replicatedBy);
             JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION + propertyNameSuffix, replicationStatus);
         }
+    }
+
+    /**
+     * Check if the core Replicator service has replicationStatusPerAgent enabled
+     */
+    private boolean isReplicationStatusPerAgentEnabled() {
+        if (bundleContext == null) {
+            return false;
+        }
+        try {
+            ServiceReference<?> ref = bundleContext.getServiceReference("com.day.cq.replication.Replicator");
+            if (ref != null) {
+                Object config = ref.getProperty("replicationStatusPerAgent");
+                return config instanceof Boolean && (Boolean) config;
+            }
+        } catch (Exception e) {
+            log.debug("Unable to read replicationStatusPerAgent configuration from Replicator service", e);
+        }
+        return false;
     }
 
     /**
