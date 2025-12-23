@@ -17,79 +17,79 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
-
 import java.util.Calendar;
-import java.util.Dictionary;
 
-//@formatter:off
-@Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Weekly",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    metatype = true,
-    configurationFactory = true,
-    policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-  @Property(label = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE,
-      name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-      propertyPrivate = false,
-      value = { }),
-  @Property(label = "Expires Time",
-      description = "Time of day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.",
-      name = AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME,
-      propertyPrivate = false),
-  @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Each week on day {expires.day-of-week} at {expires.time} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
+
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
+        "webconsole.configurationFactory.nameHint=Expires each week on day {expires.day-of-week} at {expires.time} for patterns: [{filter.pattern}]"
 })
-//@formatter:on
+@Designate(ocd = WeeklyExpiresHeaderFilter.Config.class, factory = true)
 public class WeeklyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 
-    
-    @Property(
-            label = "Expires Day",
-            description = "Day of week on which content expires.",
-            options = {
-                    @PropertyOption(name = "" + Calendar.SUNDAY, value = "Sunday"),
-                    @PropertyOption(name = "" + Calendar.MONDAY, value = "Monday"),
-                    @PropertyOption(name = "" + Calendar.TUESDAY, value = "Tuesday"),
-                    @PropertyOption(name = "" + Calendar.WEDNESDAY, value = "Wednesday"),
-                    @PropertyOption(name = "" + Calendar.THURSDAY, value = "Thursday"),
-                    @PropertyOption(name = "" + Calendar.FRIDAY, value = "Friday"),
-                    @PropertyOption(name = "" + Calendar.SATURDAY, value = "Saturday"),
-            })
-    static final String PROP_EXPIRES_DAY_OF_WEEK = "expires.day-of-week";
+    @ObjectClassDefinition(name = "ACS AEM Commons - Cache Expires Header - Weekly", description = "Adds an Expires header to responses (for example to enable Dispatcher TTL support).")
+    // meta annotation
+    public @interface Config {
+        @AttributeDefinition(name = "Filter Patterns", description = "Restricts adding the headers to request paths which match any of the supplied regular expression patterns.", cardinality = Integer.MAX_VALUE)
+        String[] filter_pattern() default {};
 
-    private int dayOfWeek;
+        @AttributeDefinition(name = "Expires Time", description = "Time of day at which response expires. Must match SimpleDateFormat of \"HH:mm\".")
+        String expires_time();
+
+        @AttributeDefinition(name = "Expires Day", description = "Day of week on which response expires.", options = {
+                @Option(value = "" + Calendar.SUNDAY, label = "Sunday"),
+                @Option(value = "" + Calendar.MONDAY, label = "Monday"),
+                @Option(value = "" + Calendar.TUESDAY, label = "Tuesday"),
+                @Option(value = "" + Calendar.WEDNESDAY, label = "Wednesday"),
+                @Option(value = "" + Calendar.THURSDAY, label = "Thursday"),
+                @Option(value = "" + Calendar.FRIDAY, label = "Friday"),
+                @Option(value = "" + Calendar.SATURDAY, label = "Saturday"),
+        })
+        int expires_day$_$of$_$week();
+
+        @AttributeDefinition(name = "Allow Authorized Requests", description = "If the header should be added also to authorized requests (carrying a \"Authorization\" header, or cookie with name \"login-token\" or \"authorizization\").")
+        boolean allow_authorized() default true;
+
+        @AttributeDefinition(name = "Allow All Parameters", description = "If the header should be added also to requests carrying any parameters except for those given in \"block.params\".")
+        boolean allow_all_params() default false;
+
+        @AttributeDefinition(name = "Disallowed Parameter Name", description = "List of request parameter names that are not allowed to be present for the header to be added. Only relevant if \"allow.all.params\" is true.", cardinality = Integer.MAX_VALUE)
+        String[] block_params() default {};
+
+        @AttributeDefinition(name = "Allow Parameter Names", description = "List of request parameter names that are allowed to be present for the header to be added. Only relevant if \"allow.all.params\" is false.", cardinality = Integer.MAX_VALUE)
+        String[] pass_through_params() default {};
+
+        @AttributeDefinition(name = "Allow Non-Dispatcher Requests", description = "If the header should be added also to requests not coming from a dispatcher (i.e. requests not carrying the \"Server-Agent\" header containing value \"Communique-Dispatcher\").")
+        boolean allow_nondispatcher() default false;
+
+        @AttributeDefinition(name = "Service Ranking", description = "Service Ranking for the OSGi service.")
+        int service_ranking() default 0;
+    }
+
+    private final Config config;
+
+    @Activate
+    public WeeklyExpiresHeaderFilter(Config config, BundleContext bundleContext) {
+        super(config.expires_time(), new AbstractCacheHeaderFilter.ServletRequestPredicates(config.filter_pattern(), config.allow_all_params(), config.block_params(), config.pass_through_params(), config.allow_authorized(), config.allow_nondispatcher()), config.service_ranking(), bundleContext);
+        if (config.expires_day$_$of$_$week() < Calendar.SUNDAY || config.expires_day$_$of$_$week() > Calendar.SATURDAY) {
+            throw new IllegalArgumentException("Day of week must be valid value from Calendar DAY_OF_WEEK attribute.");
+        }
+        this.config = config;
+    }
 
     @Override
     protected void adjustExpires(Calendar next) {
-        next.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        next.set(Calendar.DAY_OF_WEEK, config.expires_day$_$of$_$week());
         if (next.before(Calendar.getInstance())) {
             next.add(Calendar.DAY_OF_WEEK, next.getMaximum(Calendar.DAY_OF_WEEK));;
         }
     }
 
-    @Override
-    protected void doActivate(ComponentContext context) throws Exception {
-        super.doActivate(context);
-
-        @SuppressWarnings("unchecked")
-        Dictionary<String, Object> props = context.getProperties();
-        dayOfWeek = PropertiesUtil.toInteger(props.get(PROP_EXPIRES_DAY_OF_WEEK), -1);
-        if (dayOfWeek < Calendar.SUNDAY || dayOfWeek > Calendar.SATURDAY) {
-            throw new ConfigurationException(PROP_EXPIRES_DAY_OF_WEEK, "Day of week must be valid value from Calendar DAY_OF_WEEK attribute.");
-        }
-    }
 }

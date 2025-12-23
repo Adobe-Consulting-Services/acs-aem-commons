@@ -21,12 +21,19 @@ package com.adobe.acs.commons.http.headers.impl;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ResourceBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeHeaderFilter {
+
+public abstract class ResourceBasedDispatcherMaxAgeHeaderFilter extends AbstractCacheControlMaxAgeHeaderFilter {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceBasedDispatcherMaxAgeHeaderFilter.class);
+
+    protected ResourceBasedDispatcherMaxAgeHeaderFilter(long maxAge, AbstractCacheHeaderFilter.ServletRequestPredicates servletPredicates, int serviceRanking,
+            BundleContext bundleContext) {
+        super(true, maxAge, servletPredicates, serviceRanking, bundleContext);
+    }
 
     protected Resource getResource(SlingHttpServletRequest slingRequest) {
         if (slingRequest.getResource().isResourceType("cq:Page")) {
