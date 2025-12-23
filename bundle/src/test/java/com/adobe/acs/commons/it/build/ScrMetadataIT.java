@@ -122,12 +122,24 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.category");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:jmx.objectname");
 
+        // proper default value now set in OSGi annotations
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.http.headers.impl.PropertyBasedDispatcherMaxAgeHeaderFilter:inherit.property.value");
+        // was not marked as readonly before (but never supposed to be changed)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.http.headers.impl.PropertyBasedDispatcherMaxAgeHeaderFilter:dispatcher.filter.engine");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.http.headers.impl.ResourceTypeBasedDispatcherMaxAgeHeaderFilter:dispatcher.filter.engine");
+
         // Property port on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Integer})
         // Property password on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Password})
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:port");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:password");
 
+        // use proper types now with OSGi annotations and component property types
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.WeeklyExpiresHeaderFilter:expires.day-of-week");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.PropertyBasedDispatcherMaxAgeHeaderFilter:max.age");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.ResourceTypeBasedDispatcherMaxAgeHeaderFilter:max.age");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.DispatcherMaxAgeHeaderFilter:max.age");
+        
         ALLOWED_SCR_NS_URIS = new HashSet<>();
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.0.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.1.0");

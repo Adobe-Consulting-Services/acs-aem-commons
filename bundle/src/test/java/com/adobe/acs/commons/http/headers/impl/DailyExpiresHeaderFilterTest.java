@@ -17,26 +17,36 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import com.adobe.acs.commons.http.headers.impl.DailyExpiresHeaderFilter;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.converter.Converters;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DailyExpiresHeaderFilterTest {
 
-    DailyExpiresHeaderFilter filter = new DailyExpiresHeaderFilter();
+    @Mock
+    BundleContext bundleContext;
+
+    DailyExpiresHeaderFilter createFilter() {
+        Map<String, Object> props = new HashMap<>();
+        props.put("filter.pattern", new String[] { "/content/dam/.*" });
+        props.put("expires.time", "02:30");
+        DailyExpiresHeaderFilter.Config config = Converters.standardConverter().convert(props).to(DailyExpiresHeaderFilter.Config.class);
+        return new DailyExpiresHeaderFilter(config, bundleContext);
+    }
 
     @Test
     public void testAdjustExpiresPast() throws Exception {
-
-
         Calendar actual = Calendar.getInstance();
         actual.set(Calendar.SECOND, 0);
         actual.set(Calendar.MILLISECOND, 0);
@@ -45,6 +55,7 @@ public class DailyExpiresHeaderFilterTest {
         expected.setTime(actual.getTime());
         expected.add(Calendar.DAY_OF_MONTH, 1);
 
+        DailyExpiresHeaderFilter filter = createFilter();
         filter.adjustExpires(actual);
 
         assertTrue(DateUtils.isSameInstant(expected, actual));
@@ -52,8 +63,6 @@ public class DailyExpiresHeaderFilterTest {
 
     @Test
     public void testAdjustExpiresFuture() throws Exception {
-
-
         Calendar actual = Calendar.getInstance();
         actual.add(Calendar.MINUTE, 1);
         actual.set(Calendar.SECOND, 0);
@@ -62,6 +71,7 @@ public class DailyExpiresHeaderFilterTest {
         Calendar expected = Calendar.getInstance();
         expected.setTime(actual.getTime());
 
+        DailyExpiresHeaderFilter filter = createFilter();
         filter.adjustExpires(actual);
 
         assertTrue(DateUtils.isSameInstant(expected, actual));

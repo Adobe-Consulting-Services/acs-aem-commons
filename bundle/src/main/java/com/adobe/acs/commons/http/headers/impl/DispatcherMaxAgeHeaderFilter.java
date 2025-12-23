@@ -17,72 +17,62 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Dictionary;
-import java.util.Enumeration;
-
-//@formatter:off
-@Component(
-      label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
-      description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
-      metatype = true,
-      configurationFactory = true,
-      policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-    @Property(label = "Filter Patterns",
-        description = "Patterns on which to apply this Max Age cache-control rule.",
-        cardinality = Integer.MAX_VALUE,
-        name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-        propertyPrivate = false,
-        value = { }),
-    @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Max Age: {max.age} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
-})
 //@formatter:on
-public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
+        "webconsole.configurationFactory.nameHint=Max Age: {max.age} for Patterns: [{filter.pattern}]"
+})
+@Designate(ocd = DispatcherMaxAgeHeaderFilter.Config.class, factory = true)
+public class DispatcherMaxAgeHeaderFilter extends AbstractCacheControlMaxAgeHeaderFilter {
 
-    protected static final String CACHE_CONTROL_NAME = "Cache-Control";
+    @ObjectClassDefinition(name = "ACS AEM Commons - Dispacher Cache Control Header - Max Age", description = "Adds a Cache-Control: max-age header to responses (for example to enable Dispatcher TTL support).")
+    // meta annotation
+    public @interface Config {
+        /**
+         * Filter Patterns
+         *
+         * Patterns on which to apply this Max Age cache-control rule.
+         */
+        @AttributeDefinition(name = "Filter Patterns", description = "Restricts adding the headers to request paths which match any of the supplied regular expression patterns.", cardinality = Integer.MAX_VALUE)
+        String[] filter_pattern() default {};
 
-    @Property(label = "Cache-Control Max Age",
-            description = "Max age value (in seconds) to put in Cache Control header.")
-    public static final String PROP_MAX_AGE = "max.age";
+        /**
+         * Cache-Control Max-Age
+         *
+         * Max age value (in seconds) to put in Cache Control header.
+         */
+        @AttributeDefinition(name = "Cache-Control Max-Age", description = "Value of the max-age directive to emit in the Cache-Control header.")
+        long max_age();
 
-    protected static final String HEADER_PREFIX = "max-age=";
+        @AttributeDefinition(name = "Allow Authorized Requests", description = "If the header should be added also to authorized requests (carrying a \"Authorization\" header, or cookie with name \"login-token\" or \"authorizization\").")
+        boolean allow_authorized() default true;
 
-    private long maxage;
+        @AttributeDefinition(name = "Allow All Parameters", description = "If the header should be added also to requests carrying any parameters except for those given in \"block.params\".")
+        boolean allow_all_params() default false;
 
-    @Override
-    protected String getHeaderName() {
-        return CACHE_CONTROL_NAME;
+        @AttributeDefinition(name = "Disallowed Parameter Name", description = "List of request parameter names that are not allowed to be present for the header to be added. Only relevant if \"allow.all.params\" is true.", cardinality = Integer.MAX_VALUE)
+        String[] block_params() default {};
+
+        @AttributeDefinition(name = "Allow Parameter Names", description = "List of request parameter names that are allowed to be present for the header to be added. Only relevant if \"allow.all.params\" is false.", cardinality = Integer.MAX_VALUE)
+        String[] pass_through_params() default {};
+
+        @AttributeDefinition(name = "Allow Non-Dispatcher Requests", description = "If the header should be added also to requests not coming from a dispatcher (i.e. requests not carrying the \"Server-Agent\" header containing value \"Communique-Dispatcher\").")
+        boolean allow_nondispatcher() default false;
+
+        @AttributeDefinition(name = "Service Ranking", description = "Service Ranking for the OSGi service.")
+        int service_ranking() default 0;
     }
 
-    @Override
-    protected String getHeaderValue(HttpServletRequest request) {
-        return HEADER_PREFIX + maxage;
+    @Activate
+    public DispatcherMaxAgeHeaderFilter(Config config, BundleContext bundleContext) {
+        super(false, config.max_age(), new AbstractCacheHeaderFilter.ServletRequestPredicates(config.filter_pattern(), config.allow_all_params(), config.block_params(), config.pass_through_params(), config.allow_authorized(), config.allow_nondispatcher()), config.service_ranking(), bundleContext);
     }
 
-    @Override
-    protected void doActivate(ComponentContext context) throws Exception {
-        Dictionary<?, ?> properties = context.getProperties();
-        maxage = PropertiesUtil.toLong(properties.get(PROP_MAX_AGE), -1);
-        if (maxage < 0) {
-            throw new ConfigurationException(PROP_MAX_AGE, "Max Age must be specified and greater than 0.");
-        }
-    }
-
-    public String toString() {
-        return this.getClass().getName() + "[" + getHeaderValue(null) + "]";
-    }
 }
