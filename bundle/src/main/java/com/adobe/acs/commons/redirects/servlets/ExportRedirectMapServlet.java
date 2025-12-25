@@ -126,6 +126,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(12).setCellValue(ExportColumn.MODIFIED_BY.getTitle());
         headerRow.createCell(13).setCellValue(ExportColumn.CACHE_CONTROL.getTitle());
         headerRow.createCell(14).setCellValue(ExportColumn.PRESERVE_QUERY_STRING.getTitle());
+        headerRow.createCell(15).setCellValue(ExportColumn.IGNORE_CASE.getTitle());
 
         // column width in POI is measured in 1/256th of the default character width
         sheet.setColumnWidth(0, 256 * 50);
@@ -143,6 +144,7 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(12, 256 * 30);
         sheet.setColumnWidth(13, 256 * 30);
         sheet.setColumnWidth(14, 256 * 12);
+        sheet.setColumnWidth(15, 256 * 12);
 
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
@@ -198,6 +200,9 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
 
             Cell cell14 = row.createCell(14);
             cell14.setCellValue(rule.getPreserveQueryString());
+
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(rule.isCaseInsensitive());
         }
         sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 13));
 

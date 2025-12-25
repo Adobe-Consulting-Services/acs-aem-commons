@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #3683 RedirectFilter: Ignore Case value not showing in export
+
+## 6.15.4 - 2025-11-19
+
 ### Changed
 
 - #3654 RedirectFilter should always emit a trace log if no entry was found
