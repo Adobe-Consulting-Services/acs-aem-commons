@@ -21,4 +21,4 @@
     jcr:primaryType="cq:ClientLibraryFolder"
           categories="acs-commons.report-page.app"
           jsProcessor="[default:none,min:gcc]"
-          dependencies="[coralui2,acs-commons.angularjs,acs-commons.coralui2.angularjs]"/>
+          dependencies="[coralui2,acs-commons.angularjs,acs-commons.coralui2.angularjs,granite.ui.coral.foundation]"/>
