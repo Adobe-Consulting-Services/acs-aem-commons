@@ -11,11 +11,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+
+- #3683 RedirectFilter: Ignore Case value not showing in export
+
+## 6.15.4 - 2025-11-19
+
 ### Changed
 
 - #3654 RedirectFilter should always emit a trace log if no entry was found
 - #3650 Clarify description of com.adobe.acs.commons.redirects.filter.RedirectFilter -> Request Extensions/Request Paths with regards to no values
 - #2524 Add dependency to enable PathField as report parameter. 
+- Respect com.day.cq.replication.Replicator's replicationStatusPerAgent setting in ReplicationStatusManagerImpl
 
 ### Fixed
 

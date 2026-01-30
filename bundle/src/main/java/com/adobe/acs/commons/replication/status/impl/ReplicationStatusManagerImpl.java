@@ -32,11 +32,11 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +53,7 @@ import com.day.cq.wcm.api.PageManager;
  * ACS AEM Commons - Replication Status Manager
  * OSGi Service for changing the replication status of resources.
  */
-@Component
-@Service
+@Component(service=ReplicationStatusManager.class, configurationPid = { "com.day.cq.replication.impl.ReplicatorImpl", Component.NAME } )
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
@@ -63,6 +62,23 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final String REP_STATUS_ACTIVATE = "Activate";
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
     private static final int SAVE_THRESHOLD = 1024;
+    private final boolean needsReplicationStatusPerAgent;
+
+    public @interface Config {
+        /**
+         * Inherited configuration property from configuration PID "com.day.cq.replication.impl.ReplicatorImpl"
+         */
+        boolean replicationStatusPerAgent() default false;
+    }
+
+    @Activate
+    public ReplicationStatusManagerImpl(Config config) {
+        this(config.replicationStatusPerAgent());
+    }
+
+    ReplicationStatusManagerImpl(boolean needsReplicationStatusPerAgent) {
+        this.needsReplicationStatusPerAgent = needsReplicationStatusPerAgent;
+    }
 
     /**
      * {@inheritDoc}
@@ -115,7 +131,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                 continue;
             }
 
-            this.setReplicationStatus(resourceResolver, replicatedBy, replicatedAt, status, resource);
+            this.setReplicationStatus(resourceResolver, agentIds, replicatedBy, replicatedAt, status, resource);
         }
     }
 
@@ -201,7 +217,9 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     }
 
     private void setReplicationStatus(Node node, Collection<String> agentIds, Calendar replicatedAt, String replicatedBy, String replicationStatus) throws RepositoryException {
-        Set<String> propertyNameSuffixes = Stream.concat(Stream.of(""), agentIds.stream().map(s -> "_" + s)).collect(Collectors.toSet());
+        // Only include agent-specific suffixes if the Replicator service has replicationStatusPerAgent enabled
+        Stream<String> agentSuffixStream = needsReplicationStatusPerAgent && agentIds != null ? Stream.concat(Stream.of(""), agentIds.stream().map(s -> "_" + s)) : Stream.empty();
+        Set<String> propertyNameSuffixes = Stream.concat(Stream.of(""), agentSuffixStream).collect(Collectors.toSet());
         for (String propertyNameSuffix : propertyNameSuffixes) {
             JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + propertyNameSuffix, replicatedAt);
             JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + propertyNameSuffix, replicatedBy);

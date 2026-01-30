@@ -494,6 +494,7 @@ public class ImportRedirectMapServletTest {
         doReturn(301).when(rule).getStatusCode();
         doReturn(null).when(rule).getCreatedBy();
         doReturn(null).when(rule).getModifiedBy();
+        doReturn(true).when(rule).isCaseInsensitive();
 
         Workbook wb = export(Collections.singletonList(rule));
 

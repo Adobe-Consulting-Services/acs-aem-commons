@@ -22,10 +22,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.function.Function;
 
@@ -43,6 +45,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -59,7 +62,7 @@ public class ReplicationStatusManagerImplTest {
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Spy
-    ReplicationStatusManagerImpl replicationStatusManager = new ReplicationStatusManagerImpl();
+    ReplicationStatusManagerImpl replicationStatusManager = new ReplicationStatusManagerImpl(true);
 
     ResourceResolver resourceResolver;
 
@@ -216,6 +219,61 @@ public class ReplicationStatusManagerImplTest {
         assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED));
         assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY));
         assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION));
+    }
+
+    @Test
+    public void testSetReplicationStatus_ActivateWithAgentsAndAgentSpecificStatusEnabled() throws Exception {
+        final String replicationStatus = "Activate";
+        final String replicatedBy = "Test User";
+        final Calendar replicatedAt = Calendar.getInstance();
+        replicatedAt.set(1,1);
+
+        replicationStatusManager.setReplicationStatus(resourceResolver,
+                Arrays.asList("agent1", "agent2"),
+                replicatedBy,
+                replicatedAt,
+                ReplicationStatusManager.Status.ACTIVATED,
+                UNREPLICATED_PATH);
+
+        assertTrue(unreplicatedNode.isNodeType(ReplicationStatus.NODE_TYPE));
+
+        assertSameTime(replicatedAt, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertSameTime(replicatedAt, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + "_agent1").getDate());
+        assertSameTime(replicatedAt, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + "_agent2").getDate());
+        assertEquals(replicatedBy, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
+        assertEquals(replicatedBy, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + "_agent1").getString());
+        assertEquals(replicatedBy, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + "_agent2").getString());
+        assertEquals(replicationStatus, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION).getString());
+        assertEquals(replicationStatus, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION + "_agent1").getString());
+        assertEquals(replicationStatus, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION + "_agent2").getString());
+    }
+
+    @Test
+    public void testSetReplicationStatus_ActivateWithAgentsAndAgentSpecificStatusDisabled() throws Exception {
+        replicationStatusManager = Mockito.spy(new ReplicationStatusManagerImpl(false));
+        final String replicationStatus = "Activate";
+        final String replicatedBy = "Test User";
+        final Calendar replicatedAt = Calendar.getInstance();
+        replicatedAt.set(1,1);
+
+        replicationStatusManager.setReplicationStatus(resourceResolver,
+                Arrays.asList("agent1", "agent2"),
+                replicatedBy,
+                replicatedAt,
+                ReplicationStatusManager.Status.ACTIVATED,
+                UNREPLICATED_PATH);
+
+        assertTrue(unreplicatedNode.isNodeType(ReplicationStatus.NODE_TYPE));
+
+        assertSameTime(replicatedAt, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertFalse(unreplicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + "_agent1"));
+        assertFalse(unreplicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED + "_agent2"));
+        assertEquals(replicatedBy, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
+        assertFalse(unreplicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + "_agent1"));
+        assertFalse(unreplicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY + "_agent2"));
+        assertEquals(replicationStatus, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION).getString());
+        assertFalse(unreplicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION + "_agent1"));
+        assertFalse(unreplicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION + "_agent2"));
     }
 
     @Test
