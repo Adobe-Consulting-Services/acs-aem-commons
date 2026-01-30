@@ -71,6 +71,9 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
     @Reference
     private transient PackageHelper packageHelper;
 
+    @Reference
+    private transient Packaging packaging;
+
     @Override
     protected void doPost(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse)
             throws ServletException, IOException {
@@ -140,7 +143,7 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
         log.debug("package built in {} ms", (System.currentTimeMillis() - t0));
         log.debug("package size: {} MB", String.format("%.2f", (float) jcrPackage.getSize() / (1024 * 1024)));
 
-        JcrPackageManager packageManager = PackagingService.getPackageManager(resourceResolver.adaptTo(Session.class));
+        JcrPackageManager packageManager = packaging.getPackageManager(resourceResolver.adaptTo(Session.class));
         packageManager.assemble(jcrPackage, null);
         return jcrPackage.getNode().getPath();
     }
