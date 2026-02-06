@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ### Changed
+- #3614 Cross-Environment Replicator: new tool to replicate content across AEMaaCS environments
+
+## 6.14.0 - 2025-07-15
+
+### Changed
 
 - Respect com.day.cq.replication.Replicator's replicationStatusPerAgent setting in ReplicationStatusManagerImpl
 - #3682 Add "allow.authorized" flag for Cache Control header filter
