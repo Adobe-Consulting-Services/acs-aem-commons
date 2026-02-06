@@ -1,4 +1,4 @@
-Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-bundle
+Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-bundle;singleton:=true
 Import-Package: \
   com.adobe.cq.dialogconversion;resolution:=optional,\
   com.amazonaws.*;resolution:=optional,\
