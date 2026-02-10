@@ -8,8 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
-
 ## Unreleased ([details][unreleased changes details])
+
+
+## 6.16.0 - 2026-02-10
 
 ### Changed
 
