@@ -27,7 +27,7 @@ This requires the following parameters
 
 1. Release version: The version the new release version should have. The SNAPSHOT version in the master branch will be automatically set to same version with `<patch>` being incremented by one and ending with `-SNAPSHOT`.
 2. Email Release Manager: An email address associated with the release commits to the Git repository. You can use the [GitHub noreply address](https://docs.github.com/en/account-and-profile/reference/email-addresses-reference#your-noreply-email-address).
-3. A personal access token used for performing the write operations on the Git repository. Set it up in [Personal access tokens (classic)](https://github.com/settings/tokens). *[Fine-granied personal access tokens](https://github.com/settings/personal-access-tokens)* require approval from the repository admin (only <https://github.com/davidjgonzalez> at the moment) while classic ones have the repository access as the underlying user and don't require approval.
+3. A personal access token used for performing the write operations on the Git repository. Set it up in [Personal access tokens (classic)](https://github.com/settings/tokens). *[Fine-granied personal access tokens](https://github.com/settings/personal-access-tokens)* require [approval](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/managing-requests-for-personal-access-tokens-in-your-organization) from the organization owner (only <https://github.com/davidjgonzalez> at the moment) while classic ones have the repository access as the underlying user and don't require approval.
 
 It uses a PGP key and Sonatype Central Portal credentials stored in the repository secrets. The release process will perform the following steps:
 
@@ -41,7 +41,6 @@ The following manual steps need to be performed afterwardsL:
 
 1. Review and publish the draft [release notes](https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases)
 1. Add a release announcement (and any other docs) to the [documentation site](https://github.com/Adobe-Consulting-Services/adobe-consulting-services.github.io). At least update [`version` in acs-aem-commons.yml](https://github.com/Adobe-Consulting-Services/adobe-consulting-services.github.io/blob/master/_data/acs-aem-commons.yml).
-1. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`
 
 ## Manual Process (Legacy)
 
@@ -106,8 +105,6 @@ if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 8. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
 
 9. Add a release announcement (and any other docs) to the documentation site.
-
-10. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`
 
 
 [central-portal]: https://central.sonatype.org/register/central-portal/
