@@ -28,6 +28,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 6.15.4 - 2025-11-19
 
 ### Changed
+- #3614 Cross-Environment Replicator: new tool to replicate content across AEMaaCS environments
+
+## 6.14.0 - 2025-07-15
+
+### Changed
 
 - #3654 RedirectFilter should always emit a trace log if no entry was found
 - #3650 Clarify description of com.adobe.acs.commons.redirects.filter.RedirectFilter -> Request Extensions/Request Paths with regards to no values
