@@ -18,7 +18,9 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicyOption;
@@ -27,7 +29,9 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +40,10 @@ import javax.script.Bindings;
 /**
  * Bindings Values Provider that adds bindings for globalProperties,
  * sharedProperties, and mergedProperties maps.
+ * <p>
+ * This provider is disabled by default and must be explicitly enabled using OSGi config
+ * property {@code enabled=true} for
+ * {@code com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider}.
  * <p>
  * globalProperties contains the shared properties accessible by
  * all components.
@@ -48,10 +56,17 @@ import javax.script.Bindings;
  * to instance-level values, then shared values, and finally global
  * values when properties exist at multiple levels with the same name.
  */
-@Component
+@Component(metatype = true)
 @Service
 public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesBindingsValuesProvider.class);
+
+    @Property(
+            boolValue = false,
+            label = "Enabled",
+            description = "Enable shared/global/merged component property bindings for Sling scripts"
+    )
+    static final String PROP_ENABLED = "enabled";
 
     /**
      * Bind if available, check for null when reading.
@@ -59,16 +74,25 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
     @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     SharedComponentProperties sharedComponentProperties;
 
+    private volatile boolean enabled = false;
+
+    @Activate
+    protected void activate(final ComponentContext componentContext) {
+        enabled = PropertiesUtil.toBoolean(componentContext.getProperties().get(PROP_ENABLED), false);
+    }
+
     @Override
     public void addBindings(final Bindings bindings) {
-        final SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
         final Resource resource = (Resource) bindings.get(SlingBindings.RESOURCE);
-        if (request != null && resource != null) {
-            final SharedPropertiesRequestCache cache = SharedPropertiesRequestCache.fromRequest(request);
-            if (sharedComponentProperties != null) {
-                setSharedProperties(bindings, resource, cache);
-            } else {
-                log.debug("Shared Component Properties must be configured to enable this provider");
+        if (enabled) {
+            final SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
+            if (request != null && resource != null) {
+                final SharedPropertiesRequestCache cache = SharedPropertiesRequestCache.fromRequest(request);
+                if (sharedComponentProperties != null) {
+                    setSharedProperties(bindings, resource, cache);
+                } else {
+                    log.debug("Shared Component Properties must be configured to enable this provider");
+                }
             }
         }
         setDefaultBindings(bindings, resource);
