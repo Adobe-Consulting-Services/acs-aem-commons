@@ -18,6 +18,8 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -25,7 +27,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -43,6 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.osgi.service.component.ComponentContext;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
@@ -89,7 +94,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     when(resource.getPath()).thenReturn(SITE_ROOT);
     when(pageRootProvider.getRootPagePath(anyString())).thenReturn(SITE_ROOT);
 
-    
     sharedProps = new ValueMapDecorator(new HashMap<String, Object>());
     globalProps = new ValueMapDecorator(new HashMap<String, Object>());
     sharedProps.put("shared", "value");
@@ -136,19 +140,50 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
   }
 
   @Test
-  public void addBindings() {
+  public void addBindings_disabled_doesNotBindAnything() {
     final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
     sharedComponentProperties.pageRootProvider = pageRootProvider;
 
-    final SharedComponentPropertiesBindingsValuesProvider sharedComponentPropertiesBindingsValuesProvider
-        = new SharedComponentPropertiesBindingsValuesProvider();
+    final SharedComponentPropertiesBindingsValuesProvider provider =
+        new SharedComponentPropertiesBindingsValuesProvider();
 
-    sharedComponentPropertiesBindingsValuesProvider.sharedComponentProperties = sharedComponentProperties;
-    sharedComponentPropertiesBindingsValuesProvider.addBindings(bindings);
+    provider.sharedComponentProperties = sharedComponentProperties;
+    activate(provider, false);
+
+    provider.addBindings(bindings);
+
+    assertFalse(bindings.containsKey(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE));
+    assertFalse(bindings.containsKey(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE));
+    assertEquals(ValueMap.EMPTY, bindings.get(SharedComponentProperties.SHARED_PROPERTIES));
+    assertEquals(ValueMap.EMPTY, bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES));
+    assertEquals(ValueMap.EMPTY, bindings.get(SharedComponentProperties.MERGED_PROPERTIES));
+  }
+
+  @Test
+  public void addBindings_enabled_bindsSharedGlobalAndMergedProperties() {
+    final SharedComponentPropertiesImpl sharedComponentProperties = new SharedComponentPropertiesImpl();
+    sharedComponentProperties.pageRootProvider = pageRootProvider;
+
+    final SharedComponentPropertiesBindingsValuesProvider provider =
+        new SharedComponentPropertiesBindingsValuesProvider();
+
+    provider.sharedComponentProperties = sharedComponentProperties;
+    activate(provider, true);
+
+    provider.addBindings(bindings);
 
     assertEquals(sharedPropsResource, bindings.get(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE));
     assertEquals(globalPropsResource, bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE));
     assertEquals(sharedProps, bindings.get(SharedComponentProperties.SHARED_PROPERTIES));
     assertEquals(globalProps, bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES));
+    assertNotNull(bindings.get(SharedComponentProperties.MERGED_PROPERTIES));
+  }
+
+  private void activate(final SharedComponentPropertiesBindingsValuesProvider provider, final boolean enabled) {
+    final ComponentContext componentContext = mock(ComponentContext.class);
+    final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    properties.put(SharedComponentPropertiesBindingsValuesProvider.PROP_ENABLED, enabled);
+    when(componentContext.getProperties()).thenReturn(properties);
+    provider.activate(componentContext);
   }
 }
