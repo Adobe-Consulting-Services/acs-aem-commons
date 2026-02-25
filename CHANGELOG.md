@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Changed
+- #3710 Use a dedicated service user/subservice for Redirects Package creation and replication
 
 ## 6.16.0 - 2026-02-10
 
