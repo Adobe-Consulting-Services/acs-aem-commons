@@ -1,3 +1,20 @@
+/*
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
@@ -22,13 +39,21 @@ import javax.script.Bindings;
 /**
  * Bindings Values Provider that adds bindings for globalProperties,
  * sharedProperties, and mergedProperties maps.
- *
- * Default: enabled=true (for minor release backward compatibility).
+ * <p>
+ * globalProperties contains the shared properties accessible by
+ * all components.
+ * <p>
+ * sharedProperties contains the shared properties specific to the
+ * current component.
+ * <p>
+ * mergedProperties is a merge of the instance-level, shared, and
+ * global properties for the current component, giving preference
+ * to instance-level values, then shared values, and finally global
+ * values when properties exist at multiple levels with the same name.
  */
 @Component(service = BindingsValuesProvider.class)
 @Designate(ocd = SharedComponentPropertiesBindingsValuesProvider.Config.class)
-public class SharedComponentPropertiesBindingsValuesProvider
-        implements BindingsValuesProvider {
+public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
 
     private static final Logger log =
             LoggerFactory.getLogger(SharedComponentPropertiesBindingsValuesProvider.class);
@@ -93,10 +118,7 @@ public class SharedComponentPropertiesBindingsValuesProvider
 
         if (rootPagePath != null) {
 
-            bindings.put(
-                    SharedComponentProperties.SHARED_PROPERTIES_PAGE_PATH,
-                    rootPagePath
-            );
+            bindings.put(SharedComponentProperties.SHARED_PROPERTIES_PAGE_PATH, rootPagePath);
 
             String globalPropsPath =
                     sharedComponentProperties.getGlobalPropertiesPath(resource);
@@ -109,12 +131,10 @@ public class SharedComponentPropertiesBindingsValuesProvider
                     if (globalPropsResource != null) {
                         newBindings.put(
                                 SharedComponentProperties.GLOBAL_PROPERTIES,
-                                globalPropsResource.getValueMap()
-                        );
+                                globalPropsResource.getValueMap());
                         newBindings.put(
                                 SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE,
-                                globalPropsResource
-                        );
+                                globalPropsResource);
                     }
                 }));
             }
@@ -130,19 +150,16 @@ public class SharedComponentPropertiesBindingsValuesProvider
                     if (sharedPropsResource != null) {
                         newBindings.put(
                                 SharedComponentProperties.SHARED_PROPERTIES,
-                                sharedPropsResource.getValueMap()
-                        );
+                                sharedPropsResource.getValueMap());
                         newBindings.put(
                                 SharedComponentProperties.SHARED_PROPERTIES_RESOURCE,
-                                sharedPropsResource
-                        );
+                                sharedPropsResource);
                     }
                 }));
 
                 bindings.put(
                         SharedComponentProperties.SHARED_PROPERTIES_PATH,
-                        sharedPropsPath
-                );
+                        sharedPropsPath);
             }
 
             final String mergedPropertiesPath = resource.getPath();
@@ -159,15 +176,12 @@ public class SharedComponentPropertiesBindingsValuesProvider
                         sharedComponentProperties.mergeProperties(
                                 globalPropertyMap,
                                 sharedPropertyMap,
-                                resource
-                        )
-                );
+                                resource));
             }));
 
             bindings.put(
                     SharedComponentProperties.MERGED_PROPERTIES_PATH,
-                    resource.getPath()
-            );
+                    resource.getPath());
         }
     }
 
@@ -177,15 +191,13 @@ public class SharedComponentPropertiesBindingsValuesProvider
         if (!bindings.containsKey(SharedComponentProperties.GLOBAL_PROPERTIES)) {
             bindings.put(
                     SharedComponentProperties.GLOBAL_PROPERTIES,
-                    ValueMap.EMPTY
-            );
+                    ValueMap.EMPTY);
         }
 
         if (!bindings.containsKey(SharedComponentProperties.SHARED_PROPERTIES)) {
             bindings.put(
                     SharedComponentProperties.SHARED_PROPERTIES,
-                    ValueMap.EMPTY
-            );
+                    ValueMap.EMPTY);
         }
 
         if (!bindings.containsKey(SharedComponentProperties.MERGED_PROPERTIES)) {
@@ -193,8 +205,7 @@ public class SharedComponentPropertiesBindingsValuesProvider
                     SharedComponentProperties.MERGED_PROPERTIES,
                     resource == null
                             ? ValueMap.EMPTY
-                            : resource.getValueMap()
-            );
+                            : resource.getValueMap());
         }
     }
 }
