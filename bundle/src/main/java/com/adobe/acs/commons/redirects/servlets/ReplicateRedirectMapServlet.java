@@ -41,7 +41,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.servlets.post.JSONResponse;
 import org.apache.sling.servlets.post.PostResponse;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -82,21 +81,14 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
     static final String PACKAGE_THUMBNAIL_RESOURCE_PATH = "/apps/acs-commons/components/utilities/manage-redirects/thumbnail.png";
     static final String SERVICE_USER = "redirects-package-replicator";
 
-    private final transient Replicator replicator;
-    private final transient PackageHelper packageHelper;
-    private final transient Packaging packaging;
-    private final transient ResourceResolverFactory resourceResolverFactory;
-
-    @Activate
-    public ReplicateRedirectMapServlet(@Reference Replicator replicator,
-                                       @Reference PackageHelper packageHelper,
-                                       @Reference Packaging packaging,
-                                       @Reference ResourceResolverFactory resourceResolverFactory) {
-        this.replicator = replicator;
-        this.packageHelper = packageHelper;
-        this.packaging = packaging;
-        this.resourceResolverFactory = resourceResolverFactory;
-    }
+    @Reference
+    private transient Replicator replicator;
+    @Reference
+    private transient PackageHelper packageHelper;
+    @Reference
+    private transient Packaging packaging;
+    @Reference
+    private transient ResourceResolverFactory resourceResolverFactory;
 
     @Override
     protected void doPost(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse)
