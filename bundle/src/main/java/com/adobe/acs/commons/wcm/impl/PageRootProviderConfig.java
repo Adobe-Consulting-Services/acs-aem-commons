@@ -61,9 +61,17 @@ public class PageRootProviderConfig {
     /* Page root property. */
     static final String PAGE_ROOT_PATH = "page.root.path";
 
+    @Property(
+            label = "Experience Fragment Root Path Method",
+            description = "Method to determine the root path for experience fragments. If not set, the page root path method will be used. Supported values are: [ site ]",
+            value = { "" })
+    static final String XF_ROOT_PATH_METHOD = "xf.root.path.method";
+
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderConfig.class);
 
     private List<Pattern> pageRootPatterns = null;
+
+    private String xfRootPathMethod = null;
 
     /**
      * Retrieves the configured patterns.
@@ -74,6 +82,15 @@ public class PageRootProviderConfig {
         return Optional.ofNullable(this.pageRootPatterns)
                 .map(Collections::unmodifiableList)
                 .orElse(null);
+    }
+
+    /**
+     * Get XF root path method
+     *
+     * @return XF root path method
+     */
+    public String getXfRootPathMethod() {
+        return this.xfRootPathMethod;
     }
 
     @Activate
@@ -92,6 +109,7 @@ public class PageRootProviderConfig {
         }
 
         this.pageRootPatterns = Collections.unmodifiableList(patterns);
+        this.xfRootPathMethod = (String) props.get(XF_ROOT_PATH_METHOD);
     }
 
     @Deactivate

@@ -21,9 +21,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -48,7 +46,8 @@ import com.day.cq.wcm.api.PageManager;
  */
 public class PageRootProviderMultiImpl implements PageRootProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
+    private static final String XF_CONTENT_PREFIX = "/content/experience-fragments/";
+    private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
     @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private RankedServices<PageRootProviderConfig> configList = new RankedServices<>(Order.ASCENDING);
@@ -62,9 +61,9 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
             Page rootPage = pageManager.getPage(pagePath);
 
             if (rootPage == null) {
-                log.debug("Page Root not found at [ {} ]", pagePath);
+                LOG.debug("Page Root not found at [ {} ]", pagePath);
             } else if (!rootPage.isValid()) {
-                log.debug("Page Root invalid at [ {} ]", pagePath);
+                LOG.debug("Page Root invalid at [ {} ]", pagePath);
             } else {
                 return rootPage;
             }
@@ -76,18 +75,27 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
     @Override
     public String getRootPagePath(String resourcePath) {
         for (PageRootProviderConfig config : this.configList) {
+            String pathToSearch = resourcePath;
+
+            // If XF should find use the corresponding site as the root...
+            if ("site".equals(config.getXfRootPathMethod())) {
+                if (resourcePath.startsWith(XF_CONTENT_PREFIX)) {
+                    pathToSearch = "/content/" + resourcePath.substring(XF_CONTENT_PREFIX.length());
+                }
+            }
+
             for (Pattern pattern : config.getPageRootPatterns()) {
-                final Matcher matcher = pattern.matcher(resourcePath);
+                final Matcher matcher = pattern.matcher(pathToSearch);
 
                 if (matcher.find()) {
                     String rootPath = matcher.group(1);
-                    log.debug("Page Root found at [ {} ]", rootPath);
+                    LOG.debug("Page Root found at [ {} ]", rootPath);
                     return rootPath;
                 }
             }
         }
 
-        log.debug("Resource path does not include the configured page root path.");
+        LOG.debug("Resource path does not include the configured page root path.");
         return null;
     }
 

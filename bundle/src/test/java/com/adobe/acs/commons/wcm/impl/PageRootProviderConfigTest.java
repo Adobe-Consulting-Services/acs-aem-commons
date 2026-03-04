@@ -34,7 +34,7 @@ import org.junit.Test;
 public class PageRootProviderConfigTest {
     PageRootProviderConfig config = null;
 
-    Map<String, Object> properties = new HashMap<String, Object>();
+    Map<String, Object> properties = new HashMap<>();
 
     @Before
     public final void setUp() throws Exception {
@@ -42,7 +42,7 @@ public class PageRootProviderConfigTest {
     }
 
     @Test
-    public void getPageRootPatterns() throws Exception {
+    public void getPageRootPatterns() {
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
         config.activate(properties);
 
@@ -50,7 +50,7 @@ public class PageRootProviderConfigTest {
     }
 
     @Test
-    public void getPageRootPatterns_Regex() throws Exception {
+    public void getPageRootPatterns_Regex() {
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/site/([a-z_-]+)"});
         config.activate(properties);
 
@@ -58,7 +58,7 @@ public class PageRootProviderConfigTest {
     }
 
     @Test
-    public void getPageRootPatterns_RegexEnd() throws Exception {
+    public void getPageRootPatterns_RegexEnd() {
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/site/[a-z]{2}"});
         config.activate(properties);
 
@@ -66,7 +66,7 @@ public class PageRootProviderConfigTest {
     }
 
     @Test
-    public void getPageRootPatterns_Order1() throws Exception {
+    public void getPageRootPatterns_Order1() {
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content", "/content/a"});
         config.activate(properties);
 
@@ -74,7 +74,7 @@ public class PageRootProviderConfigTest {
     }
 
     @Test
-    public void getPageRootPatterns_Order2() throws Exception {
+    public void getPageRootPatterns_Order2() {
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/a", "/content"});
         config.activate(properties);
 
@@ -83,7 +83,7 @@ public class PageRootProviderConfigTest {
 
 
     @Test
-    public void getPageRootPatterns_Deactivate() throws Exception {
+    public void getPageRootPatterns_Deactivate() {
         assertNull(config.getPageRootPatterns());
 
         properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/a", "/content"});
@@ -95,6 +95,22 @@ public class PageRootProviderConfigTest {
         assertNull(config.getPageRootPatterns());
     }
 
+    @Test
+    public void getXFRootPathMethod_Null() {
+        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
+        config.activate(properties);
+
+        assertNull(config.getXfRootPathMethod());
+    }
+
+    @Test
+    public void getXFRootPathMethod_Site() {
+        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
+        properties.put(PageRootProviderConfig.XF_ROOT_PATH_METHOD, "site");
+        config.activate(properties);
+
+        assertEquals("site",  config.getXfRootPathMethod());
+    }
 
     static List<String> toStringList(final List<Pattern> patterns) {
         List<String> list = new ArrayList<String>();
