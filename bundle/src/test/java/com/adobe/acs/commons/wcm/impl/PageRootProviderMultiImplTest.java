@@ -163,6 +163,16 @@ public class PageRootProviderMultiImplTest {
 
     @Test
     public void getRootPagePath_HistoryViewerFallback_True() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content/experience-fragments/a")));
+        when(config1.getHistoryViewerFallback()).thenReturn(true);
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/experience-fragments/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/experience-fragments/a/b/c"));
+        assertEquals("/content/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_HistoryViewerFallback_True_XFMethodSite() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
         when(config1.getXfRootPathMethod()).thenReturn("site");
         when(config1.getHistoryViewerFallback()).thenReturn(true);
