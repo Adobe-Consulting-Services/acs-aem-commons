@@ -67,11 +67,19 @@ public class PageRootProviderConfig {
             value = { "" })
     static final String XF_ROOT_PATH_METHOD = "xf.root.path.method";
 
+    @Property(
+            label = "History Viewer Fallback",
+            description = "Enable this feature to use the corresponding live path when determining the page root. Note that for values reliant on page root (e.g. Shared Component Properties) the history viewer will reflect current values rather than historical values.",
+            boolValue = { false })
+    static final String HISTORY_VIEWER_FALLBACK = "history.viewer.fallback";
+
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderConfig.class);
 
     private List<Pattern> pageRootPatterns = null;
 
     private String xfRootPathMethod = null;
+
+    private boolean historyViewerFallback = false;
 
     /**
      * Retrieves the configured patterns.
@@ -93,6 +101,15 @@ public class PageRootProviderConfig {
         return this.xfRootPathMethod;
     }
 
+    /**
+     * Get history viewer fallback setting
+     *
+     * @return true if history viewer should get root from current/live site/XF paths
+     */
+    public boolean getHistoryViewerFallback() {
+        return this.historyViewerFallback;
+    }
+
     @Activate
     protected void activate(Map<String, Object> props) {
         List<Pattern> patterns = new ArrayList<Pattern>();
@@ -110,6 +127,7 @@ public class PageRootProviderConfig {
 
         this.pageRootPatterns = Collections.unmodifiableList(patterns);
         this.xfRootPathMethod = (String) props.get(XF_ROOT_PATH_METHOD);
+        this.historyViewerFallback = PropertiesUtil.toBoolean(props.get(HISTORY_VIEWER_FALLBACK), false);
     }
 
     @Deactivate

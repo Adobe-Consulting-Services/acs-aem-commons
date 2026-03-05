@@ -18,7 +18,9 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,6 +112,22 @@ public class PageRootProviderConfigTest {
         config.activate(properties);
 
         assertEquals("site",  config.getXfRootPathMethod());
+    }
+
+    @Test
+    public void getHistoryViewerFallback_Null() {
+        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
+        config.activate(properties);
+
+        assertFalse(config.getHistoryViewerFallback());
+    }
+
+    @Test
+    public void getHistoryViewerFallback_True() {
+        properties.put(PageRootProviderConfig.HISTORY_VIEWER_FALLBACK, "true");
+        config.activate(properties);
+
+        assertTrue(config.getHistoryViewerFallback());
     }
 
     static List<String> toStringList(final List<Pattern> patterns) {

@@ -151,6 +151,27 @@ public class PageRootProviderMultiImplTest {
         assertNull(provider.getRootPagePath("/content/experience-fragments/othersite/en_us/products/product-x/jcr:content/my-component"));
     }
 
+    @Test
+    public void getRootPagePath_HistoryViewerFallback_False() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        when(config1.getHistoryViewerFallback()).thenReturn(false);
+        provider.bindConfig(config1, FIRST);
+
+        assertNull(provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/experience-fragments/a/b/c"));
+        assertNull(provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_HistoryViewerFallback_True() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        when(config1.getXfRootPathMethod()).thenReturn("site");
+        when(config1.getHistoryViewerFallback()).thenReturn(true);
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/experience-fragments/a/b/c"));
+        assertEquals("/content/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/a/b/c"));
+    }
+
 
     @Test
     public void getRootPagePath_Unbind() {

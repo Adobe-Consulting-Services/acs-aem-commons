@@ -46,7 +46,8 @@ import com.day.cq.wcm.api.PageManager;
  */
 public class PageRootProviderMultiImpl implements PageRootProvider {
 
-    private static final String XF_CONTENT_PREFIX = "/content/experience-fragments/";
+    private static final Pattern VERSION_HISTORY_PATTERN = Pattern.compile("/tmp/versionhistory/[0-9a-f]+/[0-9a-f-]+/(.*)");
+    private static final Pattern XF_PATH_PATTERN = Pattern.compile("/content/experience-fragments/(.*)");
     private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
     @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -77,11 +78,14 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
         for (PageRootProviderConfig config : this.configList) {
             String pathToSearch = resourcePath;
 
-            // If XF should find use the corresponding site as the root...
+            // If page/XF history viewer should use the corresponding live content tree to determine the root...
+            if (config.getHistoryViewerFallback()) {
+                pathToSearch = VERSION_HISTORY_PATTERN.matcher(pathToSearch).replaceFirst("/content/$1");
+            }
+
+            // If XF should use the corresponding site content tree to determine the root...
             if ("site".equals(config.getXfRootPathMethod())) {
-                if (resourcePath.startsWith(XF_CONTENT_PREFIX)) {
-                    pathToSearch = "/content/" + resourcePath.substring(XF_CONTENT_PREFIX.length());
-                }
+                pathToSearch = XF_PATH_PATTERN.matcher(pathToSearch).replaceFirst("/content/$1");
             }
 
             for (Pattern pattern : config.getPageRootPatterns()) {
