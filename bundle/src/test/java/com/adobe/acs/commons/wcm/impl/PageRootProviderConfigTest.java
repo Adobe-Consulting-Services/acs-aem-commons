@@ -130,8 +130,24 @@ public class PageRootProviderConfigTest {
         assertTrue(config.getHistoryViewerFallback());
     }
 
+    @Test
+    public void getLaunchFallback_Null() {
+        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
+        config.activate(properties);
+
+        assertFalse(config.getLaunchFallback());
+    }
+
+    @Test
+    public void getLaunchFallback_True() {
+        properties.put(PageRootProviderConfig.LAUNCH_FALLBACK, "true");
+        config.activate(properties);
+
+        assertTrue(config.getLaunchFallback());
+    }
+
     static List<String> toStringList(final List<Pattern> patterns) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         for (Pattern p : patterns) {
                 list.add(p.toString());

@@ -48,6 +48,7 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
 
     private static final Pattern VERSION_HISTORY_PATTERN = Pattern.compile("/tmp/versionhistory/[0-9a-f]+/[0-9a-f-]+/(.*)");
     private static final Pattern XF_PATH_PATTERN = Pattern.compile("/content/experience-fragments/(.*)");
+    private static final Pattern LAUNCH_PATH_PATTERN = Pattern.compile("/content/launches/.*?/content/(.*)");
     private static final Logger LOG = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
     @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -81,6 +82,11 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
             // If page/XF history viewer should use the corresponding live content tree to determine the root...
             if (config.getHistoryViewerFallback()) {
                 pathToSearch = VERSION_HISTORY_PATTERN.matcher(pathToSearch).replaceFirst("/content/$1");
+            }
+
+            // If launch content should use the corresponding live content tree to determine the root...
+            if (config.getLaunchFallback()) {
+                pathToSearch = LAUNCH_PATH_PATTERN.matcher(pathToSearch).replaceFirst("/content/$1");
             }
 
             // If XF should use the corresponding site content tree to determine the root...

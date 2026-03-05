@@ -63,15 +63,21 @@ public class PageRootProviderConfig {
 
     @Property(
             label = "Experience Fragment Root Path Method",
-            description = "Method to determine the root path for experience fragments. If not set, the page root path method will be used. Supported values are: [ site ]",
+            description = "Method to determine the root path for experience fragments. If not set (default), the page root path method will be used. Supported values are: [ site ].",
             value = { "" })
     static final String XF_ROOT_PATH_METHOD = "xf.root.path.method";
 
     @Property(
             label = "History Viewer Fallback",
-            description = "Enable this feature to use the corresponding live path when determining the page root. Note that for values reliant on page root (e.g. Shared Component Properties) the history viewer will reflect current values rather than historical values.",
+            description = "Enable this feature to use the corresponding live path when determining the page root. Note that for values reliant on page root (e.g. Shared Component Properties) the history viewer will reflect current values rather than historical values. Default false.",
             boolValue = { false })
     static final String HISTORY_VIEWER_FALLBACK = "history.viewer.fallback";
+
+    @Property(
+            label = "Content Launch Fallback",
+            description = "Enable this feature to have a content launch use the corresponding live path when determining the page root. This is generally desirable, as values reliant on page root (e.g. Shared Component Properties) will reflect the values that will apply when this page is promoted (except in the rare case where the launch also includes the page root and that page root is also being promoted with new values). Default false.",
+            boolValue = { false })
+    static final String LAUNCH_FALLBACK = "launch.fallback";
 
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderConfig.class);
 
@@ -80,6 +86,7 @@ public class PageRootProviderConfig {
     private String xfRootPathMethod = null;
 
     private boolean historyViewerFallback = false;
+    private boolean launchFallback = false;
 
     /**
      * Retrieves the configured patterns.
@@ -110,6 +117,15 @@ public class PageRootProviderConfig {
         return this.historyViewerFallback;
     }
 
+    /**
+     * Get launch fallback setting
+     *
+     * @return true if launches should get root from current/live site paths
+     */
+    public boolean getLaunchFallback() {
+        return this.launchFallback;
+    }
+
     @Activate
     protected void activate(Map<String, Object> props) {
         List<Pattern> patterns = new ArrayList<Pattern>();
@@ -128,6 +144,7 @@ public class PageRootProviderConfig {
         this.pageRootPatterns = Collections.unmodifiableList(patterns);
         this.xfRootPathMethod = (String) props.get(XF_ROOT_PATH_METHOD);
         this.historyViewerFallback = PropertiesUtil.toBoolean(props.get(HISTORY_VIEWER_FALLBACK), false);
+        this.launchFallback = PropertiesUtil.toBoolean(props.get(LAUNCH_FALLBACK), false);
     }
 
     @Deactivate
