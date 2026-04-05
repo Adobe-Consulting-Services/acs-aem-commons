@@ -130,11 +130,6 @@
             <artifactId>standard</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
