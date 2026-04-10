@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+## Fixed
+
+- #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet 
 
 ## 6.16.0 - 2026-02-10
 
