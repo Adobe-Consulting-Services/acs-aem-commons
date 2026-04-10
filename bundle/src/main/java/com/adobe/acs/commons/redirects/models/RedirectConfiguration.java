@@ -159,14 +159,14 @@ public class RedirectConfiguration {
         String normalizedPath = normalizePath(resourcePath);
         RedirectMatch match = null;
         RedirectRule rule = getPathRule(normalizedPath, contextPrefix);
-        if (rule != null && !isExtensionCompatible(rule, request)) {
+        if (rule != null && !matchesExtension(rule, request)) {
             rule = null;
         }
         if(rule == null && hasNonRegexRequestURIRules()){
             // there are request URI rules. Check is any mathes
             String pathToEvaluate = determinePathToEvaluate(normalizedPath, true, request);
             rule = getPathRule(pathToEvaluate, contextPrefix);
-            if (rule != null && !isExtensionCompatible(rule, request)) {
+            if (rule != null && !matchesExtension(rule, request)) {
                 rule = null;
             }
         }
@@ -259,7 +259,7 @@ public class RedirectConfiguration {
      * @param request the current sling request, may be {@code null} for non-request callers
      * @return {@code true} if the rule's source extension is absent or compatible with the request extension
      */
-    private static boolean isExtensionCompatible(RedirectRule rule, SlingHttpServletRequest request) {
+    private static boolean matchesExtension(RedirectRule rule, SlingHttpServletRequest request) {
         String ruleExt = rule.getSourceExtension();
         if (ruleExt == null) {
             return true;
