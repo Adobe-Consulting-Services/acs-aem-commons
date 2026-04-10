@@ -159,10 +159,16 @@ public class RedirectConfiguration {
         String normalizedPath = normalizePath(resourcePath);
         RedirectMatch match = null;
         RedirectRule rule = getPathRule(normalizedPath, contextPrefix);
+        if (rule != null && !isExtensionCompatible(rule, request)) {
+            rule = null;
+        }
         if(rule == null && hasNonRegexRequestURIRules()){
             // there are request URI rules. Check is any mathes
             String pathToEvaluate = determinePathToEvaluate(normalizedPath, true, request);
             rule = getPathRule(pathToEvaluate, contextPrefix);
+            if (rule != null && !isExtensionCompatible(rule, request)) {
+                rule = null;
+            }
         }
         if (rule != null) {
             match = new RedirectMatch(rule, null);
@@ -240,6 +246,32 @@ public class RedirectConfiguration {
 
     private boolean hasNonRegexRequestURIRules() {
         return this.nonRegexRequestURIRules;
+    }
+
+    /**
+     * Verify that a path rule whose source carries an explicit extension (e.g. {@code /foo.html})
+     * only matches requests whose extension is compatible with the rule's source extension.
+     * Rules authored without an extension stay permissive and match any request extension
+     * (preserving the current default behaviour). A request without an explicit extension is
+     * also treated as compatible (AEM serves {@code /foo} as html by default).
+     *
+     * @param rule    the candidate path rule
+     * @param request the current sling request, may be {@code null} for non-request callers
+     * @return {@code true} if the rule's source extension is absent or compatible with the request extension
+     */
+    private static boolean isExtensionCompatible(RedirectRule rule, SlingHttpServletRequest request) {
+        String ruleExt = rule.getSourceExtension();
+        if (ruleExt == null) {
+            return true;
+        }
+        if (request == null) {
+            return true;
+        }
+        String requestExt = request.getRequestPathInfo().getExtension();
+        if (requestExt == null) {
+            return true;
+        }
+        return ruleExt.equalsIgnoreCase(requestExt);
     }
 
 }

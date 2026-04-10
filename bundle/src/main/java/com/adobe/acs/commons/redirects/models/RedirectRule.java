@@ -124,6 +124,7 @@ public class RedirectRule {
 
     private SubstitutionElement[] substitutions;
     private String defaultCacheControlHeader = null;
+    private String sourceExtension;
 
     @PostConstruct
     protected void init() {
@@ -164,6 +165,35 @@ public class RedirectRule {
 
         String cacheControlProperty = CACHE_CONTROL_HEADER_NAME + "_" + getStatusCode();
         defaultCacheControlHeader = resource.getParent().getValueMap().get(cacheControlProperty, String.class);
+
+        sourceExtension = ptrn == null ? extractSourceExtension(source) : null;
+    }
+
+    /**
+     * Extract a simple trailing file extension from a path rule source, e.g.
+     * <code>/foo/bar.html</code> -&gt; <code>html</code>. Returns {@code null} when the
+     * source has no extension, the dot is not in the last path segment, or the
+     * characters after the last dot are not a plain alphanumeric token (so regex
+     * metacharacters such as <code>*</code>, <code>(</code>, or <code>.</code> do not
+     * leak in as bogus extensions).
+     */
+    static String extractSourceExtension(String source) {
+        if (source == null || source.isEmpty()) {
+            return null;
+        }
+        int lastSlash = source.lastIndexOf('/');
+        int lastDot = source.lastIndexOf('.');
+        if (lastDot == -1 || lastDot < lastSlash || lastDot == source.length() - 1) {
+            return null;
+        }
+        String candidate = source.substring(lastDot + 1);
+        for (int i = 0; i < candidate.length(); i++) {
+            char c = candidate.charAt(i);
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))) {
+                return null;
+            }
+        }
+        return candidate;
     }
 
     public String getSource() {
@@ -204,6 +234,16 @@ public class RedirectRule {
 
     public Pattern getRegex() {
         return ptrn;
+    }
+
+    /**
+     * @return the simple trailing file extension of this rule's source path
+     *         (e.g. {@code "html"} for {@code "/foo.html"}), or {@code null}
+     *         if the source does not carry a plain extension. Only populated
+     *         for non-regex path rules.
+     */
+    public String getSourceExtension() {
+        return sourceExtension;
     }
 
     public Calendar getCreated() {
