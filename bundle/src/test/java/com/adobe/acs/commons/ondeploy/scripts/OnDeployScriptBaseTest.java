@@ -1,49 +1,27 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
@@ -53,12 +31,32 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 public class OnDeployScriptBaseTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private ResourceResolver resourceResolver;
-    private CloseableQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
     private OnDeployScriptBase onDeployScript;
 
     @Before
@@ -77,8 +75,8 @@ public class OnDeployScriptBaseTest {
 
         // Create the test class instance
         onDeployScript = new OnDeployScriptBaseExt();
-        queryBuilder = mock(CloseableQueryBuilder.class);
-        doReturn(queryBuilder).when(resourceResolver).adaptTo(CloseableQueryBuilder.class);
+        queryBuilder = mock(QueryBuilder.class);
+        doReturn(queryBuilder).when(resourceResolver).adaptTo(QueryBuilder.class);
         onDeployScript.execute(resourceResolver);
 
         // Reset the LogTester
@@ -223,12 +221,12 @@ public class OnDeployScriptBaseTest {
         Node node2 = contentRoot.addNode("search-and-update-node2");
         node2.setProperty("sling:resourceType", "mysite/type/old");
 
-        final CloseableQuery query = mock(CloseableQuery.class);
+        final Query query = mock(Query.class);
         SearchResult result = mock(SearchResult.class);
         when(result.getNodes()).thenReturn(Arrays.asList(node1, node2).iterator());
         when(query.getResult()).thenReturn(result);
         when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(invocation -> {
-            PredicateGroup pg = invocation.getArgumentAt(0, PredicateGroup.class);
+            PredicateGroup pg = invocation.getArgument(0);
             assertEquals("-1", pg.getParameters().get("limit"));
             assertEquals("path", pg.get(0).getType());
             assertEquals("/content", pg.get(0).getParameters().get("path"));
@@ -246,7 +244,7 @@ public class OnDeployScriptBaseTest {
 
     @Test
     public void testSearchAndUpdateResourceTypeWhenNoNodesFound() throws RepositoryException {
-        CloseableQuery query = mock(CloseableQuery.class);
+        Query query = mock(Query.class);
         SearchResult result = mock(SearchResult.class);
         when(result.getNodes()).thenReturn(Collections.EMPTY_LIST.iterator());
         when(query.getResult()).thenReturn(result);

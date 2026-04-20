@@ -26,7 +26,7 @@
 		<ul>
 			<c:forEach var="reference" items="${refModel.references}">
 				<li>
-					Type: ${reference.type} - <a title="${reference.target.path}" href="#" data-href="/crx/de/index.jsp#${reference.target.path}" target="_blank">Reference</a>					
+					Type: ${reference.type} - <a title="${reference.target.path}" href="#" data-href="${slingRequest.contextPath}/crx/de/index.jsp#${reference.target.path}" target="_blank">Reference</a>
 				</li>
 			</c:forEach>
 		</ul>

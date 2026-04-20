@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
@@ -23,7 +21,7 @@ import com.adobe.acs.commons.mcp.form.DialogProvider.DialogStyle;
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 
 /**
@@ -64,7 +62,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
     @Override
     public Resource buildComponentResource() {
-        getComponentMetadata().put(MARGIN_PROPERTY, isMargin());
+        getProperties().put(MARGIN_PROPERTY, isMargin());
         AbstractResourceImpl res = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl layoutResource = new AbstractResourceImpl(res.getPath() + "/layout", getLayout(), null, null);
         res.addChild(layoutResource);
@@ -85,10 +83,10 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
         public Resource buildComponentResource() {
             if (getDialogStyle() == DialogStyle.COMPONENT) {
                 setResourceType("granite/ui/components/coral/foundation/tabs");
-                getComponentMetadata().put("maximized", true);
+                getProperties().put("maximized", true);
             }
-            getComponentMetadata().put("orientation", getOrientation());
-            getComponentMetadata().put("size", getSize());
+            getProperties().put("orientation", getOrientation());
+            getProperties().put("size", getSize());
             return super.buildComponentResource();
         }
 
@@ -99,7 +97,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
                 SyntheticResourceBuilder rb = new SyntheticResourceBuilder(ITEMS, null);
                 items.children.forEach(tab -> {
                     rb.createChild(tab.getName(), tab.getResourceType())
-                            .withAttributes(tab.getResourceMetadata())
+                            .withAttributes(tab.getValueMap())
                             .withAttributes(MARGIN_PROPERTY, true);
                     rb.createChild(ITEMS)
                             .createChild("columns", "granite/ui/components/coral/foundation/fixedcolumns")
@@ -156,8 +154,8 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
         @Override
         public Resource buildComponentResource() {
-            getComponentMetadata().put("variant", getVariant());
-            getComponentMetadata().put("multiple", isMultiple());
+            getProperties().put("variant", getVariant());
+            getProperties().put("multiple", isMultiple());
             return super.buildComponentResource();
         }
 

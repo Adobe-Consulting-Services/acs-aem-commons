@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
@@ -26,7 +24,7 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -44,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +60,10 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
     @Reference
-    private DispatcherFlusher dispatcherFlusher;
+    private transient DispatcherFlusher dispatcherFlusher;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private transient ResourceResolverFactory resourceResolverFactory;
 
     private static final boolean DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = true;
 
@@ -140,7 +140,8 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
             for (final FlushResult result : overallResults) {
                 resultMap.put(result.agentId, result.success);
             }
-            gson.toJson(resultMap, response.getWriter());
+            String json = gson.toJson(resultMap); // #2749
+            response.getWriter().write(json);
         } else {
             String suffix;
             if (caughtException) {
@@ -157,7 +158,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
         private FlushResult(Agent agent, ReplicationResult result) {
             this.agentId = agent.getId();
-            this.success = result.isSuccess() && result.getCode() == SlingHttpServletResponse.SC_OK;
+            this.success = result.isSuccess() && result.getCode() == HttpServletResponse.SC_OK;
         }
 
         private final String agentId;

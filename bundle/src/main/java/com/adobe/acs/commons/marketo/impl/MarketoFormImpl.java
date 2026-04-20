@@ -1,28 +1,26 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.marketo.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -88,8 +86,8 @@ public class MarketoFormImpl implements MarketoForm {
   }
 
   private String toJavaScript(FormValue value, String variable) {
-    String key = StringEscapeUtils.escapeJavaScript(value.getName());
-    String val = StringEscapeUtils.escapeJavaScript(value.getValue());
+    String key = StringEscapeUtils.escapeEcmaScript(value.getName());
+    String val = StringEscapeUtils.escapeEcmaScript(value.getValue());
     if ("static".equals(value.getSource())) {
       return String.format("%s[\"%s\"]=\"%s\";%n", variable, key, val);
     } else if ("contextHub".equals(value.getSource())) {
@@ -98,7 +96,7 @@ public class MarketoFormImpl implements MarketoForm {
       return String.format("%s[\"%s\"]=%s;%n", variable, key, value.getValue());
     } else {
       return String.format("%s[\"%s\"]=\"%s\";%n", variable, key,
-          StringEscapeUtils.escapeJavaScript(request.getParameter(value.getValue())));
+          StringEscapeUtils.escapeEcmaScript(request.getParameter(value.getValue())));
     }
 
   }
@@ -125,7 +123,7 @@ public class MarketoFormImpl implements MarketoForm {
     log.debug("Final URL: {}", fullUrl);
 
     return "form.onSuccess(function(values, followUpUrl) {\n" + "location.href = \""
-        + StringEscapeUtils.escapeJavaScript(fullUrl) + "\";\n" + "return false;\n" + "});";
+        + StringEscapeUtils.escapeEcmaScript(fullUrl) + "\";\n" + "return false;\n" + "});";
 
   }
 

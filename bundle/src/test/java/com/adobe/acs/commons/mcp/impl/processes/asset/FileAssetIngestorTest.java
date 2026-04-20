@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,28 +14,49 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.AssetManager;
-import com.google.common.base.Function;
-import com.google.common.io.Files;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.FILE_PATHS;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.FOLDER_PATHS;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.util.UUID;
+import java.util.Vector;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.jcr.RepositoryException;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,24 +66,17 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nullable;
-import javax.jcr.RepositoryException;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Vector;
-import java.util.stream.Collectors;
-
-import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.AssetIngestorPaths;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileAssetIngestorTest {
@@ -72,7 +85,8 @@ public class FileAssetIngestorTest {
     private static final String SFTP_USER_TEST_NAME = "user";
     private static final String SFTP_USER_TEST_PASSWORD = "password";
 
-    @Rule // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
+    @Rule
+    // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
     public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Mock
@@ -95,7 +109,7 @@ public class FileAssetIngestorTest {
     private File tempDirectory;
 
     @Before
-    public void setup() throws PersistenceException {
+    public void setup() throws IOException {
         context.registerAdapter(ResourceResolver.class, AssetManager.class, new Function<ResourceResolver, AssetManager>() {
             @Nullable
             @Override
@@ -106,7 +120,7 @@ public class FileAssetIngestorTest {
 
         context.create().resource("/content/dam", JcrConstants.JCR_PRIMARYTYPE, "sling:Folder");
         context.resourceResolver().commit();
-        tempDirectory = Files.createTempDir();
+        tempDirectory = Files.createTempDirectory(UUID.randomUUID().toString()).toFile();
         ingestor = new FileAssetIngestor(context.getService(MimeTypeService.class));
         ingestor.timeout = 1;
         ingestor.jcrBasePath = "/content/dam";
@@ -319,7 +333,7 @@ public class FileAssetIngestorTest {
                 .addFile("file1.png", 1234L)
                 .addFile("file2.png", 4567L)
                 .asVector();
-        when(channel.ls(anyObject())).thenReturn(entries);
+        when(channel.ls(any())).thenReturn(entries);
 
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
         int count = 0;

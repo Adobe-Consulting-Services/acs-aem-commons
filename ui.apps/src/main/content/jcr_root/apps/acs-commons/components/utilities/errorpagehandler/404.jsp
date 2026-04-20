@@ -23,7 +23,7 @@
 %><%@include file="/libs/foundation/global.jsp" %><%
     ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
 		  
-    if (errorPageHandlerService != null && errorPageHandlerService.isEnabled()) {
+    if (errorPageHandlerService != null && errorPageHandlerService.isEnabled() && errorPageHandlerService.shouldRequestUseErrorPageHandler(slingRequest)) {
 
         // Handle ACS AEM Commons vanity logic
     	if (errorPageHandlerService.isVanityDispatchCheckEnabled()){

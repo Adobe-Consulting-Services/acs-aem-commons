@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
@@ -30,7 +28,6 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.workflow.WorkflowException;
-import org.apache.commons.collections.ListUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -44,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
+
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -229,7 +228,7 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
 
         private List<Payload> onboardNextPayloads(Workspace workspace, PayloadGroup payloadGroup) throws PersistenceException {
             if (payloadGroup == null) {
-                return ListUtils.EMPTY_LIST;
+                return Collections.emptyList();
             }
 
             List<Payload> payloads = payloadGroup.getPayloads();

@@ -1,0 +1,56 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<pre>
+
+Use HTTP POST to access this end-point
+--------------------------------------------
+HTTP POST /system/console/ensure-oak-index
+Parameters
+* force = true | false (optional; when blank defaults to false)
+* path = /abs/path/to/ensure/definition (optional; when blank indicates all)
+
+Example: curl --user admin:admin --data "force=true" http://localhost:4502/system/console/ensure-oak-index
+</pre>
+<br/>
+<hr/>
+<br/>
+<pre>
+ENSURE OAK INDEX SUBMISSION FORM
+--------------------------------------------
+</pre>
+<br/>
+<form method="post" action="/system/console/ensure-oak-index" target="_blank">
+    <fieldset>
+        <div>
+            <label for="path">Absolute path to ensure definition:</label>
+            <br/>
+            <input type="text" id="path" name="path" placeholder="Leave blank for all"/>
+        </div>
+        <br/>
+        <div>
+            <label for="force">Force ensure-ance:</label>
+            <input type="checkbox" value="true" id="force" name="force" style="width:250px; padding:5px;"/>
+        </div>
+        <br/>
+        <div>
+            <input type="submit" style="padding:5px;"/>
+        </div>
+    </fieldset>
+
+</form>

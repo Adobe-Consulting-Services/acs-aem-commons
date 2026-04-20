@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.version.impl;
 
@@ -42,15 +40,11 @@ public class CurrentEvolutionImpl implements Evolution {
 
     private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionImpl.class);
 
-    private final Resource resource;
     private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
-    private EvolutionConfig config;
 
     public CurrentEvolutionImpl(Resource resource, EvolutionConfig config) {
-        this.resource = resource;
-        this.config = config;
         try {
-            populate(this.resource, 0);
+            populate(resource, config, 0);
         } catch (RepositoryException e) {
             log.warn("Could not populate Evolution", e);
         }
@@ -73,10 +67,10 @@ public class CurrentEvolutionImpl implements Evolution {
 
     @Override
     public List<EvolutionEntry> getVersionEntries() {
-        return this.versionEntries;
+        return Collections.unmodifiableList(this.versionEntries);
     }
 
-    private void populate(Resource r, int depth) throws PathNotFoundException, RepositoryException {
+    private void populate(Resource r, EvolutionConfig config, int depth) throws PathNotFoundException, RepositoryException {
         ValueMap map = r.getValueMap();
         List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
@@ -94,7 +88,7 @@ public class CurrentEvolutionImpl implements Evolution {
             String relPath = EvolutionPathUtil.getLastRelativeResourceName(child.getPath());
             if (config.handleResource(relPath)) {
                 versionEntries.add(new CurrentEvolutionEntryImpl(child, config));
-                populate(child, depth);
+                populate(child, config, depth);
             }
             depth--;
         }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.Collection;
-import org.apache.commons.lang.StringUtils;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -106,27 +105,28 @@ public final class FormComponent extends AbstractContainerComponent {
     @Override
     public Resource buildComponentResource() {
         initOptions();
-        ResourceMetadata meta = getComponentMetadata();
-        meta.put(ACTION_OPT, getAction());
-        meta.put(ASYNC_OPT, isAsync());
-        meta.put(AUTOCOMPLETE_OPT, getAutocomplete());
-        meta.put(AUTOSUBMIT_FORM_OPT, isAutosubmitForm());
-        meta.put(DATA_PATH_OPT, getDataPath());
-        meta.put(ENCTYPE_OPT, getEnctype());
-        meta.put(FOUNDATION_FORM_OPT, isFoundationForm());
-        meta.put(LOADING_MASK_OPT, isLoadingMask());
-        meta.put(MARGIN_OPT, isMargin());
-        meta.put(MAXIMIZED_OPT, isMaximized());
-        meta.put(METHOD_OPT, getMethod());
-        meta.put(NAME_NOT_FOUND_MODE_OPT, getNameNotFoundMode());
-        meta.put(NOVALIDATE_OPT, isNovalidate());
-        meta.put(STYLE_OPT, getStyle());
-        meta.put(SUCCESSRESPONSE_OPT, isSuccessresponse());
-        meta.put(TARGET_OPT, getTarget());
-        meta.put(UI_OPT, getUi());
-        purgeEmptyMetadata();
 
-        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), meta);
+        Map<String, Object> properties = getProperties();
+        properties.put(ACTION_OPT, getAction());
+        properties.put(ASYNC_OPT, isAsync());
+        properties.put(AUTOCOMPLETE_OPT, getAutocomplete());
+        properties.put(AUTOSUBMIT_FORM_OPT, isAutosubmitForm());
+        properties.put(DATA_PATH_OPT, getDataPath());
+        properties.put(ENCTYPE_OPT, getEnctype());
+        properties.put(FOUNDATION_FORM_OPT, isFoundationForm());
+        properties.put(LOADING_MASK_OPT, isLoadingMask());
+        properties.put(MARGIN_OPT, isMargin());
+        properties.put(MAXIMIZED_OPT, isMaximized());
+        properties.put(METHOD_OPT, getMethod());
+        properties.put(NAME_NOT_FOUND_MODE_OPT, getNameNotFoundMode());
+        properties.put(NOVALIDATE_OPT, isNovalidate());
+        properties.put(STYLE_OPT, getStyle());
+        properties.put(SUCCESSRESPONSE_OPT, isSuccessresponse());
+        properties.put(TARGET_OPT, getTarget());
+        properties.put(UI_OPT, getUi());
+        purgeEmptyProperties();
+
+        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), properties);
         if (getHelper() != null) {
             res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
@@ -36,14 +34,14 @@ public class RichTextEditorComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("cq/gui/components/authoring/dialog/richtext");
-        getComponentMetadata().put("useFixedInlineToolbar", useFixedInlineToolbar);
+        getProperties().put("useFixedInlineToolbar", useFixedInlineToolbar);
     }
 
     @Override
     @SuppressWarnings("squid:S1192")
     public Resource buildComponentResource() {
         return new SyntheticResourceBuilder(getName(), getResourceType())
-                .withAttributes(getComponentMetadata())
+                .withAttributes(getProperties())
                 .createChild("rtePlugins")
                 .createChild("format")
                 .withAttributes("features", "bold,italic,underline")

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
@@ -38,7 +36,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.jackrabbit.vault.util.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -48,7 +45,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -81,6 +77,8 @@ import java.util.regex.Pattern;
 )
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
+  private static final String REP_POLICY = "rep:policy";
+
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
     private static final Pattern DATE_REGEX = Pattern
             .compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
@@ -92,7 +90,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID, JcrConstants.JCR_PREDECESSORS
     ));
     private static final Set<String> PROTECTED_NODES = new HashSet<>(Arrays.asList(
-            DamConstants.THUMBNAIL_NODE, AccessControlConstants.REP_POLICY
+            DamConstants.THUMBNAIL_NODE, REP_POLICY
     ));
 
     @Reference
@@ -350,35 +348,40 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws RepositoryException exception
      */
     private void setNodeSimpleArrayProperty(final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
-        JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
-
-        try {
+        
+       try {
             Object[] values;
-            if (firstVal.isBoolean()) {
-                values = new Boolean[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsBoolean();
-                }
-            } else if (DECIMAL_REGEX.matcher(firstVal.getAsString()).matches()) {
-                values = new BigDecimal[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsBigDecimal();
-                }
-            } else if (firstVal.isNumber()) {
-                values = new Long[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsLong();
-                }
-            } else {
-                values = new String[jsonArray.size()];
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    values[i] = jsonArray.get(i).getAsString();
-                }
-            }
 
-            ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
-            resourceProperties.put(key, values);
-            LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
+            if (jsonArray != null && jsonArray.size() > 0) {
+                JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
+
+                if (firstVal.isBoolean()) {
+                    values = new Boolean[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsBoolean();
+                    }
+                } else if (DECIMAL_REGEX.matcher(firstVal.getAsString()).matches()) {
+                    values = new BigDecimal[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsBigDecimal();
+                    }
+                } else if (firstVal.isNumber()) {
+                    values = new Long[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsLong();
+                    }
+                } else {
+                    values = new String[jsonArray.size()];
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values[i] = jsonArray.get(i).getAsString();
+                    }
+                }
+
+                // Only create a property if the array exists. We avoid creating an empty property since we don't know what type it is expected to be
+                ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+                resourceProperties.put(key, values);
+                LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
+            }
         } catch (Exception e) {
             LOG.error("Unable to assign property '{}' to resource '{}'", key, resource.getPath(), e);
         }

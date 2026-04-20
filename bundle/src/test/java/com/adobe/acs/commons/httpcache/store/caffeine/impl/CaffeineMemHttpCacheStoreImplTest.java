@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.store.caffeine.impl;
 
@@ -31,7 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -46,8 +44,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaffeineMemHttpCacheStoreImplTest {
@@ -73,8 +70,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
     public void test_put() throws HttpCacheDataStreamException, IOException {
         CacheKey key = mock(CacheKey.class);
         CacheContent content = mock(CacheContent.class);
-        InputStream inputStream = getClass().getResourceAsStream("cachecontent.html");
-        when(content.getInputDataStream()).thenReturn(inputStream);
+        when(content.getInputDataStream()).thenReturn(IOUtils.toInputStream("Hello world!", StandardCharsets.UTF_8));
         caffeine.put(key, content);
         assertTrue("contains entry we just put in", caffeine.contains(key));
 
@@ -82,8 +78,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
 
         CacheContent retrievedContent = caffeine.getIfPresent(key);
         String retrievedContentString = IOUtils.toString(retrievedContent.getInputDataStream(), StandardCharsets.UTF_8);
-        String expectedContentString = IOUtils.toString(getClass().getResourceAsStream("cachecontent.html"), StandardCharsets.UTF_8);
-
+        String expectedContentString = "Hello world!";
         assertEquals(expectedContentString, retrievedContentString);
     }
 
@@ -98,7 +93,8 @@ public class CaffeineMemHttpCacheStoreImplTest {
         assertTrue("contains entry we just put in", caffeine.contains(key));
 
         CacheKey secondKey = mock(CacheKey.class);
-        when(key.isInvalidatedBy(secondKey)).thenReturn(true);
+        // Mockito believes this is unnecessary, but test fails without it.
+        lenient().when(key.isInvalidatedBy(secondKey)).thenReturn(true);
 
         caffeine.invalidate(secondKey);
 

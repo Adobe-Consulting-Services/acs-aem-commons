@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +46,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.util.RequireAem;
 
 /**
  * Configuration service for Remote Asset feature.
@@ -149,6 +150,10 @@ public class RemoteAssetsConfigImpl {
 
     private Executor remoteAssetsHttpExecutor;
 
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -211,14 +216,14 @@ public class RemoteAssetsConfigImpl {
      * @return List<String>
      */
     public List<String> getTagSyncPaths() {
-        return this.tagSyncPaths;
+        return Collections.unmodifiableList(this.tagSyncPaths);
     }
 
     /**
      * @return List<String>
      */
     public List<String> getDamSyncPaths() {
-        return this.damSyncPaths;
+        return Collections.unmodifiableList(this.damSyncPaths);
     }
 
     /**
@@ -246,7 +251,7 @@ public class RemoteAssetsConfigImpl {
      * @return String
      */
     public Set<String> getWhitelistedServiceUsers() {
-        return this.whitelistedServiceUsers;
+        return Collections.unmodifiableSet(this.whitelistedServiceUsers);
     }
 
     /**

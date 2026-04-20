@@ -1,0 +1,44 @@
+{
+  "jcr:primaryType": "cq:Page",
+  "jcr:content": {
+    "jcr:primaryType": "cq:PageContent",
+    "jcr:title": "Experience",
+    "cq:template": "/conf/we-retail/settings/wcm/templates/hero-page",
+    "inheritedProperty": "inheritedValue",
+    "sling:resourceType": "weretail/components/structure/page",
+    "root": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "wcm/foundation/components/responsivegrid"
+    }
+  },
+  "arctic-surfing-in-lofoten": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "Arctic Surfing In Lofoten",
+      "propToEscape": "<html>",
+      "urlPropToEscape": "<p>paramValue</p>",
+      "cq:template": "/conf/we-retail/settings/wcm/templates/experience-page",
+      "sling:resourceType": "weretail/components/structure/page",
+      "root": {
+        "jcr:primaryType": "nt:unstructured",
+        "sling:resourceType": "wcm/foundation/components/responsivegrid",
+        "responsivegrid": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "wcm/foundation/components/responsivegrid",
+          "text":{
+            "jcr:primaryType": "nt:unstructured",
+            "sling:resourceType": "weretail/components/content/text"
+          }
+        },
+        "hero_image": {
+          "jcr:primaryType": "nt:unstructured",
+          "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
+          "useFullWidth": "true",
+          "title": "Arctic Surfing In Lofoten",
+          "sling:resourceType": "weretail/components/content/heroimage"
+        }
+      }
+    }
+  }
+}

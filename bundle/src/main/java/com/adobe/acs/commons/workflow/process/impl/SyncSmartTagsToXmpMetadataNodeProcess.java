@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.process.impl;
@@ -115,10 +113,13 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
         final Resource metadataResource = assetResource.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER);
         final Resource smartTagsResource = assetResource.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER + "/" + NN_PREDICTED_TAGS);
 
-        if (metadataResource.getChild(processArgs.getSequenceName()) != null) {
-            // Remove existing, as they will be re-created
-            resourceResolver.delete(metadataResource.getChild(processArgs.getSequenceName()));
-        }
+            if (metadataResource != null) {
+                Resource childResource = metadataResource.getChild(processArgs.getSequenceName());
+                if (childResource != null) {
+                    // Remove existing, as they will be re-created
+                    resourceResolver.delete(childResource);
+                }
+            }
 
         final Resource parentResource = resourceResolver.create(metadataResource, processArgs.getSequenceName(),
                 new ImmutableMap.Builder<String, Object>()
@@ -175,7 +176,7 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
 
         public ProcessArgs(MetaDataMap map) {
 
-            String[] lines = org.apache.commons.lang.StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            String[] lines = org.apache.commons.lang3.StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             sequenceName = StringUtils.defaultIfEmpty(data.get(ARG_SEQUENCE_NAME), DEFAULT_NN_SEQUENCE);

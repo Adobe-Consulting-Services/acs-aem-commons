@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.mcp.impl.processes;
@@ -27,7 +25,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.form.TextareaComponent;
 import com.adobe.acs.commons.mcp.form.workflow.WorkflowModelSelector;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.util.impl.QueryHelperImpl;
@@ -54,16 +52,18 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
 
     public static final String PROCESS_NAME = "Bulk Workflow";
 
-    private final QueryHelper queryHelper;
-    private final SyntheticWorkflowRunner syntheticWorkflowRunner;
+    private final transient QueryHelper queryHelper;
+    private final transient SyntheticWorkflowRunner syntheticWorkflowRunner;
 
     public enum ItemStatus {
         SUCCESS, FAILURE
     }
 
+    
     public enum QueryLanguage {
         QUERY_BUILDER(QueryHelperImpl.QUERY_BUILDER),
         LIST(QueryHelperImpl.LIST),
+        @SuppressWarnings("deprecation")
         XPATH(Query.XPATH),
         JCR_SQL2(Query.JCR_SQL2),
         JCR_SQL("JCR-SQL");
@@ -113,7 +113,7 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
     )
     public String relativePayloadPath = "";
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
     private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private transient List<Resource> payloads;
@@ -174,7 +174,7 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
                 }));
     }
 
-    public GenericReport getReport() {
+    public GenericBlobReport getReport() {
         return report;
     }
 

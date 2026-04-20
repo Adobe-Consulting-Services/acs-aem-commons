@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.reports.internal.datasources;
 
-import com.adobe.acs.commons.util.QueryHelper;
-import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
-import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
+import static javax.jcr.query.Query.JCR_SQL2;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -31,19 +36,15 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static javax.jcr.query.Query.JCR_SQL2;
+import com.adobe.acs.commons.util.QueryHelper;
+import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
+import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
 
 @Component(service = Servlet.class, property = {
     "sling.servlet.resourceTypes=acs-commons/components/utilities/report-builder/data-sources/dynamic-select",
@@ -65,7 +66,7 @@ public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
   private transient QueryHelper queryHelper;
 
   @Override
-  protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+  protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response)
       throws ServletException, IOException {
 
     final ResourceResolver resolver = request.getResourceResolver();
@@ -112,7 +113,7 @@ public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
     } catch (Exception e) {
       log.error(
           "Unable to collect the information to populate the ACS Commons Report Builder dynamic-select drop-down.", e);
-      response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

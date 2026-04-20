@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.cfi;
 
@@ -27,9 +25,15 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.cq.dam.cfm.ContentFragmentException;
+
+import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -37,6 +41,8 @@ import javax.jcr.Workspace;
 import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
+
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -89,7 +95,7 @@ public class ContentFragmentImportTest {
     @Test
     public void importOne() {
         importer.dryRunMode = false;
-        addImportRow("/test/path/fragment1", "Fragment 1", "element1", "element1value");
+        addImportRow("/test/path/fragment1", "Fragment 1", Collections.singletonMap("element1", "element1value"));
         mockFragment.elements.put("element1", null);
         instance.run(rr);
         assertEquals("Should finish process", instance.getInfo().getProgress(), 1.0, 0.0001);
@@ -99,7 +105,7 @@ public class ContentFragmentImportTest {
     @Test
     public void assertFolderCreation() {
         importer.dryRunMode = false;
-        addImportRow("/test/path/fragment1", "Fragment 1", "element1", "element1value");
+        addImportRow("/test/path/fragment1", "Fragment 1", Collections.singletonMap("element1", "element1value"));
         mockFragment.elements.put("element1", null);
         instance.run(rr);
         assertTrue("Should have created test folder", createdNodePaths.contains("/test/path"));
@@ -108,18 +114,41 @@ public class ContentFragmentImportTest {
         assertTrue("Should have created fragment1 metadata", createdNodePaths.contains("/test/path/fragment1/jcr:content"));
     }
 
+    @Test
+    public void convertExcelDateToLong() {
+
+        OffsetDateTime ta = OffsetDateTime.parse("2021-12-03T10:15:30+00:00");
+        Date date = Date.from(ta.toInstant());
+        Calendar calendar  = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        final String expectedTimeMs = String.valueOf(date.getTime());
+
+        importer.dryRunMode = false;
+        addImportRow("/test/path/fragment1", "Fragment 1",
+                ImmutableMap.of(
+                        "date1value", Date.from(ta.toInstant()),
+                        "date2value", calendar));
+        mockFragment.elements.put("date1value", null);
+        mockFragment.elements.put("date2value", null);
+        instance.run(rr);
+        assertEquals("Should finish process", instance.getInfo().getProgress(), 1.0, 0.0001);
+
+        assertEquals("Date value (date1value) should be converted to Long", expectedTimeMs, mockFragment.getElement("date1value").getContent());
+        assertEquals("Calendar value (date2value) should be converted to Long", expectedTimeMs, mockFragment.getElement("date2value").getContent());
+    }
+
     //------------------------------------------------------------------------------------------------------------------
-    private void addImportRow(String path, String title, String... values) {
+    private void addImportRow(String path, String title, Map<String, Object> values) {
         Map<String, CompositeVariant> row = new HashMap<>();
         row.put(PATH, new CompositeVariant(path));
         row.put(FOLDER_TITLE, new CompositeVariant("test folder"));
         row.put(NAME, new CompositeVariant(StringUtils.substringAfter(path, "/")));
         row.put(TITLE, new CompositeVariant(title));
         row.put(TEMPLATE, new CompositeVariant("/test/template"));
-        for (int i = 0; i < values.length - 1; i += 2) {
-            row.put(values[i], new CompositeVariant(values[i + 1]));
+        for (String fieldName : values.keySet()) {
+            row.put(fieldName, new CompositeVariant(values.get(fieldName)));
         }
-        importer.spreadsheet.getDataRowsAsCompositeVariants().add(row);
+        importer.spreadsheet.appendData(Collections.singletonList(row));
     }
 
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException, PersistenceException {
@@ -128,11 +157,11 @@ public class ContentFragmentImportTest {
         Node node = mock(Node.class);
         when(ses.nodeExists("/test")).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
         when(ses.getNode(any())).then(invocation -> {
-            currentNodePath = invocation.getArgumentAt(0, String.class);
+            currentNodePath = invocation.getArgument(0);
             return node;
         });
         when(node.addNode(any(), any())).then(invocation -> {
-            String nodeName = invocation.getArgumentAt(0, String.class);
+            String nodeName = invocation.getArgument(0);
             String nodePath = currentNodePath + "/" + nodeName;
             createdNodePaths.add(nodePath);
             currentNodePath = nodePath;
@@ -164,22 +193,22 @@ public class ContentFragmentImportTest {
 
     private ProcessInstanceImpl prepareProcessInstance(ProcessInstanceImpl source) throws PersistenceException {
         ProcessInstanceImpl instance = spy(source);
-        doNothing().when(instance).persistStatus(anyObject());
-        doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
+        doNothing().when(instance).persistStatus(any());
+        doNothing().when(instance).recordErrors(anyInt(), any(), any());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             CheckedConsumer<ResourceResolver> action = (CheckedConsumer<ResourceResolver>) invocationOnMock.getArguments()[0];
             action.accept(getMockResolver());
             return null;
-        }).when(instance).asServiceUser(anyObject());
+        }).when(instance).asServiceUser(any());
         return instance;
     }
 
     private ContentFragmentImport prepareProcessDefinition(ContentFragmentImport source) throws RepositoryException, PersistenceException, IllegalAccessException, ContentFragmentException {
         ContentFragmentImport definition = spy(source);
         Resource mockResource = mock(Resource.class);
-        doNothing().when(definition).storeReport(anyObject(), anyObject());
+        doNothing().when(definition).storeReport(any(), any());
         doReturn(mockResource).when(definition).getFragmentTemplateResource(any(), any());
-        doReturn(mockFragment).when(definition).getOrCreateFragment(anyObject(), anyObject(), anyObject(), anyObject());
+        doReturn(mockFragment).when(definition).getOrCreateFragment(any(), any(), any(), any());
         return definition;
     }
 }

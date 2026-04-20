@@ -1,34 +1,33 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * ACS AEM Commons
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright (C) 2013 - 2023 Adobe
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.jackrabbit.oak.spi.commit;
 
-import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import java.util.Map;
 
-import com.google.common.base.Objects;
-
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jackrabbit.oak.api.Root;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.google.common.base.Objects;
 
 /**
  * Commit info instances associate some meta data with a commit.
@@ -181,12 +180,12 @@ public final class CommitInfo {
 
     @Override
     public String toString() {
-        return toStringHelper(this).omitNullValues()
-            .add("sessionId", sessionId)
-            .add("userId", userId)
-            .add("external", external)
-            .add("date", date)
-            .add("info", info)
+        return new ToStringBuilder(this)
+            .append("sessionId", sessionId)
+            .append("userId", userId)
+            .append("external", external)
+            .append("date", date)
+            .append("info", info)
             .toString();
     }
 

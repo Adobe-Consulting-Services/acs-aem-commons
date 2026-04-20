@@ -1,0 +1,115 @@
+{
+  "jcr:primaryType": "sling:OrderedFolder",
+  "jcr:createdBy": "admin",
+  "jcr:created": "2023-06-07T16:09:43.164+03:00",
+  "adobestock-216674449.jpeg": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "e07e4951-b3a1-495d-886c-97a1648e0596",
+    "jcr:predecessors": [
+      "72a074a5-3eab-47a1-acff-153e35251e76"
+    ],
+    "jcr:created": "2023-06-07T16:10:27.576+03:00",
+    "jcr:baseVersion": "72a074a5-3eab-47a1-acff-153e35251e76",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "26227675-38fa-447a-9bf0-cef87b59e227"
+  },
+  "jcr:content": {
+    "jcr:primaryType": "nt:unstructured",
+    "jcr:title": "Riverside Camping Australia",
+    "cq:isTransCreated": true
+  },
+  "adobe_waadobe_wa_mg_2466.jpg": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "976af8b1-3afc-40ac-a164-ab4b16a8c8ef",
+    "jcr:predecessors": [
+      "d56cedaf-53a3-414f-a28d-11f67338594f"
+    ],
+    "jcr:created": "2023-06-07T16:10:28.033+03:00",
+    "jcr:baseVersion": "d56cedaf-53a3-414f-a28d-11f67338594f",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "ac3a0532-8823-4950-8209-26d8c0a35b92"
+  },
+  "riverside-camping-australia": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "37f52909-cd78-480e-912b-ccf313e275ec",
+    "jcr:predecessors": [
+      "68190a39-93f4-4f5a-abe5-9602620736bc"
+    ],
+    "jcr:created": "2023-06-07T16:10:27.823+03:00",
+    "jcr:baseVersion": "68190a39-93f4-4f5a-abe5-9602620736bc",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "9ead3982-0245-497f-97b0-cdf1b50f4534"
+  },
+  "adobestock-257541512.jpeg": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "17be11ee-7a05-4571-ac67-f417f85599c3",
+    "jcr:predecessors": [
+      "21cfedac-2838-4351-a4e5-e4ca0842dc5e"
+    ],
+    "jcr:created": "2023-06-07T16:10:27.257+03:00",
+    "jcr:baseVersion": "21cfedac-2838-4351-a4e5-e4ca0842dc5e",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "700f4628-f618-487a-b4ad-ebf25e8edaec"
+  },
+  "adobestock-238491803.jpeg": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "e338bb1f-42ce-430c-ad2c-e09500676c8f",
+    "jcr:predecessors": [
+      "7c71b8c4-02a2-4677-bb9d-4e7823895c44"
+    ],
+    "jcr:created": "2023-06-07T16:10:26.471+03:00",
+    "jcr:baseVersion": "7c71b8c4-02a2-4677-bb9d-4e7823895c44",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "1d32c79d-f849-4a34-8a6d-2bd7cb6635a3"
+  },
+  "adobestock-178022573.jpeg": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "fa58100d-23ef-4e65-9e94-e8223c061155",
+    "jcr:predecessors": [
+      "e4b3c82a-0b21-4c4d-9f79-9c36ceefde27"
+    ],
+    "jcr:created": "2023-06-07T16:10:26.828+03:00",
+    "jcr:baseVersion": "e4b3c82a-0b21-4c4d-9f79-9c36ceefde27",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "50ab0979-d7b5-486a-a303-8d876e4a96a4"
+  },
+  "adobestock-167833331.jpeg": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:mixinTypes": [
+      "mix:versionable"
+    ],
+    "jcr:createdBy": "admin",
+    "jcr:versionHistory": "d763e50b-14cf-452b-b93f-42614fb1eb30",
+    "jcr:predecessors": [
+      "37bb8525-cfdf-40ac-8078-655aed478dd2"
+    ],
+    "jcr:created": "2023-06-07T16:10:25.988+03:00",
+    "jcr:baseVersion": "37bb8525-cfdf-40ac-8078-655aed478dd2",
+    "jcr:isCheckedOut": true,
+    "jcr:uuid": "bc596a32-f7c1-4b0a-8268-cca3e0dbc58e"
+  }
+}

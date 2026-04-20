@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
@@ -30,7 +28,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PasswordComponent;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.SocketConfig;
@@ -402,7 +400,7 @@ public class UrlAssetImport extends AssetIngestor {
                 .collect(Collectors.toList());
 
         if (filesInFolder.isEmpty()) {
-            LOG.error("Unable to find any other files in directory " + rendition.getParent().getNodePath(preserveFileName));
+            LOG.error("Unable to find any other files in directory {}", rendition.getParent().getNodePath(preserveFileName));
             return Optional.empty();
         } else {
             // Organize files by closest match (better match = smaller levensthein distance)

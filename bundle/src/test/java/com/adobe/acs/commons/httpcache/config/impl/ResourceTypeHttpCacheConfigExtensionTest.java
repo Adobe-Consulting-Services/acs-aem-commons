@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
@@ -30,7 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -99,8 +97,6 @@ public class ResourceTypeHttpCacheConfigExtensionTest {
         extension.activate(properties);
 
         when(resource.getPath()).thenReturn("/content/acs-commons/path/to/page");
-        when(jcrContentChild.getPath()).thenReturn("/content/acs-commons/path/to/page/jcr:content");
-        when(jcrContentChild.getResourceType()).thenReturn(RT_SUB_COMP);
         when(resourceResolver.isResourceType(jcrContentChild, RT_PARENT_COMP)).thenReturn(true);
 
         assertTrue(extension.accepts(request, config));
@@ -110,14 +106,18 @@ public class ResourceTypeHttpCacheConfigExtensionTest {
     @Test
     public void test_regex() throws HttpCacheRepositoryAccessException {
         HashMap<String,Object> properties = new HashMap<>();
-        properties.put(PROP_PATHS, new String[]{"/content/(.*)"});
+        properties.put(PROP_PATHS, new String[]{"/content/acs-commons/pathA/(.*)", "/content/acs-commons/pathB/(.*)"});
         properties.put(PROP_RESOURCE_TYPES, new String[]{"acs-commons/components/(.*)"});
         properties.put(PROP_CHECK_RESOURCE_SUPER_TYPE, FALSE);
         extension.activate(properties);
 
-        when(resource.getPath()).thenReturn("/content/acs-commons/path/to/page/jcr:content/component");
+        when(resource.getPath()).thenReturn("/content/acs-commons/pathA/to/page/jcr:content/component");
         when(resource.getResourceType()).thenReturn(RT_REGULAR_COMP);
 
+        assertTrue(extension.accepts(request, config));
+        verify(resourceResolver, never()).isResourceType(resource, "acs-commons/components/(.*)");
+        
+        when(resource.getPath()).thenReturn("/content/acs-commons/pathB/to/page/jcr:content/component");
         assertTrue(extension.accepts(request, config));
         verify(resourceResolver, never()).isResourceType(resource, "acs-commons/components/(.*)");
 

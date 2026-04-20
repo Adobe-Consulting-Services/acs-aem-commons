@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.users.impl;
@@ -25,7 +23,7 @@ import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -69,7 +67,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
     private static final String SERVICE_NAME = "ensure-service-user";
     private static final Map<String, Object> AUTH_INFO;
-    public static boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    private static final boolean DEFAULT_ENSURE_IMMEDIATELY = true;
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
@@ -131,7 +129,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
 
             log.info(
                     "Successfully ensured [ {} ] of Service User [ {} ] in [ {} ms ]",
-                    operation.toString(), getAuthorizable().getPrincipalName(),
+                    operation, getAuthorizable().getPrincipalName(),
                             String.valueOf(System.currentTimeMillis() - start));
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",

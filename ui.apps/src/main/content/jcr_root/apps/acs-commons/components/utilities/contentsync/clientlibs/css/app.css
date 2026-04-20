@@ -1,0 +1,37 @@
+.diagnosis-panel-with-margin {
+    margin-top: 1rem;
+    margin-left: 3rem;
+    margin-right: 3rem;
+}
+
+.panelWithMarginTop {
+    margin-top: 1.5rem;
+}
+
+.checkboxes-panel {
+    column-width: 400px;
+}
+
+coral-dialog-content {
+    column-width: 600px;
+}
+
+.hidden {
+	display: none;
+}
+
+.createwarn {
+    margin-top: 1rem;
+    display: flex;
+    max-width: 37rem;
+}
+
+.createwarn-left {
+    flex-grow: 0;
+    margin-right: 1rem;
+}
+
+.createwarn-right {
+    flex-grow: 1;
+}
+ 

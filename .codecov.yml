@@ -1,0 +1,11 @@
+# https://docs.codecov.com/docs/codecovyml-reference
+coverage:
+  status:
+    # https://docs.codecov.com/docs/commit-status
+    project:
+      default:
+        # basic
+        target: auto
+        # each PR must not lower the coverage by more than the given percentage
+        threshold: 0.1%
+    patch: off

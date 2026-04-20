@@ -1,0 +1,76 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<sly data-sly-use.model="com.adobe.acs.commons.replication.dispatcher.DispatcherFlusherModel"
+     data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html">
+
+    <script>
+        async function submitAcsCommonsDispatcherFlushForm(form) {
+            const response = await fetch('/libs/granite/csrf/token.json');
+            const json = await response.json();
+            form.querySelector('input[name=":cq_csrf_token"]').value = json.token;
+            form.submit();
+        };
+
+    </script>
+
+    <form data-sly-test="${model.ready}"
+          onsubmit="submitAcsCommonsDispatcherFlushForm(this); return false;"
+          action="${resource.path}.flush.html" method="post">
+        <input type="hidden" name=":cq_csrf_token"/>
+        <button class="spectrum-Button spectrum-Button--fill spectrum-Button--cta spectrum-Button--accent spectrum-Button--sizeL"
+                type="submit">Flush paths on Dispatcher(s)
+        </button>
+    </form>
+
+    <h2>Flush Action</h2>
+    <ul>
+        <li data-sly-test="${'ACTIVATE' == model.actionType}">
+            Invalidate Cache
+        </li>
+        <li data-sly-test="${'DELETE' == model.actionType}">
+            Delete Cache
+        </li>
+        <li data-sly-test="${'' == model.actionType}"
+            class="not-set">Flush method not set
+        </li>
+    </ul>
+
+    <h2>Paths to Flush</h2>
+    <ul>
+        <li data-sly-test="${model.paths.empty}"
+            class="not-set">Dispatcher flush paths not set
+        </li>
+        <sly data-sly-list="${model.paths}">
+            <li>${item}</li>
+        </sly>
+    </ul>
+
+    <h2>Active Dispatcher Flush Agents (excludes Resource Only agents)</h2>
+    <ul>
+        <li data-sly-test="${model.agents.empty}"
+            class="not-set"><a href="/miscadmin#/etc/replication/agents.author"
+                               target="_blank">No active Dispatcher Flush replication agents</a></li>
+
+        <sly data-sly-list="${model.agents}">
+            <li>
+                <a href="${item.configuration.getConfigPath}.log.html" target="_target">
+                    ${item.configuration.getName}</a></li>
+        </sly>
+    </ul>
+</sly>

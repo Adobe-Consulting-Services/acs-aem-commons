@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
@@ -51,8 +49,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public abstract class AssetIngestor extends ProcessDefinition {
 
@@ -124,6 +121,13 @@ public abstract class AssetIngestor extends ProcessDefinition {
             options = "checked"
     )
     boolean preserveFileName = true;
+    @FormField(
+        name = "Preserve Folder Titles",
+        description = "If checked, existing folder titles will not be changed.",
+        component = CheckboxComponent.class,
+        options = "checked"
+    )
+    boolean preserveFolderTitles = true;
 
     @FormField(
             name = "Target JCR Folder",
@@ -300,7 +304,6 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
                 if (asset == null) {
                     AssetIngestorException ex = new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath);
-                    Logger.getLogger(AssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                     throw ex;
                 }
                 saveMigrationInfo(source, asset);
@@ -390,12 +393,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     && folderContentNode.hasProperty(JcrConstants.JCR_TITLE)
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
-            } else {
+            } else if (!preserveFolderTitles) {
                 setFolderTitle(folderNode, name);
                 r.commit();
                 r.refresh();
-                return true;
             }
+            return true;
         } else {
             HierarchicalElement parent = el.getParent();
             String parentPath;

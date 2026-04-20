@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
@@ -29,8 +27,8 @@ import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
 import com.adobe.acs.commons.util.ParameterUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -101,7 +99,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               cardinality = Integer.MAX_VALUE)
     static final String PROP_REQUEST_URI_PATTERNS = "httpcache.config.requesturi.patterns";
     private List<String> requestUriPatterns;
-    private List<Pattern> requestUriPatternsAsRegEx;
+    private List<Pattern> requestUriPatternsAsRegEx = Collections.emptyList();
 
     // Request URIs - Blacklisted.
     @Property(label = "Blacklisted request URI patterns",
@@ -110,8 +108,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               cardinality = Integer.MAX_VALUE)
     static final String PROP_BLACKLISTED_REQUEST_URI_PATTERNS =
             "httpcache.config.requesturi.patterns.blacklisted";
-    private List<String> blacklistedRequestUriPatterns;
-    private List<Pattern> blacklistedRequestUriPatternsAsRegEx;
+    private List<Pattern> blacklistedRequestUriPatternsAsRegEx = Collections.emptyList();
 
     // Authentication requirement
     // @formatter:off
@@ -138,8 +135,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
                       + ". This accepts " + "REGEX. Example - /etc/my-products(.*)",
               cardinality = Integer.MAX_VALUE)
     static final String PROP_CACHE_INVALIDATION_PATH_PATTERNS = "httpcache.config.invalidation.oak.paths";
-    private List<String> cacheInvalidationPathPatterns;
-    private List<Pattern> cacheInvalidationPathPatternsAsRegEx;
+    private List<Pattern> cacheInvalidationPathPatternsAsRegEx = Collections.emptyList();
 
     // Cache store
     // @formatter:off
@@ -272,7 +268,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         excludedCookieKeys = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS), new String[]{}));
 
         // Request URIs - Blacklisted.
-        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
+        List<String> blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
         blacklistedRequestUriPatternsAsRegEx = compileToPatterns(blacklistedRequestUriPatterns);
 
@@ -289,7 +285,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         expiryOnUpdate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_UPDATE), DEFAULT_EXPIRY_ON_UPDATE);
 
         // Cache invalidation paths.
-        cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
+        List<String> cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
 
@@ -427,17 +423,17 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
     @Override
     public List<Pattern> getRequestUriPatterns() {
-        return this.requestUriPatternsAsRegEx;
+        return Collections.unmodifiableList(this.requestUriPatternsAsRegEx);
     }
 
     @Override
     public List<Pattern> getBlacklistedRequestUriPatterns() {
-        return this.blacklistedRequestUriPatternsAsRegEx;
+        return Collections.unmodifiableList(this.blacklistedRequestUriPatternsAsRegEx);
     }
 
     @Override
     public List<Pattern> getJCRInvalidationPathPatterns() {
-        return this.cacheInvalidationPathPatternsAsRegEx;
+        return Collections.unmodifiableList(this.cacheInvalidationPathPatternsAsRegEx);
     }
 
     @Override

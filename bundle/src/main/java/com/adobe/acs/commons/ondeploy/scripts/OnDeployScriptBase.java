@@ -1,27 +1,26 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
+import com.adobe.acs.commons.cqsearch.QueryUtil;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import org.osgi.annotation.versioning.ConsumerType;
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.PredicateGroup;
@@ -78,14 +77,14 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
     /**
      * Execute the script.
-     *
+     * <p>
      * This function must be implemented by all scripts.
      */
     protected abstract void execute() throws Exception;
 
     /**
      * Retrieve a node, or create it if not present.
-     *
+     * <p>
      * The node, as well as non-existent parent nodes, are created as type
      * nt:unstructured.
      *
@@ -98,13 +97,13 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
     /**
      * Retrieve a node, or create it if not present.
-     *
+     * <p>
      * If the node does not exist, it is created as the specified nodeType.
-     *
+     * <p>
      * Non-existent parent nodes are created as type nt:unstructured.
      *
      * @param absolutePath Path to fetch or create.
-     * @param nodeType The type of node to create.
+     * @param nodeType     The type of node to create.
      * @return The fetched or created node.
      */
     protected final Node getOrCreateNode(String absolutePath, String nodeType) throws RepositoryException {
@@ -113,22 +112,22 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
     /**
      * Retrieve a node, or create it if not present.
-     *
+     * <p>
      * If the node does not exist, it is created as the specified nodeType.
-     *
+     * <p>
      * Non-existent parent nodes are created as the type specified by
      * intermediateNodeType.
      *
-     * @param absolutePath Path to fetch or create.
+     * @param absolutePath         Path to fetch or create.
      * @param intermediateNodeType The type of intermediate nodes to create.
-     * @param nodeType The type of node to create.
+     * @param nodeType             The type of node to create.
      * @return The fetched or created node.
      */
     protected final Node getOrCreateNode(String absolutePath, String intermediateNodeType, String nodeType) throws RepositoryException {
         try {
             return session.getNode(absolutePath);
         } catch (PathNotFoundException e) {
-            logger.info("Creating node (and missing parents): {}", absolutePath);
+            logger.warn("Creating node (and missing parents): {}", absolutePath);
             return JcrUtil.createPath(absolutePath, intermediateNodeType, nodeType, session, false);
         }
     }
@@ -136,7 +135,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     /**
      * Rename a property on a node.
      *
-     * @param node Node to update the property name on.
+     * @param node            Node to update the property name on.
      * @param oldPropertyName Old property name.
      * @param newPropertyName New property name.
      */
@@ -148,7 +147,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     /**
      * Rename a property on a resource.
      *
-     * @param resource Resource to update the property name on.
+     * @param resource        Resource to update the property name on.
      * @param oldPropertyName Old property name.
      * @param newPropertyName New property name.
      */
@@ -194,19 +193,19 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
         logger.info("Finding all nodes under /content with resource type: {}", oldResourceType);
 
-        final CloseableQueryBuilder queryBuilder = resourceResolver.adaptTo(CloseableQueryBuilder.class);
+        final QueryBuilder queryBuilder = resourceResolver.adaptTo(QueryBuilder.class);
         if (queryBuilder != null) {
-            try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(map), session)) {
-                SearchResult result = query.getResult();
-                Iterator<Node> nodeItr = result.getNodes();
-                if (nodeItr.hasNext()) {
-                    while (nodeItr.hasNext()) {
-                        Node node = nodeItr.next();
-                        updateResourceType(node, newResourceType);
-                    }
-                } else {
-                    logger.info("No nodes found with resource type: {}", oldResourceType);
+            Query query = queryBuilder.createQuery(PredicateGroup.create(map), session);
+            QueryUtil.setResourceResolverOn(resourceResolver, query);
+            SearchResult result = query.getResult();
+            Iterator<Node> nodeItr = result.getNodes();
+            if (nodeItr.hasNext()) {
+                while (nodeItr.hasNext()) {
+                    Node node = nodeItr.next();
+                    updateResourceType(node, newResourceType);
                 }
+            } else {
+                logger.info("No nodes found with resource type: {}", oldResourceType);
             }
         }
     }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.adobe.cq.dam.mac.sync.api.DAMSyncService;
@@ -31,7 +30,7 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -62,6 +61,10 @@ import java.util.List;
 @Service
 public class BrandPortalSyncProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;    
 
     @Reference
     private WorkflowHelper workflowHelper;

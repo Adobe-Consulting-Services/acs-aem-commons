@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.wcm.api.components.ComponentContext;
-import com.day.cq.wcm.api.designer.Design;
-import com.day.cq.wcm.api.designer.Designer;
-import com.day.cq.wcm.api.designer.Style;
-import com.google.common.base.Function;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.Locale;
+import java.util.function.Function;
+
+import javax.inject.Inject;
+import javax.jcr.Session;
+
+import com.adobe.granite.asset.api.AssetManager;
+import com.day.cq.commons.Externalizer;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.tagging.TagManager;
+import com.day.cq.wcm.api.policies.ContentPolicyManager;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -39,16 +46,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.inject.Inject;
-import javax.jcr.Session;
-import java.util.Locale;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
+import com.day.cq.wcm.api.designer.Style;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AemObjectInjectorTest {
@@ -58,13 +63,30 @@ public class AemObjectInjectorTest {
     private PageManager pageManager;
     @Mock
     private Designer designer;
+    @Mock
+    private TagManager tagManager;
+
+    @Mock
+    private AssetManager assetManager;
+
+    @Mock
+    private com.day.cq.dam.api.AssetManager oldAssetManager;
+
+    @Mock
+    private QueryBuilder queryBuilder;
+
+    @Mock
+    private ContentPolicyManager contentPolicyManager;
+
+    @Mock
+    private Externalizer externalizer;
 
     @Mock
     private Page resourcePage;
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
-    
+
 
     @Before
     public final void setUp() throws Exception {
@@ -76,6 +98,12 @@ public class AemObjectInjectorTest {
         context.registerAdapter(ResourceResolver.class, PageManager.class, adaptHandler);
         context.registerService(PageManager.class,pageManager);
         context.registerService(Designer.class,designer);
+        context.registerService(TagManager.class, tagManager);
+        context.registerService(AssetManager.class, assetManager);
+        context.registerService(com.day.cq.dam.api.AssetManager.class, oldAssetManager);
+        context.registerService(QueryBuilder.class, queryBuilder);
+        context.registerService(ContentPolicyManager.class, contentPolicyManager);
+        context.registerService(Externalizer.class, externalizer);
         context.addModelsForClasses(TestResourceModel.class);
 
 
@@ -95,8 +123,15 @@ public class AemObjectInjectorTest {
         assertNotNull(testResourceModel.getResource());
         assertNotNull(testResourceModel.getResourceResolver());
         assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getTagManager());
         assertNotNull(testResourceModel.getDesigner());
         assertNotNull(testResourceModel.getLocale());
+        assertNotNull(testResourceModel.getAssetManager());
+        assertNotNull(testResourceModel.getOldAssetManager());
+        assertNotNull(testResourceModel.getExternalizer());
+        assertNotNull(testResourceModel.getContentPolicyManager());
+        assertNotNull(testResourceModel.getQueryBuilder());
+
         assertEquals(Locale.ENGLISH, testResourceModel.getLocale());
 
         // TODO: Tests for the remaining injectable objects
@@ -112,8 +147,14 @@ public class AemObjectInjectorTest {
         assertNotNull(testResourceModel.getResource());
         assertNotNull(testResourceModel.getResourceResolver());
         assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getTagManager());
         assertNotNull(testResourceModel.getDesigner());
         assertNotNull(testResourceModel.getLocale());
+        assertNotNull(testResourceModel.getAssetManager());
+        assertNotNull(testResourceModel.getOldAssetManager());
+        assertNotNull(testResourceModel.getExternalizer());
+        assertNotNull(testResourceModel.getContentPolicyManager());
+        assertNotNull(testResourceModel.getQueryBuilder());
         assertEquals(Locale.ENGLISH, testResourceModel.getLocale());
         // TODO: Tests for the remaining injectable objects
     }
@@ -147,11 +188,30 @@ public class AemObjectInjectorTest {
         private Session session;
         @Inject @Optional
         private XSSAPI xssApi;
+
+        @Inject @Optional
+        private TagManager tagManager;
+
         @Inject @Optional
         private String namedSomethingElse;
 
         @Inject @Optional
         private Locale locale;
+
+        @Inject @Optional
+        private AssetManager  assetManager;
+
+        @Inject @Optional
+        private com.day.cq.dam.api.AssetManager oldAssetManager;
+
+        @Inject @Optional
+        private Externalizer externalizer;
+
+        @Inject @Optional
+        private QueryBuilder queryBuilder;
+
+        @Inject @Optional
+        private ContentPolicyManager contentPolicyManager;
 
         public Resource getResource() {
             return resource;
@@ -167,6 +227,10 @@ public class AemObjectInjectorTest {
 
         public PageManager getPageManager() {
             return pageManager;
+        }
+
+        public TagManager getTagManager() {
+            return tagManager;
         }
 
         public Page getCurrentPage() {
@@ -203,6 +267,26 @@ public class AemObjectInjectorTest {
 
         public Locale getLocale() {
             return locale;
+        }
+
+        public AssetManager getAssetManager() {
+            return assetManager;
+        }
+
+        public com.day.cq.dam.api.AssetManager getOldAssetManager() {
+            return oldAssetManager;
+        }
+
+        public Externalizer getExternalizer() {
+            return externalizer;
+        }
+
+        public QueryBuilder getQueryBuilder() {
+            return queryBuilder;
+        }
+
+        public ContentPolicyManager getContentPolicyManager() {
+            return contentPolicyManager;
         }
     }
 }

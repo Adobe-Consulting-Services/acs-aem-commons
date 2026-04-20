@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.audit_log_search;
 
@@ -25,13 +23,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.UnsupportedRepositoryOperationException;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -89,7 +87,9 @@ public class AuditLogSearchRequest {
     }
 
     public Date getEndDate() {
-        return endDate;
+        return Optional.ofNullable(endDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     public String getOrder() {
@@ -100,16 +100,16 @@ public class AuditLogSearchRequest {
         List<String> expressions = new ArrayList<String>();
 
         if (!StringUtils.isEmpty(type)) {
-            expressions.add("[cq:type]='" + StringEscapeUtils.escapeSql(type) + "'");
+            expressions.add("[cq:type]='" + StringUtils.replace(type, "'", "''") + "'");
         }
         if (!StringUtils.isEmpty(user)) {
-            expressions.add("[cq:userid]='" + StringEscapeUtils.escapeSql(user) + "'");
+            expressions.add("[cq:userid]='" + StringUtils.replace(user, "'", "''") + "'");
         }
         if (StringUtils.isNotEmpty(contentRoot)) {
             if (includeChildren) {
-                expressions.add("[cq:path] LIKE '" + StringEscapeUtils.escapeSql(contentRoot) + "%'");
+                expressions.add("[cq:path] LIKE '" + StringUtils.replace(contentRoot, "'", "''") + "%'");
             } else {
-                expressions.add("[cq:path]='" + StringEscapeUtils.escapeSql(contentRoot) + "'");
+                expressions.add("[cq:path]='" + StringUtils.replace(contentRoot, "'", "''") + "'");
             }
         }
         if (startDate != null) {
@@ -126,7 +126,9 @@ public class AuditLogSearchRequest {
     }
 
     public Date getStartDate() {
-        return startDate;
+        return Optional.ofNullable(startDate)
+                .map(date -> (Date) date.clone())
+                .orElse(null);
     }
 
     public String getType() {
@@ -154,9 +156,11 @@ public class AuditLogSearchRequest {
             throws UnsupportedRepositoryOperationException, RepositoryException {
         if (!userPaths.containsKey(userId)) {
             final UserManager userManager = resolver.adaptTo(UserManager.class);
-            final Authorizable usr = userManager.getAuthorizable(userId);
-            if (usr != null) {
-                userPaths.put(userId, usr.getPath());
+            if (userManager != null) {
+                final Authorizable usr = userManager.getAuthorizable(userId);
+                if (usr != null) {
+                    userPaths.put(userId, usr.getPath());
+                }
             }
         }
         return userPaths.get(userId);

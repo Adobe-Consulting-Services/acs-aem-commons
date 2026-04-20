@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.packaging;
@@ -76,13 +74,13 @@ public interface PackageHelper {
      * Derives the next package version to use based on the input params and the existing package versions matching
      * the input Package group and name. Next version increments "minor" version only.
      *
-     * Ex. 1.0.0 ~> 1.1.0
-     *     3.22.0 ~> 3.23.0
+     * Ex. 1.0.0 ~&gt; 1.1.0
+     *     3.22.0 ~&gt; 3.23.0
      *
      * If the param version's major is greater than the largest existing package version in jcr,
      * then the param version will be used.
      *
-     * Ex. param ~> 2.0.0, largest in jcr ~>1.40.0; returned version will be 2.0.0
+     * Ex. param ~&gt; 2.0.0, largest in jcr ~&gt; 1.40.0; returned version will be 2.0.0
      *
      * @param jcrPackageManager JcrPackageManager object
      * @param groupName package group name

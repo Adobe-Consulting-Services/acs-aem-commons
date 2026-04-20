@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
@@ -38,11 +36,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.decodeUriParts;
 import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.encodeUriParts;
@@ -51,6 +49,8 @@ import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement
  * Abstraction of a file which might be an asset or a rendition of another asset
  */
 public class FileOrRendition implements HierarchicalElement {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FileOrRendition.class);
 
     final String url;
     final String name;
@@ -122,7 +122,7 @@ public class FileOrRendition implements HierarchicalElement {
             String filePath = decodeUriParts(uri.getRawPath());
             return decodeUriParts(filePath);
         } catch (URISyntaxException | UnsupportedEncodingException ex) {
-            Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Cannot decode url '{}'", url, ex);
         }
         return url;
     }
@@ -205,7 +205,6 @@ public class FileOrRendition implements HierarchicalElement {
                 try {
                     size = getConnection().getContentLengthLong();
                 } catch (IOException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
                     throw ex;
                 }
@@ -250,7 +249,6 @@ public class FileOrRendition implements HierarchicalElement {
                     connection = clientProvider.getHttpClientSupplier().get().execute(lastRequest);
                     size = connection.getEntity().getContentLength();
                 } catch (IOException | IllegalArgumentException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
                     throw new IOException("Error with URL " + url + ": " + ex.getMessage(), ex);
                 }
@@ -314,7 +312,6 @@ public class FileOrRendition implements HierarchicalElement {
                     session.setPassword(clientProvider.getPassword());
                     session.connect();
                 } catch (JSchException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     throw new IOException("Unable to connect to server", ex);
                 }
             }
@@ -342,13 +339,10 @@ public class FileOrRendition implements HierarchicalElement {
                 return currentStream;
 
             } catch (URISyntaxException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Bad URI format", ex);
             } catch (JSchException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error with connection", ex);
             } catch (SftpException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error retrieving file", ex);
             }
         }
@@ -367,13 +361,10 @@ public class FileOrRendition implements HierarchicalElement {
                 SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getRawPath()));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error parsing URL", ex);
             } catch (SftpException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error getting file stats", ex);
             } catch (JSchException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error opening SFTP channel", ex);
             }
         }

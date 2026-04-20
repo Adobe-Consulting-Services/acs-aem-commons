@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Copy Properties - Step Properties"
+          sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/tabs">
+        <items jcr:primaryType="nt:unstructured">
+            <common
+                    jcr:primaryType="nt:unstructured"
+                    cq:hideOnEdit="true"/>
+            <process
+                    jcr:primaryType="nt:unstructured"
+                    cq:hideOnEdit="true"/>
+            <processcommon
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Common"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                <items jcr:primaryType="nt:unstructured">
+                    <column
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                        <items jcr:primaryType="nt:unstructured">
+                            <basic
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <title
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            disabled="false"
+                                            fieldLabel="Title"
+                                            name="./jcr:title"/>
+                                    <description
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            disabled="false"
+                                            fieldLabel="Description"
+                                            name="./jcr:description"/>
+                                </items>
+                            </basic>
+                            <advanced
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Advanced Settings"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <advance
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                            fieldDescription="Check if your handler will advance to the next step."
+                                            fieldLabel="Handler Advance"
+                                            name="./metaData/PROCESS_AUTO_ADVANCE"
+                                            text="Handler Advance"
+                                            value="true"/>
+                                </items>
+                            </advanced>
+                        </items>
+                    </column>
+                </items>
+            </processcommon>
+            <processargs
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Arguments"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                <items jcr:primaryType="nt:unstructured">
+                    <column
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                        <items jcr:primaryType="nt:unstructured">
+                            <arguments
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Properties to Copy"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <properties
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                            fieldLabel="Property Mapping"
+                                            fieldDescription="The property mapping in format [ source property -> destination property ]. Paths are relative from the dam:Asset or cq:Page payload resource.">
+                                        <field
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                fieldLabel="Source Property -> Destination Property"
+                                                emptyText="source property path -> destination property path"
+                                                required="{Boolean}true"
+                                                name="./metaData/PROPERTY_MAP"/>
+                                    </properties>
+                                </items>
+                            </arguments>
+                        </items>
+                    </column>
+                </items>
+            </processargs>
+            <workflow-process
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                    cq:hideOnEdit="true"
+                    name="./metaData/PROCESS"
+                    value="com.adobe.acs.commons.workflow.process.impl.CopyPropertiesProcess"/>
+        </items>
+    </content>
+</jcr:root>

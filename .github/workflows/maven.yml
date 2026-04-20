@@ -1,0 +1,135 @@
+name: Java CI
+
+on:
+  # for regular master build (after the merge)
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize, reopened]
+
+# restrict privileges except for setting commit status, adding PR comments and writing statuses
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  deployments: read
+  issues: read
+  packages: read
+  pull-requests: write
+  repository-projects: read
+  security-events: read
+  statuses: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        jdk: [11, 17, 21, 25]
+        include:
+          # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
+          - os: ubuntu-latest
+            jdk: 11
+            isMainBuildEnv: true
+            namePrefix: 'Main '
+      fail-fast: false
+
+    name: ${{ matrix.namePrefix }} Maven build (${{ matrix.os }}, JDK ${{ matrix.jdk }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # no additional git operations after checkout triggered in workflow, no need to store credentials
+          persist-credentials: false
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          cache: 'maven'
+          # Adobe is moving away from Azul Zulu to Oracle JDK (which is not an option) - Eclipse Temurin is suggested as the "closest thing"
+          distribution: 'temurin'
+          java-version: ${{ matrix.jdk }}
+          # generate settings.xml with the correct values
+          server-id: sonatype-central-portal # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username in deploy
+          server-password: MAVEN_PASSWORD # env variable for token in deploy
+
+      # sets environment variables to be used in subsequent steps: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      - name: Set environment variables
+        shell: bash
+        run: |
+          if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
+            echo "NVD_API_KEY=${{ secrets.NVD_API_KEY }}" >> $GITHUB_ENV
+            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check,cloud -DnvdApiKeyEnvironmentVariable=NVD_API_KEY" >> $GITHUB_ENV
+            if [ "${{github.ref}}" = "refs/heads/master" ] && [ "${{github.event_name}}" = "push" ]; then
+              echo "MAVEN_USERNAME=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}" >> $GITHUB_ENV
+              echo "MAVEN_PASSWORD=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}" >> $GITHUB_ENV
+              echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
+              echo "STEP_NAME_SUFFIX=(Deploys to Sonatype Central Portal)" >> $GITHUB_ENV
+            else
+              echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
+            fi
+          else
+            echo "MVN_ADDITIONAL_OPTS=" >> $GITHUB_ENV
+            echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
+          fi
+
+      - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
+        run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test Results (${{ matrix.os }}, JDK ${{ matrix.jdk }}))
+          path: |
+            **/target/surefire-reports/TEST*.xml
+            **/target/failsafe-reports/TEST*.xml
+            **/target/invoker-reports/TEST*.xml
+            **/target/it/**/build.log
+
+      # https://about.codecov.io/blog/javascript-code-coverage-using-github-actions-and-codecov/
+      - name: Upload code coverage to CodeCov (Main build)
+        if: matrix.isMainBuildEnv
+        uses: codecov/codecov-action@v2
+
+      # https://github.com/marketplace/actions/changelog-enforcer
+      - name: Enforce a changelog entry
+        if: matrix.isMainBuildEnv && github.event_name == 'pull_request_target'
+        uses: dangoslen/changelog-enforcer@v3
+        with:
+          changeLogPath: 'CHANGELOG.md'
+          skipLabels: 'Skip-Changelog,skip-changelog'
+
+  publish-test-results:
+    name: "Publish Tests Results"
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+
+      # only needed unless run with comment_mode: off
+      pull-requests: write
+
+      # only needed for private repository
+      contents: read
+
+      # only needed for private repository
+      issues: read
+    if: always()
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "artifacts/**/*.xml"

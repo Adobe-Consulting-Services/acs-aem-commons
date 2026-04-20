@@ -5,7 +5,7 @@
                 com.adobe.granite.ui.components.ds.EmptyDataSource,
                 com.adobe.granite.ui.components.ds.SimpleDataSource,
                 com.adobe.granite.ui.components.ds.ValueMapResource,
-                org.apache.commons.lang.StringUtils,
+                org.apache.commons.lang3.StringUtils,
                 org.apache.sling.api.SlingHttpServletRequest,
                 org.apache.sling.api.SlingHttpServletResponse,
                 org.apache.sling.api.resource.Resource,
@@ -27,10 +27,14 @@
     final DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();
     final List<DataSourceOption> options = new ArrayList<DataSourceOption>();
 
-    for (final NamedImageTransformer transform : namedImageTransforms) {
-        options.add(new DataSourceOption(StringUtils.capitalize(
-                                    StringUtils.replace(transform.getTransformName(), "-", " ")),
-                                     transform.getTransformName()));
+    if (namedImageTransforms != null) {
+        for (final NamedImageTransformer transform : namedImageTransforms) {
+            options.add(new DataSourceOption(StringUtils.capitalize(
+                                        StringUtils.replace(transform.getTransformName(), "-", " ")),
+                                         transform.getTransformName()));
+        }
+    } else {
+        options.add(new DataSourceOption("No Named Image Transforms defined", ""));
     }
 
     dataSourceBuilder.addDataSource(slingRequest, options);

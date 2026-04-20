@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <pages
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="cq/gui/components/siteadmin/admin/templates/pages"/>
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="ACS AEM Commons | Templates"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        consoleId="cq-sites-templates-templates"
+        contentPath="${requestPathInfo.suffix}"
+        currentView="${state[&quot;templates.shell.collectionpage.layoutId&quot;].string}"
+        modeGroup="cq-siteadmin-admin-childpages"
+        pageURITemplate="/libs/wcm/core/content/sites/templates.html{+id}"
+        targetCollection=".cq-siteadmin-admin-childpages">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/includeclientlibs"
+                categories="[cq.common.wcm,cq.sites.templates]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <card
+                granite:rel="cq-siteadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Card View"
+                sling:resourceType="granite/ui/components/coral/foundation/masonry"
+                icon="viewCard"
+                layoutId="card"
+                limit="{Long}20"
+                metaResourceType="cq/gui/components/siteadmin/admin/templates/meta"
+                modeGroup="cq-siteadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                selectionMode="${state[&quot;templates.shell.collectionpage.selectionMode&quot;].boolean}"
+                size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
+                src="/mnt/overlay/acs-commons/console/templates/jcr:content/views/card{.offset,limit}.html{+id}"
+                stateId="templates.shell.collectionpage">
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/templates/datasources/datasource"
+                    include="/conf(/.*)*"
+                    itemResourceType="cq/gui/components/siteadmin/admin/templates/card"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;21&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${empty param[&quot;path&quot;] ? requestPathInfo.suffix : param[&quot;path&quot;]}"/>
+            </card>
+            <list
+                granite:rel="cq-siteadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="List View"
+                sling:resourceType="granite/ui/components/coral/foundation/table"
+                icon="viewList"
+                layoutId="list"
+                limit="{Long}40"
+                metaResourceType="cq/gui/components/siteadmin/admin/templates/meta"
+                modeGroup="cq-siteadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                rowReorderAction="/bin/wcmcommand?cmd=movePage&amp;srcPath={item}&amp;destPath={item}&amp;before={before}&amp;_charset_=utf-8&amp;"
+                selectionMode="row"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                sortMode="remote"
+                src="/mnt/overlay/acs-commons/console/templates/jcr:content/views/list{.offset,limit}.html{+id}{?sortName,sortDir}"
+                stateId="templates.shell.collectionpage">
+                <columns jcr:primaryType="nt:unstructured">
+                    <select
+                        jcr:primaryType="nt:unstructured"
+                        select="{Boolean}true"/>
+                    <title
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Title"
+                        sortable="{Boolean}true"/>
+                    <templatetype
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Template type"
+                        sortable="{Boolean}true"/>
+                    <status
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Status"
+                        sortable="{Boolean}true"/>
+                    <modified
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Modified"
+                        sortable="{Boolean}true"
+                        sortType="date"/>
+                    <published
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Published"
+                        sortable="{Boolean}true"
+                        sortType="date"/>
+                </columns>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/templates/datasources/datasource"
+                    include="/conf(/.*)*"
+                    itemResourceType="cq/gui/components/siteadmin/admin/templates/row"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${empty param[&quot;path&quot;] ? requestPathInfo.suffix : param[&quot;path&quot;]}"/>
+            </list>
+        </views>
+        <breadcrumbs
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/templates/datasources/breadcrumbs"
+            path="${requestPathInfo.suffix}"
+            rootPath="/conf"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <secondary jcr:primaryType="nt:unstructured">
+                <pastepage
+                    granite:class="cq-wcm-paste-activator foundation-collection-action"
+                    granite:hidden="{Boolean}true"
+                    granite:rel="cq-siteadmin-admin-pastetemplate"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    actionConfigName="granite/ui/shell/actions/paste"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        cq-wcm-paste-activator-target=".cq-siteadmin-admin-childpages"
+                        foundation-collection-action="\{&quot;target&quot;: &quot;.cq-siteadmin-admin-childpages&quot;, &quot;activeSelectionCount&quot;: &quot;none&quot;, &quot;relScope&quot;: &quot;collection&quot;}"/>
+                </pastepage>
+                <createtemplate
+                    granite:class="cq-siteadmin-admin-createtemplate-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    relScope="collection"
+                    target=".cq-siteadmin-admin-childpages"
+                    text="Create"
+                    variant="primary">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/libs/wcm/core/content/sites/createtemplatewizard.html{+id}"/>
+                </createtemplate>
+            </secondary>
+            <selection jcr:primaryType="nt:unstructured">
+                <open
+                    granite:rel="cq-siteadmin-admin-actions-edit-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.open"
+                    actionConfigName="granite/ui/shell/actions/edit"
+                    activeSelectionCount="single"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        cookiePath.url="/"
+                        href.uritemplate="/bin/wcmcommand?cmd=open&amp;_charset_=utf-8&amp;path={item}/structure"/>
+                </open>
+                <viewproperties
+                    granite:rel="cq-siteadmin-admin-actions-properties-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    actionConfigName="granite/ui/shell/actions/properties"
+                    activeSelectionCount="multiple"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/mnt/overlay/acs-commons/console/templates/properties.html{?item*}"/>
+                </viewproperties>
+                <enabletemplate
+                    granite:rel="cq-siteadmin-admin-actions-enable-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.enable.template"
+                    activeSelectionCount="multiple"
+                    icon="multiple"
+                    target=".cq-siteadmin-admin-childpages"
+                    text="Enable"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-mode-group="cq-siteadmin-admin-childpages"
+                        foundation-mode-value="default"/>
+                </enabletemplate>
+                <disabletemplate
+                    granite:rel="cq-siteadmin-admin-actions-disable-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.disable.template"
+                    activeSelectionCount="multiple"
+                    icon="exclude"
+                    target=".cq-siteadmin-admin-childpages"
+                    text="Disable"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-mode-group="cq-siteadmin-admin-childpages"
+                        foundation-mode-value="default"/>
+                </disabletemplate>
+                <publish
+                    granite:rel="cq-siteadmin-admin-actions-publish-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.publish"
+                    activeSelectionCount="multiple"
+                    icon="globe"
+                    target=".cq-siteadmin-admin-childpages"
+                    text="Publish"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-mode-group="cq-siteadmin-admin-childpages"
+                        foundation-mode-value="default"/>
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        referenceSrc.url="/libs/wcm/core/content/reference.json?_charset_=utf-8{&amp;path*}"
+                        wizardSrc.uritemplate="/mnt/overlay/acs-commons/console/publishtemplatewizard.html?_charset_=utf-8{&amp;item*}"/>
+                </publish>
+                <copy
+                    granite:rel="cq-siteadmin-admin-actions-copy-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.copy"
+                    actionConfigName="granite/ui/shell/actions/copy"
+                    activeSelectionCount="multiple"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-mode-group="cq-siteadmin-admin-childpages"
+                        foundation-mode-value="default"/>
+                </copy>
+                <deletetemplate
+                    granite:rel="cq-siteadmin-admin-actions-delete-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.delete.template"
+                    actionConfigName="granite/ui/shell/actions/delete"
+                    activeSelectionCount="multiple"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar"/>
+            </selection>
+        </actions>
+        <rails jcr:primaryType="nt:unstructured">
+            <references
+                granite:class="cq-rail-references"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="References"
+                sling:resourceType="granite/ui/components/coral/foundation/panel/railpanel">
+                <items jcr:primaryType="nt:unstructured">
+                    <references
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="References"
+                        sling:resourceType="granite/ui/references/components/coral/references"
+                        adminUrl="/libs/wcm/core/content/sites/templates.html/conf"
+                        text="References">
+                        <items jcr:primaryType="nt:unstructured">
+                            <list
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/contsys"
+                                class="list">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <contents
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/references/components/coral/group"
+                                        title="Content References">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <contentreferences
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/references/components/coral/type"
+                                                itemResourceType="cq/gui/components/siteadmin/admin/templates/references"
+                                                title="Pages Using Template"
+                                                type="templateReference"/>
+                                            <formReferences
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/references/components/coral/type"
+                                                itemResourceType="cq/gui/components/siteadmin/admin/templates/formReferences"
+                                                title="Forms &amp; Documents Using Template"
+                                                type="formReferences"/>
+                                        </items>
+                                    </contents>
+                                </items>
+                            </list>
+                        </items>
+                    </references>
+                </items>
+            </references>
+        </rails>
+    </jcr:content>
+    <properties/>
+</jcr:root>

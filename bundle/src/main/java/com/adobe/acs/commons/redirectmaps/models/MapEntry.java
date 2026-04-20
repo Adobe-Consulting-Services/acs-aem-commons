@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.redirectmaps.models;
 
@@ -26,14 +24,14 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class MapEntry {
-    private int id;
+    private long id;
     private final String origin;
     private final String source;
     private String status;
     private final String target;
     private boolean valid = true;
 
-    public MapEntry(int id, String source, String target, String origin) {
+    public MapEntry(long id, String source, String target, String origin) {
         source = source.trim();
         this.source = source;
         this.target = target;
@@ -41,7 +39,7 @@ public class MapEntry {
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

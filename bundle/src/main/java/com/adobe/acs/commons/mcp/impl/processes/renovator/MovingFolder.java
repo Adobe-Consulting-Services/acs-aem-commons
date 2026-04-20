@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.resourceExists;
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.waitUntilResourceFound;
@@ -41,6 +39,8 @@ import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.waitUntilR
  */
 public class MovingFolder extends MovingNode {
     protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
+
+    private static final Logger LOG = LoggerFactory.getLogger(MovingFolder.class);
 
     @Override
     public boolean isCopiedBeforeMove() {
@@ -55,6 +55,11 @@ public class MovingFolder extends MovingNode {
     @Override
     public boolean isAbleToHaveChildren() {
         return true;
+    }
+
+    @Override
+    protected boolean isAuditableMove() {
+        return false;
     }
 
     @Override
@@ -94,7 +99,7 @@ public class MovingFolder extends MovingNode {
                 waitUntilResourceFound(rr, targetParentPath);
             }
             Resource destParent = rr.getResource(targetParentPath);
-            Logger.getLogger(MovingFolder.class.getName()).log(Level.INFO, "Creating target for {0}", getSourcePath());
+            LOG.info("Creating target for {}", getSourcePath());
             rr.create(destParent, targetName, getClonedProperties(source));
             rr.commit();
             rr.refresh();

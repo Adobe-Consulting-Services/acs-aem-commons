@@ -17,7 +17,7 @@
   limitations under the License.
   #L%
   --%>
-<%@page import="com.adobe.acs.commons.genericlists.GenericList, com.adobe.acs.commons.mcp.form.impl.GeneratedDialogWrapper"%>
+<%@page import="com.adobe.acs.commons.genericlists.GenericList, com.adobe.acs.commons.mcp.form.GeneratedDialogWrapper"%>
 <%@include file="/libs/foundation/global.jsp"%>
 
 <%

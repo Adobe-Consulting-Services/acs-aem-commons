@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.rewriter.impl;
@@ -24,14 +22,14 @@ import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
-
+import com.day.cq.wcm.contentsync.PathRewriterOptions;
 import junitx.util.PrivateAccessor;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.commons.testing.sling.MockResource;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
@@ -40,7 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -52,17 +50,27 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
-import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VersionedClientlibsTransformerFactoryTest {
@@ -74,6 +82,9 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Mock
     private HtmlLibrary proxiedHtmlLibrary;
+
+    @Mock
+    private HtmlLibrary resourceResolverHtmlLibrary;
 
     @Mock
     private ContentHandler handler;
@@ -106,6 +117,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     private ResourceResolver resourceResolver;
 
     private static final String PATH = "/etc/clientlibs/test";
+    private static final String MAP_PATH = "/mylib/test";
     private static final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f"; // md5 of "I love strings"
     private static final String PROXIED_FAKE_STREAM_CHECKSUM="669a712c318596cd7e7520e3e2000cfb"; // md5 of "I love strings when they are proxied"
     private static final byte[] BYTES;
@@ -139,6 +151,9 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(proxiedHtmlLibrary.getLibraryPath()).thenReturn(PROXIED_PATH);
         when(proxiedHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
 
+        when(resourceResolverHtmlLibrary.getLibraryPath()).thenReturn(MAP_PATH);
+        when(resourceResolverHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are resolved".getBytes()));
+
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getSearchPath()).thenReturn(new String[] { "/libs/", "/apps/" });
@@ -153,7 +168,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @After
     public void tearDown() throws Exception {
-        reset(htmlLibraryManager, htmlLibrary, handler);
+        reset(htmlLibraryManager, htmlLibrary, resourceResolverHtmlLibrary, handler);
         transformer = null;
     }
 
@@ -163,7 +178,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         props.put("enforce.md5", Boolean.TRUE);
         when(componentContext.getProperties()).thenReturn(props);
         factory.activate(componentContext);
-        verify(bundleContext).registerService(eq(Filter.class.getName()), any(Object.class), any(Dictionary.class));
+        verify(bundleContext).registerService(eq(Filter.class), any(Filter.class), any());
     }
 
     @Test
@@ -178,7 +193,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("a"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("a"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".css", attributesCaptor.getValue().getValue(0));
@@ -198,7 +213,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -219,7 +234,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".ACSHASH"+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -241,7 +256,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -261,7 +276,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -282,7 +297,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min.ACSHASH"+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -301,7 +316,26 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testJavaScriptClientLibraryInLink() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
@@ -322,7 +356,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
@@ -334,8 +368,6 @@ public class VersionedClientlibsTransformerFactoryTest {
         final String badProxyPath = PROXY_PATH + "/bad";
 
         ClientLibrary clientLibrary = mock(ClientLibrary.class);
-        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
-        when(clientLibrary.allowProxy()).thenReturn(true);
         when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
 
@@ -347,7 +379,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         // because the path isn't correct, we refresh the cache, so there should be exactly two retrievals of the list
@@ -374,12 +406,53 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         verify(htmlLibraryManager, times(1)).getLibraries();
 
         assertEquals(PROXY_PATH + "."+ PROXIED_FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testProxiedStaticJavaScriptResource() throws Exception {
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.emptyMap());
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", PROXY_PATH + "/resources/some-resource.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        verifyNoMoreInteractions(htmlLibraryManager);
+
+        assertEquals(PROXY_PATH + "/resources/some-resource.js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testProxiedStaticCssResource() throws Exception {
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.emptyMap());
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PROXY_PATH + "/resources/some-resource.css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+
+        verifyNoMoreInteractions(htmlLibraryManager);
+
+        assertEquals(PROXY_PATH + "/resources/some-resource.css", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -417,10 +490,31 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testClientLibFoundWithResourceResolverMapping() throws Exception {
+
+        MockResource clientlib = new MockResource(resourceResolver, PATH,"");
+        when(resourceResolver.resolve(slingRequest, MAP_PATH)).thenReturn(clientlib);
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", MAP_PATH + ".min.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        assertEquals(MAP_PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
 
     @Test
@@ -437,7 +531,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".styles", attributesCaptor.getValue().getValue(0));
@@ -457,7 +551,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -476,7 +570,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".vbs", attributesCaptor.getValue().getValue(0));
@@ -496,7 +590,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("relative/script.js", attributesCaptor.getValue().getValue(0));
@@ -515,7 +609,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("//example.com/same/scheme/script.js", attributesCaptor.getValue().getValue(0));
@@ -535,7 +629,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("//example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
@@ -554,7 +648,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("http://www.example.com/same/scheme/script.js", attributesCaptor.getValue().getValue(0));
@@ -574,7 +668,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("https://example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
@@ -588,8 +682,22 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void doFilter_proxiedClientLibs_jsResource() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc.clientlibs/some-app/clientlibs/some-clientlib/resources/some-resource.js");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+        verifyNothingHappened();
+    }
+
+    @Test
+    public void doFilter_proxiedClientLibs_cssResource() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc.clientlibs/some-app/clientlibs/some-clientlib/resources/some-resource.css");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+        verifyNothingHappened();
+    }
+
+    @Test
     public void doFilter_notFoundInCache_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM);
@@ -603,7 +711,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
@@ -617,7 +725,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_notFoundInCacheWithDot_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.foobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
         when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
@@ -640,6 +748,25 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5Match() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min." + INPUTSTREAM_MD5 + ".js");
+        factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
+
+        HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
+        when(htmlLibrary.getLibraryPath()).thenReturn("/etc/clientlibs/some");
+        when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(htmlLibrary);
+
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+
+        verifyNo404();
+
+        verify(htmlLibraryManager).getLibrary(LibraryType.JS, "/etc/clientlibs/some");
+        verify(htmlLibrary, never()).getInputStream(false);
+    }
+
+    @Test
+    public void doFilter_foundInCache_md5Match_enforceMd5() throws Exception {
+        PrivateAccessor.setField(factory, "enforceMd5", true);
+
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
@@ -650,11 +777,14 @@ public class VersionedClientlibsTransformerFactoryTest {
         filter.doFilter(slingRequest, slingResponse, filterChain);
 
         verifyNo404();
+
+        verify(htmlLibraryManager).getLibrary(LibraryType.JS, "/etc/clientlibs/some");
+        verify(htmlLibrary, never()).getInputStream(false);
     }
 
     @Test
     public void doFilter_foundInCacheWithDot_md5Match() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min." + INPUTSTREAM_MD5 + ".js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -668,7 +798,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCache_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.foobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -682,7 +812,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void doFilter_foundInCacheWithDot_md5MisMatch() throws Exception {
-        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
+        when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.foobar.js");
         factory.getCache().put(new VersionedClientLibraryMd5CacheKey("/etc/clientlibs/some.path", LibraryType.JS), INPUTSTREAM_MD5);
 
         HtmlLibrary htmlLibrary = mock(HtmlLibrary.class);
@@ -703,8 +833,35 @@ public class VersionedClientlibsTransformerFactoryTest {
         verifyNo404();
     }
 
+    @Test
+    public void disableTransformation_exportWithCqWcmContentSync() throws Exception {
+        
+        // add PATH_REWRITING_OPTIONS attributes and init transformer
+        when(slingRequest.getAttribute(PathRewriterOptions.ATTRIBUTE_PATH_REWRITING_OPTIONS)).thenReturn(new HashMap<String, Object>());
+        transformer = factory.createTransformer();
+        transformer.init(processingContext, null);
+        transformer.setContentHandler(handler);
+        
+        // transformation should not be enabled
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
+    
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+    
+        transformer.startElement(null, "link", null, in);
+    
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+    
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+    
+        assertEquals(PATH +".css", attributesCaptor.getValue().getValue(0));
+    }
+
     private void verifyNothingHappened() throws IOException, ServletException {
-        verifyZeroInteractions(htmlLibraryManager);
+        verifyNoInteractions(htmlLibraryManager);
         verifyNo404();
     }
 

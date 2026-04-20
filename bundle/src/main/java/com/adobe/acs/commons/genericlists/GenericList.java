@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,22 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.genericlists;
 
-import com.adobe.acs.commons.mcp.form.FormField;
-import com.adobe.acs.commons.mcp.form.MultifieldComponent;
 import java.util.List;
 import java.util.Locale;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
+
+import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.MultifieldComponent;
 
 /**
  * A generic list of title/value pairs.
@@ -44,7 +45,7 @@ public interface GenericList {
      *
      * @return the item list
      */
-    @Nonnull
+    @NotNull
     @Inject
     @Named("list")
     @FormField(name = "List", component = MultifieldComponent.class)
@@ -56,7 +57,7 @@ public interface GenericList {
      * @param value the list item's value
      * @return the title or null
      */
-    @CheckForNull
+    @Nullable
     String lookupTitle(String value);
 
     /**
@@ -66,7 +67,7 @@ public interface GenericList {
      * @param locale the locale for localization
      * @return the title or null
      */
-    @CheckForNull
+    @Nullable
     String lookupTitle(String value, Locale locale);
 
     /**
@@ -81,10 +82,10 @@ public interface GenericList {
          *
          * @return the title
          */
-        @Nonnull
+        @NotNull
         @Inject
         @Named("jcr:title")
-        @FormField(name = "Title")
+        @FormField(name = "Title", localize = true)
         String getTitle();
 
         /**
@@ -94,7 +95,7 @@ public interface GenericList {
          *
          * @return the title
          */
-        @Nonnull
+        @NotNull
         String getTitle(Locale locale);
 
         /**
@@ -102,7 +103,7 @@ public interface GenericList {
          *
          * @return the value
          */
-        @Nonnull
+        @NotNull
         @Inject
         @Named("value")
         @FormField(name = "Value")

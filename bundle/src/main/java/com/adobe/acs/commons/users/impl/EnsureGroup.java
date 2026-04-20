@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.users.impl;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +26,7 @@ import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -38,7 +37,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
-import org.apache.jackrabbit.oak.spi.security.principal.PrincipalImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -86,7 +84,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
     private static final Logger log = LoggerFactory.getLogger(EnsureGroup.class);
     private static final String SERVICE_NAME = "ensure-service-user";
     private static final Map<String, Object> AUTH_INFO;
-    public static boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    private static final boolean DEFAULT_ENSURE_IMMEDIATELY = true;
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
@@ -146,7 +144,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
                 log.debug("No changes required for Group [ {} ]. Skipping...", group.getPrincipalName());
             }
 
-            log.info("Successfully ensured [ {} ] of Group [ {} ] in [ {} ms ]", operation.toString(),
+            log.info("Successfully ensured [ {} ] of Group [ {} ] in [ {} ms ]", operation,
                     getAuthorizable().getPrincipalName(), String.valueOf(System.currentTimeMillis() - start));
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Group [ %s ]",
@@ -223,7 +221,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
             log.debug("Requesting creation of group [ {} ] at [ {} ]", group.getPrincipalName(),
                     group.getIntermediatePath());
 
-            jcrGroup = userManager.createGroup(new PrincipalImpl(group.getPrincipalName()), group.getIntermediatePath());
+            jcrGroup = userManager.createGroup(new SimplePrincipal(group.getPrincipalName()), group.getIntermediatePath());
             log.debug("Created group at [ {} ]", jcrGroup.getPath());
         }
 
@@ -357,5 +355,36 @@ public final class EnsureGroup implements EnsureAuthorizable {
             throw new IllegalArgumentException("Unknown Ensure Group operation [ " + operationStr + " ]", e);
         }
     }
+
+
+    // taken from https://www.albinsblog.com/2015/04/how-to-craetemanage-groups-and-users-java-adobecq5.html
+    private static class SimplePrincipal implements Principal {
+      protected final String name;
+
+      public SimplePrincipal(String name) {
+          if (StringUtils.isBlank(name)) {
+              throw new IllegalArgumentException("Principal name cannot be blank.");
+          }
+          this.name = name;
+      }
+
+      public String getName() {
+          return name;
+      }
+
+      @Override
+      public int hashCode() {
+          return name.hashCode();
+      }
+
+      @Override
+      public boolean equals(Object obj) {
+          if (obj instanceof Principal) {
+              return name.equals(((Principal) obj).getName());
+          }
+          return false;
+      }
+  }
+
 
 }

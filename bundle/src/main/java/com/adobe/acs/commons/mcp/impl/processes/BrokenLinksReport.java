@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -25,7 +23,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -37,6 +35,8 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlParser;
 import org.apache.tika.sax.Link;
 import org.apache.tika.sax.LinkContentHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.io.ByteArrayInputStream;
@@ -44,6 +44,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.List;
 import java.util.EnumMap;
@@ -96,6 +97,8 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     private transient Set<String> deepCheckList;
     private transient Pattern regex;
 
+    private static final Logger log = LoggerFactory.getLogger(BrokenLinksReport.class);
+
     @Override
     public void init() throws RepositoryException {
         excludeList = Arrays.stream(excludeProperties.split(",")).map(String::trim).collect(Collectors.toSet());
@@ -104,7 +107,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         regex = Pattern.compile(propertyRegex);
     }
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
 
     @SuppressWarnings("squid:S00115")
     enum Report {
@@ -123,7 +126,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        GenericReport genericReport = new GenericReport();
+        GenericBlobReport genericReport = new GenericBlobReport();
         genericReport.setRows(reportData, "Source", Report.class);
         genericReport.persist(rr, instance.getPath() + "/jcr:content/report");
 
@@ -187,6 +190,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                     parser.parse(new ByteArrayInputStream(val.getBytes("utf-8")), linkHandler, new Metadata(), new ParseContext());
                     return linkHandler.getLinks().stream().map(Link::getUri);
                 } catch (Exception e) {
+                    log.warn("Could not parse links from property value of {}", property.getKey(), e);
                     return Stream.empty();
                 }
             });
@@ -217,7 +221,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                                     .collect(Collectors.toList());
                             return brokenPaths;
                         })).entrySet().stream().filter(e -> !e.getValue().isEmpty())
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
      }
 
     // access from unit tests

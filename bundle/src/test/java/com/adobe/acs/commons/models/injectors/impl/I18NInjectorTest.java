@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
@@ -38,7 +36,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -75,16 +74,19 @@ public class I18NInjectorTest {
         context.registerService(Injector.class, i18nInjector);
         context.registerService(StaticInjectAnnotationProcessorFactory.class, new I18NAnnotationProcessorFactory());
         context.addModelsForClasses(TestModelI18nValueImpl.class);
-        when(i18nService.translate("com.acs.commmons.test", context.currentResource())).thenReturn("Translated from english");
-        when(i18nService.translate("anotherValidI18nField", context.currentResource())).thenReturn("FromNameValue");
-        when(i18nService.translate("injectField", context.currentResource())).thenReturn("InjectFieldValue");
+        when(i18nService.translate(Mockito.eq("com.acs.commmons.test"), Mockito.any(), Mockito.eq(false))).thenReturn("Translated from english");
+        when(i18nService.translate(Mockito.eq("anotherValidI18nField"), Mockito.any(), Mockito.eq(false))).thenReturn("FromNameValue");
+
+        when(i18nService.translate(Mockito.eq("com.acs.commmons.test.resource"), Mockito.any(), Mockito.eq(true))).thenReturn("Translated from english - resource");
+        when(i18nService.translate(Mockito.eq("anotherValidI18nFieldResource"), Mockito.any(), Mockito.eq(true))).thenReturn("FromNameValue - resource");
 
         when(i18nService.translate("com.acs.commmons.test", context.request())).thenReturn("Translated from english");
         when(i18nService.translate("anotherValidI18nField", context.request())).thenReturn("FromNameValue");
-        when(i18nService.translate("injectField", context.request())).thenReturn("InjectFieldValue");
+
 
         when(i18nService.i18n(context.request())).thenReturn(i18n);
-        when(i18nService.i18n(context.currentResource())).thenReturn(i18n);
+        when(i18nService.i18n(Mockito.any(), Mockito.eq(false))).thenReturn(i18n);
+        when(i18nService.i18n(Mockito.any(), Mockito.eq(true))).thenReturn(i18n);
 
     }
 
@@ -95,7 +97,8 @@ public class I18NInjectorTest {
 
     @Test
     public void test_from_resource() {
-        Adaptable adaptable = slingHttpServletRequest.getResource();
+        // fails due to https://issues.apache.org/jira/browse/SLING-10937
+        Adaptable adaptable = context.currentResource();
         testAdaptable(adaptable);
     }
 
@@ -115,11 +118,15 @@ public class I18NInjectorTest {
         assertNotNull(adapted);
         assertEquals("Translated from english", adapted.getValidI18nField());
         assertEquals("FromNameValue", adapted.getAnotherValidI18nField());
+        assertEquals("Translated from english - resource", adapted.getValidI18nFieldResource());
+        assertEquals("FromNameValue - resource", adapted.getAnotherValidI18nFieldResource());
         assertNull("we should skip javax.Inject", adapted.getInjectField());
         assertSame(i18n, adapted.getI18n());
+        assertSame(i18n, adapted.getAlternateI18n());
 
         if (adaptable instanceof Resource) {
-            verify(i18nService, times(1)).i18n((Resource) adaptable);
+            verify(i18nService, times(1)).i18n(Mockito.any(), Mockito.eq(true));
+            verify(i18nService, times(1)).i18n(Mockito.any(), Mockito.eq(false));
         } else if (adaptable instanceof HttpServletRequest) {
             verify(i18nService, times(1)).i18n((HttpServletRequest) adaptable);
         }

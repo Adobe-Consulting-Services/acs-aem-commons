@@ -55,4 +55,25 @@
             ui.clearWait();
         });
     }
+
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+        name: "acscommons.clientlib.check",
+        handler: function(_name, _el, config) {
+            function renderLogs(logs){
+                return 'Logs<ul><li>' + logs.join('</li><li>') + '</li></ul>';
+            }
+            ui.wait();
+            $.ajax({
+                url: config.data.test + "?path=" + config.data.path,
+                dataType: "json",
+            }).done(function(data) {
+                ui.alert(data.title,renderLogs(data.logs), "success");
+            }).fail(function(jqXHR) {
+                var data = JSON.parse(jqXHR.responseText);
+                ui.alert(data.title, data.detail + '<br/><br/>' +renderLogs(data.logs), "error");
+            }).always(function() {
+                ui.clearWait();
+            });
+        }
+    });
 })(window, document, Granite.$, Granite);

@@ -1,0 +1,42 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="spectrum-Tabs spectrum-Tabs--sizeM spectrum-Tabs--horizontal">
+    <div class="spectrum-Tabs-item is-selected" tabindex="0">
+        <span data-tab="package-definition" data-tab-indicator="5px"
+              class="spectrum-Tabs-itemLabel">Package definition</span>
+    </div>
+    <div class="spectrum-Tabs-item" tabindex="0">
+        <span data-tab="results" data-tab-indicator="150px" class="spectrum-Tabs-itemLabel">Results</span>
+    </div>
+    <div data-tab-selection-indicator class="spectrum-Tabs-selectionIndicator" style="width: 120px; left: 5px;"></div>
+</div>
+
+<div data-tab-content="package-definition">
+    <div data-sly-resource="./configuration"></div>
+    <br/>
+    <div data-sly-include="buttons.html"></div>
+</div>
+
+<div data-tab-content="results"
+     style="display: none;"
+     data-sly-include="results.html">
+</div>
+
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-call="${clientlib.all @ categories=['acs-commons.utilities.packager']}"/>

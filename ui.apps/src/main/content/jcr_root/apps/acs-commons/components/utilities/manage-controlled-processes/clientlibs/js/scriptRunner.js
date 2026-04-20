@@ -103,6 +103,8 @@ var ScriptRunner = {
 
                 inputForm.html($html).trigger("foundation-contentloaded");
 
+                ScriptRunner.fixTooltipIcons(inputForm);
+
             },
             data: {
                 processDefinition: definition
@@ -142,7 +144,7 @@ var ScriptRunner = {
     },
     rebuildProcessList: function () {
         jQuery.ajax({
-            url: ScriptRunner.SERVLET_URL + ".list.json",
+            url: ScriptRunner.SERVLET_URL + ".list.json?_dc=" + Date.now(),
             dataType: "json",
             success: function (response) {
                 var processDom, process, i, noErrors = true, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
@@ -292,14 +294,22 @@ var ScriptRunner = {
                         innerHTML: response
                     },
                     footer: {
+                        innerHTML: '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+
+                        /*
+                        - https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/2660
+                        - Remove Halt button as this is reported to result in Oak repo corruption sometimes
+
                         innerHTML: (!ended ? '<button id="haltButton" is="coral-button" variant="default">Halt</button>':'') +
                                 '<button id="okButton" is="coral-button" variant="default" coral-close>Close</button>'
+                        */
                     },
                     closable: true,
                     variant: "info"
                 });
-//                window.top.document.body.appendChild(diag);
-                diag.show();                
+
+                diag.show();
+                diag.querySelector('[handle="wrapper"]').classList.add("coral--light");
                 diag.on('click', '#haltButton', function () {
                     diag.hide();
                     ScriptRunner.haltProcess(processId);                    
@@ -322,8 +332,9 @@ var ScriptRunner = {
             closable: true,
             variant: "warning"
         });
-//        window.top.document.body.appendChild(haltDialog);
+
         haltDialog.show();
+        haltDialog.querySelector('[handle="wrapper"]').classList.add("coral--light");
         haltDialog.on('click', '#haltButton', function () {
             jQuery.ajax({
                 url: ScriptRunner.SERVLET_URL + ".halt.json",
@@ -334,6 +345,22 @@ var ScriptRunner = {
                 }
             });
             haltDialog.hide();
+        });
+    },
+    fixTooltipIcons: function (inputForm) {
+        inputForm[0].querySelectorAll('coral-icon.coral-Form-fieldinfo').forEach(function(iconEl) {
+          var parentEl = iconEl.parentNode;
+          var tooltipEl = parentEl.querySelector('coral-tooltip[id="' + iconEl.getAttribute('aria-describedby') + '"]');
+          if (!tooltipEl) { return; }
+          var tooltipText = tooltipEl.innerText.trim();
+          if (!tooltipText) { return; }
+          var newTooltipEl = document.createElement("span");
+
+          newTooltipEl.innerHTML = '<span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" style="margin-top: -.25rem;" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="left" data-quicktip-content="' + tooltipText + '" aria-label="' + tooltipText + '" tabindex="0"></span>';
+
+          parentEl.appendChild(newTooltipEl);
+          iconEl.remove();
+          tooltipEl.remove();
         });
     }
 };

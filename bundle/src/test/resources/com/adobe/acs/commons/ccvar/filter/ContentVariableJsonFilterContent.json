@@ -1,0 +1,54 @@
+{
+  "jcr:primaryType": "cq:Page",
+  "jcr:content": {
+    "jcr:primaryType": "cq:PageContent",
+    "jcr:title": "Experience",
+    "cq:template": "/conf/we-retail/settings/wcm/templates/hero-page",
+    "inheritedProperty": "inheritedValue",
+    "sling:resourceType": "weretail/components/structure/page",
+    "root": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "wcm/foundation/components/responsivegrid"
+    }
+  },
+  "arctic-surfing-in-lofoten": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "Arctic Surfing In Lofoten",
+      "pageTitle": "Surfing In Arctic Lofoten",
+      "property": "test space",
+      "cq:template": "/conf/we-retail/settings/wcm/templates/experience-page",
+      "sling:resourceType": "weretail/components/structure/page",
+      "root": {
+        "jcr:primaryType": "nt:unstructured",
+        "sling:resourceType": "wcm/foundation/components/responsivegrid",
+        "responsivegrid": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "wcm/foundation/components/responsivegrid"
+        },
+        "hero_image": {
+          "jcr:primaryType": "nt:unstructured",
+          "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
+          "useFullWidth": "true",
+          "title": "{{page_properties.jcr:title}}",
+          "sling:resourceType": "weretail/components/content/heroimage"
+        },
+        "hero_image_1": {
+          "jcr:primaryType": "nt:unstructured",
+          "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
+          "useFullWidth": "true",
+          "property": "{{page_properties.property|url}}",
+          "sling:resourceType": "weretail/components/content/heroimage"
+        },
+        "hero_image_2": {
+          "jcr:primaryType": "nt:unstructured",
+          "fileReference": "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
+          "useFullWidth": "true",
+          "property": "{{page_properties.property|fakeAction}}",
+          "sling:resourceType": "weretail/components/content/heroimage"
+        }
+      }
+    }
+  }
+}

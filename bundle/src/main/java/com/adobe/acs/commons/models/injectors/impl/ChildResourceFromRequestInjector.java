@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
@@ -25,8 +23,10 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
+import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +52,14 @@ import java.util.function.Function;
 @Component(
         service = {Injector.class},
         property = {
-                Constants.SERVICE_RANKING + "=3000"
+                Constants.SERVICE_RANKING + ":Integer=3000"
         }
 )
 public class ChildResourceFromRequestInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(ChildResourceFromRequestInjector.class);
+
+    @Reference
+    private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
     public String getName() {
         return "child-resources-from-request";
@@ -95,7 +98,7 @@ public class ChildResourceFromRequestInjector implements Injector {
     private Object getValueForRequest(SlingHttpServletRequest request, String name, Type declaredType) {
         Resource child = request.getResource().getChild(name);
         return getValueSingleOrList(child, declaredType,
-                (childResource) -> { return new OverridePathSlingRequestWrapper(request, childResource.getPath()); });
+                (childResource) -> { return new OverridePathSlingRequestWrapper(request, childResource.getPath(), bindingsValuesProvidersByContext); });
     }
 
     private Object getValueForResource(Resource resource, String name, Type declaredType) {

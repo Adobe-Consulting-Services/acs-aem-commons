@@ -1,0 +1,3 @@
+{
+  "README": "This enables the AuthoringUIModeFilter on AEM Author, to allow for TouchUI based editing of HTML content under /etc/acs-commons"
+}

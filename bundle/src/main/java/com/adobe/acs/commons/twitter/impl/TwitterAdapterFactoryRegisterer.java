@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.twitter.impl;
 
@@ -23,6 +21,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
@@ -35,7 +34,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 @Component(metatype = true, label = "ACS AEM Commons - Twitter Client Adapter Factory",
-    description = "Adapter Factory to generate TwitterClient objects.", configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory")
+    description = "Adapter Factory to generate TwitterClient objects.", configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory",
+    policy = ConfigurationPolicy.REQUIRE)
 public class TwitterAdapterFactoryRegisterer {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
@@ -70,7 +70,7 @@ public class TwitterAdapterFactoryRegisterer {
             this.adapterFactoryServiceRegistration = bundleContext.registerService(AdapterFactory.class, adapterFactory, serviceProps);
 
         } catch (NoClassDefFoundError e) {
-            log.info("Twitter4J Library not found. Not registering TwitterAdapterFactory.");
+            log.error("Twitter4J Library not found. Not registering TwitterAdapterFactory.");
         }
     }
 

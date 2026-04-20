@@ -1,28 +1,25 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.cloudconfig.impl;
 
 import java.io.IOException;
 import java.util.Collections;
 
-import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +30,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.post.HtmlResponse;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.aemds.guide.utils.JcrResourceConstants;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -52,7 +50,7 @@ public class CreateCloudConfigServlet extends SlingAllMethodsServlet {
   private static final Logger log = LoggerFactory.getLogger(CreateCloudConfigServlet.class);
 
   @Override
-  protected void doPost(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+  protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response)
       throws IOException {
     ResourceResolver resolver = request.getResourceResolver();
     PageManager pageManager = resolver.adaptTo(PageManager.class);

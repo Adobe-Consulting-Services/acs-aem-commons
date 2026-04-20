@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.images.impl;
 
@@ -23,18 +21,20 @@ import com.adobe.acs.commons.dam.RenditionPatternPicker;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
+import com.day.cq.commons.DownloadResource;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.dam.commons.util.OrientationUtil;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.foundation.Image;
 import com.day.image.Layer;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -61,6 +61,7 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,6 +126,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
+    private static final Logger AVOID_USAGE_LOGGER =
+          LoggerFactory.getLogger(NamedTransformImageServlet.class.getName() + ".AvoidUsage");
+
     public static final String NAME_IMAGE = "image";
 
     public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
@@ -142,10 +146,12 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final String TYPE_QUALITY = "quality";
 
     private static final String TYPE_PROGRESSIVE = "progressive";
+    private static final String PROP_ADD_URL_PARAMETERS = "addUrlParams";
 
     /* Asset Rendition Pattern Picker */
-
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
+    private static final String TIFF_ORIENTATION = "tiff:Orientation";
+    public static final String PARAM_SEPARATOR = ":";
 
     @Property(label = "Asset Rendition Picker Regex",
             description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
@@ -153,19 +159,19 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
 
-    private final Map<String, NamedImageTransformer> namedImageTransformers =
+    private final transient Map<String, NamedImageTransformer> namedImageTransformers =
             new ConcurrentHashMap<String, NamedImageTransformer>();
 
-    private final Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
+    private final transient Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
 
     @Reference
-    private MimeTypeService mimeTypeService;
+    private transient MimeTypeService mimeTypeService;
 
     private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
-    private RenditionPatternPicker renditionPatternPicker =
+    private transient RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
-
+    
     /**
      * Only accept requests that.
      * - Are not null
@@ -204,6 +210,12 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
+
+         // Warn when this servlet is used
+         AVOID_USAGE_LOGGER.warn("An image is transformed on-the-fly, which can be a very resource intensive operation. "
+              + "If done frequently, you should consider switching to dynamic AEM web-optimized images or creating such a rendition upfront using processing profiles. "
+              + "See https://adobe-consulting-services.github.io/acs-aem-commons/features/named-image-transform/index.html for more details.");
+
         // Get the transform names from the suffix
         final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
 
@@ -213,14 +225,17 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Image image = resolveImage(request);
         final String mimeType = getMimeType(request, image);
         Layer layer = getLayer(image);
+
+        // Adjust layer to image orientation
+        processImageOrientation(image.getResource(), layer);
         
         if (layer == null) {
-            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         
         // Transform the image
-        layer = this.transform(layer, imageTransformersWithParams);
+        layer = this.transform(layer, imageTransformersWithParams, request);
 
         // Get the quality
         final double quality = this.getQuality(mimeType,
@@ -248,7 +263,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @param imageTransformersWithParams the transforms and their params
      * @return the transformed Image layer
      */
-    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
+    protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams, SlingHttpServletRequest request) {
         for (final String type : imageTransformersWithParams.keySet()) {
             if (StringUtils.equals(TYPE_QUALITY, type)) {
                 // Do not process the "quality" transform in the usual manner
@@ -261,15 +276,80 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 continue;
             }
 
-            final ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
+            ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
             if (transformParams != null) {
+              if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
+                LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
+                if(!cropParamsFromUrl.isEmpty()) {
+                  transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
+                  transformParams.putAll(cropParamsFromUrl);
+                }
+              }
+
                 layer = imageTransformer.transform(layer, transformParams);
             }
         }
 
         return layer;
     }
+
+  /**
+   * Rotate and flip image based on it's tiff:Orientation metadata.
+   * @param imageResource image resource
+   * @param layer image Layer object
+   */
+  protected void processImageOrientation(Resource imageResource, Layer layer) {
+    ValueMap properties = getImageMetadataValueMap(imageResource);
+    if(properties != null) {
+      String orientation = properties.get(TIFF_ORIENTATION, String.class);
+      if(orientation != null &&  Short.parseShort(orientation) != OrientationUtil.ORIENTATION_NORMAL) {
+        switch(Short.parseShort(orientation)) {
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL:
+            layer.flipHorizontally();
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_180:
+            layer.rotate(180);
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_VERTICAL:
+            layer.flipVertically();
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_270_CW:
+            layer.flipHorizontally();
+            layer.rotate(270);
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_90_CW:
+            layer.rotate(90);
+            break;
+          case OrientationUtil.ORIENTATION_MIRROR_HORIZONTAL_ROTATE_90_CW:
+            layer.flipHorizontally();
+            layer.rotate(90);
+            break;
+          case OrientationUtil.ORIENTATION_ROTATE_270_CW:
+            layer.rotate(270);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Returns ValueMap of the Image Metadata resource
+   * @param imageResource image resource
+   * @return metadata ValueMap, or null if given resource doesn't have jcr:content/metadata node.
+   */
+  protected ValueMap getImageMetadataValueMap(Resource imageResource) {
+    ValueMap result = null;
+    final Resource metadata = imageResource.getChild("jcr:content/metadata");
+    if (metadata != null) {
+      result = metadata.adaptTo(ValueMap.class);
+    }
+    return result;
+  }
+
+  /**
 
     /**
      * Gets the NamedImageTransformers based on the Suffix segments in order.
@@ -340,7 +420,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 || resource.isResourceType(JcrConstants.NT_RESOURCE)) {
             // For renditions; use the requested rendition
             final Image image = new Image(resource);
-            image.set(Image.PN_REFERENCE, resource.getPath());
+            image.set(DownloadResource.PN_REFERENCE, resource.getPath());
             return image;
         }
 
@@ -370,7 +450,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         Rendition rendition = asset.getRendition(renditionPatternPicker);
 
         if (rendition == null) {
-            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker.toString(),
+            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker,
                     resource.getPath());
             rendition = asset.getOriginal();
         }
@@ -378,7 +458,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Resource renditionResource = resource.getResourceResolver().getResource(rendition.getPath());
 
         final Image image = new Image(resource);
-        image.set(Image.PN_REFERENCE, renditionResource.getPath());
+        image.set(DownloadResource.PN_REFERENCE, renditionResource.getPath());
         return image;
     }
 
@@ -430,6 +510,21 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 
+    private LinkedHashMap<String, Object> getCropParamsFromUrl(SlingHttpServletRequest request) {
+      LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>();
+
+      String transformName = PathInfoUtil.getFirstSuffixSegment(request);
+      String extension = PathInfoUtil.getLastSuffixSegment(request);
+
+      String paramsString = StringUtils.substringBetween(request.getRequestURI(), transformName + "/", extension);
+      String[] params = StringUtils.split(paramsString, "/");
+      for (String param : params) {
+        urlParams.put(StringUtils.substringBefore(param, ":"),
+              StringUtils.substringAfter(param, PARAM_SEPARATOR));
+      }
+      return urlParams;
+  }
+
     /**
      * Gets the Image layer.
      *
@@ -470,7 +565,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @return
      */
     protected final double getQuality(final String mimeType, final ValueMap transforms) {
-        final String key = "quality";
+        final String key = "quality"; // NOSONAR // replace with already existing constant
         final int defaultQuality = 82;
         final int maxQuality = 100;
         final int minQuality = 0;
@@ -531,6 +626,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                     DEFAULT_ASSET_RENDITION_PICKER_REGEX);
             renditionPatternPicker = new RenditionPatternPicker(DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         }
+
+        /**
+        * We want to be able to determine if the absence of the messages of the AVOID_USAGE_LOGGER
+        * is caused by not using this feature or by disabling the WARN messages.
+        */
+        if (!AVOID_USAGE_LOGGER.isWarnEnabled()) {
+          log.info("Warnings for the use of the NamedTransfomringImageServlet disabled");
+        }
+
     }
 
     protected final void bindNamedImageTransformers(final NamedImageTransformer service,
@@ -563,3 +667,4 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         }
     }
 }
+

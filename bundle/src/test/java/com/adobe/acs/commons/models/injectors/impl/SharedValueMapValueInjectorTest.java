@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
@@ -25,12 +23,14 @@ import com.adobe.acs.commons.models.injectors.impl.model.impl.TestSharedValueMap
 import com.adobe.acs.commons.wcm.impl.PageRootProviderConfig;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderMultiImpl;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider;
+import com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesImpl;
 import com.day.cq.wcm.api.NameConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.util.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Before;
@@ -74,6 +74,7 @@ public class SharedValueMapValueInjectorTest {
     public void setup() throws RepositoryException {
         this.context.registerInjectActivateService(new PageRootProviderConfig(), "page.root.path", "/content/mysite/[a-z]{2}");
         this.context.registerInjectActivateService(new PageRootProviderMultiImpl());
+        this.context.registerInjectActivateService(new SharedComponentPropertiesImpl());
         this.context.registerInjectActivateService(new SharedValueMapValueAnnotationProcessorFactory());
         this.context.registerInjectActivateService(new SharedValueMapValueInjector());
         this.context.addModelsForClasses(TestSharedValueMapValueModelImpl.class);

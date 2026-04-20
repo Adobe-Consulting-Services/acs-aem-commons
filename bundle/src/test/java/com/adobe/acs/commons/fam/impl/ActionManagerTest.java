@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
@@ -32,8 +30,6 @@ import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -43,6 +39,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -52,26 +50,28 @@ import static org.mockito.Mockito.*;
  */
 public class ActionManagerTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ActionManagerTest.class);
+
     public static void run(Runnable r) {
         try {
             Thread t = new Thread(r);
             t.start();
             t.join();
         } catch (InterruptedException ex) {
-            Logger.getLogger(ActionManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("interrupted exception", ex);
         }
     }
 
     public static ThrottledTaskRunner getTaskRunner() {
         ThrottledTaskRunner taskRunner = mock(ThrottledTaskRunner.class);
-        doAnswer(i -> {
-            run((Runnable) i.getArguments()[0]);
-            return null;
-        }).when(taskRunner).scheduleWork(any(Runnable.class));
-        doAnswer(i -> {
-            run((Runnable) i.getArguments()[0]);
-            return null;
-        }).when(taskRunner).scheduleWork(any(Runnable.class),any(CancelHandler.class));
+//        doAnswer(i -> {
+//            run((Runnable) i.getArguments()[0]);
+//            return null;
+//        }).when(taskRunner).scheduleWork(any(Runnable.class));
+//        doAnswer(i -> {
+//            run((Runnable) i.getArguments()[0]);
+//            return null;
+//        }).when(taskRunner).scheduleWork(any(Runnable.class),any(CancelHandler.class));
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
             return null;
@@ -98,9 +98,9 @@ public class ActionManagerTest {
             when(mockResolver.isLive()).thenReturn(true);
             when(mockResolver.hasChanges()).thenReturn(true);
             when(mockResolver.create(any(), any(), any())).then((InvocationOnMock invocation) -> {
-                Resource parent = invocation.getArgumentAt(0, Resource.class);
-                String name = invocation.getArgumentAt(1, String.class);
-                Map<String,Object> properties = invocation.getArgumentAt(2, Map.class);
+                Resource parent = invocation.getArgument(0);
+                String name = invocation.getArgument(1);
+                Map<String,Object> properties = invocation.getArgument(2);
                 ResourceMetadata metadata = new ResourceMetadata();
                 metadata.putAll(properties);
 
@@ -108,6 +108,30 @@ public class ActionManagerTest {
                 Resource res = new AbstractResourceImpl(path, null, null, metadata);
                 when(mockResolver.getResource(path)).thenReturn(res);
                 return res;
+            });
+            when(mockResolver.move(anyString(), anyString())).then((InvocationOnMock invocation) -> {
+                String srcPath = invocation.getArgument(0);
+                String destParentPath = invocation.getArgument(1);
+                Resource src = mockResolver.getResource(srcPath);
+                if(src==null) {
+                    throw new PersistenceException("Resource at " + srcPath + " does not exist.");
+                }
+                Resource destParent = mockResolver.getResource(destParentPath);
+                if(destParent==null) {
+                    throw new PersistenceException("Resource at " + destParentPath + " does not exist.");
+                }
+
+                String destPath = destParentPath + "/" + src.getName();
+                Resource dest = mockResolver.getResource(destPath);
+                if(dest!=null) {
+                    throw new PersistenceException("Resource at " + destPath + " already exists.");
+                }
+                dest = new AbstractResourceImpl(destPath, src.getResourceType(), src.getResourceSuperType(), src.getResourceMetadata());
+
+                when(mockResolver.getResource(destPath)).thenReturn(dest);
+                when(mockResolver.getResource(srcPath)).thenReturn(null);
+
+                return destParent;
             });
         }
         return mockResolver;
@@ -218,7 +242,7 @@ public class ActionManagerTest {
       Queue<Runnable> taskQueue = new LinkedList<>();
       ThrottledTaskRunner runner = mock(ThrottledTaskRunner.class);
       Answer<Void> answer = i -> {
-        Runnable r = i.getArgumentAt(0, Runnable.class);
+        Runnable r = i.getArgument(0);
         taskQueue.add(r);
         return null;
       };

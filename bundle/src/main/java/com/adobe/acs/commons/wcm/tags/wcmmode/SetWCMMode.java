@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.tags.wcmmode;
 
@@ -29,13 +27,13 @@ import com.day.cq.wcm.api.WCMMode;
 
 /**
  * Implementation of the &lt;wcmmode:setMode&gt; tag, this sets the <code>WCMMode</code> to
- * the specified mode and restores it to the original mode.<br/>
+ * the specified mode and restores it to the original mode.<br>
  * The following attributes can be specified:
  * <ul>
  * <li>mode: to mode to be set</li>
  * <li>restore: must the original mode be restored (default true)</li>
  * </ul>
- * Example:<br/>
+ * Example:<br>
  * &lt;wcmmode:setMode mode="disabled"&gt;
  * ...
  * &lt;/wcmmode:setMode&gt;

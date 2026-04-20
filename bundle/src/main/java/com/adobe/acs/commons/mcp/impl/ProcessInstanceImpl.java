@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
@@ -33,16 +31,16 @@ import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
-import org.slf4j.LoggerFactory;
-
+import java.io.Serializable;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.management.openmbean.CompositeData;
@@ -52,15 +50,15 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
-import java.io.Serializable;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstraction of a Process which runs using FAM and consists of one or more actions.
@@ -231,7 +229,9 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 action.manager.onFailure((failures, rr) -> {
                     asServiceUser(service -> recordErrors(step, failures, service));
                 });
-                action.manager.onFinish(() -> runStep(step + 1));
+                action.manager.onFinish(() -> {
+                    runStep(step + 1);
+                });
             }
             action.manager.deferredWithResolver(rr -> action.builder.accept(action.manager));
         }
@@ -244,8 +244,14 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         List<ArchivedProcessFailure> archivedFailures = failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toList());
         infoBean.setReportedErrors(archivedFailures);
         try {
+            ResourceUtil.getOrCreateResource(rr, BASE_PATH,
+                    Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER), null, false);
+            ResourceUtil.getOrCreateResource(rr, getPath(),
+                    Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, "cq:Page"), null, false);
+
             String errFolder = getPath() + "/jcr:content/failures/step" + (step + 1);
-            JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));
+            ResourceUtil.getOrCreateResource(rr, errFolder,
+                    Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED), "nt:unstructured", false);
             if (rr.hasChanges()) {
                 rr.commit();
             }
@@ -262,7 +268,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 });
             }
             batch.commitBatch();
-        } catch (RepositoryException | PersistenceException | LoginException | NullPointerException ex) {
+        } catch (PersistenceException | LoginException | NullPointerException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }

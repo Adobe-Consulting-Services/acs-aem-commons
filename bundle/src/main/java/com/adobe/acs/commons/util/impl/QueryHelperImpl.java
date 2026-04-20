@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.util.impl;
 
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.cqsearch.QueryUtil;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -51,7 +49,7 @@ import java.util.Map;
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference
-    private CloseableQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
 
     public static final String QUERY_BUILDER = "queryBuilder";
 
@@ -74,8 +72,8 @@ public class QueryHelperImpl implements QueryHelper {
         if (StringUtils.isEmpty(statement)) {
             return Collections.emptyList();
         }
-
-        final String[] lines = StringUtils.split(statement, '\n');
+        
+        final String[] lines = statement.split("\\r?\\n");
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
             return getResourcesFromQueryBuilder(resourceResolver, lines, relPath);
@@ -128,15 +126,15 @@ public class QueryHelperImpl implements QueryHelper {
             params.put("p.limit", "-1");
         }
 
-        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
-            final List<Hit> hits = query.getResult().getHits();
-            for (final Hit hit : hits) {
-                final Resource resource = resourceResolver.getResource(hit.getPath());
-                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
+        final List<Hit> hits = query.getResult().getHits();
+        for (final Hit hit : hits) {
+            final Resource resource = resourceResolver.getResource(hit.getPath());
+            final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
 
-                if (relativeAwareResource != null) {
-                    resources.add(relativeAwareResource);
-                }
+            if (relativeAwareResource != null) {
+                resources.add(relativeAwareResource);
             }
         }
 
@@ -154,15 +152,18 @@ public class QueryHelperImpl implements QueryHelper {
         final Row firstRow = rows.nextRow();
 
         final String plan = firstRow.getValue("plan").getString();
-        return StringUtils.contains(plan, " /* traverse ");
+        // since Oak 1.60 (https://issues.apache.org/jira/browse/OAK-10527) 
+        // with newline instead of space after "traverse"
+        // see https://github.com/apache/jackrabbit-oak/blame/28e456c8111bff9e7de3a2af9c032ba3dfa560f8/oak-core/src/main/java/org/apache/jackrabbit/oak/query/index/TraversingIndex.java#L162C22-L162C30
+        return StringUtils.contains(plan, " /* traverse");
     }
 
     @Override
     @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
-        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver)) {
-            return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
-        }
+        com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
+        QueryUtil.setResourceResolverOn(resourceResolver, query);
+        return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
     }
 
     /**

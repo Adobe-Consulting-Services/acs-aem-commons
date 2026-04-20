@@ -24,7 +24,7 @@
 	<ul>
 		<c:forEach var="tag" items="${tags.tags}">
 			<li>
-				<a href="#" data-href="/libs/cq/tagging/gui/content/tags.html${tag.path}" target="_blank">
+				<a href="#" data-href="${slingRequest.contextPath}/libs/cq/tagging/gui/content/tags.html${tag.path}" target="_blank">
 					${tag.title}
 				</a>
 			</li>

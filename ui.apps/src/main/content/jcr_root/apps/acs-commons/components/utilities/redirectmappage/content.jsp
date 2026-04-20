@@ -2,6 +2,9 @@
 <%@include file="/libs/foundation/global.jsp" %>
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
 <cq:setContentBundle />
+
+
+
 <div ng-controller="MainCtrl" ng-init="app.uri = '${resourcePath}'; init();">
 
     <br/><hr/><br/>

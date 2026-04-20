@@ -1,29 +1,32 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.email.impl;
 
+import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 import junitx.util.PrivateAccessor;
+
+import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.ByteArrayDataSource;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -36,10 +39,13 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.activation.DataSource;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
+
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,6 +93,13 @@ public class EmailServiceImplTest {
         when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
 
         context.registerService(MessageGatewayService.class, messageGatewayService);
+        context.registerService(MailTemplateManager.class, new MailTemplateManager() {
+            @Override
+            public <T extends Email> T getEmail(MailTemplate template, Map<String, String> params, Class<T> mailType)
+            throws IOException, EmailException, MessagingException {
+                return template.getEmail(StrLookup.mapLookup(params), mailType) ;
+            }
+        });
         context.registerInjectActivateService(emailService);
     }
 

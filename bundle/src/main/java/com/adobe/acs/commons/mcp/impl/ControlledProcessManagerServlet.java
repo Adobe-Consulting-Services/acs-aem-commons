@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
@@ -77,7 +75,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
     private static final List<String> IGNORED_SERVLET_INPUTS = Arrays.asList("definition", "description", "action");
 
     @Reference
-    ControlledProcessManager manager;
+    transient ControlledProcessManager manager;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
@@ -120,7 +118,8 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
             result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
-        getGson().toJson(result, response.getWriter());
+        String json = getGson().toJson(result); // #2749
+        response.getWriter().write(json);
     }
 
     Gson getGson() {

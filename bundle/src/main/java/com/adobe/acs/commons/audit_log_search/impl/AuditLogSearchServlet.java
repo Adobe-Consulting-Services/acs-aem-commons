@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.audit_log_search.impl;
 
@@ -24,13 +22,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +48,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet",
-        methods = {"GET"},
+@SlingServlet(
+        methods = {HttpConstants.METHOD_GET},
         resourceTypes = {"acs-commons/components/utilities/audit-log-search"},
         selectors = {"auditlogsearch"},
-        extensions = {"json"}, metatype = false)
+        extensions = {"json"})
 @SuppressWarnings("serial")
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 

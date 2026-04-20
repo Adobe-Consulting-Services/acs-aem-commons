@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.AccessibleObjectUtil;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
+
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Radio button selector component
@@ -41,6 +40,8 @@ public abstract class RadioComponent extends FieldComponent {
     private static final String DESCRIPTION_DELIMITER = "::";
 
     public static class EnumerationSelector extends RadioComponent {
+
+        private static final Logger LOG = LoggerFactory.getLogger(EnumerationSelector.class);
 
         @Override
         public Map<String, String> getOptions() {
@@ -59,7 +60,7 @@ public abstract class RadioComponent extends FieldComponent {
                     name = name + DESCRIPTION_DELIMITER + desc.value();
                 }
             } catch (NoSuchFieldException | SecurityException ex) {
-                Logger.getLogger(RadioComponent.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.error("Unable to lookup '{}' on class", name, ex);
             }
             return name;
         }
@@ -68,36 +69,36 @@ public abstract class RadioComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/radiogroup");
-        getComponentMetadata().put("vertical", hasOption("vertical"));
-        getComponentMetadata().put("text", getFieldDefinition().name());
-        getComponentMetadata().remove("fieldLabel");
-        getComponentMetadata().remove("fieldDescription");
+        getProperties().put("vertical", hasOption("vertical"));
+        getProperties().put("text", getFieldDefinition().name());
+        getProperties().remove("fieldLabel");
+        getProperties().remove("fieldDescription");
     }
 
     @Override
     public Resource buildComponentResource() {
         AbstractResourceImpl component = (AbstractResourceImpl) super.buildComponentResource();
-        AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new ResourceMetadata());
+        AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new HashMap<>());
         component.addChild(options);
 
         String defaultValue = getOption("default").orElse(null);
 
         getOptions().forEach((value, name) -> {
-            final ResourceMetadata meta = new ResourceMetadata();
+            final HashMap<String, Object> properties = new HashMap<>();
             final String nodeName = JcrUtil.escapeIllegalJcrChars(value);
 
             if (value.equals(defaultValue)) {
-                meta.put("checked", true);
+                properties.put("checked", true);
             }
-            meta.put("name", getName());
-            meta.put("value", value);
+            properties.put("name", getName());
+            properties.put("value", value);
             if (name.contains("::")) {
                 String description = StringUtils.substringAfter(name, DESCRIPTION_DELIMITER);
-                meta.put("title", description);
+                properties.put("title", description);
                 name = StringUtils.substringBefore(name, DESCRIPTION_DELIMITER);
             }
-            meta.put("text", name);
-            AbstractResourceImpl option = new AbstractResourceImpl("option_" + nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", meta);
+            properties.put("text", name);
+            AbstractResourceImpl option = new AbstractResourceImpl("option_" + nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", properties);
             options.addChild(option);
         });
         return component;

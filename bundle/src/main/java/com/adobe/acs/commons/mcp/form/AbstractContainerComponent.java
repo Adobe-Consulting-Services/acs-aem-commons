@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,25 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.AccessibleObjectUtil;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.sling.api.resource.ResourceMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent a generic container component which has one or more children
  */
 public class AbstractContainerComponent extends FieldComponent {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractContainerComponent.class);
 
     Map<String, FieldComponent> fieldComponents = new LinkedHashMap<>();
     private boolean composite;
@@ -66,9 +66,9 @@ public class AbstractContainerComponent extends FieldComponent {
             } else {
                 extractFieldComponents(fieldType);
                 fieldComponents.values().forEach(comp -> {
-                    ResourceMetadata meta = comp.getComponentMetadata();
-                    String currentName = String.valueOf(meta.get("name"));
-                    meta.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
+                    Map<String, Object> properties = comp.getProperties();
+                    String currentName = String.valueOf(properties.get("name"));
+                    properties.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
                 });
             }
         }
@@ -94,9 +94,9 @@ public class AbstractContainerComponent extends FieldComponent {
 
     public FieldComponent generateDefaultChildComponent() {
         try {
-            return defaultChildComponent.newInstance();
-        } catch (InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(AbstractContainerComponent.class.getName()).log(Level.SEVERE, null, ex);
+            return defaultChildComponent.getDeclaredConstructor().newInstance();
+        } catch (RuntimeException | ReflectiveOperationException ex) {
+            LOG.error("got exception", ex);
             return null;
         }
     }
@@ -104,9 +104,9 @@ public class AbstractContainerComponent extends FieldComponent {
     private void extractFieldComponents(Class clazz) {
         if (clazz == String.class || clazz.isPrimitive()) {
             FieldComponent comp = generateDefaultChildComponent();
-            FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null);
+            FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null, false, null);
             comp.setup(getName(), null, fieldDef, getHelper());
-            comp.getComponentMetadata().put("title", getName());
+            comp.getProperties().put("title", getName());
             // TODO: Provide a proper mechanism for setting path when creating components
             addComponent(getName(), comp);
             composite = false;

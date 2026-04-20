@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
@@ -31,6 +29,7 @@ import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanup;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanupFactory;
 import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestor;
 import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestorFactory;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
 import org.apache.sling.event.jobs.JobManager;
@@ -111,6 +110,7 @@ public class FactoryInjectionTest {
         registerMock(JobManager.class);
         registerMock(PageManagerFactory.class);
         registerMock(Replicator.class);
+        slingContext.registerService(RequireAem.class,mock(RequireAem.class),"distribution","classic");
     }
 
     private <T> void registerMock(Class<T> clazz) {

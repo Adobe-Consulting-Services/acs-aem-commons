@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
@@ -28,6 +26,7 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +39,6 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -205,9 +203,9 @@ public class EndpointServiceImpl implements EndpointService {
             URIBuilder builder = new URIBuilder(actionUrl);
              queryParameters.forEach((k, v) -> builder.addParameter(k, v));
              uri = builder.build();
-         
-      } catch(URISyntaxException uriexception) {
-            LOGGER.error(uriexception.getMessage());
+
+      } catch(URISyntaxException uriException) {
+            LOGGER.error("Unable to process the actionURL: {} using uriBuilder", actionUrl, uriException);
             return new JsonObject();
       }
 
@@ -225,11 +223,9 @@ public class EndpointServiceImpl implements EndpointService {
            }
       }
       catch (IOException ioexception) {
-         LOGGER.error(ioexception.getMessage());
+         LOGGER.error("Unable to process the request", ioexception);
          return new JsonObject();
-         
       }
-
    }
 
    private JsonObject processGet(@NotNull final URI uri, String[] headers) throws IOException {
@@ -296,14 +292,14 @@ public class EndpointServiceImpl implements EndpointService {
         addHeaders(base, convertServiceSpecificHeaders(headers));
       }
 
-      StringEntity input = new StringEntity(payload.toString());
-      input.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+      Charset contentTypeCharset = charsetFrom(base.getLastHeader(CONTENT_TYPE));
+      StringEntity input = new StringEntity(payload.toString(), contentTypeCharset);
 
       if (!base.getClass().isInstance(HttpGet.class)) {
          base.setEntity(input);
       }
 
-      LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload);
+      LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI(), payload);
 
       try (CloseableHttpClient httpClient = helper.getHttpClient(integrationService.getTimeoutinMilliSeconds())) {
          CloseableHttpResponse response = httpClient.execute(base);
@@ -345,7 +341,27 @@ public class EndpointServiceImpl implements EndpointService {
    private void addHeaders(HttpRequest request, List<Map.Entry<String, String>> headers) {
       headers.forEach(e -> request.addHeader(e.getKey(), e.getValue()));
    }
-   
+
+   protected Charset charsetFrom(Header header) {
+      if (header == null) {
+        return null;
+      }
+
+      try {
+        String value = header.getValue();
+        String[] split = value.split(";");
+        if (split.length > 1) {
+          String[] charset = split[1].split("=");
+          if (charset.length > 1) {
+            return Charset.forName(charset[1].trim());
+          }
+        }
+      } catch (Exception e) {
+        LOGGER.error("Unable to get charset from content type", e);
+      }
+      return null;
+   }
+
    protected List<Map.Entry<String, String>> convertServiceSpecificHeaders(String[] specificServiceHeaders) {
          if (specificServiceHeaders == null) {
             return Collections.emptyList();

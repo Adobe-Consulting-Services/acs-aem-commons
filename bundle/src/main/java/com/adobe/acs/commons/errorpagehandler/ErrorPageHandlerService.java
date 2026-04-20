@@ -1,23 +1,23 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.errorpagehandler;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -34,7 +34,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 @SuppressWarnings("squid:S1214")
 public interface ErrorPageHandlerService {
-    int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    int DEFAULT_STATUS_CODE = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     /**
      * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists however it should not be used.
@@ -130,4 +130,10 @@ public interface ErrorPageHandlerService {
      * @return true if check is enabled else false
      */
     boolean isVanityDispatchCheckEnabled();
+
+    /**
+     * @param request The request
+     * @return True if the service should be used for this service/ False if it should not 
+     */
+    public boolean shouldRequestUseErrorPageHandler(SlingHttpServletRequest request);
 }

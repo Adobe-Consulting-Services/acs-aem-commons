@@ -1,0 +1,188 @@
+{
+  "jcr:primaryType": "sling:Folder",
+  "server0": {
+    "jcr:primaryType": "sling:Folder",
+    "2021-05-06": {
+      "jcr:primaryType": "sling:Folder",
+      "jcr:createdBy": "workflow-service",
+      "test-workflow_1": {
+        "jcr:primaryType": "cq:Workflow",
+        "startTime": "Thu May 06 2021 10:09:12 GMT+0200",
+        "endTime": "Thu May 06 2021 10:10:12 GMT+0200",
+        "status": "ABORTED",
+        "parentInstanceId": "none",
+        "initiator": "admin",
+        "modelVersion": "1.349",
+        "jcr:uuid": "01e832f7-763b-4deb-8d22-8d88b49a0015",
+        "modelId": "/var/workflow/models/test-workflow",
+        "workItems": {
+          "jcr:primaryType": "nt:unstructured"
+        },
+        "orTab": {
+          "jcr:primaryType": "nt:unstructured"
+        },
+        "data": {
+          "jcr:primaryType": "cq:WorkflowData",
+          "payload": {
+            "jcr:primaryType": "cq:Payload",
+            "path": "/content/dam/any/special/assets"
+          },
+          "metaData": {
+            "jcr:primaryType": "nt:unstructured",
+            "currentJobs": "VolatileWorkItem_node1_var_workflow_instances_server0_2021-05-06_test-workflow_1"
+          }
+        },
+        "history": {
+          "jcr:primaryType": "nt:unstructured",
+          "b0a5b0b3-7c14-436f-aee4-be3864f1fc14": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:12 GMT+0200",
+            "user": "admin",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "e596824a-c05b-45ed-bef1-b995c27de3e6": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:12 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "7ee3719c-d56f-4b46-8fa3-2c7836bb15a4": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:10:12 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "3f81f54d-3808-4ccd-a048-97ec0407a3db": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:10:12 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "991b3835-b1db-4e60-8771-3e3566dbbc40": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:10:12 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowAborted",
+            "message": ""
+          }
+        },
+        "metaData": {
+          "jcr:primaryType": "nt:unstructured"
+        }
+      },
+      "test-workflow_2": {
+        "jcr:primaryType": "cq:Workflow",
+        "startTime": "Thu May 06 2021 10:10:00 GMT+0200",
+        "status": "RUNNING",
+        "parentInstanceId": "none",
+        "initiator": "admin",
+        "modelVersion": "1.349",
+        "jcr:uuid": "24e6d0ff-4480-4f46-bf53-b6b497aa4770",
+        "modelId": "/var/workflow/models/test-workflow-two",
+        "workItems": {
+          "jcr:primaryType": "nt:unstructured"
+        },
+        "orTab": {
+          "jcr:primaryType": "nt:unstructured"
+        },
+        "data": {
+          "jcr:primaryType": "cq:WorkflowData",
+          "payload": {
+            "jcr:primaryType": "cq:Payload",
+            "path": "/content/dam/any/assets"
+          },
+          "metaData": {
+            "jcr:primaryType": "nt:unstructured",
+            "currentJobs": "VolatileWorkItem_node1_var_workflow_instances_server0_2021-05-06_test-workflow_2"
+          }
+        },
+        "history": {
+          "jcr:primaryType": "nt:unstructured",
+          "83d76d9b-cc09-4373-a1b4-86a8381cb43c": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:10:00 GMT+0200",
+            "user": "admin",
+            "event": "WorkflowCompleted",
+            "message": ""
+          }
+        },
+        "metaData": {
+          "jcr:primaryType": "nt:unstructured"
+        }
+      },
+      "test-workflow_3": {
+        "jcr:primaryType": "cq:Workflow",
+        "startTime": "Thu May 06 2021 10:09:33 GMT+0200",
+        "endTime": "Thu May 06 2021 10:09:33 GMT+0200",
+        "status": "COMPLETED",
+        "parentInstanceId": "none",
+        "initiator": "admin",
+        "modelVersion": "1.349",
+        "jcr:uuid": "23846a1b-3e49-469e-aaf5-a291339a3201",
+        "modelId": "/var/workflow/models/test-workflow-two",
+        "workItems": {
+          "jcr:primaryType": "nt:unstructured"
+        },
+        "orTab": {
+          "jcr:primaryType": "nt:unstructured"
+        },
+        "data": {
+          "jcr:primaryType": "cq:WorkflowData",
+          "payload": {
+            "jcr:primaryType": "cq:Payload",
+            "path": "/content/dam/any/assets"
+          },
+          "metaData": {
+            "jcr:primaryType": "nt:unstructured",
+            "currentJobs": "VolatileWorkItem_node1_var_workflow_instances_server0_2021-05-06_test-workflow_2"
+          }
+        },
+        "history": {
+          "jcr:primaryType": "nt:unstructured",
+          "b1605730-25a4-4592-9434-0f00f1cc38cb": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:33 GMT+0200",
+            "user": "admin",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "8b59c51b-6820-41c7-ac2d-cf5506b507aa": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:33 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "7755a953-3c39-4695-b45c-c1df40ed7d7a": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:33 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "41d6a532-6516-482e-8a09-d175ec6edfbb": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:33 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          },
+          "78bcc39f-4090-486e-a9e2-6dadf49f1763": {
+            "jcr:primaryType": "nt:unstructured",
+            "date": "Thu May 06 2021 10:09:33 GMT+0200",
+            "user": "workflow-service",
+            "event": "WorkflowCompleted",
+            "message": ""
+          }
+        },
+        "metaData": {
+          "jcr:primaryType": "nt:unstructured"
+        }
+      }
+    }
+  }
+}

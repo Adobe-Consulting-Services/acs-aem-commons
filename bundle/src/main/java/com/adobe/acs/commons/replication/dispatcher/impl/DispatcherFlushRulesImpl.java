@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushRules;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.AgentManager;
@@ -31,7 +30,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -59,9 +58,9 @@ import java.util.regex.Pattern;
 @Component(
         label = "ACS AEM Commons - Dispatcher Flush Rules",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
-                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
+                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent. "
                 + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
-                + "'CQ-Action-Scope: ResourceOnly'."
+                + "'CQ-Action-Scope: ResourceOnly'. "
                 + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
                 + "due to dangerous cyclic conditions.",
         metatype = true,
@@ -73,7 +72,7 @@ import java.util.regex.Pattern;
                 name = "webconsole.configurationFactory.nameHint",
                 value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
 })
-public class DispatcherFlushRulesImpl implements Preprocessor {
+public class DispatcherFlushRulesImpl implements Preprocessor, DispatcherFlushRules {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
     private static final String OPTION_INHERIT = "INHERIT";
@@ -254,14 +253,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
                         DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
-        log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
+        log.debug("Hierarchical flush rules: {}", this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
         this.resourceOnlyFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
                         DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 
-        log.debug("ResourceOnly flush rules: " + this.resourceOnlyFlushRules);
+        log.debug("ResourceOnly flush rules: {}", this.resourceOnlyFlushRules);
     }
 
     /**

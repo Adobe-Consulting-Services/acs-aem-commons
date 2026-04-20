@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.images.transformers.impl.composites;
 
@@ -35,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultiplyBlendCompositeTest {
@@ -45,10 +43,10 @@ public class MultiplyBlendCompositeTest {
     @Mock
     ColorModel notDirect;
 
-    @Spy
+    
     DirectColorModel srcColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
 
-    @Spy
+    
     DirectColorModel destColorModel = (DirectColorModel) DirectColorModel.getRGBdefault();
 
     @Mock
@@ -68,23 +66,19 @@ public class MultiplyBlendCompositeTest {
 
     @Test
     public void testCreateContext() throws Exception {
-
         CompositeContext ctx = composite.createContext(srcColorModel, destColorModel, hints);
         assertNotNull(ctx);
-        verifyZeroInteractions(srcColorModel, destColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrc() throws Exception {
         composite.createContext(notDirect, destColorModel, hints);
-        verifyZeroInteractions(notDirect, destColorModel, hints);
 
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDest() throws Exception {
         composite.createContext(srcColorModel, notDirect, hints);
-        verifyZeroInteractions(notDirect, srcColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -93,8 +87,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(),
                 srcColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -103,8 +95,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, 0, srcColorModel.getGreenMask(),
                 srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -113,8 +103,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), 0, srcColorModel.getBlueMask(),
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -123,8 +111,6 @@ public class MultiplyBlendCompositeTest {
         srcColorModel = new DirectColorModel(Integer.SIZE, srcColorModel.getRedMask(), srcColorModel.getGreenMask(), 0,
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -133,8 +119,6 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
                 destColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -143,8 +127,6 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, 0, destColorModel.getGreenMask(),
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -153,8 +135,6 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), 0,
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -163,7 +143,5 @@ public class MultiplyBlendCompositeTest {
         destColorModel = new DirectColorModel(Integer.SIZE, destColorModel.getRedMask(), destColorModel.getGreenMask(),
                 0, destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
-        Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
     }
 }

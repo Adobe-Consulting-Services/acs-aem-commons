@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="ACS AEM Commons | Unpublish Template"
+        sling:resourceType="granite/ui/components/coral/foundation/page"
+        consoleId="cq-sites-templates-unpublish">
+        <head jcr:primaryType="nt:unstructured">
+            <viewport
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/admin/page/viewport"/>
+            <favicon
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/page/favicon"/>
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[coralui3,granite.ui.coral.foundation,cq.sites.unpublishwizard]"/>
+        </head>
+        <body
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/page/body">
+            <items jcr:primaryType="nt:unstructured">
+                <form
+                    granite:class="cq-siteadmin-admin-unpublishpage-form"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    maximized="{Boolean}true"
+                    method="post"
+                    novalidate="{Boolean}true"
+                    style="vertical">
+                    <items jcr:primaryType="nt:unstructured">
+                        <wizard
+                            granite:class="cq-siteadmin-admin-unpublishpage"
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Unpublish"
+                            sling:resourceType="granite/ui/components/coral/foundation/wizard"
+                            cancelHref="/acs-commons.html${granite:encodeURIPath(empty param.item ? requestPathInfo.suffix : param.item)}">
+                            <items jcr:primaryType="nt:unstructured">
+                                <unpublishstep
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Unpublish"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <fixedColumns
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                                            active="{Boolean}true"
+                                            margin="{Boolean}true"
+                                            maximized="{Boolean}false">
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <fixedColumn1
+                                                    granite:id="references"
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <references
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/siteadmin/admin/unpublishwizard/references"
+                                                            replicationURL="/bin/replicate.json"
+                                                            requestActivationWorkflow="/etc/workflow/models/request_for_activation/jcr:content/model"
+                                                            scheduleActivationWorkflow="/etc/workflow/models/scheduled_activation/jcr:content/model"
+                                                            workflowURL="/etc/workflow/instances"/>
+                                                    </items>
+                                                </fixedColumn1>
+                                                <fixedColumn2
+                                                    granite:id="schedule"
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <schedule
+                                                            jcr:primaryType="nt:unstructured"
+                                                            jcr:title="Scheduling the template"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                                            <items jcr:primaryType="nt:unstructured">
+                                                                <activationDate
+                                                                    jcr:primaryType="nt:unstructured"
+                                                                    sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                                                                    displayedFormat="D MMMM YYYY hh:mm a"
+                                                                    displayTimezoneMessage="{Boolean}true"
+                                                                    fieldDescription="Leave empty to unpublish immediately."
+                                                                    fieldLabel="Deactivation date"
+                                                                    minDate="today"
+                                                                    name="activationDate"
+                                                                    type="datetime"/>
+                                                            </items>
+                                                        </schedule>
+                                                        <workflow
+                                                            granite:id="workflow"
+                                                            jcr:primaryType="nt:unstructured"
+                                                            jcr:title="Workflow: Request for deactivation"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                                            <items jcr:primaryType="nt:unstructured">
+                                                                <comment
+                                                                    granite:id="comment"
+                                                                    jcr:primaryType="nt:unstructured"
+                                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                                                    fieldLabel="Description"
+                                                                    rows="{Long}2"/>
+                                                            </items>
+                                                        </workflow>
+                                                    </items>
+                                                </fixedColumn2>
+                                            </items>
+                                        </fixedColumns>
+                                    </items>
+                                    <parentConfig
+                                        jcr:primaryType="nt:unstructured"
+                                        validation="{Boolean}false">
+                                        <next
+                                            granite:class="foundation-wizard-control"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            text="Unpublish"
+                                            type="submit"
+                                            variant="primary">
+                                            <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                foundation-wizard-control-action="next"/>
+                                        </next>
+                                    </parentConfig>
+                                </unpublishstep>
+                            </items>
+                        </wizard>
+                    </items>
+                </form>
+            </items>
+        </body>
+    </jcr:content>
+</jcr:root>

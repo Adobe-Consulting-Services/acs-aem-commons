@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ClusterLeader;
 import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -60,6 +60,7 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -67,8 +68,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.sling.discovery.TopologyEvent;
-import org.apache.sling.discovery.TopologyEventListener;
 
 @Component(
         label = "ACS AEM Commons - Package Replication Status Updater",
@@ -99,13 +98,14 @@ import org.apache.sling.discovery.TopologyEventListener;
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, TopologyEventListener {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private static final String FALLBACK_REPLICATION_USER_ID = "Package Replication";
     private static final String PROPERTY_PATHS = "paths"; // this is not used for the actual Sling Job
     private static final String PROPERTY_PATH = "path";
     private static final String PROPERTY_REPLICATED_BY = "replicatedBy";
+    private static final String PROPERTY_AGENT_IDS = "agentId";
 
     private enum ReplicatedAt {
         CURRENT_TIME,
@@ -160,7 +160,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Reference
     private JobManager jobManager;
 
-    private boolean isLeader = false;
+    @Reference
+    private ClusterLeader clusterLeader;
 
     // Previously "Package Replication"
     private static final String DEFAULT_REPLICATED_BY_OVERRIDE = "";
@@ -198,31 +199,28 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Override
     @SuppressWarnings("squid:S3776")
     public final void handleEvent(final Event event) {
-        if (this.isLeader) {
-            // Only run on master
-            final Map<String, Object> jobConfig = getInfoFromEvent(event);
-            final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
+        final Map<String, Object> jobConfig = getInfoFromEvent(event);
+        final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
 
-            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO))  {
-            
-                for (String path : paths) {
-                    if (!this.containsJcrPackagePath(path)) {
-                        continue;
-                    }
-                    
-                    final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
-                    if (jcrPackage != null) {
-                        // Close jcrPackages after they've been used to check if a Job should be invoked.
-                        jcrPackage.close();
-                        jobConfig.put(PROPERTY_PATH, path);
-                        // trigger one job per package to make one exception not affect other packages
-                        jobManager.addJob(JOB_TOPIC, jobConfig);
-                    }
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO))  {
+        
+            for (String path : paths) {
+                if (!this.containsJcrPackagePath(path)) {
+                    continue;
                 }
-            } catch (LoginException e) {
-                log.error("Could not obtain a resource resolver.", e);
-            } 
-        }
+                
+                final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
+                if (jcrPackage != null) {
+                    // Close jcrPackages after they've been used to check if a Job should be invoked.
+                    jcrPackage.close();
+                    jobConfig.put(PROPERTY_PATH, path);
+                    // trigger one job per package to make one exception not affect other packages
+                    jobManager.addJob(JOB_TOPIC, jobConfig);
+                }
+            }
+        } catch (LoginException e) {
+            log.error("Could not obtain a resource resolver.", e);
+        } 
     }
 
     @Override
@@ -230,7 +228,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         final String path = (String) job.getProperty(PROPERTY_PATH);
         final String replicatedBy =
                 StringUtils.defaultIfEmpty(this.replicatedByOverride, (String) job.getProperty(PROPERTY_REPLICATED_BY));
-
+        Collection<String> agentIds = job.getProperty(PROPERTY_AGENT_IDS, List.class);
+        if (agentIds == null) {
+            agentIds = Collections.emptySet();
+        }
         log.debug("Processing Replication Status Update for JCR Package: {}", path);
 
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
@@ -242,7 +243,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             }
             
             try {
-                setReplicationStatus(jcrPackage, replicatedBy, resourceResolver);
+                setReplicationStatus(jcrPackage, agentIds, replicatedBy, resourceResolver);
             } finally {
                 // Close  package when we are done.
                 jcrPackage.close();
@@ -276,7 +277,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
     
     
-    private void setReplicationStatus(JcrPackage jcrPackage, String replicatedBy, ResourceResolver resourceResolver) throws RepositoryException {
+    private void setReplicationStatus(JcrPackage jcrPackage, Collection<String> agentIds, String replicatedBy, ResourceResolver resourceResolver) throws RepositoryException {
         final List<Resource> resources = new ArrayList<>();
         final String packageId;
         try {
@@ -303,6 +304,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         try {
             if (resources.size() > 0) {
                 replicationStatusManager.setReplicationStatus(resourceResolver,
+                        agentIds,
                         replicatedBy,
                         getJcrPackageLastModified(jcrPackage),
                         ReplicationStatusManager.Status.ACTIVATED,
@@ -328,28 +330,31 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     protected final Map<String, Object> getInfoFromEvent(Event event) {
         final Map<String, Object> eventConfig = new HashMap<>();
 
-        final ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
-        if (replicationEvent != null) {
-            // Granite event
-            final ReplicationAction replicationAction = replicationEvent.getReplicationAction();
-            eventConfig.put(PROPERTY_PATHS, replicationAction.getPaths());
-            eventConfig.put(PROPERTY_REPLICATED_BY, replicationAction.getUserId());
-        } else {
-            // CQ event
-            String[] paths = (String[]) event.getProperty(ReplicationAction.PROPERTY_PATHS);
+        ReplicationAction replicationAction = ReplicationAction.fromEvent(event);
+        if (replicationAction != null) {
+            // CQ event (com/day/cq/replication)
+            String[] paths = replicationAction.getPaths();
             if (paths == null) {
                 paths = ArrayUtils.EMPTY_STRING_ARRAY;
             }
 
-            String userId = (String) event.getProperty(ReplicationAction.PROPERTY_USER_ID);
+            String userId = replicationAction.getUserId();
             if (StringUtils.isBlank(userId)) {
                 userId = StringUtils.defaultIfEmpty(this.replicatedByOverride, FALLBACK_REPLICATION_USER_ID);
             }
 
             eventConfig.put(PROPERTY_PATHS, paths);
-            eventConfig.put(PROPERTY_REPLICATED_BY,userId);
+            eventConfig.put(PROPERTY_REPLICATED_BY, userId);
+            // set by AEMaaCS in com.day.cq.replication.ReplicatedAction#toEvent(...)
+            eventConfig.put(PROPERTY_AGENT_IDS, (List<String>)event.getProperty("agentIds"));
+        } else {
+            ReplicationEvent replicationEvent = ReplicationEvent.fromEvent(event);
+            // Granite event (com/adobe/granite/replication)
+            replicationAction = replicationEvent.getReplicationAction();
+            eventConfig.put(PROPERTY_PATHS, replicationAction.getPaths());
+            eventConfig.put(PROPERTY_REPLICATED_BY, replicationAction.getUserId());
+            // no information about targeted agents provided with this event
         }
-
         return eventConfig;
     }
 
@@ -494,12 +499,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             pathRestrictionByNodeType.put(nodeTypeAndPathRestriction.getKey(), pathRestrictionPattern);
         }
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
-        log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
+        log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt);
         log.info("Package Replication Status - Node Types and Path Restrictions: [ {} ]", pathRestrictionByNodeType);
-    }
-
-    @Override
-    public void handleTopologyEvent(TopologyEvent te) {
-        this.isLeader = te.getNewView().getLocalInstance().isLeader();
     }
 }

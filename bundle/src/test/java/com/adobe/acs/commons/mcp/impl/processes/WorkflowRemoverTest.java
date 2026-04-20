@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.mcp.impl.processes;
@@ -24,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -141,7 +140,7 @@ public class WorkflowRemoverTest {
 
     }
 
-    @Test
+    @Test(expected = ParseException.class)
     public void parseParametersBadDateInput() throws Exception {
         remover.payloadPaths = new ArrayList<>();
         remover.payloadPaths.add("/content/dam/.*");
@@ -160,15 +159,11 @@ public class WorkflowRemoverTest {
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.COMPLETED.name());
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.SUSPENDED.name());
 
-        try {
-            remover.parseParameters();
-        } catch (ParseException e) {
-            log.warn("parse exception is expected with bad input.", e);
-        }
+        remover.parseParameters();
 
     }
 
-    @Test
+    @Test(expected = PatternSyntaxException.class)
     public void parseParametersBadRegexInput() throws Exception {
         remover.payloadPaths = new ArrayList<>();
         remover.payloadPaths.add("/content/dam/.*");
@@ -187,11 +182,7 @@ public class WorkflowRemoverTest {
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.COMPLETED.name());
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.SUSPENDED.name());
 
-        try{
-            remover.parseParameters();
-        } catch (PatternSyntaxException e) {
-            log.warn("pattern exception is expected with bad input.", e);
-        }
+        remover.parseParameters();
 
     }
 
@@ -216,9 +207,7 @@ public class WorkflowRemoverTest {
 
         remover.performCleanupActivity(actionManager);
 
-        Mockito.verify(workflowInstanceRemover, Mockito.times(1)).removeWorkflowInstances(Mockito.eq(ctx.resourceResolver()),
-                Mockito.eq(remover.getModelIds()), Mockito.eq(remover.getStatuses()), Mockito.eq(remover.getPayloads()), Mockito.eq(remover.getOlderThan()),
-                Mockito.anyInt(), Mockito.anyInt());
-
+        WorkflowRemovalConfig workflowRemovalConfig = new WorkflowRemovalConfig(remover.getModelIds(), remover.getStatuses(), remover.getPayloads(), remover.getOlderThan(), remover.getOlderThanMillis());
+        Mockito.verify(workflowInstanceRemover, Mockito.times(1)).removeWorkflowInstances(Mockito.eq(ctx.resourceResolver()), Mockito.eq(remover.getWorkflowRemovalConfig()));
     }
 }

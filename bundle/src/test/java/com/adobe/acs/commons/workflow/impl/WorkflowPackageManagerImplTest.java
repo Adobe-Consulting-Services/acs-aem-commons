@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.impl;
@@ -44,7 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -96,8 +94,6 @@ public final class WorkflowPackageManagerImplTest {
     @Before
     public void setUp() throws Exception {
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-        when(resourceResolver.getResource("/var/workflow/packages")).thenReturn(workflowPackageRootResource);
         when(resourceResolver.getResource(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackageResource);
         when(workflowPackageResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
         when(workflowPackageNode.getSession()).thenReturn(session);
@@ -111,7 +107,6 @@ public final class WorkflowPackageManagerImplTest {
         // Normal Page Path
 
         when(pageManager.getPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
-        when(pageManager.getContainingPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
         when(normalPage.getContentResource()).thenReturn(normalPageContentResource);
         when(normalPageContentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(false);
     }
@@ -215,6 +210,11 @@ public final class WorkflowPackageManagerImplTest {
         @Override
         public String getPath() {
             return WORKFLOW_PACKAGE_PATH;
+        }
+
+        @Override
+        public boolean hasNode(String arg0) {
+            return false;
         }
     };
 }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,26 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.data.CompositeVariant;
-import com.adobe.acs.commons.data.Spreadsheet;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.AssetManager;
-import com.google.common.base.Function;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
+import java.util.function.Function;
+
 import javax.jcr.RepositoryException;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -43,17 +42,21 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.data.Spreadsheet;
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
 
 /**
  * Provide code coverage for URL Asset Import
@@ -112,6 +115,7 @@ public class UrlAssetImportTest {
             method.accept(context.resourceResolver());
             return null;
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
+        Actions.setCurrentActionManager(actionManager);
     }
 
     private void addImportRow(String... cols) {
@@ -120,7 +124,7 @@ public class UrlAssetImportTest {
         for (int i = 0; i < cols.length && i < header.size(); i++) {
             row.put(header.get(i), new CompositeVariant(cols[i]));
         }
-        importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
+        importProcess.fileData.appendData(Collections.singletonList(row));
     }
 
     @Test
@@ -136,6 +140,38 @@ public class UrlAssetImportTest {
         importProcess.importRenditions(actionManager);
         assertEquals(1, importProcess.getCount(importProcess.importedAssets));
         assertEquals(1, importProcess.getCount(importProcess.createdFolders));
+    }
+
+    @Test
+    public void testFolderTitlePreserve() throws IOException, RepositoryException {
+        context.load().json("/com/adobe/acs/commons/mcp/impl/processes/asset-ingestor.json", "/content/dam/testfolder");
+        importProcess.init();
+        importProcess.preserveFolderTitles = true;
+        URL testImg = getClass().getResource("/img/test.png");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test", "rendition", "test.png");
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
+        importProcess.createFolders(actionManager);
+        assertEquals(1, importProcess.getCount(importProcess.createdFolders));
+        context.currentResource("/content/dam/testfolder/jcr:content");
+        ValueMap vm = context.currentResource().getValueMap();
+        assertEquals("Test Folder", vm.get("jcr:title"));
+    }
+
+    @Test
+    public void testFolderNoTitlePreserve() throws IOException, RepositoryException {
+        context.load().json("/com/adobe/acs/commons/mcp/impl/processes/asset-ingestor.json", "/content/dam/testfolder");
+        importProcess.init();
+        importProcess.preserveFolderTitles = false;
+        URL testImg = getClass().getResource("/img/test.png");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test", "rendition", "test.png");
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
+        importProcess.createFolders(actionManager);
+        assertEquals(1, importProcess.getCount(importProcess.createdFolders));
+        context.currentResource("/content/dam/testfolder/jcr:content");
+        ValueMap vm = context.currentResource().getValueMap();
+        assertEquals("testfolder", vm.get("jcr:title"));
     }
 
     @Test

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.List;
+
+import javax.jcr.RepositoryException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.sling.api.request.builder.Builders;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.engine.SlingRequestProcessor;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.ActionBatch;
@@ -28,30 +46,10 @@ import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.contentsync.handler.util.RequestResponseFactory;
 import com.day.cq.dam.api.DamConstants;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.jcr.RepositoryException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.output.NullOutputStream;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.engine.SlingRequestProcessor;
 
 /**
  * Replace folder thumbnails under a user-definable set of circumstances As a business user, I would like an easy way to
@@ -85,16 +83,8 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     public static final String FOLDER_THUMBNAIL = "/jcr:content/folderThumbnail";
 
-    private static Map<String, Object> THUMBNAIL_PARAMS = new HashMap<>();
-
-    static {
-        THUMBNAIL_PARAMS.put("width", "200");
-        THUMBNAIL_PARAMS.put("height", "120");
-    }
-
     private static final int PLACEHOLDER_SIZE = 1024;
 
-    private RequestResponseFactory requestFactory;
     private SlingRequestProcessor slingProcessor;
 
     @FormField(name = "Starting Path",
@@ -115,8 +105,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     private transient List<String> foldersToReplace = Collections.synchronizedList(new ArrayList<>());
 
-    public RefreshFolderTumbnails(RequestResponseFactory reqRspFactory, SlingRequestProcessor slingProcessor) {
-        this.requestFactory = reqRspFactory;
+    public RefreshFolderTumbnails(SlingRequestProcessor slingProcessor) {
         this.slingProcessor = slingProcessor;
     }
 
@@ -150,7 +139,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        GenericReport report = new GenericReport();
+        GenericBlobReport report = new GenericBlobReport();
         report.setName("Rebuild thumbnails " + startingPath);
         report.setRows(reportData, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
@@ -199,12 +188,20 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
     }
 
     private void rebuildThumbnail(ResourceResolver rr, String folderPath) throws ServletException, IOException {
-        HttpServletRequest req = requestFactory.createRequest("GET", folderPath + ".folderthumbnail.jpg", THUMBNAIL_PARAMS);
-        try (NullOutputStream out = new NullOutputStream()) {
-            HttpServletResponse res = requestFactory.createResponse(out);
-            slingProcessor.processRequest(req, res, rr);
-            res.flushBuffer();
+        Resource resource = rr.getResource(folderPath);
+        if (resource == null) {
+            throw new IllegalArgumentException("Resource not found at " + folderPath);
         }
+        HttpServletRequest req = Builders.newRequestBuilder(resource)
+                .withRequestMethod("GET")
+                .withSelectors("folderthumbnail")
+                .withExtension("jpg")
+                .withParameter("width", "200")
+                .withParameter("height", "120")
+                .build();
+        HttpServletResponse res = Builders.newResponseBuilder().build();
+        slingProcessor.processRequest(req, res, rr);
+        res.flushBuffer();
         record(folderPath, "Rebuild", "Thumbnail was rebuilt");
     }
 

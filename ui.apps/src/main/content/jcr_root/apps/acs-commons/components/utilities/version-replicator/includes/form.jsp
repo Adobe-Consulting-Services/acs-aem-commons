@@ -37,6 +37,7 @@
     pageContext.setAttribute("agentResourcePaths", agentResourcePaths);
 %>
 <form class="coral-Form coral-Form--vertical acs-form"
+        style="padding-bottom: 2rem; border-bottom: solid 1px #ccc; margin-bottom: 2rem;"
         novalidate
         id="versionReplicator"
         ng-hide="app.running"
@@ -46,7 +47,7 @@
         <p class="instructions">
             Select the root paths to replicate. Resource versions matching the specified date & time will be replicated.
         </p>
-        <table class="coral-Table acs-table">
+        <table class="coral-Table acs-table" style="width: 100%">
             <tbody>
                 <tr class="coral-Table-row"
                     ng-repeat="rootPath in form.rootPaths">
@@ -101,7 +102,7 @@
         <div class="instructions">
             Select 1 or more replication agents target for this replication.
         </div>
-        <ul id="cmbAgent" class="coral-List coral-List--minimal acs-column-33-33-33">
+        <ul id="cmbAgent" class="coral-List coral-List--minimal">
             <c:forEach var="agent" items="${agents}" varStatus="loop">
                  <c:set var="index">${loop.index}</c:set>
                  <c:if test="${agent.valid && agent.enabled}">

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.rewriter.impl;
 
 import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -115,7 +113,6 @@ public final class StylesheetInlinerTransformerFactoryTest {
         when(slingRequest.getRequestURL()).thenReturn(new StringBuffer("testing"));
         when(resource.adaptTo(eq(InputStream.class))).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));
         when(resourceResolver.getResource(eq(CSS_RESOURCE_PATH + ".css" ))).thenReturn(resource);
-        when(resourceResolver.getResource(eq(NON_EXISTING_PATH))).thenReturn(null);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getRequestPathInfo()).thenReturn(requestPathInfo);
@@ -131,12 +128,12 @@ public final class StylesheetInlinerTransformerFactoryTest {
         startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
+        verify(handler).startElement(isNull(), eq(HTML), isNull(), eq(empty));
+        verify(handler).startElement(isNull(), eq(HEAD), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(HEAD), isNull());
+        verify(handler).startElement(isNull(), eq(BODY), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(BODY), isNull());
+        verify(handler).endElement(isNull(), eq(HTML), isNull());
     }
 
     @Test
@@ -146,13 +143,13 @@ public final class StylesheetInlinerTransformerFactoryTest {
         startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(), eq(HTML), isNull(), eq(empty));
+        verify(handler).startElement(isNull(), eq(HEAD), isNull(), eq(empty));
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
+        verify(handler).endElement(isNull(), eq(HEAD), isNull());
+        verify(handler).startElement(isNull(), eq(BODY), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(BODY), isNull());
+        verify(handler).endElement(isNull(), eq(HTML), isNull());
     }
 
     @Test
@@ -163,14 +160,14 @@ public final class StylesheetInlinerTransformerFactoryTest {
         addStylesheetLink(CLIENTLIB_PATH);
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(), eq(HTML), isNull(), eq(empty));
+        verify(handler).startElement(isNull(), eq(HEAD), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(HEAD), isNull());
+        verify(handler).startElement(isNull(), eq(BODY), isNull(), eq(empty));
         verifyDiv();
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
+        verify(handler).endElement(isNull(), eq(BODY), isNull());
+        verify(handler).endElement(isNull(), eq(HTML), isNull());
     }
 
     @Test
@@ -180,13 +177,13 @@ public final class StylesheetInlinerTransformerFactoryTest {
         startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(), eq(HTML), isNull(), eq(empty));
+        verify(handler).startElement(isNull(), eq(HEAD), isNull(), eq(empty));
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
+        verify(handler).endElement(isNull(), eq(HEAD), isNull());
+        verify(handler).startElement(isNull(), eq(BODY), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(BODY), isNull());
+        verify(handler).endElement(isNull(), eq(HTML), isNull());
     }
 
     @Test
@@ -197,14 +194,14 @@ public final class StylesheetInlinerTransformerFactoryTest {
         addStylesheetLink(CSS_RESOURCE_PATH);
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(), eq(HTML), isNull(), eq(empty));
+        verify(handler).startElement(isNull(), eq(HEAD), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(HEAD), isNull());
+        verify(handler).startElement(isNull(), eq(BODY), isNull(), eq(empty));
         verifyDiv();
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
+        verify(handler).endElement(isNull(), eq(BODY), isNull());
+        verify(handler).endElement(isNull(), eq(HTML), isNull());
     }
 
     @Test
@@ -214,12 +211,12 @@ public final class StylesheetInlinerTransformerFactoryTest {
         startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
+        verify(handler).startElement(isNull(), eq(HTML), isNull(), eq(empty));
+        verify(handler).startElement(isNull(), eq(HEAD), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(HEAD), isNull());
+        verify(handler).startElement(isNull(), eq(BODY), isNull(), eq(empty));
+        verify(handler).endElement(isNull(), eq(BODY), isNull());
+        verify(handler).endElement(isNull(), eq(HTML), isNull());
     }
 
     @Test
@@ -227,7 +224,7 @@ public final class StylesheetInlinerTransformerFactoryTest {
         startHeadSection();
         startBodySection();
         addStylesheetLink(CSS_RESOURCE_PATH + "-incorrect");
-        verify(handler).startElement(isNull(String.class), eq(LINK), isNull(String.class), any(Attributes.class));
+        verify(handler).startElement(isNull(), eq(LINK), isNull(), any(Attributes.class));
     }
 
     @Test
@@ -267,16 +264,16 @@ public final class StylesheetInlinerTransformerFactoryTest {
     }
 
     private void verifyDiv() throws SAXException {
-        verify(handler).startElement(isNull(String.class), eq(DIV), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(), eq(DIV), isNull(), eq(empty));
         verify(handler).characters(TEST_DATA.toCharArray(), 0, TEST_DATA.length());
-        verify(handler).endElement(isNull(String.class), eq(DIV), isNull(String.class));
+        verify(handler).endElement(isNull(), eq(DIV), isNull());
     }
 
     private void verifyInlineStyle() throws SAXException {
-        verify(handler).startElement(isNull(String.class), eq(STYLE), isNull(String.class), any(Attributes.class));
+        verify(handler).startElement(isNull(), eq(STYLE), isNull(), any(Attributes.class));
         verify(handler).characters(NEWLINE.toCharArray(), 0, NEWLINE.length());
         verify(handler).characters(CSS_CONTENTS.toCharArray(), 0, CSS_CONTENTS.length());
-        verify(handler).endElement(isNull(String.class), eq(STYLE), isNull(String.class));
+        verify(handler).endElement(isNull(), eq(STYLE), isNull());
     }
 
     private void startHeadSection(final Attributes atts) throws SAXException {

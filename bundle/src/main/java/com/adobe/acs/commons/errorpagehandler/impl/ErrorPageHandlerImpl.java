@@ -1,65 +1,22 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingConstants;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.apache.sling.auth.core.AuthUtil;
-import org.apache.sling.commons.auth.Authenticator;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
@@ -75,6 +32,50 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.auth.Authenticator;
+import org.apache.sling.api.request.RequestProgressTracker;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.auth.core.AuthUtil;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
 
 @Component(
         label = "ACS AEM Commons - Error Page Handler",
@@ -101,7 +102,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
             boolValue = DEFAULT_ENABLED)
     private static final String PROP_ENABLED = "enabled";
-    
+
+    /* Excluded URI patterns */
+    protected ArrayList<Pattern> excludedUriPatterns = new ArrayList<>();
+
+    @Property(
+            label = "Excluded URI patterns from handler",
+            description = "Regex URI patterns that are excluded from the error page handler. [Optional] [Default: None] [Forces: ^/content/test-site(/.*)?, ^/content/dam/test(/.*)?] ",
+            cardinality = Integer.MAX_VALUE)
+    private static final String EXCLUDED_URIS_FROM_HANDLER = "error-page.uri-exclusions";
+
+
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
 
@@ -125,8 +136,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Fallback Error Code Extension */
     private static final String DEFAULT_FALLBACK_ERROR_NAME = "500";
-
-    private String fallbackErrorName = DEFAULT_FALLBACK_ERROR_NAME;
 
     @Property(
             label = "Fallback error page name",
@@ -176,7 +185,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     /* Not Found Path Patterns */
     private static final String[] DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS = {};
-    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<Pattern>();
+    private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<>();
 
     @Property(
             label = "Not Found Exclusions",
@@ -238,8 +247,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                     + "Example: 'png' "
                     + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
             cardinality = Integer.MAX_VALUE,
-            value = { "png", "jpeg", "jpg", "gif" })
+            value = {"png", "jpeg", "jpg", "gif"})
     private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
+
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -247,9 +257,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Reference
     private Authenticator authenticator;
 
-    @Reference
-    private ComponentHelper componentHelper;
-    
     @Reference
     private VanityURLService vanityUrlService;
 
@@ -504,7 +511,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
-     * @param request the request object
+     * @param request       the request object
      * @param errorResource the error resource
      * @return
      */
@@ -613,7 +620,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      *
      * @param request
      * @param response
-     *
      * @return true if the request will be authenticated, false is the request could not trigger authentication
      */
     protected boolean authenticateRequest(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -630,6 +636,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
      * <p>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
+     *
      * @param request
      * @param response
      */
@@ -659,7 +666,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             log.debug(iw.toString());
         }
 
-        if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
+        if (this.getStatusCode(request) == HttpServletResponse.SC_NOT_FOUND
                 && this.isAnonymousRequest(request)
                 && AuthUtil.isBrowserRequest(request)
                 && this.isRedirectToLogin(path)) {
@@ -793,6 +800,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         response.reset();
         response.setContentType("text/html");
         response.setStatus(statusCode);
+        // Header required for AEM CS; this will noop on 6.x installs
+        response.setHeader("x-aem-error-pass", "true");
     }
 
     /**
@@ -838,7 +847,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
                         DEFAULT_ENABLED));
-        
+
         this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
                 PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
                         DEFAULT_VANITY_DISPATCH_ENABLED));
@@ -853,7 +862,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_PAGE_EXTENSION),
                         DEFAULT_ERROR_PAGE_EXTENSION));
 
-        this.fallbackErrorName = PropertiesUtil.toString(config.get(PROP_FALLBACK_ERROR_NAME),
+        final String fallbackErrorName = PropertiesUtil.toString(config.get(PROP_FALLBACK_ERROR_NAME),
                 PropertiesUtil.toString(config.get(legacyPrefix + PROP_FALLBACK_ERROR_NAME),
                         DEFAULT_FALLBACK_ERROR_NAME));
 
@@ -868,11 +877,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         String[] tmpNotFoundExclusionPatterns = PropertiesUtil.toStringArray(
                 config.get(PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS), DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS);
 
-        this.notFoundExclusionPatterns = new ArrayList<Pattern>();
+        this.notFoundExclusionPatterns = new ArrayList<>();
         for (final String tmpPattern : tmpNotFoundExclusionPatterns) {
             this.notFoundExclusionPatterns.add(Pattern.compile(tmpPattern));
         }
 
+        String[] tmpExcludedUriPatterns = ArrayUtils.addAll(PropertiesUtil.toStringArray(config.get(EXCLUDED_URIS_FROM_HANDLER)),
+                "^/content/test-site(/.*)?", "^/content/dam/test(/.*)?");
+        // The above patterns are the default patterns that are always excluded from the error page handler due to a requirement by AEM Cloud Manager
+        for (final String tmpPattern : tmpExcludedUriPatterns) {
+            this.excludedUriPatterns.add(Pattern.compile(tmpPattern));
+        }
 
         /** Error Page Cache **/
 
@@ -937,7 +952,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         pw.printf("Enabled: %s", this.enabled).println();
         pw.printf("System Error Page Path: %s", this.systemErrorPagePath).println();
         pw.printf("Error Page Extension: %s", this.errorPageExtension).println();
-        pw.printf("Fallback Error Page Name: %s", this.fallbackErrorName).println();
+        pw.printf("Fallback Error Page Name: %s", fallbackErrorName).println();
+        pw.printf("Excluded URI Patterns: %s", Arrays.toString(excludedUriPatterns.toArray())).println();
 
         pw.printf("Resource Not Found - Behavior: %s", this.notFoundBehavior).println();
         pw.printf("Resource Not Found - Exclusion Path Patterns %s", Arrays.toString(tmpNotFoundExclusionPatterns)).println();
@@ -1006,7 +1022,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 try {
                     dispatcher.include(new GetRequest(request), response);
                 } catch (Exception e) {
-                    log.debug("Exception swallowed while including error page", e);
+                    log.error("Exception swallowed while including error page", e);
                 }
             }
         } else {
@@ -1014,7 +1030,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             try {
                 response.getWriter().write(responseData);
             } catch (Exception e) {
-                log.info("Exception swallowed while including error page", e);
+                log.error("Exception swallowed while including error page", e);
             }
         }
     }
@@ -1035,8 +1051,24 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     @Override
-    public boolean isVanityDispatchCheckEnabled(){
+    public boolean isVanityDispatchCheckEnabled() {
         return this.vanityDispatchCheckEnabled;
     }
 
+    @Override
+    public boolean shouldRequestUseErrorPageHandler(SlingHttpServletRequest request) {
+        if (CollectionUtils.isEmpty(this.excludedUriPatterns)) {
+            return true;
+        }
+
+        String requestURI = request.getRequestURI();
+
+        for (Pattern excludedPattern : this.excludedUriPatterns) {
+            if (excludedPattern.matcher(requestURI).matches()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

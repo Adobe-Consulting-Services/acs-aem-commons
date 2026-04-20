@@ -1,0 +1,254 @@
+/*-
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2022 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.contentsync;
+
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+
+/**
+ * HTTP connection to a remote AEM instance + some sugar methods to fetch data
+ */
+public class RemoteInstance implements Closeable {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+    private final CloseableHttpClient httpClient;
+    private final SyncHostConfiguration hostConfiguration;
+
+    @Deprecated
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
+        throw new RuntimeException("@Deprecated");
+    }
+
+    @Deprecated
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        throw new RuntimeException("@Deprecated");
+    }
+
+    public RemoteInstance(HttpClientBuilderFactory builderFactory, SyncHostConfiguration hostConfiguration, GeneralSettingsModel generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        this.hostConfiguration = hostConfiguration;
+        this.httpClient = createHttpClient(builderFactory.newBuilder(), hostConfiguration, generalSettings,  integrationService);
+    }
+
+    private CloseableHttpClient createHttpClient(HttpClientBuilder builder, SyncHostConfiguration hostConfiguration, GeneralSettingsModel generalSettings, IntegrationService integrationService)
+            throws GeneralSecurityException {
+        setAuthentication(hostConfiguration, builder, integrationService);
+        int soTimeout = generalSettings.getSocketTimeout();
+        int connTimeout = generalSettings.getConnectTimeout();
+        boolean disableCertCheck = generalSettings.isDisableCertCheck();
+        RequestConfig.Builder requestConfig = RequestConfig
+                .custom()
+                .setConnectTimeout(connTimeout)
+                .setSocketTimeout(soTimeout)
+                .setCookieSpec(CookieSpecs.STANDARD);
+        String proxyHost = System.getenv("AEM_PROXY_HOST");
+        if (proxyHost != null) {
+            int proxyPort = Integer.parseInt(System.getenv().getOrDefault("AEM_HTTPS_PROXY_PORT", "3128"));
+            log.debug("AEM_PROXY_HOST: {}, AEM_HTTPS_PROXY_PORT: {}", proxyHost, proxyPort);
+            requestConfig.setProxy(new HttpHost(proxyHost, proxyPort));
+        }
+        builder.setDefaultRequestConfig(requestConfig.build());
+        if (disableCertCheck) {
+            // Disable hostname verification and allow self-signed certificates
+            SSLContextBuilder sslbuilder = new SSLContextBuilder();
+            sslbuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                    sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
+            builder.setSSLSocketFactory(sslsf);
+        }
+        return builder.build();
+    }
+
+    void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, IntegrationService integrationService){
+        if (hostConfiguration.isOAuthEnabled()) {
+            // If OAuth is enabled, use the AccessTokenProvider to get the token
+            try {
+                // the lifetime of Adobe's tokens is 24 hours, enough to request once and re-use across all the calls
+                String accessToken = integrationService.getAccessToken();
+                builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    request.addHeader("Authorization", "Bearer " + accessToken);
+                });
+            } catch (Exception e) {
+                String msg = String.format("Failed to get an access token: %s.", e.getMessage());
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            // If username and password are set, use them for basic authentication
+            BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            provider.setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+            builder.setDefaultCredentialsProvider(provider);
+        }
+
+    }
+
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public InputStream getStream(String path) throws IOException, URISyntaxException {
+        URI uri = toURI(path);
+
+        return getStream(uri);
+    }
+
+    public InputStream getStream(URI uri ) throws IOException {
+        log.debug("getStream: {}", uri);
+        HttpGet request = new HttpGet(uri);
+        CloseableHttpResponse response = httpClient.execute(request);
+        int statusCode = response.getStatusLine().getStatusCode();
+        log.debug("getStream() statusCode: {}", response.getStatusLine().getStatusCode());
+        if (statusCode == HttpStatus.SC_OK){
+            return response.getEntity().getContent();
+        } else {
+            String textResponse = response.getEntity() == null ? "" : EntityUtils.toString(response.getEntity());
+            String msg;
+            switch (statusCode){
+                case HttpStatus.SC_MULTIPLE_CHOICES:
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
+                            "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
+                    throw new IOException(msg);
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new FileNotFoundException("Not found: " + uri);
+                default:
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + textResponse);
+                    throw new IOException(msg);
+            }
+        }
+    }
+
+    public String getString(URI uri) throws IOException {
+        log.debug("getString: {}", uri);
+        HttpGet request = new HttpGet(uri);
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            String str = EntityUtils.toString(response.getEntity());
+            log.debug("getString() statusCode: {}", response.getStatusLine().getStatusCode());
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                return str;
+            } else {
+                String msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + str);
+                throw new IOException(msg);
+            }
+        }
+    }
+
+    private String formatError(String uri, int statusCode, String message) {
+        return String.format("Failed to fetch data from %s, HTTP [%d]%n%s", uri, statusCode, message);
+    }
+
+    public String getPrimaryType(String path) throws IOException, URISyntaxException {
+        URI uri = toURI(path + "/" + JCR_PRIMARYTYPE);
+        String str = getString(uri);
+        if (str.isEmpty()) {
+            throw new IllegalStateException("It appears " + hostConfiguration.getUsername()
+                    + " user does not have permissions to read " + uri);
+        }
+        return str;
+    }
+
+    public List<String> listChildren(String path) throws IOException, URISyntaxException {
+        List<String> children;
+        log.debug("listChildren: {}", path);
+        try (InputStream is = getStream(path + ".1.json"); JsonReader reader = Json.createReader(is)) {
+            children = reader
+                    .readObject()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().getValueType() == JsonValue.ValueType.OBJECT)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+        } catch (FileNotFoundException e){
+            children = Collections.emptyList();
+        }
+        return children;
+    }
+
+    public JsonObject getJson(String path, String... parameters) throws IOException, URISyntaxException {
+        URI uri = toURI(path, parameters);
+        return getJson(uri);
+    }
+
+    public JsonObject getJson(URI uri) throws IOException {
+        try (InputStream is = getStream(uri); JsonReader reader = Json.createReader(is)) {
+            return reader.readObject();
+        }
+    }
+
+    URI toURI(String path, String ... parameters) throws URISyntaxException {
+        URIBuilder ub = new URIBuilder(hostConfiguration.getHost())
+                .setPath(path);
+        if(parameters != null) {
+            if (parameters.length % 2 != 0) {
+                throw new IllegalArgumentException("query string parameters must be an even number of name/values:" + Arrays.asList(parameters));
+            }
+            for (int i = 0; i < parameters.length; i += 2) {
+                ub.addParameter(parameters[i], parameters[i + 1]);
+            }
+        }
+        return ub.build();
+    }
+
+    @Override
+    public void close() throws IOException {
+        httpClient.close();
+    }
+
+    public SyncHostConfiguration getHostConfiguration(){
+        return hostConfiguration;
+    }
+}

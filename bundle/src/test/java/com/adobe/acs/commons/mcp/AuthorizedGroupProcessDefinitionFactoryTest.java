@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.RepositoryException;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.Group;
@@ -103,7 +99,7 @@ public class AuthorizedGroupProcessDefinitionFactoryTest {
             }
             return groupList.iterator();
         } catch (RepositoryException ex) {
-            Logger.getLogger(AuthorizedGroupProcessDefinitionFactoryTest.class.getName()).log(Level.SEVERE, null, ex);
+            // ignore it here, we are just mocking
             return null;
         }
 

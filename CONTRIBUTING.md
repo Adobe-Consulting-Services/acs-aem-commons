@@ -42,15 +42,12 @@ The best pull request are small and focused. Don't try to change the world in on
 * Add JUnit test for Java code. Our coverage ratio isn't great, but we don't want it to get worse.
 * Until explicitly enabled, features should be invisible to AEM users and excluded from any execution stack.
   * OSGi Services automatically registered as part of the stack should be annotated with `policy = ConfigurationPolicy.REQUIRE`. *Common candidates include (but not limited to): Filters, Scheduled Services, Event Listeners and Authentication handlers.*
-  * Ex. Until a OSGi Configuration is added for the feature "Component Error Handler", this Sling Filter will remain inactive making it impossible to effect Request processing.
+    * Example: until an OSGi Configuration is added for the feature "Component Error Handler", this Sling Filter will remain inactive making it impossible to affect request processing.
+  * Client libraries should not contribute to a category which gets automatically loaded by AEM but should require an explicit reference. Further details in [Wrapper Client Libraries](https://adobe-consulting-services.github.io/acs-aem-commons/pages/releases/4-0-0.html#breaking-functional-changes)
 
 ## Version Compatibility
 
-The _master_ branch of ACS AEM Commons (4.x) is expected to be installable on AEM 6.3 and AEM 6.4. This means that all *required* OSGi dependencies must be available on 6.3. It is acceptable for some features to require AEM 6.4, but contributors are strongly encouraged to be thoughtful about requiring 6.4.
-
-The _compat/6.2_ branch of ACS AEM Commons (3.x) is expected to be installable on AEM 6.2.
-
-The _compat/6.0_ branch (2.x) is expected to be installable on AEM 6.0 and AEM 6.1.
+The _master_ branch of ACS AEM Commons is expected to be installable on AEM 6.4 or newer. This means that all *required* OSGi dependencies must be available on 6.4, 6.5 and AEM as a Cloud Service. For further details refer to [Compatibility](https://adobe-consulting-services.github.io/acs-aem-commons/pages/compatibility.html).
 
 ## Participating in Code Reviews
 

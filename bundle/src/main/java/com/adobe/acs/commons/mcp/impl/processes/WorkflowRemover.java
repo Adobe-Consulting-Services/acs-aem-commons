@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.mcp.form.NumberfieldComponent;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalConfig;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -44,7 +45,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.DatePickerComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.MultifieldComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
 
@@ -59,7 +60,7 @@ public class WorkflowRemover extends ProcessDefinition {
 
     private final WorkflowInstanceRemover workflowInstanceRemover;
 
-    private final transient GenericReport report = new GenericReport();
+    private final transient GenericBlobReport report = new GenericBlobReport();
     private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     @FormField(name = "Workflow Payload Paths", description = "Payload path regex", hint = "/content/dam/.*",
@@ -69,6 +70,10 @@ public class WorkflowRemover extends ProcessDefinition {
     @FormField(name = "Workflows Older Than", description = "only remove workflows older than the specified date",
             component = DatePickerComponent.class)
     public String olderThanVal;
+
+    @FormField(name = "Workflows Older Than Milliseconds", description = "only remove workflows that were started longer than the specified milliseconds ago",
+            component = NumberfieldComponent.class)
+    public long olderThanMillis;
 
     @FormField(
             name = "Workflow Models",
@@ -84,6 +89,8 @@ public class WorkflowRemover extends ProcessDefinition {
             options = { MultifieldComponent.USE_CLASS
                     + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowStatusSelector" })
     public List<String> statuses = new ArrayList<>();
+
+    private WorkflowRemovalConfig workflowRemovalConfig;
 
     public WorkflowRemover(WorkflowInstanceRemover workflowInstanceRemover) {
         super();
@@ -125,8 +132,7 @@ public class WorkflowRemover extends ProcessDefinition {
 
             parseParameters();
 
-            workflowInstanceRemover.removeWorkflowInstances(rr, modelIds, statuses, payloads, olderThan, BATCH_SIZE,
-                    MAX_DURATION_MINS);
+            workflowInstanceRemover.removeWorkflowInstances(rr, workflowRemovalConfig);
 
             WorkflowRemovalStatus status = workflowInstanceRemover.getStatus();
             EnumMap<ReportColumns, Object> reportRow = report(status);
@@ -173,22 +179,34 @@ public class WorkflowRemover extends ProcessDefinition {
             olderThan = Calendar.getInstance();
             olderThan.setTime(d);
         }
+
+        workflowRemovalConfig = new WorkflowRemovalConfig(modelIds, statuses, payloads, olderThan, olderThanMillis);
+        workflowRemovalConfig.setBatchSize(BATCH_SIZE);
+        workflowRemovalConfig.setMaxDurationInMins(MAX_DURATION_MINS);
     }
 
     public List<String> getModelIds() {
-        return modelIds;
+        return Collections.unmodifiableList(modelIds);
     }
 
     public List<Pattern> getPayloads() {
-        return payloads;
+        return Collections.unmodifiableList(payloads);
     }
 
     public Calendar getOlderThan() {
         return olderThan;
     }
 
+    public long getOlderThanMillis() {
+        return olderThanMillis;
+    }
+
     public List<String> getStatuses() {
-        return statuses;
+        return Collections.unmodifiableList(statuses);
+    }
+
+    public WorkflowRemovalConfig getWorkflowRemovalConfig() {
+        return workflowRemovalConfig;
     }
 
     public enum ReportColumns {

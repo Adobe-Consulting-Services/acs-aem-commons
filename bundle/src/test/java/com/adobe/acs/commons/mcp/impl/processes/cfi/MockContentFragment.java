@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.cfi;
 
@@ -28,13 +26,20 @@ import com.adobe.cq.dam.cfm.VariationDef;
 import com.adobe.cq.dam.cfm.VariationTemplate;
 import com.adobe.cq.dam.cfm.VersionDef;
 import com.adobe.cq.dam.cfm.VersionedContent;
+import com.day.cq.tagging.Tag;
+
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Incomplete mock that provides just enough for basic testing
@@ -46,6 +51,14 @@ public class MockContentFragment implements ContentFragment {
     String path;
     HashMap<String, String> elements = new HashMap<>();
     HashMap<String, Object> metadata = new HashMap<>();
+    FragmentTemplate template;
+
+    public MockContentFragment(){
+        template = mock(FragmentTemplate.class);
+        ElementTemplate elementTemplate = mock(ElementTemplate.class);
+        doReturn("text/html").when(elementTemplate).getInitialContentType();
+        doReturn(elementTemplate).when(template).getForElement(any(ContentElement.class));
+    }
 
     @Override
     public Iterator<ContentElement> getElements() {
@@ -113,7 +126,7 @@ public class MockContentFragment implements ContentFragment {
 
     @Override
     public FragmentTemplate getTemplate() {
-        return null;
+        return template;
     }
 
     @Override
@@ -149,10 +162,42 @@ public class MockContentFragment implements ContentFragment {
         return null;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
+    public <AdapterType> AdapterType adaptTo(@NotNull Class<AdapterType> aClass) {
         return null;
     }
-    
+
+    @Override
+    public void removeVariation(String name) throws ContentFragmentException {
+    }
+
+    @NotNull
+    @Override
+    public Calendar getLastModifiedDeep() throws ContentFragmentException {
+        return Calendar.getInstance();
+    }
+
+    @Override
+    public @Nullable Calendar getLastModifiedDate() {
+        return Calendar.getInstance();
+    }
+
+    @Override
+    public @NotNull Tag[] getTags() throws ContentFragmentException {
+        return new Tag[0];
+    }
+
+    @Override
+    public @NotNull Tag[] getVariationTags(@NotNull String arg0) throws ContentFragmentException {
+        return new Tag[0];
+    }
+
+    @Override
+    public void setTags(@NotNull Tag[] arg0) throws ContentFragmentException {
+    }
+
+    @Override
+    public void setVariationTags(@NotNull Tag[] arg0, @NotNull String arg1) throws ContentFragmentException {
+    }
 }

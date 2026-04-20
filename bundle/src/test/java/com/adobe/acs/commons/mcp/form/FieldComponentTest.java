@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent.ClientLibraryType;
+import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -99,7 +99,28 @@ public class FieldComponentTest {
         assertEquals("/apps/some/path", resourceCaptor.getValue().getPath());
     }
 
-    public class TestFieldComponent extends FieldComponent {
+    public static final String TEST_VALUE_1 = "Madness?  This is sparta!";
+
+    @Test
+    public void testDefaultFormValuesMatchCodeDefaults() {
+        Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(AnnotationTestClass.class, null);
+        assertEquals("Should have default string value", TEST_VALUE_1, form.get("test1").getProperties().get("value"));
+        assertEquals("1st Checkbox should be checked", "true", form.get("isChecked").getProperties().get("checked"));
+        assertEquals("2nd Checkbox not should be checked", null, form.get("isNotChecked").getProperties().get("checked"));
+    }
+
+    public static class AnnotationTestClass {
+        @FormField(name="field 1")
+        String test1=TEST_VALUE_1;
+
+        @FormField(name="Checkbox", component = CheckboxComponent.class)
+        boolean isChecked = true;
+
+        @FormField(name="Checkbox", component = CheckboxComponent.class)
+        boolean isNotChecked;
+    }
+
+    public static class TestFieldComponent extends FieldComponent {
         public TestFieldComponent(String[] options) {
             FormField field = new FormField() {
                 @Override
@@ -155,6 +176,20 @@ public class FieldComponentTest {
                 @Override
                 public String[] options() {
                     return options;
+                }
+
+                public boolean showOnCreate() {
+                    return true;
+                }
+
+                @Override
+                public boolean localize() {
+                    return false;
+                }
+
+                @Override
+                public String[] languages() {
+                    return null;
                 }
             };
             setup("test", null, field, null);

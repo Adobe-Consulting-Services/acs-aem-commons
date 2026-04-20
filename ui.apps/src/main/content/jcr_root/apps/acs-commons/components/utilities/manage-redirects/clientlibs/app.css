@@ -1,0 +1,49 @@
+
+
+.acs-tooltip {
+    margin-left: 160px !important;
+}
+
+.code-java {
+    font-size:11px;
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace
+}
+
+.active {
+    color: #82c387;
+}
+
+.expired {
+    color: #dcdcdc;
+}
+
+.pending {
+    color: #f5b95a;
+}
+
+.invalid {
+    color: #fa7369;
+}
+
+.dlg-import-cell {
+    padding: 4px 8px;
+    height: 36px;
+}
+
+#swap {
+    display: none;
+}
+
+#edit-redirect-coral-table {
+    min-height: calc(100vh - 350px);
+}
+
+#edit-redirect-coral-table tbody {
+    height: 100%;
+    overflow-y: scroll;
+}
+
+#table-footer {
+    margin: 1rem;
+}

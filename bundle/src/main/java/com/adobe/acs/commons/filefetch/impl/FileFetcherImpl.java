@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.filefetch.impl;
 
@@ -50,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
 import com.adobe.acs.commons.filefetch.FileFetcher;
-
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.Rendition;
@@ -72,6 +70,10 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
   private static final String SERVICE_USER_NAME = "file-fetch";
 
   protected FileFetchConfiguration config;
+  
+  // Disable this feature on AEM as a Cloud Service
+  @Reference(target="(distribution=classic)")
+  RequireAem requireAem;
 
   @Reference
   private ResourceResolverFactory factory;
@@ -87,8 +89,8 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
   @Activate
   public void activate(FileFetchConfiguration config) {
-    log.info("Activing with configuration: {}", config);
     this.config = config;
+    log.info("Activating FileFetcher with configuration {}", getConfigurationAsString());
     run();
   }
 
@@ -205,7 +207,6 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
           log.info("Replicating fetched file {}", path);
           replicator.replicate(resolver.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
         } else {
-          log.warn("Received invalid status code: {}", responseCode);
           throw new IOException("Received invalid status code: " + responseCode);
         }
       } finally {
@@ -220,6 +221,21 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
       log.error("Failed to get service user", e);
     }
 
+  }
+  
+  // Unfortunately annotations cannot have default methods, so we have to implement
+  // it here.
+  private String getConfigurationAsString() {
+    return String.format("FileFetcherConfiguration[remoteURL=%s, damPath=%s, mimeType=%s, headers=%s, cron expression=[%s],"
+        + " valid response codes=%s, connection timeout=%s]", 
+        config.remoteUrl(),
+        config.damPath(),
+        config.mimeType(),
+        Arrays.toString(config.headers()),
+        config.scheduler_expression(),
+        Arrays.toString(config.validResponseCodes()),
+        config.timeout()
+        );
   }
 
 }

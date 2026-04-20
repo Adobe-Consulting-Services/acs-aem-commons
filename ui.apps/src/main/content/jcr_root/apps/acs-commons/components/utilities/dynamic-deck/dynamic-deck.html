@@ -1,0 +1,85 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE html>
+<head>
+    <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'dynamic-deck-dynamo.base']}"
+     data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+
+<coral-shell-header aria-hidden="false" aria-label="Header Bar"
+                    class="coral--dark granite-shell-header coral3-Shell-header"
+                    role="region">
+    <coral-shell-header-home aria-level="2" class="globalnav-toggle" data-globalnav-toggle-href="/" role="heading">
+        <a class="coral3-Shell-homeAnchor" href="/"
+           icon="adobeExperienceManagerColor" is="coral-shell-homeanchor"
+           style="display: inline-block; padding-right: 0;">
+            <coral-icon
+                    aria-label="adobe experience manager color"
+                    class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--adobeExperienceManagerColor coral3-Icon--sizeM"
+                    icon="adobeExperienceManagerColor" role="img"
+                    size="M"></coral-icon>
+            <coral-shell-homeanchor-label>Adobe Experience Manager
+            </coral-shell-homeanchor-label>
+        </a>
+        <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${properties.jcr:title} </span>
+    </coral-shell-header-home>
+</coral-shell-header>
+
+
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-header">
+        <betty-titlebar>
+            <betty-titlebar-title>
+                <span aria-level="1" class="granite-title" role="heading">${properties.jcr:title}</span>
+            </betty-titlebar-title>
+            <betty-titlebar-primary></betty-titlebar-primary>
+            <betty-titlebar-secondary>
+                <i class="coral-Icon coral-Icon--infoCircle docs-ThemeSwitcher-icon" data-init="quicktip"
+                   data-quicktip-arrow="right" data-quicktip-type="info"
+                   data-quicktip-content="Make sure ACS commons UI.Content package is installed to get query list page">
+                </i>
+                <a href="/mnt/overlay/acs-commons/components/utilities/genericlist.html?item=/etc/acs-commons/lists/dynamic-deck-query-list"
+                   is="coral-anchorbutton" variant="info" icon="rail" iconsize="S">
+                    Query List
+                </a>
+            </betty-titlebar-secondary>
+        </betty-titlebar>
+    </div>
+    <div class="content-container-inner" style="width:60%; margin:0 auto;">
+
+        <sly data-sly-use.properties="com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DynamicDeckInitiatorPageModel">
+            <sly data-sly-resource="${properties.formResource}"/>
+        </sly>
+
+        <coral-actionbar-item class="coral3-ActionBar-item">
+            <button class="coral3-Button coral3-Button--primary create-deck-initiator" icon="checkCircle" iconsize="S"
+                    is="coral-button"
+                    size="M" variant="primary">
+                <coral-icon alt="" class="coral3-Icon coral3-Icon--sizeS coral3-Icon--checkCircle" icon="automate"
+                            size="S"></coral-icon>
+                <coral-button-label>
+                    Initiate Deck Creation
+                </coral-button-label>
+            </button>
+        </coral-actionbar-item>
+    </div>
+</div>
+</body>

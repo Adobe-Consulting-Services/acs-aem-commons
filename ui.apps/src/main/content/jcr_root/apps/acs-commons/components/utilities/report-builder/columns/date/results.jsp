@@ -20,13 +20,17 @@
 <%@include file="/libs/foundation/global.jsp" %>
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
 <sling2:getResource path="${result.path}" var="resultRsrc" />
-<td is="coral-table-cell" value="${result.valueMap[properties.property].time.time}">        
+
+<%-- Sets the property variable that trims leading property slashes --%>
+<%@include file="../property.jsp" %>
+
+<td is="coral-table-cell" value="${result.valueMap[property].time.time}">
 	<c:choose>
 		<c:when test="${not empty properties.format}">
-			<fmt:formatDate value="${result.valueMap[properties.property].time}" pattern="${properties.format}" />
+			<fmt:formatDate value="${result.valueMap[property].time}" pattern="${properties.format}" />
 		</c:when>
 		<c:otherwise>
-			<fmt:formatDate value="${result.valueMap[properties.property].time}" dateStyle="medium" timeStyle="medium" />
+			<fmt:formatDate value="${result.valueMap[property].time}" dateStyle="medium" timeStyle="medium" />
 		</c:otherwise>
 	</c:choose>
 </td>

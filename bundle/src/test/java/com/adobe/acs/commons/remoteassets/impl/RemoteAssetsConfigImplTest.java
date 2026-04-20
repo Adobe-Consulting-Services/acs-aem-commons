@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+import com.adobe.acs.commons.util.RequireAem.Distribution;
+
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
@@ -27,11 +28,22 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import javax.jcr.AccessDeniedException;
+import javax.jcr.InvalidItemStateException;
+import javax.jcr.ItemExistsException;
+import javax.jcr.ReferentialIntegrityException;
+import javax.jcr.RepositoryException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
 
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
 import static org.junit.Assert.assertEquals;
@@ -42,11 +54,22 @@ import static org.junit.Assert.fail;
 public class RemoteAssetsConfigImplTest {
 
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     @Before
-    public final void setup() {
+    public final void setup() throws RepositoryException {
         setupRemoteAssetsServiceUser(context);
+        
+        // does not work with a Mock here
+        RequireAem requireAem = new RequireAem() {
+          
+          @Override
+          public Distribution getDistribution() {
+            return null;
+          }
+        };
+        context.registerService(RequireAem.class, requireAem, "distribution","classic");
+        LogTester.reset();
     }
 
     @Test
@@ -127,7 +150,8 @@ public class RemoteAssetsConfigImplTest {
 
         ResourceResolver resourceResolver = config.getResourceResolver();
         assertNotNull(resourceResolver);
-        assertEquals("acs-commons-remote-assets-service", resourceResolver.getUserID());
+        // the following does not work due to https://issues.apache.org/jira/browse/SLING-10995
+        //assertEquals("acs-commons-remote-assets-service", resourceResolver.getUserID());
     }
 
     @Test
@@ -141,8 +165,8 @@ public class RemoteAssetsConfigImplTest {
         assertEquals(TEST_SERVER_PASSWORD, config.getPassword());
         assertEquals(Arrays.asList(TEST_TAGS_PATH_A, TEST_TAGS_PATH_B), config.getTagSyncPaths());
         assertEquals(Arrays.asList(TEST_DAM_PATH_A, TEST_DAM_PATH_B), config.getDamSyncPaths());
-        assertEquals(new Integer(TEST_RETRY_DELAY), config.getRetryDelay());
-        assertEquals(new Integer(TEST_SAVE_INTERVAL), config.getSaveInterval());
+        assertEquals(Integer.valueOf(TEST_RETRY_DELAY), config.getRetryDelay());
+        assertEquals(Integer.valueOf(TEST_SAVE_INTERVAL), config.getSaveInterval());
         assertEquals(new HashSet<String>(Arrays.asList(TEST_WHITELISTED_SVC_USER_A, TEST_WHITELISTED_SVC_USER_B)), config.getWhitelistedServiceUsers());
 
         assertNotNull(config.getRemoteAssetsHttpExecutor());

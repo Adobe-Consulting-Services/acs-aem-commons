@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.data.Variant;
+import com.adobe.acs.commons.mcp.util.IntrospectionUtil;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -33,10 +33,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 /**
  * Describes a component in a manner which supports auto-generated forms
@@ -47,7 +48,7 @@ public abstract class FieldComponent {
     private FormField formField;
     private AccessibleObject accessibleObject;
     private SlingScriptHelper sling;
-    private final ResourceMetadata componentMetadata = new ResourceMetadata();
+    private final Map<String, Object> properties = new HashMap<>();
     private String resourceType = "granite/ui/components/coral/foundation/form/textfield";
     private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
     private Resource resource;
@@ -61,18 +62,26 @@ public abstract class FieldComponent {
         this.sling = sling;
         this.accessibleObject = fieldOrMethod;
         this.setCategory(field.category());
-        if (!componentMetadata.containsKey("name")) {
-            componentMetadata.put("name", name);
+        if (!properties.containsKey("name")) {
+            properties.put("name", name);
         }
-        componentMetadata.put("fieldLabel", formField.name());
+        properties.put("fieldLabel", formField.name());
         if (!StringUtils.isEmpty(formField.description())) {
-            componentMetadata.put("fieldDescription", formField.description());
+            properties.put("fieldDescription", formField.description());
         }
         if (formField.required()) {
-            componentMetadata.put("required", formField.required());
+            properties.put("required", formField.required());
         }
-        componentMetadata.put("emptyText", formField.hint());
-        getOption("default").ifPresent(val -> componentMetadata.put("value", val));
+        properties.put("emptyText", formField.hint());
+        if (formField.showOnCreate()) {
+            properties.put("cq:showOnCreate", true);
+        }
+
+        Optional<String> defaultValue = getOption("default");
+        if (!defaultValue.isPresent()) {
+            defaultValue = IntrospectionUtil.getDeclaredValue(fieldOrMethod).map(String::valueOf);
+        }
+        defaultValue.ifPresent(val -> properties.put("value", val));
         init();
     }
 
@@ -94,20 +103,6 @@ public abstract class FieldComponent {
         return path;
     }
 
-    /**
-     * Get form field if possible
-     * @return Form field if a safe cast is possible otherwise null
-     * @deprecated Use getAccessibleObject and AccessibleObjectUtils to handle both Method (getter) or Fields
-     */
-    @Deprecated
-    public final Field getField() {
-        if (accessibleObject instanceof Field) {
-            return (Field) accessibleObject;
-        } else {
-            return null;
-        }
-    }
-
     public final AccessibleObject getAccessibleObject() {
         return accessibleObject;
     }
@@ -123,7 +118,7 @@ public abstract class FieldComponent {
 
     private Resource getComponentResource() {
         if (resource == null) {
-            purgeEmptyMetadata();
+            purgeEmptyProperties();
             resource = buildComponentResource();
             if (resource instanceof AbstractResourceImpl && sling != null) {
                 ((AbstractResourceImpl) resource).setResourceResolver(sling.getRequest().getResourceResolver());
@@ -140,8 +135,8 @@ public abstract class FieldComponent {
      * @return
      */
     public Resource buildComponentResource() {
-        purgeEmptyMetadata();
-        AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, componentMetadata);
+        purgeEmptyProperties();
+        AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, properties);
         if (sling != null) {
             res.setResourceResolver(sling.getRequest().getResourceResolver());
         }
@@ -149,10 +144,10 @@ public abstract class FieldComponent {
     }
 
     /**
-     * @return the componentMetadata
+     * @return the component's properties
      */
-    public final ResourceMetadata getComponentMetadata() {
-        return componentMetadata;
+    public final Map<String, Object> getProperties() {
+        return properties;
     }
 
     public final Map<ClientLibraryType, Set<String>> getClientLibraryCategories() {
@@ -209,14 +204,14 @@ public abstract class FieldComponent {
         this.resourceSuperType = resourceSuperType;
     }
 
-    public final void purgeEmptyMetadata() {
+    public final void purgeEmptyProperties() {
         Set<String> emptyKeys = new HashSet<>();
-        componentMetadata.forEach((key, value) -> {
+        properties.forEach((key, value) -> {
             if (value == null || "".equals(value)) {
                 emptyKeys.add(key);
             }
         });
-        componentMetadata.keySet().removeAll(emptyKeys);
+        properties.keySet().removeAll(emptyKeys);
     }
 
     /**

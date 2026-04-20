@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.impl;
 
@@ -23,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -56,7 +55,7 @@ public class PageRootProviderConfig {
 
     @Property(
             label = "Root page path pattern",
-            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
+            description = "Regex(es) used to select the root page root path. Regex must contain at least one group (with index 1) which is used as page root. It is matched against the given path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
             cardinality = Integer.MAX_VALUE,
             value = { DEFAULT_PAGE_ROOT_PATH })
     /* Page root property. */
@@ -72,7 +71,9 @@ public class PageRootProviderConfig {
      * @return list of page root patterns.
      */
     public List<Pattern> getPageRootPatterns() {
-        return this.pageRootPatterns;
+        return Optional.ofNullable(this.pageRootPatterns)
+                .map(Collections::unmodifiableList)
+                .orElse(null);
     }
 
     @Activate
@@ -84,7 +85,7 @@ public class PageRootProviderConfig {
             try {
                 Pattern p = Pattern.compile("^(" + regex + ")(|/.*)$");
                 patterns.add(p);
-                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
+                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p);
             } catch (Exception e) {
                 log.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
             }
@@ -97,7 +98,7 @@ public class PageRootProviderConfig {
     protected void deactivate() {
         if (this.pageRootPatterns != null) {
             for (Pattern p : this.pageRootPatterns) {
-                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
+                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p);
             }
 
             this.pageRootPatterns = null;

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
@@ -26,6 +24,7 @@ import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.Map;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Test;
 
@@ -116,15 +115,19 @@ public class SyntheticFormResourceTest {
     public void syntheticResourceTest() throws DeserializeException {
         SlingHttpServletRequest mockRequest = mock(SlingHttpServletRequest.class);
         SlingScriptHelper mockScriptHelper = mock(SlingScriptHelper.class);
+        ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
         when(mockScriptHelper.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getResourceResolver()).thenReturn(mockResourceResolver);
+        when(mockResourceResolver.getResource(anyString())).thenReturn(null);
+
         Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), mockScriptHelper);
         assertNotNull(form.get("textComponentTest"));
         Resource fieldResource = form.get("textComponentTest").buildComponentResource();
         assertEquals("granite/ui/components/coral/foundation/form/textfield", fieldResource.getResourceType());
         assertEquals("granite/ui/components/coral/foundation/form/field", fieldResource.getResourceSuperType());
-        assertEquals("textComponentTest", fieldResource.getResourceMetadata().get("name"));
-        assertEquals("Text component", fieldResource.getResourceMetadata().get("fieldLabel"));
-        assertEquals(true, fieldResource.getResourceMetadata().get("required"));
+        assertEquals("textComponentTest", fieldResource.getValueMap().get("name"));
+        assertEquals("Text component", fieldResource.getValueMap().get("fieldLabel"));
+        assertEquals(true, fieldResource.getValueMap().get("required"));
     }
 
     @Test

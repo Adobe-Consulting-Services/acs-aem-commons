@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.i18n.impl;
 
@@ -23,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -48,7 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Constants;
 
@@ -60,13 +58,18 @@ import com.day.cq.wcm.api.Page;
 public final class I18nProviderImplTest {
 
     private static final Locale LOCALE = Locale.US;
+    private static final Locale LOCALE_ALTERNATE = Locale.FRENCH;
+
     private static final String I18N_KEY = "i18nKey";
     private static final String TRANSLATED_FROM_ENGLISH = "Translated from English!";
+    private static final String TRANSLATED_FROM_FRENCH = "Bonjour!";
 
     private final I18nProviderImpl i18nProvider = spy(new I18nProviderImpl());
     private final HashMap<String, Object> resourceBundleProviderProps = new HashMap<>();
+    private final HashMap<String, Object> resourceBundleProviderPropsAlternatve = new HashMap<>();
 
     private final Map<String, String> i18nMap = new HashMap<>();
+    private final Map<String, String> i18nMapAlternate = new HashMap<>();
 
     @Mock
     private Config config;
@@ -76,6 +79,8 @@ public final class I18nProviderImplTest {
 
     @Mock
     private ResourceBundle resourceBundle;
+    @Mock
+    private ResourceBundle resourceBundleAlternate;
 
     @Mock
     private Resource resource;
@@ -95,17 +100,17 @@ public final class I18nProviderImplTest {
         resourceBundleProviderProps.put(Constants.SERVICE_RANKING, 11);
 
         when(resourceBundleProvider.getResourceBundle(LOCALE)).thenReturn(resourceBundle);
+        when(resourceBundleProvider.getResourceBundle(LOCALE_ALTERNATE)).thenReturn(resourceBundleAlternate);
+
         when(resource.getPath()).thenReturn("/some/path");
 
         i18nMap.put(I18N_KEY, TRANSLATED_FROM_ENGLISH);
-
-        final Answer<String> answer = (Answer<String>) invocationOnMock -> i18nMap.get(invocationOnMock.getArguments()[1]);
-        doAnswer(answer).when(i18nProvider).translate(anyString(), any(HttpServletRequest.class));
-        doAnswer(answer).when(i18nProvider).translate(anyString(), any(Locale.class));
+        i18nMapAlternate.put(I18N_KEY, TRANSLATED_FROM_FRENCH);
 
         doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 
         when(resourcePage.getLanguage(false)).thenReturn(LOCALE);
+        when(resourcePage.getLanguage(true)).thenReturn(LOCALE_ALTERNATE);
 
         when(config.getTtl()).thenReturn(10L);
         when(config.maxSizeCount()).thenReturn(10L);
@@ -136,15 +141,20 @@ public final class I18nProviderImplTest {
     @Test
     public void test_translate_resource() {
         final I18n mocked = mock(I18n.class);
+        final I18n mockedAlternate = mock(I18n.class);
         when(mocked.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_ENGLISH);
+        when(mockedAlternate.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_FRENCH);
+
         doReturn(mocked).when(i18nProvider).i18n(resourceBundle);
+        doReturn(mockedAlternate).when(i18nProvider).i18n(resourceBundleAlternate);
 
         doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 
-        when(resourceBundleProvider.getResourceBundle(LOCALE)).thenReturn(resourceBundle);
-
         final String translated = i18nProvider.translate(I18N_KEY, resource);
         assertEquals(TRANSLATED_FROM_ENGLISH, translated);
+
+        final String translatedAlternate = i18nProvider.translate(I18N_KEY, resource, true);
+        assertEquals(TRANSLATED_FROM_FRENCH, translatedAlternate);
     }
 
     @Test
@@ -183,7 +193,6 @@ public final class I18nProviderImplTest {
 
     @Test
     public void test_translate_resource_null()  {
-        doReturn(null).when(i18nProvider).i18n(resource);
         assertNull(i18nProvider.translate(null, resource));
     }
 

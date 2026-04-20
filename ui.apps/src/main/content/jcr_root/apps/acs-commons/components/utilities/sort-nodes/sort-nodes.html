@@ -1,0 +1,165 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE html>
+<head>
+    <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'acs-commons.sort-nodes']}"
+     data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+
+<coral-shell-header aria-hidden="false" aria-label="Header Bar"
+                    class="coral--dark granite-shell-header coral3-Shell-header"
+                    role="region">
+    <coral-shell-header-home aria-level="2" class="globalnav-toggle" data-globalnav-toggle-href="/" role="heading">
+        <a class="coral3-Shell-homeAnchor" href="/"
+           icon="adobeExperienceManagerColor" is="coral-shell-homeanchor"
+           style="display: inline-block; padding-right: 0;">
+            <coral-icon
+                    aria-label="adobe experience manager color"
+                    class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--adobeExperienceManagerColor coral3-Icon--sizeM"
+                    icon="adobeExperienceManagerColor" role="img"
+                    size="M"></coral-icon>
+            <coral-shell-homeanchor-label>Adobe Experience Manager
+            </coral-shell-homeanchor-label>
+        </a>
+        <span style="line-height: 2.375rem;"> / ACS AEM Commons / ${properties.jcr:title} </span>
+    </coral-shell-header-home>
+</coral-shell-header>
+
+
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-header">
+        <betty-titlebar>
+            <betty-titlebar-title>
+                <span aria-level="1" class="granite-title" role="heading">${properties.jcr:title}</span>
+            </betty-titlebar-title>
+            <betty-titlebar-primary></betty-titlebar-primary>
+            <betty-titlebar-secondary>
+            </betty-titlebar-secondary>
+        </betty-titlebar>
+    </div>
+    <div class="content-container-inner" style="width:60%; margin:0 auto;">
+
+        <p>
+            The path selected below must be of an orderable node type.
+        </p>
+
+        <ul>
+            <li>AEM pages are sortable.</li>
+            <li>AEM Asset folders must be set as orderable. Existing folders can be switched to orderable via its
+                Folder Properties.
+            </li>
+        </ul>
+
+        <form id="sort-nodes-form" action="" enctype="multipart/form-data" method="post" novalidate=""
+              class="coral-Form coral-Form--vertical foundation-layout-util-vmargin foundation-form"
+              data-foundation-form-ajax="true" data-foundation-form-loadingmask="true">
+            <input type="hidden" name=":http-equiv-accept" value="application/json"/>
+            <input type="hidden" name=":operation" value="acs-commons:sortNodes"/>
+            <section class="coral-Form-fieldset">
+                <div class="coral-Form-fieldwrapper">
+                    <label class="coral-Form-fieldlabel">Path *</label>
+
+                    <span class="coral-PathBrowser coral-Form-field"
+                          style="width: 100%"
+                          data-init="pathbrowser" data-root-path="/"
+                          data-option-loader="granite.ui.pathBrowser.pages.hierarchyNotFile"
+                          data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/content?predicate=hierarchyNotFile"
+                          data-picker-title="Select Source Path"
+                          data-delay="30000"
+                          data-picker-multiselect="false" data-root-path-valid-selection="false">
+                     <span
+                             class="coral-InputGroup coral-InputGroup--block">
+                        <input
+                                class="coral-InputGroup-input js-coral-pathbrowser-input coral-Textfield source"
+                                style="width: 100%"
+                                is="coral-textfield" placeholder="Select/Enter source path"
+                                name="./destinationPath" value="" aria-invalid="false"
+                                aria-haspopup="true" aria-expanded="false" aria-owns="coral-26"
+                                required placeholder="/content/someFolder">
+                        <span class="coral-InputGroup-button">
+                           <button
+                                   class="js-coral-pathbrowser-button coral-Button coral-Button--secondary"
+                                   style="height: 100%"
+                                   type="button" title="Browse" is="coral-button"
+                                   icon="folderSearch" iconsize="S" size="M" variant="secondary">
+                               <style>
+                                   .coral-Icon svg { display: none; }
+                               </style>
+
+                              <coral-icon
+                                      class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"
+                                      icon="folderSearch" size="S" role="img"
+                                      aria-label="folder search"></coral-icon>
+                           </button>
+                        </span>
+                     </span>
+                  </span>
+
+                </div>
+                <div class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline"
+                     data-sly-use.defs="com.adobe.acs.commons.sorter.Sorters">
+                    <label class="coral-Form-fieldlabel">Sorter</label>
+                    <coral-select class="coral-Form-field" id="sorterDefinitionSelector" name=":sorterName"
+                                  data-sly-list="${defs.availableSorters}">
+                        <coral-select-item value="${item.name}">${item.label}</coral-select-item>
+                    </coral-select>
+                </div>
+                <div class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                    <coral-checkbox data-allowBulkEdit="true" name="./:caseSensitive" value="true"
+                                    class="coral-Form-field">
+                        <coral-checkbox-label>Case Sensitive</coral-checkbox-label>
+                    </coral-checkbox>
+                </div>
+                <div class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                    <coral-checkbox data-allowBulkEdit="true" name="./:respectNumbers" value="true"
+                                    class="coral-Form-field">
+                        <coral-checkbox-label>Numbers First</coral-checkbox-label>
+                    </coral-checkbox>
+                    <coral-icon class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS"
+                                icon="infoCircle" size="S" id="file-info" role="img"
+                                style="width: 20px; height: 20px; margin-top: 6px;"
+                                aria-label="info circle"></coral-icon>
+                    <coral-tooltip variant="info" placement="right" target="#file-info"
+                                   class="coral3-Tooltip coral3-Tooltip--info" aria-hidden="true" tabindex="-1"
+                                   role="tooltip" style="display: none;">
+                        <coral-tooltip-content>
+                            Sort numbers first followed by alphabetical values.
+                        </coral-tooltip-content>
+                    </coral-tooltip>
+                </div>
+
+            </section>
+
+            <coral-actionbar-item class="coral3-ActionBar-item">
+                <button class="coral3-Button coral3-Button--primary sort-nodes-button" icon="checkCircle" iconsize="S"
+                        is="coral-button"
+                        size="M" variant="primary">
+                    <coral-icon alt="" class="coral3-Icon coral3-Icon--sizeS coral3-Icon--checkCircle" icon="reorder"
+                                size="S"></coral-icon>
+                    <coral-button-label>
+                        Sort Nodes
+                    </coral-button-label>
+                </button>
+            </coral-actionbar-item>
+        </form>
+    </div>
+</div>
+</body>

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.twitter.impl;
 
@@ -31,10 +29,12 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.testing.osgi.MockBundleContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.osgi.framework.BundleContext;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -48,8 +48,10 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class TwitterAdapterFactoryTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     public static final String VALID_OAUTH_CLIENT_ID = "abcd";
     public static final String VALID_OAUTH_SECRET = "efgh";
@@ -211,11 +213,11 @@ public class TwitterAdapterFactoryTest {
         validOAuthConfig.put("oauth.client.secret", VALID_OAUTH_SECRET);
         this.validOauthValueMap = new ValueMapDecorator(validOAuthConfig);
 
-        when(bundleContext.registerService(eq(AdapterFactory.class), any(AdapterFactory.class), any())).thenAnswer(i -> {
+        lenient().when(bundleContext.registerService(eq(AdapterFactory.class), any(AdapterFactory.class), any())).thenAnswer(i -> {
             if (registeredFactory != null) {
                 throw new IllegalArgumentException("TwitterAdapterFactory already registered");
             }
-            registeredFactory = i.getArgumentAt(1, TwitterAdapterFactory.class);
+            registeredFactory = i.getArgument(1);
             return null;
         });
     }

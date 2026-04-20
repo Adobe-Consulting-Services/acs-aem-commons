@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */package com.adobe.acs.commons.version.impl;
 
 import java.util.Map;
@@ -49,8 +47,6 @@ public class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     protected static final String PROPERTY_IGNORES = "properties.ignore";
     protected static final String RESOURCE_IGNORES = "resources.ignore";
-    private String[] propertyIgnores;
-    private String[] resourceIgnores;
 
     private EvolutionConfig evolutionConfig;
 
@@ -61,8 +57,8 @@ public class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     @Activate
     protected void activate(final Map<String, String> config) {
-        propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[] { "" });
-        resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[] { "" });
+        String[] propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[]{""});
+        String[] resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[]{""});
         evolutionConfig = new EvolutionConfig(propertyIgnores, resourceIgnores);
         log.debug("Ignored properties: {}", (Object[]) propertyIgnores);
         log.debug("Ignored resources: {}", (Object[]) resourceIgnores);

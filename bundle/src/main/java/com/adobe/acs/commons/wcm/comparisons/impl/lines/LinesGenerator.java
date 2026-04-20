@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
@@ -35,7 +33,7 @@ import java.util.List;
  * B  |  B
  * C  |  C
  * -  |  E
- * IDs are created with Function<T, Serializable>
+ * IDs are created with Function&lt;T, Serializable&gt;
  *
  * @param <T>
  */
@@ -47,10 +45,8 @@ public class LinesGenerator<T> {
     private Stepper<T> right;
 
     private T leftValue;
-    private int leftSpacer;
 
     private T rightValue;
-    private int rightSpacer;
 
     public LinesGenerator(Function<T, Serializable> toId) {
         this.toId = toId;
@@ -66,24 +62,23 @@ public class LinesGenerator<T> {
         this.rightValue = this.right.next();
 
         do {
-            this.leftSpacer = this.right.positionOfIdAfterCurrent(leftValue);
-            this.rightSpacer = this.left.positionOfIdAfterCurrent(rightValue);
+            int leftSpacer = this.right.positionOfIdAfterCurrent(leftValue);
+            int rightSpacer = this.left.positionOfIdAfterCurrent(rightValue);
 
             if (leftValue != null && rightValue != null && toId.apply(leftValue).equals(toId.apply(rightValue))) {
                 addPair(lines);
 
             } else if (leftSpacer < rightSpacer && leftSpacer > 0) {
-                addWithLeftSpacers(lines);
+                addWithLeftSpacers(lines, leftSpacer);
 
             } else if (rightSpacer > 0) {
-                addWithRightSpacers(lines);
+                addWithRightSpacers(lines, rightSpacer);
 
             } else if (leftSpacer > 0) {
-                addWithLeftSpacers(lines);
+                addWithLeftSpacers(lines, leftSpacer);
 
             } else {
                 addSeperated(lines);
-
             }
         } while (leftValue != null || rightValue != null);
 
@@ -101,14 +96,14 @@ public class LinesGenerator<T> {
         }
     }
 
-    private void addWithLeftSpacers(List<Line<T>> lines) {
+    private void addWithLeftSpacers(List<Line<T>> lines, int leftSpacer) {
         for (int i = 0; i < leftSpacer; i++) {
             lines.add(LineImpl.right(rightValue));
             rightValue = this.right.next();
         }
     }
 
-    private void addWithRightSpacers(List<Line<T>> lines) {
+    private void addWithRightSpacers(List<Line<T>> lines, int rightSpacer) {
         for (int i = 0; i < rightSpacer; i++) {
             lines.add(LineImpl.left(leftValue));
             leftValue = this.left.next();
@@ -120,6 +115,4 @@ public class LinesGenerator<T> {
         this.leftValue = this.left.next();
         this.rightValue = this.right.next();
     }
-
-
 }

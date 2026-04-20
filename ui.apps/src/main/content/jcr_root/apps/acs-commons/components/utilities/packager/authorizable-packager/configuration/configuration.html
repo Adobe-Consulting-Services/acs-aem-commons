@@ -1,0 +1,39 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h3>Package definition</h3>
+<ul>
+    <li>Package name: ${properties.packageName || 'authorizables' }</li>
+    <li>Package group: ${properties.packageGroupName || 'Authorizables' }</li>
+    <li>Package version: ${properties.packageVersion}</li>
+    <li>Package description: ${properties.packageDescription}</li>
+    <li>Package ACL handling: ${properties.packageACLHandling}</li>
+    <li>Conflict resolution: ${properties.conflictResolution }</li>
+    <li>Include packager page: ${properties.includeConfiguration}</li>
+</ul>
+
+<h3>Authorizable Ids</h3>
+<ul data-sly-test="${!properties.authorizableIds}">
+    <li class="not-set">None</li>
+</ul>
+<ul data-sly-test="${properties.authorizableIds}"
+    data-sly-list="${properties.authorizableIds}">
+    <li>${item}</li>
+</ul>
+
+

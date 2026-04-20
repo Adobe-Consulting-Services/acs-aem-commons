@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.cfi;
 
@@ -35,22 +33,20 @@ import com.adobe.cq.dam.cfm.ContentFragmentException;
 import com.adobe.cq.dam.cfm.FragmentTemplate;
 import com.day.cq.commons.jcr.JcrConstants;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -308,12 +304,17 @@ public class ContentFragmentImport extends ProcessDefinition {
     private void setContentElements(ContentFragment cf, Map<String, CompositeVariant> row) throws ContentFragmentException {
         for (Iterator<ContentElement> i = cf.getElements(); i.hasNext();) {
             ContentElement contentElement = i.next();
-            String elementName = contentElement.getName();
-            String value = getString(row, elementName);
+            String value = getString(row, contentElement);
             String currentValue = contentElement.getContent();
 
+            String contentType;
+            if(StringUtils.isBlank(currentValue)) { // Workaround issue #3147
+                contentType = cf.getTemplate().getForElement(contentElement).getInitialContentType();
+            } else {
+                contentType = contentElement.getContentType();
+            }
             if (!String.valueOf(value).equals(String.valueOf(currentValue))) {
-                contentElement.setContent(value, contentElement.getContentType());
+                contentElement.setContent(value, contentType);
             }
         }
     }
@@ -327,17 +328,31 @@ public class ContentFragmentImport extends ProcessDefinition {
         }
     }
 
+    private String getString(Map<String, CompositeVariant> row, ContentElement contentElement) {
+        String elementName = contentElement.getName();
+        String dataType = contentElement.getValue().getDataType().getTypeString();
+        CompositeVariant v = row.get(elementName.toLowerCase());  // Workaround issue #1428
+        if (v != null) {
+            Object value = v.getValue();
+            if(value instanceof Calendar && dataType.matches("date|calendar")) {
+                long timestamp = ((Calendar) value).getTimeInMillis();
+                return String.valueOf(timestamp);
+            } else if (value instanceof Date && dataType.matches("date|calendar")) {
+                long timestamp = ((Date) value).getTime();
+                return String.valueOf(timestamp);
+            } else {
+                return (String) v.getValueAs(String.class);
+            }
+        } else {
+            return null;
+        }
+    }
+
     protected ContentFragment getOrCreateFragment(Resource parent, Resource template, String name, String title) throws ContentFragmentException {
         Resource fragmentResource = parent.getChild(name);
         if (fragmentResource == null) {
-            try {
-                FragmentTemplate fragmentTemplate = template.adaptTo(FragmentTemplate.class);
-// TODO: Replace this reflection hack with the proper method once ACS Commons doesn't support 6.2 anymore
-                return (ContentFragment) MethodUtils.invokeMethod(fragmentTemplate, "createFragment", parent, name, title);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-                Logger.getLogger(ContentFragmentImport.class.getName()).log(Level.SEVERE, "Unable to call createFragment method -- Is this 6.3 or newer?", ex);
-                return null;
-            }
+            FragmentTemplate fragmentTemplate = template.adaptTo(FragmentTemplate.class);
+            return fragmentTemplate.createFragment(parent, name, title);
         } else {
             return fragmentResource.adaptTo(ContentFragment.class);
         }

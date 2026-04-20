@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+import com.adobe.acs.commons.util.RequireAem.Distribution;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -34,6 +34,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
@@ -112,6 +113,15 @@ public class RemoteAssetsBinarySyncImplTest {
         remoteAssetsConfigs.put("server.url", "http://localhost:" + mockServerRule.getPort());
         remoteAssetsConfigs.put("server.insecure", true);
 
+        // does not work with a Mock here :-(
+        RequireAem requireAem = new RequireAem() {
+          
+          @Override
+          public Distribution getDistribution() {
+            return null;
+          }
+        };
+        context.registerService(RequireAem.class,requireAem,"distribution","classic");
         remoteAssetsConfig = spy(new RemoteAssetsConfigImpl());
         context.registerInjectActivateService(remoteAssetsConfig, remoteAssetsConfigs);
         remoteAssetsBinarySync = context.registerInjectActivateService(new RemoteAssetsBinarySyncImpl());

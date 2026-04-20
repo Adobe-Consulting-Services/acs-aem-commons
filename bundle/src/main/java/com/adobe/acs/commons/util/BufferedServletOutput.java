@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
@@ -49,8 +47,9 @@ public final class BufferedServletOutput {
     private final PrintWriter printWriter;
     private final ByteArrayOutputStream outputStream;
     private final ServletOutputStream servletOutputStream;
-    private boolean flushBuffer;
+    private boolean flushWrappedBuffer;
     private ResponseWriteMethod writeMethod;
+    private boolean flushBufferOnClose = true;
 
     /** 
      * Creates a new servlet output buffering both the underlying writer and output stream.
@@ -64,7 +63,7 @@ public final class BufferedServletOutput {
      * 
      * @param wrappedResponse the wrapped response
      * @param writer          the writer to use as buffer (may be {@code null} in case you don't want to buffer the writer)
-     * @param outputStream    the {@link ByteArrayOutputStream} to use as buffer for {@link #getOutputStream()) (may be {@code null} in case
+     * @param outputStream    the {@link ByteArrayOutputStream} to use as buffer for getOutputStream() (may be {@code null} in case
      *                            you don't want to buffer the output stream)
      */
     public BufferedServletOutput(ServletResponse wrappedResponse, StringWriter writer, ByteArrayOutputStream outputStream) {
@@ -129,6 +128,21 @@ public final class BufferedServletOutput {
         }
         return writer.toString();
     }
+    
+    /**
+     * Finds if there's still data pending, which needs to be flushed. Could be implemented
+     * with "getBufferedString().length() > 0, but that throws exceptions we don't like here.
+     * @return true if there is data pending in this buffer
+     */
+    boolean hasPendingData() {
+        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod)) {
+            return false;
+        }
+        if (writer == null) {
+            return false;
+        }
+        return writer.toString().length() > 0;
+    }
 
     /**
      * 
@@ -159,30 +173,57 @@ public final class BufferedServletOutput {
     }
 
     /** 
-     * Closing leads to spooling the buffered output stream or writer to the underlying/wrapped response.
+     * Influences the behavior of the buffered data during calling {@link #close()}.
+     * If {@code flushBufferOnClose} is {@code true} (default setting) the buffer is flushed to the wrapped response, otherwise the buffer is discarded.
+     * @param flushBufferOnClose
+     */
+    public void setFlushBufferOnClose(boolean flushBufferOnClose) {
+        this.flushBufferOnClose = flushBufferOnClose;
+    }
+
+    /** 
+     * Closing leads to flushing the buffered output stream or writer to the underlying/wrapped response but only in case {@link #flushBufferOnClose} is set to {@code true}.
      * Also this will automatically commit the response in case {@link #flushBuffer} has been called previously!
      * 
      * @throws IOException */
     void close() throws IOException {
-        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) {
-            wrappedResponse.getOutputStream().write(getBufferedBytes());
-        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null) {
-            wrappedResponse.getWriter().write(getBufferedString());
+        if (flushBufferOnClose) {
+            if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null && getBufferedBytes().length > 0) {
+                wrappedResponse.getOutputStream().write(getBufferedBytes());
+            } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null && getBufferedString().length() > 0) {
+                wrappedResponse.getWriter().write(getBufferedString());
+            }
         }
-        if (flushBuffer) {
+        if (flushWrappedBuffer) {
             wrappedResponse.flushBuffer();
         }
     }
 
     /**
-     * Will not commit the response, but only make sure that the wrapped response's {@code flushBuffer()} is executed, once this {@link #close()} is called
+     * Will not commit the response, but only make sure that the wrapped response's {@code flushBuffer()} is executed, once this {@link #close()} is called.
+     * This only affects output which is buffered, i.e. for unbuffered output the flush is not deferred.
+     * @throws IOException 
      */
-    public void flushBuffer() {
-        log.warn("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
-        if (log.isDebugEnabled()) {
-            Throwable t = new Throwable("");
-            log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
+    public void flushBuffer() throws IOException {
+        if (isBuffered()) {
+            log.debug("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
+            if (log.isDebugEnabled()) {
+                Throwable t = new Throwable("");
+                log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
+            }
+            flushWrappedBuffer = true;
+        } else {
+            wrappedResponse.flushBuffer();
         }
-        flushBuffer = true;
+    }
+
+    /**
+     * 
+     * @return {@code true} for responses which are already buffered or potentially buffered (not yet clear because neither
+     * {@link #getWriter()} nor {@link #getOutputStream()} have been called yet!
+     */
+    private boolean isBuffered() {
+        return (writeMethod == null || (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) 
+                || (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null));
     }
 }

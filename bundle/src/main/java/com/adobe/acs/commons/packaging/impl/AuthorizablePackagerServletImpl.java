@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.packaging.impl;
@@ -38,6 +36,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
@@ -48,7 +47,7 @@ import com.adobe.acs.commons.packaging.PackageHelper;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "POST" },
+        methods = { HttpConstants.METHOD_POST },
         resourceTypes = { "acs-commons/components/utilities/packager/authorizable-packager" },
         selectors = { "package" },
         extensions = { "json" }
@@ -66,10 +65,10 @@ public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
             "/apps/acs-commons/components/utilities/packager/authorizable-packager/definition/package-thumbnail.png";
 
     @Reference
-    private Packaging packaging;
+    private transient Packaging packaging;
 
     @Reference
-    private PackageHelper packageHelper;
+    private transient PackageHelper packageHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,

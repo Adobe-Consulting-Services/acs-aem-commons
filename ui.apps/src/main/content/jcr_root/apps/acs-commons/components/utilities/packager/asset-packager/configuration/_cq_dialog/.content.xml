@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Pages (and referenced assets) packager"
+          sling:resourceType="cq/gui/components/authoring/dialog"
+          extraClientlibs="[]"
+          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/packagers/asset-packager/index.html">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+        <items jcr:primaryType="nt:unstructured">
+            <tabs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    maxmized="{Boolean}true">
+                <items jcr:primaryType="nt:unstructured">
+                    <general
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Configuration"
+                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                            margin="{Boolean}true">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <package-name
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package name"
+                                            fieldDescription="Name of the package to created."
+                                            required="true"
+                                            value="assets"
+                                            name="./packageName"/>
+
+                                    <package-group-name
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package group name"
+                                            fieldDescription="Package group to assign this package to."
+                                            required="true"
+                                            value="Assets"
+                                            name="./packageGroupName"/>
+
+                                    <package-version
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package version"
+                                            fieldDescription="Package version to assign this package. This value is ignored is Conflict Resolution is set to IncrementValue."
+                                            required="true"
+                                            value="1.0.0"
+                                            name="./packageVersion"/>
+
+                                    <package-description
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            fieldLabel="Package description"
+                                            fieldDescription="Package description. Enter the purpose and scope of this package for future reference."
+                                            value="ACL Package initially defined by a ACS AEM Commons - ACL Packager configuration."
+                                            name="./packageDescription"/>
+
+                                    <package-acl-handling
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            fieldLabel="Package ACL handling"
+                                            fieldDescription="Dictates how package's ACLs will be installed on target systems."
+                                            required="true"
+                                            name="./packageACLHandling">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <overwrite
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Overwrite"
+                                                    value="Overwrite"
+                                                    selected="true"/>
+                                            <merge
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Merge"
+                                                    value="Merge"/>
+                                            <mergePreserve
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="MergePreserve"
+                                                    value="MergePreserve"/>
+                                        </items>
+                                    </package-acl-handling>
+
+                                    <conflict-resolution
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            fieldLabel="Conflict resolution"
+                                            fieldDescription="Determines how package creation will be handled in the event of an existing package of the same Package group, name and version."
+                                            required="true"
+                                            name="./conflictResolution">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <replace
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Replace"
+                                                    value="Replace"/>
+                                            <increment-version
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Increment Version"
+                                                    value="IncrementVersion"
+                                                    selected="true"/>
+                                            <none
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="None"
+                                                    value="None"/>
+                                        </items>
+                                    </conflict-resolution>
+
+                                    <page-path
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            fieldLabel="Page root path"
+                                            fieldDescription="The path that the asset reference has to start with."
+                                            required="true"
+                                            rootPath="/content"
+                                            value="/content"
+                                            name="./pagePath"/>
+                                    <exclude-pages
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                            text="Exclude Pages"
+                                            fieldDescription="Exclude the pages from the package definition. Creates a packages with just assets."
+                                            value="true"
+                                            uncheckedValue="false"
+                                            name="./excludePages"/>
+                                </items>
+                            </column>
+                        </items>
+                    </general>
+                    <advanced
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Advanced"
+                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                            margin="{Boolean}true">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <asset-path
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            fieldLabel="Allowed assets root path"
+                                            fieldDescription="The path that the asset reference has to start with."
+                                            required="true"
+                                            rootPath="/content/dam"
+                                            value="/content/dam"
+                                            name="./assetPrefix"/>
+
+                                    <page-exclusions
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                            fieldLabel="Exclude page regex patterns"
+                                            fieldDescription="Click the '+' to add a new exclude pattern. The pattern will exclude both the pages and their assets from the package.&lt;br/>By default all pages are searched and included in the package."
+                                            composite="{Boolean}false">
+                                        <field
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                name="./pageExclusions"/>
+                                    </page-exclusions>
+
+                                    <asset-exclusions
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                            fieldLabel="Exclude asset regex patterns"
+                                            fieldDescription="Click the '+' to add a new exclude pattern. The pattern will exclude the assets from the package.&lt;br/>By default all assets are included."
+                                            composite="{Boolean}false">
+                                        <field
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                name="./assetExclusions"/>
+                                    </asset-exclusions>
+
+                                </items>
+                            </column>
+                        </items>
+                    </advanced>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>

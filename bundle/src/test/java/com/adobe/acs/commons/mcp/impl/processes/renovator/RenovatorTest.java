@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
@@ -26,20 +24,23 @@ import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import javax.jcr.RepositoryException;
@@ -56,18 +58,25 @@ import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 
-import org.apache.commons.lang.StringUtils;
+import com.day.cq.audit.AuditLog;
+import com.day.cq.audit.AuditLogEntry;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.Replicator;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.apache.sling.testing.mock.sling.builder.ImmutableValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
@@ -88,11 +97,19 @@ public class RenovatorTest {
     ProcessInstanceImpl instance;
     ReplicatorQueue queue;
     ResourceResolver rr;
+    AuditLog mockAudit;
+    Replicator replicator;
 
     @Before
-    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException {
-        queue = spy(new ReplicatorQueue());
-        factory.setReplicator(queue);
+    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException, ReplicationException {
+        queue = new ReplicatorQueue();
+        replicator =  mock(Replicator.class);
+        factory.replicator = replicator;
+
+        mockAudit = mock(AuditLog.class);
+        when(mockAudit.getCategories()).thenReturn(new String[]{"com/day/cq/dam", "com/day/cq/wcm/core/page"});
+        factory.setAuditLog(mockAudit);
+
         tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
         instance = prepareProcessInstance(
                 new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
@@ -123,6 +140,24 @@ public class RenovatorTest {
     }
 
     @Test
+    public void testMoveAssetsWithAudits() throws DeserializeException, RepositoryException {
+        Map<String, Object> values = new HashMap<>();
+        values.put("sourceJcrPath", "/content/dam/folderA");
+        values.put("destinationJcrPath", "/content/dam/folderB");
+        values.put("auditTrails", "true");
+        instance.init(rr, values);
+        instance.run(rr);
+
+        verify(mockAudit, times(2)).add(any(AuditLogEntry.class));
+
+        assertNotNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderB/asset1/created"));
+        assertNotNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderB/asset2/created"));
+
+        assertNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderA/asset1/created"));
+        assertNull(rr.getResource("/var/audit/com.day.cq.dam/content/dam/folderA/asset2/created"));
+    }
+
+    @Test
     public void noPublishTest() throws Exception {
         assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
@@ -132,8 +167,16 @@ public class RenovatorTest {
 
         instance.init(rr, values);
         instance.run(rr);
-        assertTrue("Should unpublish the source folder", queue.getDeactivateOperations().containsKey("/content/dam/folderA"));
-        assertTrue("Should publish the moved source folder", queue.getActivateOperations().containsKey("/content/dam/republishA"));
+
+        ArgumentCaptor<String> deactivationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(1))
+                .replicate(any(Session.class), eq(ReplicationActionType.DEACTIVATE), deactivationCaptor.capture());
+        assertTrue("Should unpublish the source folder", deactivationCaptor.getValue().equals("/content/dam/folderA"));
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, times(1))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture());
+        assertTrue("Should publish the moved source folder", activationCaptor.getValue().equals("/content/dam/republishA"));
     }
 
     @Test
@@ -175,8 +218,27 @@ public class RenovatorTest {
         assertEquals("/target", test2.get("attr2"));
     }
 
+
+    
     @Test
-    public void testMoveManyAssets() throws DeserializeException, RepositoryException {
+    public void testUpdateMultiValuedReferences() throws RepositoryException, PersistenceException, LoginException, IllegalAccessException {
+        final ModifiableValueMap test1 = rr.resolve("/test").adaptTo(ModifiableValueMap.class);
+        final ModifiableValueMap test2 = rr.resolve("/test/child1").adaptTo(ModifiableValueMap.class);
+        final Session session = rr.adaptTo(Session.class);
+        final AtomicBoolean changedProperty = new AtomicBoolean(false);
+        MovingAsset asset = new MovingAsset();
+        asset.setSourcePath("/source");
+        asset.setDestinationPath("/target");
+        test1.put("attr1", new String[] {"/source", "/someOtherPath1"});
+        test2.put("attr2", new String[] {"/someOtherPath1", "/source", "/someOtherPath2"});
+        asset.updateMultiValuedReferences("attr1", test1.get("attr1"), session, test1, changedProperty, "/test");
+        asset.updateMultiValuedReferences("attr2", test2.get("attr2"), session, test2, changedProperty, "/test");
+        assertTrue(Arrays.asList((String[]) test1.get("attr1")).contains("/target"));
+        assertTrue(Arrays.asList((String[]) test2.get("attr2")).contains("/target"));
+    }
+
+    @Test
+    public void testMoveManyAssets() throws DeserializeException, RepositoryException, ReplicationException {
         Map<String, Object> values = new HashMap<>();
         values.put("dryRun", "false");
         // Provide input so that the init() method doesn't error out, but this should be ignored later
@@ -189,13 +251,19 @@ public class RenovatorTest {
         instance.init(rr, values);
 
         instance.run(rr);
+
+
         // Make sure that target folders were created
         assertNotNull(rr.getResource("/content/dam/folderC"));
         assertNotNull(rr.getResource("/content/dam/folderC/subfolder"));
         // Ensure process finished
         assertEquals(1.0, instance.updateProgress(), 0.00001);
-        assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC"));
-        assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC/subfolder"));
+
+        ArgumentCaptor<String> activationCaptor = ArgumentCaptor.forClass(String.class);
+        verify(replicator, atLeast(2))
+                .replicate(any(Session.class), eq(ReplicationActionType.ACTIVATE), activationCaptor.capture());
+        assertTrue("Should publish new folders", activationCaptor.getAllValues().contains("/content/dam/folderC"));
+        assertTrue("Should publish new folders", activationCaptor.getAllValues().contains("/content/dam/folderC/subfolder"));
     }
 
     Map<String, String> testNodes = new TreeMap<String, String>() {
@@ -208,6 +276,17 @@ public class RenovatorTest {
             put("/content/dam/folderA/asset2", DamConstants.NT_DAM_ASSET);
             put("/test", "NT:UNSTRUCTURED");
             put("/test/child1", "NT:UNSTRUCTURED");
+            put("/var", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset1", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset1/created", "cq:AuditEvent");
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset2", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/var/audit/com.day.cq.dam/content/dam/folderA/asset2/created", "cq:AuditEvent");
+            put("/var/audit/com.day.cq.wcm.core.page", JcrResourceConstants.NT_SLING_FOLDER);
         }
     };
 
@@ -217,8 +296,12 @@ public class RenovatorTest {
         for (Map.Entry<String, String> entry : testNodes.entrySet()) {
             String path = entry.getKey();
             String type = entry.getValue();
-            AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "", new ResourceMetadata());
-            mockFolder.getResourceMetadata().put(JCR_PRIMARYTYPE, type);
+
+            Map<String, Object> mockProperties = new HashMap<>();
+            mockProperties.put(JCR_PRIMARYTYPE, type);
+
+            AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "",
+                    mockProperties);
 
             when(rr.resolve(path)).thenReturn(mockFolder);
             when(rr.getResource(path)).thenReturn(mockFolder);
@@ -259,28 +342,28 @@ public class RenovatorTest {
 
     private ProcessInstanceImpl prepareProcessInstance(ProcessInstanceImpl source) throws PersistenceException {
         ProcessInstanceImpl instance = spy(source);
-        doNothing().when(instance).persistStatus(anyObject());
-        doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
+        doNothing().when(instance).persistStatus(any());
+//        doNothing().when(instance).recordErrors(anyInt(), any(), any());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             CheckedConsumer<ResourceResolver> action = (CheckedConsumer<ResourceResolver>) invocationOnMock.getArguments()[0];
             action.accept(getMockResolver());
             return null;
-        }).when(instance).asServiceUser(anyObject());
+        }).when(instance).asServiceUser(any());
 
         return instance;
     }
 
     private Renovator prepareProcessDefinition(Renovator source, Function<String, List<String>> refFunction) throws RepositoryException, PersistenceException, IllegalAccessException {
         Renovator definition = spy(source);
-        doNothing().when(definition).storeReport(anyObject(), anyObject());
-        doNothing().when(definition).checkNodeAcls(anyObject(), anyObject(), anyObject());
+        doNothing().when(definition).storeReport(any(), any());
+        doNothing().when(definition).checkNodeAcls(any(), any(), any());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             if (refFunction != null) {
                 MovingNode node = (MovingNode) invocationOnMock.getArguments()[1];
                 node.getAllReferences().addAll(refFunction.apply(node.getSourcePath()));
             }
             return null;
-        }).when(definition).findReferences(anyObject(), anyObject());
+        }).when(definition).findReferences(any(), any());
         return definition;
     }
 }

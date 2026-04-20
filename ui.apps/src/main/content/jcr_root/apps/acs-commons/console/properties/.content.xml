@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="ACS AEM Commons | Page Properties"
+        sling:resourceType="granite/ui/components/shell/propertiespage"
+        backHref="${empty param.backHref ? (empty header.Referer ? granite:concat(&quot;/acs-commons.html&quot;, granite:encodeURIPath(granite:relativeParent(param.item, 1))) : header.Referer) : param.backHref}"
+        consoleId="cq-sites-pages-properties"
+        coral2="{Boolean}true"
+        formId="cq-sites-properties-form"
+        simpleSave="{Boolean}false">
+        <head jcr:primaryType="nt:unstructured">
+            <dialogclientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="cq/gui/components/siteadmin/admin/properties/includeclientlibs"
+                folderResourceTypes="[sling:Folder,sling:OrderedFolder]"
+                path="${param.item}/jcr:content"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/properties/title"
+            path="${param.item}"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <addPermissions
+                granite:class="js-cq-sites-PermissionsProperties-action js-cq-sites-AddPermissionsDialog-show hide"
+                granite:title="Create ACL Permissions"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                icon="add"
+                text="Add Permissions"
+                variant="actionBar">
+                <granite:rendercondition
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                    path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                    privileges="jcr:modifyAccessControl"/>
+            </addPermissions>
+            <editClosedUserGroups
+                granite:class="js-cq-sites-PermissionsProperties-action js-cq-sites-ClosedUserGroupDialog-show hide"
+                granite:title="Edit Closed User Group"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                icon="usersLock"
+                text="Edit Closed User Group"
+                variant="actionBar">
+                <granite:rendercondition
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                    path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                    privileges="jcr:modifyAccessControl"/>
+            </editClosedUserGroups>
+            <displayEffectivePermissions
+                granite:class="js-cq-sites-PermissionsProperties-action js-cq-sites-EffectivePermissionsDialog-show hide"
+                granite:title="Effective Permissions"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                icon="viewList"
+                text="Effective Permissions"
+                variant="actionBar">
+                <granite:rendercondition
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                    path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                    privileges="jcr:readAccessControl"/>
+            </displayEffectivePermissions>
+        </actions>
+        <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/viewproperties">
+            <bulk jcr:primaryType="nt:unstructured">
+                <content
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                    margin="{Boolean}true">
+                    <items jcr:primaryType="nt:unstructured">
+                        <pageselector
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/properties/pageselector"/>
+                        <pageproperties
+                            granite:class="cq-siteadmin-admin-properties"
+                            granite:id="cq-sites-properties-form"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/properties/bulk/form"
+                            style="vertical">
+                            <successresponse
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/responses/redirect"
+                                href="${empty param.backHref ? (empty header.Referer ? granite:concat(&quot;/acs-commons.html&quot;, granite:encodeURIPath(granite:relativeParent(param.item, 1))) : header.Referer) : param.backHref}"/>
+                            <items jcr:primaryType="nt:unstructured">
+                                <ref
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="cq/gui/components/siteadmin/admin/properties/bulk/include"
+                                    folderResourceTypes="[sling:Folder,sling:OrderedFolder]"
+                                    path="${param.item}/jcr:content"/>
+                            </items>
+                        </pageproperties>
+                    </items>
+                </content>
+            </bulk>
+            <single jcr:primaryType="nt:unstructured">
+                <content
+                    granite:class="cq-siteadmin-admin-properties"
+                    granite:id="cq-sites-properties-form"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/properties/form"
+                    path="${param.item}"
+                    style="vertical">
+                    <items jcr:primaryType="nt:unstructured">
+                        <ref
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/properties/include"
+                            folderResourceTypes="[sling:Folder,sling:OrderedFolder]"
+                            path="${param.item}/jcr:content"/>
+                    </items>
+                </content>
+            </single>
+        </content>
+    </jcr:content>
+    <tabs jcr:primaryType="nt:unstructured">
+        <permissions
+            cq:showOnCreate="{Boolean}false"
+            granite:class="js-cq-sites-PermissionsProperties cq-sites-PermissionsProperties u-coral-padding-horizontal"
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Permissions"
+            sling:resourceType="granite/ui/components/coral/foundation/container"
+            margin="{Boolean}true">
+            <rendercondition
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                privileges="jcr:readAccessControl"/>
+            <items jcr:primaryType="nt:unstructured">
+                <path
+                    granite:class="js-cq-sites-PermissionsProperties-pagePath"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                    value="${empty param.item ? requestPathInfo.suffix : param.item}"/>
+                <canUserEditAcl
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/properties/localacl/useracl"
+                    class="js-cq-sites-PermissionsProperties-userAcl"/>
+                <cugConfigWarning
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/properties/cugconfigwarning"
+                    warning="The Closed User Group cannot be edited because the page is using a deprecated configuration for the Closed User Group.&lt;br>Please refer to the &lt;a href=&quot;https://www.adobe.com/go/aem6_5_docs_cug_migration_en&quot; class=&quot;coral-Link&quot;>documentation&lt;/a>."/>
+                <closedUserGroupList
+                    granite:class="js-cq-sites-ClosedUserGroup-permissions cq-sites-ClosedUserGroup-permissions"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Closed User Group"
+                    sling:resourceType="granite/ui/components/coral/foundation/table"
+                    icon="group"
+                    itemResourceType="cq/gui/components/siteadmin/admin/properties/localacl/localacllistitem/closedusergroupitem"
+                    layoutId="list"
+                    limit="{Long}40"
+                    orderable="{Boolean}false"
+                    path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                    size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                    src="/mnt/overlay/acs-commons/console/properties/tabs/permissions/items/closedUserGroupList{.offset,limit}.html{+id}">
+                    <columns jcr:primaryType="nt:unstructured">
+                        <imageLabel
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Closed User Group"/>
+                        <browsePage
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Browse page"/>
+                        <editContent jcr:primaryType="nt:unstructured"/>
+                        <deletePage jcr:primaryType="nt:unstructured"/>
+                        <publishPage jcr:primaryType="nt:unstructured"/>
+                        <createSubPages jcr:primaryType="nt:unstructured"/>
+                        <actions jcr:primaryType="nt:unstructured"/>
+                    </columns>
+                    <datasource
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="cq/gui/components/siteadmin/admin/properties/localacl/localacllistitem/closedusergroupitem/datasource"
+                        limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                        offset="${requestPathInfo.selectors[0]}"/>
+                </closedUserGroupList>
+                <userGroupList
+                    granite:class="js-cq-sites-UserGroup-permissions cq-sites-UserGroup-permissions"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="User or group"
+                    sling:resourceType="granite/ui/components/coral/foundation/table"
+                    icon="group"
+                    layoutId="list"
+                    limit="{Long}40"
+                    orderable="{Boolean}false"
+                    size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}">
+                    <columns jcr:primaryType="nt:unstructured">
+                        <imageLabel
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="User or group"/>
+                        <browsePage
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Browse page"/>
+                        <editContent
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Edit content"/>
+                        <deletePage
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Delete page"/>
+                        <publishPage
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Publish/unpublish page"/>
+                        <createSubPages
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Create sub-pages"/>
+                        <actions jcr:primaryType="nt:unstructured"/>
+                    </columns>
+                    <datasource
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="cq/gui/components/siteadmin/admin/properties/localacl/localacldatasource"
+                        itemResourceType="cq/gui/components/siteadmin/admin/properties/localacl/localacllistitem"
+                        page="${empty param.item ? requestPathInfo.suffix : param.item}"/>
+                </userGroupList>
+                <createPermissionsDialog
+                    granite:class="js-cq-sites-CreatePermissionsDialog coral-Form--vertical"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Add Permissions"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <items jcr:primaryType="nt:unstructured">
+                        <header
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                            <items jcr:primaryType="nt:unstructured">
+                                <content
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <authorizableList
+                                            granite:class="js-cq-sites-CreatePermissionsDialog-authorizableList cq-sites-PermissionsCreateDialog-authorizableList"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/authorizable/autocomplete"
+                                            emptyText="Select user or group"
+                                            forceselection="{Boolean}true"
+                                            multiple="{Boolean}true"
+                                            selector="all"/>
+                                    </items>
+                                </content>
+                            </items>
+                        </header>
+                        <acl
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="/mnt/overlay/acs-commons/console/properties/accesscontrollist"/>
+                    </items>
+                    <footer jcr:primaryType="nt:unstructured">
+                        <cancel
+                            granite:class="js-cq-sites-CreatePermissionsDialog-cancel"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Cancel">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </cancel>
+                        <add
+                            granite:class="js-cq-sites-PermissionsDialog-aclSubmit js-cq-sites-CreatePermissionsDialog-add"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Add"
+                            variant="primary">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </add>
+                    </footer>
+                    <rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                        privileges="jcr:modifyAccessControl"/>
+                </createPermissionsDialog>
+                <editCUGDialog
+                    granite:class="js-cq-sites-CUGPermissionsDialog coral-Form--vertical"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Edit Closed User Group"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <items jcr:primaryType="nt:unstructured">
+                        <header
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                            <items jcr:primaryType="nt:unstructured">
+                                <content
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <authorizableList
+                                            granite:class="js-cq-sites-CUGPermissionsDialog-authorizableList cq-sites-PermissionsCreateDialog-authorizableList"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/authorizable/autocomplete"
+                                            emptyText="Select user or group"
+                                            forceselection="{Boolean}true"
+                                            multiple="{Boolean}true"
+                                            selector="all"/>
+                                    </items>
+                                </content>
+                            </items>
+                        </header>
+                    </items>
+                    <footer jcr:primaryType="nt:unstructured">
+                        <cancel
+                            granite:class="js-cq-sites-CUGPermissionsDialog-cancel"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Cancel">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </cancel>
+                        <add
+                            granite:class="js-cq-sites-CUGPermissionsDialog-save"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Save"
+                            variant="primary">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </add>
+                    </footer>
+                    <rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                        privileges="jcr:modifyAccessControl"/>
+                </editCUGDialog>
+                <editPermissionsDialog
+                    granite:class="js-cq-sites-EditPermissionsDialog"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Edit Permissions"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <items jcr:primaryType="nt:unstructured">
+                        <acl
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="/mnt/overlay/acs-commons/console/properties/accesscontrollist"/>
+                    </items>
+                    <footer jcr:primaryType="nt:unstructured">
+                        <cancel
+                            granite:class="js-cq-sites-EditPermissionsDialog-cancel"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Cancel">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </cancel>
+                        <update
+                            granite:class="js-cq-sites-PermissionsDialog-aclSubmit js-cq-sites-EditPermissionsDialog-update"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Save"
+                            variant="primary">
+                            <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                close="{Boolean}true"/>
+                        </update>
+                    </footer>
+                    <rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="${empty param.item ? requestPathInfo.suffix : param.item}"
+                        privileges="jcr:modifyAccessControl"/>
+                </editPermissionsDialog>
+                <effectivePermissionsDialog
+                    granite:class="js-cq-sites-EffectivePermissionsDialog cq-sites-EffectivePermissionsDialog"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Effective Permissions"
+                    sling:resourceType="granite/ui/components/coral/foundation/dialog">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        effective-acl-src="/libs/wcm/core/content/sites/properties/effectivepermissions.html${granite:encodeURIPath(empty param.item ? requestPathInfo.suffix : param.item)}"/>
+                    <items jcr:primaryType="nt:unstructured"/>
+                </effectivePermissionsDialog>
+            </items>
+        </permissions>
+    </tabs>
+    <accesscontrollist
+        granite:class="cq-sites-Permissions-aclContainer"
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+        <items jcr:primaryType="nt:unstructured">
+            <col1
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <checkboxlist
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/nestedcheckboxlist">
+                        <items jcr:primaryType="nt:unstructured">
+                            <browse
+                                granite:class="js-cq-sites-PermissionsProperties-acl js-cq-sites-PermissionsProperties-acl--read"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                checked="{Boolean}false"
+                                disconect="{Boolean}true"
+                                name="read"
+                                text="Browse page"
+                                title="Browse page"
+                                value="true"/>
+                            <edit
+                                granite:class="js-cq-sites-PermissionsProperties-acl js-cq-sites-PermissionsProperties-acl--modify"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                checked="{Boolean}false"
+                                disconect="{Boolean}true"
+                                name="modify"
+                                text="Edit content"
+                                title="Edit content"
+                                value="true"/>
+                            <delete
+                                granite:class="js-cq-sites-PermissionsProperties-acl js-cq-sites-PermissionsProperties-acl--delete"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                checked="{Boolean}false"
+                                disconect="{Boolean}true"
+                                name="delete"
+                                text="Delete page"
+                                title="Delete page"
+                                value="true"/>
+                        </items>
+                    </checkboxlist>
+                </items>
+            </col1>
+            <col2
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <checkboxlist
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/nestedcheckboxlist">
+                        <items jcr:primaryType="nt:unstructured">
+                            <publish
+                                granite:class="js-cq-sites-PermissionsProperties-acl js-cq-sites-PermissionsProperties-acl--replicate"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                checked="{Boolean}false"
+                                name="replicate"
+                                text="Publish/unpublish page"
+                                title="Publish/unpublish page"
+                                value="true"/>
+                            <createchild
+                                granite:class="js-cq-sites-PermissionsProperties-acl js-cq-sites-PermissionsProperties-acl--create"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                checked="{Boolean}false"
+                                name="create"
+                                text="Create sub-pages"
+                                title="Create sub-pages"
+                                value="true"/>
+                        </items>
+                    </checkboxlist>
+                </items>
+            </col2>
+        </items>
+    </accesscontrollist>
+    <effectivepermissions
+        granite:rel="cq-siteadmin-admin-properties-effective-permissions"
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/foundation/container"
+        class="foundation-layout-util-maximized-alt"
+        itemscope="{Boolean}true">
+        <granite:data
+            jcr:primaryType="nt:unstructured"
+            effectiveacl-src="/libs/wcm/core/content/sites/properties/effectivepermissions.html${granite:encodeURIPath(empty param.item ? requestPathInfo.suffix : param.item)}"
+            foundation-mode-group="cq-siteadmin-admin-properties-effective-permissions"/>
+        <datasource
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/properties/effectiveacl/effectiveacldatasource"
+            itemResourceType="cq/gui/components/siteadmin/admin/properties/effectiveacl/effectiveaclentry"
+            path="${empty param.item ? requestPathInfo.suffix : param.item}"/>
+        <layout
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/foundation/layouts/multilayouts"
+            layout="list">
+            <layouts jcr:primaryType="nt:unstructured">
+                <list
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/layouts/listview"
+                    itemprop="item"
+                    layoutId="list"
+                    maximized="{Boolean}false"
+                    stateId="cq-siteadmin-admin-properties-effective-permissions">
+                    <headers
+                        jcr:primaryType="nt:unstructured"
+                        class="card-page"
+                        movable="{Boolean}false"
+                        selectable="{Boolean}false">
+                        <principal
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="main"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            sort-selector=".label .main .principal"
+                            title="Principal"/>
+                        <path
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="main"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            sort-selector=".label .main .path"
+                            title="Path"/>
+                        <browse
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="permission"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            title="Browse"/>
+                        <edit
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="permission"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            title="Modify"/>
+                        <delete
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="permission"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            title="Delete"/>
+                        <replicate
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="permission"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            title="Replicate"/>
+                        <create
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/pages/headers/deflt"
+                            class="permission"
+                            configurable="{Boolean}false"
+                            default="{Boolean}true"
+                            title="Create"/>
+                    </headers>
+                </list>
+            </layouts>
+            <empty
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="cq/gui/components/siteadmin/admin/properties/effectiveacl/emptyeffectiveacllist"/>
+        </layout>
+    </effectivepermissions>
+</jcr:root>

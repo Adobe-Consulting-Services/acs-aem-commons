@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.redirectmaps.models;
 
@@ -46,7 +44,7 @@ import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.redirectmaps.impl.FakeSlingHttpServletRequest;
+import com.adobe.acs.commons.redirectmaps.impl.FakeHttpServletRequest;
 import com.day.cq.commons.jcr.JcrConstants;
 
 /**
@@ -78,7 +76,7 @@ public class RedirectMapModel {
   @Source("sling-object")
   private ResourceResolver resourceResolver;
 
-  private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, String suffix) {
+  private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, String suffix, long id) {
     List<MapEntry> entries = new ArrayList<>();
     while (items.hasNext()) {
       Resource item = items.next();
@@ -88,15 +86,15 @@ public class RedirectMapModel {
       if (child != null) {
         properties = child.getValueMap();
       }
-      FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver, config.getProtocol(),
+      FakeHttpServletRequest mockRequest = new FakeHttpServletRequest(config.getProtocol(),
           config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
       String pageUrl = config.getProtocol() + "://" + config.getDomain()
           + resourceResolver.map(mockRequest, item.getPath() + suffix);
 
       String[] sources = properties.get(config.getProperty(), String[].class);
-      int i = 0;
+      
       for (String source : sources) {
-        MapEntry entry = new MapEntry(i++, source, pageUrl, item.getPath());
+        MapEntry entry = new MapEntry(id++, source, pageUrl, item.getPath());
         if (source.matches(".*\\s+.*")) {
           String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
           log.warn(msg);
@@ -109,7 +107,7 @@ public class RedirectMapModel {
     return entries;
   }
 
-  private List<MapEntry> gatherEntries(RedirectConfigModel config) {
+  private List<MapEntry> gatherEntries(RedirectConfigModel config, long id) {
     log.trace("gatherEntries");
 
     log.debug("Getting all of the entries for {}", config.getResource());
@@ -119,33 +117,33 @@ public class RedirectMapModel {
     String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
         + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath() + "')";
     log.debug("Finding pages with redirects with query: {}", pageQuery);
-    entries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), ".html"));
+    entries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), ".html",id));
     String assetQuery = "SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
         + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath() + "')";
     log.debug("Finding assets with redirects with query: {}", assetQuery);
-    entries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), ""));
+    entries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), "", id));
     return entries;
   }
 
-  public List<MapEntry> getEntries() throws IOException {
+  public List<MapEntry> getEntries(long id) throws IOException {
     log.trace("getEntries");
 
     List<MapEntry> entries = new ArrayList<>();
-    if (redirectMap != null) {
-      InputStream is = redirectMap.adaptTo(InputStream.class);
-      if (is != null) {
-        int i = 0;
-        for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
-          MapEntry entry = toEntry(i++, line);
-          if (entry != null) {
-            entries.add(entry);
-          }
+    java.util.Optional<InputStream> op = java.util.Optional.ofNullable(redirectMap).map(rm -> rm.adaptTo(InputStream.class));
+    if (op.isPresent()) {
+      InputStream is = op.get();
+      for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
+        MapEntry entry = toEntry(id++, line);
+        if (entry != null) {
+          entries.add(entry);
         }
       }
     }
-
+    
     if (redirects != null) {
-      redirects.forEach(r -> entries.addAll(gatherEntries(r)));
+      for(RedirectConfigModel r : redirects){
+        entries.addAll(gatherEntries(r, id));
+      }
     } else {
       log.debug("No redirect configurations specified");
     }
@@ -182,7 +180,7 @@ public class RedirectMapModel {
     log.trace("getInvalidEntries");
     List<MapEntry> invalidEntries = new ArrayList<>();
     if (redirects != null) {
-      List<MapEntry> entries = getEntries();
+      List<MapEntry> entries = getEntries(0);
 
       invalidEntries.addAll(entries.stream().filter(e -> !e.isValid()).collect(Collectors.toList()));
       log.debug("Found {} invalid entries", invalidEntries.size());
@@ -224,7 +222,7 @@ public class RedirectMapModel {
     return sb.toString();
   }
 
-  private MapEntry toEntry(int id, String l) {
+  private MapEntry toEntry(long id, String l) {
     String[] seg = l.split("\\s+");
 
     MapEntry entry = null;
@@ -247,7 +245,7 @@ public class RedirectMapModel {
   private void writeEntries(RedirectConfigModel config, StringBuilder sb) {
     log.trace("writeEntries");
 
-    List<MapEntry> entries = this.gatherEntries(config);
+    List<MapEntry> entries = this.gatherEntries(config,0);
 
     sb.append("\n# Dynamic entries for " + config.getResource().getPath() + "\n");
     for (MapEntry entry : entries) {

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.synthetic;
@@ -40,7 +38,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
      * Process a payload path using using the provided Workflow Processes.
      * Convenience method for calling:
-     * > execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
+     * &gt; execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
      *
      * @param resourceResolver      the resourceResolver object that provides access to the JCR for WF operations
      * @param payloadPath           the path to execute the workflow against

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.email.process.impl;
 
@@ -30,7 +28,7 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -51,7 +49,8 @@ public class SendTemplatedEmailUtils {
 
     private static final String PN_USER_EMAIL = "profile/email";
 
-    private SendTemplatedEmailUtils() {}
+    private SendTemplatedEmailUtils() {
+    }
 
     /***
      * Tests whether the payload is a DAM asset or a cq:Page for DAM asset
@@ -102,7 +101,7 @@ public class SendTemplatedEmailUtils {
      * else an array of emails for each individual in the group
      *
      * @param resourceResolver
-     * @param principleOrPath name of a user or group or the path to such
+     * @param principleOrPath  name of a user or group or the path to such
      * @return String[] of email(s) associated with account
      */
     protected static final String[] getEmailAddrsFromPathOrName(ResourceResolver resourceResolver, String principleOrPath) {
@@ -127,8 +126,7 @@ public class SendTemplatedEmailUtils {
      * array emails for each individual in the group
      *
      * @param resourceResolver
-     * @param principlePath
-     *            path to a CQ user or group
+     * @param principlePath    path to a CQ user or group
      * @return String[] of email(s) associated with account
      */
     @SuppressWarnings({"squid:S3776"})

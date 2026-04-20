@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,33 +14,41 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Iterator;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.spi.resource.provider.ResolveContext;
+import org.apache.sling.spi.resource.provider.ResourceContext;
+import org.apache.sling.spi.resource.provider.ResourceProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
 import com.adobe.acs.commons.mcp.form.GeneratedDialogWrapper;
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Iterator;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.commons.lang.reflect.MethodUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.Model;
-import org.apache.sling.spi.resource.provider.ResolveContext;
-import org.apache.sling.spi.resource.provider.ResourceContext;
-import org.apache.sling.spi.resource.provider.ResourceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Create a resource provider for a dialog, the resource type is identified in
+ * three ways: First it checks if the Model annotation is present and declares a
+ * resource type. Failing that it looks for a getter named getResourceType.
+ * Finally it looks for a public property named resourceType.
+ * If resource type cannot be determined then this class will throw an exception.
+ */
 public class DialogResourceProviderImpl extends ResourceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DialogResourceProviderImpl.class);
@@ -52,11 +59,11 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private final Class originalClass;
     private final boolean isComponent;
 
-    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException {
+    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException  {
         originalClass = c;
         isComponent = annotation != null && annotation.style() == DialogProvider.DialogStyle.COMPONENT;
         if (GeneratedDialog.class.isAssignableFrom(c)) {
-            dialog = (GeneratedDialog) c.newInstance();
+            dialog = (GeneratedDialog) c.getDeclaredConstructor().newInstance();
         } else {
             dialog = new GeneratedDialogWrapper(c);
         }
@@ -87,23 +94,25 @@ public class DialogResourceProviderImpl extends ResourceProvider {
             try {
                 Method getter = MethodUtils.getMatchingAccessibleMethod(originalClass, "getResourceType", new Class[]{});
                 if (getter != null) {
-                    resourceType = String.valueOf(getter.invoke(originalClass.newInstance()));
+                    resourceType = String.valueOf(getter.invoke(originalClass.getDeclaredConstructor().newInstance()));
                 } else {
                     Field field = FieldUtils.getField(originalClass, "resourceType", true);
                     if (field != null) {
-                        resourceType = String.valueOf(field.get(originalClass.newInstance()));
+                        resourceType = String.valueOf(field.get(originalClass.getDeclaredConstructor().newInstance()));
+                    } else {
+                        throw new InstantiationException(String.format("No resource type present for %s", originalClass.getCanonicalName()));
                     }
                 }
-            } catch (InvocationTargetException | IllegalAccessException ex) {
-                LOGGER.debug("Unable to determine sling resource type for model bean: " + originalClass);
+            } catch (RuntimeException | ReflectiveOperationException ex) {
+                LOGGER.error("Unable to determine sling resource type for model bean: {} ", originalClass);
             }
         }
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public Resource getResource(@Nonnull ResolveContext resolveContext, @Nonnull String path, @Nonnull ResourceContext resourceContext, @CheckForNull Resource parent) {
-        LOGGER.debug("Get resource at path: " + path);
+    public Resource getResource(@NotNull ResolveContext resolveContext, @NotNull String path, @NotNull ResourceContext resourceContext, @Nullable Resource parent) {
+        LOGGER.debug("Get resource at path: {}", path);
         AbstractResourceImpl clone = null;
         if (root.equals(path)) {
             clone = ((AbstractResourceImpl) this.resource).cloneResource();
@@ -111,7 +120,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
             return parent;
         } else {
             String relPath = path.substring(root.length() + 1);
-            LOGGER.debug("Relative path: " + relPath);
+            LOGGER.debug("Relative path: {}", relPath);
             AbstractResourceImpl child = (AbstractResourceImpl) this.resource.getChild(relPath);
             if (child != null) {
                 clone = child.cloneResource();
@@ -122,15 +131,15 @@ public class DialogResourceProviderImpl extends ResourceProvider {
             clone.setResourceResolver(resolveContext.getResourceResolver());
             clone.setPath(path);
         } else {
-            LOGGER.debug("Unable to find node for " + path);
+            LOGGER.debug("Unable to find node for {}", path);
         }
         return clone;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public Iterator<Resource> listChildren(@Nonnull ResolveContext resolveContext, @Nonnull Resource parent) {
-        LOGGER.debug("List children of " + parent.getPath());
+    public Iterator<Resource> listChildren(@NotNull ResolveContext resolveContext, @NotNull Resource parent) {
+        LOGGER.debug("List children of {}", parent.getPath());
         if (parent instanceof AbstractResourceImpl) {
             AbstractResourceImpl res = (AbstractResourceImpl) parent;
             return res.listChildren();

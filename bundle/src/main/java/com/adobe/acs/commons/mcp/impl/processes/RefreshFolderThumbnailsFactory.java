@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,26 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
-import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import com.day.cq.contentsync.handler.util.RequestResponseFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.engine.SlingRequestProcessor;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import com.adobe.acs.commons.util.RequireAem;
+
+@Component(service = ProcessDefinitionFactory.class)
 public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<RefreshFolderTumbnails> {
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+
     @Reference
     private SlingRequestProcessor slingProcessor;
-    
-    @Reference
-    RequestResponseFactory reqRspFactory;
-    
+
     @Override
     public String getName() {
         return "Refresh asset folder thumbnails";
@@ -42,7 +41,6 @@ public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<Ref
 
     @Override
     protected RefreshFolderTumbnails createProcessDefinitionInstance() {
-        return new RefreshFolderTumbnails(reqRspFactory, slingProcessor);
+        return new RefreshFolderTumbnails(slingProcessor);
     }
-    
 }

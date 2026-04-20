@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,20 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.google.gson.JsonObject;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.apache.http.util.EntityUtils;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
@@ -37,9 +39,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -191,7 +195,36 @@ public class EndpointServiceImplTest {
         assertThat(request, hasHeader("custom2", "header2"));
         assertEquals(7, request.getAllHeaders().length);
     }
-    
+
+    @Test
+    public void testPostWithServiceSpecificHeaders() throws Exception {
+        when(config.method()).thenReturn("POST");
+        when(config.specificServiceHeaders()).thenReturn(new String[] {
+           "content-type:application/json;charset=UTF-8",
+        });
+        endpointService.activate(config);
+        JsonObject payload = new JsonObject();
+        payload.addProperty("result", "My ‘Payload’");
+        JsonObject result = endpointService.performIO_Action(payload);
+        JSONAssert.assertEquals("{'result':'ok'}", result.toString(), false);
+
+        ArgumentCaptor<HttpPost> captor = ArgumentCaptor.forClass(HttpPost.class);
+        verify(httpClient, times(1)).execute(captor.capture());
+        verify(httpClient, times(1)).close();
+        verifyNoMoreInteractions(httpClient);
+
+        HttpPost request = captor.getValue();
+        assertTrue(request instanceof HttpPost);
+        assertThat(request, hasUri("https://test.com"));
+        assertThat(request, hasEntity("{\"result\":\"My ‘Payload’\"}"));
+        assertThat(request, hasHeader("authorization", "Bearer ACCESS_TOKEN"));
+        assertThat(request, hasHeader("cache-control", "no-cache"));
+        assertThat(request, hasHeader("x-api-key", "API_KEY"));
+        assertThat(request, hasHeader("content-type", "application/json", "application/json;charset=UTF-8"));
+
+        assertEquals(5, request.getAllHeaders().length);
+    }
+
     @Test
     public void testConvertServiceSpecificHeadersWithNull() {
           List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(null);
@@ -206,7 +239,18 @@ public class EndpointServiceImplTest {
 
           assertEquals(2, headers.size());
     }
-   
+
+    @Test
+    public void testCharsetFrom() {
+        Charset iso88591 = endpointService.charsetFrom(new BasicHeader("Content-Type", "application/json;charset=iso-8859-1"));
+        assertEquals("ISO-8859-1", iso88591.name());
+
+        Charset utf8 = endpointService.charsetFrom(new BasicHeader("Content-Type", "application/json;charset=UTF-8"));
+        assertEquals("UTF-8", utf8.name());
+
+        assertEquals(null, endpointService.charsetFrom(null));
+        assertEquals(null, endpointService.charsetFrom(new BasicHeader("Content-Type", "application/json;charset=invalid")));
+    }
 
     public static TypeSafeMatcher<HttpUriRequest> hasUri(final String uri) {
         return new TypeSafeMatcher<HttpUriRequest>() {
@@ -258,5 +302,34 @@ public class EndpointServiceImplTest {
         };
     }
 
+    public static TypeSafeMatcher<HttpPost> hasEntity(final String payload) {
+        return new TypeSafeMatcher<HttpPost>() {
+            @Override
+            protected boolean matchesSafely(HttpPost request) {
+                try {
+                    HttpEntity entity = request.getEntity();
+                    String content = EntityUtils.toString(entity);
+                    return payload.equals(content);
+                } catch (IOException e) {
+                    return false;
+                }
+            }
 
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("with payload: " + payload);
+            }
+
+            @Override
+            public void describeMismatchSafely(HttpPost request, Description description) {
+                try {
+                    HttpEntity entity = request.getEntity();
+                    String content = EntityUtils.toString(entity);
+                    description.appendText("was " + content);
+                } catch (IOException e) {
+                    description.appendText("got exception " + e.getMessage());
+                }
+            }
+        };
+    }
 }

@@ -1,0 +1,30 @@
+Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-bundle;singleton:=true
+Import-Package: \
+  com.adobe.cq.dialogconversion;resolution:=optional,\
+  com.amazonaws.*;resolution:=optional,\
+  com.fasterxml.jackson.core;resolution:=optional,\
+  com.fasterxml.jackson.databind;resolution:=optional,\
+  com.github.jknack.handlebars;resolution:=optional,\
+  com.github.benmanes.caffeine.*;resolution:=optional,\
+  twitter4j.*;resolution:=optional,\
+  org.apache.poi.ss.usermodel;version="[3.0,6)",\
+  org.apache.poi.ss.util;version="[3.0,6)",\
+  org.apache.poi.xssf.usermodel;version="[2.0,6)",\
+  javax.annotation;version=0.0.0,\
+  !android.util.*,\
+  !com.google.common.*,\
+  !com.google.errorprone.annotations.*,\
+  !com.google.thirdparty.*,\
+  !com.jcraft.*,\
+  !io.jsonwebtoken.*,\
+  !org.bouncycastle.jce.*,\
+  !org.checkerframework.checker.nullness.qual,\
+  com.day.cq.wcm.api;version="[1.30,2)",\
+  *
+# support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
+# paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
+-plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
+# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
+# this is not properly merged with entries from Felix SCR Bnd plugin, therefore later on patched with m-shade-p
+Service-Component: OSGI-INF/*.xml
+-classpath: $(basedir)/target/aem-sdk-api-info/

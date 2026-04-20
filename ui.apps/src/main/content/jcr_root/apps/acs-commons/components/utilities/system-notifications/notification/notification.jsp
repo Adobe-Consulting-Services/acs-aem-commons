@@ -31,7 +31,19 @@
     String notificationId = systemNotifications.getNotificationId(pageManager.getContainingPage(resource));
     
     pageContext.setAttribute("title", xssAPI.encodeForHTML(properties.get("jcr:title", String.class)));
-    pageContext.setAttribute("style", xssAPI.encodeForHTMLAttr(properties.get("style", "green")));
+
+    String style = properties.get("style", "green");
+    if ("green".equals(style)) {
+        style = "success";
+    } else if ("red".equals(style)) {
+        style = "error";
+    } else if ("yellow".equals(style)) {
+        style = "warning";
+    } else if ("blue".equals(style)) {
+        style = "info";
+    }
+
+    pageContext.setAttribute("style", xssAPI.encodeForHTMLAttr(style));
     pageContext.setAttribute("uid", xssAPI.encodeForHTMLAttr(notificationId));
 
     Date onTime = properties.get("onTime", Date.class);
@@ -51,14 +63,26 @@
     message = systemNotifications.getMessage(message, onTimeFormatted, offTimeFormatted);
     pageContext.setAttribute("message", message);
 
-
     boolean dismissible = properties.get("dismissible", true);
-    pageContext.setAttribute("dismissible", dismissible );
+    pageContext.setAttribute("dismissible", dismissible);
 
-%><div class="acsCommons-System-Notification acsCommons-System-Notification--${style}"
-       data-dismissible="${dismissible}"
-       data-uid="${uid}">
-<% if (dismissible) { %>    <a href="#" class="acsCommons-System-Notification-dismiss">Dismiss</a><% } %>
-    <div class="acsCommons-System-Notification-title">${title}</div>
-    <div class="acsCommons-System-Notification-message">${message}</div>
-</div>
+    pageContext.setAttribute("dismissibleLabel",
+        xssAPI.encodeForHTML(properties.get("dismissibleLabel", "Close")));
+
+
+%><coral-alert
+  size="L"
+  variant="${style}"
+  class="acsCommons-System-Notification"
+  data-dismissible="${dismissible}"
+  data-fn-acs-commons-system-notification-uid="${uid}">
+  <coral-alert-header>${title}</coral-alert-header>
+  <coral-alert-content>
+    ${message}
+    <% if (dismissible) { %>
+        <div style="text-align:right">
+          <button data-fn-acs-commons-system-notification-dismiss="${uid}" is="coral-button" variant="minimal" >${dismissibleLabel}</button>
+        </div>
+    <% } %>
+  </coral-alert-content>
+</coral-alert>

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.oak.sql2scorer.impl.servlets;
 
@@ -23,7 +21,7 @@ import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -37,17 +35,19 @@ import javax.jcr.query.RowIterator;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.jetbrains.annotations.NotNull;
+import org.osgi.service.component.annotations.Component;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.apache.jackrabbit.util.ISO8601;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
 
 /**
  * This servlet submits a JCR-SQL2 query with an additional oak:scoreExplanation column that contains the explanation of
@@ -132,8 +132,8 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
     static final String KEY_ERROR = "error";
 
     @Override
-    protected void doPost(@Nonnull final SlingHttpServletRequest request,
-                          @Nonnull final SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(@NotNull final SlingHttpServletRequest request,
+                          @NotNull final SlingHttpServletResponse response) throws ServletException, IOException {
 
         response.setContentType("application/json;charset=utf-8");
 

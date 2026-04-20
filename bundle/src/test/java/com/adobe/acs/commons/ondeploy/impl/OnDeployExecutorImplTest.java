@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
@@ -29,15 +27,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.doThrow;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -50,10 +48,13 @@ import javax.management.openmbean.TabularData;
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleMakeChangesThenFail;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -64,18 +65,19 @@ import org.junit.Test;
 
 public class OnDeployExecutorImplTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     @Before
     public void setup() throws RepositoryException {
         context.build().resource(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER).commit();
-
+        context.registerService(RequireAem.class, mock(RequireAem.class),"distribution","classic");
         LogTester.reset();
     }
 
     @Test
     public void testCloseResources() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
         doReturn(resourceResolver).when(impl).logIn();
@@ -305,6 +307,21 @@ public class OnDeployExecutorImplTest {
 
         Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
+    }
+
+    @Test
+    public void testExecuteDoesntCommitChangesMadeByFailingScript() {
+        context.registerService(OnDeployScriptProvider.class, 
+                () -> asList(new OnDeployScriptTestExampleMakeChangesThenFail()));
+
+        try {
+            context.registerInjectActivateService(new OnDeployExecutorImpl());
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof OnDeployEarlyTerminationException);
+        }
+
+        assertNull(context.resourceResolver().getResource(OnDeployScriptTestExampleMakeChangesThenFail.CREATED_PATH));
     }
 
     @Test

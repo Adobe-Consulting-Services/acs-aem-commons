@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.models.injectors.annotation;
 
 
+import com.adobe.acs.commons.models.injectors.impl.HierarchicalPagePropertyInjector;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -41,20 +40,42 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @InjectAnnotation
-@Source(HierarchicalPageProperty.SOURCE)
+@Source(HierarchicalPagePropertyInjector.SOURCE)
 public @interface HierarchicalPageProperty {
 
+
     /**
-     * Source value used for this annotation.
-     * @see Source
+     * Start traversing upwards in the hierarchy from a specific level, skipping lower levels.
+     * @since 6.0.16
+     * @see https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/com/day/cq/wcm/api/Page.html#getAbsoluteParent-int-
+     *   | level | returned                        |
+     *  |     0 | /content                        |
+     *  |     1 | /content/geometrixx             |
+     *  |     2 | /content/geometrixx/en          |
+     *  |     3 | /content/geometrixx/en/products |
+     *  |     4 | null
+     * If we'd use 1 in this example, we would skip over level 2 and 3.
+     * -1 means we disable this value.
      */
-    String SOURCE = "hierarchical-page-property";
+    int traverseFromAbsoluteParent() default -1;
+
+    /**
+     * Whether to use the current page (true) or the resource page (false).
+     * @return
+     */
+    boolean useCurrentPage() default false;
 
     /**
      * Specifies the name of the value from the value map to take.
      * If empty, then the name is derived from the method or field.
      */
     String value() default StringUtils.EMPTY;
+
+    /**
+     * Specifies if it should use the hierarchy to search for the page property.
+     * If false, it will only look at the current page.
+     */
+    boolean inherit() default true;
 
     /**
      * if set to REQUIRED injection is mandatory, if set to OPTIONAL injection is optional, in case of DEFAULT

@@ -1,48 +1,43 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
-import org.osgi.annotation.versioning.ProviderType;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.lang.ClassUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @ProviderType
 public final class TypeUtil {
@@ -161,7 +156,8 @@ public final class TypeUtil {
         } else if (StringUtils.equalsIgnoreCase("false", data)) {
             return klass.cast(Boolean.FALSE);
         } else if (JSON_DATE.matcher(data).matches()) {
-            return klass.cast(ISODateTimeFormat.dateTimeParser().parseDateTime(data).toDate());
+            long epochSeconds = OffsetDateTime.parse(data).toInstant().toEpochMilli();
+            return klass.cast(new Date(epochSeconds));
         } else {
             return klass.cast(data);
         }
@@ -243,7 +239,7 @@ public final class TypeUtil {
     }
 
     /**
-     * Transforms a Map of <String, ?> into a ValueMap.
+     * Transforms a Map of &lgt;String, ?&gt; into a ValueMap.
      *
      * @param map
      * @return a ValueMap of the parameter map

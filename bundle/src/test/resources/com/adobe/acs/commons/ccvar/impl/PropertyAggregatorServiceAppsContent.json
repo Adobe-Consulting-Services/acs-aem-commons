@@ -1,0 +1,31 @@
+{
+  "jcr:primaryType": "cq:Component",
+  "jcr:title": "Accordion",
+  "cq:isContainer": "true",
+  "sling:resourceSuperType": "core/wcm/components/accordion/v1/accordion",
+  "componentGroup": "CCVAR Test - Content",
+  "cq:editConfig": {
+    "jcr:primaryType": "cq:EditConfig",
+    "cq:listeners": {
+      "jcr:primaryType": "cq:EditListenersConfig",
+      "afterchildmove": "CQ.CoreComponents.panelcontainer.v1.AFTER_CHILD_MOVE",
+      "afterchilddelete": "CQ.CoreComponents.panelcontainer.v1.AFTER_CHILD_DELETE",
+      "afterchildinsert": "CQ.CoreComponents.panelcontainer.v1.AFTER_CHILD_INSERT"
+    }
+  },
+  "cq:template": {
+    "jcr:primaryType": "nt:unstructured",
+    "item_1": {
+      "jcr:primaryType": "nt:unstructured",
+      "jcr:title": "Item 1",
+      "layout": "responsiveGrid",
+      "sling:resourceType": "ccvar/components/container"
+    },
+    "item_2": {
+      "jcr:primaryType": "nt:unstructured",
+      "jcr:title": "Item 2",
+      "layout": "responsiveGrid",
+      "sling:resourceType": "ccvar/components/container"
+    }
+  }
+}

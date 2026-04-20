@@ -27,3 +27,16 @@ content/src/main/content/jcr_root/etc/clientlibs/.content.xml
 
 node_modules
 bundle/mockserver.log
+
+#VS Code
+.vscode
+.history
+
+#Jenv
+.java-version
+
+# Maven versions plugin
+pom.xml.versionsBackup
+
+# Qlty plugin folder
+/.qlty/

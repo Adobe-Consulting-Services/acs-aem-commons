@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
@@ -96,8 +94,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
 
-    private long maxSizeInMb;
-
     /** Cache - Uses Google Guava's cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
@@ -105,7 +101,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     protected void activate(Map<String, Object> configs) {
         // Read config and populate values.
         ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
-        maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
+        long maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitailize the cache.
@@ -150,7 +146,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
         @Override
         public void onRemoval(RemovalNotification<CacheKey, MemCachePersistenceObject> removalNotification) {
-            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey().toString(),
+            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey(),
                     removalNotification.getCause().name());
         }
     }

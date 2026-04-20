@@ -84,7 +84,7 @@
                 var results = [];
 
                 if(!_.isEmpty(data.hits)){
-                    results = _.pluck(data.hits, "path");
+                    results = _.map(data.hits, "path");
                 }
 
                 if (callback){

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.json;
 
@@ -23,8 +21,6 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
@@ -52,6 +48,7 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
                         for (Value v : p.getValues()) {
                             writeValue(writer, v);
                         }
+                        writer.endArray();
                     } else {
                         writeValue(writer, p.getValue());
                     }
@@ -63,7 +60,6 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
                 }
                 writer.endObject();
             } catch (RepositoryException ex) {
-                Logger.getLogger(JcrJsonAdapter.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException(ex);
             }
         }

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.genericlists.impl;
 
@@ -28,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
@@ -39,12 +38,19 @@ public final class GenericListImpl implements GenericList {
 
     public static final class ItemImpl implements Item {
 
+        // Title and Text are always the exact same value,
+        // text is really only used by json resources, but need to keep title for Backwards Compatability
+        @SuppressWarnings("squid:S1068")
+        private final String text;
         private final String title;
         private final String value;
         private final ValueMap props;
 
+        
+
         public ItemImpl(String t, String v, ValueMap props) {
             this.title = t;
+            this.text = t;
             this.value = v;
             this.props = props;
         }
@@ -100,27 +106,32 @@ public final class GenericListImpl implements GenericList {
     private final Map<String, Item> valueMapping;
 
     public GenericListImpl(Resource listParsys) {
-        List<Item> tempItems = new ArrayList<>();
-        Map<String, Item> tempValueMapping = new HashMap<>();
-        Iterator<Resource> children = listParsys.listChildren();
-        while (children.hasNext()) {
-            Resource res = children.next();
-            ValueMap map = res.getValueMap();
-            String title = map.get(NameConstants.PN_TITLE, String.class);
-            String value = map.get(PN_VALUE, String.class);
-            if (title != null && value != null) {
-                ItemImpl item = new ItemImpl(title, value, map);
-                tempItems.add(item);
-                tempValueMapping.put(value, item);
+        if (listParsys == null) {
+            items = Collections.emptyList();
+            valueMapping = Collections.emptyMap();
+        } else {
+            List<Item> tempItems = new ArrayList<>();
+            Map<String, Item> tempValueMapping = new HashMap<>();
+            Iterator<Resource> children = listParsys.listChildren();
+            while (children.hasNext()) {
+                Resource res = children.next();
+                ValueMap map = res.getValueMap();
+                String title = map.get(NameConstants.PN_TITLE, String.class);
+                String value = map.get(PN_VALUE, String.class);
+                if (title != null) {
+                    ItemImpl item = new ItemImpl(title, value, map);
+                    tempItems.add(item);
+                    tempValueMapping.put(value, item);
+                }
             }
+            items = Collections.unmodifiableList(tempItems);
+            valueMapping = Collections.unmodifiableMap(tempValueMapping);
         }
-        items = Collections.unmodifiableList(tempItems);
-        valueMapping = Collections.unmodifiableMap(tempValueMapping);
     }
 
     @Override
     public List<Item> getItems() {
-        return items;
+        return new ArrayList<>(items);
     }
 
     @Override

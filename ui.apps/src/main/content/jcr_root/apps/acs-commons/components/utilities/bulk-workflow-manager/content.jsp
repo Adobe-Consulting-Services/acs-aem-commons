@@ -18,9 +18,28 @@
   ~ #L%
   --%>
 <%@include file="/libs/foundation/global.jsp" %><%
-%><%@page session="false" %><%
+%><%@page session="false" contentType="text/html" pageEncoding="utf-8"
+          import="com.adobe.acs.commons.util.RequireAem" %><%
 
-%><div class="page"
+RequireAem requireAem = sling.getService(RequireAem.class);
+
+if (RequireAem.Distribution.CLOUD_READY.equals(requireAem.getDistribution())) { %>
+
+<link rel="stylesheet" href="https://unpkg.com/@adobe/spectrum-css@2.15.1/dist/standalone/spectrum-light.css"/>
+<div class="spectrum-Toast spectrum-Toast--negative" style="display: block; margin: 0 auto; width: 100%;">
+    <div class="spectrum-Toast-body">
+        <div class="spectrum-Toast-content">
+            Bulk Workflow Manager is not compatible with your version of Adobe Experience Manager.
+            <br/>
+            As a possible alternative, please checkout ACS AEM Commons Manage Controlled Processes (MCP).
+        </div>
+    </div>
+</div>
+
+<%  return;
+} %>
+
+<div class="page"
          role="main"
          ng-controller="MainCtrl"
          ng-init="app.uri = '${resourcePath}'; init();">

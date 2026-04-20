@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.throttling;
 
@@ -32,7 +30,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestProgressTracker;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
@@ -89,10 +86,10 @@ public class RequestThrottlerTest {
         rt.activate(config);
         context.request().setResource(context.resourceResolver().getResource("/"));
         FilterChain chain = mock(FilterChain.class);
-        doNothing().when(chain).doFilter(anyObject(), anyObject());
+        doNothing().when(chain).doFilter(any(), any());
         rt.doFilter(context.request(), context.response(), chain);
         verify(chain).doFilter(context.request(), context.response());
-        verify(rt, never()).doFilterInternal(anyObject(), anyObject());
+        verify(rt, never()).doFilterInternal(any(), any());
     }
 
     @Test
@@ -115,14 +112,14 @@ public class RequestThrottlerTest {
         doReturn(rpt).when(request).getRequestProgressTracker();
 
         FilterChain chain = mock(FilterChain.class);
-        doNothing().when(chain).doFilter(anyObject(), anyObject());
+        doNothing().when(chain).doFilter(any(), any());
 
         for (int i = 0; i < 10; i++) {
             rt.doFilter(request, context.response(), chain);
 
         }
         verify(chain, times(10)).doFilter(request, context.response());
-        verify(rpt, times(10)).log(anyObject());
+        verify(rpt, times(10)).log(any());
 
     }
 

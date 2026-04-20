@@ -1,0 +1,1158 @@
+{
+  "jcr:primaryType": "dam:AssetContent",
+  "jcr:mixinTypes": ["cq:ReplicationStatus"],
+  "cq:lastReplicationAction": "Activate",
+  "cq:lastReplicatedBy": "egor.kozlov",
+  "jcr:lastModifiedBy": "john.mcfarland@fleetcor.com",
+  "cq:lastReplicated": "2023-02-19T12:28:37.379Z",
+  "dam:assetState": "processed",
+  "jcr:lastModified": "2022-04-26T16:39:56.300Z",
+  "usages": {
+    "jcr:primaryType": "nt:unstructured",
+    "usedBy": ["asset"],
+    "dam:score": 1,
+    "asset": {
+      "jcr:primaryType": "nt:unstructured",
+      "lastUsed": "2022-05-16T03:49:08.558Z",
+      "count": 1
+      }
+    },
+  "renditions": {
+    "jcr:primaryType": "nt:folder",
+    "jcr:createdBy": "john.mcfarland@fleetcor.com",
+    "jcr:created": "2022-04-26T16:38:58.061Z",
+    "cq5dam.thumbnail.48.48.png": {
+      "jcr:primaryType": "nt:file",
+      "jcr:createdBy": "workflow-process-service",
+      "jcr:created": "2022-04-26T16:39:56.246Z",
+      "jcr:content": {
+        "jcr:primaryType": "oak:Resource",
+        "jcr:lastModifiedBy": "workflow-process-service",
+        "jcr:mimeType": "image/png",
+        "jcr:lastModified": "2022-04-26T16:39:56.247Z",
+        ":jcr:data": 536
+        }
+      },
+    "cq5dam.thumbnail.140.100.png": {
+      "jcr:primaryType": "nt:file",
+      "jcr:createdBy": "workflow-process-service",
+      "jcr:created": "2022-04-26T16:39:56.242Z",
+      "jcr:content": {
+        "jcr:primaryType": "oak:Resource",
+        "jcr:lastModifiedBy": "workflow-process-service",
+        "jcr:mimeType": "image/png",
+        "jcr:lastModified": "2022-04-26T16:39:56.243Z",
+        ":jcr:data": 1684
+        }
+      },
+    "cq5dam.web.1280.1280.jpeg": {
+      "jcr:primaryType": "nt:file",
+      "jcr:createdBy": "workflow-process-service",
+      "jcr:created": "2022-04-26T16:39:56.284Z",
+      "jcr:content": {
+        "jcr:primaryType": "oak:Resource",
+        "jcr:lastModifiedBy": "workflow-process-service",
+        "jcr:mimeType": "image/jpeg",
+        "jcr:lastModified": "2022-04-26T16:39:56.296Z",
+        ":jcr:data": 12627
+        }
+      },
+    "original": {
+      "jcr:primaryType": "nt:file",
+      "jcr:createdBy": "john.mcfarland@fleetcor.com",
+      "jcr:created": "2022-04-26T16:38:58.062Z",
+      "jcr:content": {
+        "jcr:primaryType": "oak:Resource",
+        "jcr:lastModifiedBy": "john.mcfarland@fleetcor.com",
+        "jcr:mimeType": "image/jpeg",
+        "jcr:lastModified": "2022-04-26T16:38:58.062Z",
+        ":jcr:data": 632024
+        }
+      },
+    "cq5dam.thumbnail.319.319.png": {
+      "jcr:primaryType": "nt:file",
+      "jcr:createdBy": "workflow-process-service",
+      "jcr:created": "2022-04-26T16:39:56.256Z",
+      "jcr:content": {
+        "jcr:primaryType": "oak:Resource",
+        "jcr:lastModifiedBy": "workflow-process-service",
+        "jcr:mimeType": "image/png",
+        "jcr:lastModified": "2022-04-26T16:39:56.257Z",
+        ":jcr:data": 4082
+        }
+      }
+    },
+  "related": {"jcr:primaryType": "nt:unstructured"},
+  "metadata": {
+    "jcr:primaryType": "nt:unstructured",
+    "jcr:mixinTypes": ["cq:Taggable"],
+    "dam:Physicalheightininches": "-1.0",
+    "dam:Physicalwidthininches": "-1.0",
+    "xmpTPg:HasVisibleTransparency": "False",
+    "dam:Fileformat": "JPEG",
+    "dam:Progressive": "no",
+    "tiff:ImageLength": 249,
+    "xmp:CreatorTool": "Adobe Illustrator 26.0 (Windows)",
+    "dam:extracted": "2022-04-26T16:39:56.083Z",
+    "dc:format": "image/jpeg",
+    "dam:Bitsperpixel": 32,
+    "xmpMM:DocumentID": "xmp.did:526773d2-a98f-654f-bf01-cbbe9b3a6f9d",
+    "dam:MIMEtype": "image/jpeg",
+    "dam:Physicalwidthindpi": -1,
+    "dam:Physicalheightindpi": -1,
+    "xmpMM:OriginalDocumentID": "uuid:5D20892493BFDB11914A8590D31508C8",
+    "ns1_1_:StartupProfile": "Print",
+    "xmpTPg:NPages": 1,
+    "dam:Numberofimages": 1,
+    "xmp:MetadataDate": "2020-05-26T16:53:03.000+05:30",
+    "xmpMM:RenditionClass": "proof:pdf",
+    "pdf:Producer": "Adobe PDF library 15.00",
+    "xmpTPg:HasVisibleOverprint": "False",
+    "ns1_1_:CreatorSubTool": "Adobe Illustrator",
+    "dam:Numberoftextualcomments": 0,
+    "xmpMM:InstanceID": "uuid:c9914b06-205d-4060-b620-fae57f2f5102",
+    "xmp:ModifyDate": "2021-12-10T14:22:37.000Z",
+    "xmp:CreateDate": "2021-12-10T08:22:37.000-06:00",
+    "tiff:ImageWidth": 657,
+    "dam:sha1": "08b44275cc46301a535ee1c7095c0daa3f3dffe8",
+    "dam:size": 632024,
+    "ns1_1_:Type": "Document",
+    "dc:title": "Print",
+    "xmp:Thumbnails": {
+      "jcr:primaryType": "nt:unstructured",
+      "xmpNodeType": "xmpArray",
+      "xmpArraySize": 1,
+      "xmpArrayType": "rdf:Alt",
+      "1": {
+        "jcr:primaryType": "nt:unstructured",
+        "xmpNodeType": "xmpStruct",
+        "xmpGImg:image": "/9j/4AAQSkZJRgABAgEASABIAAD/7QAsUGhvdG9zaG9wIDMuMAA4QklNA+0AAAAAABAASAAAAAEA AQBIAAAAAQAB/+4ADkFkb2JlAGTAAAAAAf/bAIQABgQEBAUEBgUFBgkGBQYJCwgGBggLDAoKCwoK DBAMDAwMDAwQDA4PEA8ODBMTFBQTExwbGxscHx8fHx8fHx8fHwEHBwcNDA0YEBAYGhURFRofHx8f Hx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8f/8AAEQgBAAEAAwER AAIRAQMRAf/EAaIAAAAHAQEBAQEAAAAAAAAAAAQFAwIGAQAHCAkKCwEAAgIDAQEBAQEAAAAAAAAA AQACAwQFBgcICQoLEAACAQMDAgQCBgcDBAIGAnMBAgMRBAAFIRIxQVEGE2EicYEUMpGhBxWxQiPB UtHhMxZi8CRygvElQzRTkqKyY3PCNUQnk6OzNhdUZHTD0uIIJoMJChgZhJRFRqS0VtNVKBry4/PE 1OT0ZXWFlaW1xdXl9WZ2hpamtsbW5vY3R1dnd4eXp7fH1+f3OEhYaHiImKi4yNjo+Ck5SVlpeYmZ qbnJ2en5KjpKWmp6ipqqusra6voRAAICAQIDBQUEBQYECAMDbQEAAhEDBCESMUEFURNhIgZxgZEy obHwFMHR4SNCFVJicvEzJDRDghaSUyWiY7LCB3PSNeJEgxdUkwgJChgZJjZFGidkdFU38qOzwygp 0+PzhJSktMTU5PRldYWVpbXF1eX1RlZmdoaWprbG1ub2R1dnd4eXp7fH1+f3OEhYaHiImKi4yNjo +DlJWWl5iZmpucnZ6fkqOkpaanqKmqq6ytrq+v/aAAwDAQACEQMRAD8A9U4q7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq 7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq 7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq 7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq 7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq 7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq 7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7 FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F XYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX Yq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXY q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FX//2Q==",
+        "xmpGImg:width": 256,
+        "xmpGImg:format": "JPEG",
+        "xmpGImg:height": 256
+        }
+      },
+    "xmpMM:DerivedFrom": {
+      "jcr:primaryType": "nt:unstructured",
+      "stRef:instanceID": "uuid:f346e470-2f42-4b41-ab9e-90c244b06151",
+      "stRef:originalDocumentID": "uuid:5D20892493BFDB11914A8590D31508C8",
+      "xmpNodeType": "xmpStruct",
+      "stRef:renditionClass": "proof:pdf",
+      "stRef:documentID": "xmp.did:68f615b9-b15d-024c-915a-8c6e37af3c70"
+      },
+    "xmpMM:History": {
+      "jcr:primaryType": "nt:unstructured",
+      "xmpNodeType": "xmpArray",
+      "xmpArraySize": 37,
+      "xmpArrayType": "rdf:Seq",
+      "1": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/pdf to <unknown>",
+        "xmpNodeType": "xmpStruct"
+        },
+      "2": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-04-17T14:19:15.000+05:30",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:D27F11740720681191099C3B601C4548"
+        },
+      "3": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/pdf to <unknown>",
+        "xmpNodeType": "xmpStruct"
+        },
+      "4": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/pdf to <unknown>",
+        "xmpNodeType": "xmpStruct"
+        },
+      "5": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-15T16:23:06.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F97F1174072068118D4ED246B3ADB1C6"
+        },
+      "6": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-15T17:10:45.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FA7F1174072068118D4ED246B3ADB1C6"
+        },
+      "7": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-15T22:53:33.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:EF7F117407206811A46CA4519D24356B"
+        },
+      "8": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-15T23:07:07.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F07F117407206811A46CA4519D24356B"
+        },
+      "9": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T10:35:43.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F77F117407206811BDDDFD38D0CF24DD"
+        },
+      "10": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/pdf to <unknown>",
+        "xmpNodeType": "xmpStruct"
+        },
+      "11": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T10:40:59.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F97F117407206811BDDDFD38D0CF24DD"
+        },
+      "12": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/vnd.adobe.illustrator to <unknown>",
+        "xmpNodeType": "xmpStruct"
+        },
+      "13": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T11:26:55.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FA7F117407206811BDDDFD38D0CF24DD"
+        },
+      "14": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T11:29:01.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FB7F117407206811BDDDFD38D0CF24DD"
+        },
+      "15": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T11:29:20.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FC7F117407206811BDDDFD38D0CF24DD"
+        },
+      "16": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T11:30:54.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FD7F117407206811BDDDFD38D0CF24DD"
+        },
+      "17": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T11:31:22.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FE7F117407206811BDDDFD38D0CF24DD"
+        },
+      "18": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T12:23:46.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:B233668C16206811BDDDFD38D0CF24DD"
+        },
+      "19": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T13:27:54.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:B333668C16206811BDDDFD38D0CF24DD"
+        },
+      "20": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T13:46:13.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:B433668C16206811BDDDFD38D0CF24DD"
+        },
+      "21": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T15:47:57.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F77F11740720681197C1BF14D1759E83"
+        },
+      "22": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T15:51:06.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F87F11740720681197C1BF14D1759E83"
+        },
+      "23": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-16T15:52:22.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F97F11740720681197C1BF14D1759E83"
+        },
+      "24": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/vnd.adobe.illustrator to application/vnd.adobe.illustrator",
+        "xmpNodeType": "xmpStruct"
+        },
+      "25": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-22T13:28:01.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FA7F117407206811B628E3BF27C8C41B"
+        },
+      "26": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/vnd.adobe.illustrator to application/vnd.adobe.illustrator",
+        "xmpNodeType": "xmpStruct"
+        },
+      "27": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-22T16:23:53.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:FF7F117407206811B628E3BF27C8C41B"
+        },
+      "28": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/vnd.adobe.illustrator to application/vnd.adobe.illustrator",
+        "xmpNodeType": "xmpStruct"
+        },
+      "29": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-05-28T16:45:26.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:07C3BD25102DDD1181B594070CEB88D9"
+        },
+      "30": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "converted",
+        "stEvt:params": "from application/vnd.adobe.illustrator to application/vnd.adobe.illustrator",
+        "xmpNodeType": "xmpStruct"
+        },
+      "31": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-06-02T13:25:25.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F87F1174072068119098B097FDA39BEF"
+        },
+      "32": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-06-09T14:58:36.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F77F117407206811BB1DBF8F242B6F84"
+        },
+      "33": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-06-11T14:31:27.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F97F117407206811ACAFB8DA80854E76"
+        },
+      "34": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-06-11T22:37:35.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:0180117407206811834383CD3A8D2303"
+        },
+      "35": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "stEvt:changed_xmpArrayType": "rdf:Bag",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS4",
+        "stEvt:when": "2008-06-27T14:40:42.000-07:00",
+        "stEvt:changed": ["/"],
+        "stEvt:instanceID": "xmp.iid:F77F117407206811818C85DF6A1A75C3"
+        },
+      "36": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator CS5",
+        "stEvt:when": "2009-11-26T17:25:36.000+05:30",
+        "stEvt:changed": "/",
+        "stEvt:instanceID": "xmp.iid:0580117407206811910989C2A6325BB5"
+        },
+      "37": {
+        "jcr:primaryType": "nt:unstructured",
+        "stEvt:action": "saved",
+        "xmpNodeType": "xmpStruct",
+        "stEvt:softwareAgent": "Adobe Illustrator 24.2 (Windows)",
+        "stEvt:when": "2020-05-26T16:53:03.000+05:30",
+        "stEvt:changed": "/",
+        "stEvt:instanceID": "xmp.iid:526773d2-a98f-654f-bf01-cbbe9b3a6f9d"
+        }
+      },
+    "xmpTPg:MaxPageSize": {
+      "jcr:primaryType": "nt:unstructured",
+      "stDim:h": "792.000000",
+      "stDim:w": "612.000000",
+      "xmpNodeType": "xmpStruct",
+      "stDim:unit": "Points"
+      },
+    "xmpTPg:SwatchGroups": {
+      "jcr:primaryType": "nt:unstructured",
+      "xmpNodeType": "xmpArray",
+      "xmpArraySize": 3,
+      "xmpArrayType": "rdf:Seq",
+      "1": {
+        "jcr:primaryType": "nt:unstructured",
+        "xmpNodeType": "xmpStruct",
+        "xmpG:groupName": "Default Swatch Group",
+        "xmpG:groupType": 0,
+        "xmpG:Colorants": {
+          "jcr:primaryType": "nt:unstructured",
+          "xmpNodeType": "xmpArray",
+          "xmpArraySize": 40,
+          "xmpArrayType": "rdf:Seq",
+          "1": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "White",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "2": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "100.000000",
+            "xmpG:swatchName": "Black",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "3": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "CMYK Red",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "4": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "CMYK Yellow",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "5": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "CMYK Green",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "100.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "6": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "CMYK Cyan",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "100.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "7": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "CMYK Blue",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "100.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "8": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "CMYK Magenta",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "9": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "10.000000",
+            "xmpG:swatchName": "C=15 M=100 Y=90 K=10",
+            "xmpG:yellow": "90.000000",
+            "xmpG:cyan": "15.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "10": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "90.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=90 Y=85 K=0",
+            "xmpG:yellow": "85.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "11": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "80.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=80 Y=95 K=0",
+            "xmpG:yellow": "95.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "12": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "50.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=50 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "13": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "35.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=35 Y=85 K=0",
+            "xmpG:yellow": "85.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "14": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=5 M=0 Y=90 K=0",
+            "xmpG:yellow": "90.000000",
+            "xmpG:cyan": "5.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "15": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=20 M=0 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "20.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "16": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=50 M=0 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "50.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "17": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=75 M=0 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "75.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "18": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "10.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "10.000000",
+            "xmpG:swatchName": "C=85 M=10 Y=100 K=10",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "85.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "19": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "30.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "30.000000",
+            "xmpG:swatchName": "C=90 M=30 Y=95 K=30",
+            "xmpG:yellow": "95.000000",
+            "xmpG:cyan": "90.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "20": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=75 M=0 Y=75 K=0",
+            "xmpG:yellow": "75.000000",
+            "xmpG:cyan": "75.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "21": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "10.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=80 M=10 Y=45 K=0",
+            "xmpG:yellow": "45.000000",
+            "xmpG:cyan": "80.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "22": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "15.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=70 M=15 Y=0 K=0",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "70.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "23": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "50.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=85 M=50 Y=0 K=0",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "85.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "24": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "95.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=100 M=95 Y=5 K=0",
+            "xmpG:yellow": "5.000000",
+            "xmpG:cyan": "100.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "25": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "25.000000",
+            "xmpG:swatchName": "C=100 M=100 Y=25 K=25",
+            "xmpG:yellow": "25.000000",
+            "xmpG:cyan": "100.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "26": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=75 M=100 Y=0 K=0",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "75.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "27": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=50 M=100 Y=0 K=0",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "50.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "28": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "10.000000",
+            "xmpG:swatchName": "C=35 M=100 Y=35 K=10",
+            "xmpG:yellow": "35.000000",
+            "xmpG:cyan": "35.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "29": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=10 M=100 Y=50 K=0",
+            "xmpG:yellow": "50.000000",
+            "xmpG:cyan": "10.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "30": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "95.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=95 Y=20 K=0",
+            "xmpG:yellow": "20.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "31": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "25.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=25 M=25 Y=40 K=0",
+            "xmpG:yellow": "40.000000",
+            "xmpG:cyan": "25.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "32": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "45.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "5.000000",
+            "xmpG:swatchName": "C=40 M=45 Y=50 K=5",
+            "xmpG:yellow": "50.000000",
+            "xmpG:cyan": "40.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "33": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "50.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "25.000000",
+            "xmpG:swatchName": "C=50 M=50 Y=60 K=25",
+            "xmpG:yellow": "60.000000",
+            "xmpG:cyan": "50.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "34": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "60.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "40.000000",
+            "xmpG:swatchName": "C=55 M=60 Y=65 K=40",
+            "xmpG:yellow": "65.000000",
+            "xmpG:cyan": "55.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "35": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "40.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=25 M=40 Y=65 K=0",
+            "xmpG:yellow": "65.000000",
+            "xmpG:cyan": "25.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "36": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "50.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "10.000000",
+            "xmpG:swatchName": "C=30 M=50 Y=75 K=10",
+            "xmpG:yellow": "75.000000",
+            "xmpG:cyan": "30.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "37": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "60.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "25.000000",
+            "xmpG:swatchName": "C=35 M=60 Y=80 K=25",
+            "xmpG:yellow": "80.000000",
+            "xmpG:cyan": "35.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "38": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "65.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "35.000000",
+            "xmpG:swatchName": "C=40 M=65 Y=90 K=35",
+            "xmpG:yellow": "90.000000",
+            "xmpG:cyan": "40.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "39": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "70.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "50.000000",
+            "xmpG:swatchName": "C=40 M=70 Y=100 K=50",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "40.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "40": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "70.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "70.000000",
+            "xmpG:swatchName": "C=50 M=70 Y=80 K=70",
+            "xmpG:yellow": "80.000000",
+            "xmpG:cyan": "50.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            }
+          }
+        },
+      "2": {
+        "jcr:primaryType": "nt:unstructured",
+        "xmpNodeType": "xmpStruct",
+        "xmpG:groupName": "Grays",
+        "xmpG:groupType": 1,
+        "xmpG:Colorants": {
+          "jcr:primaryType": "nt:unstructured",
+          "xmpNodeType": "xmpArray",
+          "xmpArraySize": 11,
+          "xmpArrayType": "rdf:Seq",
+          "1": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "100.000000",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=100",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "2": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "89.999400",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=90",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "3": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "79.998800",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=80",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "4": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "69.999700",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=70",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "5": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "59.999100",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=60",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "6": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "50.000000",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=50",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "7": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "39.999400",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=40",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "8": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "29.998800",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=30",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "9": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "19.999700",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=20",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "10": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "9.999100",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=10",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "11": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "0.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "4.998800",
+            "xmpG:swatchName": "C=0 M=0 Y=0 K=5",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            }
+          }
+        },
+      "3": {
+        "jcr:primaryType": "nt:unstructured",
+        "xmpNodeType": "xmpStruct",
+        "xmpG:groupName": "Brights",
+        "xmpG:groupType": 1,
+        "xmpG:Colorants": {
+          "jcr:primaryType": "nt:unstructured",
+          "xmpNodeType": "xmpArray",
+          "xmpArraySize": 6,
+          "xmpArrayType": "rdf:Seq",
+          "1": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "100.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=100 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "2": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "75.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=75 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "3": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "10.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=0 M=10 Y=95 K=0",
+            "xmpG:yellow": "95.000000",
+            "xmpG:cyan": "0.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "4": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "10.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=85 M=10 Y=100 K=0",
+            "xmpG:yellow": "100.000000",
+            "xmpG:cyan": "85.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "5": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "90.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.000000",
+            "xmpG:swatchName": "C=100 M=90 Y=0 K=0",
+            "xmpG:yellow": "0.000000",
+            "xmpG:cyan": "100.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            },
+          "6": {
+            "jcr:primaryType": "nt:unstructured",
+            "xmpG:magenta": "90.000000",
+            "xmpNodeType": "xmpStruct",
+            "xmpG:black": "0.003100",
+            "xmpG:swatchName": "C=60 M=90 Y=0 K=0",
+            "xmpG:yellow": "0.003100",
+            "xmpG:cyan": "60.000000",
+            "xmpG:mode": "CMYK",
+            "xmpG:type": "PROCESS"
+            }
+          }
+        }
+      }
+    }
+  }

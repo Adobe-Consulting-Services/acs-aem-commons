@@ -1,0 +1,18 @@
+# Start Group: one
+User-agent: googlebot
+Allow: /botsOnly/
+Allow: /onlyGoogle/
+Disallow: /noGoogle/
+Disallow: /stillNoGoogle/
+# End Group: one
+# Start Group: two
+User-agent: bingbot
+User-agent: yahoobot
+Disallow: /content/geometrixx/en/no-bots/
+# End Group: two
+# Start Group: three
+User-agent: *
+Allow: /content/geometrixx/en/
+# End Group: three
+Sitemap: https://www.geometrixx.com/sitemap.xml
+Sitemap: https://www.geometrixx.com/content/geometrixx/en.sitemap.xml

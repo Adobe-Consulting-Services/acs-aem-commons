@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -46,8 +44,8 @@ import org.mockito.invocation.InvocationOnMock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -60,7 +58,7 @@ public class DataImporterTest {
     private static Spreadsheet importerData;
 
     @Rule
-    public final SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_MOCK);
+    public final SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_OAK);
 
     private DataImporter importer;
     private ActionManagerFactory actionManagerFactory;
@@ -87,7 +85,7 @@ public class DataImporterTest {
         doAnswer(this::runImmediately).when(runner).scheduleWork(any(), any());
         doAnswer(this::runImmediately).when(runner).scheduleWork(any(), anyInt());
         doAnswer(this::runImmediately).when(runner).scheduleWork(any(), any(), anyInt());
-        slingContext.registerInjectActivateService(runner);
+        slingContext.registerService(runner);
 
         // Set up FAM action manager factory
         actionManagerFactory = new ActionManagerFactoryImpl();
@@ -110,7 +108,7 @@ public class DataImporterTest {
     }
 
     private Object runImmediately(InvocationOnMock invocation) {
-        Runnable r = invocation.getArgumentAt(0, Runnable.class);
+        Runnable r = invocation.getArgument(0);
         r.run();
         return null;
     }
@@ -121,6 +119,9 @@ public class DataImporterTest {
         process.run(rr);
         assertNotNull("Node1 wasn't created", rr.getResource("/tmp/node1"));
         assertNotNull("Node2 wasn't created", rr.getResource("/tmp/node2"));
+
+        assertNotNull("Relative property path node wasn't created", rr.getResource("/tmp/node1/foo/bar"));
+        assertNotNull("Relative property path node wasn't created", rr.getResource("/tmp/node2/foo/bar"));
     }
 
     @Test
@@ -146,7 +147,7 @@ public class DataImporterTest {
         Calendar cal = values.get("date1", Calendar.class);
         assertEquals(1985, cal.get(Calendar.YEAR));
         assertEquals(Calendar.NOVEMBER, cal.get(Calendar.MONTH));
-        assertEquals((Long) 26L, new Long(cal.get(Calendar.DAY_OF_MONTH)));
+        assertEquals((Long) 26L, Long.valueOf(cal.get(Calendar.DAY_OF_MONTH)));
         cal = values.get("date2", Calendar.class);
         assertEquals(1985, cal.get(Calendar.YEAR));
         assertEquals(Calendar.NOVEMBER, cal.get(Calendar.MONTH));
@@ -155,6 +156,9 @@ public class DataImporterTest {
         assertEquals(9, cal.get(Calendar.HOUR_OF_DAY));
         assertEquals(0, cal.get(Calendar.MINUTE));
         assertEquals(0, cal.get(Calendar.SECOND));
+
+        assertEquals("relative property path 1", rr.getResource("/tmp/node1/foo/bar").getValueMap().get("test", String.class));
+        assertEquals("relative property path 2", rr.getResource("/tmp/node2/foo/bar").getValueMap().get("test", String.class));
     }
 
 }

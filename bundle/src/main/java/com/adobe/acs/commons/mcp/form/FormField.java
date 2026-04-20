@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
@@ -48,13 +46,23 @@ public @interface FormField {
 
     String[] options() default {};
 
+    boolean showOnCreate() default true;
+
+    boolean localize() default false;
+
+    String[] languages() default { "en" };
+
     public static class Factory {
         private Factory() {
             // Factory cannot be instantiated
         }
 
-        // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
         public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options) {
+            return create(name, hint, description, category, required, clazz, options, false, new String[]{"en"});
+        }
+
+        // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
+        public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options, boolean localize, String[] languages) {
             return new FormField() {
                 @Override
                 public String name() {
@@ -94,6 +102,21 @@ public @interface FormField {
                 @Override
                 public Class<? extends Annotation> annotationType() {
                     return null;
+                }
+
+                @Override
+                public boolean showOnCreate() {
+                    return true;
+                }
+
+                @Override
+                public boolean localize() {
+                    return localize;
+                }
+
+                @Override
+                public String[] languages() {
+                    return languages;
                 }
             };
         }

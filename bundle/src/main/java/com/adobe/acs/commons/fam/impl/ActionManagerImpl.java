@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
@@ -140,7 +138,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public List<Failure> getFailureList() {
-        return failures;
+        return Collections.unmodifiableList(failures);
     }
 
     @Override
@@ -170,20 +168,20 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             }
         } catch (Error e) {
             // These are very fatal errors but we should log them if we can
-            LOG.error("Fatal uncaught error in action " + getName(), e);
+            LOG.error("Fatal uncaught error in action {}", getName(), e);
             if (!closesResolver) {
                 logError(new RuntimeException(e));
             }
             throw e;
         } catch (Exception t) {
             // Less fatal errors, but still need to explicitly catch them
-            LOG.error("Error in action " + getName(), t);
+            LOG.error("Error in action {}", getName(), t);
             if (!closesResolver) {
                 logError(t);
             }
         } catch (Throwable t) {
             // There are some slippery runtime errors (unchecked) which slip through the cracks
-            LOG.error("Fatal uncaught error in action " + getName(), t);
+            LOG.error("Fatal uncaught error in action {}", getName(), t);
             if (!closesResolver) {
                 logError(new RuntimeException(t));
             }
@@ -228,7 +226,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 QueryResult results = query.execute();
                 for (NodeIterator nodeIterator = results.getNodes(); nodeIterator.hasNext();) {
                     final String nodePath = nodeIterator.nextNode().getPath();
-                    LOG.info("Processing found result " + nodePath);
+                    LOG.info("Processing found result {}", nodePath);
                     deferredWithResolver((ResourceResolver r) -> {
                         currentPath.set(nodePath);
                         if (filters != null) {
@@ -243,7 +241,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     });
                 }
             } catch (RepositoryException ex) {
-                LOG.error("Repository exception processing query " + queryStatement, ex);
+                LOG.error("Repository exception processing query '{}'", queryStatement, ex);
             }
         });
 
@@ -280,7 +278,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     try {
                         this.withResolver(handler);
                     } catch (Exception ex) {
-                        LOG.error("Error in success handler for action " + getName(), ex);
+                        LOG.error("Error in success handler for action {}", getName(), ex);
                     }
                 });
             }
@@ -300,9 +298,9 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         }
         handlerList.forEach(handler -> {
             try {
-                this.withResolver(res -> handler.accept(getFailureList(), res));
+                this.withResolver(res -> handler.accept(this.failures, res));
             } catch (Exception ex) {
-                LOG.error("Error in error handler for action " + getName(), ex);
+                LOG.error("Error in error handler for action {}", getName(), ex);
             }
         });
     }
@@ -360,7 +358,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     private void logError(Exception ex) {
-        LOG.error("Caught exception in task: " + ex.getMessage(), ex);
+        LOG.error("Caught exception in task: {}", ex.getMessage(), ex);
         Failure fail = new Failure();
         fail.setNodePath(currentPath.get());
         fail.setException(ex);
@@ -384,12 +382,12 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             tasksError.incrementAndGet();
             tasksSuccessful.decrementAndGet();
         }
-        LOG.error("Persistence error prevented saving changes for: " + itemList, ex);
+        LOG.error("Persistence error prevented saving changes for: {}" ,itemList, ex);
     }
 
     private void logFilteredOutItem(String path) {
         tasksFilteredOut.incrementAndGet();
-        LOG.info("Filtered out " + path);
+        LOG.info("Filtered out {}", path);
     }
 
     public long getRuntime() {

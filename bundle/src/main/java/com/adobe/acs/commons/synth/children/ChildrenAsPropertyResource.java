@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.synth.children;
 
@@ -23,21 +21,22 @@ import com.adobe.acs.commons.json.JsonObjectUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -153,7 +152,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      **/
     @Override
     public final Iterator<Resource> listChildren() {
-        return IteratorUtils.getIterator(this.orderedCache);
+        return this.orderedCache.iterator();
     }
 
     /**
@@ -161,7 +160,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      **/
     @Override
     public final Iterable<Resource> getChildren() {
-        return this.orderedCache;
+        return Collections.unmodifiableSet(this.orderedCache);
     }
 
     /**
@@ -324,16 +323,19 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
     protected final JsonObject serializeToJSON(final Resource resourceToSerialize)
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
-        final DateTimeFormatter dtf = ISODateTimeFormat.dateTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         final Map<String, Object> serializedData = new HashMap<String, Object>();
 
         for (Map.Entry<String, Object> entry : resourceToSerialize.getValueMap().entrySet()) {
             if (entry.getValue() instanceof Calendar) {
                 final Calendar cal = (Calendar) entry.getValue();
-                serializedData.put(entry.getKey(), dtf.print(cal.getTimeInMillis()));
+                LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), 
+                    ZoneId.systemDefault());
+                serializedData.put(entry.getKey(), date.format(formatter));
             } else if (entry.getValue() instanceof Date) {
                 final Date date = (Date) entry.getValue();
-                serializedData.put(entry.getKey(), dtf.print(date.getTime()));
+                LocalDateTime ldt = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                serializedData.put(entry.getKey(), ldt.format(formatter));
             } else {
                 serializedData.put(entry.getKey(), entry.getValue());
             }

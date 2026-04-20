@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
@@ -52,9 +50,7 @@ import com.day.cq.dam.commons.util.DamUtil;
  *
  * Pulls the binaries for a remote asset in order to make it a true local asset.
  */
-@Component(
-        service = RemoteAssetsBinarySync.class
-)
+@Component(service=RemoteAssetsBinarySync.class)
 public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
@@ -69,7 +65,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      */
     @Override
     public boolean syncAsset(Resource resource) {
-        ;
+        
         try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver()){
             
             try {

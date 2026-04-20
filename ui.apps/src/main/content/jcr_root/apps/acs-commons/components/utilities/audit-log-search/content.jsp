@@ -31,7 +31,7 @@
 					<i class="coral-Icon coral-Icon--sizeXS coral-Icon--close coral-MinimalButton-icon"></i>
 				</button>
 				<i class="coral-Alert-typeIcon coral-Icon coral-Icon--sizeS coral-Icon--alert"></i>
-				<strong class="coral-Alert-title">Index Missing</strong>
+				<div><strong class="coral-Alert-title">Index Missing</strong></div>
 				<div class="coral-Alert-message">
 					<p>
 					No index found for the type <code>cq:AuditEvent</code>, this will result in very slow performance or failure to search audit events.

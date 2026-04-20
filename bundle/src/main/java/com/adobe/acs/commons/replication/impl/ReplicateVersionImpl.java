@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.replication.impl;
 
@@ -67,7 +65,7 @@ public class ReplicateVersionImpl implements
             .getLogger(ReplicateVersionImpl.class);
 
     @Reference
-    private Replicator replicator;
+    private transient Replicator replicator;
 
     @Override
     public final List<ReplicationResult> replicate(
@@ -167,7 +165,7 @@ public class ReplicateVersionImpl implements
                 return 0;
             }
         });
-        Calendar cal = GregorianCalendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         for (Version v : versions) {
             try {

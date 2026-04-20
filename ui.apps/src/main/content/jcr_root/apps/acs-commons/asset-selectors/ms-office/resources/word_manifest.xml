@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
+  <Id>afd47bdf-9fa7-4a31-a897-87e1cbd760fe</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>ACS Commons</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="AEM Assets"/>
+  <Description DefaultValue="Addin for importing assets from AEM Asset Selector."/>
+  <IconUrl DefaultValue="http://localhost:4502/etc.clientlibs/acs-commons/asset-selectors/ms-office/asset-selector/clientlibs/resources/icon.png"/>
+  <HighResolutionIconUrl DefaultValue="http://localhost:4502/etc.clientlibs/acs-commons/asset-selectors/ms-office/asset-selector/clientlibs/resources/icon.png"/>
+  <SupportUrl DefaultValue="https://adobe-consulting-services.github.io/acs-aem-commons/features/ms-office-asset-selector/index.html"/>
+  <AppDomains>
+    <AppDomain>adobe.com</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Document"/>
+  </Hosts>  
+  <DefaultSettings>
+    <SourceLocation DefaultValue="http://localhost:4502/content/asset-selectors/ms-office.html"/>
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Description"/>
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
+          </GetStarted>
+          <FunctionFile resid="Commands.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="CommandsGroup">
+                <Label resid="CommandsGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="TaskpaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Supertip>
+                    <Title resid="TaskpaneButton.Label" />
+                    <Description resid="TaskpaneButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="http://localhost:4502/etc.clientlibs/acs-commons/asset-selectors/ms-office/asset-selector/clientlibs/resources/16by16.ico"/>
+        <bt:Image id="Icon.32x32" DefaultValue="http://localhost:4502/etc.clientlibs/acs-commons/asset-selectors/ms-office/asset-selector/clientlibs/resources/32by32.ico"/>
+        <bt:Image id="Icon.80x80" DefaultValue="http://localhost:4502/etc.clientlibs/acs-commons/asset-selectors/ms-office/asset-selector/clientlibs/resources/64by64.ico"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://adobe-consulting-services.github.io/acs-aem-commons/features/ms-office-asset-selector/index.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="http://localhost:4502/content/asset-selectors/ms-office.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="Import assets from the Adobe AEM!" />
+        <bt:String id="CommandsGroup.Label" DefaultValue="Commands Group" />
+        <bt:String id="TaskpaneButton.Label" DefaultValue="AEM Assets" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Your add-in loaded succesfully. Now you can import assets from AEM." />
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show a Taskpane" />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

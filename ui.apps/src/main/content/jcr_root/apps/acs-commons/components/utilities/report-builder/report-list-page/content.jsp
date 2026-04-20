@@ -61,7 +61,7 @@
 				<tr is="coral-table-row">
 					<sling2:getResource base="${report}" path="jcr:content" var="reportContent" />
 					<td is="coral-table-cell">
-						<a class="coral-Link" href="${report.path}.html?wcmmode=disabled">
+						<a class="coral-Link" href="${slingRequest.contextPath}${report.path}.html?wcmmode=disabled">
 							${sling2:encode(reportContent.valueMap['jcr:title'],'HTML')}
 						</a>	
 					</td>
@@ -69,11 +69,11 @@
 						${sling2:encode(reportContent.valueMap['jcr:description'],'HTML')}
 					</td>
 					<td is="coral-table-cell">
-						<button is="coral-button" icon="edit" iconsize="S" data-href="/editor.html${report.path}.html">
+						<button is="coral-button" icon="edit" iconsize="S" data-href="${slingRequest.contextPath}/editor.html${report.path}.html">
 						</button>
 					</td>
 					<td is="coral-table-cell">
-						<form action="${report.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-remove_${report.name}" ng-submit="postValues($event,'fn-acsCommons-remove_${report.name}')">
+						<form action="${slingRequest.contextPath}${report.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-remove_${report.name}" ng-submit="postValues($event,'fn-acsCommons-remove_${report.name}')">
 							<input type="hidden"  name=":operation" value="delete" />
 							<div class="coral-Form-fieldwrapper">
 								<button is="coral-button" icon="delete" iconsize="S"></button>

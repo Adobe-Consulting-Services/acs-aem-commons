@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,38 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.users.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
@@ -54,9 +33,26 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnsureAceTest {
@@ -68,22 +64,21 @@ public class EnsureAceTest {
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Mock
-    CloseableQueryBuilder queryBuilder;
+    QueryBuilder queryBuilder;
 
     @Mock
-    CloseableQuery query;
+    Query query;
 
     @Mock
     SearchResult result;
 
     @Before
     public void setUp() throws Exception {
-        context.registerService(CloseableQueryBuilder.class, queryBuilder);
+        context.registerService(QueryBuilder.class, queryBuilder);
 
         when(result.getHits()).thenReturn(Collections.emptyList());
         when(query.getResult()).thenReturn(result);
-        doNothing().when(query).close();
-        when(queryBuilder.createQuery(any(PredicateGroup.class), any(ResourceResolver.class))).thenReturn(query);
+        when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).thenReturn(query);
     }
 
     @Test
@@ -112,7 +107,6 @@ public class EnsureAceTest {
         assertNotNull("new allow node should exist", newAce);
 
         Hit mockHit = mock(Hit.class);
-        when(mockHit.getResource()).thenReturn(newAce);
         when(mockHit.getPath()).thenThrow(new RepositoryException("no more storage on cloud!"));
 
         final List<Hit> hits = Collections.singletonList(mockHit);
@@ -136,9 +130,7 @@ public class EnsureAceTest {
         List<Hit> nextHits = new ArrayList<>();
         while (nextAces.hasNext()) {
             Hit nextHit = mock(Hit.class);
-            Resource nextAce = nextAces.next();
-            when(nextHit.getResource()).thenReturn(nextAce);
-            when(nextHit.getPath()).thenReturn(nextAce.getPath());
+            Resource nextAce = nextAces.next();;
         }
 
         when(result.getHits()).thenReturn(nextHits);

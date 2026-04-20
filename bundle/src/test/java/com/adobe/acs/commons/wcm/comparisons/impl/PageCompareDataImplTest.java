@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
@@ -48,7 +46,7 @@ import org.apache.sling.api.resource.ValueMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
@@ -225,7 +223,7 @@ public final class PageCompareDataImplTest {
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.resolve(path)).thenReturn(resource);
 
-        final Session session = mock(Session.class, Answers.RETURNS_DEEP_STUBS.get());
+        final Session session = mock(Session.class, Answers.RETURNS_DEEP_STUBS);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
 
         final VersionManager versionManager = mock(VersionManager.class);
@@ -234,7 +232,7 @@ public final class PageCompareDataImplTest {
         final VersionHistory history = mock(VersionHistory.class);
         when(versionManager.getVersionHistory(path)).thenReturn(history);
 
-        final Version version = mock(Version.class, Answers.RETURNS_DEEP_STUBS.get());
+        final Version version = mock(Version.class, Answers.RETURNS_DEEP_STUBS);
         when(version.getName()).thenReturn(versionName);
         final GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(date);

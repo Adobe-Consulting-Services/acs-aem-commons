@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
@@ -110,13 +108,11 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         if (log.isDebugEnabled()) {
             log.debug("ResourceHttpCacheConfigExtension {} : ResourceType acceptance check on [ {} ~> {} ]", configName, request.getResource(), request.getResource().getResourceType());
         }
-
-        for (Pattern pattern : pathPatterns) {
-            Matcher m = pattern.matcher(request.getResource().getPath());
-            if (!m.matches()) {
-                return false;
-            }
+  
+        if (!checkContentPath(request.getResource().getPath())) {
+          return false;
         }
+        
         // Passed the content path test..
 
         Resource candidateResource = request.getResource();
@@ -129,6 +125,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         log.debug("ResourceHttpCacheConfigExtension {} :  checking for resource type matches", configName);
         // Match resource types.
         return checkResourceType(candidateResource);
+    }
+    
+    private boolean checkContentPath(String contentPath) {
+        return pathPatterns.stream().anyMatch( pattern -> pattern.matcher(contentPath).matches());
     }
 
     private boolean checkResourceType(Resource candidateResource) {

@@ -19,7 +19,6 @@
  */
 
 /*global angular: false */
-
 angular.module('ACS.Commons.notifications', []).factory('NotificationsService', ['$timeout', function ($timeout) {
     return {
         data: {

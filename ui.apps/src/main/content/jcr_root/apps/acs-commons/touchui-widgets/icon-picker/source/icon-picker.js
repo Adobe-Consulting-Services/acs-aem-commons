@@ -17,8 +17,10 @@
  * limitations under the License.
  * #L%
  */
-$(document).on('cui-contentloaded.data-api', function (e) {
-    $('[data-init~=graphiciconselect] > select').fontIconPicker({
-        'theme' : 'fip-coral'
+(function($, $document) {
+    $(document).on('cui-contentloaded.data-api', function (e) {
+        $('[data-init~=graphiciconselect] > select').fontIconPicker({
+            'theme' : 'fip-coral'
+        });
     });
-});
+}(jQuery, jQuery(document)));

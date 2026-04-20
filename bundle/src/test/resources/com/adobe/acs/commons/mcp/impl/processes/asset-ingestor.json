@@ -1,0 +1,10 @@
+{
+  "jcr:primaryType": "sling:Folder",
+  "jcr:createdBy": "admin",
+  "jcr:created": "Wed Aug 05 2020 14:22:27 GMT+0100",
+  "jcr:content": {
+    "jcr:primaryType": "nt:unstructured",
+    "jcr:title": "Test Folder",
+    "sourcing": "false"
+  }
+}

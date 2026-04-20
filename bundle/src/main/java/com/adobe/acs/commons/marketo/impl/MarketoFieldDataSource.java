@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.marketo.impl;
 
@@ -26,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 
@@ -37,6 +34,7 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.servlets.ServletResolverConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -82,7 +80,7 @@ public class MarketoFieldDataSource extends SlingSafeMethodsServlet {
   }
 
   @Override
-  public void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+  public void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) {
     log.trace("doGet");
 
     List<Resource> options = null;
@@ -95,9 +93,11 @@ public class MarketoFieldDataSource extends SlingSafeMethodsServlet {
         throw new RepositoryException("Unable to retrieve Marketo Client Configuration Manager");
       }
       if (config == null) {
-        log.warn("No Marketo configuration found for resource {}", request.getRequestPathInfo().getSuffix());
-        throw new RepositoryException("No Marketo configuration found for resource");
+                String msg = String.format("No Marketo configuration found for resource %s",
+                        request.getRequestPathInfo().getSuffix());
+                throw new RepositoryException(msg);
       }
+
 
       options = formCache.get(config).stream()
           .sorted((MarketoField f1, MarketoField f2) -> f1.getId().compareTo(f2.getId())).map(f -> {

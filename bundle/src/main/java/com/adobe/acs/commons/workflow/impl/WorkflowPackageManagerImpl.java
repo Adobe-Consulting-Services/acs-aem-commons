@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.workflow.impl;
@@ -29,7 +27,7 @@ import com.day.cq.wcm.api.WCMException;
 import com.day.cq.workflow.collection.ResourceCollection;
 import com.day.cq.workflow.collection.ResourceCollectionManager;
 import com.day.cq.workflow.collection.ResourceCollectionUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -42,6 +40,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.serviceusermapping.ServiceUserMapped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,6 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,10 +86,10 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String[] DEFAULT_WF_PACKAGE_TYPES = {"cq:Page", "cq:PageContent", "dam:Asset"};
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
-    
+
     private static final String SERVICE_NAME = "workflowpackagemanager-service";
     private static final Map<String, Object> AUTH_INFO;
-    
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -104,10 +102,13 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Reference
     private ResourceCollectionManager resourceCollectionManager;
-    
+
     @Reference
     ResourceResolverFactory resourceResolverFactory;
-    
+
+    @Reference(target = "("+ServiceUserMapped.SUBSERVICENAME+"="+SERVICE_NAME+")")
+    ServiceUserMapped serviceUserMapped;
+
     private String bucketPath;
 
     /**
@@ -128,13 +129,13 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        
+        String workflowPackagePath = bucketPath;
 
         if (StringUtils.isNotBlank(bucketSegment)) {
-            bucketPath += "/" + bucketSegment;
+            workflowPackagePath += "/" + bucketSegment;
         }
 
-        final Node shardNode = JcrUtils.getOrCreateByPath(bucketPath,
+        final Node shardNode = JcrUtils.getOrCreateByPath(workflowPackagePath,
                 NT_SLING_FOLDER, NT_SLING_FOLDER, session, false);
         final Page page = pageManager.create(shardNode.getPath(), JcrUtil.createValidName(name),
                 WORKFLOW_PACKAGE_TEMPLATE, name, false);
@@ -173,7 +174,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      * {@inheritDoc}
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
-            final String path, final String[] nodeTypes) throws RepositoryException {
+                                       final String path, final String[] nodeTypes) throws RepositoryException {
         final List<String> collectionPaths = new ArrayList<String>();
 
         final Resource resource = resourceResolver.getResource(path);
@@ -297,6 +298,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             // this service must not get activated
             throw new IllegalStateException(e);
         }
-        
+
     }
 }

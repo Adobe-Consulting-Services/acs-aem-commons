@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 - Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.util;
 
 import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.commons.lang.ArrayUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import javax.management.NotCompliantMBeanException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.resource.LoginException;
@@ -38,13 +42,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.NotCompliantMBeanException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Base class for services to extend which want to manage other services based
@@ -68,7 +65,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Activate
-    public void activate(ComponentContext context) throws LoginException {
+    public synchronized void activate(ComponentContext context) throws LoginException {
         log.trace("activate");
         bctx = context.getBundleContext();
         refreshCache();
@@ -76,7 +73,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     }
 
     @Deactivate
-    public void deactivate(ComponentContext context) throws LoginException {
+    public synchronized void deactivate(ComponentContext context) throws LoginException {
         log.trace("deactivate");
         for (String id : registeredServices.keySet()) {
             unregisterService(id);
@@ -140,6 +137,10 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
         try ( ResourceResolver resolver = getResourceResolver()) {
 
             Resource aprRoot = resolver.getResource(getRootPath());
+            if (aprRoot == null) {
+                log.error("Root path for service resource not found: {}", getRootPath());
+                return;
+            }
             List<String> configuredIds = new ArrayList<String>();
             for (Resource child : aprRoot.getChildren()) {
                 if (!JcrConstants.JCR_CONTENT.equals(child.getName())) {

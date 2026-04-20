@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
@@ -58,6 +56,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.gson.io.GsonSerializer;
+import io.jsonwebtoken.security.InvalidKeyException;
 
 //scheduler is set to once per hour
 //you can use cronmaker.com for generating cron expressions
@@ -141,25 +141,20 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
                 LOGGER.error("JSON does not contain an access_token");
             }
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Unable to fetch the access token", e);
         }
 
         LOGGER.info("JWT Access Token : {}", token);
         return token;
     }
 
-    protected String getJwtToken() {
-        String jwtToken = StringUtils.EMPTY;
-        try {
-            jwtToken = Jwts
+    protected String getJwtToken() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String jwtToken = Jwts
                     .builder()
                     .setClaims(getJwtClaims())
-                    .signWith(RS256, getPrivateKey())
+                    .signWith(getPrivateKey(), RS256)
+                    .serializeToJsonWith(new GsonSerializer())
                     .compact();
-        } catch (Exception e) {
-            LOGGER.error("JWT claims {}", getJwtClaims());
-            LOGGER.error(e.getMessage());
-        }
         LOGGER.info("JWT Token : \n {}", jwtToken);
         return jwtToken;
     }
@@ -210,11 +205,11 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtClaims;
     }
 
-    private Date getExpirationDate() {
+    private long getExpirationDate() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.SECOND, jwtServiceConfig.expirationTimeInSeconds());
-        return cal.getTime();
+        return cal.getTime().getTime();
     }
 
 }

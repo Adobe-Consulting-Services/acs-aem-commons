@@ -50,8 +50,8 @@
                 <div class="foundation-layout-panel-body">
                     <div class="foundation-layout-panel-content">
                         <div id="mcp-workspace">
-                            <iframe src='manage-controlled-processes.process-manager.html' style='display:block; width: 100%; height:100%; border:none'></iframe>
-                        </div>                        
+                             <sling:include path="." replaceSelectors="process-manager"/>
+                        </div>
                     </div>
                 </div>
             </div>

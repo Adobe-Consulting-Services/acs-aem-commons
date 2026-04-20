@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
@@ -34,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.exceptions.BucketNodeFactoryException;
@@ -45,12 +43,6 @@ public class BucketNodeFactoryTest
 
     @Mock Session session;
     @Mock Node cacheRootNode;
-
-    @Before
-    public void setup() throws Exception{
-        when(session.isLive()).thenReturn(true);
-        when(cacheRootNode.getPath()).thenReturn(MockSettings.VALID_ROOT_PATH);
-    }
 
     @Test(expected = BucketNodeFactoryException.class)
     public void testInvalidPath() throws BucketNodeFactoryException, RepositoryException

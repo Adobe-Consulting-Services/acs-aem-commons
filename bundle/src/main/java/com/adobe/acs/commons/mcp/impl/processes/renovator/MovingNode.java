@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
+import com.day.cq.audit.AuditLog;
+import com.day.cq.audit.AuditLogEntry;
+import com.day.cq.wcm.api.PageEvent;
+import com.day.cq.wcm.api.PageModification;
 import com.day.cq.wcm.commons.ReferenceSearch;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +61,8 @@ public abstract class MovingNode {
     public abstract boolean isSupposedToBeReferenced();
 
     public abstract boolean isAbleToHaveChildren();
+
+    protected abstract boolean isAuditableMove();
 
     public void addChild(MovingNode child) {
         if (child != this) {
@@ -122,28 +128,30 @@ public abstract class MovingNode {
      * @return the children
      */
     public List<MovingNode> getChildren() {
-        return children;
+        return Collections.unmodifiableList(children);
     }
 
     /**
      * @param children the children to set
      */
     public void setChildren(List<MovingNode> children) {
-        this.children = children;
+        this.children = Optional.ofNullable(children)
+                .map(list -> (List<MovingNode>) new ArrayList<>(list))
+                .orElse(Collections.emptyList());
     }
 
     /**
      * @return the references
      */
     public List<String> getAllReferences() {
-        return allReferences;
+        return Collections.unmodifiableList(allReferences);
     }
 
     /**
      * @return the references
      */
     public List<String> getPublishedReferences() {
-        return publishedReferences;
+        return Collections.unmodifiableList(publishedReferences);
     }
 
     /**
@@ -177,6 +185,9 @@ public abstract class MovingNode {
                 .filter(p -> isActivated(rr, p.getPagePath()))
                 .map(ReferenceSearch.Info::getPagePath)
                 .collect(Collectors.toCollection(() -> publishedReferences));
+        if(isActivated(rr, sourcePath)){
+            publishedReferences.add(destinationPath);
+        }
     }
 
     /**
@@ -250,4 +261,21 @@ public abstract class MovingNode {
         return props;
     }
 
+    public void addAuditRecordForMove(ResourceResolver rr, AuditLog auditLog) {
+        if(isAuditableMove()) {
+            Map<String, Object> props = new HashMap<>();
+
+            props.put("path", getSourcePath());
+            props.put("destination", getDestinationPath());
+            props.put("type", PageModification.ModificationType.MOVED.toString());
+
+            AuditLogEntry moveAuditEntry = new AuditLogEntry(PageEvent.EVENT_TOPIC,
+                    Calendar.getInstance().getTime(),
+                    rr.getUserID() != null ? rr.getUserID() : "renovator",
+                    getSourcePath(),
+                    PageModification.ModificationType.MOVED.toString(),
+                    props);
+            auditLog.add(moveAuditEntry);
+        }
+    }
 }

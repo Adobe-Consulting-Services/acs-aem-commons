@@ -1,21 +1,19 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
@@ -24,7 +22,7 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.vault.util.Text;
@@ -67,7 +65,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      *
      * @param session the session
      * @param path tthe root path to generate checksums for
-     * @return the map of abs path ~> checksums
+     * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
      */
@@ -84,7 +82,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @param session the session
      * @param path the root path to generate checksums for
      * @param options the {@link ChecksumGeneratorOptions} that define the checksum generation
-     * @return the map of abs path ~> checksums
+     * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
      */

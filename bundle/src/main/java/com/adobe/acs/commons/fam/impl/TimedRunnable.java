@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
@@ -44,12 +42,12 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
     int priority;
     Runnable work;
     ThrottledTaskRunner runner;
-    int timeout;
+    Long timeout;
     TimeUnit timeoutUnit;
     Optional<CancelHandler> cancelHandler = Optional.empty();
     private static final Logger LOG = LoggerFactory.getLogger(TimedRunnable.class);
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, int priority) {
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, long timeout, TimeUnit timeoutUnit, int priority) {
         this.work = work;
         this.runner = runner;
         this.timeout = timeout;
@@ -58,7 +56,7 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
         LOG.debug("Task created");
     }
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, long timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
         this(work, runner, timeout, timeoutUnit, priority);
         this.cancelHandler = Optional.of(cancelHandler);
     }
@@ -111,8 +109,8 @@ public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
                 LOG.error("Watchdog thread interrupted", ex);
             }
             if (!finished1) {
-                LOG.error("Watchdog reached interval timeout, worker thread will now be interrupted!");
-                workThread.interrupt();
+                // The watchdog condition should never be met as task.timeout is forced to -1, however just to be safe...
+                LOG.warn("Thread interruption is no longer supported.");
             }
         };
     }

@@ -1,0 +1,63 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<section class="coral-Form coral-Form--vertical">
+
+    <table is="coral-table">
+        <thead is="coral-table-head">
+        <tr is="coral-table-row">
+            <th is="coral-table-headercell">Initiator</th>
+            <th is="coral-table-headercell">Start Time</th>
+            <th is="coral-table-headercell">Finish Time</th>
+            <th is="coral-table-headercell">Path</th>
+            <th is="coral-table-headercell"># Resources</th>
+            <th is="coral-table-headercell">Status</th>
+            <th is="coral-table-headercell">Logs</th>
+            <th is="coral-table-headercell">Re-Run</th>
+        </tr>
+        </thead>
+
+        <tbody is="coral-table-body" divider="cell">
+        <sly
+                data-sly-use.defs="com.adobe.acs.commons.contentsync.ContentSyncHistoryModel"
+                data-sly-list="${defs.jobs}">
+            <tr is="coral-table-row">
+                <td is="coral-table-cell">${item.startedBy}</td>
+                <td is="coral-table-cell">${'dd-MM-yyyy hh:mm:ss' @ format=item.slingevent:created}</td>
+                <td is="coral-table-cell" data-sly-test="${item.slingevent:finishedDate}">${'dd-MM-yyyy hh:mm:ss' @ format=item.slingevent:finishedDate}</coral-progress></td>
+                <td is="coral-table-cell" data-sly-test="${!item.slingevent:finishedDate}"><coral-progress class='process-progress' value="${item.progress}" showpercent>${item.progressMessage}</coral-progress></td>
+                <td is="coral-table-cell">${item.root}</td>
+                <td is="coral-table-cell">${item.numberOfSteps}</td>
+                <td is="coral-table-cell">
+                    <coral-tag color="${item.statusColor}">${item.jobState}</coral-tag>
+                    <coral-tag color="${item.statusColor}" data-sly-test="${item.dryRun}">DRY RUN</coral-tag>
+                </td>
+                <td is="coral-table-cell">
+                    <a title="view log in a new tab" href="/contentsync/jcr:content/sync.log.txt/${item.slingevent:eventId}" target="_blank"
+                       is="coral-anchorbutton" variant="quiet" icon="download" iconsize="S"></a>
+                </td>
+                <td is="coral-table-cell">
+                    <a title="re-run" href="/contentsync.html/var/eventing/jobs/finished/acs-commons.contentsync.job/${item.slingevent:eventId}"
+                       is="coral-anchorbutton" variant="quiet" icon="redo" iconsize="S"></a>
+                </td>
+            </tr>
+        </sly>
+        </tbody>
+
+    </table>
+
+</section>

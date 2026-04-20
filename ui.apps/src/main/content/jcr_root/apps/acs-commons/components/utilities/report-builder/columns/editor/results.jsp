@@ -35,7 +35,10 @@
 			<c:set var="path" value="${fn:replace(result.path,':','%3A')}" />
 		</c:otherwise>
 	</c:choose>
-	<a target="_blank" data-href="${editor}${path}" class="coral-Button coral-Button--square">
+	<c:if test="${properties.appendHtmlExtension}">
+	    <c:set var="path" value="${path}.html" />
+    </c:if>
+	<a target="_blank" data-href="${slingRequest.contextPath}${editor}${path}" class="coral-Button coral-Button--square">
 		<i class="coral-Icon coral-Icon--gear coral-Icon--sizeS"></i>
 	</a>
 </td>

@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2014 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 
 package com.adobe.acs.commons.synth;
@@ -76,7 +74,7 @@ public final class Synthesizer {
 
         Resource synthesizedResource = buildResource(request.getResourceResolver(), resourceType, properties);
 
-        return doRender(synthesizedResource, SynthesizedSlingHttpServletRequest.METHOD_GET, "html", request, response);
+        return doRender(synthesizedResource, "html", request, response, new String[]{});
     }
 
     /**
@@ -92,15 +90,34 @@ public final class Synthesizer {
     public static String render(Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
-        return doRender(resource, SynthesizedSlingHttpServletRequest.METHOD_GET, "html", request, response);
+        return doRender(resource,"html", request, response, new String[]{});
     }
 
-    private static String doRender(Resource resource, String requestMethod, String requestExtension,
-                                   SlingHttpServletRequest request, SlingHttpServletResponse response)
+    /**
+     * Renders "GET {resource}{selectors}.{extension}"
+     *
+     * @param resource Resource
+     * @param request Original request used for dispatching
+     * @param response Original response used for dispatching
+     * @param selectors Sling selectors (can be empty)
+     * @param extension html, json etc
+     * @return HTML result of rendering the resource
+     * @throws ServletException
+     * @throws IOException
+     */
+    public static String render(Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response, String extension, String[] selectors)
+            throws ServletException, IOException {
+
+        return doRender(resource, extension, request, response, selectors);
+    }
+
+    private static String doRender(Resource resource, String requestExtension,
+                                   SlingHttpServletRequest request, SlingHttpServletResponse response, String[] selectors)
             throws ServletException, IOException {
 
         SynthesizedSlingHttpServletRequest synthesizedRequest = new SynthesizedSlingHttpServletRequest(request)
-                .setMethod(requestMethod)
+                .setMethod(SynthesizedSlingHttpServletRequest.METHOD_GET)
+                .setSelectors(selectors)
                 .setExtension(requestExtension)
                 .setResource(resource);
 

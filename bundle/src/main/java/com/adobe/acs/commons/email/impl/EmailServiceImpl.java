@@ -1,22 +1,20 @@
 /*
-* #%L
-* ACS AEM Commons Bundle
-* %%
-* Copyright (C) 2013 Adobe
-* %%
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-* #L%
-*/
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.adobe.acs.commons.email.impl;
 
 import com.adobe.acs.commons.email.EmailService;
@@ -24,7 +22,6 @@ import com.adobe.acs.commons.email.EmailServiceConstants;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
-import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -80,6 +77,9 @@ public final class EmailServiceImpl implements EmailService {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private MailTemplateManager mailTemplateManager;
 
     public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
 
@@ -231,7 +231,7 @@ public final class EmailServiceImpl implements EmailService {
                            final Class<? extends Email> mailType,
                            final Map<String, String> params) throws EmailException, MessagingException, IOException {
 
-        final Email email = mailTemplate.getEmail(StrLookup.mapLookup(params), mailType);
+        final Email email = mailTemplateManager.getEmail(mailTemplate, params, mailType);
 
         if (params.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)
                 && params.containsKey(EmailServiceConstants.SENDER_NAME)) {

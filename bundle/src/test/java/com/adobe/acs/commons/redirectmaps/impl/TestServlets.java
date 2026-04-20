@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2018 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.redirectmaps.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -47,9 +44,12 @@ import org.apache.sling.commons.testing.sling.MockResourceResolver;
 import org.apache.tika.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +59,8 @@ import com.day.cq.commons.jcr.JcrConstants;
 
 import junitx.util.PrivateAccessor;
 
+@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TestServlets {
 
     private static final Logger log = LoggerFactory.getLogger(TestServlets.class);
@@ -193,7 +195,7 @@ public class TestServlets {
 
     };
 
-    @InjectMocks
+    @Mock
     private RedirectMapModel model;
 
     private List<RedirectConfigModel> redirectConfigs = new ArrayList<RedirectConfigModel>() {
@@ -234,7 +236,6 @@ public class TestServlets {
     public void init() throws IOException, NoSuchFieldException {
         log.info("init");
 
-        MockitoAnnotations.initMocks(this);
 
         final MockResourceResolver mockResolver = new MockResourceResolver() {
             public Iterator<Resource> findResources(String query, String language) {
@@ -276,7 +277,7 @@ public class TestServlets {
                 .adaptTo(InputStream.class);
 
         log.debug("Setting up the resource /etc/redirectMap.txt/jcr:content");
-        doReturn(mockMapContentResource).when(mockFileResource).getChild(JcrConstants.JCR_CONTENT);
+        Mockito.lenient().doReturn(mockMapContentResource).when(mockFileResource).getChild(JcrConstants.JCR_CONTENT);
         doReturn("/etc/redirectMap.txt/jcr:content").when(mockMapContentResource).getPath();
         doReturn(mvm).when(mockMapContentResource).adaptTo(ModifiableValueMap.class);
         mockResolver.addResource(mockMapContentResource);

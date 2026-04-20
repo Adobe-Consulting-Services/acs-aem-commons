@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2019 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -33,13 +31,13 @@ import java.util.stream.StreamSupport;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +50,8 @@ import com.adobe.acs.commons.mcp.form.Description;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
-import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.form.TextfieldComponent;
+import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.RangeIterator;
 import com.day.cq.tagging.Tag;
@@ -64,16 +63,16 @@ import com.day.cq.tagging.TagManager;
  */
 public class TagReporter extends ProcessDefinition implements Serializable {
   public enum ItemStatus {
-    FAILURE, INVALID_TAG, SUCCESS
+    EXTENDED_DATA, FAILURE, INVALID_TAG, SUCCESS
   }
 
   public enum ReferenceMethod {
 
-    @Description("Quicker method, requires the references to be in a cq:tags field of a cq:Taggable node (or mixin)")
-    DEFAULT_TAG_MANAGER_FIND,
-
     @Description("Slower method, will find references in any attribute, but runs a full text search for each tag")
-    DEEP_SEARCH
+    DEEP_SEARCH,
+
+    @Description("Quicker method, requires the references to be in a cq:tags field of a cq:Taggable node (or mixin)")
+    DEFAULT_TAG_MANAGER_FIND
 
   }
 
@@ -87,22 +86,33 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   private static final long serialVersionUID = 4325471295421747160L;
 
-  @FormField(name = "Tag path", description = "The path to the root tag / namespace of this report, all tags under this tag will be included in the report", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
-      "default=/content/cq:tags", "base=/" })
-  public transient String tagPath = null;
+  /*
+   * Limit based on cell char limit in Excel.
+   *
+   * @See https://bz.apache.org/bugzilla/show_bug.cgi?id=56579
+   */
+  public static final int CELL_CHAR_LIMIT = 32767;
 
   @FormField(name = "Root Search path", description = "The path under which to search for references to the tags", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
       "default=/content", "base=/" })
   public transient String rootSearchPath = null;
 
+  @FormField(name = "Tag path", description = "The path to the root tag / namespace of this report, all tags under this tag will be included in the report", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
+      "default=/content/cq:tags", "base=/" })
+  public transient String tagPath = null;
+
   @FormField(name = "Include References", description = "Include the references to the tags in the report", component = CheckboxComponent.class)
   public boolean includeReferences = false;
+
+  @FormField(name = "References Char Limit", description = "Character limit for references when saving to the spreadsheet cells, must be less than 32,767", component = TextfieldComponent.class, required = true, options = {
+      "default=4096" })
+  public String referencesCharacterLimit = "4096";
 
   @FormField(name = "Reference Method", description = "The method used for finding references to the tag", component = RadioComponent.EnumerationSelector.class, options = {
       "vertical", "default=DEFAULT_TAG_FIND" })
   public ReferenceMethod referenceMethod = ReferenceMethod.DEFAULT_TAG_MANAGER_FIND;
 
-  private final transient GenericReport report = new GenericReport();
+  private final transient GenericBlobReport report = new GenericBlobReport();
 
   private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
@@ -117,6 +127,30 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     instance.defineCriticalAction("Traversing tags", rr, this::traverseTags);
 
     instance.defineCriticalAction("Finding references", rr, this::recordTags);
+  }
+
+  private @NotNull List<String> computeReferenceCellValues(Collection<String> references) {
+    List<String> cells = new ArrayList<>();
+    List<String> cell = new ArrayList<>();
+    int len = 0;
+    for (String ref : references) {
+      if (len + ref.length() < CELL_CHAR_LIMIT) {
+        cell.add(ref);
+        len = len + ref.length() + 1;
+      } else {
+        cells.add(cell.stream().collect(Collectors.joining(",")));
+        cell.clear();
+        cell.add(ref);
+        len = ref.length() + 1;
+      }
+    }
+    if (!cell.isEmpty()) {
+      cells.add(cell.stream().collect(Collectors.joining(",")));
+    }
+    if (cells.isEmpty()) {
+      cells.add("");
+    }
+    return cells;
   }
 
   private void findReferencesDeep(ResourceResolver resolver, String id, String title) {
@@ -155,31 +189,46 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     }
   }
 
-  public GenericReport getReport() {
+  public GenericBlobReport getReport() {
     return report;
   }
 
   public List<EnumMap<ReportColumns, Object>> getReportRows() {
-    return reportRows;
+    return Collections.unmodifiableList(reportRows);
   }
 
   @Override
   public void init() throws RepositoryException {
-    // nothing to do here
+    if (referenceMethod == null) {
+      referenceMethod = ReferenceMethod.DEFAULT_TAG_MANAGER_FIND;
+    }
   }
 
   private void record(ItemStatus status, String tagId, String title, Collection<String> references) {
-    final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
 
-    row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
-    row.put(ReportColumns.TAG_ID, tagId);
-    row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
-    row.put(ReportColumns.TAG_TITLE, title);
     if (this.includeReferences) {
-      row.put(ReportColumns.REFERENCES, StringUtils.join(references, ",\n"));
+      List<String> referenceCellValues = computeReferenceCellValues(references);
+      for (int i = 0; i < referenceCellValues.size(); i++) {
+        final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
+
+        ItemStatus stat = i == 0 ? status : ItemStatus.EXTENDED_DATA;
+        row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(stat.name()));
+        row.put(ReportColumns.TAG_ID, tagId);
+        row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
+        row.put(ReportColumns.TAG_TITLE, title);
+        row.put(ReportColumns.REFERENCES, referenceCellValues.get(i));
+        reportRows.add(row);
+      }
+    } else {
+      final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
+
+      row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
+      row.put(ReportColumns.TAG_ID, tagId);
+      row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
+      row.put(ReportColumns.TAG_TITLE, title);
+      reportRows.add(row);
     }
 
-    reportRows.add(row);
   }
 
   private void record(ItemStatus status, String tagId, String title, long referenceCount) {

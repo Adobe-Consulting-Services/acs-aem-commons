@@ -1,9 +1,8 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * ACS AEM Commons
+ *
+ * Copyright (C) 2013 - 2023 Adobe
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
@@ -28,7 +26,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.feed.StringResponseWrapper;
-import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.collections4.map.SingletonMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -36,13 +34,15 @@ import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 import javax.management.NotCompliantMBeanException;
@@ -64,11 +64,13 @@ import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CAC
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class HttpCacheEngineImplTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     HttpCacheConfig memCacheConfig;
@@ -108,8 +110,8 @@ public class HttpCacheEngineImplTest {
         when(memCacheStore.getStoreType()).thenReturn(VALUE_MEM_CACHE_STORE_TYPE);
         when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
 
-        doAnswer((Answer<Void>) invocationOnMock -> {
-            Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+        lenient().doAnswer((Answer<Void>) invocationOnMock -> {
+            Runnable runnable = invocationOnMock.getArgument(0);
             runnable.run();
             return null;
         }).when(throttledTaskRunner).scheduleWork(any(Runnable.class));
@@ -173,7 +175,6 @@ public class HttpCacheEngineImplTest {
         when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
         //cacheConfig.buildCacheKey(request)
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
@@ -200,7 +201,6 @@ public class HttpCacheEngineImplTest {
         when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         StringResponseWrapper response = new StringResponseWrapper(new MockSlingHttpServletResponse());
 
@@ -234,7 +234,7 @@ public class HttpCacheEngineImplTest {
         when(response.getContentType()).thenReturn("text/html");
         when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        when(response.getHeaders(anyString())).thenAnswer((Answer<List>) invocationOnMock -> Arrays.asList(headers.get( invocationOnMock.getArgumentAt(0, String.class))));
+        when(response.getHeaders(anyString())).thenAnswer((Answer<List>) invocationOnMock -> Arrays.asList(headers.get( invocationOnMock.getArgument(0))));
 
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
 
@@ -245,9 +245,6 @@ public class HttpCacheEngineImplTest {
 
         CacheContent mockedCacheContent = mock(CacheContent.class);
 
-        when(mockedCacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
-        when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
-        when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
 
         headers.put("someResponseHeader", new String[]{"SomeValue"});
@@ -262,8 +259,6 @@ public class HttpCacheEngineImplTest {
 
         CacheKey mockedCacheKey = mock(CacheKey.class);
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
-        when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         when(jcrCacheStore.createTempSink()).thenReturn(new MemTempSinkImpl());
 
 
