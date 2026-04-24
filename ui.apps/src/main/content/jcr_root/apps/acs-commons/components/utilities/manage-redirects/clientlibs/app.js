@@ -185,6 +185,7 @@
     var cacheControlHeader = tr.find(".cacheControlHeader").data("value");
     var caseInsensitive = tr.find(".source").data("case-insensitive");
     var preserveQueryString = tr.find(".target").data("preserve-query-string");
+    var matchType = tr.find(".source").data("match-type");
 
     var form = $("#editRuleDialog").find("form");
     form[0].reset();
@@ -199,6 +200,8 @@
         .setValues(tags.split(","));
     var select = $("#status-code-select-box").get(0);
     select.value = "" + statusCode;
+    var matchTypeSelect = $("#match-type-select-box").get(0);
+    matchTypeSelect.value = matchType;
     form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
     form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
     form.find('input[name="./note"]').val(note);
