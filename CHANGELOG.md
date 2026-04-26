@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+<<<<<<< Updated upstream
+=======
+- #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
+>>>>>>> Stashed changes
 
 ## 6.16.0 - 2026-02-10
 
