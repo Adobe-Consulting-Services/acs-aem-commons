@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3715 - Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
 
+### Fixed
+
+- #3742 Remove usage of Apache Tika 1.x
+
 ## 6.16.0 - 2026-02-10
 
 ### Changed
