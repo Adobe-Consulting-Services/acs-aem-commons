@@ -1460,6 +1460,114 @@ public class RedirectFilterTest {
         assertEquals("/content/we-retail/en/two", navigate("/content/we-retail/en/ONE").getHeader("Location"));
     }
 
+    /**
+     * #3696 An .html rule must not hijack requests for other extensions such as .xml sitemaps.
+     * Before the fix, a rule with source "/content/we-retail/na.html" would wrongly match a
+     * request for "/content/we-retail/na.sitemap-index.xml".
+     *
+     * Real AEM always resolves to the base resource path (without selectors/extension); we
+     * achieve the same effect in the mock by enabling ignoreSelectors on the config, which
+     * causes the filter to strip the resolution path info before matching.
+     */
+    @Test
+    public void testHtmlRuleIgnoresXmlRequest_3696() throws Exception {
+        withRules(new RedirectResourceBuilder(context)
+                .setSource("/content/we-retail/na.html")
+                .setTarget("/content/we-retail/na/en.html")
+                .setStatusCode(301).build());
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, true);
+
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/na", "sitemap-index", "xml");
+
+        assertNull("an .html rule must not hijack an .xml request", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testHtmlRuleStillRedirectsHtmlRequest() throws Exception {
+        withRules(new RedirectResourceBuilder(context)
+                .setSource("/content/we-retail/na.html")
+                .setTarget("/content/we-retail/na/en.html")
+                .setStatusCode(301).build());
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, true);
+
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/na", null, "html");
+
+        assertEquals(301, response.getStatus());
+        assertEquals("/content/we-retail/na/en.html", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testHtmlRuleStillRedirectsNoExtensionRequest() throws Exception {
+        withRules(new RedirectResourceBuilder(context)
+                .setSource("/content/we-retail/na.html")
+                .setTarget("/content/we-retail/na/en.html")
+                .setStatusCode(301).build());
+
+        // request has no extension — single-arg navigate with a path that has no dots
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/na");
+
+        assertEquals(301, response.getStatus());
+        // preserveExtension() is enabled in setUp() but the request has no extension,
+        // so the target keeps its authored .html
+        assertEquals("/content/we-retail/na/en.html", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testPdfRuleDoesNotRedirectJpgRequest() throws Exception {
+        withRules(new RedirectResourceBuilder(context)
+                .setSource("/content/dam/we-retail/en/events/test.pdf")
+                .setTarget("/content/dam/geometrixx/en/target/test.pdf")
+                .setStatusCode(302).build());
+
+        MockSlingHttpServletResponse response = navigate("/content/dam/we-retail/en/events/test.jpg");
+
+        assertNull("a .pdf rule must not match a .jpg request", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testEvaluateUriStillWorks() throws Exception {
+        // sanity check: a rule with evaluateURI=true keeps its behaviour unaffected by the #3696 fix
+        withRules(new RedirectResourceBuilder(context)
+                .setSource("/content/geometrixx/en/one.html/suffix.html")
+                .setTarget("/content/geometrixx/en/redirected-page")
+                .setStatusCode(302)
+                .setEvaluateURI(true)
+                .build());
+
+        MockSlingHttpServletResponse response = navigateToURI("/content/geometrixx/en/one.html/suffix.html");
+        assertEquals("/content/geometrixx/en/redirected-page", response.getHeader("Location"));
+    }
+
+    /**
+     * Context-prefix rules with an explicit extension (e.g. source=/en/one.html under prefix
+     * /content/geometrixx) must not redirect requests for a different extension (e.g. .xml).
+     * This verifies that isExtensionCompatible() is honoured on the context-prefix code path.
+     */
+    @Test
+    public void testContextPrefixWithMismatchedExtension() throws Exception {
+        withRules(new RedirectResourceBuilder(context)
+                .setSource("/en/one.html")
+                .setTarget("/en/two.html")
+                .setStatusCode(301).build());
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, true);
+
+        // .xml request via selector+extension navigate: after selector stripping the path is /content/geometrixx/en/one
+        // then context-prefix lookup finds the rule, but extension "xml" != "html" → no redirect
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one", "sitemap-idx", "xml");
+        assertNull("Context-prefix .html rule must not redirect an .xml request", response.getHeader("Location"));
+
+        // .html request: extension matches, redirect should happen
+        configResource.adaptTo(ModifiableValueMap.class).remove(Redirects.CFG_PROP_IGNORE_SELECTORS);
+        response = navigate("/content/geometrixx/en/one.html");
+        assertEquals(301, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
+    }
+
     @Test
     public void testCaseInsensitiveRegexRedirects() throws Exception {
         withRules(
