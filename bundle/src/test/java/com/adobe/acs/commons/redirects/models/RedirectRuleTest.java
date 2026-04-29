@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
+import static org.junit.Assert.assertNull;
 import static junit.framework.TestCase.assertTrue;
 import static junitx.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -319,5 +320,74 @@ public class RedirectRuleTest {
         assertDateEquals("02 January 2021", rule.getModified());
         assertEquals("no-cache", rule.getCacheControlHeader());
         assertTrue(rule.isCaseInsensitive());
+    }
+
+    @Test
+    public void testAutoDetectDefault() {
+        // No matchType stored → AUTO_DETECT: trailing * becomes (.*), pattern is set
+        Resource resource = context.create().resource("/var/acs-commons/redirects/match-type/auto",
+                "source", "/content/we-retail/*",
+                "target", "/content/new/$1",
+                "statusCode", 302);
+        RedirectRule rule = resource.adaptTo(RedirectRule.class);
+        assertEquals(MatchType.AUTO_DETECT, rule.getMatchType());
+        // trailing * was converted to (.*) → one capturing group → ptrn non-null
+        assertTrue("AUTO_DETECT with trailing * should produce a regex pattern", rule.getRegex() != null);
+
+        // Pattern without capturing groups and no trailing * → ptrn must be null in AUTO_DETECT
+        Resource resource2 = context.create().resource("/var/acs-commons/redirects/match-type/auto2",
+                "source", "/content/we-retail/page",
+                "target", "/content/new/",
+                "statusCode", 302);
+        RedirectRule rule2 = resource2.adaptTo(RedirectRule.class);
+        assertEquals(MatchType.AUTO_DETECT, rule2.getMatchType());
+        assertNull(rule2.getRegex());
+    }
+
+    @Test
+    public void testPlainTextMatchType() {
+        // PLAIN_TEXT: source with regex metacharacters must produce ptrn == null (exact match only)
+        Resource resource = context.create().resource("/var/acs-commons/redirects/match-type/plain",
+                "source", "/content/we-retail/[a-z]+",
+                "target", "/content/new/",
+                "statusCode", 302,
+                "matchType", "PLAIN_TEXT");
+        RedirectRule rule = resource.adaptTo(RedirectRule.class);
+        assertEquals(MatchType.PLAIN_TEXT, rule.getMatchType());
+        assertNull(rule.getRegex());
+    }
+
+    @Test
+    public void testRegexMatchTypeWithoutGroups() {
+        // REGEX: source without capturing groups must still produce a non-null pattern (fixes #3734)
+        Resource resource = context.create().resource("/var/acs-commons/redirects/match-type/regex-nogroup",
+                "source", "/content/path/.*",
+                "target", "/new/fixed/path",
+                "statusCode", 302,
+                "matchType", "REGEX");
+        RedirectRule rule = resource.adaptTo(RedirectRule.class);
+        assertEquals(MatchType.REGEX, rule.getMatchType());
+        assertTrue("REGEX matchType must compile pattern even without capturing groups", rule.getRegex() != null);
+        assertTrue("/content/path/anything should match", rule.getRegex().matcher("/content/path/anything").matches());
+        assertFalse("/other/path should not match", rule.getRegex().matcher("/other/path").matches());
+    }
+
+    @Test
+    public void testRegexMatchTypeNoTrailingStarConversion() {
+        // REGEX: trailing * must NOT be converted to (.*); the source is compiled as-is (fixes #3730)
+        Resource resource = context.create().resource("/var/acs-commons/redirects/match-type/regex-trailing-star",
+                "source", "/content/we-retail/something-[a-z]*",
+                "target", "/new/path",
+                "statusCode", 302,
+                "matchType", "REGEX");
+        RedirectRule rule = resource.adaptTo(RedirectRule.class);
+        assertEquals(MatchType.REGEX, rule.getMatchType());
+        assertTrue("REGEX matchType should produce a pattern", rule.getRegex() != null);
+        // The original regex [a-z]* only matches lowercase letters; aaa1 has a digit → no match
+        assertFalse("/content/we-retail/something-aaa1 should not match [a-z]*",
+                rule.getRegex().matcher("/content/we-retail/something-aaa1").matches());
+        // Pure lowercase letters → match
+        assertTrue("/content/we-retail/something-abc should match [a-z]*",
+                rule.getRegex().matcher("/content/we-retail/something-abc").matches());
     }
 }

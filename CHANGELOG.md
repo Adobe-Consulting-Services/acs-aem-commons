@@ -9,7 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
 ## Unreleased ([details][unreleased changes details])
-
+- #3734 RedirectManager: Support regular expression in source without capturing groups 
+- #3730 RedirectManager: Trailing "*" in source path being converted to "(.*)" might destroy regular expression
 
 - #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
 - #3715 - Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
