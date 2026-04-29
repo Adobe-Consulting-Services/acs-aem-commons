@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
 >>>>>>> Stashed changes
 
+### Fixed
+
+- #3742 Remove usage of Apache Tika 1.x
+
 ## 6.16.0 - 2026-02-10
 
 ### Changed
