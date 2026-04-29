@@ -78,7 +78,7 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.event.inputs.releaseVersion }}
+          tag: acs-aem-commons-${{ github.event.inputs.releaseVersion }}
           # generateReleaseNotesPreviousTag, https://github.com/ncipollo/release-action/issues/552
           generateReleaseNotes: true
           draft: ${{ github.event.inputs.dryRun }}

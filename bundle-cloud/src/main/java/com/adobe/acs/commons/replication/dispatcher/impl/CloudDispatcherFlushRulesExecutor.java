@@ -52,25 +52,35 @@ public class CloudDispatcherFlushRulesExecutor implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CloudDispatcherFlushRulesExecutor.class);
 
-    @Reference
-    private DiscoveryService discoveryService;
+    @Reference DiscoveryService discoveryService;
 
     @Reference
-    private volatile List<DispatcherFlushRules> dispatcherFlushRules;
+    volatile List<DispatcherFlushRules> dispatcherFlushRules;
 
     @Override
     public void handleEvent(Event event) {
-        String distributionType = (String) event.getProperty(DISTRIBUTION_TYPE);
-
         boolean isLeader = discoveryService.getTopology().getLocalInstance().isLeader();
         // process the OSGi event on the leader author instance
         if (isLeader) {
-            String[] distributionPaths = (String[]) event.getProperty(DISTRIBUTION_PATHS);
-            if (distributionPaths == null || distributionPaths.length == 0) {
-                log.debug("Skipping processing because the distribution paths are empty");
+            final ReplicationActionType actionType;
+            Object distributionType = event.getProperty(DISTRIBUTION_TYPE);
+            if (distributionType == null) {
+                log.warn("Skipping processing because the distribution type is null");
+                return;
+            } else if (distributionType instanceof String) {
+                actionType = getReplicationActionType(distributionType.toString());
+            } else if (distributionType instanceof DistributionRequestType) {
+                actionType = getReplicationActionType(distributionType.toString());
+            } else {
+                log.warn("Skipping processing because the distribution type is of unsupported type: {}", distributionType.getClass().getName());
                 return;
             }
-            ReplicationActionType actionType = getReplicationActionType(distributionType);
+
+            String[] distributionPaths = (String[]) event.getProperty(DISTRIBUTION_PATHS);
+            if (distributionPaths == null || distributionPaths.length == 0) {
+                log.warn("Skipping processing because the distribution paths are empty");
+                return;
+            }
             if (actionType != null) {
                 executeFlushRules(actionType, Arrays.asList(distributionPaths));
             }
@@ -80,7 +90,7 @@ public class CloudDispatcherFlushRulesExecutor implements EventHandler {
     private void executeFlushRules(ReplicationActionType actionType, List<String> distributionPaths) {
         ReplicationAction action = new ReplicationAction(actionType, distributionPaths.toArray(new String[0]), 0L, "", null);
         ReplicationOptions opts = new ReplicationOptions();
-        log.debug("Executing dispatcher flush rules for distribution paths {}", distributionPaths);
+        log.debug("Executing dispatcher flush rules for distribution paths {}...", distributionPaths);
         for (DispatcherFlushRules dispatcherFlushRule : dispatcherFlushRules) {
             try {
                 dispatcherFlushRule.preprocess(action, opts);
@@ -88,9 +98,7 @@ public class CloudDispatcherFlushRulesExecutor implements EventHandler {
                 log.warn("Could not execute dispatcher flush rule for distribution paths [{}]", distributionPaths, e);
             }
         }
-        if (log.isInfoEnabled()) {
-            log.info("Executed flush rules for resources [{}]", distributionPaths);
-        }
+        log.info("Executed flush rules for resources [{}]", distributionPaths);
     }
 
 

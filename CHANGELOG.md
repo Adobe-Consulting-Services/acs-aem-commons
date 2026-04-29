@@ -8,8 +8,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
-
 ## Unreleased ([details][unreleased changes details])
+
+- #3715 - Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
+
+### Fixed
+
+- #3742 Remove usage of Apache Tika 1.x
+
+## 6.16.0 - 2026-02-10
 
 ### Changed
 
@@ -20,6 +27,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3692 Redirect Manager: prevent java.lang.IllegalStateException in author logs when publishing redirects
 - #3683 RedirectFilter: Ignore Case value not showing in export
+- #3604 ClassCastException with org.apache.sling.distribution.DistributionRequestType in CloudDispatcherFlushRulesExecutor.handleEvent
 - #2524 Add dependency to enable PathField as report parameter. 
 
 ## 6.15.4 - 2025-11-19
