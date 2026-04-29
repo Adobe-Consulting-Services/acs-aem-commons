@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Fixed
 
 - #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet 
+- #3715 Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
+- #3742 Remove usage of Apache Tika 1.x
 
 ## 6.16.0 - 2026-02-10
 
