@@ -11,7 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 
 ## Fixed
-
+- #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
+- #3734 RedirectManager: Support regular expression in source without capturing groups 
+- #3730 RedirectManager: Trailing "*" in source path being converted to "(.*)" might destroy regular expression
 - #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet 
 - #3715 Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
 - #3742 Remove usage of Apache Tika 1.x
