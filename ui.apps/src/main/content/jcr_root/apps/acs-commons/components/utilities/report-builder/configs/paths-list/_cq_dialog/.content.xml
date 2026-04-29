@@ -53,6 +53,14 @@
 						sling:resourceType="granite/ui/components/foundation/form/hidden"
 						name="./reportExecutor"
 						value="com.adobe.acs.commons.reports.models.PathListReportExecutor"/>
+                    <hideAllResults
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                        text="Hide All results checkbox"
+                        checked="{Boolean}true"
+                        value="true"
+                        uncheckedValue="false"
+                        name="./hideAllResults"/>
 				</items>
 			</column>
 		</items>
