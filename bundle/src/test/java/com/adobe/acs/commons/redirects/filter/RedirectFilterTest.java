@@ -1207,14 +1207,35 @@ public class RedirectFilterTest {
     public void testIgnoredContextPrefix() throws Exception {
         withRules(
             new RedirectResourceBuilder(context)
-                    .setSource("/en/one")
+                    .setSource("/content/geometrixx/en/one")
                     .setTarget("/content/escapedsite/en/one")
                     .setStatusCode(302)
                     .setContextPrefixIgnored(true).build()
         );
 
         Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
-        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/we-retail");
+
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escapedsite/en/one.html", response.getHeader("Location"));
+        verify(filterChain, never())
+                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
+    public void testIgnoredContextPrefixWithRegularExpression() throws Exception {
+        withRules(
+            new RedirectResourceBuilder(context)
+                    .setSource("/content/geometrixx/(en|de)/one")
+                    .setTarget("/content/escapedsite/en/one")
+                    .setStatusCode(302)
+                    .setContextPrefixIgnored(true).build()
+        );
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/we-retail");
 
         MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
 
@@ -1232,7 +1253,7 @@ public class RedirectFilterTest {
                     .setTarget("/en/two")
                     .setStatusCode(302).build(),
             new RedirectResourceBuilder(context)
-                    .setSource("/en/three(.*)")
+                    .setSource("/content/geometrixx/en/three(.*)")
                     .setTarget("/content/escaped/en/four")
                     .setStatusCode(302)
                     .setContextPrefixIgnored(true).build(),

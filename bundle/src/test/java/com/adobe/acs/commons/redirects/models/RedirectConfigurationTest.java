@@ -47,4 +47,6 @@ public class RedirectConfigurationTest {
         assertEquals(resourcePath, determinePathToEvaluate(resourcePath, false, mockRequest));
         assertEquals(expectedURI, determinePathToEvaluate(resourcePath, true, mockRequest));
     }
+    
+    
 }

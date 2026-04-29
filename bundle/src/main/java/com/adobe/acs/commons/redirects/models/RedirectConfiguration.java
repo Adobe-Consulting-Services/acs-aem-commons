@@ -168,9 +168,10 @@ public class RedirectConfiguration {
             match = new RedirectMatch(rule, null);
         } else {
             for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
+                final String contextPrefixForRule = entry.getValue().getContextPrefixIgnored() ? "" : contextPrefix;
                 boolean evaluateURI = entry.getValue().getEvaluateURI();
                 String pathToEvaluate = determinePathToEvaluate(normalizedPath, evaluateURI, request);
-                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefix, entry.getValue().isCaseInsensitive());
+                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefixForRule, entry.getValue().isCaseInsensitive());
                 if (m.matches()) {
                     match = new RedirectMatch(entry.getValue(), m);
                     break;
@@ -220,10 +221,15 @@ public class RedirectConfiguration {
         } else {
             RedirectRule rule = getPathRule(normalizedPath);
             if(rule == null) {
+                // strip or prepend context prefix
                 if(normalizedPath.startsWith(contextPrefix)) {
                     rule = getPathRule(normalizedPath.replace(contextPrefix, ""));
                 } else {
                     rule = getPathRule(contextPrefix + normalizedPath);
+                }
+                // but disregard the rule if it should ignore the context prefix
+                if (rule != null && rule.getContextPrefixIgnored()) {
+                    return null;
                 }
             }
             return rule;
