@@ -12,6 +12,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3734 RedirectManager: Support regular expression in source without capturing groups 
 - #3730 RedirectManager: Trailing "*" in source path being converted to "(.*)" might destroy regular expression
 
+- #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
+- #3715 - Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
+
+### Fixed
+
+- #3742 Remove usage of Apache Tika 1.x
+
 ## 6.16.0 - 2026-02-10
 
 ### Changed

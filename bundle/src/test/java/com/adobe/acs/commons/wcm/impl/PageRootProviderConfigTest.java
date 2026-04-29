@@ -18,13 +18,15 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
@@ -34,60 +36,58 @@ import org.junit.Test;
 public class PageRootProviderConfigTest {
     PageRootProviderConfig config = null;
 
-    Map<String, Object> properties = new HashMap<String, Object>();
-
     @Before
     public final void setUp() throws Exception {
         config = new PageRootProviderConfig();
     }
 
     @Test
-    public void getPageRootPatterns() throws Exception {
-        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content"});
-        config.activate(properties);
+    public void getPageRootPatterns() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content"}, "", false, false);
+        config.activate(cfg);
 
         assertEquals(Arrays.asList("^(/content)(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
 
     @Test
-    public void getPageRootPatterns_Regex() throws Exception {
-        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/site/([a-z_-]+)"});
-        config.activate(properties);
+    public void getPageRootPatterns_Regex() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content/site/([a-z_-]+)"}, "", false, false);
+        config.activate(cfg);
 
         assertEquals(Arrays.asList("^(/content/site/([a-z_-]+))(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
 
     @Test
-    public void getPageRootPatterns_RegexEnd() throws Exception {
-        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/site/[a-z]{2}"});
-        config.activate(properties);
+    public void getPageRootPatterns_RegexEnd() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content/site/[a-z]{2}"}, "", false, false);
+        config.activate(cfg);
 
         assertEquals(Arrays.asList("^(/content/site/[a-z]{2})(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
 
     @Test
-    public void getPageRootPatterns_Order1() throws Exception {
-        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content", "/content/a"});
-        config.activate(properties);
+    public void getPageRootPatterns_Order1() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content", "/content/a"}, "", false, false);
+        config.activate(cfg);
 
         assertEquals(Arrays.asList("^(/content)(|/.*)$", "^(/content/a)(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
 
     @Test
-    public void getPageRootPatterns_Order2() throws Exception {
-        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/a", "/content"});
-        config.activate(properties);
+    public void getPageRootPatterns_Order2() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content/a", "/content"}, "", false, false);
+        config.activate(cfg);
 
         assertEquals(Arrays.asList("^(/content/a)(|/.*)$", "^(/content)(|/.*)$"), toStringList(config.getPageRootPatterns()));
     }
 
 
     @Test
-    public void getPageRootPatterns_Deactivate() throws Exception {
+    public void getPageRootPatterns_Deactivate() {
         assertNull(config.getPageRootPatterns());
 
-        properties.put(PageRootProviderConfig.PAGE_ROOT_PATH, new String[]{"/content/a", "/content"});
-        config.activate(properties);
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content/a", "/content"}, "", false, false);
+        config.activate(cfg);
 
         assertEquals(Arrays.asList("^(/content/a)(|/.*)$", "^(/content)(|/.*)$"), toStringList(config.getPageRootPatterns()));
 
@@ -95,9 +95,65 @@ public class PageRootProviderConfigTest {
         assertNull(config.getPageRootPatterns());
     }
 
+    @Test
+    public void getXFRootPathMethod_Empty() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content"}, "", false, false);
+        config.activate(cfg);
+
+        assertEquals("", config.getXfRootPathMethod());
+    }
+
+    @Test
+    public void getXFRootPathMethod_Site() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content"}, "site", false, false);
+        config.activate(cfg);
+
+        assertEquals("site",  config.getXfRootPathMethod());
+    }
+
+    @Test
+    public void getHistoryViewerFallback_False() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content"}, "", false, false);
+        config.activate(cfg);
+
+        assertFalse(config.getHistoryViewerFallback());
+    }
+
+    @Test
+    public void getHistoryViewerFallback_True() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{}, "", true, false);
+        config.activate(cfg);
+
+        assertTrue(config.getHistoryViewerFallback());
+    }
+
+    @Test
+    public void getLaunchFallback_False() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{"/content"}, "", false, false);
+        config.activate(cfg);
+
+        assertFalse(config.getLaunchFallback());
+    }
+
+    @Test
+    public void getLaunchFallback_True() {
+        PageRootProviderConfig.Config cfg = mockConfig(new String[]{}, "", false, true);
+        config.activate(cfg);
+
+        assertTrue(config.getLaunchFallback());
+    }
+
+    private PageRootProviderConfig.Config mockConfig(String[] pageRootPaths, String xfRootPathMethod, boolean historyViewerFallback, boolean launchFallback) {
+        PageRootProviderConfig.Config cfg = mock(PageRootProviderConfig.Config.class);
+        when(cfg.page_root_path()).thenReturn(pageRootPaths);
+        when(cfg.xf_root_path_method()).thenReturn(xfRootPathMethod != null ? xfRootPathMethod : "");
+        when(cfg.history_viewer_fallback()).thenReturn(historyViewerFallback);
+        when(cfg.launch_fallback()).thenReturn(launchFallback);
+        return cfg;
+    }
 
     static List<String> toStringList(final List<Pattern> patterns) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         for (Pattern p : patterns) {
                 list.add(p.toString());

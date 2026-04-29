@@ -648,8 +648,8 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.commons.html</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
+            <version>1.1.0</version>
+            <scope>provided</scope>
         </dependency>
         <!-- the custom annotation for AemObject -->
         <dependency>
@@ -682,21 +682,6 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.drewnoakes</groupId>
-                    <artifactId>metadata-extractor</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.code.gson</groupId>
-                    <artifactId>gson</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.wcm</groupId>
@@ -735,10 +720,6 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.tika</groupId>
-                    <artifactId>tika-core</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.jackrabbit</groupId>
