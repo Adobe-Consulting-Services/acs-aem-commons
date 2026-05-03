@@ -22,11 +22,22 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
+import com.day.cq.wcm.api.NameConstants;
 import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
-import org.apache.jackrabbit.vault.packaging.*;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.servlets.post.JSONResponse;
 import org.apache.sling.servlets.post.PostResponse;
@@ -40,7 +51,11 @@ import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.redirects.models.Configurations.REDIRECTS_RESOURCE_TYPE;
@@ -64,35 +79,39 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
     static final String PACKAGE_GROUP = "com.adobe.acs.commons.redirects";
     static final String PACKAGE_VERSION = "1.0";
     static final String PACKAGE_THUMBNAIL_RESOURCE_PATH = "/apps/acs-commons/components/utilities/manage-redirects/thumbnail.png";
+    static final String SERVICE_USER = "redirects-package-replicator";
 
     @Reference
     private transient Replicator replicator;
-
     @Reference
     private transient PackageHelper packageHelper;
-
     @Reference
     private transient Packaging packaging;
+    @Reference
+    private transient ResourceResolverFactory resourceResolverFactory;
 
     @Override
     protected void doPost(SlingHttpServletRequest slingRequest, SlingHttpServletResponse slingResponse)
             throws ServletException, IOException {
 
         PostResponse postResponse = new JSONResponse();
-        String path = slingRequest.getResource().getPath();
-        postResponse.setPath(path);
-        log.debug("replicating {}", path);
-        try {
-            ResourceResolver resourceResolver = slingRequest.getResourceResolver();
-            String packagePath = createPackage(resourceResolver, slingRequest.getResource());
+        String redirectsParentPath = slingRequest.getResource().getPath();
+        postResponse.setPath(redirectsParentPath);
+        log.debug("replicating {}", redirectsParentPath);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(
+                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER))) {
 
+            String packagePath = createPackage(resourceResolver, redirectsParentPath);
             Session session = resourceResolver.adaptTo(Session.class);
             replicator.replicate(session, ReplicationActionType.ACTIVATE, packagePath);
+            updateReplicationStatusWithCurrentUser(slingRequest.getResource());
 
-            updateStatus(slingRequest.getResource());
-            postResponse.setTitle("Redirects replicated: " + path);
+            postResponse.setTitle("Redirects replicated: " + redirectsParentPath);
         } catch (IOException | ReplicationException | RepositoryException | PackageException e) {
             log.error("failed to replicate redirects", e);
+            postResponse.setError(e);
+        } catch (LoginException e) {
+            log.error("Could not get resource resolver", e);
             postResponse.setError(e);
         }
         postResponse.send(slingResponse, true);
@@ -105,7 +124,7 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
      */
     String createPackageName(String path) {
         return Arrays.stream(path.substring(1).split("/"))
-                .map(p -> JcrUtil.createValidName(p))
+                .map(JcrUtil::createValidName)
                 .collect(Collectors.joining("."));
 
     }
@@ -113,22 +132,23 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
     /**
      * create a package with the redirects rules
      *
-     * @param resourceResolver user session
-     * @param resource         the redirects parent, e.g. /conf/global/settings/redirects
+     * @param resourceResolver   user session
+     * @param redirectParentPath the redirects parent, e.g. /conf/global/settings/redirects
      * @return path to the created package
      */
-    String createPackage(ResourceResolver resourceResolver, Resource resource) throws IOException, RepositoryException, PackageException {
+    String createPackage(ResourceResolver resourceResolver,
+                         String redirectParentPath) throws IOException, RepositoryException, PackageException {
 
-        long t0 = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         Map<String, String> packageDefinitionProperties = new HashMap<>();
         packageDefinitionProperties.put(JcrPackageDefinition.PN_AC_HANDLING,
                 AccessControlHandling.OVERWRITE.toString());
         packageDefinitionProperties.put(JcrPackageDefinition.PN_DESCRIPTION,
-                "ACS Commons Redirect Manager rules for " + resource.getPath());
+                "ACS Commons Redirect Manager rules for " + redirectParentPath);
 
-        String packageName = createPackageName(resource.getPath());
-        final JcrPackage jcrPackage = packageHelper.createPackage(
-                Collections.singletonList(resource),
+        String packageName = createPackageName(redirectParentPath);
+        final JcrPackage jcrPackage = packageHelper.createPackageForPaths(
+                Collections.singletonList(redirectParentPath),
                 resourceResolver.adaptTo(Session.class),
                 PACKAGE_GROUP,
                 packageName,
@@ -140,7 +160,7 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
         packageHelper.addThumbnail(jcrPackage,
                 resourceResolver.getResource(PACKAGE_THUMBNAIL_RESOURCE_PATH));
 
-        log.debug("package built in {} ms", (System.currentTimeMillis() - t0));
+        log.debug("package built in {} ms", (System.currentTimeMillis() - startTime));
         log.debug("package size: {} MB", String.format("%.2f", (float) jcrPackage.getSize() / (1024 * 1024)));
 
         JcrPackageManager packageManager = packaging.getPackageManager(resourceResolver.adaptTo(Session.class));
@@ -151,12 +171,15 @@ public class ReplicateRedirectMapServlet extends SlingAllMethodsServlet {
     /**
      * Update replication status on the redirect resource so that UI can display it
      */
-    void updateStatus(Resource resource) throws PersistenceException {
+    void updateReplicationStatusWithCurrentUser(Resource resource) throws PersistenceException {
         ResourceResolver resourceResolver = resource.getResourceResolver();
-        ;
         ValueMap vm = resource.adaptTo(ModifiableValueMap.class);
-        vm.put("cq:lastReplicated", Calendar.getInstance());
-        vm.put("cq:lastReplicatedBy", resourceResolver.getUserID());
+        if (vm == null) {
+            log.error("Could not adapt resource to value map");
+            return;
+        }
+        vm.put(NameConstants.PN_PAGE_LAST_REPLICATED, Calendar.getInstance());
+        vm.put(NameConstants.PN_PAGE_LAST_REPLICATED_BY, resourceResolver.getUserID());
         resource.getResourceResolver().commit();
     }
 }
