@@ -63,6 +63,7 @@ public class RedirectRule {
     public static final String CASE_INSENSITIVE_PROPERTY_NAME = "caseInsensitive";
     public static final String REDIRECT_RESOURCE_REQUEST_ATTRIBUTE = "redirectResource";
     public static final String PRESERVE_QUERY_STRING = "preserveQueryString";
+    public static final String MATCH_TYPE_PROPERTY_NAME = "matchType";
     public static final String SHARD_NAME_PREFIX = "shard-";
 
     @ValueMapValue
@@ -113,6 +114,9 @@ public class RedirectRule {
     @ValueMapValue(name = PRESERVE_QUERY_STRING)
     private String preserveQueryString;
 
+    @ValueMapValue(name = MATCH_TYPE_PROPERTY_NAME)
+    private String matchType;
+
     @Self
     private Resource resource;
 
@@ -146,6 +150,7 @@ public class RedirectRule {
             cacheControlHeader = resource.getValueMap().get(CACHE_CONTROL_HEADER_NAME, String.class);
             caseInsensitive = resource.getValueMap().get(CASE_INSENSITIVE_PROPERTY_NAME, false);
             preserveQueryString = resource.getValueMap().get(PRESERVE_QUERY_STRING, String.class);
+            matchType = resource.getValueMap().get(MATCH_TYPE_PROPERTY_NAME, String.class);
         }
 
         if (StringUtils.isBlank(source) || StringUtils.isBlank(target) || statusCode == null) {
@@ -155,11 +160,19 @@ public class RedirectRule {
         source = source.trim();
         target = target.trim();
 
-        String regex = source;
-        if (regex.endsWith("*")) {
-            regex = regex.replaceAll("\\*$", "(.*)");
+        MatchType mt = getMatchType();
+        if (mt == MatchType.PLAIN_TEXT) {
+            ptrn = null;
+        } else if (mt == MatchType.REGEX) {
+            ptrn = toRegexForced(source, caseInsensitive);
+        } else {
+            // AUTO_DETECT: existing behaviour
+            String regex = source;
+            if (regex.endsWith("*")) {
+                regex = regex.replaceAll("\\*$", "(.*)");
+            }
+            ptrn = toRegex(regex, caseInsensitive);
         }
-        ptrn = toRegex(regex, caseInsensitive);
         substitutions = SubstitutionElement.parse(target);
 
         String cacheControlProperty = CACHE_CONTROL_HEADER_NAME + "_" + getStatusCode();
@@ -258,9 +271,9 @@ public class RedirectRule {
     @Override
     public String toString() {
         return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s, effectiveFrom=%s, note=%s, evaluateURI=%s,"
-                        + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s, cacheControlHeader=%s}",
+                        + "contextPrefixIgnored=%s, tags=%s, created=%s, createdBy=%s, modified=%s, modifiedBy=%s, cacheControlHeader=%s, matchType=%s}",
                 source, target, statusCode, untilDate, effectiveFrom, note, evaluateURI, contextPrefixIgnored,
-                Arrays.toString(tagIds), created, createdBy, modified, modifiedBy, cacheControlHeader);
+                Arrays.toString(tagIds), created, createdBy, modified, modifiedBy, cacheControlHeader, matchType);
     }
 
     @Override
@@ -345,6 +358,31 @@ public class RedirectRule {
 
     public String getPreserveQueryString() {
         return preserveQueryString;
+    }
+
+    public MatchType getMatchType() {
+        if (matchType != null) {
+            try {
+                return MatchType.valueOf(matchType);
+            } catch (IllegalArgumentException e) {
+                log.warn("unknown matchType value '{}', falling back to AUTO_DETECT", matchType);
+            }
+        }
+        return MatchType.AUTO_DETECT;
+    }
+
+    /**
+     * Compile src as a regex without requiring capturing groups.
+     * Used when matchType is {@link MatchType#REGEX}.
+     */
+    static Pattern toRegexForced(String src, boolean nc) {
+        try {
+            int flags = nc ? Pattern.CASE_INSENSITIVE : 0;
+            return Pattern.compile(src, flags);
+        } catch (PatternSyntaxException e) {
+            log.error("invalid regex: {}", src);
+            return null;
+        }
     }
 
     /**

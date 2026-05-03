@@ -30,17 +30,15 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.html.HtmlParser;
-import org.apache.tika.sax.Link;
-import org.apache.tika.sax.LinkContentHandler;
+import org.apache.sling.commons.html.Html;
+import org.apache.sling.commons.html.HtmlElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -184,11 +182,12 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         if (htmlFields.contains(property.getKey())) {
             stream = stream.flatMap(val -> {
                 try {
-                    // parse html and extract links via underlying tagsoup library
-                    LinkContentHandler linkHandler = new LinkContentHandler();
-                    HtmlParser parser = new HtmlParser();
-                    parser.parse(new ByteArrayInputStream(val.getBytes("utf-8")), linkHandler, new Metadata(), new ParseContext());
-                    return linkHandler.getLinks().stream().map(Link::getUri);
+                    return Html.stream(new ByteArrayInputStream(val.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8.name())
+                            .filter(el -> el.getType() == HtmlElementType.START_TAG)
+                            .map(BrokenLinksReport::extractLink)
+                            .filter(href -> href != null && !href.isEmpty())
+                            // collect to a list so the underlying input stream can be closed eagerly
+                            .collect(Collectors.toList()).stream();
                 } catch (Exception e) {
                     log.warn("Could not parse links from property value of {}", property.getKey(), e);
                     return Stream.empty();
@@ -196,6 +195,35 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
             });
         }
         return stream;
+    }
+
+    /**
+     * Extract a link reference from an HTML start tag.
+     */
+    private static String extractLink(org.apache.sling.commons.html.HtmlElement element) {
+        String name = element.getValue();
+        if (name == null || !element.supportsAttributes()) {
+            return null;
+        }
+        String attrName;
+        switch (name.toLowerCase()) {
+            case "a":
+            case "area":
+            case "link":
+            case "base":
+                attrName = "href";
+                break;
+            case "img":
+            case "script":
+            case "iframe":
+            case "frame":
+                attrName = "src";
+                break;
+            default:
+                return null;
+        }
+        org.apache.sling.commons.html.AttrValue value = element.getAttributes().get(attrName);
+        return value == null ? null : value.getValue();
     }
 
     /**

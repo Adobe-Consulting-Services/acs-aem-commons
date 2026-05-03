@@ -25,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>6.16.1-SNAPSHOT</version>
+    <version>6.17.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -98,7 +98,7 @@
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1770729939</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1777480380</project.build.outputTimestamp>
         
     </properties>
 
@@ -547,11 +547,6 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>1.2.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tika</groupId>
-                <artifactId>tika-parsers</artifactId>
-                <version>1.17</version>
             </dependency>
             <!-- should match https://github.com/apache/jackrabbit-oak/blob/jackrabbit-oak-1.8.0/oak-blob-cloud/pom.xml#L121 shipped with AEM 6.4 -->
             <dependency>
