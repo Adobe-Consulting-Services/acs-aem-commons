@@ -109,7 +109,7 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
             if (replace) {
                 jcrRules = Collections.emptyMap();
                 for (Resource ch : storageRoot.getChildren()) {
-                    if(ch.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)) {
+                    if(ch.isResourceType(REDIRECT_RULE_RESOURCE_TYPE) || ch.isResourceType(NT_UNSTRUCTURED)) {
                         ch.getResourceResolver().delete(ch);
                     }
                 }
