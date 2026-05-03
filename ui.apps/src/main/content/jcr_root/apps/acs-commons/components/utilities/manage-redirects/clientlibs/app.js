@@ -472,9 +472,9 @@
     var configName = $(this).data("name");
 
     var dialog = new Coral.Dialog().set({
-      header: { innerHTML: "Delete Configuration" },
-      content: { innerHTML: "Are you sure you want to delete <strong>" + configName +
-           "</strong> and all its redirect rules? This action cannot be undone." },
+      header: { innerHTML: "Delete Redirect Rules" },
+      content: { innerHTML: "Are you sure you want to delete all redirect rules in <strong>" + configName +
+           "</strong>? This action cannot be undone." },
       footer: { innerHTML:
           '<button is="coral-button" variant="default" coral-close>Cancel</button>' +
           '<button is="coral-button" variant="warning" class="confirm-delete-config">Delete</button>' },
