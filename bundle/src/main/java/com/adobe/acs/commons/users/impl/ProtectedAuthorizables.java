@@ -152,7 +152,6 @@ public final class ProtectedAuthorizables {
             "acs-commons-package-replication-status-event-service",
             "acs-commons-component-error-handler-service",
             "acs-commons-dispatcher-flush-service",
-            "acs-commons-twitter-updater-service",
             "acs-commons-review-task-asset-mover-service",
             "acs-commons-httpcache-jcr-storage-service",
             "acs-commons-manage-controlled-processes-service",

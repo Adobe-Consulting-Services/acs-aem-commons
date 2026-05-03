@@ -25,7 +25,6 @@
         <include pattern="/etc/acs-commons/jcr:content"/>
         <include pattern="/etc/acs-commons/automatic-package-replication(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager(/jcr:content)?"/>
-        <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?"/>
         <include pattern="/etc/acs-commons/dispatcher-flush(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/lists(/jcr:content)?"/>
         <include pattern="/etc/acs-commons/lists/dynamic-deck-query-list(/jcr:content)?"/>
