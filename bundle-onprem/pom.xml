@@ -17,7 +17,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -34,7 +35,8 @@
 
     <artifactId>acs-aem-commons-bundle-onprem</artifactId>
     <name>ACS AEM Commons - Bundle Fragment (for On Prem)</name>
-    <description>ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring On Prem</description>
+    <description>ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring On Prem
+    </description>
     <build>
         <plugins>
             <plugin>
@@ -131,6 +133,16 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- End Test dependencies -->
         <!-- ======================== -->
         <!-- put UberJar last so that more specific artifacts take precedence -->
@@ -140,7 +152,7 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
+
     <profiles>
         <profile>
             <id>release</id>
@@ -171,6 +183,6 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
                     </plugin>
                 </plugins>
             </build>
-         </profile>
+        </profile>
     </profiles>
 </project>
