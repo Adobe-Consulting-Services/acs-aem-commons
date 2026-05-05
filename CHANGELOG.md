@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
+### Changed
+- #3710 Use a dedicated service user/subservice for Redirects Package creation and replication
 
 ## [6.17.0] - 2026-04-29
 
