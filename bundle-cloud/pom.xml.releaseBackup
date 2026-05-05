@@ -2,7 +2,7 @@
 <!--
   ~ ACS AEM Commons
   ~
-  ~ Copyright (C) 2013 - 2024 Adobe
+  ~ Copyright (C) 2013 - 2023 Adobe
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,27 +16,24 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <!-- ====================================================================== -->
-    <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
+    <!-- P A R E N T  P R O J E C T  D E S C R I P T I O N                      -->
     <!-- ====================================================================== -->
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.17.1-SNAPSHOT</version>
+        <version>6.15.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
-    <!-- P R O J E C T D E S C R I P T I O N -->
+    <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-
-    <artifactId>acs-aem-commons-bundle-onprem</artifactId>
-    <name>ACS AEM Commons - Bundle Fragment (for On Prem)</name>
-    <description>ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring On Prem
-    </description>
+    <artifactId>acs-aem-commons-bundle-cloud</artifactId>
+    <name>ACS AEM Commons Bundle - Core Cloud Fragment</name>
+    <description>OSGi Core bundle fragment for ACS AEM Commons (only AEMaaCS)</description>
     <build>
         <plugins>
             <plugin>
@@ -44,8 +41,10 @@
                 <artifactId>bnd-maven-plugin</artifactId>
                 <configuration>
                     <bnd><![CDATA[
+Bundle-Name: ACS AEM Commons - Bundle Fragment (for AEMaaCS)
+Bundle-Description: ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring AEMaaCS
 Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
-                    ]]></bnd>
+                                ]]></bnd>
                 </configuration>
             </plugin>
             <plugin>
@@ -71,61 +70,16 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
     </build>
 
     <dependencies>
-        <!-- ======================== -->
-        <!-- START build dependencies -->
         <dependency>
             <groupId>com.adobe.acs</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Start Test dependencies -->
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation.versioning</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation.bundle</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.component.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.metatype.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.servlets.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- END build dependencies -->
-        <!-- ======================== -->
-        <!-- START runtime dependencies not contained in uber-jar -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.framework</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- END runtime dependencies not contained in uber-jar -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,25 +88,29 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.wcm</groupId>
+            <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- End Test dependencies -->
-        <!-- ======================== -->
-        <!-- put UberJar last so that more specific artifacts take precedence -->
+        <!-- the aem-sdk-api should be the last dependency, as other dependencies should take precedence in case of package clashes -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
+            <artifactId>aem-sdk-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
+    
     <profiles>
         <profile>
             <id>release</id>
@@ -183,6 +141,6 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
                     </plugin>
                 </plugins>
             </build>
-        </profile>
+         </profile>
     </profiles>
 </project>
