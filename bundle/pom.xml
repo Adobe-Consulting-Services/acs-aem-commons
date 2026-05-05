@@ -166,6 +166,7 @@
                                         <include>io.jsonwebtoken:jjwt-gson</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
+                                        <include>com.github.jknack:*</include>
                                     </includes>
                                 </bannedDependencies>
                             </rules>
@@ -193,25 +194,31 @@
                                     <include>io.jsonwebtoken:jjwt-api</include>
                                     <include>io.jsonwebtoken:jjwt-impl</include>
                                     <include>io.jsonwebtoken:jjwt-gson</include>
+                                    <include>com.github.jknack:handlebars</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
+                                <!-- due to https://github.com/apache/maven-shade-plugin/issues/478 use a shaded name which doesn't include the original name -->
                                 <relocation>
                                     <pattern>com.google.common</pattern>
-                                    <shadedPattern>acscommons.com.google.common</shadedPattern>
+                                    <shadedPattern>acscommons.google.common</shadedPattern>
                                 </relocation>
                                 <!-- contained in guava as well -->
                                 <relocation>
                                     <pattern>com.google.thirdparty</pattern>
-                                    <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
+                                    <shadedPattern>acscommons.google.thirdparty</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.jcraft</pattern>
-                                    <shadedPattern>acscommons.com.jcraft</shadedPattern>
+                                    <shadedPattern>acscommons.jcraft</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>io.jsonwebtoken</pattern>
-                                    <shadedPattern>acscommons.io.jsonwebtoken</shadedPattern>
+                                    <shadedPattern>acscommons.jsonwebtoken</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.github.jknack.handlebars</pattern>
+                                    <shadedPattern>acscommons.github.jknack.handlebars</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
@@ -249,6 +256,12 @@
                                     <artifact>io.jsonwebtoken:jjwt-gson</artifact>
                                     <includes>
                                         <include>io/jsonwebtoken/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.jknack:handlebars</artifact>
+                                    <includes>
+                                        <include>com/github/jknack/handlebars/**</include>
                                     </includes>
                                 </filter>
                             </filters>
@@ -297,6 +310,12 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>32.0.0-jre</version>
+            </dependency>
+            <!-- use and shade newer Handlebars version than shipped with AEM -->
+            <dependency>
+                <groupId>com.github.jknack</groupId>
+                <artifactId>handlebars</artifactId>
+                <version>4.3.1</version><!-- last version compatible with Java 8-->
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -439,11 +458,6 @@
             <artifactId>aws-java-sdk-s3</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.jknack</groupId>
-            <artifactId>handlebars</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <!-- END runtime dependencies not contained in uber-jar -->
         <!-- ======================== -->
         <!-- START: optional dependencies which are neither part of AEM nor ACS AEM Commons but need separate installation -->
@@ -529,6 +543,18 @@
                 <exclusion>
                     <groupId>com.google.code.gson</groupId>
                     <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <scope>compile</scope>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

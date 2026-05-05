@@ -1,10 +1,10 @@
 Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-bundle;singleton:=true
+# Exlude all shaded dependencies
 Import-Package: \
   com.adobe.cq.dialogconversion;resolution:=optional,\
   com.amazonaws.*;resolution:=optional,\
   com.fasterxml.jackson.core;resolution:=optional,\
   com.fasterxml.jackson.databind;resolution:=optional,\
-  com.github.jknack.handlebars;resolution:=optional,\
   com.github.benmanes.caffeine.*;resolution:=optional,\
   twitter4j.*;resolution:=optional,\
   org.apache.poi.ss.usermodel;version="[3.0,6)",\
@@ -17,6 +17,7 @@ Import-Package: \
   !com.google.thirdparty.*,\
   !com.jcraft.*,\
   !io.jsonwebtoken.*,\
+  !com.github.jknack.handlebars.*,\
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
   com.day.cq.wcm.api;version="[1.30,2)",\
