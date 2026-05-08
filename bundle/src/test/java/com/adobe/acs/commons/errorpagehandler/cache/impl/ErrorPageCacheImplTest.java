@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ErrorPageCacheImplTest {
