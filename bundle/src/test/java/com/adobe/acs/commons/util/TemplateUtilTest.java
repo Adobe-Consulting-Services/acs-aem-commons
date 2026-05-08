@@ -17,9 +17,10 @@
  */
 package com.adobe.acs.commons.util;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
@@ -28,15 +29,14 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Test;
 
-import com.adobe.acs.commons.util.TemplateUtil;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 
 public class TemplateUtilTest {
 
-    static String TMPL_FAKE = "/apps/templates/fake";
+    static final String TMPL_FAKE = "/apps/templates/fake";
 
-    static String TMPL_FAKE2 = "/apps/templates/fake2";
+    static final String TMPL_FAKE2 = "/apps/templates/fake2";
 
     @Test
     public void test_that_null_page_always_returns_false() {
