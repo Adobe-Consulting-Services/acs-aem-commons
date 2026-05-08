@@ -260,9 +260,9 @@
                                 </filter>
                                 <filter>
                                     <artifact>com.github.jknack:handlebars</artifact>
-                                    <includes>
-                                        <include>com/github/jknack/handlebars/**</include>
-                                    </includes>
+                                    <!-- do not filter files from that dependency as it contains also resources outside the namespace com.github.jknack.handlebars
+                                         those are just left not relocated, but included in the final artifact as is, which is fine as they don't cause any conflicts
+                                    -->
                                 </filter>
                             </filters>
                             <transformers>
