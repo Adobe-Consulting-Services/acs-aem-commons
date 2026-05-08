@@ -17,10 +17,10 @@
  */
 package com.adobe.acs.commons.http.impl;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.mockserver.model.HttpRequest.*;
-import static org.mockserver.model.HttpResponse.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
 import com.google.gson.JsonObject;
@@ -125,7 +125,7 @@ public class HttpClientFactoryImplTest {
     public void testDisableSSLCertCheck() throws Exception {
         // this test doesn't actually test anything, but at least ensures that the SSL
         // initialization code doesn't throw exceptions
-        HttpClientFactoryImpl impl = createFactory(false, null, null);
+        createFactory(false, null, null);
     }
 
 }
