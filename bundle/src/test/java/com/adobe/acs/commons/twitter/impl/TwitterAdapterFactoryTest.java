@@ -22,7 +22,7 @@ import com.adobe.cq.commerce.common.ValueMapDecorator;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;

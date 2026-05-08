@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 import javax.script.Bindings;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 import org.junit.Test;
 

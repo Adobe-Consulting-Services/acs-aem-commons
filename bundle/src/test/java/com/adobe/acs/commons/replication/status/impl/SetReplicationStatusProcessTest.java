@@ -50,7 +50,7 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 
 public class SetReplicationStatusProcessTest {
