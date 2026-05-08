@@ -301,6 +301,10 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             </goals>
                             <configuration>
                                 <includeDistributionManagement>false</includeDistributionManagement>
+                                <diffignores>
+                                    <!-- ignore Bundle-Version header for baseline, i.e. no enforcement of specific bundle versions -->
+                                    <diffignore>Bundle-Version</diffignore>
+                                </diffignores>
                             </configuration>
                         </execution>
                     </executions>
