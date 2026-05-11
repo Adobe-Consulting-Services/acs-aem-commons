@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
 
+## Changed
+
+- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
+
 ## [6.17.0] - 2026-04-29
 
 ## Changed
