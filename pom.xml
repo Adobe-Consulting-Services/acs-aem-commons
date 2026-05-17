@@ -25,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>6.17.1-SNAPSHOT</version>
+    <version>6.17.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -98,7 +98,7 @@
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1777480380</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1777999629</project.build.outputTimestamp>
         
     </properties>
 
@@ -434,7 +434,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -454,7 +454,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>12.1.6</version>
+                    <version>12.2.0</version>
                 </plugin>
                 <!-- used to validate/publish from a stage repository to Maven Central (https://maveniverse.eu/docs/njord/plugin-documentation/index.html) -->
                 <plugin>
@@ -815,13 +815,13 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             </execution>
                         </executions>
                         <configuration>
-                            <cveValidForHours>24</cveValidForHours>
+                            <nvdValidForHours>24</nvdValidForHours>
                             <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
                             <skipProvidedScope>true</skipProvidedScope>
                             <skipSystemScope>true</skipSystemScope>
                             <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
                             <suppressionFiles>
-                                <suppressionFile>dependency-check-maven-plugin-suppression.xml</suppressionFile>
+                                <suppressionFile>${maven.multiModuleProjectDirectory}/dependency-check-maven-plugin-suppression.xml</suppressionFile>
                             </suppressionFiles>
                             <!-- use the mirror provided by https://github.com/dependency-check/DependencyCheck_Builder which is updated daily -->
                             <!-- compare with https://jeremylong.github.io/DependencyCheck/data/mirrornvd.html -->

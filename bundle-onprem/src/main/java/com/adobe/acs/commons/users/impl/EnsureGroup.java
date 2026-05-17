@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,64 +27,87 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - Ensure Group",
-           configurationFactory = true,
-           metatype = true,
-           immediate = true,
-           policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-                    @Property(name = "webconsole.configurationFactory.nameHint",
-                              value = "Ensure Group: {operation} {principalName}")
-})
-@Service(value = { EnsureGroup.class, EnsureAuthorizable.class })
+@Component(
+        service = {EnsureGroup.class, EnsureAuthorizable.class},
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true
+)
+@Designate(ocd = EnsureGroup.Config.class, factory = true)
 public final class EnsureGroup implements EnsureAuthorizable {
 
-    @Property(label = "Ensure immediately", boolValue = true,
-            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
-    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Ensure Group",
+            description = "Ensures Group configuration"
+    )
+    public @interface Config {
+        @AttributeDefinition(
+                name = "Ensure immediately",
+                description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean."
+        )
+        boolean ensure_immediately() default DEFAULT_ENSURE_IMMEDIATELY;
 
-    public static final String DEFAULT_OPERATION = "add";
-    @Property(
-            label = "Operation",
-            description = "Defines if the group (principal name) should be adjusted to align with this config or removed completely",
-            options = { @PropertyOption(name = "add", value = "Ensure existence (add)"),
-                    @PropertyOption(name = "remove", value = "Ensure extinction (remove)") })
-    public static final String PROP_OPERATION = "operation";
+        @AttributeDefinition(
+                name = "Operation",
+                description = "Defines if the group (principal name) should be adjusted to align with this config or removed completely",
+                options = {
+                        @Option(label = "Ensure existence (add)", value = "add"),
+                        @Option(label = "Ensure extinction (remove)", value = "remove")
+                }
+        )
+        String operation() default DEFAULT_OPERATION;
 
-    @Property(label = "Principal Name", description = "The grouo's principal name")
-    public static final String PROP_PRINCIPAL_NAME = "principalName";
+        @AttributeDefinition(
+                name = "Principal Name",
+                description = "The group's principal name"
+        )
+        String principalName();
 
-    @Property(label = "ACEs",
-            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_ACES = "aces";
+        @AttributeDefinition(
+                name = "ACEs",
+                description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)"
+        )
+        String[] aces() default {};
 
-    @Property(
-            label = "Member Of",
-            description = "Defines groups this group must be a member of.  Group will be removed from any groups not listed.",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_MEMBER_OF = "member-of";
+        @AttributeDefinition(
+                name = "Member Of",
+                description = "Defines groups this group must be a member of. Group will be removed from any groups not listed."
+        )
+        String[] member_of() default {};
+
+        @AttributeDefinition(
+                name = "Service Ranking",
+                description = "Service ranking for webconsole display"
+        )
+        int webconsole_configurationFactory_nameHint() default 0;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(EnsureGroup.class);
     private static final String SERVICE_NAME = "ensure-service-user";
     private static final Map<String, Object> AUTH_INFO;
     private static final boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    public static final String DEFAULT_OPERATION = "add";
+
+    // Keep these constants for backward compatibility
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+    public static final String PROP_OPERATION = "operation";
+    public static final String PROP_PRINCIPAL_NAME = "principalName";
+    public static final String PROP_ACES = "aces";
+    public static final String PROP_MEMBER_OF = "member-of";
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
@@ -116,17 +139,15 @@ public final class EnsureGroup implements EnsureAuthorizable {
     /**
      * Entry point for Ensuring a Group.
      *
-     * @param operation
-     *            the ensure operation to execute (ADD or REMOVE)
-     * @param group
-     *            the group configuration to ensure
+     * @param operation the ensure operation to execute (ADD or REMOVE)
+     * @param group     the group configuration to ensure
      * @throws EnsureAuthorizableException
      */
     @Override
     public void ensure(Operation operation, AbstractAuthorizable group) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             if (Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, (Group) group);
@@ -156,10 +177,8 @@ public final class EnsureGroup implements EnsureAuthorizable {
      * Ensures that the provided Group and configured ACEs exist. Any extra ACEs will be removed, and any missing ACEs
      * added.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the group and ACE management
-     * @param group
-     *            the group to ensure
+     * @param resourceResolver the resource resolver to perform the group and ACE management
+     * @param group            the group to ensure
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
      */
@@ -179,10 +198,8 @@ public final class EnsureGroup implements EnsureAuthorizable {
     /**
      * Ensures that the provided Group and any of its ACEs are removed.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the group and ACE management
-     * @param group
-     *            the group to ensure
+     * @param resourceResolver the resource resolver to perform the group and ACE management
+     * @param group            the group to ensure
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
      */
@@ -202,10 +219,8 @@ public final class EnsureGroup implements EnsureAuthorizable {
     /**
      * Ensures a Group exists with the principal name provided by the Group configuration.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the group management
-     * @param group
-     *            the group to ensure
+     * @param resourceResolver the resource resolver to perform the group management
+     * @param group            the group to ensure
      * @return the Group; this should never return null
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
@@ -231,16 +246,14 @@ public final class EnsureGroup implements EnsureAuthorizable {
     /**
      * Locates a Group by principal name, or null.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the group management
-     * @param principalName
-     *            the principal name
+     * @param resourceResolver the resource resolver to perform the group management
+     * @param principalName    the principal name
      * @return the Group or null
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
      */
     private org.apache.jackrabbit.api.security.user.Group findGroup(ResourceResolver resourceResolver,
-            String principalName) throws RepositoryException, EnsureAuthorizableException {
+                                                                    String principalName) throws RepositoryException, EnsureAuthorizableException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
         org.apache.jackrabbit.api.security.user.Group jcrGroup = null;
 
@@ -263,19 +276,14 @@ public final class EnsureGroup implements EnsureAuthorizable {
      * Ensure the group is direct member of all groups listed in the Ensure Group config. Any extra memberships are
      * removed.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the group management
-     * @param jcrGroup
-     *            the Jackrabbit security group object
-     * @param group
-     *            the Group configuration object
-     * @throws EnsureAuthorizableException
-     *             if any of the groups in the config don't exist, or exist but are not groups
-     * @throws RepositoryException
-     *             if an error occurs while performing repository operations
+     * @param resourceResolver the resource resolver to perform the group management
+     * @param jcrGroup         the Jackrabbit security group object
+     * @param group            the Group configuration object
+     * @throws EnsureAuthorizableException if any of the groups in the config don't exist, or exist but are not groups
+     * @throws RepositoryException         if an error occurs while performing repository operations
      */
     private void ensureMembership(ResourceResolver resourceResolver,
-            org.apache.jackrabbit.api.security.user.Group jcrGroup, Group group) throws EnsureAuthorizableException,
+                                  org.apache.jackrabbit.api.security.user.Group jcrGroup, Group group) throws EnsureAuthorizableException,
             RepositoryException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
 
@@ -313,11 +321,9 @@ public final class EnsureGroup implements EnsureAuthorizable {
 
     /**
      * Remove the group from all groups it belongs to.
-     * 
-     * @param jcrGroup
-     *            the Jackrabbit security group object
-     * @throws RepositoryException
-     *             if an error occurs while performing repository operations
+     *
+     * @param jcrGroup the Jackrabbit security group object
+     * @throws RepositoryException if an error occurs while performing repository operations
      */
     private void ensureRemoveMembership(org.apache.jackrabbit.api.security.user.Group jcrGroup)
             throws RepositoryException {
@@ -330,16 +336,21 @@ public final class EnsureGroup implements EnsureAuthorizable {
     }
 
     @Activate
-    protected void activate(final Map<String, Object> config) {
-        boolean ensureImmediately =
-                PropertiesUtil.toBoolean(config.get(PROP_ENSURE_IMMEDIATELY), DEFAULT_ENSURE_IMMEDIATELY);
+    protected void activate(final Config config) {
+        boolean ensureImmediately = config.ensure_immediately();
+        String operationStr = StringUtils.upperCase(config.operation());
 
-        String operationStr =
-                StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
         try {
             this.operation = Operation.valueOf(operationStr);
+
+            // Convert Config to Map for Group constructor
+            Map<String, Object> configMap = new java.util.HashMap<>();
+            configMap.put(PROP_PRINCIPAL_NAME, config.principalName());
+            configMap.put(PROP_ACES, config.aces());
+            configMap.put(PROP_MEMBER_OF, config.member_of());
+
             // Parse OSGi Configuration into Group object
-            this.group = new Group(config);
+            this.group = new Group(configMap);
 
             if (ensureImmediately) {
                 // Ensure
@@ -349,8 +360,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
             }
 
         } catch (EnsureAuthorizableException e) {
-            log.error("Unable to ensure Group [ {} ]",
-                    PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), "Undefined Group Principal Name"), e);
+            log.error("Unable to ensure Group [ {} ]", config.principalName(), e);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown Ensure Group operation [ " + operationStr + " ]", e);
         }
@@ -359,32 +369,32 @@ public final class EnsureGroup implements EnsureAuthorizable {
 
     // taken from https://www.albinsblog.com/2015/04/how-to-craetemanage-groups-and-users-java-adobecq5.html
     private static class SimplePrincipal implements Principal {
-      protected final String name;
+        protected final String name;
 
-      public SimplePrincipal(String name) {
-          if (StringUtils.isBlank(name)) {
-              throw new IllegalArgumentException("Principal name cannot be blank.");
-          }
-          this.name = name;
-      }
+        public SimplePrincipal(String name) {
+            if (StringUtils.isBlank(name)) {
+                throw new IllegalArgumentException("Principal name cannot be blank.");
+            }
+            this.name = name;
+        }
 
-      public String getName() {
-          return name;
-      }
+        public String getName() {
+            return name;
+        }
 
-      @Override
-      public int hashCode() {
-          return name.hashCode();
-      }
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
 
-      @Override
-      public boolean equals(Object obj) {
-          if (obj instanceof Principal) {
-              return name.equals(((Principal) obj).getName());
-          }
-          return false;
-      }
-  }
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Principal) {
+                return name.equals(((Principal) obj).getName());
+            }
+            return false;
+        }
+    }
 
 
 }
