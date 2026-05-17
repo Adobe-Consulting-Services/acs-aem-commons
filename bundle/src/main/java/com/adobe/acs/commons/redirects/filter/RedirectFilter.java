@@ -646,6 +646,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
         } catch (ExecutionException e){
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;
+        } catch (IllegalArgumentException e) {
+            log.debug("Skipping mapped URL match, invalid URI", e);
+            return null;
         }
     }
 
