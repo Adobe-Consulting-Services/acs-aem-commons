@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
+- #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node 
 
 ## [6.17.0] - 2026-04-29
 
