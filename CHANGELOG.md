@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+### Fixed
+
+- #3758 OverridePathSlingRequestWrapper: avoid repeated instantiation of SlingModelsScriptEngineFactory on every request
+
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
 
 ## [6.17.0] - 2026-04-29
