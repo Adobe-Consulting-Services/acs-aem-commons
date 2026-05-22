@@ -96,7 +96,8 @@ angular
           if (window.location.hash !== "" && window.location.hash !== "#") {
             var params = window.location.hash.substr(1);
             loadResults(params).done(function () {
-              var url = new URL(window.location.hash.replace("#", "?"));
+              var baseUrl = window.location.href.split('#')[0];
+              var url = new URL(baseUrl + window.location.hash.replace("#", "?"));
               url.searchParams.forEach(function (val, key) {
                 $('input[name="' + key + '"]:not([type="checkbox"])').val(val);
                 var $sel = $('coral-select[name="' + key + '"]');
