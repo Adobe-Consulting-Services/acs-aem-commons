@@ -32,16 +32,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,14 +254,22 @@ public class FileOrRendition implements HierarchicalElement {
             if (connection == null) {
                 try {
                     lastRequest = new HttpGet(url);
+                    HttpClientContext context = HttpClientContext.create();
                     if (StringUtils.isNotBlank(clientProvider.getUsername())) {
-                        String credentials = clientProvider.getUsername() + ":" +
-                                StringUtils.defaultString(clientProvider.getPassword());
-                        String encoded = Base64.getEncoder().encodeToString(
-                                credentials.getBytes(StandardCharsets.UTF_8));
-                        lastRequest.setHeader("Authorization", "Basic " + encoded);
+                        URI uri = lastRequest.getURI();
+                        HttpHost target = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+                        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                        credentialsProvider.setCredentials(
+                                new AuthScope(target),
+                                new UsernamePasswordCredentials(
+                                        clientProvider.getUsername(),
+                                        StringUtils.defaultString(clientProvider.getPassword())));
+                        BasicAuthCache authCache = new BasicAuthCache();
+                        authCache.put(target, new BasicScheme());
+                        context.setCredentialsProvider(credentialsProvider);
+                        context.setAuthCache(authCache);
                     }
-                    connection = clientProvider.getHttpClientSupplier().get().execute(lastRequest);
+                    connection = clientProvider.getHttpClientSupplier().get().execute(lastRequest, context);
                     size = connection.getEntity().getContentLength();
                 } catch (IOException | IllegalArgumentException ex) {
                     size = -1L;
