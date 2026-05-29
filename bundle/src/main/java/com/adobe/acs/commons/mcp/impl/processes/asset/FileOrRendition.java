@@ -32,11 +32,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
@@ -246,6 +249,13 @@ public class FileOrRendition implements HierarchicalElement {
             if (connection == null) {
                 try {
                     lastRequest = new HttpGet(url);
+                    if (StringUtils.isNotBlank(clientProvider.getUsername())) {
+                        String credentials = clientProvider.getUsername() + ":" +
+                                StringUtils.defaultString(clientProvider.getPassword());
+                        String encoded = Base64.getEncoder().encodeToString(
+                                credentials.getBytes(StandardCharsets.UTF_8));
+                        lastRequest.setHeader("Authorization", "Basic " + encoded);
+                    }
                     connection = clientProvider.getHttpClientSupplier().get().execute(lastRequest);
                     size = connection.getEntity().getContentLength();
                 } catch (IOException | IllegalArgumentException ex) {
