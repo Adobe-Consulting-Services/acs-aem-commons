@@ -12,19 +12,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
 
+### Fixed
+
+- #3763 Fix URL Asset Import using stored Credentials
+
 ## [6.17.0] - 2026-04-29
 
 ## Changed
 
-- #3644 All Result checkbox on Reports could be configurable 
+- #3644 All Result checkbox on Reports could be configurable
 - #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
-- #3734 RedirectManager: Support regular expression in source without capturing groups 
+- #3734 RedirectManager: Support regular expression in source without capturing groups
 - #3715 Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
 
 ## Fixed
 
-- #3730 RedirectManager: Trailing "*" in source path being converted to "(.*)" might destroy regular expression
-- #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet 
+- #3730 RedirectManager: Trailing "_" in source path being converted to "(._)" might destroy regular expression
+- #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet
 - #3742 Remove usage of Apache Tika 1.x
 
 ## 6.16.0 - 2026-02-10
@@ -39,7 +43,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3692 Redirect Manager: prevent java.lang.IllegalStateException in author logs when publishing redirects
 - #3683 RedirectFilter: Ignore Case value not showing in export
 - #3604 ClassCastException with org.apache.sling.distribution.DistributionRequestType in CloudDispatcherFlushRulesExecutor.handleEvent
-- #2524 Add dependency to enable PathField as report parameter. 
+- #2524 Add dependency to enable PathField as report parameter.
 
 ## 6.15.4 - 2025-11-19
 
@@ -66,6 +70,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## 6.14.0 - 2025-07-15
 
 ### Changed
+
 - #3636 Content Sync: support dedicated egress IP address
 - #3623 Content Sync: improve error handling
 
@@ -77,7 +82,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
 - #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
 - #3601 Content Sync: in case of an error print the exception and continue instead of aborting
-- #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.* should expose error messages to end users
+- #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.\* should expose error messages to end users
 - #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
 - #3626 Redirect Manager: Fix Replace Mode issue, delete only 'redirect-row' nodes
 
@@ -98,13 +103,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3562 Fixed compilation errors in iscurrentusermemberof render condition
 - #3457 Allow disabling the ContentPolicyValueInjector
 
- ## 6.11.0 - 2025-03-14
+## 6.11.0 - 2025-03-14
 
 ### Changed
+
 - #3501 Redirect Manager: Large-Scale Import Optimization
 - #3507 - Rewrite javascript clientlibs when used in link tags for preloading.
 
 ### Fixed
+
 - #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
 - #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
 - #3539 - Fixed NPE issue in AcsCommonsConsoleAuthoringUIModeFilter, if cq-authoring-mode cookie is missing
@@ -409,7 +416,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3060 - Query packager does only picks last list item when in list mode
 - #3057 - Re-labled asset packager, added missing excludePages property
-- Updated dependencies with vulnerabilities:  guava-30.1-jre.jar: CVE-2020-8908, jjwt-api-0.11.2.jar: CVE-2022-45688
+- Updated dependencies with vulnerabilities: guava-30.1-jre.jar: CVE-2020-8908, jjwt-api-0.11.2.jar: CVE-2022-45688
 
 ### Changed
 
@@ -1228,7 +1235,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1649 - Added support for custom Content-Type header.
 - #1720 - Adjusted metatype for HTTP Cache components.
 - #1729 - Url Asset Ingestor | Support case sensitive properties
-- #1753 - Remove Dynamic*ClientLibraryServlet and breaks out TouchUI widgets into discrete Client Libraries
+- #1753 - Remove Dynamic\*ClientLibraryServlet and breaks out TouchUI widgets into discrete Client Libraries
 
 ### Removed
 
