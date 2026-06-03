@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+### Fixed
+
+- #3757 Redirect Manager: catch IllegalArgumentException from URI.create() to prevent uncaught throwable on malicious/malformed request URLs
+
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
 
 ## [6.17.0] - 2026-04-29

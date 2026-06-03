@@ -356,6 +356,23 @@ public class RedirectFilterTest {
     }
 
     @Test
+    public void testMaliciousUriDoesNotThrow() throws Exception {
+        when(filter.mapUrls()).thenReturn(true);
+        withRules(
+            new RedirectResourceBuilder(context)
+                    .setSource("/en/one")
+                    .setTarget("/en/two")
+                    .setStatusCode(302).build()
+        );
+        // Malicious URL decoded by Sling contains an illegal URI character (#),
+        // simulating a command-injection attempt (issue #3757).
+        MockSlingHttpServletResponse response = navigate(
+                "/content/we-retail/en/page%7cecho%20qaohyb$()/%20umdyjo/nz%5exyu%7c%7ca%20%23.html");
+        assertEquals(200, response.getStatus());
+        verify(filterChain).doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
     public void testNavigateNoRewrite() throws Exception {
         withRules(
             new RedirectResourceBuilder(context)
