@@ -647,7 +647,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             log.error("failed to load redirect rules from {}", configPath, e);
             return null;
         } catch (IllegalArgumentException e) {
-            log.debug("Skipping mapped URL match, invalid URI", e);
+            log.warn("Skipping mapped URL match, invalid URI", e);
             return null;
         }
     }
