@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
 
+### Fixed
+
+- #3763 Fix URL Asset Import using stored Credentials
+
 ## [6.17.0] - 2026-04-29
 
 ## Changed
