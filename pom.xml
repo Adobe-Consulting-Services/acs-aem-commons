@@ -78,14 +78,14 @@
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.25</sl4fj.version>
-        <bnd.version>6.4.0</bnd.version>
+        <bnd.version>7.3.0</bnd.version>
 
         <!-- the minimum AEM 6.5 version being supported -->
         <aem.classic.api.version>6.5.21.0000</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
         <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
 
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version> <!-- >= 5.x requires Java 11 -->
         <njord.version>0.8.7</njord.version>
         <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
@@ -480,7 +480,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                                     <version>3.9.0</version><!-- njord requires Maven 3.9.0 -->
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>11</version>
+                                    <version>17</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
