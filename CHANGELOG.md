@@ -13,8 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3758 OverridePathSlingRequestWrapper: avoid repeated instantiation of SlingModelsScriptEngineFactory on every request
-
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
+- #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node 
+- #3763 Fix URL Asset Import using stored Credentials
 
 ## [6.17.0] - 2026-04-29
 
