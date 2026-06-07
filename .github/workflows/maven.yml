@@ -28,11 +28,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        jdk: [11, 17, 21, 25]
+        jdk: [17, 21, 25]
         include:
           # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
           - os: ubuntu-latest
-            jdk: 11
+            jdk: 25
             isMainBuildEnv: true
             namePrefix: 'Main '
       fail-fast: false
