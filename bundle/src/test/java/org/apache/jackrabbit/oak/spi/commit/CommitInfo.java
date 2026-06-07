@@ -17,17 +17,14 @@
  */
 package org.apache.jackrabbit.oak.spi.commit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jackrabbit.oak.api.Root;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import com.google.common.base.Objects;
 
 /**
  * Commit info instances associate some meta data with a commit.
@@ -90,9 +87,9 @@ public final class CommitInfo {
      * @param external indicates if the commit info is from external change
      */
     public CommitInfo(@NotNull String sessionId, @Nullable String userId, Map<String, Object> info, boolean external) {
-        this.sessionId = checkNotNull(sessionId);
+        this.sessionId = Objects.requireNonNull(sessionId);
         this.userId = (userId == null) ? OAK_UNKNOWN : userId;
-        this.info = checkNotNull(info);
+        this.info = Objects.requireNonNull(info);
         this.external = external;
     }
 
@@ -175,7 +172,7 @@ public final class CommitInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(sessionId, userId, date, info, external);
+        return Objects.hash(sessionId, userId, date, info, external);
     }
 
     @Override

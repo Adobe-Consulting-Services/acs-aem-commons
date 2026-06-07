@@ -24,7 +24,6 @@ import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
 import com.adobe.acs.commons.wcm.comparisons.VersionService;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.collect.Lists;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -36,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.RepositoryException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -201,12 +201,12 @@ public class PageCompareModelTest {
 //        when(resource.getResourceResolver()).thenReturn(resolver);
 
         PageCompareData pageCompareData = mock(PageCompareData.class);
-        final List<Line<PageCompareDataLine>> lineResult = Lists.newArrayList(
-                mockOne2OneDataLine("a", "b"));
+        final List<Line<PageCompareDataLine>> lineResult = new ArrayList<>(
+                Arrays.asList(mockOne2OneDataLine("a", "b")));
         when(lines.generate(anyCollection(), anyCollection())).thenReturn(lineResult);
-        final ArrayList<VersionSelection> versionSelections = Lists.newArrayList(
+        final ArrayList<VersionSelection> versionSelections = new ArrayList<>(Arrays.asList(
                 mock(VersionSelection.class),
-                mock(VersionSelection.class));
+                mock(VersionSelection.class)));
         when(pageCompareData.getVersions()).thenReturn(versionSelections);
         when(loader.load(resource, version != null ? version : "latest")).thenReturn(pageCompareData);
         return pageCompareData;

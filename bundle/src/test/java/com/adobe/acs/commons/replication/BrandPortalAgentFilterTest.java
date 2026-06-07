@@ -20,7 +20,6 @@ package com.adobe.acs.commons.replication;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
-import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -33,7 +32,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -69,14 +70,10 @@ public class BrandPortalAgentFilterTest {
     @Before
     public void setUp() throws Exception {
         slingContext.create().resource(assetsFolderPath,
-                ImmutableMap.<String, Object>builder()
-                        .put("mpConfig", cloudServiceConfigPath)
-                        .build());
+                mapOf("mpConfig", cloudServiceConfigPath));
 
         slingContext.create().resource(cloudServiceConfigPath + "/jcr:content",
-                ImmutableMap.<String, Object>builder()
-                        .put("tenantURL", brandPortalOrigin)
-                        .build());
+                mapOf("tenantURL", brandPortalOrigin));
 
         filter = new BrandPortalAgentFilter(slingContext.resourceResolver().getResource(assetsFolderPath));
 
@@ -110,10 +107,15 @@ public class BrandPortalAgentFilterTest {
     @Test // #1349
     public void mpConfigIsNotConfigured() {
         slingContext.create().resource(assetsFolderPathWithoutMpConfig,
-                ImmutableMap.<String, Object>builder()
-                        .build());
+                new HashMap<>());
 
         final List<Resource> actual = filter.getBrandPortalConfigs(slingContext.resourceResolver().getResource(assetsFolderPathWithoutMpConfig));
         assertEquals(0, actual.size());
+    }
+
+    private static Map<String, Object> mapOf(String key, Object value) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(key, value);
+        return map;
     }
 }

@@ -21,8 +21,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -32,9 +35,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LinesTest {
@@ -44,8 +44,8 @@ public class LinesTest {
     @Test
     public void generate_singleLine() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("A");
-        List<String> right = Lists.newArrayList("A");
+        List<String> left = Arrays.asList("A");
+        List<String> right = Arrays.asList("A");
 
         // when
         final List<Line<String>> lines = one2OneLines.generate(left, right);
@@ -59,8 +59,8 @@ public class LinesTest {
     @Test
     public void generate_twoLines() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("A");
-        List<String> right = Lists.newArrayList("B");
+        List<String> left = Arrays.asList("A");
+        List<String> right = Arrays.asList("B");
 
         // when
         final List<Line<String>> lines = one2OneLines.generate(left, right);
@@ -68,15 +68,15 @@ public class LinesTest {
         // then
         assertThat(lines.size(), is(2));
 
-        assertThat(lines.get(0), isLineWith(Optional.of("A"), Optional.<String>absent()));
-        assertThat(lines.get(1), isLineWith(Optional.<String>absent(), Optional.of("B")));
+        assertThat(lines.get(0), isLineWith(Optional.of("A"), Optional.empty()));
+        assertThat(lines.get(1), isLineWith(Optional.empty(), Optional.of("B")));
     }
 
     @Test
     public void generate_twoLines_firstSpacerLeft() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("B");
-        List<String> right = Lists.newArrayList("A", "B");
+        List<String> left = Arrays.asList("B");
+        List<String> right = Arrays.asList("A", "B");
 
         // when
         final List<Line<String>> lines = one2OneLines.generate(left, right);
@@ -84,15 +84,15 @@ public class LinesTest {
         // then
         assertThat(lines.size(), is(2));
 
-        assertThat(lines.get(0), isLineWith(Optional.<String>absent(), Optional.of("A")));
+        assertThat(lines.get(0), isLineWith(Optional.empty(), Optional.of("A")));
         assertThat(lines.get(1), isLineWith(Optional.of("B"), Optional.of("B")));
     }
 
     @Test
     public void generate_twoLines_firstSpacerRight() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("A", "B");
-        List<String> right = Lists.newArrayList("B");
+        List<String> left = Arrays.asList("A", "B");
+        List<String> right = Arrays.asList("B");
 
         // when
         final List<Line<String>> lines = one2OneLines.generate(left, right);
@@ -100,15 +100,15 @@ public class LinesTest {
         // then
         assertThat(lines.size(), is(2));
 
-        assertThat(lines.get(0), isLineWith(Optional.of("A"), Optional.<String>absent()));
+        assertThat(lines.get(0), isLineWith(Optional.of("A"), Optional.empty()));
         assertThat(lines.get(1), isLineWith(Optional.of("B"), Optional.of("B")));
     }
 
     @Test
     public void generate_matrixTest1() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("A", "B", "C", "E");
-        List<String> right = Lists.newArrayList("B", "C", "D", "E");
+        List<String> left = Arrays.asList("A", "B", "C", "E");
+        List<String> right = Arrays.asList("B", "C", "D", "E");
 
         /*
          *   A | -
@@ -125,18 +125,18 @@ public class LinesTest {
         assertThat(lines.size(), is(5));
 
         Iterator<Line<String>> lineIterator = lines.iterator();
-        assertThat(lineIterator.next(), isLineWith(Optional.of("A"), Optional.<String>absent()));
+        assertThat(lineIterator.next(), isLineWith(Optional.of("A"), Optional.empty()));
         assertThat(lineIterator.next(), isLineWith(Optional.of("B"), Optional.of("B")));
         assertThat(lineIterator.next(), isLineWith(Optional.of("C"), Optional.of("C")));
-        assertThat(lineIterator.next(), isLineWith(Optional.<String>absent(), Optional.of("D")));
+        assertThat(lineIterator.next(), isLineWith(Optional.empty(), Optional.of("D")));
         assertThat(lineIterator.next(), isLineWith(Optional.of("E"), Optional.of("E")));
     }
 
     @Test
     public void generate_matrixTest2() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("E", "A", "B", "C", "X");
-        List<String> right = Lists.newArrayList("B", "C", "D", "E", "X");
+        List<String> left = Arrays.asList("E", "A", "B", "C", "X");
+        List<String> right = Arrays.asList("B", "C", "D", "E", "X");
 
         /*
          *   E | -
@@ -155,20 +155,20 @@ public class LinesTest {
         assertThat(lines.size(), is(7));
 
         Iterator<Line<String>> lineIterator = lines.iterator();
-        assertThat(lineIterator.next(), isLineWith(Optional.of("E"), Optional.<String>absent()));
-        assertThat(lineIterator.next(), isLineWith(Optional.of("A"), Optional.<String>absent()));
+        assertThat(lineIterator.next(), isLineWith(Optional.of("E"), Optional.empty()));
+        assertThat(lineIterator.next(), isLineWith(Optional.of("A"), Optional.empty()));
         assertThat(lineIterator.next(), isLineWith(Optional.of("B"), Optional.of("B")));
         assertThat(lineIterator.next(), isLineWith(Optional.of("C"), Optional.of("C")));
-        assertThat(lineIterator.next(), isLineWith(Optional.<String>absent(), Optional.of("D")));
-        assertThat(lineIterator.next(), isLineWith(Optional.<String>absent(), Optional.of("E")));
+        assertThat(lineIterator.next(), isLineWith(Optional.empty(), Optional.of("D")));
+        assertThat(lineIterator.next(), isLineWith(Optional.empty(), Optional.of("E")));
         assertThat(lineIterator.next(), isLineWith(Optional.of("X"), Optional.of("X")));
     }
 
     @Test
     public void generate_matrixTest3() throws Exception {
         // given
-        List<String> left = Lists.newArrayList("B", "C", "D", "E", "X");
-        List<String> right = Lists.newArrayList("E", "A", "B", "C", "X");
+        List<String> left = Arrays.asList("B", "C", "D", "E", "X");
+        List<String> right = Arrays.asList("E", "A", "B", "C", "X");
 
         /*
          *   - | E
@@ -187,12 +187,12 @@ public class LinesTest {
         assertThat(lines.size(), is(7));
 
         Iterator<Line<String>> lineIterator = lines.iterator();
-        assertThat(lineIterator.next(), isLineWith(Optional.<String>absent(), Optional.of("E")));
-        assertThat(lineIterator.next(), isLineWith(Optional.<String>absent(), Optional.of("A")));
+        assertThat(lineIterator.next(), isLineWith(Optional.empty(), Optional.of("E")));
+        assertThat(lineIterator.next(), isLineWith(Optional.empty(), Optional.of("A")));
         assertThat(lineIterator.next(), isLineWith(Optional.of("B"), Optional.of("B")));
         assertThat(lineIterator.next(), isLineWith(Optional.of("C"), Optional.of("C")));
-        assertThat(lineIterator.next(), isLineWith(Optional.of("D"), Optional.<String>absent()));
-        assertThat(lineIterator.next(), isLineWith(Optional.of("E"), Optional.<String>absent()));
+        assertThat(lineIterator.next(), isLineWith(Optional.of("D"), Optional.empty()));
+        assertThat(lineIterator.next(), isLineWith(Optional.of("E"), Optional.empty()));
         assertThat(lineIterator.next(), isLineWith(Optional.of("X"), Optional.of("X")));
     }
 
@@ -202,8 +202,8 @@ public class LinesTest {
         return new TypeSafeMatcher<Line<String>>() {
             @Override
             protected boolean matchesSafely(Line<String> stringLine) {
-                return left.equals(Optional.fromNullable(stringLine.getLeft()))
-                        && right.equals(Optional.fromNullable(stringLine.getRight()));
+                return left.equals(Optional.ofNullable(stringLine.getLeft()))
+                        && right.equals(Optional.ofNullable(stringLine.getRight()));
             }
 
             @Override

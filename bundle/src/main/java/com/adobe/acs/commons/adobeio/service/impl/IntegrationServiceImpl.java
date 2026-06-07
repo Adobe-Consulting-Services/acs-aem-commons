@@ -29,6 +29,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -117,7 +117,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
             post.addHeader(CACHE_CONTRL, NO_CACHE);
             post.addHeader(CONTENT_TYPE, CONTENT_TYPE_URL_ENCODED);
 
-            List<BasicNameValuePair> params = Lists.newArrayList();
+            List<BasicNameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair(CLIENT_ID, jwtServiceConfig.clientId()));
             params.add(new BasicNameValuePair(CLIENT_SECRET, jwtServiceConfig.clientSecret()));
             params.add(new BasicNameValuePair(JWT_TOKEN, getJwtToken()));

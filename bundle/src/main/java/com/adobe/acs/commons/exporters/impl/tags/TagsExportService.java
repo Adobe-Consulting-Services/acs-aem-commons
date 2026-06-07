@@ -18,11 +18,12 @@
 package com.adobe.acs.commons.exporters.impl.tags;
 
 import com.day.cq.commons.jcr.JcrConstants;
-import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.jcr.query.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -112,7 +113,9 @@ public class TagsExportService {
   }
 
   private static List<Resource> getAllTags(String path, ResourceResolver rr) {
-    return Lists.newArrayList(rr.findResources(String.format(TAGS_QUERY, path), Query.JCR_SQL2));
+    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+            rr.findResources(String.format(TAGS_QUERY, path), Query.JCR_SQL2), 0), false)
+        .collect(Collectors.toList());
   }
 
   private static int tagsDepth(List<Resource> tags) {

@@ -19,12 +19,13 @@
 package com.adobe.acs.commons.replication;
 
 import com.day.cq.replication.Agent;
-import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -53,7 +54,7 @@ public class AgentIdsAgentFilterTest {
 
     @Test
     public void isIncluded() throws Exception {
-        filter = new AgentIdsAgentFilter(ImmutableList.<String>builder().add("one").add("two").build());
+        filter = new AgentIdsAgentFilter(Arrays.asList("one", "two"));
         assertTrue(filter.isIncluded(agentAcceptOne));
         assertTrue(filter.isIncluded(agentAcceptTwo));
         assertFalse(filter.isIncluded(agentAcceptThree));

@@ -17,29 +17,31 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
-
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 class Stepper<T> {
 
     private final List<Serializable> ids;
-    private final Iterable<T> values;
+    private final List<T> values;
     private final Function<T, Serializable> toId;
 
     private int step = 0;
 
     Stepper(Iterable<T> steps, Function<T, Serializable> toId) {
         this.toId = toId;
-        this.values = steps;
-        this.ids = FluentIterable.from(steps).transform(toId).toList();
+        this.values = new ArrayList<>();
+        this.ids = new ArrayList<>();
+        for (T stepValue : steps) {
+            this.values.add(stepValue);
+            this.ids.add(toId.apply(stepValue));
+        }
     }
 
     public T next() {
-        T ret = Iterables.size(values) > step ? Iterables.get(values, step) : null;
+        T ret = values.size() > step ? values.get(step) : null;
         step++;
         return ret;
     }

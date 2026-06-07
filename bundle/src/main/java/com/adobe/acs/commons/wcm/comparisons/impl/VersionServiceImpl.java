@@ -20,7 +20,6 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.wcm.comparisons.VersionService;
 import com.day.cq.wcm.api.NameConstants;
-import com.google.common.collect.Iterators;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
@@ -45,7 +44,11 @@ public class VersionServiceImpl implements VersionService {
             Resource versionableResource = resource.isResourceType(NameConstants.NT_PAGE) ? resource.getChild(NameConstants.NN_CONTENT) : resource;
             VersionManager versionManager = versionableResource.getResourceResolver().adaptTo(Session.class).getWorkspace().getVersionManager();
             final Iterator<Version> allVersions = versionManager.getVersionHistory(versionableResource.getPath()).getAllVersions();
-            return Iterators.getLast(allVersions);
+            Version last = null;
+            while (allVersions.hasNext()) {
+                last = allVersions.next();
+            }
+            return last;
         } catch (RepositoryException e) {
             log.error("Error receiving last version of resource [ {} ]", resource.getName());
         }

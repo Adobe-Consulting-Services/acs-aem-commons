@@ -21,9 +21,9 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.day.cq.commons.PathInfo;
-import com.google.common.base.Objects;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
+import java.util.Objects;
 
 /**
  * RequestPathCacheKey. Not used currently.
@@ -66,14 +66,14 @@ public class RequestPathCacheKey extends AbstractCacheKey implements CacheKey {
             return false;
         }
         RequestPathCacheKey that = (RequestPathCacheKey) o;
-        return Objects.equal(getSelector(), that.getSelector())
-                && Objects.equal(getExtension(), that.getExtension())
-                && Objects.equal(getResourcePath(), that.getResourcePath());
+        return Objects.equals(getSelector(), that.getSelector())
+                && Objects.equals(getExtension(), that.getExtension())
+                && Objects.equals(getResourcePath(), that.getResourcePath());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getSelector(), getExtension(), getResourcePath());
+        return Objects.hash(getSelector(), getExtension(), getResourcePath());
     }
 
     @Override

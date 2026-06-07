@@ -19,7 +19,7 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.LibraryType;
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 class VersionedClientLibraryMd5CacheKey {
     private final String path;
@@ -45,12 +45,12 @@ class VersionedClientLibraryMd5CacheKey {
         }
         final VersionedClientLibraryMd5CacheKey other = (VersionedClientLibraryMd5CacheKey) obj;
 
-        return Objects.equal(this.path, other.path) && Objects.equal(this.type, other.type);
+        return Objects.equals(this.path, other.path) && Objects.equals(this.type, other.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.path, this.type);
+        return Objects.hash(this.path, this.type);
     }
 
     @Override

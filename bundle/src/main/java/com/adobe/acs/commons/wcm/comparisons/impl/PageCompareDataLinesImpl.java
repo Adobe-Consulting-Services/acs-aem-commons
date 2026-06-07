@@ -21,13 +21,13 @@ import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
 import com.adobe.acs.commons.wcm.comparisons.impl.lines.LinesGenerator;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
-import com.google.common.base.Function;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.function.Function;
 
 @Component(metatype = false)
 @Service

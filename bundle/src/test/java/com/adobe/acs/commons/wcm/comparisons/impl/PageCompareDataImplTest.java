@@ -26,8 +26,11 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
@@ -51,8 +54,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
 import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class PageCompareDataImplTest {
@@ -143,7 +144,7 @@ public final class PageCompareDataImplTest {
         // given
         final Resource resource = mockResource("/my/path", "latest", new Date());
 
-        final Set<String> valueMapKeys = Sets.newHashSet("a", "b");
+        final Set<String> valueMapKeys = new HashSet<>(Arrays.asList("a", "b"));
         final Property a = mockProperty("a", "/my/path/a", "value a");
         when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
         final Property b = mockProperty("b", "/my/path/b", "value b");
@@ -165,7 +166,7 @@ public final class PageCompareDataImplTest {
         // given
         final Resource resource = mockResource("/my/path", "latest", new Date());
 
-        final Set<String> valueMapKeys = Sets.newHashSet("a", "b");
+        final Set<String> valueMapKeys = new HashSet<>(Arrays.asList("a", "b"));
         final Property a = mockProperty("a", "/my/path/a", "value a");
         when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
         final Property b = mockProperty("b", "/my/path/b", "value b");
@@ -179,10 +180,10 @@ public final class PageCompareDataImplTest {
 
         final Property e = mockProperty("e", "/my/path/d/e", "value e");
         when(childD.adaptTo(Node.class).getProperty("e")).thenReturn(e);
-        when(childD.getValueMap().keySet()).thenReturn(Sets.newHashSet("e"));
+        when(childD.getValueMap().keySet()).thenReturn(new HashSet<>(Collections.singletonList("e")));
 
 
-        final List<Resource> children = Lists.newArrayList(childC, childD);
+        final List<Resource> children = new ArrayList<>(Arrays.asList(childC, childD));
         when(resource.getChildren()).thenReturn(children);
 
         // when
@@ -214,7 +215,7 @@ public final class PageCompareDataImplTest {
         final Resource resource = mock(Resource.class);
         when(resource.getPath()).thenReturn(path);
         when(resource.getValueMap()).thenReturn(mock(ValueMap.class));
-        when(resource.getChildren()).thenReturn(Lists.newArrayList());
+        when(resource.getChildren()).thenReturn(new ArrayList<>());
 
         final Node node = mock(Node.class);
         when(resource.adaptTo(Node.class)).thenReturn(node);

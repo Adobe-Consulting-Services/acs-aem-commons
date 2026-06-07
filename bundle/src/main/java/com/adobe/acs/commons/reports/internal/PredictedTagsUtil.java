@@ -23,7 +23,6 @@ import com.adobe.acs.commons.reports.models.PredictedTag;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.commons.util.DamUtil;
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.util.PathUtil;
 import org.apache.sling.api.resource.Resource;
@@ -34,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class PredictedTagsUtil {
 
@@ -73,7 +74,9 @@ public class PredictedTagsUtil {
             return Collections.emptyList();
         }
 
-        final List<Resource> predictedTagResources = ImmutableList.copyOf(predictedTagsResource.getChildren());
+        final List<Resource> predictedTagResources = StreamSupport
+                .stream(predictedTagsResource.getChildren().spliterator(), false)
+                .collect(Collectors.toList());
         final List<PredictedTag> predictedTags = new ArrayList<>();
         for (final Resource predictedTagResource : predictedTagResources) {
             final PredictedTag predictedTag = predictedTagResource.adaptTo(PredictedTag.class);

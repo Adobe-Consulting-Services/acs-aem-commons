@@ -18,11 +18,11 @@
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.base.Function;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * LinesGenerator&lt;T&gt; combines two list of values (left and right) to a comparing map. Values with same id are in one line, with different ids in different lines. Example:

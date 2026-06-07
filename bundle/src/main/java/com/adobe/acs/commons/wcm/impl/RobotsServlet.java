@@ -23,7 +23,7 @@ import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
 import com.day.text.Text;
-import com.google.common.io.ByteStreams;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -255,7 +255,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
                         written = true;
                     } else if (property instanceof InputStream) {
                         try (InputStream stream = (InputStream)property) {
-                            ByteStreams.copy(stream, response.getOutputStream());
+                            IOUtils.copy(stream, response.getOutputStream());
                             written = true;
                         }
                     } else {

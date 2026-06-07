@@ -20,6 +20,7 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.jcr.Node;
@@ -36,7 +37,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.adobe.acs.commons.wcm.comparisons.VersionService;
-import com.google.common.collect.ImmutableMap;
 
 public final class VersionServiceImplTest {
 
@@ -50,7 +50,7 @@ public final class VersionServiceImplTest {
     
     @Before
     public void setup() throws Exception {
-        Map<String, Object> props = ImmutableMap.of("jcr:primaryType", "nt:unstructured");
+        Map<String, Object> props = Collections.singletonMap("jcr:primaryType", "nt:unstructured");
         ResourceResolver rr = context.resourceResolver();
         Resource root = rr.getResource("/");
         Resource manyVersions = rr.create(root, "manyVersions", props);

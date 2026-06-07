@@ -17,15 +17,15 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
-import com.google.common.base.Function;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.adobe.acs.commons.wcm.comparisons.impl.lines.StepperTest.Step.step;
 import static com.adobe.acs.commons.wcm.comparisons.impl.lines.StepperTest.Step.toId;
-import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -36,7 +36,7 @@ public class StepperTest {
 
     @Test
     public void shouldStepOverAll() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
 
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
@@ -48,7 +48,7 @@ public class StepperTest {
 
     @Test
     public void shouldFindPositionOfFirst() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         final int position = underTest.positionOfIdAfterCurrent(steps.get(0));
@@ -58,7 +58,7 @@ public class StepperTest {
 
     @Test
     public void shouldFindPositionOfSecond() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         final int position = underTest.positionOfIdAfterCurrent(steps.get(1));
@@ -68,7 +68,7 @@ public class StepperTest {
 
     @Test
     public void shouldFindRelativePositionOfSecond() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         underTest.next();
@@ -79,7 +79,7 @@ public class StepperTest {
 
     @Test
     public void shouldNotFindRelativePositionOfFirstAfterSecond() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         underTest.next();
@@ -90,7 +90,7 @@ public class StepperTest {
 
     @Test
     public void shouldNotBeEmptyOnStart() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         assertFalse(underTest.isEmpty());
@@ -98,7 +98,7 @@ public class StepperTest {
 
     @Test
     public void shouldNotBeEmptyOnSecond() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         underTest.next();
@@ -108,7 +108,7 @@ public class StepperTest {
 
     @Test
     public void shouldBeEmptyOnLast() throws Exception {
-        List<Step> steps = newArrayList(step("1"), step("2"), step("3"));
+        List<Step> steps = Arrays.asList(step("1"), step("2"), step("3"));
         Stepper<Step> underTest = new Stepper<Step>(steps, toId);
 
         underTest.next();

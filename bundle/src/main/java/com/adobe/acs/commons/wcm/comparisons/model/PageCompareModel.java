@@ -23,8 +23,8 @@ import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 import com.adobe.acs.commons.wcm.comparisons.VersionService;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import org.jetbrains.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -38,8 +38,7 @@ import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.version.Version;
 import java.util.List;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import java.util.ArrayList;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class PageCompareModel {
@@ -77,8 +76,8 @@ public class PageCompareModel {
         this.pathB = request.getParameter("pathB");
         String paramVersionB = request.getParameter("b");
 
-        this.versionA = isNullOrEmpty(paramVersionA) ? LATEST : paramVersionA;
-        this.versionB = isNullOrEmpty(paramVersionB) ? LATEST : paramVersionB;
+        this.versionA = StringUtils.isEmpty(paramVersionA) ? LATEST : paramVersionA;
+        this.versionB = StringUtils.isEmpty(paramVersionB) ? LATEST : paramVersionB;
     }
 
     @PostConstruct
@@ -114,7 +113,7 @@ public class PageCompareModel {
         if (a != null && b != null) {
             return lines.generate(a.getLines(), b.getLines());
         }
-        return Lists.newArrayList();
+        return new ArrayList<>();
     }
 
     public PageCompareData getA() {

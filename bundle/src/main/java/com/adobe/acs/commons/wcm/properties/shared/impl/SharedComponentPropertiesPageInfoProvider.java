@@ -22,8 +22,6 @@ import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.PageInfoProvider;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -52,6 +50,7 @@ import javax.jcr.security.Privilege;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +118,10 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
                 if (accessControlManager.hasPrivileges(rootPageContentPath, requiredPrivs)) {
                     props.put("enabled", true);
                     props.put("root", rootPagePath);
-                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) org.apache.sling.commons.json.JSONArray::new));
+                    Map<String, Object> components = new LinkedHashMap<>();
+                    componentsWithSharedProperties.forEach((key, value) ->
+                            components.put(key, new org.apache.sling.commons.json.JSONArray(value)));
+                    props.put("components", components);
                 } else {
                     log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, rootPageContentPath);
                 }

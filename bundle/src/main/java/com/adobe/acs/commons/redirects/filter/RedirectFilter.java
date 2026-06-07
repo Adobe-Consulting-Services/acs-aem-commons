@@ -24,12 +24,12 @@ import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.RedirectState;
 import com.adobe.acs.commons.redirects.models.Redirects;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.wcm.api.WCMMode;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
@@ -234,7 +234,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                     exts, paths, mapUrls);
             executor = Executors.newSingleThreadExecutor();
 
-            rulesCache = CacheBuilder.newBuilder().build();
+            rulesCache = Caffeine.newBuilder().build();
 
         }
     }

@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.oak.EnsureOakIndexManager;
-import com.google.common.collect.ImmutableMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnsureOakIndexServletTest {
@@ -63,7 +64,7 @@ public class EnsureOakIndexServletTest {
     
     @Test
     public void testPostWithForce() throws IOException {
-        context.request().setParameterMap(ImmutableMap.of("force","true"));
+        context.request().setParameterMap(singleParam("force", "true"));
         servlet.doPost(context.request(), context.response());
         verify(ensureOakIndexManager).ensureAll(true);
         assertEquals(HttpServletResponse.SC_OK,context.response().getStatus());
@@ -71,10 +72,19 @@ public class EnsureOakIndexServletTest {
     
     @Test
     public void testPostWithPathAndNonForce() throws IOException {
-        context.request().setParameterMap(ImmutableMap.of("force","blub","path",INDEX_PATH));
+        Map<String, Object> params = new HashMap<>();
+        params.put("force", "blub");
+        params.put("path", INDEX_PATH);
+        context.request().setParameterMap(params);
         servlet.doPost(context.request(), context.response());
         verify(ensureOakIndexManager).ensure(false, INDEX_PATH);
         assertEquals(HttpServletResponse.SC_OK,context.response().getStatus());
+    }
+
+    private Map<String, Object> singleParam(String key, String value) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(key, value);
+        return params;
     }
     
 }

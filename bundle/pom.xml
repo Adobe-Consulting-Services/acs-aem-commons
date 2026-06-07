@@ -160,7 +160,6 @@
                                     <!-- here we need to explicitly list the set of dependencies which
                                     are allowed with scope=compile -->
                                     <includes>
-                                        <include>com.google.guava:*</include>
                                         <include>io.jsonwebtoken:jjwt-api</include>
                                         <include>io.jsonwebtoken:jjwt-impl</include>
                                         <include>io.jsonwebtoken:jjwt-gson</include>
@@ -188,7 +187,6 @@
                             <shadeSourcesContent>true</shadeSourcesContent>
                             <artifactSet>
                                 <includes>
-                                    <include>com.google.guava:*</include>
                                     <include>com.jcraft:jsch</include>
                                     <include>com.jcraft:jzlib</include>
                                     <include>io.jsonwebtoken:jjwt-api</include>
@@ -199,15 +197,6 @@
                             </artifactSet>
                             <relocations>
                                 <!-- due to https://github.com/apache/maven-shade-plugin/issues/478 use a shaded name which doesn't include the original name -->
-                                <relocation>
-                                    <pattern>com.google.common</pattern>
-                                    <shadedPattern>acscommons.google.common</shadedPattern>
-                                </relocation>
-                                <!-- contained in guava as well -->
-                                <relocation>
-                                    <pattern>com.google.thirdparty</pattern>
-                                    <shadedPattern>acscommons.google.thirdparty</shadedPattern>
-                                </relocation>
                                 <relocation>
                                     <pattern>com.jcraft</pattern>
                                     <shadedPattern>acscommons.jcraft</shadedPattern>
@@ -222,12 +211,6 @@
                                 </relocation>
                             </relocations>
                             <filters>
-                                <filter>
-                                    <artifact>com.google.guava:guava</artifact>
-                                    <includes>
-                                        <include>com/google/**</include>
-                                    </includes>
-                                </filter>
                                 <filter>
                                     <artifact>com.jcraft:jsch</artifact>
                                     <includes>
@@ -305,12 +288,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- use and shade newer Guava version than shipped with AEM -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>32.0.0-jre</version>
-            </dependency>
             <!-- use and shade newer Handlebars version than shipped with AEM -->
             <dependency>
                 <groupId>com.github.jknack</groupId>
@@ -482,29 +459,6 @@
         <!-- ======================== -->
         <!-- START: shaded and relocated dependencies -->
         <!-- Http Cache Dependencies -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.j2objc</groupId>
-                    <artifactId>j2objc-annotations</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>jsr305</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.errorprone</groupId>
-                    <artifactId>error_prone_annotations</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.checkerframework</groupId>
-                    <artifactId>checker-qual</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>

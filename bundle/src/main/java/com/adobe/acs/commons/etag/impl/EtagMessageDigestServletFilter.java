@@ -38,6 +38,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -56,7 +57,6 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.etag.impl.EtagMessageDigestServletFilter.Config;
 import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.adobe.acs.commons.util.BufferedSlingHttpServletResponse;
-import com.google.common.io.BaseEncoding;
 
 /** Generates the ETag response header from a message digest of the response. This header is supposed to be cached also on the
  * dispatcher! */
@@ -257,7 +257,7 @@ public class EtagMessageDigestServletFilter implements Filter {
             messageDigest.update(configuration.salt().getBytes(StandardCharsets.UTF_8));
         }
         byte[] digest = messageDigest.digest();
-        String hexDigest = BaseEncoding.base16().lowerCase().encode(digest);
+        String hexDigest = Hex.encodeHexString(digest);
         log.debug("ETag based on {} digest of the response is {}", messageDigest.getAlgorithm(), hexDigest);
         return hexDigest;
     }

@@ -21,8 +21,6 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.Revision;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -36,6 +34,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,10 +45,8 @@ import java.util.stream.StreamSupport;
 public class FrozenAsset implements InvocationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(FrozenAsset.class);
-    private static final Joiner pathJoiner = Joiner.on('/').skipNulls();
-
-    private static final String RENDITIONS_PATH = pathJoiner.join(JcrConstants.JCR_CONTENT, DamConstants.RENDITIONS_FOLDER);
-    private static final String METADATA_PATH = pathJoiner.join(JcrConstants.JCR_CONTENT, DamConstants.METADATA_FOLDER);
+    private static final String RENDITIONS_PATH = JcrConstants.JCR_CONTENT + "/" + DamConstants.RENDITIONS_FOLDER;
+    private static final String METADATA_PATH = JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER;
 
     private final Asset head;
     private final Resource frozenResource;
@@ -114,7 +111,7 @@ public class FrozenAsset implements InvocationHandler {
     }
 
     public Rendition getRendition(Asset asset, String name) {
-        Resource r = frozenResource.getChild(pathJoiner.join(RENDITIONS_PATH, name));
+        Resource r = frozenResource.getChild(RENDITIONS_PATH + "/" + name);
         if (r == null) {
             return null;
         }
@@ -136,9 +133,9 @@ public class FrozenAsset implements InvocationHandler {
     public List<Rendition> getRenditions(Asset asset) {
         Resource renditions = frozenResource.getChild(RENDITIONS_PATH);
         if (renditions == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
-        List<Rendition> rv = Lists.newArrayList();
+        List<Rendition> rv = new ArrayList<>();
         for (Resource r : renditions.getChildren()) {
             rv.add(getRendition(asset, r.getName()));
         }

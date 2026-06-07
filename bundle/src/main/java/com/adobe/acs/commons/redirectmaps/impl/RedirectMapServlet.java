@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
-import com.google.common.net.MediaType;
 
 /**
  * Servlet for generating an Apache RedirectMap text file from an uploaded file
@@ -51,7 +50,7 @@ public class RedirectMapServlet extends SlingSafeMethodsServlet {
         log.debug("Requesting redirect maps from {}", request.getResource());
         RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-        response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
+        response.setContentType("text/plain;charset=UTF-8");
         response.getOutputStream().write(redirectMap.getRedirectMap().getBytes(StandardCharsets.UTF_8));
     }
 }

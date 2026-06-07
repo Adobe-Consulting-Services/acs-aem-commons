@@ -82,13 +82,13 @@ import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
 import com.day.cq.wcm.contentsync.PathRewriterOptions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
@@ -168,7 +168,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         final BundleContext bundleContext = componentContext.getBundleContext();
         final Dictionary<?, ?> props = componentContext.getProperties();
         final int size = PropertiesUtil.toInteger(props.get(PROP_MD5_CACHE_SIZE), DEFAULT_MD5_CACHE_SIZE);
-        this.md5Cache = CacheBuilder.newBuilder().recordStats().maximumSize(size).build();
+        this.md5Cache = Caffeine.newBuilder().recordStats().maximumSize(size).build();
         this.disableVersioning = PropertiesUtil.toBoolean(props.get(PROP_DISABLE_VERSIONING), DEFAULT_DISABLE_VERSIONING);
         this.enforceMd5 = PropertiesUtil.toBoolean(props.get(PROP_ENFORCE_MD5), DEFAULT_ENFORCE_MD5);
         if (enforceMd5) {

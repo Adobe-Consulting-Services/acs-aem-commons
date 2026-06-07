@@ -23,10 +23,10 @@ import com.adobe.acs.commons.models.injectors.impl.InjectorUtils;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.day.cq.i18n.I18n;
 import com.day.cq.wcm.api.Page;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
@@ -88,7 +88,7 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
 
     protected void activate(final Config config) {
         final long size = config.maxSizeCount();
-        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+        final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder()
                 .maximumSize(size)
                 .recordStats();
 

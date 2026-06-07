@@ -21,7 +21,6 @@ package com.adobe.acs.commons.reports.models;
 
 import com.adobe.acs.commons.reports.internal.PredictedTagsUtil;
 import com.day.cq.dam.api.Asset;
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -38,6 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Arrays;
 
 public class PredictedTagReportCellCSVExporterTest {
 
@@ -110,7 +110,7 @@ public class PredictedTagReportCellCSVExporterTest {
 
         String predictedPath = ASSET_PATH + "/" + PREDICTED_TAGS_PROPERTY_PATH;
         doReturn(predictedTagsParentResource).when(mockResolver).getResource(predictedPath);
-        doReturn(ImmutableList.of(predictedTag1Resource, predictedTag2Resource)).when(predictedTagsParentResource).getChildren();
+        doReturn(Arrays.asList(predictedTag1Resource, predictedTag2Resource)).when(predictedTagsParentResource).getChildren();
         doReturn(predictedTag1).when(predictedTag1Resource).adaptTo(PredictedTag.class);
         doReturn(predictedTag2).when(predictedTag2Resource).adaptTo(PredictedTag.class);
 
@@ -136,7 +136,7 @@ public class PredictedTagReportCellCSVExporterTest {
 
         String predictedPath = ASSET_PATH + "/" + PREDICTED_TAGS_PROPERTY_PATH;
         doReturn(predictedTagsParentResource).when(mockResolver).getResource(predictedPath);
-        doReturn(ImmutableList.of(predictedTag1Resource, predictedTag2Resource)).when(predictedTagsParentResource).getChildren();
+        doReturn(Arrays.asList(predictedTag1Resource, predictedTag2Resource)).when(predictedTagsParentResource).getChildren();
         doReturn(predictedTag1).when(predictedTag1Resource).adaptTo(PredictedTag.class);
         doReturn(predictedTag2).when(predictedTag2Resource).adaptTo(PredictedTag.class);
 
@@ -163,7 +163,7 @@ public class PredictedTagReportCellCSVExporterTest {
 
         String predictedPath = ASSET_PATH + "/" + PREDICTED_TAGS_PROPERTY_PATH;
         doReturn(predictedTagsParentResource).when(mockResolver).getResource(predictedPath);
-        doReturn(ImmutableList.of(predictedTag1Resource, predictedTag2Resource)).when(predictedTagsParentResource).getChildren();
+        doReturn(Arrays.asList(predictedTag1Resource, predictedTag2Resource)).when(predictedTagsParentResource).getChildren();
         doReturn(predictedTag1).when(predictedTag1Resource).adaptTo(PredictedTag.class);
         doReturn(predictedTag2).when(predictedTag2Resource).adaptTo(PredictedTag.class);
 

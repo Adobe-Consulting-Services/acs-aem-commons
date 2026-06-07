@@ -21,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.http.HttpStatus;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -62,7 +62,7 @@ public class TagsExportServletTest {
 
   @Test
   public void testCorrectParameters_defaultLocalizationAppliedOnlyToTagWithoutLocalization() throws Exception {
-    Map<String, Object> params = ImmutableMap.of(
+    Map<String, Object> params = mapOf(
         PARAMETER_PATH, "/etc/tags/root/zeroLocalizedTitle",
         PARAMETER_LOCALIZED,"true",
         PARAMETER_DEFAULT_LOCALIZATION,"pl");
@@ -78,7 +78,7 @@ public class TagsExportServletTest {
 
   @Test
   public void testWrongPath_emptyOutput() throws Exception {
-    Map<String, Object> params = ImmutableMap.of(
+    Map<String, Object> params = mapOf(
         PARAMETER_PATH, "/wrong/Path",
         PARAMETER_LOCALIZED,"true",
         PARAMETER_DEFAULT_LOCALIZATION,"pl");
@@ -93,7 +93,7 @@ public class TagsExportServletTest {
 
   @Test
   public void testMissingPath_emptyOutput() throws Exception {
-    Map<String, Object> params = ImmutableMap.of(
+    Map<String, Object> params = mapOf(
         PARAMETER_LOCALIZED,"true",
         PARAMETER_DEFAULT_LOCALIZATION,"pl");
 
@@ -107,7 +107,7 @@ public class TagsExportServletTest {
 
   @Test
   public void testCorrectParameters_nonLocalizedOutput() throws Exception {
-    Map<String, Object> params = ImmutableMap.of(
+    Map<String, Object> params = mapOf(
         PARAMETER_PATH, BRAND_TAGS_ROOT,
         PARAMETER_LOCALIZED,"false",
         PARAMETER_DEFAULT_LOCALIZATION,"pl");
@@ -124,7 +124,7 @@ public class TagsExportServletTest {
 
   @Test
   public void missingLocalizationParams_defaultParamsApplied_nonLocalizedOutput() throws Exception {
-    Map<String, Object> params = ImmutableMap.of(
+    Map<String, Object> params = mapOf(
         PARAMETER_PATH, BRAND_TAGS_ROOT);
 
     context.request().setParameterMap(params);
@@ -142,5 +142,13 @@ public class TagsExportServletTest {
     Field serviceField = servlet.getClass().getDeclaredField("tagsExportService");
     serviceField.setAccessible(true);
     serviceField.set(servlet, service);
+  }
+
+  private static Map<String, Object> mapOf(Object... keyValues) {
+    Map<String, Object> map = new LinkedHashMap<>();
+    for (int i = 0; i < keyValues.length; i += 2) {
+      map.put((String) keyValues[i], keyValues[i + 1]);
+    }
+    return map;
   }
 }

@@ -18,7 +18,6 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.commons.Externalizer;
-import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -35,6 +34,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -62,9 +63,9 @@ public class QrCodeServletTest {
         request = new MockSlingHttpServletRequest(context.resourceResolver(), context.bundleContext());
         response = new MockSlingHttpServletResponse();
 
-        requestResource = context.create().resource(RESOURCE_PATH, ImmutableMap.<String, Object>builder()
-                .put("enabled", true)
-                .build());
+        Map<String, Object> props = new HashMap<>();
+        props.put("enabled", true);
+        requestResource = context.create().resource(RESOURCE_PATH, props);
     }
 
     @Test

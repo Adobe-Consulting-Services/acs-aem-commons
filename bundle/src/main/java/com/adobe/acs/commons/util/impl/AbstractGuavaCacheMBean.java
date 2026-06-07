@@ -17,8 +17,8 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheStats;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;

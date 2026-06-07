@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;

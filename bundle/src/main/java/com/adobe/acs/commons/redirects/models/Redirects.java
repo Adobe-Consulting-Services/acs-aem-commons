@@ -22,7 +22,6 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
-import com.google.common.collect.Lists;
 
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -91,8 +90,22 @@ public class Redirects {
                 pageNumber = Integer.parseInt(pg);
             }
             List<Resource> all = readRedirects(configResource);
-            pages = Lists.partition(all, pageSize);
+            pages = partition(all, pageSize);
         }
+    }
+
+    private static <T> List<List<T>> partition(List<T> input, int size) {
+        if (size <= 0) {
+            throw new IllegalArgumentException("size must be greater than zero");
+        }
+        if (input.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<List<T>> result = new ArrayList<>();
+        for (int i = 0; i < input.size(); i += size) {
+            result.add(input.subList(i, Math.min(i + size, input.size())));
+        }
+        return result;
     }
 
     /**

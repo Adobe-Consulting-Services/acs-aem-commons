@@ -26,7 +26,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.jcr.query.Query;
 
@@ -47,7 +49,6 @@ import java.util.List;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
 import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
-import com.google.common.collect.ImmutableMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DynamicSelectDataSourceTest {
@@ -89,13 +90,13 @@ public class DynamicSelectDataSourceTest {
     public void testsWithSingleResource() throws Exception {
         
         // Prepare resources
-        context.build().resource("/querynode", ImmutableMap.of(DynamicSelectDataSource.PN_DROP_DOWN_QUERY_LANGUAGE,Query.JCR_SQL2,
+        context.build().resource("/querynode", mapOf(DynamicSelectDataSource.PN_DROP_DOWN_QUERY_LANGUAGE,Query.JCR_SQL2,
                 DynamicSelectDataSource.PN_DROP_DOWN_QUERY,queryStatement,
                 DynamicSelectDataSource.PN_ALLOW_PROPERTY_NAMES,"jcr:title")).commit();
         context.request().setResource(context.resourceResolver().getResource("/querynode"));
         
         // test data
-        context.build().resource("/result1", ImmutableMap.of("prop1","value1","jcr:title","someTitle")).commit();
+        context.build().resource("/result1", mapOf("prop1","value1","jcr:title","someTitle")).commit();
         resourceList.add(context.resourceResolver().getResource("/result1"));
 
         servlet.doGet(context.request(),context.response());
@@ -107,14 +108,14 @@ public class DynamicSelectDataSourceTest {
     public void testWithMultipleResources() throws Exception {
         
         // Prepare resources
-        context.build().resource("/querynode", ImmutableMap.of(DynamicSelectDataSource.PN_DROP_DOWN_QUERY_LANGUAGE,Query.JCR_SQL2,
+        context.build().resource("/querynode", mapOf(DynamicSelectDataSource.PN_DROP_DOWN_QUERY_LANGUAGE,Query.JCR_SQL2,
                 DynamicSelectDataSource.PN_DROP_DOWN_QUERY,queryStatement,
                 DynamicSelectDataSource.PN_ALLOW_PROPERTY_NAMES,"jcr:title")).commit();
         context.request().setResource(context.resourceResolver().getResource("/querynode"));
         
         // test data
-        context.build().resource("/result1", ImmutableMap.of("prop1","value1","jcr:title","someTitle")).commit();
-        context.build().resource("/result2", ImmutableMap.of("prop1","value1","jcr:title","someTitle")).commit();
+        context.build().resource("/result1", mapOf("prop1","value1","jcr:title","someTitle")).commit();
+        context.build().resource("/result2", mapOf("prop1","value1","jcr:title","someTitle")).commit();
         resourceList.add(context.resourceResolver().getResource("/result1"));
         resourceList.add(context.resourceResolver().getResource("/result2"));
 
@@ -127,7 +128,7 @@ public class DynamicSelectDataSourceTest {
     public void testWithNoQueryStringSpecified() throws Exception {
         
         // Prepare resources
-        context.build().resource("/querynode", ImmutableMap.of(DynamicSelectDataSource.PN_DROP_DOWN_QUERY_LANGUAGE,Query.JCR_SQL2,
+        context.build().resource("/querynode", mapOf(DynamicSelectDataSource.PN_DROP_DOWN_QUERY_LANGUAGE,Query.JCR_SQL2,
                 DynamicSelectDataSource.PN_DROP_DOWN_QUERY,"", // no query string
                 DynamicSelectDataSource.PN_ALLOW_PROPERTY_NAMES,"jcr:title")).commit();
         context.request().setResource(context.resourceResolver().getResource("/querynode"));
@@ -135,6 +136,14 @@ public class DynamicSelectDataSourceTest {
         servlet.doGet(context.request(),context.response());
         verify(dataSourceBuilder,times(1)).addDataSource(eq(context.request()),dsCaptor.capture());
         assertEquals(0,dsCaptor.getValue().size());
+    }
+
+    private static Map<String, Object> mapOf(Object... keyValuePairs) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0; i < keyValuePairs.length; i += 2) {
+            map.put((String) keyValuePairs[i], keyValuePairs[i + 1]);
+        }
+        return map;
     }
     
 }

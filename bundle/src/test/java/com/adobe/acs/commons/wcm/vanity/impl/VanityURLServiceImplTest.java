@@ -18,7 +18,6 @@
 package com.adobe.acs.commons.wcm.vanity.impl;
 
 import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;

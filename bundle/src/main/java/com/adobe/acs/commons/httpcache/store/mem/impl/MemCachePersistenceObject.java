@@ -19,9 +19,6 @@ package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -47,7 +44,7 @@ public class MemCachePersistenceObject implements Serializable {
     /** Response content type */
     private String contentType;
     /** Response headers */
-    transient Multimap<String, String> headers;
+    transient Map<String, List<String>> headers;
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
     private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
@@ -80,12 +77,12 @@ public class MemCachePersistenceObject implements Serializable {
         this.writeMethod = writeMethod;
 
         // Iterate headers and take a copy.
-        this.headers = HashMultimap.create();
+        this.headers = new HashMap<>();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             for (String value : entry.getValue()) {
                 if (!"Sling-Tracer-Protocol-Version".equals(entry.getKey()) && !"Sling-Tracer-Request-Id".equals(entry.getKey())) {
                     // Do NOT cache Sling Tracer headers as this makes debugging difficult and confusing!
-                    this.headers.put(entry.getKey(), value);
+                    this.headers.computeIfAbsent(entry.getKey(), k -> new ArrayList<>()).add(value);
                 }
             }
         }
@@ -135,9 +132,8 @@ public class MemCachePersistenceObject implements Serializable {
     public Map<String, List<String>> getHeaders() {
         Map<String, List<String>> map = new HashMap<String, List<String>>();
 
-        // Convert com.google.common.collect.AbstractMapBasedMultimap$WrappedSet to List<String> value to avoid cast
-        // exception
-        for (Map.Entry<String, Collection<String>> entry : Multimaps.asMap(headers).entrySet()) {
+        // Return defensive copies of header values to keep the cache payload immutable for callers.
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             map.put(entry.getKey(), new ArrayList<String>(entry.getValue()));
         }
 

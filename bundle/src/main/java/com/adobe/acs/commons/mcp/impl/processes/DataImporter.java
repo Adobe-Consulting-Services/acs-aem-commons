@@ -42,7 +42,6 @@ import javax.jcr.Session;
 
 import com.day.crx.JcrConstants;
 import com.day.text.Text;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.request.RequestParameter;
@@ -295,7 +294,7 @@ public class DataImporter extends ProcessDefinition {
         Map<String, Object> nodeProps = createPropertyMap(row);
 
         rr.refresh();
-        Resource main = rr.create(parent, nodeName, ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, row.get(JcrConstants.JCR_PRIMARYTYPE)));
+        Resource main = rr.create(parent, nodeName, Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, row.get(JcrConstants.JCR_PRIMARYTYPE)));
         try {
             populateMetadataFromRow(main, nodeProps);
         } catch (RepositoryException e) {

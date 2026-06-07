@@ -19,13 +19,15 @@
  */
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,9 +40,11 @@ class DynamicDeckConfigurationServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        Map<String, Object> config = new HashMap<>();
+        config.put("placeholderImagePath", "imagePath");
+        config.put("collectionQuery", "query");
         dynamicDeckConfigurationService = context.registerInjectActivateService(new DynamicDeckConfigurationServiceImpl(),
-                ImmutableMap.of("placeholderImagePath", "imagePath",
-                        "collectionQuery", "query"));
+                config);
     }
 
     @Test

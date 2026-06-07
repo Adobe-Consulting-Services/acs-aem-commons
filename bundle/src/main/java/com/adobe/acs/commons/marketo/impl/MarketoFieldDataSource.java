@@ -47,9 +47,8 @@ import com.adobe.acs.commons.marketo.client.MarketoField;
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 /**
  * Used to drive the list of Form ID options for the Marketo Form component
@@ -67,12 +66,9 @@ public class MarketoFieldDataSource extends SlingSafeMethodsServlet {
   private transient MarketoClient client;
 
 
-  private transient LoadingCache<MarketoClientConfiguration, List<MarketoField>> formCache = CacheBuilder.newBuilder()
-      .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<MarketoClientConfiguration, List<MarketoField>>() {
-        public List<MarketoField> load(MarketoClientConfiguration config) throws Exception {
-          return client.getFields(config);
-        }
-      });
+  private transient LoadingCache<MarketoClientConfiguration, List<MarketoField>> formCache = Caffeine.newBuilder()
+      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .build(config -> client.getFields(config));
 
   @Reference
   public void bindMarketoClient(MarketoClient client) {

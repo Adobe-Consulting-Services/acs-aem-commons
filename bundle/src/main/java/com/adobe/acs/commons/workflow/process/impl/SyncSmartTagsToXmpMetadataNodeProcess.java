@@ -29,7 +29,6 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.commons.util.DamUtil;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -43,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -121,13 +121,12 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
                 }
             }
 
-        final Resource parentResource = resourceResolver.create(metadataResource, processArgs.getSequenceName(),
-                new ImmutableMap.Builder<String, Object>()
-                        .put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED)
-                        .put("xmpArrayType", "rdf:Seq")
-                        .put("xmpNodeType", "xmpArray")
-                        .put("xmpArraySize", 0L)
-                        .build());
+        final Map<String, Object> parentProps = new HashMap<>();
+        parentProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+        parentProps.put("xmpArrayType", "rdf:Seq");
+        parentProps.put("xmpNodeType", "xmpArray");
+        parentProps.put("xmpArraySize", 0L);
+        final Resource parentResource = resourceResolver.create(metadataResource, processArgs.getSequenceName(), parentProps);
 
         final AtomicInteger count = new AtomicInteger(0);
         if (smartTagsResource != null) {
@@ -150,13 +149,12 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
     private void createSequenceItemResource(Asset asset, ProcessArgs processArgs, ResourceResolver resourceResolver,
                                             Resource parentResource, AtomicInteger count, ValueMap properties) {
         try {
-            resourceResolver.create(parentResource, String.valueOf(count.incrementAndGet()),
-                    new ImmutableMap.Builder<String, Object>()
-                            .put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED)
-                            .put("xmpNodeType", "xmpStruct")
-                            .put(processArgs.getNameProperty(), properties.get(PN_SMART_TAG_NAME, String.class))
-                            .put(processArgs.getConfidenceProperty(), properties.get(PN_SMART_TAG_CONFIDENCE, Double.class))
-                            .build());
+            final Map<String, Object> itemProps = new HashMap<>();
+            itemProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED);
+            itemProps.put("xmpNodeType", "xmpStruct");
+            itemProps.put(processArgs.getNameProperty(), properties.get(PN_SMART_TAG_NAME, String.class));
+            itemProps.put(processArgs.getConfidenceProperty(), properties.get(PN_SMART_TAG_CONFIDENCE, Double.class));
+            resourceResolver.create(parentResource, String.valueOf(count.incrementAndGet()), itemProps);
         } catch (PersistenceException e) {
             log.error("Unable to sync Smart Tag [ {} ] to XMP Metadata structure for asset [ {} ]",
                     properties.get("name", String.class), asset.getPath(), e);

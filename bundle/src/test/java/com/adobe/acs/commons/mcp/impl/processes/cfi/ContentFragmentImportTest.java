@@ -42,7 +42,6 @@ import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -124,10 +123,11 @@ public class ContentFragmentImportTest {
         final String expectedTimeMs = String.valueOf(date.getTime());
 
         importer.dryRunMode = false;
+        Map<String, Object> values = new HashMap<>();
+        values.put("date1value", Date.from(ta.toInstant()));
+        values.put("date2value", calendar);
         addImportRow("/test/path/fragment1", "Fragment 1",
-                ImmutableMap.of(
-                        "date1value", Date.from(ta.toInstant()),
-                        "date2value", calendar));
+                values);
         mockFragment.elements.put("date1value", null);
         mockFragment.elements.put("date2value", null);
         instance.run(rr);

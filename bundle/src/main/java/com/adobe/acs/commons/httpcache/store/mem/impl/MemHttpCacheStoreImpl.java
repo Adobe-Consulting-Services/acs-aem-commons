@@ -26,11 +26,11 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-import com.google.common.cache.Weigher;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.RemovalListener;
+import com.github.benmanes.caffeine.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -112,7 +112,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         }
         if (ttl != DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
-            cache = CacheBuilder.newBuilder()
+            cache = Caffeine.newBuilder()
                     .maximumWeight(maxSizeInMb * MEGABYTE)
                     .weigher(new MemCacheEntryWeigher())
                     .expireAfterWrite(ttl, TimeUnit.SECONDS)
@@ -121,7 +121,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
                     .build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder()
+            cache = Caffeine.newBuilder()
                     .maximumWeight(maxSizeInMb * MEGABYTE)
                     .weigher(new MemCacheEntryWeigher())
                     .removalListener(new MemCacheEntryRemovalListener())
@@ -145,9 +145,8 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         private static final Logger log = LoggerFactory.getLogger(MemCacheEntryRemovalListener.class);
 
         @Override
-        public void onRemoval(RemovalNotification<CacheKey, MemCachePersistenceObject> removalNotification) {
-            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey(),
-                    removalNotification.getCause().name());
+        public void onRemoval(CacheKey key, MemCachePersistenceObject value, RemovalCause cause) {
+            log.debug("Mem cache entry for uri {} removed due to {}", key, cause.name());
         }
     }
 

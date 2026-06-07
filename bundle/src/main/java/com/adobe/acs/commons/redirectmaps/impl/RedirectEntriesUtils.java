@@ -42,8 +42,6 @@ import com.adobe.acs.commons.redirectmaps.models.MapEntry;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.NameConstants;
-import com.google.common.base.Charsets;
-import com.google.common.net.MediaType;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -105,7 +103,7 @@ public class RedirectEntriesUtils {
             throw new PersistenceException("Retrieve resource " + contentResource + " for editing");
         }
         mvm.put(JcrConstants.JCR_DATA,
-                new ByteArrayInputStream(StringUtils.join(entries, "\n").getBytes(Charsets.UTF_8)));
+                new ByteArrayInputStream(StringUtils.join(entries, "\n").getBytes(StandardCharsets.UTF_8)));
         mvm.put(JcrConstants.JCR_LASTMODIFIED, now);
         mvm.put(JcrConstants.JCR_LAST_MODIFIED_BY, request.getResourceResolver().getUserID());
         request.getResourceResolver().commit();
@@ -120,7 +118,7 @@ public class RedirectEntriesUtils {
         log.debug("Requesting redirect maps from {}", request.getResource());
         RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-        response.setContentType(MediaType.JSON_UTF_8.toString());
+        response.setContentType("application/json;charset=UTF-8");
 
         JsonObject res = new JsonObject();
         res.addProperty("message", message);

@@ -20,11 +20,11 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import com.adobe.acs.commons.wcm.comparisons.lines.Lines;
-import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,12 +60,12 @@ public class PageCompareDataLinesTest {
         PageCompareDataLine leftLine = mock(PageCompareDataLine.class);
         when(leftLine.getUniqueName()).thenReturn("left");
 
-        List<PageCompareDataLine> left = Lists.newArrayList(leftLine);
+        List<PageCompareDataLine> left = new ArrayList<>(Collections.singletonList(leftLine));
 
         PageCompareDataLine rightLine = mock(PageCompareDataLine.class);
         when(rightLine.getUniqueName()).thenReturn("right");
 
-        List<PageCompareDataLine> right = Lists.newArrayList(rightLine);
+        List<PageCompareDataLine> right = new ArrayList<>(Collections.singletonList(rightLine));
 
         // when
         final List<Line<PageCompareDataLine>> result = underTest.generate(left, right);

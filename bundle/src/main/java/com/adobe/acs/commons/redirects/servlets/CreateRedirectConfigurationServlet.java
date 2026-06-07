@@ -20,7 +20,6 @@ package com.adobe.acs.commons.redirects.servlets;
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.filter.RedirectFilterMBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -91,18 +90,22 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             String configName = redirectFilter == null ? RedirectFilter.DEFAULT_CONFIG_NAME : redirectFilter.getConfigName();
             Resource bucket = root.getChild(bucketName);
             if (bucket == null) {
+                Map<String, Object> bucketProps = new HashMap<>();
+                bucketProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER);
                 bucket = resolver.create(root, bucketName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER));
+                        bucketProps);
                 log.info("created {}", bucket.getPath());
             }
 
             Resource config = bucket.getChild(configName);
             if (config == null) {
                 String contextPrefix = StringUtils.defaultString(request.getParameter(REQ_PARAM_CTX_PREFIX));
+                Map<String, Object> configProps = new HashMap<>();
+                configProps.put(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_ORDERED_FOLDER);
+                configProps.put(ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH);
+                configProps.put(REQ_PARAM_CTX_PREFIX, contextPrefix);
                 config = resolver.create(bucket, configName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
-                                ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH,
-                                REQ_PARAM_CTX_PREFIX, contextPrefix));
+                        configProps);
                 log.info("created {} with context prefix '{}'", config.getPath(), contextPrefix);
                 resolver.commit();
                 rsp.put(REQ_PARAM_PATH, config.getPath());

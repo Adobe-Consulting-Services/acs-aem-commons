@@ -24,7 +24,7 @@ import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.Redirects;
 import com.day.cq.wcm.api.WCMMode;
-import com.google.common.cache.Cache;
+import com.github.benmanes.caffeine.cache.Cache;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

@@ -20,7 +20,6 @@ package com.adobe.acs.commons.httpcache.config.impl.keys;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -39,23 +38,23 @@ import java.util.stream.Collectors;
 
 public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
     private String cacheKeyId;
-    private ImmutableMap<String, String> actualKeyValues;
-    private ImmutableMap<String, String[]> allowedKeyValues;
+    private Map<String, String> actualKeyValues;
+    private Map<String, String[]> allowedKeyValues;
 
     public KeyValueCacheKey(final SlingHttpServletRequest request, final HttpCacheConfig cacheConfig,
                             final String cacheKeyId, final Map<String, String[]> allowedKeyValues, Map<String, String> actualKeyValues) {
         super(request, cacheConfig);
         this.cacheKeyId = cacheKeyId;
-        this.allowedKeyValues = ImmutableMap.copyOf(allowedKeyValues);
-        this.actualKeyValues = ImmutableMap.copyOf(actualKeyValues);
+        this.allowedKeyValues = Collections.unmodifiableMap(new HashMap<>(allowedKeyValues));
+        this.actualKeyValues = Collections.unmodifiableMap(new HashMap<>(actualKeyValues));
     }
 
     public KeyValueCacheKey(final String uri, final HttpCacheConfig cacheConfig, final String cacheKeyId,
                             final Map<String, String[]> allowedKeyValues) {
         super(uri, cacheConfig);
         this.cacheKeyId = cacheKeyId;
-        this.allowedKeyValues = ImmutableMap.copyOf(allowedKeyValues);
-        this.actualKeyValues = ImmutableMap.copyOf(Collections.emptyMap());
+        this.allowedKeyValues = Collections.unmodifiableMap(new HashMap<>(allowedKeyValues));
+        this.actualKeyValues = Collections.emptyMap();
     }
     
     Map<String, String> getActualKeyValues() {
@@ -173,8 +172,8 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
     private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
         parentReadObject(o);
         cacheKeyId = o.readUTF();
-        allowedKeyValues = ImmutableMap.copyOf((Map<String, String[]>) o.readObject());
-        actualKeyValues = ImmutableMap.copyOf(((Map<String,String>) o.readObject()));
+        allowedKeyValues = Collections.unmodifiableMap((Map<String, String[]>) o.readObject());
+        actualKeyValues = Collections.unmodifiableMap((Map<String, String>) o.readObject());
     }
 
 }

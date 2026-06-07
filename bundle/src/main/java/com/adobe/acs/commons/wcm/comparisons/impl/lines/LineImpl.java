@@ -20,7 +20,7 @@ package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 class LineImpl<T> implements Line<T> {
 
@@ -40,16 +40,16 @@ class LineImpl<T> implements Line<T> {
     }
 
     private LineImpl(T left, T right) {
-        this.left = Optional.fromNullable(left);
-        this.right = Optional.fromNullable(right);
+        this.left = Optional.ofNullable(left);
+        this.right = Optional.ofNullable(right);
     }
 
     public T getLeft() {
-        return left.orNull();
+        return left.orElse(null);
     }
 
     public T getRight() {
-        return right.orNull();
+        return right.orElse(null);
     }
 
     @Override

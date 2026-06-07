@@ -36,7 +36,6 @@ import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.eval.PathPredicateEvaluator;
 import com.day.cq.wcm.api.NameConstants;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.core.fs.FileSystem;
 import org.apache.sling.api.resource.*;
@@ -236,7 +235,10 @@ public final class DynamicDeckUtils {
 
         query.setHitsPerPage(0);
 
-        return Lists.newArrayList(query.getResult().getResources());
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(query.getResult().getResources(), Spliterator.ORDERED),
+                false
+        ).collect(java.util.stream.Collectors.toList());
     }
 
     /**
