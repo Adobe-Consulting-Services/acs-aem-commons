@@ -98,8 +98,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     private transient Pattern regex;
 
     private static final Logger log = LoggerFactory.getLogger(BrokenLinksReport.class);
-    
-    private static final String dummyBaseUri = "http://localhost";
+    private static final String DUMMY_BASE_URI = "http://localhost";
 
     @Override
     public void init() throws RepositoryException {
@@ -200,7 +199,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     private static List<String> extractLinks(String html, Parser parser) {
          // base URI is required to parse relative links, but it is not relevant for the extracted hrefs as they are returned as-is
         try (StreamParser streamer = new StreamParser(parser)) {
-            streamer.parse(html, dummyBaseUri);
+            streamer.parse(html, DUMMY_BASE_URI);
             return streamer.stream()
                     .map(BrokenLinksReport::extractLink)
                     .filter(href -> href != null && !href.isEmpty())
