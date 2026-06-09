@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,26 +25,21 @@ import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
-@Component
-@Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
-        value = "com.adobe.acs.commons:type=Ensure Service User") })
-@References({ @Reference(referenceInterface = EnsureAuthorizable.class, policy = ReferencePolicy.DYNAMIC,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
-@Service(value = DynamicMBean.class)
+@Component(
+        service = DynamicMBean.class,
+        property = {
+                "jmx.objectname=com.adobe.acs.commons:type=Ensure Service User"
+        }
+)
 public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implements EnsureAuthorizableManager {
 
     private static final Logger log = LoggerFactory.getLogger(EnsureAuthorizableManagerImpl.class);
@@ -81,15 +76,20 @@ public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implem
         }
     }
 
+    @Reference(
+            service = EnsureAuthorizable.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC
+    )
     protected final void bindEnsureAuthorizable(final EnsureAuthorizable service, final Map<Object, Object> props) {
-        final String type = PropertiesUtil.toString(props.get("service.pid"), null);
+        final String type = (String) props.get("service.pid");
         if (type != null) {
             this.ensureAuthorizables.put(type, service);
         }
     }
 
     protected final void unbindEnsureAuthorizable(final EnsureAuthorizable service, final Map<Object, Object> props) {
-        final String type = PropertiesUtil.toString(props.get("service.pid"), null);
+        final String type = (String) props.get("service.pid");
         if (type != null) {
             this.ensureAuthorizables.remove(type);
         }

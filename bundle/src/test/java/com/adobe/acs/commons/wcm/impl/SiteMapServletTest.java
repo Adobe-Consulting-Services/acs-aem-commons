@@ -17,8 +17,17 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import com.day.cq.commons.Externalizer;
-import io.wcm.testing.mock.aem.junit.AemContext;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.xmlunit.matchers.EvaluateXPathMatcher.hasXPath;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
@@ -30,14 +39,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.day.cq.commons.Externalizer;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-import static org.xmlunit.matchers.EvaluateXPathMatcher.hasXPath;
+import io.wcm.testing.mock.aem.junit.AemContext;
 
 public class SiteMapServletTest {
 

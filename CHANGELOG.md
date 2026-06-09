@@ -11,7 +11,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased
 
 ### Changed
+
 - #3710 Use a dedicated service user/subservice for Redirects Package creation and replication
+- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
+
+### Fixed
+
+- #3758 OverridePathSlingRequestWrapper: avoid repeated instantiation of SlingModelsScriptEngineFactory on every request
+- #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node 
+- #3763 Fix URL Asset Import using stored Credentials
 
 ## [6.17.0] - 2026-04-29
 

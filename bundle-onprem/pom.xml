@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.17.1-SNAPSHOT</version>
+        <version>6.17.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -34,7 +34,8 @@
 
     <artifactId>acs-aem-commons-bundle-onprem</artifactId>
     <name>ACS AEM Commons - Bundle Fragment (for On Prem)</name>
-    <description>ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring On Prem</description>
+    <description>ACS AEM Commons Core OSGi bundle fragment containing AEM server-side logic requiring On Prem
+    </description>
     <build>
         <plugins>
             <plugin>
@@ -131,6 +132,16 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- End Test dependencies -->
         <!-- ======================== -->
         <!-- put UberJar last so that more specific artifacts take precedence -->
@@ -140,7 +151,7 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
+
     <profiles>
         <profile>
             <id>release</id>
@@ -171,6 +182,6 @@ Fragment-Host: com.adobe.acs.acs-aem-commons-bundle
                     </plugin>
                 </plugins>
             </build>
-         </profile>
+        </profile>
     </profiles>
 </project>

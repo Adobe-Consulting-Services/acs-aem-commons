@@ -38,5 +38,9 @@ bundle/mockserver.log
 # Maven versions plugin
 pom.xml.versionsBackup
 
+# Maven release plugin
+*.releaseBackup
+release.properties
+
 # Qlty plugin folder
 /.qlty/

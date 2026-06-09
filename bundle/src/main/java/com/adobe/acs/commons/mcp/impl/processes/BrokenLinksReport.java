@@ -17,6 +17,33 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.jcr.RepositoryException;
+
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.jsoup.parser.StreamParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -25,31 +52,6 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericBlobReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.commons.html.Html;
-import org.apache.sling.commons.html.HtmlElementType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.jcr.RepositoryException;
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.List;
-import java.util.EnumMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Broken Links Checker MCP task
@@ -96,6 +98,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     private transient Pattern regex;
 
     private static final Logger log = LoggerFactory.getLogger(BrokenLinksReport.class);
+    private static final String DUMMY_BASE_URI = "http://localhost";
 
     @Override
     public void init() throws RepositoryException {
@@ -180,14 +183,10 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
             stream = Stream.empty();
         }
         if (htmlFields.contains(property.getKey())) {
+            Parser parser = Parser.htmlParser();
             stream = stream.flatMap(val -> {
                 try {
-                    return Html.stream(new ByteArrayInputStream(val.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8.name())
-                            .filter(el -> el.getType() == HtmlElementType.START_TAG)
-                            .map(BrokenLinksReport::extractLink)
-                            .filter(href -> href != null && !href.isEmpty())
-                            // collect to a list so the underlying input stream can be closed eagerly
-                            .collect(Collectors.toList()).stream();
+                    return extractLinks(val, parser).stream();
                 } catch (Exception e) {
                     log.warn("Could not parse links from property value of {}", property.getKey(), e);
                     return Stream.empty();
@@ -197,12 +196,26 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
         return stream;
     }
 
+    private static List<String> extractLinks(String html, Parser parser) {
+         // base URI is required to parse relative links, but it is not relevant for the extracted hrefs as they are returned as-is
+        try (StreamParser streamer = new StreamParser(parser)) {
+            streamer.parse(html, DUMMY_BASE_URI);
+            return streamer.stream()
+                    .map(BrokenLinksReport::extractLink)
+                    .filter(href -> href != null && !href.isEmpty())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.warn("Could not parse links from html", e);
+            return Collections.emptyList();
+        }
+    }
+
     /**
-     * Extract a link reference from an HTML start tag.
+     * Extract a link reference from an HTML element.
      */
-    private static String extractLink(org.apache.sling.commons.html.HtmlElement element) {
-        String name = element.getValue();
-        if (name == null || !element.supportsAttributes()) {
+    private static String extractLink(Element element) {
+        String name = element.nodeName();
+        if (name == null || element.attributesSize() == 0) {
             return null;
         }
         String attrName;
@@ -222,8 +235,7 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
             default:
                 return null;
         }
-        org.apache.sling.commons.html.AttrValue value = element.getAttributes().get(attrName);
-        return value == null ? null : value.getValue();
+        return element.attr(attrName);
     }
 
     /**
@@ -243,11 +255,10 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
                 .collect(Collectors.toMap(
                         entry -> resource.getPath() + "/" + entry.getKey(),
                         entry -> {
-                            List<String> brokenPaths =  collectPaths(entry, htmlFields)
+                            return collectPaths(entry, htmlFields)
                                     .filter(href -> regex.matcher(href).matches())
                                     .filter(path -> ResourceUtil.isNonExistingResource(resource.getResourceResolver().resolve(path)))
                                     .collect(Collectors.toList());
-                            return brokenPaths;
                         })).entrySet().stream().filter(e -> !e.getValue().isEmpty())
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
      }

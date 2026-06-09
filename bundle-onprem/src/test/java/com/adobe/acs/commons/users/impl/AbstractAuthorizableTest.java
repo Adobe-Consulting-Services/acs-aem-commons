@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@
  */
 package com.adobe.acs.commons.users.impl;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AbstractAuthorizableTest {
 
     @Test
@@ -34,7 +35,7 @@ public class AbstractAuthorizableTest {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read,rep:write;path=/content/dam;rep:glob=/jcr:content/*;rep:ntNames=cq:Page,dam:Asset;rep:itemNames=jcr:title,jcr:description;rep:prefixes=cq,dam";
 
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
@@ -44,7 +45,7 @@ public class AbstractAuthorizableTest {
         assertEquals("/home/fake", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
-            assertEquals(true, ace.isAllow());
+            assertTrue(ace.isAllow());
             assertEquals("jcr:read", ace.getPrivilegeNames().get(0));
             assertEquals("rep:write", ace.getPrivilegeNames().get(1));
             assertEquals("/content/dam", ace.getContentPath());
@@ -74,7 +75,7 @@ public class AbstractAuthorizableTest {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;rep:glob=;";
 
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
@@ -85,7 +86,7 @@ public class AbstractAuthorizableTest {
 
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
-            assertEquals(null, ace.getRepGlob());
+            assertNull(ace.getRepGlob());
         }
     }
 
@@ -94,7 +95,7 @@ public class AbstractAuthorizableTest {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;";
 
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
@@ -105,13 +106,13 @@ public class AbstractAuthorizableTest {
 
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
-            assertEquals(null, ace.getRepGlob());
+            assertNull(ace.getRepGlob());
         }
     }
 
     @Test
     public void testServiceUser_AcesWithSpaces_1552() throws EnsureAuthorizableException {
-        String[] aces= new String[] {
+        String[] aces = new String[]{
                 "\ntype=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content/dam",
                 "\n  type=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content ",
                 "\n  \ttype=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content/projects \t",
@@ -119,7 +120,7 @@ public class AbstractAuthorizableTest {
                 "\n\n\n\n\ntype=allow;privileges=jcr:all;path=/etc/workflow\n    "
         };
 
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
@@ -137,18 +138,18 @@ public class AbstractAuthorizableTest {
         }
     }
 
-    @Test(expected=EnsureAuthorizableException.class)
-    public void testServiceUser_ProtectedSystemUser() throws EnsureAuthorizableException {
-        Map<String, Object> config = new HashMap<String, Object>();
+    @Test
+    public void testServiceUser_ProtectedSystemUser() {
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "cryptoservice");
 
-        new ServiceUser(config);
+        assertThrows(EnsureAuthorizableException.class, () -> new ServiceUser(config));
     }
 
 
     @Test
     public void testServiceUser_principalName() throws EnsureAuthorizableException {
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
 
         FakeAuthorizable serviceUser = new FakeAuthorizable(config);
@@ -159,7 +160,7 @@ public class AbstractAuthorizableTest {
 
     @Test
     public void testServiceUser_relativePrincipalName1() throws EnsureAuthorizableException {
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "folder/test-service-user");
 
         FakeAuthorizable serviceUser = new FakeAuthorizable(config);
@@ -170,7 +171,7 @@ public class AbstractAuthorizableTest {
 
     @Test
     public void testServiceUser_relativePrincipalName2() throws EnsureAuthorizableException {
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "./folder/test-service-user");
 
         FakeAuthorizable serviceUser = new FakeAuthorizable(config);
@@ -181,7 +182,7 @@ public class AbstractAuthorizableTest {
 
     @Test
     public void testServiceUser_relativePrincipalName3() throws EnsureAuthorizableException {
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/folder/test-service-user");
 
         FakeAuthorizable serviceUser = new FakeAuthorizable(config);
@@ -192,7 +193,7 @@ public class AbstractAuthorizableTest {
 
     @Test
     public void testServiceUser_absoluteRealtivePrincipalName2() throws EnsureAuthorizableException {
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/home/fake/folder/test-service-user");
 
         FakeAuthorizable serviceUser = new FakeAuthorizable(config);
@@ -201,7 +202,7 @@ public class AbstractAuthorizableTest {
         assertEquals("/home/fake/folder", serviceUser.getIntermediatePath());
     }
 
-    private class FakeAuthorizable extends AbstractAuthorizable {
+    private static class FakeAuthorizable extends AbstractAuthorizable {
 
         public FakeAuthorizable(Map<String, Object> config) throws EnsureAuthorizableException {
             super(config);
