@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node 
 - #3763 Fix URL Asset Import using stored Credentials
 
+## Changed
+
+- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
+
 ## [6.17.0] - 2026-04-29
 
 ## Changed

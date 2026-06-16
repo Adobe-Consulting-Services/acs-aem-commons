@@ -24,8 +24,11 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.testing.osgi.MockBundle;
 import org.apache.sling.commons.testing.osgi.MockComponentContext;
+import org.apache.sling.rewriter.ProcessingComponentConfiguration;
+import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -156,6 +159,93 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         List<Attributes> values = attributesCaptor.getAllValues();
         String expectedScheme = scheme  == null ? inputUrl.substring(0, inputUrl.indexOf("://")) : scheme;
         assertEquals(expectedScheme + "://static.host.com/content/dam/flower.jpg", values.get(values.size() - 1).getValue(0));
+    }
+
+    @Test
+    public void test_requireDispatcher_disabled_withoutHeader_still_rewrites() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static.host.com");
+        // require.dispatcher defaults to false – rewriting must always happen regardless of headers
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("//static.host.com/etc/clientlib/test.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_requireDispatcher_enabled_withDispatcherHeader_rewrites() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static.host.com");
+        ctx.setProperty("require.dispatcher", true);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        SlingHttpServletRequest slingRequest = mock(SlingHttpServletRequest.class);
+        ProcessingContext processingContext = mock(ProcessingContext.class);
+        ProcessingComponentConfiguration processingConfig = mock(ProcessingComponentConfiguration.class);
+        when(processingContext.getRequest()).thenReturn(slingRequest);
+        when(slingRequest.getHeader("Server-Agent")).thenReturn("Communique-Dispatcher");
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+        transformer.init(processingContext, processingConfig);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("//static.host.com/etc/clientlib/test.css", out.getValue(0));
+    }
+
+    @Test
+    public void test_requireDispatcher_enabled_withoutDispatcherHeader_skips_rewriting() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/etc/clientlib" });
+        ctx.setProperty("host.pattern", "static.host.com");
+        ctx.setProperty("require.dispatcher", true);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        SlingHttpServletRequest slingRequest = mock(SlingHttpServletRequest.class);
+        ProcessingContext processingContext = mock(ProcessingContext.class);
+        ProcessingComponentConfiguration processingConfig = mock(ProcessingComponentConfiguration.class);
+        when(processingContext.getRequest()).thenReturn(slingRequest);
+        when(slingRequest.getHeader("Server-Agent")).thenReturn(null);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+        transformer.init(processingContext, processingConfig);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
+        transformer.startElement(null, "link", null, in);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        // URL must be unchanged – no host prepended
+        assertEquals("/etc/clientlib/test.css", out.getValue(0));
     }
 
     @Test

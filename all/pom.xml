@@ -313,7 +313,7 @@
                     <plugin>
                         <groupId>com.adobe.aem</groupId>
                         <artifactId>aemanalyser-maven-plugin</artifactId>
-                        <version>1.6.18</version>
+                        <version>1.6.20</version>
                         <executions>
                             <execution>
                                 <id>aem-analyser</id>
@@ -322,6 +322,8 @@
                                 </goals>
                                 <configuration>
                                     <classifier>cloud</classifier>
+                                    <!-- due to https://github.com/adobe/aemanalyser-maven-plugin/issues/354 -->
+                                    <repoInitValidation>false</repoInitValidation>
                                 </configuration>
                             </execution>
                         </executions>

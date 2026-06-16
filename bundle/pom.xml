@@ -167,6 +167,7 @@
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
                                         <include>com.github.jknack:*</include>
+                                        <include>org.jsoup:jsoup</include>
                                     </includes>
                                 </bannedDependencies>
                             </rules>
@@ -195,6 +196,7 @@
                                     <include>io.jsonwebtoken:jjwt-impl</include>
                                     <include>io.jsonwebtoken:jjwt-gson</include>
                                     <include>com.github.jknack:handlebars</include>
+                                    <include>org.jsoup:jsoup</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -219,6 +221,10 @@
                                 <relocation>
                                     <pattern>com.github.jknack.handlebars</pattern>
                                     <shadedPattern>acscommons.github.jknack.handlebars</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.jsoup</pattern>
+                                    <shadedPattern>acscommons.jsoup</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
@@ -260,8 +266,14 @@
                                 </filter>
                                 <filter>
                                     <artifact>com.github.jknack:handlebars</artifact>
+                                    <!-- do not filter files from that dependency as it contains also resources outside the namespace com.github.jknack.handlebars
+                                         those are just left not relocated, but included in the final artifact as is, which is fine as they don't cause any conflicts
+                                    -->
+                                </filter>
+                                <filter>
+                                    <artifact>org.jsoup:jsoup</artifact>
                                     <includes>
-                                        <include>com/github/jknack/handlebars/**</include>
+                                        <include>org/jsoup/**</include>
                                     </includes>
                                 </filter>
                             </filters>
@@ -316,6 +328,11 @@
                 <groupId>com.github.jknack</groupId>
                 <artifactId>handlebars</artifactId>
                 <version>4.3.1</version><!-- last version compatible with Java 8-->
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.22.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -550,13 +567,17 @@
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
             <scope>compile</scope>
-
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <scope>compile</scope>
         </dependency>
         <!-- END: shaded and relocated dependencies -->
         <!-- ======================== -->
@@ -665,12 +686,6 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.impl</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.commons.html</artifactId>
-            <version>1.1.0</version>
-            <scope>provided</scope>
         </dependency>
         <!-- the custom annotation for AemObject -->
         <dependency>

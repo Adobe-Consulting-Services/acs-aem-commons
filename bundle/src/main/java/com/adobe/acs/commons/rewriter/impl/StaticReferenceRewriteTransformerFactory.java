@@ -29,7 +29,10 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.rewriter.ProcessingComponentConfiguration;
+import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
 import org.osgi.service.component.ComponentContext;
@@ -39,6 +42,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,9 +71,32 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {
 
+        private static final String HEADER_SERVER_AGENT = "Server-Agent";
+        private static final String DISPATCHER_AGENT_VALUE = "Communique-Dispatcher";
+
+        private boolean skipRewriting = false;
+
+        @Override
+        public void init(final ProcessingContext context, final ProcessingComponentConfiguration config) throws IOException {
+            super.init(context, config);
+            if (requireDispatcher) {
+                final SlingHttpServletRequest request = context.getRequest();
+                final String serverAgent = request.getHeader(HEADER_SERVER_AGENT);
+                skipRewriting = !DISPATCHER_AGENT_VALUE.equals(serverAgent);
+                if (skipRewriting) {
+                    log.debug("Skipping static reference rewriting: '{}' header not present or not '{}'",
+                            HEADER_SERVER_AGENT, DISPATCHER_AGENT_VALUE);
+                }
+            }
+        }
+
         public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
                 throws SAXException {
-            getContentHandler().startElement(namespaceURI, localName, qName, rebuildAttributes(localName, atts));
+            if (skipRewriting) {
+                getContentHandler().startElement(namespaceURI, localName, qName, atts);
+            } else {
+                getContentHandler().startElement(namespaceURI, localName, qName, rebuildAttributes(localName, atts));
+            }
         }
     }
 
@@ -114,6 +141,11 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten", boolValue = false)
     private static final String PROP_REPLACE_HOST = "replaceHost";
 
+    @Property(label = "Require Dispatcher", boolValue = false,
+            description = "When enabled, static reference rewriting is skipped for requests that do not carry "
+                    + "the 'Server-Agent: Communique-Dispatcher' request header (i.e. direct, non-dispatcher requests).")
+    private static final String PROP_REQUIRE_DISPATCHER = "require.dispatcher";
+
     private Map<String, String[]> attributes;
 
     private Map<String, Pattern> matchingPatterns;
@@ -126,6 +158,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private String staticHostScheme;
 
     private boolean replaceHost;
+
+    private boolean requireDispatcher;
 
     public Transformer createTransformer() {
         return new StaticReferenceRewriteTransformer();
@@ -281,6 +315,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.staticHostScheme = PropertiesUtil.toString(properties.get(PROP_HOST_SCHEME), "");
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
         this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
+        this.requireDispatcher = PropertiesUtil.toBoolean(properties.get(PROP_REQUIRE_DISPATCHER), false);
 
         if (!this.replaceHost && matchingPatterns.values().stream().noneMatch(str -> str.toString().startsWith("^"))) {
             log.warn("BEWARE! Replace host is false and your regex is not anchored to the start of the string, this may result in a double host.");
