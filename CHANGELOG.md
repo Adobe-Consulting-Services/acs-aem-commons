@@ -12,24 +12,39 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
-- #3758 OverridePathSlingRequestWrapper: avoid repeated instantiation of SlingModelsScriptEngineFactory on every request
-- #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node 
-- #3763 Fix URL Asset Import using stored Credentials
+### Changed
 
-## Changed
+## [6.17.4] - 2026-06-20
+
+### Fixed
+
+- #3764 ACS AEM Commons 6.17.x cannot be deployed on AEM 6.5.21+
+- #3763 Fix URL Asset Import using stored Credentials
+- #3758 OverridePathSlingRequestWrapper: avoid repeated instantiation of SlingModelsScriptEngineFactory on every request
+- #3741 Reports tile hidden in Tools menu on AEM LTS (6.5.2.LTS) due to failing granite:rendercondition
+- #3164 Failed to construct URL when loading report with hash parameter
+
+### Changed
 
 - #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
+- #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node
+
+## [6.17.2] - 2026-05-05
+
+### Fixed 
+- #3716 Shade and relocate Handlebars
+- #3751 Ensure authorizable to onpremEnsure authorizable to onprem
 
 ## [6.17.0] - 2026-04-29
 
-## Changed
+### Changed
 
 - #3644 All Result checkbox on Reports could be configurable 
 - #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
 - #3734 RedirectManager: Support regular expression in source without capturing groups 
 - #3715 Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
 
-## Fixed
+### Fixed
 
 - #3730 RedirectManager: Trailing "*" in source path being converted to "(.*)" might destroy regular expression
 - #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet 
