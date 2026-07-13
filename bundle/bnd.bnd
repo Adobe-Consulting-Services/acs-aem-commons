@@ -18,6 +18,7 @@ Import-Package: \
   !com.jcraft.*,\
   !io.jsonwebtoken.*,\
   !com.github.jknack.handlebars.*,\
+  !org.jsoup.*,\
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
   com.day.cq.wcm.api;version="[1.30,2)",\
