@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,50 +24,81 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - Ensure Service User", configurationFactory = true, metatype = true,
-        immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Properties({ @Property(name = "webconsole.configurationFactory.nameHint",
-        value = "Ensure Service User: {operation} {principalName}") })
-@Service(value = { EnsureServiceUser.class, EnsureAuthorizable.class })
+@Component(
+        service = {EnsureServiceUser.class, EnsureAuthorizable.class},
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true
+)
+@Designate(ocd = EnsureServiceUser.Config.class, factory = true)
 public final class EnsureServiceUser implements EnsureAuthorizable {
 
-    @Property(label = "Ensure immediately", boolValue = true,
-            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
-    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
-    public static final String DEFAULT_OPERATION = "add";
-    @Property(
-            label = "Operation",
-            description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
-            options = { @PropertyOption(name = "add", value = "Ensure existence (add)"),
-                    @PropertyOption(name = "remove", value = "Ensure extinction (remove)") })
-    public static final String PROP_OPERATION = "operation";
-    @Property(label = "Principal Name", description = "The service user's principal name")
-    public static final String PROP_PRINCIPAL_NAME = "principalName";
-    @Property(label = "ACEs",
-            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_ACES = "aces";
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Ensure Service User",
+            description = "Ensures Service User configuration"
+    )
+    public @interface Config {
+        @AttributeDefinition(
+                name = "Ensure immediately",
+                description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean."
+        )
+        boolean ensure_immediately() default DEFAULT_ENSURE_IMMEDIATELY;
+
+        @AttributeDefinition(
+                name = "Operation",
+                description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
+                options = {
+                        @Option(label = "Ensure existence (add)", value = "add"),
+                        @Option(label = "Ensure extinction (remove)", value = "remove")
+                }
+        )
+        String operation() default DEFAULT_OPERATION;
+
+        @AttributeDefinition(
+                name = "Principal Name",
+                description = "The service user's principal name"
+        )
+        String principalName();
+
+        @AttributeDefinition(
+                name = "ACEs",
+                description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)"
+        )
+        String[] aces() default {};
+
+        @AttributeDefinition(
+                name = "Service Ranking",
+                description = "Service ranking for webconsole display"
+        )
+        int webconsole_configurationFactory_nameHint() default 0;
+    }
+
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
     private static final String SERVICE_NAME = "ensure-service-user";
     private static final Map<String, Object> AUTH_INFO;
     private static final boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    public static final String DEFAULT_OPERATION = "add";
+
+    // Keep these constants for backward compatibility with tests
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+    public static final String PROP_OPERATION = "operation";
+    public static final String PROP_PRINCIPAL_NAME = "principalName";
+    public static final String PROP_ACES = "aces";
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
@@ -100,17 +131,15 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     /**
      * Entry point for Ensuring a System User.
      *
-     * @param operation
-     *            the ensure operation to execute (ADD or REMOVE)
-     * @param serviceUser
-     *            the service user configuration to ensure
+     * @param operation   the ensure operation to execute (ADD or REMOVE)
+     * @param serviceUser the service user configuration to ensure
      * @throws EnsureAuthorizableException
      */
     @Override
     public void ensure(Operation operation, AbstractAuthorizable serviceUser) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             if (Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, (ServiceUser) serviceUser);
             } else if (Operation.REMOVE.equals(operation)) {
@@ -130,7 +159,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
             log.info(
                     "Successfully ensured [ {} ] of Service User [ {} ] in [ {} ms ]",
                     operation, getAuthorizable().getPrincipalName(),
-                            String.valueOf(System.currentTimeMillis() - start));
+                    String.valueOf(System.currentTimeMillis() - start));
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",
                     operation.toString(), serviceUser.getPrincipalName()), e);
@@ -141,10 +170,8 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
      * Ensures that the provided ServiceUser and configured ACEs exist. Any extra ACEs will be removed, and any missing
      * ACEs added.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user and ACE management
-     * @param serviceUser
-     *            the service user to ensure
+     * @param resourceResolver the resource resolver to perform the user and ACE management
+     * @param serviceUser      the service user to ensure
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
      */
@@ -164,10 +191,8 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     /**
      * Ensures that the provided ServiceUser and any of its ACEs are removed.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user and ACE management
-     * @param serviceUser
-     *            the service user to ensure
+     * @param resourceResolver the resource resolver to perform the user and ACE management
+     * @param serviceUser      the service user to ensure
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
      */
@@ -185,10 +210,8 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     /**
      * Ensures a System User exists with the principal name provided by the Service User configuration.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user management
-     * @param serviceUser
-     *            the service user to ensure
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param serviceUser      the service user to ensure
      * @return the System User; this should never return null
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
@@ -214,10 +237,8 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
      * Locates a System User by principal name, or null. Note, if a rep:User can be found but it is NOT a system user,
      * this method will throw an exception.
      *
-     * @param resourceResolver
-     *            the resource resolver to perform the user management
-     * @param principalName
-     *            the principal name
+     * @param resourceResolver the resource resolver to perform the user management
+     * @param principalName    the principal name
      * @return the System User or null
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
@@ -250,16 +271,20 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     }
 
     @Activate
-    protected void activate(final Map<String, Object> config) {
-        boolean ensureImmediately =
-                PropertiesUtil.toBoolean(config.get(PROP_ENSURE_IMMEDIATELY), DEFAULT_ENSURE_IMMEDIATELY);
+    protected void activate(final Config config) {
+        boolean ensureImmediately = config.ensure_immediately();
+        String operationStr = StringUtils.upperCase(config.operation());
 
-        String operationStr =
-                StringUtils.upperCase(PropertiesUtil.toString(config.get(PROP_OPERATION), DEFAULT_OPERATION));
         try {
             this.operation = Operation.valueOf(operationStr);
+
+            // Convert Config to Map for ServiceUser constructor
+            Map<String, Object> configMap = new java.util.HashMap<>();
+            configMap.put(PROP_PRINCIPAL_NAME, config.principalName());
+            configMap.put(PROP_ACES, config.aces());
+
             // Parse OSGi Configuration into Service User object
-            this.serviceUser = new ServiceUser(config);
+            this.serviceUser = new ServiceUser(configMap);
 
             if (ensureImmediately) {
                 // Ensure
@@ -270,7 +295,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
 
         } catch (EnsureAuthorizableException e) {
             log.error("Unable to ensure Service User [ {} ]",
-                    PropertiesUtil.toString(config.get(PROP_PRINCIPAL_NAME), "Undefined Service User Principal Name"),
+                    config.principalName(),
                     e);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown Ensure Service User operation [ " + operationStr + " ]", e);

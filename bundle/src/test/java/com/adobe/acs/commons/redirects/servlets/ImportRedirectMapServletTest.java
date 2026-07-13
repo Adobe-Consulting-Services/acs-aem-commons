@@ -483,6 +483,53 @@ public class ImportRedirectMapServletTest {
         assertNotNull(auditResource); // Should contain audit log path
     }
 
+    /**
+     * When existing rules are sharded (imports larger than {@code SHARD_SIZE} place
+     * rules under {@code shard-0}, {@code shard-1}, ... containers), the "replace"
+     * mode should still remove all previous rules before importing the new ones.
+     *
+     * @see <a href="https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/3718">Issue #3718</a>
+     */
+    @Test
+    public void testReplaceShardedRules_3718() throws ServletException, IOException {
+        // Setup: existing rules stored under shard-0 (as done by the servlet
+        // itself when the number of imported rules exceeds SHARD_SIZE)
+        new RedirectResourceBuilder(context, redirectStoragePath, true)
+                .setSource("/sharded/one")
+                .setTarget("/content/one")
+                .setStatusCode(301)
+                .build();
+        new RedirectResourceBuilder(context, redirectStoragePath, true)
+                .setSource("/sharded/two")
+                .setTarget("/content/two")
+                .setStatusCode(301)
+                .build();
+
+        assertNotNull("shard-0 should exist before import",
+                context.resourceResolver().getResource(redirectStoragePath + "/shard-0"));
+        assertEquals("number of redirects before import ", 2, servlet.getRules(storageRoot).size());
+
+        // Import a small spreadsheet with a single rule and "replace" enabled
+        byte[] excelBytes = createMockExcelFile();
+        setupFileUpload(excelBytes, CONTENT_TYPE_EXCEL);
+        context.request().addRequestParameter("replace", "true");
+
+        // Execute
+        servlet.doPost(context.request(), context.response());
+
+        // Verify: after "replace" only the new rule from the spreadsheet should
+        // remain. The bug in #3718 was that shard-N containers are nt:unstructured
+        // nodes (not REDIRECT_RULE_RESOURCE_TYPE) and were therefore skipped by
+        // the delete loop, leaving their rules in place after "replace".
+        Map<String, Resource> rules = servlet.getRules(storageRoot);
+        assertEquals("number of redirects after import ", 1, rules.size());
+        assertNotNull(rules.get("/old"));
+        assertNull(rules.get("/sharded/one"));
+        assertNull(rules.get("/sharded/two"));
+        assertNull("shard-0 container should be removed on replace",
+                context.resourceResolver().getResource(redirectStoragePath + "/shard-0"));
+    }
+
     private void setupFileUpload(byte[] content, String contentType) throws IOException {
         context.request().addRequestParameter("file", content, contentType);
     }

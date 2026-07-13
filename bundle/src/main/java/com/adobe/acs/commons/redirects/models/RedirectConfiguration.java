@@ -168,11 +168,12 @@ public class RedirectConfiguration {
             match = new RedirectMatch(rule, null);
         } else {
             for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                boolean evaluateURI = entry.getValue().getEvaluateURI();
+                RedirectRule regexRule = entry.getValue();
+                boolean evaluateURI = regexRule.getEvaluateURI();
                 String pathToEvaluate = determinePathToEvaluate(normalizedPath, evaluateURI, request);
-                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefix, entry.getValue().isCaseInsensitive());
+                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefix, regexRule.isCaseInsensitive(), regexRule.getContextPrefixIgnored());
                 if (m.matches()) {
-                    match = new RedirectMatch(entry.getValue(), m);
+                    match = new RedirectMatch(regexRule, m);
                     break;
                 }
             }
@@ -187,8 +188,8 @@ public class RedirectConfiguration {
      * @param contextPrefix the optional context prefix
      * @return the matcher associated with the rule
      */
-    private Matcher getRuleMatch(Pattern rulePattern, String pathToEvaluate, String contextPrefix, boolean nc) {
-        if("".equals(contextPrefix)) {
+    private Matcher getRuleMatch(Pattern rulePattern, String pathToEvaluate, String contextPrefix, boolean nc, boolean contextPrefixIgnored) {
+        if(contextPrefixIgnored || "".equals(contextPrefix)) {
             return rulePattern.matcher(pathToEvaluate);
         } else {
             //we add the context prefix to the pattern since a pattern might be too broad otherwise,
@@ -224,6 +225,10 @@ public class RedirectConfiguration {
                     rule = getPathRule(normalizedPath.replace(contextPrefix, ""));
                 } else {
                     rule = getPathRule(contextPrefix + normalizedPath);
+                }
+                // A contextPrefixIgnored rule must match its source exactly — not via prefix manipulation
+                if(rule != null && rule.getContextPrefixIgnored()) {
+                    return null;
                 }
             }
             return rule;

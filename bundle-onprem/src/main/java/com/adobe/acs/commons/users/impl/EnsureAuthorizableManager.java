@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,17 @@
 
 package com.adobe.acs.commons.users.impl;
 
-public interface EnsureAuthorizable {
+import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
 
-    Operation getOperation();
+@ProviderType
+@Description("ACS AEM Commons - Ensure Authorizable MBean")
+public interface EnsureAuthorizableManager {
 
-    AbstractAuthorizable getAuthorizable();
+    @Description("Execute all Ensure Service User and Ensure Group configurations")
+    void ensureAll();
 
-    void ensure(Operation operation, AbstractAuthorizable authorizable) throws EnsureAuthorizableException;
+    @Description("Execute all Ensure Service User and Ensure Group configurations for the provided principal name")
+    void ensurePrincipalName(@Name(value = "Principal Name") String principalName);
 }

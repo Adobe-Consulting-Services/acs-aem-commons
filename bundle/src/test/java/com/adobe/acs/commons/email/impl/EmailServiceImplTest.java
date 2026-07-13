@@ -20,7 +20,7 @@ package com.adobe.acs.commons.email.impl;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang3.RandomStringUtils;

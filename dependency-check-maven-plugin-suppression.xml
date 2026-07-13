@@ -25,4 +25,12 @@
         <packageUrl regex="true">^pkg:maven/com\.google\.guava/guava@.*$</packageUrl>
         <vulnerabilityName>CVE-2020-8908</vulnerabilityName>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        This suppresses the CVE-2025-48924 in Handlebars' Shaded Commons Lang dependency. The affected method is not used.
+        ]]></notes>
+        <sha1>302d01a9279f7a400b1e767be60f12c02a5cf513</sha1>
+        <cve>CVE-2025-48924</cve>
+    </suppress>
+    
 </suppressions>

@@ -50,6 +50,7 @@ import java.util.Map;
 public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrapper {
     private static final String ATTR_SLING_BINDINGS = SlingBindings.class.getName();
     private static final Logger LOG = LoggerFactory.getLogger(OverridePathSlingRequestWrapper.class);
+    private static final SlingModelsScriptEngineFactory SLING_MODELS_SCRIPT_ENGINE_FACTORY = new SlingModelsScriptEngineFactory();
 
     private final SlingBindings myBindings = new SlingBindings();
     private final Resource resource;
@@ -101,7 +102,7 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
         SimpleBindings additionalBindings = new SimpleBindings();
         additionalBindings.putAll(this.myBindings);
 
-        Collection<BindingsValuesProvider> bindingsValuesProviders = bindingsValuesProvidersByContext.getBindingsValuesProviders(new SlingModelsScriptEngineFactory(), "request");
+        Collection<BindingsValuesProvider> bindingsValuesProviders = bindingsValuesProvidersByContext.getBindingsValuesProviders(SLING_MODELS_SCRIPT_ENGINE_FACTORY, "request");
         Iterator<BindingsValuesProvider> bindingsValuesProviderIterator = bindingsValuesProviders.iterator();
         while (bindingsValuesProviderIterator.hasNext()) {
             BindingsValuesProvider provider = bindingsValuesProviderIterator.next();

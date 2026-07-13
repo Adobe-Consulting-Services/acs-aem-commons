@@ -36,7 +36,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import com.day.cq.commons.jcr.JcrConstants;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RedirectMapModelTest {

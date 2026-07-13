@@ -171,6 +171,29 @@
                                                         name="./source"
                                                         required="{Boolean}true"
                                                         rootPath="/content"/>
+                                                <matchType
+                                                        jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                        granite:id="match-type-select-box"
+                                                        fieldLabel="Source Match Type"
+                                                        fieldDescription="How to interpret the Source Path. Auto-Detect: a trailing * is converted to (.*) and the source is treated as a regex only if it contains capturing groups. Plain Text: always an exact path match. Regular Expression: always compiled as a regex without requiring capturing groups."
+                                                        name="./matchType">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <auto_detect
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="Auto-Detect (default)"
+                                                                selected="{Boolean}true"
+                                                                value="AUTO_DETECT"/>
+                                                        <plain_text
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="Plain Text"
+                                                                value="PLAIN_TEXT"/>
+                                                        <regex
+                                                                jcr:primaryType="nt:unstructured"
+                                                                text="Regular Expression"
+                                                                value="REGEX"/>
+                                                    </items>
+                                                </matchType>
                                                 <evaluateURI
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"

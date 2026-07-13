@@ -84,7 +84,7 @@ public class RedirectFilterTest {
     private String redirectStoragePath = RedirectResourceBuilder.DEFAULT_CONF_PATH;
 
     private String[] contentRoots = new String[]{
-            "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail"};
+            "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail", "/en"};
 
     @Before
     public void setUp() throws Exception {
@@ -1210,18 +1210,62 @@ public class RedirectFilterTest {
                     .setSource("/en/one")
                     .setTarget("/content/escapedsite/en/one")
                     .setStatusCode(302)
-                    .setContextPrefixIgnored(true).build()
+                    .setContextPrefixIgnored(true).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/two")
+                        .setTarget("/content/escapedsite/en/two")
+                        .setStatusCode(302)
+                        .setContextPrefixIgnored(true).build()
         );
 
         Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
         configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
 
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+        MockSlingHttpServletResponse response;
+        //  A contextPrefixIgnored rule must match its source exactly — not via prefix manipulation
+        response = navigate("/content/geometrixx/en/one.html");
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getHeader("Location"));
 
+        // Exact path match: source /en/one matches incoming /en/one
+        response = navigate("/en/one.html");
         assertEquals(302, response.getStatus());
         assertEquals("/content/escapedsite/en/one.html", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        // matches the 2nd rule exactly;
+        response = navigate("/content/geometrixx/en/two.html");
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escapedsite/en/two.html", response.getHeader("Location"));
+
+        // does not match the 2nd rule because with contextPrefixIgnored=true the prefix must not be stripped/added to find the rule
+        response = navigate("/en/two.html");
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getHeader("Location"));
+    }
+
+    @Test
+    public void testIgnoredContextPrefixWithRegex() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/en/three(.*)")
+                        .setTarget("/content/escaped/en/four")
+                        .setStatusCode(302)
+                        .setContextPrefixIgnored(true).build()
+                );
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response;
+        //  A contextPrefixIgnored rule must match its source exactly — not via prefix manipulation
+        response = navigate("/content/geometrixx/en/three/abc.html");
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getHeader("Location"));
+
+        // Exact path match: regex /en/three(.*) matches incoming /en/three/abc.html
+        response = navigate("/en/three/abc.html");
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escaped/en/four.html", response.getHeader("Location"));
     }
 
     @Test
@@ -1231,11 +1275,6 @@ public class RedirectFilterTest {
                     .setSource("/en/one(.*)")
                     .setTarget("/en/two")
                     .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/en/three(.*)")
-                    .setTarget("/content/escaped/en/four")
-                    .setStatusCode(302)
-                    .setContextPrefixIgnored(true).build(),
             new RedirectResourceBuilder(context)
                     .setSource("/(.*)")
                     .setTarget("/content/geometrixx/en/six")
@@ -1250,13 +1289,6 @@ public class RedirectFilterTest {
 
         assertEquals(302, response.getStatus());
         assertEquals("/content/geometrixx/en/two.html", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
-
-        response = navigate("/content/geometrixx/en/three.html");
-
-        assertEquals(302, response.getStatus());
-        assertEquals("/content/escaped/en/four.html", response.getHeader("Location"));
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
 

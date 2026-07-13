@@ -41,7 +41,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.testing.sling.MockResourceResolver;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +57,7 @@ import com.adobe.acs.commons.redirectmaps.models.RedirectConfigModel;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -233,7 +233,7 @@ public class TestServlets {
     };
 
     @Before
-    public void init() throws IOException, NoSuchFieldException {
+    public void init() throws IOException, NoSuchFieldException, IllegalAccessException {
         log.info("init");
 
 

@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,48 +17,45 @@
  */
 package com.adobe.acs.commons.users.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
-@RunWith(MockitoJUnitRunner.class)
 public class GroupTest {
 
     @Test
     public void testGroupMemberOf() throws EnsureAuthorizableException {
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put(EnsureGroup.PROP_MEMBER_OF, new String[] { "contributors", "user-administrators" });
+        config.put(EnsureGroup.PROP_MEMBER_OF, new String[]{"contributors", "user-administrators"});
         config.put(EnsureGroup.PROP_PRINCIPAL_NAME, "mycorp-authors");
-        config.put(EnsureGroup.PROP_ACES, new String[] {});
+        config.put(EnsureGroup.PROP_ACES, new String[]{});
 
         Group group = new Group(config);
 
         assertEquals("mycorp-authors", group.getPrincipalName());
-        assertTrue("memberOf missing value contributors.", group.getMemberOf().contains("contributors"));
-        assertTrue("memberOf missing value user-administrators.", group.getMemberOf().contains("user-administrators"));
+        assertTrue(group.getMemberOf().contains("contributors"), "memberOf missing value contributors.");
+        assertTrue(group.getMemberOf().contains("user-administrators"), "memberOf missing value user-administrators.");
     }
 
     @Test
     public void testGroupMemberOf_missing() throws EnsureAuthorizableException {
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put(EnsureGroup.PROP_MEMBER_OF, new String[] { "contributors", "user-administrators" });
+        config.put(EnsureGroup.PROP_MEMBER_OF, new String[]{"contributors", "user-administrators"});
         config.put(EnsureGroup.PROP_PRINCIPAL_NAME, "mycorp-authors");
-        config.put(EnsureGroup.PROP_ACES, new String[] {});
+        config.put(EnsureGroup.PROP_ACES, new String[]{});
 
         Group group = new Group(config);
 
         assertEquals("mycorp-authors", group.getPrincipalName());
-        assertTrue("memberOf missing value contributors.", group.getMemberOf().contains("contributors"));
-        assertTrue("memberOf missing value user-administrators.", group.getMemberOf().contains("user-administrators"));
+        assertTrue(group.getMemberOf().contains("contributors"), "memberOf missing value contributors.");
+        assertTrue(group.getMemberOf().contains("user-administrators"), "memberOf missing value user-administrators.");
 
         group.addMembership("contributors");
 

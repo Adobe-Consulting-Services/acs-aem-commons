@@ -185,6 +185,7 @@
     var cacheControlHeader = tr.find(".cacheControlHeader").data("value");
     var caseInsensitive = tr.find(".source").data("case-insensitive");
     var preserveQueryString = tr.find(".target").data("preserve-query-string");
+    var matchType = tr.find(".source").data("match-type");
 
     var form = $("#editRuleDialog").find("form");
     form[0].reset();
@@ -199,6 +200,8 @@
         .setValues(tags.split(","));
     var select = $("#status-code-select-box").get(0);
     select.value = "" + statusCode;
+    var matchTypeSelect = $("#match-type-select-box").get(0);
+    matchTypeSelect.value = matchType;
     form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
     form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
     form.find('input[name="./note"]').val(note);
@@ -464,6 +467,50 @@
     e.preventDefault();
     var dialog = document.querySelector("#createDialog");
     dialog.show();
+  });
+
+  $(document).on("click", ".delete-configuration-btn", function (e) {
+    e.preventDefault();
+    var configPath = $(this).data("path");
+    var configName = $(this).data("name");
+
+    var dialog = new Coral.Dialog().set({
+      header: { innerHTML: "Delete Redirect Rules" },
+      content: { innerHTML: "Are you sure you want to delete all redirect rules in <strong>" + configName +
+           "</strong>? This action cannot be undone." },
+      footer: { innerHTML:
+          '<button is="coral-button" variant="default" coral-close>Cancel</button>' +
+          '<button is="coral-button" variant="warning" class="confirm-delete-config">Delete</button>' },
+      variant: "warning",
+      closable: "on"
+    });
+    document.body.appendChild(dialog);
+    dialog.show();
+
+    $(dialog).find(".confirm-delete-config").one("click", function () {
+      $.ajax({
+        url: configPath,
+        type: "POST",
+        data: { ":operation": "delete" },
+        async: false
+      }).done(function () {
+        dialog.hide();
+        location.reload(true);
+      }).fail(function (xhr) {
+        dialog.hide();
+        var msg = xhr.responseJSON && xhr.responseJSON.message ?
+            xhr.responseJSON.message : "Unexpected error";
+        var errDialog = new Coral.Dialog().set({
+          header: { innerHTML: "Delete Failed" },
+          content: { innerHTML: msg },
+          footer: { innerHTML: '<button is="coral-button" variant="primary" coral-close>OK</button>' },
+          variant: "error",
+          closable: "on"
+        });
+        document.body.appendChild(errDialog);
+        errDialog.show();
+      });
+    });
   });
 
   $(document).on("click", ".caconfig-configuration-submit", function (e) {

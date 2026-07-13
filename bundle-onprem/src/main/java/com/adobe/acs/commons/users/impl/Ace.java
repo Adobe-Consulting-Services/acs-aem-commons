@@ -1,7 +1,7 @@
 /*
  * ACS AEM Commons
  *
- * Copyright (C) 2013 - 2023 Adobe
+ * Copyright (C) 2013 - 2026 Adobe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,14 @@ import java.util.Map;
 
 /**
  * ACE OSGi Config Format
- *
+ * <p>
  * type=allow;privileges=jcr:read,rep:write;path=/content/foo;rep:glob=/jcr:content/*
- *
+ * <p>
  * REQUIRED
  * - type = allow | deny
  * - privileges = privilegeNames comma separated
  * - path = absolute path (must exist in JCR)
- *
+ * <p>
  * OPTIONAL
  * - rep:glob = rep glob expression
  * - rep:ntNames = ntNames expression
@@ -112,9 +112,9 @@ public final class Ace {
     }
 
     protected void validate(String type, String path, List<String> privilegeNames) throws EnsureAuthorizableException {
-        if (!ArrayUtils.contains(new String[] { "allow", "deny"}, type)) {
+        if (!ArrayUtils.contains(new String[]{"allow", "deny"}, type)) {
             throw new EnsureAuthorizableException("Ensure Service User requires valid type. [ " + type + " ] type is invalid");
-        } else if (!StringUtils.startsWith(path , "/")) {
+        } else if (!StringUtils.startsWith(path, "/")) {
             throw new EnsureAuthorizableException("Ensure Service User requires an absolute path. [ " + path + " ] path is invalid");
         } else if (privilegeNames.size() < 1) {
             throw new EnsureAuthorizableException("Ensure Service User requires at least 1 privilege to apply.");
@@ -156,7 +156,9 @@ public final class Ace {
         return exists;
     }
 
-    /** rep:glob **/
+    /**
+     * rep:glob
+     **/
 
     public String getRepGlob() {
         return repGlob;
@@ -166,7 +168,9 @@ public final class Ace {
         return getRepGlob() != null;
     }
 
-    /** rep:ntNames **/
+    /**
+     * rep:ntNames
+     **/
 
     public List<String> getRepNtNames() {
         return Collections.unmodifiableList(repNtNames);
@@ -177,7 +181,9 @@ public final class Ace {
     }
 
 
-    /** rep:itemNames **/
+    /**
+     * rep:itemNames
+     **/
 
     public List<String> getRepItemNames() {
         return Collections.unmodifiableList(repItemNames);
@@ -187,7 +193,9 @@ public final class Ace {
         return !getRepItemNames().isEmpty();
     }
 
-    /** rep:prefixes **/
+    /**
+     * rep:prefixes
+     **/
 
     public List<String> getRepPrefixes() {
         return Collections.unmodifiableList(repPrefixes);
@@ -199,6 +207,7 @@ public final class Ace {
 
     /**
      * Determines if the configured ACE is the same as the actual ACE in the JCR.
+     *
      * @param actual the actual ACE in the JCR
      * @return true if both ACEs are logically the same, false if not.
      * @throws RepositoryException
@@ -218,22 +227,22 @@ public final class Ace {
         // rep:glob
 
         // We are converting the single value RepGlob into a List for convenience
-        if(!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(PROP_REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
+        if (!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(PROP_REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
             return false;
         }
 
         // rep:ntNames
-        if(!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(PROP_REP_NT_NAMES), this.getRepNtNames())) {
+        if (!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(PROP_REP_NT_NAMES), this.getRepNtNames())) {
             return false;
         }
 
         // rep:itemNames
-        if(!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(PROP_REP_ITEM_NAMES), this.getRepItemNames())) {
+        if (!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(PROP_REP_ITEM_NAMES), this.getRepItemNames())) {
             return false;
         }
 
         // rep:prefixes
-        if(!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(PROP_REP_PREFIXES), this.getRepPrefixes())) {
+        if (!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(PROP_REP_PREFIXES), this.getRepPrefixes())) {
             return false;
         }
 

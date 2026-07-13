@@ -51,7 +51,7 @@ import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class StylesheetInlinerTransformerFactoryTest {
@@ -104,7 +104,7 @@ public final class StylesheetInlinerTransformerFactoryTest {
     private Resource resource;
 
     @Before
-    public void setUp() throws NoSuchFieldException, IOException {
+    public void setUp() throws NoSuchFieldException, IOException, IllegalAccessException {
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
 
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));

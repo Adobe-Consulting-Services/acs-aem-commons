@@ -26,4 +26,6 @@
 	<dd>${properties.queryLanguage}</dd>
 	<dt>Page Size</dt>
 	<dd>${properties.pageSize}</dd>
+    <dt>Hide All results checkbox</dt>
+    <dd>${properties.hideAllResults}</dd>
 </dl>

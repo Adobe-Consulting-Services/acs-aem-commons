@@ -60,7 +60,7 @@ public class PageRootProviderMultiImplTest {
     }
 
     @Test
-    public void getRootPagePath() throws Exception {
+    public void getRootPagePath() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         provider.bindConfig(config1, FIRST);
 
@@ -75,21 +75,23 @@ public class PageRootProviderMultiImplTest {
     }
 
     @Test
-    public void getRootPagePath_Regex() throws Exception {
-        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/([a-z_-]+)")));
+    public void getRootPagePath_Regex() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/([a-z_-]+)"), buildPattern("/content/experience-fragments/site/([a-z_-]+)")));
         provider.bindConfig(config1, FIRST);
 
         assertEquals("/content/site/en_us", provider.getRootPagePath("/content/site/en_us/products/product-x"));
         assertEquals("/content/site/fr", provider.getRootPagePath("/content/site/fr/products/product-x/jcr:content/my-component"));
         assertEquals("/content/site/de_de", provider.getRootPagePath("/content/site/de_de"));
+        assertEquals("/content/experience-fragments/site/en_us", provider.getRootPagePath("/content/experience-fragments/site/en_us/products/product-x"));
 
         assertNull(provider.getRootPagePath("/content"));
         assertNull(provider.getRootPagePath("/content/en_us/products"));
         assertNull(provider.getRootPagePath("/content/123/site"));
+        assertNull(provider.getRootPagePath("/content/experience-fragments/othersite/en_us/products"));
     }
 
     @Test
-    public void getRootPagePath_RegexEnd() throws Exception {
+    public void getRootPagePath_RegexEnd() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/[a-z]{2}")));
         provider.bindConfig(config1, FIRST);
 
@@ -101,7 +103,7 @@ public class PageRootProviderMultiImplTest {
     }
 
     @Test
-    public void getRootPagePath_Order1() throws Exception {
+    public void getRootPagePath_Order1() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content"), buildPattern("/content/a")));
         provider.bindConfig(config1, FIRST);
 
@@ -109,7 +111,7 @@ public class PageRootProviderMultiImplTest {
     }
 
     @Test
-    public void getRootPagePath_Order2() throws Exception {
+    public void getRootPagePath_Order2() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content")));
         provider.bindConfig(config1, FIRST);
 
@@ -118,7 +120,7 @@ public class PageRootProviderMultiImplTest {
     }
 
     @Test
-    public void getRootPagePath_MultiOrder1() throws Exception {
+    public void getRootPagePath_MultiOrder1() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
         provider.bindConfig(config1, FIRST);
@@ -128,7 +130,7 @@ public class PageRootProviderMultiImplTest {
     }
 
     @Test
-    public void getRootPagePath_MultiOrder2() throws Exception {
+    public void getRootPagePath_MultiOrder2() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
         when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         provider.bindConfig(config1, FIRST);
@@ -138,9 +140,81 @@ public class PageRootProviderMultiImplTest {
         assertEquals("/content", provider.getRootPagePath("/content/b"));
     }
 
+    @Test
+    public void getRootPagePath_XFRootPathMethod_Site() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/site/([a-z_-]+)")));
+        when(config1.getXfRootPathMethod()).thenReturn("site");
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/site/en_us", provider.getRootPagePath("/content/experience-fragments/site/en_us/products/product-x"));
+
+        assertNull(provider.getRootPagePath("/content/experience-fragments/othersite/en_us/products/product-x/jcr:content/my-component"));
+    }
 
     @Test
-    public void getRootPagePath_Unbind() throws Exception {
+    public void getRootPagePath_HistoryViewerFallback_False() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content/experience-fragments/a")));
+        when(config1.getHistoryViewerFallback()).thenReturn(false);
+        provider.bindConfig(config1, FIRST);
+
+        assertNull(provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/experience-fragments/a/b/c"));
+        assertNull(provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_HistoryViewerFallback_True() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content/experience-fragments/a")));
+        when(config1.getHistoryViewerFallback()).thenReturn(true);
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/experience-fragments/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/experience-fragments/a/b/c"));
+        assertEquals("/content/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_HistoryViewerFallback_True_XFMethodSite() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        when(config1.getXfRootPathMethod()).thenReturn("site");
+        when(config1.getHistoryViewerFallback()).thenReturn(true);
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/experience-fragments/a/b/c"));
+        assertEquals("/content/a", provider.getRootPagePath("/tmp/versionhistory/5dcec28ce5482dac2f0daa7f045f65b4c49391535a805c6a778761b78b5e2155/3d930917-6bcb-42e6-8b90-5d6c09e83fcf/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_LaunchFallback_False() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content/experience-fragments/a")));
+        when(config1.getLaunchFallback()).thenReturn(false);
+        provider.bindConfig(config1, FIRST);
+
+        assertNull(provider.getRootPagePath("/content/launches/2026/03/05/translation_reviewspanish10/content/experience-fragments/a/b/c"));
+        assertNull(provider.getRootPagePath("/content/launches/2026/03/05/translation_reviewspanish10/content/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_LaunchFallback_True() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a"), buildPattern("/content/experience-fragments/a")));
+        when(config1.getLaunchFallback()).thenReturn(true);
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/experience-fragments/a", provider.getRootPagePath("/content/launches/2026/03/05/translation_reviewspanish10/content/experience-fragments/a/b/c"));
+        assertEquals("/content/a", provider.getRootPagePath("/content/launches/2026/03/05/translation_reviewspanish10/content/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_LaunchFallback_True_XFMethodSite() {
+        when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
+        when(config1.getXfRootPathMethod()).thenReturn("site");
+        when(config1.getLaunchFallback()).thenReturn(true);
+        provider.bindConfig(config1, FIRST);
+
+        assertEquals("/content/a", provider.getRootPagePath("/content/launches/2026/03/05/translation_reviewspanish10/content/experience-fragments/a/b/c"));
+        assertEquals("/content/a", provider.getRootPagePath("/content/launches/2026/03/05/translation_reviewspanish10/content/a/b/c"));
+    }
+
+    @Test
+    public void getRootPagePath_Unbind() {
         when(config1.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content/a")));
         when(config2.getPageRootPatterns()).thenReturn(Arrays.asList(buildPattern("/content")));
         provider.bindConfig(config1, FIRST);
