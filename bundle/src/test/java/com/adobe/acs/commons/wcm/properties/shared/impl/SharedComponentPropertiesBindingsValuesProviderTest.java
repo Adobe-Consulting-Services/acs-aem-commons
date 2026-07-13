@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -102,7 +103,7 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     }
 
     @Test
-    public void testDisabled() throws Exception {
+    public void testDisabled() {
         SharedComponentProperties sharedComponentProperties = mock(SharedComponentProperties.class);
         SharedComponentPropertiesBindingsValuesProvider provider = createProvider(
                 sharedComponentProperties, false);
@@ -120,7 +121,7 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     }
 
     @Test
-    public void testEnabled() throws Exception {
+    public void testEnabled() {
         PageRootProvider pageRootProvider = mock(PageRootProvider.class);
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
         Resource sharedPropsResource = mock(Resource.class);
@@ -161,17 +162,22 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
                 bindings.get(SharedComponentProperties.SHARED_PROPERTIES));
         assertEquals(globalProps,
                 bindings.get(SharedComponentProperties.GLOBAL_PROPERTIES));
+        assertNotNull(bindings.get(SharedComponentProperties.MERGED_PROPERTIES));
     }
 
     private SharedComponentPropertiesBindingsValuesProvider createProvider(
             SharedComponentProperties sharedComponentProperties,
-            boolean enabled) throws Exception {
+            boolean enabled) {
         SharedComponentPropertiesBindingsValuesProvider provider =
                 new SharedComponentPropertiesBindingsValuesProvider();
         SharedComponentPropertiesBindingsValuesProvider.Config config =
                 mock(SharedComponentPropertiesBindingsValuesProvider.Config.class);
         when(config.enabled()).thenReturn(enabled);
-        PrivateAccessor.setField(provider, "sharedComponentProperties", sharedComponentProperties);
+        try {
+            PrivateAccessor.setField(provider, "sharedComponentProperties", sharedComponentProperties);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
         provider.activate(config);
         return provider;
     }
