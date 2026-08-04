@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3533 ReferencesModel: fix NullPointerException in CSV export when a reference has a null or blank target, causing affected rows to be silently dropped from the report
+
 ### Changed
 
 ## [6.17.4] - 2026-06-20

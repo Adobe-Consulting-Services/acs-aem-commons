@@ -36,7 +36,6 @@ import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 import com.adobe.granite.references.Reference;
 import com.adobe.granite.references.ReferenceAggregator;
 import com.adobe.granite.references.ReferenceList;
-import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,18 +98,21 @@ public class ReferencesModel implements ReportCellCSVExporter {
 
             if (reference == null) {
                 log.warn("Reference is null for resource: {}", resource.getPath());
+                references.remove();
                 continue;
             }
 
             Resource target = reference.getTarget();
             if (target == null) {
                 log.warn("Reference target is null for resource: {}", resource.getPath());
+                references.remove();
                 continue;
             }
 
             String targetPath = target.getPath();
             if (StringUtils.isBlank(targetPath)) {
                 log.warn("Reference target path is blank for resource: {}", resource.getPath());
+                references.remove();
                 continue;
             }
 
