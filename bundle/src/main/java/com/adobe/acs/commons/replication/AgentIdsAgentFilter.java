@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AgentIdsAgentFilter implements AgentFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(AgentIdsAgentFilter.class);
     private final List<String> agentIds;
 
     public AgentIdsAgentFilter(List<String> agentIds) {
