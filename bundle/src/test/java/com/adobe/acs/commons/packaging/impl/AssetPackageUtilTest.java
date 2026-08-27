@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
@@ -57,22 +56,17 @@ public class AssetPackageUtilTest {
         context.load().json(getClass().getResourceAsStream("AssetPackagerServletConfiguration.json"),
             PACKAGER_CONTENT_PATH);
 
-        final ResourceResolver resourceResolver = context.resourceResolver();
-        final ValueMap properties = getAssetPackagerConfigurationProperties();
+        final Resource assetPackagerResource = context.resourceResolver().getResource(PACKAGER_CONTENT_PATH);
+        final ValueMap properties = assetPackagerResource.getChild("jcr:content/configuration").getValueMap();
 
-        final AssetPackageUtil assetPackageUtil = new AssetPackageUtil(properties, resourceResolver);
+        final AssetPackageUtil assetPackageUtil = new AssetPackageUtil(properties, context.resourceResolver());
 
         final List<PathFilterSet> packageFilterPaths = assetPackageUtil.getPackageFilterPaths();
 
+        // Test is inclusive of the following cases:
+        // 1. Resolve asset path references
+        // 2. Resolve asset UUID references
+        // 3. Ignore asset UUIDs that do not resolve to an asset
         assertEquals(4, packageFilterPaths.size());
-    }
-
-    /**
-     * @return asset packager configuration properties
-     */
-    private ValueMap getAssetPackagerConfigurationProperties() {
-        final Resource assetPackagerResource = context.resourceResolver().getResource(PACKAGER_CONTENT_PATH);
-
-        return assetPackagerResource.getChild("jcr:content/configuration").getValueMap();
     }
 }
