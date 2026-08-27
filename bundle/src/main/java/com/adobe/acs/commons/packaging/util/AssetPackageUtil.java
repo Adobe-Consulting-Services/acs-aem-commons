@@ -24,14 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.wcm.api.NameConstants;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -41,6 +36,12 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.wcm.api.NameConstants;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 
 public class AssetPackageUtil {
 
@@ -52,6 +53,11 @@ public class AssetPackageUtil {
     private static final String PN_ASSET_PREFIX = "assetPrefix";
     private static final String PN_PAGE_EXCLUSIONS = "pageExclusions";
     private static final String PN_ASSET_EXCLUSIONS = "assetExclusions";
+
+    /** Asset URN reference pattern. */
+    private static final Pattern AEM_ASSET_URN = Pattern.compile(
+        "^/?urn:aaid:aem:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:/.*)?$"
+    );
 
     private String customPrefix;
     private List<Pattern> pageExclusionPatterns;
@@ -188,16 +194,30 @@ public class AssetPackageUtil {
 
     /**
      * Adds a property value to the filter set list if it is not empty, referencing the DAM, and is
-     * an actual DAM Asset.
+     * an actual DAM Asset. The property value can be either an asset path or an asset URN reference.
      *
      * @param filters The total list of filter sets
      * @param value   The current property value
      */
     private void addFilter(final Set<PathFilterSet> filters, final String value,
                            final ResourceResolver resourceResolver) {
-        if (StringUtils.isNotBlank(value) && DamUtil.isAsset(resourceResolver.getResource(value))
-                && fitsAssetPattern(value)) {
-            filters.add(new PathFilterSet(value));
+        if (StringUtils.isNotBlank(value)) {
+            final Matcher uuidMatcher = AEM_ASSET_URN.matcher(value);
+
+            if (uuidMatcher.matches()) {
+                final String uuid = uuidMatcher.group(1);
+
+                // Attempt to resolve asset by ID
+                final Resource assetResource = resourceResolver.getResource("/jcr:id/" + uuid);
+
+                if (DamUtil.isAsset(assetResource) && fitsAssetPattern(assetResource.getPath())) {
+                    filters.add(new PathFilterSet(assetResource.getPath()));
+                }
+            } else {
+                if (DamUtil.isAsset(resourceResolver.getResource(value)) && fitsAssetPattern(value)) {
+                    filters.add(new PathFilterSet(value));
+                }
+            }
         }
     }
 
