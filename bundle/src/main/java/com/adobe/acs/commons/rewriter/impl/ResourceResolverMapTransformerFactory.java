@@ -99,17 +99,44 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
                 final String attrValue = newAttrs.getValue(i);
                 if (StringUtils.startsWith(attrValue, "/") && !StringUtils.startsWith(attrValue, "//")) {
                     // Only map absolute paths (starting w /), avoid relative-scheme URLs starting w //
+                    final int suffixIndex = indexOfQueryOrFragment(attrValue);
+                    final String path = suffixIndex == -1 ? attrValue : attrValue.substring(0, suffixIndex);
+                    // Never decode (or otherwise touch) the query string / fragment: ResourceResolver#map
+                    // passes it through unchanged, so decoding it here would let it carry unescaped
+                    // characters (eg. a double quote) straight into the rewritten HTML attribute.
+                    final String suffix = suffixIndex == -1 ? "" : attrValue.substring(suffixIndex);
                     try {
-                        final String attrValueDecoded = new URLCodec().decode(attrValue);
-                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, attrValueDecoded));
+                        // The path may already contain percent-encoded characters (eg. a thumbnail
+                        // rendition path with an encoded "jcr:content"); decode it first so that
+                        // ResourceResolver#map, which encodes the path it is given, doesn't double-encode it.
+                        final String pathDecoded = new URLCodec().decode(path);
+                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, pathDecoded) + suffix);
                     } catch (DecoderException e) {
                         log.error("Could not decode the attribute value", e);
-                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, attrValue));
+                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, path) + suffix);
                     }
                 }
             }
         }
         return newAttrs;
+    }
+
+    /**
+     * Finds the index of the first query string ({@code ?}) or fragment ({@code #}) marker in the given URL.
+     *
+     * @param url the URL to inspect
+     * @return the index of the first {@code ?} or {@code #}, or {@code -1} if the URL has neither
+     */
+    private static int indexOfQueryOrFragment(final String url) {
+        final int queryIndex = url.indexOf('?');
+        final int fragmentIndex = url.indexOf('#');
+        if (queryIndex == -1) {
+            return fragmentIndex;
+        }
+        if (fragmentIndex == -1) {
+            return queryIndex;
+        }
+        return Math.min(queryIndex, fragmentIndex);
     }
 
     @Activate
