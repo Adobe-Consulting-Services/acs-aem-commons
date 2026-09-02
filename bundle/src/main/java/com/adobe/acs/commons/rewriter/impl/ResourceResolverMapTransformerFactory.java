@@ -95,30 +95,46 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
 
         for (int i = 0; i < len; i++) {
             final String attrName = newAttrs.getLocalName(i);
-            if (ArrayUtils.contains(modifiableAttributes, attrName)) {
-                final String attrValue = newAttrs.getValue(i);
-                if (StringUtils.startsWith(attrValue, "/") && !StringUtils.startsWith(attrValue, "//")) {
-                    // Only map absolute paths (starting w /), avoid relative-scheme URLs starting w //
-                    final int suffixIndex = indexOfQueryOrFragment(attrValue);
-                    final String path = suffixIndex == -1 ? attrValue : attrValue.substring(0, suffixIndex);
-                    // Never decode (or otherwise touch) the query string / fragment: ResourceResolver#map
-                    // passes it through unchanged, so decoding it here would let it carry unescaped
-                    // characters (eg. a double quote) straight into the rewritten HTML attribute.
-                    final String suffix = suffixIndex == -1 ? "" : attrValue.substring(suffixIndex);
-                    try {
-                        // The path may already contain percent-encoded characters (eg. a thumbnail
-                        // rendition path with an encoded "jcr:content"); decode it first so that
-                        // ResourceResolver#map, which encodes the path it is given, doesn't double-encode it.
-                        final String pathDecoded = new URLCodec().decode(path);
-                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, pathDecoded) + suffix);
-                    } catch (DecoderException e) {
-                        log.error("Could not decode the attribute value", e);
-                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, path) + suffix);
-                    }
-                }
+            if (!ArrayUtils.contains(modifiableAttributes, attrName)) {
+                continue;
+            }
+            final String attrValue = newAttrs.getValue(i);
+            if (isMappableAbsolutePath(attrValue)) {
+                newAttrs.setValue(i, mapAttributeValue(slingRequest, attrValue));
             }
         }
         return newAttrs;
+    }
+
+    /**
+     * Only absolute paths (starting with a single {@code /}) are mapped; relative-scheme URLs
+     * starting with {@code //} are left untouched.
+     */
+    private static boolean isMappableAbsolutePath(final String attrValue) {
+        return StringUtils.startsWith(attrValue, "/") && !StringUtils.startsWith(attrValue, "//");
+    }
+
+    private static String mapAttributeValue(final SlingHttpServletRequest slingRequest, final String attrValue) {
+        final int suffixIndex = indexOfQueryOrFragment(attrValue);
+        final String path = suffixIndex == -1 ? attrValue : attrValue.substring(0, suffixIndex);
+        // Never decode (or otherwise touch) the query string / fragment: ResourceResolver#map
+        // passes it through unchanged, so decoding it here would let it carry unescaped
+        // characters (e.g., a double quote) straight into the rewritten HTML attribute.
+        final String suffix = suffixIndex == -1 ? "" : attrValue.substring(suffixIndex);
+        return mapPath(slingRequest, path) + suffix;
+    }
+
+    private static String mapPath(final SlingHttpServletRequest slingRequest, final String path) {
+        try {
+            // The path may already contain percent-encoded characters (eg. a thumbnail
+            // rendition path with an encoded "jcr:content"); decode it first so that
+            // ResourceResolver#map, which encodes the path it is given, doesn't double-encode it.
+            final String pathDecoded = new URLCodec().decode(path);
+            return slingRequest.getResourceResolver().map(slingRequest, pathDecoded);
+        } catch (DecoderException e) {
+            log.error("Could not decode the attribute value", e);
+            return slingRequest.getResourceResolver().map(slingRequest, path);
+        }
     }
 
     /**
