@@ -64,6 +64,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -494,12 +497,19 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      */
     private String getMimeType(final SlingHttpServletRequest request, final Image image) {
         final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
+        String cleanLastSuffix = lastSuffix;
+        try {
+            if (lastSuffix != null) {
+                cleanLastSuffix = StringUtils.substringBefore(URLDecoder.decode(lastSuffix, StandardCharsets.UTF_8.name()), " ");
+            }
+        } catch (UnsupportedEncodingException e) {
+            log.error("An error occurred while decoding the URL.");
+        }
+        final String mimeType = mimeTypeService.getMimeType(cleanLastSuffix);
 
-        final String mimeType = mimeTypeService.getMimeType(lastSuffix);
-
-        if (!StringUtils.endsWithIgnoreCase(lastSuffix, ".orig")
-            && !StringUtils.endsWithIgnoreCase(lastSuffix, ".original")
-            && (ImageIO.getImageWritersByMIMEType(mimeType).hasNext())) {
+        if (!StringUtils.endsWithIgnoreCase(cleanLastSuffix, ".orig")
+                && !StringUtils.endsWithIgnoreCase(cleanLastSuffix, ".original")
+                && (ImageIO.getImageWritersByMIMEType(mimeType).hasNext())) {
             return mimeType;
         } else {
             try {

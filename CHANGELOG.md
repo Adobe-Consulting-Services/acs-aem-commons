@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3628 Fix URL decoding issue in named transform image servlet
+
 ### Changed
 
 ## [6.17.4] - 2026-06-20
