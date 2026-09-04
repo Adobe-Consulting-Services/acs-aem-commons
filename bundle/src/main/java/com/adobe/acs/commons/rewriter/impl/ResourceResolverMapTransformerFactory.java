@@ -95,12 +95,11 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
 
         for (int i = 0; i < len; i++) {
             final String attrName = newAttrs.getLocalName(i);
-            if (!ArrayUtils.contains(modifiableAttributes, attrName)) {
-                continue;
-            }
-            final String attrValue = newAttrs.getValue(i);
-            if (isMappableAbsolutePath(attrValue)) {
-                newAttrs.setValue(i, mapAttributeValue(slingRequest, attrValue));
+            if (ArrayUtils.contains(modifiableAttributes, attrName)) {
+                final String attrValue = newAttrs.getValue(i);
+                if (isMappableAbsolutePath(attrValue)) {
+                    newAttrs.setValue(i, mapAttributeValue(slingRequest, attrValue));
+                }
             }
         }
         return newAttrs;
