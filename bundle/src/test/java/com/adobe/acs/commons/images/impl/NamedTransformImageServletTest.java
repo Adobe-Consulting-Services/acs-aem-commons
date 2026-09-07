@@ -35,9 +35,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.adobe.acs.commons.testing.PrivateAccessor;
+import com.day.cq.wcm.api.PageManager;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,6 +107,15 @@ public final class NamedTransformImageServletTest {
     private Resource metadataResource;
 
     private ValueMap metadataValueMap;
+
+    @Mock
+    private SlingHttpServletResponse response;
+
+    @Mock
+    private RequestPathInfo requestPathInfo;
+
+    @Mock
+    private ResourceResolver resourceResolver;
 
     @Before
     public void setUp() {
@@ -428,6 +442,28 @@ public final class NamedTransformImageServletTest {
       Map<String, Object> metadataMap = new HashMap<String, Object>();
       metadataMap.put(TIFF_ORIENTATION, num);
       metadataValueMap = new ValueMapDecorator(metadataMap);
+    }
+
+    @Test
+    public void testDoGet_WithUrlEncodedSuffix() throws Exception {
+        when(request.getRequestPathInfo()).thenReturn(requestPathInfo);
+        when(requestPathInfo.getSuffix()).thenReturn("/my-transform/my%20image.jpg%202x");
+
+        when(request.getResourceResolver()).thenReturn(resourceResolver);
+        Resource resource = mock(Resource.class);
+        when(request.getResource()).thenReturn(resource);
+        when(resource.getResourceResolver()).thenReturn(resourceResolver);
+
+        PageManager pageManager = mock(PageManager.class);
+        when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
+
+        MimeTypeService mimeTypeService = mock(MimeTypeService.class);
+        when(mimeTypeService.getMimeType("my image.jpg")).thenReturn("image/jpeg");
+
+        PrivateAccessor.setField(servlet, "mimeTypeService", mimeTypeService);
+
+        servlet.doGet(request, response);
+        verify(mimeTypeService).getMimeType("my image.jpg");
     }
 
   /* Testing for resolveImage requires too much orchestration/mocking to be useful */

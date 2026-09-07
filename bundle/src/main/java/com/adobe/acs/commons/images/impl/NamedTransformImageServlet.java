@@ -138,6 +138,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
 
+    private static final Pattern SRCSET_DESCRIPTOR_PATTERN =
+            Pattern.compile("\\s+(?:\\d+w|(?:\\d+(?:\\.\\d+)?|\\.\\d+)x)$");
+
     public static final String RT_LOCAL_SOCIAL_IMAGE = "social:asiFile";
 
     public static final String RT_REMOTE_SOCIAL_IMAGE = "nt:adobesocialtype";
@@ -500,10 +503,13 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         String cleanLastSuffix = lastSuffix;
         try {
             if (lastSuffix != null) {
-                cleanLastSuffix = StringUtils.substringBefore(URLDecoder.decode(lastSuffix, StandardCharsets.UTF_8.name()), " ");
+                cleanLastSuffix = SRCSET_DESCRIPTOR_PATTERN.matcher(
+                        URLDecoder.decode(lastSuffix, StandardCharsets.UTF_8.name())).replaceFirst("");
             }
         } catch (UnsupportedEncodingException e) {
-            log.error("An error occurred while decoding the URL.");
+            log.warn("Failed to URL-decode request URL [{}]. Falling back to PNG mime type.",
+                    request.getRequestURI(), e);
+            return MIME_TYPE_PNG;
         }
         final String mimeType = mimeTypeService.getMimeType(cleanLastSuffix);
 
