@@ -284,17 +284,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
             ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
-            if (transformParams != null) {
-              if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
+            if (transformParams.get(PROP_ADD_URL_PARAMETERS, false)) {
                 LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
-                if(!cropParamsFromUrl.isEmpty()) {
-                  transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
-                  transformParams.putAll(cropParamsFromUrl);
+                if (!cropParamsFromUrl.isEmpty()) {
+                    transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
+                    transformParams.putAll(cropParamsFromUrl);
                 }
-              }
-
-                layer = imageTransformer.transform(layer, transformParams);
             }
+
+            layer = imageTransformer.transform(layer, transformParams);
         }
 
         return layer;
