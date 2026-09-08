@@ -64,6 +64,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -134,6 +137,9 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     public static final String NAMED_IMAGE_FILENAME_PATTERN = "acs.commons.namedimage.filename.pattern";
 
     public static final String DEFAULT_FILENAME_PATTERN = "(image|img)\\.(.+)";
+
+    private static final Pattern SRCSET_DESCRIPTOR_PATTERN =
+            Pattern.compile("\\s+(?:\\d+w|(?:\\d+(?:\\.\\d+)?|\\.\\d+)x)$");
 
     public static final String RT_LOCAL_SOCIAL_IMAGE = "social:asiFile";
 
@@ -278,17 +284,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
             ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
-            if (transformParams != null) {
-              if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
+            if (transformParams.get(PROP_ADD_URL_PARAMETERS, false)) {
                 LinkedHashMap<String, Object> cropParamsFromUrl = getCropParamsFromUrl(request);
-                if(!cropParamsFromUrl.isEmpty()) {
-                  transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
-                  transformParams.putAll(cropParamsFromUrl);
+                if (!cropParamsFromUrl.isEmpty()) {
+                    transformParams = new ValueMapDecorator(new LinkedHashMap<String, Object>(transformParams));
+                    transformParams.putAll(cropParamsFromUrl);
                 }
-              }
-
-                layer = imageTransformer.transform(layer, transformParams);
             }
+
+            layer = imageTransformer.transform(layer, transformParams);
         }
 
         return layer;
@@ -494,12 +498,22 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      */
     private String getMimeType(final SlingHttpServletRequest request, final Image image) {
         final String lastSuffix = PathInfoUtil.getLastSuffixSegment(request);
+        String cleanLastSuffix = lastSuffix;
+        try {
+            if (lastSuffix != null) {
+                cleanLastSuffix = SRCSET_DESCRIPTOR_PATTERN.matcher(
+                        URLDecoder.decode(lastSuffix, StandardCharsets.UTF_8.name())).replaceFirst("");
+            }
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Failed to URL-decode request URL [{}]. Falling back to PNG mime type.",
+                    request.getRequestURI(), e);
+            return MIME_TYPE_PNG;
+        }
+        final String mimeType = mimeTypeService.getMimeType(cleanLastSuffix);
 
-        final String mimeType = mimeTypeService.getMimeType(lastSuffix);
-
-        if (!StringUtils.endsWithIgnoreCase(lastSuffix, ".orig")
-            && !StringUtils.endsWithIgnoreCase(lastSuffix, ".original")
-            && (ImageIO.getImageWritersByMIMEType(mimeType).hasNext())) {
+        if (!StringUtils.endsWithIgnoreCase(cleanLastSuffix, ".orig")
+                && !StringUtils.endsWithIgnoreCase(cleanLastSuffix, ".original")
+                && (ImageIO.getImageWritersByMIMEType(mimeType).hasNext())) {
             return mimeType;
         } else {
             try {

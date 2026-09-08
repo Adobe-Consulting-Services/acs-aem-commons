@@ -14,10 +14,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3628 Fix URL decoding issue in named transform image servlet
 - #3757 Redirect Manager: catch IllegalArgumentException from URI.create() to prevent uncaught throwable on malicious/malformed request URLs
 - #2165 ResourceResolverMapTransformerFactory: stop decoding the query string/fragment of rewritten attributes, which allowed unescaped characters (eg. a double quote) to break out of the HTML attribute
 
 ### Changed
+
+- #3710 Use a dedicated service user/subservice for Redirects Package creation and replication
+- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
 
 ## [6.17.4] - 2026-06-20
 
