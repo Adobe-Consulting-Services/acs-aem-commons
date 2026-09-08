@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.osgi.framework.Constants;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -35,6 +36,7 @@ import javax.jcr.Session;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -88,7 +90,11 @@ class ReplicateRedirectMapServletTest {
         context.registerService(Replicator.class, replicator);
         context.registerService(PackageHelper.class, packageHelper);
         context.registerService(Packaging.class, packaging);
-        context.registerService(ResourceResolverFactory.class, resourceResolverFactory);
+        // outrank the ResourceResolverFactory that AemContext auto-registers so the servlet's
+        // @Reference is wired to this mock (and its session-adapting resolver) instead
+        Map<String, Object> resourceResolverFactoryProps = new HashMap<>();
+        resourceResolverFactoryProps.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+        context.registerService(ResourceResolverFactory.class, resourceResolverFactory, resourceResolverFactoryProps);
         ReplicateRedirectMapServlet component = new ReplicateRedirectMapServlet();
         target = context.registerInjectActivateService(component);
     }

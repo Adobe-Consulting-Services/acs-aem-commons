@@ -40,6 +40,7 @@ import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -145,6 +146,10 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
     private ProcessInstance doStartProcess(SlingHttpServletRequest request) throws RepositoryException, ReflectiveOperationException, DeserializeException {
         String def = request.getParameter("definition");
         String description = request.getParameter("description");
+        User user = request.getResourceResolver().adaptTo(User.class);
+        if (user == null || !manager.getAllProcessDefinitionsForUser(user).containsKey(def)) {
+            throw new IllegalAccessException("User is not authorized to start process: " + def);
+        }
         ProcessDefinition definition = manager.findDefinitionByNameOrPath(def);
         ProcessInstance instance = manager.createManagedProcessInstance(definition, description);
         instance.init(request.getResourceResolver(), convertRequestMap(request.getRequestParameterMap()));
