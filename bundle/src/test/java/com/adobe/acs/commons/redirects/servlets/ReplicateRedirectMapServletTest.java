@@ -6,7 +6,6 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
-import junitx.util.PrivateAccessor;
 import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -82,7 +81,7 @@ class ReplicateRedirectMapServletTest {
     private ReplicateRedirectMapServlet target;
 
     @BeforeEach
-    void setUp() throws LoginException, NoSuchFieldException {
+    void setUp() throws LoginException {
         context.currentResource(context.create().resource(REDIRECTS_PARENT_PATH));
         ResourceResolverWrapper resourceResolverWrapper = stubResourceResolverWithSession();
         lenient().when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolverWrapper);
@@ -92,7 +91,6 @@ class ReplicateRedirectMapServletTest {
         context.registerService(ResourceResolverFactory.class, resourceResolverFactory);
         ReplicateRedirectMapServlet component = new ReplicateRedirectMapServlet();
         target = context.registerInjectActivateService(component);
-        PrivateAccessor.setField(target, "resourceResolverFactory", resourceResolverFactory);
     }
 
     @Test
