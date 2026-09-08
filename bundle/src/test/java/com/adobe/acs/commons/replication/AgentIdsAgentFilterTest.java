@@ -20,6 +20,7 @@ package com.adobe.acs.commons.replication;
 
 import com.day.cq.replication.Agent;
 import com.google.common.collect.ImmutableList;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,5 +58,21 @@ public class AgentIdsAgentFilterTest {
         assertTrue(filter.isIncluded(agentAcceptOne));
         assertTrue(filter.isIncluded(agentAcceptTwo));
         assertFalse(filter.isIncluded(agentAcceptThree));
+    }
+
+    @Test
+    public void isIncluded_emptyList() throws Exception {
+        filter = new AgentIdsAgentFilter(Collections.emptyList());
+        assertTrue(filter.isIncluded(agentAcceptOne));
+        assertTrue(filter.isIncluded(agentAcceptTwo));
+        assertTrue(filter.isIncluded(agentAcceptThree));
+    }
+
+    @Test
+    public void isIncluded_nullList() throws Exception {
+        filter = new AgentIdsAgentFilter(null);
+        assertTrue(filter.isIncluded(agentAcceptOne));
+        assertTrue(filter.isIncluded(agentAcceptTwo));
+        assertTrue(filter.isIncluded(agentAcceptThree));
     }
 }
