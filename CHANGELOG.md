@@ -19,6 +19,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- #3710 Use a dedicated service user/subservice for Redirects Package creation and replication
+- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
+
 ## [6.17.4] - 2026-06-20
 
 ### Fixed
