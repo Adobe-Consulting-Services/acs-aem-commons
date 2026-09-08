@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2165 ResourceResolverMapTransformerFactory: stop decoding the query string/fragment of rewritten attributes, which allowed unescaped characters (eg. a double quote) to break out of the HTML attribute
+
 ### Changed
 
 ## [6.17.4] - 2026-06-20
