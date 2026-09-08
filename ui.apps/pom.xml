@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.17.3-SNAPSHOT</version>
+        <version>6.17.5-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -65,37 +65,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.cj.jshintmojo</groupId>
-                <artifactId>jshint-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>lint</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <directories>
-                        <directory>src/main/content/jcr_root</directory>
-                    </directories>
-                    <failOnError>true</failOnError>
-                    <globals>jQuery,window,$</globals>
-                    <excludes>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
-                        <exclude>
-                            /src/main/content/jcr_root/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/js/vendor
-                        </exclude>
-                        <exclude>
-                            /src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js
-                        </exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/clientlibs/vendor</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
 
             <plugin>
