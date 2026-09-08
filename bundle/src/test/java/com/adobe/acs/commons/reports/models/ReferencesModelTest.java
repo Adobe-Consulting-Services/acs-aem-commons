@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ReferencesModelTest {
@@ -102,6 +103,66 @@ public class ReferencesModelTest {
 
     assertNotNull(referencesModel.getValue(mockResourceSource));
     assertEquals("VALID - /target", referencesModel.getValue(mockResourceSource));
+
+    log.info("Test Successful!");
+  }
+
+  /**
+   * Regression test for https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/3533.
+   * A reference whose target is null should be silently removed during init(), so that getValue()
+   * does not throw a NullPointerException and the valid references are still returned.
+   */
+  @Test
+  public void testGetValue_nullTargetReferenceIsSkipped() throws Exception {
+    log.info("testGetValue_nullTargetReferenceIsSkipped");
+
+    Reference nullTargetRef = mock(Reference.class);
+    when(nullTargetRef.getTarget()).thenReturn(null);
+
+    ReferenceList references = new MockReferenceList(mockResourceSource);
+    references.add(new Reference(mockResourceSource, mockResourceTarget, "VALID"));
+    references.add(nullTargetRef);
+
+    ReferenceAggregator aggregator = new MockReferencesAggregator(references);
+
+    ReferencesModel model = new ReferencesModel(mockResourceSource, delimiterConfiguration);
+    Field af = ReferencesModel.class.getDeclaredField("aggregator");
+    af.setAccessible(true);
+    af.set(model, aggregator);
+    model.init();
+
+    // The null-target reference must be filtered out; only the valid one survives
+    assertEquals(1, model.getReferences().size());
+    assertEquals("VALID - /target", model.getValue(mockResourceSource));
+
+    log.info("Test Successful!");
+  }
+
+  /**
+   * Regression test for https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/3533.
+   * When ALL references have a null target, getValue() should return an empty string rather than
+   * throwing a NullPointerException, so the CSV export can continue to the next row.
+   */
+  @Test
+  public void testGetValue_allNullTargetReferencesReturnEmptyString() throws Exception {
+    log.info("testGetValue_allNullTargetReferencesReturnEmptyString");
+
+    Reference nullTargetRef = mock(Reference.class);
+    when(nullTargetRef.getTarget()).thenReturn(null);
+
+    ReferenceList references = new MockReferenceList(mockResourceSource);
+    references.add(nullTargetRef);
+
+    ReferenceAggregator aggregator = new MockReferencesAggregator(references);
+
+    ReferencesModel model = new ReferencesModel(mockResourceSource, delimiterConfiguration);
+    Field af = ReferencesModel.class.getDeclaredField("aggregator");
+    af.setAccessible(true);
+    af.set(model, aggregator);
+    model.init();
+
+    assertEquals(0, model.getReferences().size());
+    assertEquals("", model.getValue(mockResourceSource));
 
     log.info("Test Successful!");
   }

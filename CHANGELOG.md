@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3533 ReferencesModel: fix NullPointerException in CSV export when a reference has a null or blank target, causing affected rows to be silently dropped from the report
 - #3628 Fix URL decoding issue in named transform image servlet
 - #3757 Redirect Manager: catch IllegalArgumentException from URI.create() to prevent uncaught throwable on malicious/malformed request URLs
 - #2165 ResourceResolverMapTransformerFactory: stop decoding the query string/fragment of rewritten attributes, which allowed unescaped characters (eg. a double quote) to break out of the HTML attribute
