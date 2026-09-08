@@ -29,7 +29,7 @@
 
             " %><%
 
-    Resource hostsResource = ConfigurationUtils.getHostsResource(resourceResolver);
+    Resource hostsResource = resourceResolver.getResource(ConfigurationUtils.HOSTS_PATH);
 	Resource suffixResource = slingRequest.getRequestPathInfo().getSuffixResource();
 
     List<Resource> lst = new ArrayList<Resource>();
@@ -37,9 +37,9 @@
         for (Resource item : hostsResource.getChildren()) {
             ValueMap vm = new ValueMapDecorator(new HashMap<String, Object>());
 
-            String host = item.getValueMap().get("host", "");
+            String name = item.getValueMap().get("name", item.getValueMap().get("host", ""));
             vm.put("value", item.getPath());
-            vm.put("text", host);
+            vm.put("text", name);
             if(suffixResource != null && suffixResource.getPath().equals(item.getPath())) {
                 vm.put("selected", true);
             }

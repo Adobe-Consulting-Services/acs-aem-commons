@@ -29,7 +29,7 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -201,7 +201,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                 Resource resource = resourceResolver.getResource(path);
                 AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
 
-                if (resource != null) {
+                if (resource != null && assetManager != null) {
                     ValueMap taskProperties = resource.getValueMap();
                     String contentPath = taskProperties.get(PN_CONTENT_PATH, String.class);
 

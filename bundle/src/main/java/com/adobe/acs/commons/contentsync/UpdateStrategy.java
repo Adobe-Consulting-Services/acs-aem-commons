@@ -20,19 +20,32 @@
 package com.adobe.acs.commons.contentsync;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public interface UpdateStrategy {
+
+    default List<CatalogItem> getItems(SlingHttpServletRequest request) {
+        Map<String, Object> params = request.getParameterMap().keySet().stream().collect(Collectors.toMap(Function.identity(), request::getParameter));
+        try {
+            return getItems(params);
+        } catch (LoginException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     /**
      * This method is called on the remote instance when Content Sync requests the list of resources to sync
      *
-     * @param request   the request from the Content Sync UI
+     * @param params   map with request parameters
      * @return  the list of resources to sync
      */
-    List<CatalogItem> getItems(SlingHttpServletRequest request);
+    List<CatalogItem> getItems(Map<String, Object> params) throws LoginException;
 
 
     /**

@@ -25,17 +25,24 @@
                   com.adobe.granite.ui.components.ds.DataSource,
                   com.adobe.granite.ui.components.ds.SimpleDataSource,
                   com.adobe.granite.ui.components.ds.ValueMapResource,
-                  com.adobe.acs.commons.contentsync.UpdateStrategy"%><%
+                  com.adobe.acs.commons.contentsync.UpdateStrategy,
+                  com.adobe.acs.commons.contentsync.ConfigurationUtils,
+                  com.adobe.acs.commons.contentsync.GeneralSettingsModel
+                  "%><%
 %><%
 
+    GeneralSettingsModel generalSettings = resourceResolver.resolve(ConfigurationUtils.SETTINGS_PATH).adaptTo(GeneralSettingsModel.class);
     List<Resource> lst = new ArrayList<Resource>();
 	UpdateStrategy[] s = sling.getServices(UpdateStrategy.class, null);
 	if(s != null) {
         for (UpdateStrategy stragegy : s) {
             ValueMap vm = new ValueMapDecorator(new HashMap<String, Object>());
-
-            vm.put("value", stragegy.getClass().getName());
-            vm.put("text", stragegy.getClass().getName());
+			String clz = stragegy.getClass().getName();
+            vm.put("value", clz);
+            vm.put("text", stragegy.getClass().getSimpleName());
+            if(generalSettings.getStrategyPid().equals(clz)) {
+                vm.put("selected", true);
+            }
 
             lst.add(new ValueMapResource(resourceResolver, new ResourceMetadata(), "nt:unstructured", vm));
         }

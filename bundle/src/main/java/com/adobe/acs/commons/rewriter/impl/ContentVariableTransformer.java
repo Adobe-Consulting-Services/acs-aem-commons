@@ -76,6 +76,7 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
                                 (String) ContentVariableReplacementUtil.getValue(contentVariableReplacements, key);
                         String newAttrValue = ContentVariableReplacementUtil.doReplacement(currentAttribute, key,
                                 replaceValue, propertyConfigService.getAction(key));
+                        currentAttribute = newAttrValue;
                         newAttrs.setValue(i, newAttrValue);
                     }
                 }

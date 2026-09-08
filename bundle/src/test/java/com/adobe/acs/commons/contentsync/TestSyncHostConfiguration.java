@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import static com.adobe.acs.commons.contentsync.ConfigurationUtils.HOSTS_PATH;
-import static junitx.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -68,5 +68,16 @@ public class TestSyncHostConfiguration {
         assertEquals("admin", configuration.getPassword());
         verify(crypto, times(1)).isProtected(captor.capture());
         verify(crypto, times(1)).unprotect(captor.capture());
+    }
+
+    @Test
+    public void testIsAuthEnabled() {
+        configPath = HOSTS_PATH + "/host2";
+        SyncHostConfiguration oauthConfiguration = getConfiguration("host", "http://localhost:4502", "authType", "oauth");
+        assertEquals(true, oauthConfiguration.isOAuthEnabled());
+
+        configPath = HOSTS_PATH + "/host3";
+        SyncHostConfiguration basicConfiguration = getConfiguration("host", "http://localhost:4502", "authType", "basic");
+        assertEquals(false, basicConfiguration.isOAuthEnabled());
     }
 }

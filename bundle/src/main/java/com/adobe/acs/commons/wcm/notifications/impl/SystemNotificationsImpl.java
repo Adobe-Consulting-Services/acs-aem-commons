@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -139,6 +139,11 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             // If no notifications folder or no active notifications; do not inject JS
             return false;
         }
+
+        // Do not apply when exporting / updating experience fragments to Adobe Target
+		if (StringUtils.contains(slingRequest.getQueryString(), "wcmmode=disabled")) {
+			return false;
+		}
 
         return super.accepts(servletRequest, servletResponse);
     }

@@ -17,19 +17,19 @@
  */
 package com.adobe.acs.commons.granite.ui.components.impl.include;
 
-import com.adobe.granite.ui.components.ExpressionResolver;
-import com.adobe.granite.ui.components.FilteringResourceWrapper;
-import org.apache.commons.collections.iterators.FilterIterator;
-import org.apache.commons.collections.iterators.TransformIterator;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
-
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
+
+import org.apache.commons.collections4.iterators.FilterIterator;
+import org.apache.commons.collections4.iterators.TransformIterator;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.jetbrains.annotations.NotNull;
+
+import com.adobe.granite.ui.components.ExpressionResolver;
+import com.adobe.granite.ui.components.FilteringResourceWrapper;
 
 
 public class NamespaceResourceWrapper extends FilteringResourceWrapper {
@@ -41,9 +41,12 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
 
     private final ValueMap valueMap;
 
-    public NamespaceResourceWrapper(@Nonnull Resource resource, @Nonnull ExpressionResolver expressionResolver,
-                                    @Nonnull SlingHttpServletRequest request,
-                                    String[] namespacedProperties) {
+    private boolean copyToplevelProperties;
+
+    public NamespaceResourceWrapper(@NotNull Resource resource, @NotNull ExpressionResolver expressionResolver,
+                                    @NotNull SlingHttpServletRequest request,
+                                    String[] namespacedProperties,
+                                    boolean copyToplevelProperties) {
         super(resource, expressionResolver, request);
         this.expressionResolver = expressionResolver;
         this.request = request;
@@ -51,7 +54,9 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
                 .map(array -> Arrays.copyOf(array, array.length))
                 .orElse(new String[0]);
 
-        valueMap = new NamespaceDecoratedValueMapBuilder(request, resource, namespacedProperties).build();
+        this.copyToplevelProperties = copyToplevelProperties;
+
+        valueMap = new NamespaceDecoratedValueMapBuilder(request, resource, namespacedProperties,copyToplevelProperties).build();
     }
 
     @Override
@@ -62,7 +67,7 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
             return null;
         }
 
-        NamespaceResourceWrapper wrapped =new NamespaceResourceWrapper(child, expressionResolver, request,namespacedProperties);
+        NamespaceResourceWrapper wrapped =new NamespaceResourceWrapper(child, expressionResolver, request, namespacedProperties, copyToplevelProperties);
 
         if(!isVisible(wrapped)){
             return null;
@@ -75,8 +80,8 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
     public Iterator<Resource> listChildren() {
         return new TransformIterator(
                 new FilterIterator(super.listChildren(),
-                        o -> isVisible(new NamespaceResourceWrapper((Resource) o, expressionResolver, request,namespacedProperties))),
-                        o -> new NamespaceResourceWrapper((Resource) o, expressionResolver, request,namespacedProperties)
+                        o -> isVisible(new NamespaceResourceWrapper((Resource) o, expressionResolver, request, namespacedProperties, copyToplevelProperties))),
+                        o -> new NamespaceResourceWrapper((Resource) o, expressionResolver, request, namespacedProperties, copyToplevelProperties)
         );
     }
 

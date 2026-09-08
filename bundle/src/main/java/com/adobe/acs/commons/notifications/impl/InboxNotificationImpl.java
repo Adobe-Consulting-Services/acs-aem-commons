@@ -18,7 +18,7 @@
 package com.adobe.acs.commons.notifications.impl;
 
 import com.adobe.acs.commons.notifications.InboxNotification;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 

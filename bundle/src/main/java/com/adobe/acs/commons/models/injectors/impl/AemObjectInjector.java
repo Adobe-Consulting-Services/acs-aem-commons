@@ -17,6 +17,11 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
+import com.adobe.granite.asset.api.AssetManager;
+import com.day.cq.commons.Externalizer;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.tagging.TagManager;
+import com.day.cq.wcm.api.policies.ContentPolicyManager;
 import org.apache.sling.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -34,27 +39,14 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
-import com.adobe.acs.commons.i18n.I18nProvider;
 import com.adobe.acs.commons.models.injectors.annotation.AemObject;
-import com.day.cq.i18n.I18n;
 
 import javax.jcr.Session;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getComponentContext;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getCurrentDesign;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getCurrentPage;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getCurrentStyle;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getDesigner;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getPageManager;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResource;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResourceDesign;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResourcePage;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResourceResolver;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getSession;
-import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getXssApi;
+import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.*;
 import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericParam;
 
 /**
@@ -145,10 +137,23 @@ public final class AemObjectInjector implements Injector {
             return resolveXssApi(adaptable);
         case LOCALE:
             return resolveLocale(adaptable);
+        case TAG_MANAGER:
+            return adaptFromResourceResolver(adaptable, TagManager.class);
+        case ASSET_MANAGER:
+            return adaptFromResourceResolver(adaptable, AssetManager.class);
+        case ASSET_MANAGER_OLD:
+            return adaptFromResourceResolver(adaptable, com.day.cq.dam.api.AssetManager.class);
+        case QUERY_BUILDER:
+            return adaptFromResourceResolver(adaptable, QueryBuilder.class);
+        case CONTENT_POLICY_MANAGER:
+            return adaptFromResourceResolver(adaptable,ContentPolicyManager.class);
+        case EXTERNALIZER:
+            return adaptFromResourceResolver(adaptable, Externalizer.class);
         default:
             return null;
         }
     }
+
 
     private Object resolveLocale(Object adaptable) {
         final Page page = getResourcePage(adaptable);
@@ -190,6 +195,12 @@ public final class AemObjectInjector implements Injector {
         CURRENT_STYLE,
         SESSION,
         LOCALE,
+        TAG_MANAGER,
+        QUERY_BUILDER,
+        CONTENT_POLICY_MANAGER,
+        ASSET_MANAGER,
+        ASSET_MANAGER_OLD,
+        EXTERNALIZER,
         XSS_API;
 
         private static final String RESOURCE_PAGE_STRING = "resourcePage";
@@ -203,6 +214,8 @@ public final class AemObjectInjector implements Injector {
                 return ObjectType.RESOURCE_RESOLVER;
             } else if (classOrGenericParam.isAssignableFrom(ComponentContext.class)) {
                 return ObjectType.COMPONENT_CONTEXT;
+            } else if (classOrGenericParam.isAssignableFrom(TagManager.class)) {
+                return ObjectType.TAG_MANAGER;
             } else if (classOrGenericParam.isAssignableFrom(PageManager.class)) {
                 return ObjectType.PAGE_MANAGER;
             } else if (classOrGenericParam.isAssignableFrom(Page.class)) {
@@ -219,6 +232,16 @@ public final class AemObjectInjector implements Injector {
                 return ObjectType.XSS_API;
             } else if(classOrGenericParam.isAssignableFrom(Locale.class)){
                 return ObjectType.LOCALE;
+            } else if(classOrGenericParam.isAssignableFrom(AssetManager.class)){
+                return ObjectType.ASSET_MANAGER;
+            } else if(classOrGenericParam.isAssignableFrom(com.day.cq.dam.api.AssetManager.class)){
+                return ObjectType.ASSET_MANAGER_OLD;
+            } else if(classOrGenericParam.isAssignableFrom(QueryBuilder.class)){
+                return ObjectType.QUERY_BUILDER;
+            } else if(classOrGenericParam.isAssignableFrom(ContentPolicyManager.class)){
+                return ObjectType.CONTENT_POLICY_MANAGER;
+            } else if(classOrGenericParam.isAssignableFrom(Externalizer.class)){
+                return ObjectType.EXTERNALIZER;
             }
 
             return null;

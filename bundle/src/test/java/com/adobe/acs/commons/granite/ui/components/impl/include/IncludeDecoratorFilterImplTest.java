@@ -37,13 +37,13 @@ import java.lang.annotation.Annotation;
 
 import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE;
 import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.REQ_ATTR_NAMESPACE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IncludeDecoratorFilterImplTest {
 
+    public static final String IGNORE_CHILDREN_RESOURCE_TYPE = "ignore/children/resource/type";
     @Mock
     FilterChain filterChain;
 
@@ -69,7 +69,7 @@ public class IncludeDecoratorFilterImplTest {
 
             @Override
             public String[] resourceTypesIgnoreChildren() {
-                return new String[]{"ignore/children/resource/type"};
+                return new String[]{IGNORE_CHILDREN_RESOURCE_TYPE};
             }
         });
 
@@ -98,7 +98,7 @@ public class IncludeDecoratorFilterImplTest {
         Mockito.doAnswer(invocationOnMock -> {
 
             SlingHttpServletRequest captured = invocationOnMock.getArgument(0, SlingHttpServletRequest.class);
-            assertEquals("ignore/children/resource/type", captured.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE));
+            assertEquals(IGNORE_CHILDREN_RESOURCE_TYPE, captured.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE));
             return null;
 
         }).when(filterChain).doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
@@ -107,6 +107,26 @@ public class IncludeDecoratorFilterImplTest {
         systemUnderTest.doFilter(context.request(), context.response(), filterChain);
 
         assertTrue("namespace is removed after the filter is performed", context.request().getAttribute(REQ_ATTR_NAMESPACE) == null);
+    }
+
+    @Test
+    public void test_ignored_types_reactivate() throws IOException, ServletException {
+
+        Mockito.doAnswer(invocationOnMock -> {
+
+            SlingHttpServletRequest captured = invocationOnMock.getArgument(0, SlingHttpServletRequest.class);
+            assertEquals("block1", captured.getAttribute(REQ_ATTR_NAMESPACE));
+            assertNull(captured.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE));
+            return null;
+
+        }).when(filterChain).doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        context.request().setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, IGNORE_CHILDREN_RESOURCE_TYPE);
+        context.request().setAttribute(REQ_ATTR_NAMESPACE, "nested");
+        systemUnderTest.doFilter(context.request(), context.response(), filterChain);
+
+        assertEquals("nested", context.request().getAttribute(REQ_ATTR_NAMESPACE));
+        assertEquals(IGNORE_CHILDREN_RESOURCE_TYPE, context.request().getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE));
     }
 
     @Test

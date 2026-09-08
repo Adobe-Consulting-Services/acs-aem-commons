@@ -56,16 +56,25 @@ public class RedirectConfiguration {
 
     private RedirectConfiguration(){
         pathRules = new LinkedHashMap<>();
+        caseInsensitiveRules = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         patternRules = new LinkedHashMap<>();
     }
 
     public RedirectConfiguration(Resource resource, String storageSuffix) {
-        pathRules = new LinkedHashMap<>();
-        caseInsensitiveRules = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        patternRules = new LinkedHashMap<>();
-        path = resource.getPath();
+        this(resource, storageSuffix, true);
+    }
+
+    RedirectConfiguration(Resource configResource, String storageSuffix, boolean loadRules) {
+        this();
+        path = configResource.getPath();
         name = path.replace("/" + storageSuffix, "");
-        Collection<RedirectRule> rules = RedirectFilter.getRules(resource);
+        if(loadRules){
+            loadRules(configResource);
+        }
+    }
+
+    void loadRules(Resource configResource) {
+        Collection<RedirectRule> rules = RedirectFilter.getRules(configResource);
         for (RedirectRule rule : rules) {
             if (rule.getRegex() != null) {
                 patternRules.put(rule.getRegex(), rule);
@@ -84,7 +93,6 @@ public class RedirectConfiguration {
     /**
      * @return resource path without .html extension
      */
-
     public static String normalizePath(String resourcePath) {
         int sep = resourcePath.lastIndexOf('.');
         if (sep != -1 && !resourcePath.startsWith("/content/dam/")) {
@@ -160,11 +168,12 @@ public class RedirectConfiguration {
             match = new RedirectMatch(rule, null);
         } else {
             for (Map.Entry<Pattern, RedirectRule> entry : getPatternRules().entrySet()) {
-                boolean evaluateURI = entry.getValue().getEvaluateURI();
+                RedirectRule regexRule = entry.getValue();
+                boolean evaluateURI = regexRule.getEvaluateURI();
                 String pathToEvaluate = determinePathToEvaluate(normalizedPath, evaluateURI, request);
-                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefix, entry.getValue().isCaseInsensitive());
+                Matcher m = getRuleMatch(entry.getKey(), pathToEvaluate, contextPrefix, regexRule.isCaseInsensitive(), regexRule.getContextPrefixIgnored());
                 if (m.matches()) {
-                    match = new RedirectMatch(entry.getValue(), m);
+                    match = new RedirectMatch(regexRule, m);
                     break;
                 }
             }
@@ -179,8 +188,8 @@ public class RedirectConfiguration {
      * @param contextPrefix the optional context prefix
      * @return the matcher associated with the rule
      */
-    private Matcher getRuleMatch(Pattern rulePattern, String pathToEvaluate, String contextPrefix, boolean nc) {
-        if("".equals(contextPrefix)) {
+    private Matcher getRuleMatch(Pattern rulePattern, String pathToEvaluate, String contextPrefix, boolean nc, boolean contextPrefixIgnored) {
+        if(contextPrefixIgnored || "".equals(contextPrefix)) {
             return rulePattern.matcher(pathToEvaluate);
         } else {
             //we add the context prefix to the pattern since a pattern might be too broad otherwise,
@@ -216,6 +225,10 @@ public class RedirectConfiguration {
                     rule = getPathRule(normalizedPath.replace(contextPrefix, ""));
                 } else {
                     rule = getPathRule(contextPrefix + normalizedPath);
+                }
+                // A contextPrefixIgnored rule must match its source exactly — not via prefix manipulation
+                if(rule != null && rule.getContextPrefixIgnored()) {
+                    return null;
                 }
             }
             return rule;

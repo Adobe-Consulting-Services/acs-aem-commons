@@ -22,13 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class TagReportCellCSVExporter implements ReportCellCSVExporter {
   @OSGiService
   private DelimiterConfiguration delimiterConfiguration;
 
-  @Inject
+  @ValueMapValue
   private String property;
 
   public TagReportCellCSVExporter() {}

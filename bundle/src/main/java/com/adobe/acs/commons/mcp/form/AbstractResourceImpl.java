@@ -76,8 +76,12 @@ public class AbstractResourceImpl extends AbstractResource {
             properties = new HashMap<>();
         }
 
-        properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
-        properties.put(JcrResourceConstants.SLING_RESOURCE_SUPER_TYPE_PROPERTY, resourceSuperType);
+        if (resourceType != null) {
+            properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
+        }
+        if (resourceSuperType != null) {
+            properties.put(JcrResourceConstants.SLING_RESOURCE_SUPER_TYPE_PROPERTY, resourceSuperType);
+        }
 
         this.properties = new ValueMapDecorator(properties);
     }

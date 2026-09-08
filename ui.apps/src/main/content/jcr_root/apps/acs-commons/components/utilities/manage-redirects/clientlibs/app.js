@@ -115,15 +115,18 @@
       $.ajax({
         url: redirectPath + ".html"
       }).done(function (trHtml) {
+        var tr;
         if (response.isCreate) {
           var editRedirectTable = $(TABLE_SELECTOR);
-          var tr = editRedirectTable
+          tr = editRedirectTable
             .find("tbody")[0]
             .appendChild(document.createElement("tr"));
-          $(tr).replaceWith(trHtml);
+          tr.id = redirectId;
+          tr.dataset.path = redirectPath;
         } else {
-          $("#" + redirectId).replaceWith(trHtml);
+          tr = $("#" + redirectId)[0];
         }
+        tr.innerHTML = trHtml;
         var ui = $(window).adaptTo("foundation-ui");
         ui.clearWait();
       });
@@ -181,6 +184,8 @@
     var tags = tr.find(".tags").data("value");
     var cacheControlHeader = tr.find(".cacheControlHeader").data("value");
     var caseInsensitive = tr.find(".source").data("case-insensitive");
+    var preserveQueryString = tr.find(".target").data("preserve-query-string");
+    var matchType = tr.find(".source").data("match-type");
 
     var form = $("#editRuleDialog").find("form");
     form[0].reset();
@@ -194,7 +199,9 @@
         .adaptTo("foundation-field")
         .setValues(tags.split(","));
     var select = $("#status-code-select-box").get(0);
-    select.value = statusCode;
+    select.value = "" + statusCode;
+    var matchTypeSelect = $("#match-type-select-box").get(0);
+    matchTypeSelect.value = matchType;
     form.find('coral-datepicker[name="./untilDate"]').val(untilDate);
     form.find('coral-datepicker[name="./effectiveFrom"]').val(effectiveFrom);
     form.find('input[name="./note"]').val(note);
@@ -214,6 +221,7 @@
     evalURI.click(function () {
       evalURI.val(evalURI.is(":checked"));
     });
+    $("#preserve-query-string-select-box").get(0).value = preserveQueryString;
 
     cpi.click(function () {
       cpi.val(cpi.is(":checked"));
@@ -273,13 +281,18 @@
 
     var $form = $(this).closest("form");
     var data = new FormData($form[0]);
+    var ui = $(window).adaptTo("foundation-ui");
+    ui.wait();
     $.ajax({
       url: $form.attr("action"),
       type: "POST",
       data: new FormData($form[0]),
       processData: false,
       contentType: false
+    }).fail(function (response) {
+        ui.clearWait();
     }).done(function (response) {
+        ui.clearWait();
       var isErr = response.log.length;
       if (response.log.length) {
         var maxItems = 10;
@@ -343,28 +356,93 @@
     first.attr("selected", "");
     $(".coral-panel-stack").show();
 
-    $("#redirect-search-box").bind("keyup keydown change", function (e) {
-      var searchText = $(this).val();
-      var editRedirectTable = $("#edit-redirect-coral-table");
-      var rows = editRedirectTable.find("tr");
-      $.each(rows, function (rowIndex, row) {
-        var source = $(row).find(".source").data("value");
-        var target = $(row).find(".target").data("value");
-        var comment = $(row).find(".note").data("value");
-        if (
-          (source &&
-            source.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
-          (target &&
-            target.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
-          (comment &&
-            comment.toLowerCase().indexOf(searchText.toLowerCase()) != -1)
-        ) {
-          $(row).show();
-        } else {
-          if (rowIndex > 0) $(row).hide();
-        }
-      });
+    var searching = false;
+    var searchTimeout;
+
+  $("#redirect-search-box").on("input", function (e) {
+      var searchText = $(this).val().trim();
+      var caconfig = $("input[name='caconfig']").val();
+      var supportsFulltextSearch = $("input[name='fulltextSearchEnabled']").val() === "true";
+
+      if (supportsFulltextSearch) {
+          var swap = $("#swap");
+          var table = $("#edit-redirect-coral-table");
+          var tbody = table.find("tbody");
+          var tableFooter = $("#table-footer");
+          var mode = table.data("mode") || "browse"; // Default mode is 'browse'
+
+          // Clear previous timeout if it exists
+          clearTimeout(searchTimeout);
+
+          // Set a new timeout to trigger search after 2 seconds of inactivity
+          searchTimeout = setTimeout(function () {
+              if (searchText !== "") {
+                  if (searching) { return; } // If a search is already in progress, do nothing
+                  searching = true; // Set searching flag to true
+                  table.removeAttr("orderable");
+
+                   var url = "/apps/acs-commons/content/redirect-manager.search.html" + caconfig + "?term=" + encodeURIComponent(searchText);
+                  // Perform AJAX request for search
+                  $.ajax(url).done(function (response) {
+                      searching = false; // Reset searching flag once search is complete
+
+                      tableFooter.hide();
+
+                      if (mode !== "search") {
+                          // Save the browse rows and display search results
+                          swap.html(tbody.html());
+                      }
+
+                      table.data("mode", "search");
+                      tbody.html(response);
+
+                      if (tbody.children().length === 0) {
+                        tbody.append(EMPTY_ROW);
+                      }
+
+                  });
+              } else if (mode !== "browse") {
+                  // If search text is empty and mode is not 'browse', switch back to browse mode
+                  tbody.html(swap.html());
+                  swap.html("");
+                  table.data("mode", "browse");
+                  table.attr("orderable", true);
+
+                  tableFooter.show();
+
+                  if (tbody.children().length === 0) {
+                    tbody.append(EMPTY_ROW);
+                  }
+              }
+
+          }, 150); // in ms
+      } else {
+          var editRedirectTable = $("#edit-redirect-coral-table");
+          var rows = editRedirectTable.find("tr");
+          $.each(rows, function (rowIndex, row) {
+            var source = $(row).find(".source").data("value");
+            var target = $(row).find(".target").data("value");
+            var comment = $(row).find(".note").data("value");
+            if (
+              (source &&
+                source.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
+              (target &&
+                target.toLowerCase().indexOf(searchText.toLowerCase()) != -1) ||
+              (comment &&
+                comment.toLowerCase().indexOf(searchText.toLowerCase()) != -1)
+            ) {
+              $(row).show();
+            } else {
+              if (rowIndex > 0) $(row).hide();
+            }
+          });
+      }
     });
+
+    var EMPTY_ROW =
+      '<tr is="coral-table-row" class="empty-row">' +
+        '<td is="coral-table-cell" colspan="14" style="text-align: center;">No redirect rules match this search.</td>' +
+      '</tr>';
 
     $("#status-code-select-box").change(function (e) {
       var val = $(e.target).find(":selected").val();
@@ -389,6 +467,50 @@
     e.preventDefault();
     var dialog = document.querySelector("#createDialog");
     dialog.show();
+  });
+
+  $(document).on("click", ".delete-configuration-btn", function (e) {
+    e.preventDefault();
+    var configPath = $(this).data("path");
+    var configName = $(this).data("name");
+
+    var dialog = new Coral.Dialog().set({
+      header: { innerHTML: "Delete Redirect Rules" },
+      content: { innerHTML: "Are you sure you want to delete all redirect rules in <strong>" + configName +
+           "</strong>? This action cannot be undone." },
+      footer: { innerHTML:
+          '<button is="coral-button" variant="default" coral-close>Cancel</button>' +
+          '<button is="coral-button" variant="warning" class="confirm-delete-config">Delete</button>' },
+      variant: "warning",
+      closable: "on"
+    });
+    document.body.appendChild(dialog);
+    dialog.show();
+
+    $(dialog).find(".confirm-delete-config").one("click", function () {
+      $.ajax({
+        url: configPath,
+        type: "POST",
+        data: { ":operation": "delete" },
+        async: false
+      }).done(function () {
+        dialog.hide();
+        location.reload(true);
+      }).fail(function (xhr) {
+        dialog.hide();
+        var msg = xhr.responseJSON && xhr.responseJSON.message ?
+            xhr.responseJSON.message : "Unexpected error";
+        var errDialog = new Coral.Dialog().set({
+          header: { innerHTML: "Delete Failed" },
+          content: { innerHTML: msg },
+          footer: { innerHTML: '<button is="coral-button" variant="primary" coral-close>OK</button>' },
+          variant: "error",
+          closable: "on"
+        });
+        document.body.appendChild(errDialog);
+        errDialog.show();
+      });
+    });
   });
 
   $(document).on("click", ".caconfig-configuration-submit", function (e) {

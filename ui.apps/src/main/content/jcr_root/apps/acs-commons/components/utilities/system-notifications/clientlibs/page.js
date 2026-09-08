@@ -18,18 +18,24 @@
  * #L%
  */
 
-$(function() { 
-    $('.fn-acsCommons-Notifications-save').click(function(event) {
-        var $form;
-        
-        event.stopPropagation();
+$(function() {
+     $('[data-fn-acs-commons-system-notification-cancel]').click(function(event) {
+        var url = $(this).attr('data-fn-acs-commons-system-notification-cancel');
         event.preventDefault();
+        event.stopPropagation();
 
-        $form = $('#fn-acsCommons-Notifications-form');
+        window.location.href = url;
 
-        $.post($form.attr('action'), $form.serialize(), function() {
-           location.reload(true);
+     });
+
+    $('[data-fn-acs-commons-system-notification-form]').submit(function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        $.post($(this).attr('action'), $(this).serialize(), function() {
+            $('body').fadeOut(500, function() {
+              location.reload(true);
+           });
         });
-
     });
 });

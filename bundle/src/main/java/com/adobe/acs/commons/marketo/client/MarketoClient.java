@@ -20,9 +20,8 @@ package com.adobe.acs.commons.marketo.client;
 import java.io.IOException;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.jetbrains.annotations.NotNull;
 
 import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
 
@@ -38,14 +37,14 @@ public interface MarketoClient {
      * @return a valid Marketo API Token
      * @throws IOException an error occurs retrieving the token
      */
-    public @Nonnull String getApiToken(@Nonnull MarketoClientConfiguration config) throws MarketoApiException;
+    public @NotNull String getApiToken(@NotNull MarketoClientConfiguration config) throws MarketoApiException;
 
     /**
      * Retrieve a HttpClient for interacting with the Marketo API
      * 
      * @return the httpclient
      */
-    public @Nonnull CloseableHttpClient getHttpClient();
+    public @NotNull CloseableHttpClient getHttpClient();
 
     /**
      * Retrieve all of the available forms from the current organization in Marketo.
@@ -54,7 +53,7 @@ public interface MarketoClient {
      * @return the full list of available forms
      * @throws IOException an exception occurs interacting with the API
      */
-    public @Nonnull List<MarketoForm> getForms(@Nonnull MarketoClientConfiguration config) throws MarketoApiException;
+    public @NotNull List<MarketoForm> getForms(@NotNull MarketoClientConfiguration config) throws MarketoApiException;
 
     /**
      * Retrieve all of the available forms from the current organization in Marketo.
@@ -63,6 +62,6 @@ public interface MarketoClient {
      * @return the full list of available forms
      * @throws IOException an exception occurs interacting with the API
      */
-    public @Nonnull List<MarketoField> getFields(@Nonnull MarketoClientConfiguration config) throws MarketoApiException;
+    public @NotNull List<MarketoField> getFields(@NotNull MarketoClientConfiguration config) throws MarketoApiException;
 
 }

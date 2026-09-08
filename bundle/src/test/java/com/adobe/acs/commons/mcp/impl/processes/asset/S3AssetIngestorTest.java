@@ -33,14 +33,13 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

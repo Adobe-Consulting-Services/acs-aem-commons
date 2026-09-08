@@ -31,6 +31,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ import java.util.Map;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = { "POST" },
+        methods = { HttpConstants.METHOD_POST },
         resourceTypes = { "acs-commons/components/utilities/packager/query-packager" },
         selectors = { "package" },
         extensions = { "json" }

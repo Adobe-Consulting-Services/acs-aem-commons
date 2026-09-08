@@ -130,4 +130,10 @@ public interface ErrorPageHandlerService {
      * @return true if check is enabled else false
      */
     boolean isVanityDispatchCheckEnabled();
+
+    /**
+     * @param request The request
+     * @return True if the service should be used for this service/ False if it should not 
+     */
+    public boolean shouldRequestUseErrorPageHandler(SlingHttpServletRequest request);
 }

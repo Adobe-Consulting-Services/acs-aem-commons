@@ -20,7 +20,7 @@ package com.adobe.acs.commons.httpcache.config.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;

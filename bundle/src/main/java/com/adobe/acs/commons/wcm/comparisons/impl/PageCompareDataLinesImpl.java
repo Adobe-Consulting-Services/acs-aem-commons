@@ -24,8 +24,8 @@ import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
 import com.google.common.base.Function;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
 

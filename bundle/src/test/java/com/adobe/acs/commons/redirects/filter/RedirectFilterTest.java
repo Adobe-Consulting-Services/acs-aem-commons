@@ -19,6 +19,7 @@ package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.RedirectResourceBuilder;
+import com.adobe.acs.commons.redirects.models.HandleQueryString;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
 import com.adobe.acs.commons.redirects.models.Redirects;
@@ -35,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.management.openmbean.TabularData;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -42,9 +44,9 @@ import org.apache.http.Header;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
@@ -52,6 +54,8 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -64,6 +68,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class RedirectFilterTest {
@@ -78,22 +84,18 @@ public class RedirectFilterTest {
     private String redirectStoragePath = RedirectResourceBuilder.DEFAULT_CONF_PATH;
 
     private String[] contentRoots = new String[]{
-            "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail"};
+            "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail", "/en"};
 
     @Before
     public void setUp() throws Exception {
         context.addModelsForClasses(RedirectRule.class);
         filter = spy(new RedirectFilter());
-        ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
-        when(resourceResolverFactory.getServiceResourceResolver(any(Map.class)))
-                .thenReturn(context.resourceResolver());
-        filter.resourceResolverFactory = resourceResolverFactory;
 
         configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.paths()).thenReturn(contentRoots);
-        when(configuration.additionalHeaders()).thenReturn(new String[]{"Expires: 12345", "Invalid"});
+        when(configuration.additionalHeaders()).thenReturn(new String[]{"Expires: 12345", "Cache-Control: max-age=1", "Invalid"});
         when(configuration.bucketName()).thenReturn("settings");
         when(configuration.configName()).thenReturn("redirects");
         when(configuration.preserveExtension()).thenReturn(true);
@@ -119,13 +121,38 @@ public class RedirectFilterTest {
         filter.configResolver = configResolver;
     }
 
+
+    private MockSlingHttpServletResponse navigate(String resourcePath, String selectorString, String extension) throws IOException, ServletException {
+        StringBuilder pathBuilder = new StringBuilder(resourcePath);
+        if(selectorString != null) {
+            pathBuilder.append(".").append(selectorString);
+        }
+        if(extension != null) {
+            pathBuilder.append(".").append(extension);
+        }
+        String requestPath = pathBuilder.toString();
+
+        context.requestPathInfo().setResourcePath(requestPath);
+        context.requestPathInfo().setSelectorString(selectorString);
+        context.requestPathInfo().setExtension(extension);
+        Resource resource = new NonExistingResource(context.resourceResolver(), requestPath);
+        resource.getResourceMetadata().put("sling.resolutionPathInfo", "." + selectorString + "." + extension);
+        MockSlingHttpServletRequest request = context.request();
+        request.setResource(resource);
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+        filter.doFilter(request, response, filterChain);
+        filter.doFilter(request, response, filterChain);
+
+        return response;
+    }
+
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
         MockSlingHttpServletRequest request = context.request();
         int idx = resourcePath.lastIndexOf('.');
-        if (idx > 0) {
-            context.requestPathInfo().setExtension(resourcePath.substring(idx + 1));
-        }
         int qs = resourcePath.lastIndexOf('?');
+        if (idx > 0) {
+            context.requestPathInfo().setExtension(resourcePath.substring(idx + 1, qs == -1 ? resourcePath.length() : qs));
+        }
         if (qs > 0) {
             request.setQueryString(resourcePath.substring(qs + 1));
         }
@@ -178,7 +205,7 @@ public class RedirectFilterTest {
         assertEquals(new HashSet<>(Arrays.asList(contentRoots)), new HashSet<>(filter.getPaths()));
         assertEquals(Arrays.asList("GET", "HEAD"), new ArrayList<>(filter.getMethods()));
         List<Header> headers = filter.getOnDeliveryHeaders();
-        assertEquals(1, headers.size());
+        assertEquals(2, headers.size());
         Header header = headers.iterator().next();
         assertEquals("Expires", header.getName());
         assertEquals("12345", header.getValue());
@@ -329,6 +356,23 @@ public class RedirectFilterTest {
     }
 
     @Test
+    public void testMaliciousUriDoesNotThrow() throws Exception {
+        when(filter.mapUrls()).thenReturn(true);
+        withRules(
+            new RedirectResourceBuilder(context)
+                    .setSource("/en/one")
+                    .setTarget("/en/two")
+                    .setStatusCode(302).build()
+        );
+        // Malicious URL decoded by Sling contains an illegal URI character (#),
+        // simulating a command-injection attempt (issue #3757).
+        MockSlingHttpServletResponse response = navigate(
+                "/content/we-retail/en/page%7cecho%20qaohyb$()/%20umdyjo/nz%5exyu%7c%7ca%20%23.html");
+        assertEquals(200, response.getStatus());
+        verify(filterChain).doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+    }
+
+    @Test
     public void testNavigateNoRewrite() throws Exception {
         withRules(
             new RedirectResourceBuilder(context)
@@ -346,20 +390,172 @@ public class RedirectFilterTest {
     }
 
     @Test
-    public void testPreserveQueryString() throws Exception {
-        withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build()
-        );
+    public void testPreserveQueryString() {
 
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2");
+        // Test combining query strings (combine = true)
+        assertEquals("/path?a=1&b=2",
+            filter.preserveQueryString("/path?a=1", "b=2", true));
+
+        // Test replacing query strings (combine = false)
+        assertEquals("/path?b=2",
+            filter.preserveQueryString("/path?a=1", "b=2", false));
+
+        // Test with fragment - combining
+        assertEquals("/path?a=1&b=2#section",
+            filter.preserveQueryString("/path?a=1#section", "b=2", true));
+
+        // Test with fragment - replacing
+        assertEquals("/path?b=2#section",
+            filter.preserveQueryString("/path?a=1#section", "b=2", false));
+
+        // Test empty request query - combining
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", "", true));
+
+        // Test empty request query - replacing (should keep original)
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", "", false));
+
+        // Test null request query - combining
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", null, true));
+
+        // Test null request query - replacing (should keep original)
+        assertEquals("/path?a=1",
+            filter.preserveQueryString("/path?a=1", null, false));
+
+        // Test complex combining
+        assertEquals("/path?a=1&b=2&c=3&d=4",
+            filter.preserveQueryString("/path?a=1&b=2", "c=3&d=4", true));
+
+        // Test complex replacing
+        assertEquals("/path?c=3&d=4",
+            filter.preserveQueryString("/path?a=1&b=2", "c=3&d=4", false));
+
+        // Test with fragment and multiple parameters - combining
+        assertEquals("/path?a=1&b=2&c=3#section",
+            filter.preserveQueryString("/path?a=1&b=2#section", "c=3", true));
+
+        // Test with fragment and multiple parameters - replacing
+        assertEquals("/path?c=3#section",
+            filter.preserveQueryString("/path?a=1&b=2#section", "c=3", false));
+    }
+
+    @Test
+    public void testPreserveQueryStringConfiguration() throws Exception{
+        withRules(
+                new RedirectResourceBuilder(context)
+                        // preserve query string is not set and inherited from the OSGi configuration
+                        .setSource("/test1")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.IGNORE.name())
+                        .setSource("/test2")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.REPLACE.name())
+                        .setSource("/test3")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build(),
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
+                        .setSource("/test4")
+                        .setTarget("/content/we-retail/en/target")
+                        .setStatusCode(302).build()
+
+        );
+        Resource resource = context.resourceResolver().getResource(redirectStoragePath);
+        Map<String, RedirectRule> rules = getRules(resource).stream()
+                .collect(Collectors.toMap(RedirectRule::getSource, r -> r));
+
+        assertEquals(true, filter.getConfiguration().preserveQueryString());
+        // inherited from the OSGi configuration, see the assert above
+        assertEquals(HandleQueryString.COMBINE, filter.getPreserveQueryString(rules.get("/test1")));
+
+        assertEquals(HandleQueryString.IGNORE, filter.getPreserveQueryString(rules.get("/test2")));
+        assertEquals(HandleQueryString.REPLACE, filter.getPreserveQueryString(rules.get("/test3")));
+        assertEquals(HandleQueryString.COMBINE, filter.getPreserveQueryString(rules.get("/test4")));
+    }
+
+
+    @Test
+    public void testCombineQueryString() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target/?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
 
         assertEquals(302, response.getStatus());
-        assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+        assertEquals("/target/?source=acs-commons&release=6.11&fbclid=blah&timestamp=12345", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testCombineQueryStringAndPreserveExtension() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(true);
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.COMBINE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/target.html?source=acs-commons&release=6.11&fbclid=blah&timestamp=12345", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testReplaceQueryString() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.REPLACE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target/?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/target/?fbclid=blah&timestamp=12345", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testIgnoreQueryString() throws Exception {
+        when(configuration.preserveExtension()).thenReturn(false); // no .html extension in the Location header
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setPreserveQueryString(HandleQueryString.IGNORE.name())
+                        .setSource("/content/we-retail/source")
+                        .setTarget("/target/?source=acs-commons&release=6.11")
+                        .setStatusCode(302).build()
+        );
+        MockSlingHttpServletResponse response = navigate("/content/we-retail/source.html?fbclid=blah&timestamp=12345");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/target/?source=acs-commons&release=6.11", response.getHeader("Location"));
+    }
+
+
+    @Test
+    public void testPreserveExtensionMethod() {
+
+        // Basic extension preservation
+        assertEquals("/content/page.html",
+            filter.preserveExtension("/content/page", "html"));
+
+        // With query string
+        assertEquals("/content/page.html?param=value",
+            filter.preserveExtension("/content/page?param=value", "html"));
+
     }
 
     @Test
@@ -1031,18 +1227,62 @@ public class RedirectFilterTest {
                     .setSource("/en/one")
                     .setTarget("/content/escapedsite/en/one")
                     .setStatusCode(302)
-                    .setContextPrefixIgnored(true).build()
+                    .setContextPrefixIgnored(true).build(),
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/geometrixx/en/two")
+                        .setTarget("/content/escapedsite/en/two")
+                        .setStatusCode(302)
+                        .setContextPrefixIgnored(true).build()
         );
 
         Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
         configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
 
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+        MockSlingHttpServletResponse response;
+        //  A contextPrefixIgnored rule must match its source exactly — not via prefix manipulation
+        response = navigate("/content/geometrixx/en/one.html");
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getHeader("Location"));
 
+        // Exact path match: source /en/one matches incoming /en/one
+        response = navigate("/en/one.html");
         assertEquals(302, response.getStatus());
         assertEquals("/content/escapedsite/en/one.html", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
+
+        // matches the 2nd rule exactly;
+        response = navigate("/content/geometrixx/en/two.html");
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escapedsite/en/two.html", response.getHeader("Location"));
+
+        // does not match the 2nd rule because with contextPrefixIgnored=true the prefix must not be stripped/added to find the rule
+        response = navigate("/en/two.html");
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getHeader("Location"));
+    }
+
+    @Test
+    public void testIgnoredContextPrefixWithRegex() throws Exception {
+        withRules(
+                new RedirectResourceBuilder(context)
+                        .setSource("/en/three(.*)")
+                        .setTarget("/content/escaped/en/four")
+                        .setStatusCode(302)
+                        .setContextPrefixIgnored(true).build()
+                );
+
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_CONTEXT_PREFIX, "/content/geometrixx");
+
+        MockSlingHttpServletResponse response;
+        //  A contextPrefixIgnored rule must match its source exactly — not via prefix manipulation
+        response = navigate("/content/geometrixx/en/three/abc.html");
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getHeader("Location"));
+
+        // Exact path match: regex /en/three(.*) matches incoming /en/three/abc.html
+        response = navigate("/en/three/abc.html");
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/escaped/en/four.html", response.getHeader("Location"));
     }
 
     @Test
@@ -1052,11 +1292,6 @@ public class RedirectFilterTest {
                     .setSource("/en/one(.*)")
                     .setTarget("/en/two")
                     .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/en/three(.*)")
-                    .setTarget("/content/escaped/en/four")
-                    .setStatusCode(302)
-                    .setContextPrefixIgnored(true).build(),
             new RedirectResourceBuilder(context)
                     .setSource("/(.*)")
                     .setTarget("/content/geometrixx/en/six")
@@ -1074,13 +1309,6 @@ public class RedirectFilterTest {
         verify(filterChain, never())
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
 
-        response = navigate("/content/geometrixx/en/three.html");
-
-        assertEquals(302, response.getStatus());
-        assertEquals("/content/escaped/en/four.html", response.getHeader("Location"));
-        verify(filterChain, never())
-                .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
-
         response = navigate("/content/geometrixx/en/five.html");
 
         assertEquals(302, response.getStatus());
@@ -1089,84 +1317,64 @@ public class RedirectFilterTest {
                 .doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
     }
 
-
+    /**
+     * Default behaviour: selectors are taken into account, e.g.
+     * for the rule
+     * /content/we-retail/en/one => /content/we-retail/en/page1
+     *
+     *  /content/we-retail/en/one.html will match
+     *  and
+     *  /content/we-retail/en/one.a.b.c.html will not match because of the selectors
+     *
+     */
     @Test
-    public void testMatchSelectors() throws Exception {
+    public void testNotMatchSelectors() throws Exception {
         RedirectFilter.Configuration configuration = filter.getConfiguration();
-        when(configuration.evaluateSelectors()).thenReturn(true);
         filter.activate(configuration, context.bundleContext());
 
         withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one.mobile")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build()
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/one")
+                        .setTarget("/content/we-retail/en/page1")
+                        .setStatusCode(302).build()
         );
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, false);
 
-        // happy path: selector matched
-        assertEquals("/content/geometrixx/en/two.html",
-                navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
-
-        // no selectors
-        assertEquals(null, navigate("/content/geometrixx/en/one.html").getHeader("Location"));
-        // selector does not match the rule
-        assertEquals(null, navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+        assertEquals("/content/we-retail/en/page1.html",
+                navigate("/content/we-retail/en/one", null, "html").getHeader("Location"));
+        assertEquals(null,
+                navigate("/content/we-retail/en/one", "a.b.c", "html").getHeader("Location"));
     }
 
+    /**
+     * Ignore Selectors in the caconf is checked and selectors are ignored
+     * for the rule
+     * /content/we-retail/en/one => /content/we-retail/en/page1
+     *  both will match:
+     *  /content/we-retail/en/one.html
+     *  and
+     *  /content/we-retail/en/one.a.b.c.html
+     *
+     */
     @Test
-    public void testMatchSelectorsRegex() throws Exception {
+    public void testMatchIfSelectorsIgnored() throws Exception {
         RedirectFilter.Configuration configuration = filter.getConfiguration();
-        when(configuration.evaluateSelectors()).thenReturn(true);
         filter.activate(configuration, context.bundleContext());
 
         withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one\\.(mobile|desktop)")
-                    .setTarget("/content/geometrixx/en/two")
-                    .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/we-retail/en/home.product1/*")
-                    .setTarget("/content/we-retail/en/home.product2")
-                    .setStatusCode(302).build()
+                new RedirectResourceBuilder(context)
+                        .setSource("/content/we-retail/en/one")
+                        .setTarget("/content/we-retail/en/page1")
+                        .setStatusCode(302).build()
         );
+        Resource configResource = context.resourceResolver().getResource(redirectStoragePath);
+        configResource.adaptTo(ModifiableValueMap.class).put(Redirects.CFG_PROP_IGNORE_SELECTORS, true);
 
-        assertEquals("/content/geometrixx/en/two.html",
-                navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
-        assertEquals("/content/geometrixx/en/two.html",
-                navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
-        // unknown selector, does not match the regex
-        assertEquals(null, navigate("/content/geometrixx/en/one.unknown.html").getHeader("Location"));
-
-        assertEquals("/content/we-retail/en/home.product2.html",
-                navigate("/content/we-retail/en/home.product1/feature.html").getHeader("Location"));
-        assertEquals(null, navigate("/content/we-retail/en/home.unknown/feature.html").getHeader("Location"));
-    }
-
-
-    @Test
-    public void testSelectorsDisabled() throws Exception {
-        RedirectFilter.Configuration configuration = filter.getConfiguration();
-        when(configuration.evaluateSelectors()).thenReturn(false);
-        filter.activate(configuration, context.bundleContext());
-
-        withRules(
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one")
-                    .setTarget("/content/geometrixx/en/page1")
-                    .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one.desktop")
-                    .setTarget("/content/geometrixx/en/page1")
-                    .setStatusCode(302).build(),
-            new RedirectResourceBuilder(context)
-                    .setSource("/content/geometrixx/en/one.mobile")
-                    .setTarget("/content/geometrixx/en/page1")
-                    .setStatusCode(302).build()
-        );
-
-        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.html").getHeader("Location"));
-        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.mobile.html").getHeader("Location"));
-        assertEquals("/content/geometrixx/en/page1.html", navigate("/content/geometrixx/en/one.desktop.html").getHeader("Location"));
+        assertEquals("/content/we-retail/en/page1.html",
+                navigate("/content/we-retail/en/one", "a.b.c", "html").getHeader("Location"));
+        assertEquals("/content/we-retail/en/page1.html",
+                navigate("/content/we-retail/en/one", "a.b.c", "html").getHeader("Location"));
     }
 
     @Test
@@ -1267,7 +1475,7 @@ public class RedirectFilterTest {
     }
 
     /**
-     * Cache-Control header is configured in the contextual configuration
+     * Cache-Control header is configured in the contextual configuration (and also in the additionalHeaders)
      */
     @Test
     public void testCacheControlHeadersDefault() throws Exception {
@@ -1283,7 +1491,8 @@ public class RedirectFilterTest {
 
         MockSlingHttpServletResponse response = navigateToURI("/content/we-retail/en/page.html");
         assertEquals("/content/we-retail/en/target", response.getHeader("Location"));
-        assertEquals("no-cache", response.getHeader("Cache-Control"));
+        // the cache-control header from the additionalHeaders must be overwritten!
+        MatcherAssert.assertThat(response.getHeaders("Cache-Control"), Matchers.contains("no-cache"));
     }
 
     @Test

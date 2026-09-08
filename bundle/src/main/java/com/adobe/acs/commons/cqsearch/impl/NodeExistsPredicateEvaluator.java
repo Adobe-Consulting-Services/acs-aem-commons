@@ -21,7 +21,7 @@ import com.day.cq.search.Predicate;
 import com.day.cq.search.eval.AbstractPredicateEvaluator;
 import com.day.cq.search.eval.EvaluationContext;
 import com.day.cq.search.eval.PredicateEvaluator;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -19,8 +19,8 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import com.adobe.acs.commons.version.impl.EvolutionConfig;
 import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 

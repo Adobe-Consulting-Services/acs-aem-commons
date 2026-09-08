@@ -25,7 +25,4 @@
     href="/apps/acs-commons/content/reports.html"
     id="acs-commons__reports"
     target="_blank">
-    <granite:rendercondition
-        jcr:primaryType="nt:unstructured"
-        sling:resourceType="acs-commons/components/report-builder/rendercondition"/>
 </jcr:root>

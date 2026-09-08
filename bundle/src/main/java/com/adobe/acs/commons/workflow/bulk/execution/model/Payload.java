@@ -23,7 +23,7 @@ import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.google.gson.JsonObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;

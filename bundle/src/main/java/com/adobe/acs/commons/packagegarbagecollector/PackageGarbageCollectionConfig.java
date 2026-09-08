@@ -22,20 +22,20 @@ package com.adobe.acs.commons.packagegarbagecollector;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(name = "ACS Commons - Package Garbage Collection Configuration", description = "Used to config a package garbage collection job")
+@ObjectClassDefinition(name = "ACS Commons - Package Garbage Collection Configuration", description = "Used to config a package garbage collection job.")
 public @interface PackageGarbageCollectionConfig {
-    @AttributeDefinition(name = "Schedule", description = "Cron expression detailing when the garbage collection is run. Default runs at 02:30 every day")
+    @AttributeDefinition(name = "Schedule", description = "Cron expression detailing when the garbage collection is run. Default runs at 02:30 every day.")
     String scheduler() default "0 30 2 ? * * *";
 
-    @AttributeDefinition(name = "Package Group Name", description = "The group name of the packages to remove")
+    @AttributeDefinition(name = "Package group name", description = "The group name of the packages to remove.")
     String groupName() default "";
 
-    @AttributeDefinition(name = "Max age of package", description = "Packages older than this (in days) will be removed. Default is 60 days")
+    @AttributeDefinition(name = "Max upload age of package", description = "Packages uploaded more than the given amount of days ago will be removed. Default is 60 days.")
     int maxAgeInDays() default 60;
 
-    @AttributeDefinition(name = "Remove not installed packages", description = "Remove packages that are not installed (or have been uninstalled) and  the created date is older than maxAgeInDays. Default is false.")
+    @AttributeDefinition(name = "Remove not installed packages", description = "Remove packages that are not installed (or have been uninstalled) and the upload date is older than maxAgeInDays. Default is false.")
     boolean removeNotInstalledPackages() default false;
 
     @AttributeDefinition(name = "webconsole.configurationFactory.nameHint")
-    String webconsole_configurationFactory_nameHint() default "Package Garbage Collection - Clear packages in {groupName} older than {maxAgeInDays} days using the schedule [{scheduler}]";
+    String webconsole_configurationFactory_nameHint() default "Package Garbage Collection - Clear packages in {groupName} uploaded older than {maxAgeInDays} days using the schedule [{scheduler}]";
 }

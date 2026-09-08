@@ -26,7 +26,6 @@ import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
-import org.apache.jackrabbit.vault.packaging.VaultPackage;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -49,6 +48,7 @@ import static com.adobe.acs.commons.packagegarbagecollector.PackageGarbageCollec
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -130,14 +130,13 @@ public class PackageGarbageCollectionJobTest {
 
     JcrPackage mockPackage(Integer daysAgo, Integer lastUnpackedDaysAgo, String packageName, String name, String version) throws RepositoryException, IOException {
         JcrPackage jcrPackage = mock(JcrPackage.class);
-        VaultPackage vaultPackage = mock(VaultPackage.class);
-        when(jcrPackage.getPackage()).thenReturn(vaultPackage);
-        when(vaultPackage.getCreated()).thenReturn(getDate(daysAgo));
         Node packageNode = mock(Node.class);
         when(packageNode.getPath()).thenReturn("/etc/packages/" + packageName);
-        when(jcrPackage.getNode()).thenReturn(packageNode);
         JcrPackageDefinition definition = mock(JcrPackageDefinition.class);
         when(definition.getLastUnpacked()).thenReturn(getDate(lastUnpackedDaysAgo));
+        when(definition.getLastUnwrapped()).thenReturn(getDate(daysAgo));
+        lenient().when(definition.getCreated()).thenReturn(null);
+        when(definition.getNode()).thenReturn(packageNode);
         PackageId pid = mock(PackageId.class);
         when(pid.getName()).thenReturn(name);
         when(pid.getGroup()).thenReturn("com.acs");

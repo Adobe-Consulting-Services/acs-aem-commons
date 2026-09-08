@@ -17,53 +17,73 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.event.propertytypes.EventTopics;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Component disabler service
+ * OSGi bundle disabler service
  * <p>
- * In the AEM security checklist, there are some bundles which should be disabled in production environents.
+ * In the AEM security checklist, there are some bundles which should be disabled in production environments.
  * Whilst these bundles can be manually stopped, this component will do that as part of a deployment.  It will also
  * ensure that if they are manually started once more, then they will be immediately stopped.
  */
-@org.apache.felix.scr.annotations.Component(immediate = true, metatype = true,
-        label = "ACS AEM Commons - OSGI Bundle Disabler", description = "Disables bundles by configuration",
-        policy = ConfigurationPolicy.REQUIRE)
-@Service()
-@Property(name = "event.topics", value = { "org/osgi/framework/BundleEvent/STARTED" }, propertyPrivate = true)
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@EventTopics(value = { "org/osgi/framework/BundleEvent/STARTED"} )
+@Designate(ocd = BundleDisabler.Config.class)
 public class BundleDisabler implements EventHandler {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - OSGI Bundle Disabler", description = "Disables OSGi bundles by configuration")
+    static @interface Config {
+        @AttributeDefinition(name = "Disabled bundles", description = "The symbolic names of the bundles you want to disable", cardinality = Integer.MAX_VALUE)
+        String[] bundles();
+    }
+
+    @Component(service = ConfigAmendment.class, property = "webconsole.configurationFactory.nameHint={bundles}")
+    @Designate(factory = true, ocd = BundleDisabler.Config.class)
+    public static final class ConfigAmendment {
+        private final Config config;
+
+        @Activate
+        public ConfigAmendment(Config config) {
+            this.config = config;
+        }
+
+        public Config getConfig() {
+            return config;
+        }
+    }
 
     private static final Logger log = LoggerFactory.getLogger(BundleDisabler.class);
 
-    @Property(label = "Disabled bundles", description = "The symbolic names of the bundles you want to disable",
-            cardinality = Integer.MAX_VALUE)
-    private static final String DISABLED_BUNDLES = "bundles";
+    private final BundleContext bundleContext;
 
-    private BundleContext bundleContext;
-
-    private List<String> disabledBundles = Collections.emptyList();
+    private final Set<String> disabledBundles;
 
     @Activate
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        this.bundleContext = componentContext.getBundleContext();
-        this.disabledBundles = getDisabledBundles(properties);
+    public BundleDisabler(BundleContext bundleContext, Config config, @Reference(policyOption = ReferencePolicyOption.GREEDY) List<ConfigAmendment> configAmendments) {
+        this.bundleContext = bundleContext;
+        this.disabledBundles = new HashSet<>();
+        this.disabledBundles.addAll(Arrays.asList(config.bundles()));
+        configAmendments.stream().forEach(amendment -> disabledBundles.addAll(Arrays.asList(amendment.getConfig().bundles())));
         disableBundles();
     }
 
@@ -93,15 +113,10 @@ public class BundleDisabler implements EventHandler {
 
     private void disableBundle(final Bundle bundle) throws BundleException {
         if (isBundleStoppable(bundle) && isNotOwnBundle(bundle)) {
-            log.info("Bundle {} disabled by configuration (name={}) ",
+            log.info("Bundle {} disabled by configuration (id={}) ",
                     bundle.getSymbolicName(), bundle.getBundleId());
             bundle.stop();
         }
-    }
-
-    private List<String> getDisabledBundles(final Map<String, Object> properties) {
-        final String[] bundlesProperty = PropertiesUtil.toStringArray(properties.get(DISABLED_BUNDLES), new String[0]);
-        return Arrays.asList(PropertiesUtil.toStringArray(bundlesProperty, new String[0]));
     }
 
     private boolean isOnBundleStopList(final Bundle bundle) {

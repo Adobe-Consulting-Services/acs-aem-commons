@@ -23,7 +23,7 @@ import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
 import static org.apache.sling.jcr.resource.api.JcrResourceConstants.NT_SLING_ORDERED_FOLDER;
 import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Arrays;
 import java.util.Calendar;

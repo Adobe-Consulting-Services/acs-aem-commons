@@ -22,6 +22,6 @@
     jcr:title="Content Sync"
     jcr:description="Synchronize content between AEM instances"
     icon="sync"
-    href="/apps/acs-commons/content/contentsync.html"
+    href="/contentsync.html"
     id="acs-commons__contentsync"
     target="_blank"/>

@@ -26,7 +26,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import javax.management.NotCompliantMBeanException;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.api.resource.LoginException;

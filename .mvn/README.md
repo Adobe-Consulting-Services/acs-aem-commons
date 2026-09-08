@@ -1,0 +1,1 @@
+Used for determining [`maven.multiModuleProjectDirectory`](https://issues.apache.org/jira/browse/MNG-5786).

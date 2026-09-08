@@ -24,10 +24,7 @@
         com.adobe.acs.commons.contentsync.ConfigurationUtils
             " %><%
 
-    // ensure the settings nodes	
-	ConfigurationUtils.getSettingsResource(resourceResolver);
-
-    Resource hostsResource = ConfigurationUtils.getHostsResource(resourceResolver); 
+    Resource hostsResource = resourceResolver.getResource(ConfigurationUtils.HOSTS_PATH);
     DataSource ds = new AbstractDataSource() {
         public Iterator<Resource> iterator() {
             return new PagingIterator<Resource>(hostsResource.listChildren(), null, null);

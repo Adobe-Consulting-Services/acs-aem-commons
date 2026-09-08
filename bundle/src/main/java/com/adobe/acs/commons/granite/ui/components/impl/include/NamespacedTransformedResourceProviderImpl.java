@@ -43,17 +43,25 @@ public class NamespacedTransformedResourceProviderImpl implements NamespacedTran
                 description = "Properties that should be namespaced"
         )
         String[] properties() default {"name", "fileNameParameter", "fileReferenceParameter"};
+
+        @AttributeDefinition(
+                name = "Copy top level properties",
+                description = "Copy the top level properties of the snippets to the include node"
+        )
+        boolean copyToplevelProperties() default true;
     }
 
     @Reference
     private ExpressionResolver expressionResolver;
 
     private String[] namespacedProperties;
+    private boolean copyToplevelProperties;
 
     @Activate
     @Modified
     public void init(Config config) {
         this.namespacedProperties = config.properties();
+        this.copyToplevelProperties = config.copyToplevelProperties();
     }
 
     @Override
@@ -62,7 +70,9 @@ public class NamespacedTransformedResourceProviderImpl implements NamespacedTran
                 targetResource,
                 expressionResolver,
                 request,
-                namespacedProperties);
+                namespacedProperties,
+                copyToplevelProperties
+        );
     }
 
 }

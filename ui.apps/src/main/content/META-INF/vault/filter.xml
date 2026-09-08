@@ -2,7 +2,7 @@
 <!--
   ~ ACS AEM Commons
   ~
-  ~ Copyright (C) 2013 - 2023 Adobe
+  ~ Copyright (C) 2013 - 2024 Adobe
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -49,16 +49,33 @@
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1"/>
-        <include
-                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/dialogpublishurl(/.*)?"/>
         <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items"/>
-        <include
-                pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
+        <include pattern="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl(/.*)?"/>
     </filter>
     <filter root="/apps/settings">
         <include pattern="/apps/settings"/>
         <include pattern="/apps/settings/dam"/>
         <include pattern="/apps/settings/dam/indesign"/>
         <include pattern="/apps/settings/dam/indesign/scripts(/.*)?"/>
+    </filter>
+    <filter root="/apps/wcm">
+        <include pattern="/apps/wcm/core"/>
+        <include pattern="/apps/wcm/core/content"/>
+        <include pattern="/apps/wcm/core/content/editor"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/acs-commons_copy-publish-url-dialog(/.*)"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items/list"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items/list/items"/>
+        <include pattern="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items/list/items/acs-commons_copy-publish-url(/.*)"/>
     </filter>
 </workspaceFilter>

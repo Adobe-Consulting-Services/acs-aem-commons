@@ -23,14 +23,6 @@ import com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
-import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
-import static org.apache.sling.jcr.resource.api.JcrResourceConstants.NT_SLING_FOLDER;
 
 public class ConfigurationUtils {
     public static final String CONFIG_PATH = "/var/acs-commons/contentsync";
@@ -39,22 +31,25 @@ public class ConfigurationUtils {
 
     public static final String UPDATE_STRATEGY_KEY = "update-strategy";
     public static final String EVENT_USER_DATA_KEY = "event-user-data";
+    public static final String SO_TIMEOUT_STRATEGY_KEY = "soTimeout";
+    public static final String CONNECT_TIMEOUT_KEY = "connTimeout";
+    public static final String DISABLE_CERT_CHECK_KEY = "disableCertCheck";
+
+    public static final String DEFAULT_STRATEGY_PID = LastModifiedStrategy.class.getName();
 
     private ConfigurationUtils(){
 
     }
 
     public static Resource getSettingsResource(ResourceResolver resourceResolver) throws PersistenceException {
-        Map<String, Object> resourceProperties = new HashMap<>();
-        resourceProperties.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
-        resourceProperties.put(UPDATE_STRATEGY_KEY, LastModifiedStrategy.class.getName());
-        resourceProperties.put(EVENT_USER_DATA_KEY, "changedByPageManagerCopy");
-        return ResourceUtil.getOrCreateResource(resourceResolver, SETTINGS_PATH, resourceProperties, NT_SLING_FOLDER, true);
+        throw new RuntimeException("@Deprecated");
     }
 
     public static Resource getHostsResource(ResourceResolver resourceResolver) throws PersistenceException {
-        Map<String, Object> resourceProperties = new HashMap<>();
-        resourceProperties.put(JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
-        return ResourceUtil.getOrCreateResource(resourceResolver, HOSTS_PATH, resourceProperties, NT_SLING_FOLDER, true);
+        throw new RuntimeException("@Deprecated");
+    }
+
+    public static void persistAuditLog(ResourceResolver resourceResolver, String path, long count, String data) throws PersistenceException {
+        throw new RuntimeException("@Deprecated");
     }
 }

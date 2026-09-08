@@ -21,8 +21,6 @@ import com.adobe.acs.commons.reports.internal.DelimiterConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import com.adobe.acs.commons.reports.internal.ExporterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -31,6 +29,7 @@ import org.apache.sling.models.annotations.Optional;
 
 import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 /**
  * An exporter for exporting formatted string values
@@ -38,10 +37,10 @@ import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 @Model(adaptables = Resource.class)
 public class StringReportCellCSVExporter implements ReportCellCSVExporter {
 
-  @Inject
+  @ValueMapValue
   private String property;
 
-  @Inject
+  @ValueMapValue
   @Optional
   private String format;
 

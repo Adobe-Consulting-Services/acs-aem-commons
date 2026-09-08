@@ -17,27 +17,23 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.granite.ui.clientlibs.ClientLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
-import com.google.gson.stream.JsonWriter;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+
+import javax.servlet.ServletException;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.google.gson.stream.JsonWriter;
 
 abstract class AbstractDynamicClientLibraryServlet extends SlingSafeMethodsServlet {
 
@@ -48,7 +44,7 @@ abstract class AbstractDynamicClientLibraryServlet extends SlingSafeMethodsServl
     private boolean excludeAll;
 
     @Override
-    protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
         ResourceResolver resourceResolver = request.getResourceResolver();
         response.setContentType("application/json");
         JsonWriter writer = new JsonWriter(response.getWriter());

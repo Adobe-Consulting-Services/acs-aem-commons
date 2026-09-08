@@ -31,6 +31,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,12 +116,30 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.redirects.filter.RedirectFilter:mapUrls");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlusherImpl:service.ranking");
 
+        // These properties are not configurable OSGi config properties, they have been moved to EnsureOakIndexManagerExecutor
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.title");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.label");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:felix.webconsole.category");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexManagerImpl:jmx.objectname");
+
+        // proper default value now set in OSGi annotations
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.http.headers.impl.PropertyBasedDispatcherMaxAgeHeaderFilter:inherit.property.value");
+        // was not marked as readonly before (but never supposed to be changed)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.http.headers.impl.PropertyBasedDispatcherMaxAgeHeaderFilter:dispatcher.filter.engine");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.http.headers.impl.ResourceTypeBasedDispatcherMaxAgeHeaderFilter:dispatcher.filter.engine");
+
         // Property port on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Integer})
         // Property password on component com.adobe.acs.commons.http.impl.HttpClientFactoryImpl has different types (was: {String}, is: {Password})
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:port");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.impl.HttpClientFactoryImpl:password");
 
+        // use proper types now with OSGi annotations and component property types
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.WeeklyExpiresHeaderFilter:expires.day-of-week");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.PropertyBasedDispatcherMaxAgeHeaderFilter:max.age");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.ResourceTypeBasedDispatcherMaxAgeHeaderFilter:max.age");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.http.headers.impl.DispatcherMaxAgeHeaderFilter:max.age");
+        
         ALLOWED_SCR_NS_URIS = new HashSet<>();
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.0.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.1.0");
@@ -214,12 +233,12 @@ public class ScrMetadataIT {
     private DescriptorList getDescriptorsFromLatestRelease() throws Exception {
         // https://central.sonatype.org/search/rest-api-guide/
         HttpClientBuilder builder = HttpClientBuilder.create().setServiceUnavailableRetryStrategy( new ServiceUnavailableRetryStrategy() {
-            
+
             @Override
             public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
                 return executionCount < 5 && TRANSIENT_ERROR_STATUS_CODES.contains(response.getStatusLine().getStatusCode());
             }
-            
+
             @Override
             public long getRetryInterval() {
                 return 5000; // in milliseconds
@@ -237,7 +256,7 @@ public class ScrMetadataIT {
             } else {
                 String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
                 System.out.printf("Fetching %s\n", url);
-    
+
                 client.execute(new HttpGet(url), new ResponseHandler<Void>() {
 
                     @Override
@@ -273,7 +292,7 @@ public class ScrMetadataIT {
             while (entry != null) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".xml")) {
                     if (entry.getName().startsWith("OSGI-INF/metatype")) {
-                        metatypeDescriptors.add(parseMetatype(new InputStreamFacade(zis), entry.getName()));
+                        metatypeDescriptors.addAll(parseMetatype(new InputStreamFacade(zis), entry.getName()));
                     } else if (entry.getName().startsWith("OSGI-INF/")) {
                         result.merge(parseScr(new InputStreamFacade(zis), entry.getName(), checkNs));
                     }
@@ -308,13 +327,13 @@ public class ScrMetadataIT {
                         }
                     } else if ("metatype".equals(parentDirectoryName)) {
                         try (InputStream input = Files.newInputStream(file)) {
-                            metatypeDescriptors.add(parseMetatype(input, file.getFileName().toString()));
+                            metatypeDescriptors.addAll(parseMetatype(input, file.getFileName().toString()));
                         }
                     }
                 }
                 return super.visitFile(file, attrs);
             }
-            
+
         });
         // metatype descriptors must come last (after component descriptions)
         for (Descriptor metatypeDescriptor : metatypeDescriptors) {
@@ -360,8 +379,9 @@ public class ScrMetadataIT {
         return result;
     }
 
-    private Descriptor parseMetatype(InputStream is, String name) throws IOException {
-        Descriptor result = new Descriptor();
+    private Collection<Descriptor> parseMetatype(InputStream is, String name) throws IOException {
+        List<Descriptor> descriptors = new ArrayList<>();
+        List<Property> properties = new ArrayList<>();
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
             while (reader.hasNext()) {
@@ -378,18 +398,19 @@ public class ScrMetadataIT {
                         } else {
                             pidAttribute = start.getAttributeByName(new QName("pid"));
                             if (pidAttribute != null) {
-                                result.name = pidAttribute.getValue();
+                                descriptor.name = pidAttribute.getValue();
                             }
                         }
+                        descriptors.add(descriptor);
                     } else if (elementName.equals("AD")) {
                         String propName = start.getAttributeByName(new QName("id")).getValue();
                         Attribute value = start.getAttributeByName(new QName("default"));
                         Attribute typeAttr = start.getAttributeByName(new QName("type"));
                         String type = typeAttr == null ? "String" : typeAttr.getValue();
                         if (value == null) {
-                            result.properties.add(new Property(propName, "(metatype)", type));
+                            properties.add(new Property(propName, "(metatype)", type));
                         } else {
-                            result.properties.add(new Property(propName, "(metatype)" + value.getValue(), type));
+                            properties.add(new Property(propName, "(metatype)" + value.getValue(), type));
                         }
                     }
                 }
@@ -397,10 +418,7 @@ public class ScrMetadataIT {
         } catch (XMLStreamException e) {
             throw new IOException("Error parsing XML", e);
         }
-        if (result.name == null) {
-            throw new IllegalArgumentException("Could not identify pid for " + name);
-        }
-        return result;
+        return descriptors;
     }
 
     private String cleanText(String input) {

@@ -41,7 +41,9 @@ public final class FieldsetComponent extends ContainerComponent {
 
     @Override
     public Resource buildComponentResource() {
-        getProperties().put(CLASS, getCssClass());
+        if (getCssClass() != null) {
+            getProperties().put(CLASS, getCssClass());
+        }
         return super.buildComponentResource();
     }
 

@@ -22,7 +22,6 @@ import com.adobe.acs.commons.email.EmailServiceConstants;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
-import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -78,6 +77,9 @@ public final class EmailServiceImpl implements EmailService {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference
+    private MailTemplateManager mailTemplateManager;
 
     public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
 
@@ -229,7 +231,7 @@ public final class EmailServiceImpl implements EmailService {
                            final Class<? extends Email> mailType,
                            final Map<String, String> params) throws EmailException, MessagingException, IOException {
 
-        final Email email = mailTemplate.getEmail(StrLookup.mapLookup(params), mailType);
+        final Email email = mailTemplateManager.getEmail(mailTemplate, params, mailType);
 
         if (params.containsKey(EmailServiceConstants.SENDER_EMAIL_ADDRESS)
                 && params.containsKey(EmailServiceConstants.SENDER_NAME)) {

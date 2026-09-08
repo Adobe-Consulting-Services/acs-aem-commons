@@ -44,8 +44,8 @@ import javax.jcr.query.QueryResult;
 import javax.jcr.query.Row;
 import javax.jcr.query.RowIterator;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -228,8 +228,8 @@ public class QueryReportExecutor implements ReportExecutor {
         }
         StringBuilder sb = new StringBuilder();
         for (Entry<String, String> entry : details.entrySet()) {
-            sb.append("<dt>" + StringEscapeUtils.escapeHtml(entry.getKey()) + "</dt>");
-            sb.append("<dd>" + StringEscapeUtils.escapeHtml(entry.getValue()) + "</dd>");
+            sb.append("<dt>" + StringEscapeUtils.escapeHtml4(entry.getKey()) + "</dt>");
+            sb.append("<dd>" + StringEscapeUtils.escapeHtml4(entry.getValue()) + "</dd>");
         }
 
         return "<dl>" + sb.toString() + "</dl>";

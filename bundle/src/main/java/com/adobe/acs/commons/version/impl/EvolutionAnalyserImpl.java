@@ -47,8 +47,6 @@ public class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     protected static final String PROPERTY_IGNORES = "properties.ignore";
     protected static final String RESOURCE_IGNORES = "resources.ignore";
-    private String[] propertyIgnores;
-    private String[] resourceIgnores;
 
     private EvolutionConfig evolutionConfig;
 
@@ -59,8 +57,8 @@ public class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     @Activate
     protected void activate(final Map<String, String> config) {
-        propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[] { "" });
-        resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[] { "" });
+        String[] propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[]{""});
+        String[] resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[]{""});
         evolutionConfig = new EvolutionConfig(propertyIgnores, resourceIgnores);
         log.debug("Ignored properties: {}", (Object[]) propertyIgnores);
         log.debug("Ignored resources: {}", (Object[]) resourceIgnores);

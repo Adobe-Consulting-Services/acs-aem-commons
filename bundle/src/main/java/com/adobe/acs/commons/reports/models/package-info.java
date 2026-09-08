@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@org.osgi.annotation.versioning.Version("1.2.0")
+@org.osgi.annotation.versioning.Version("1.2.1")
 package com.adobe.acs.commons.reports.models;
 
 

@@ -94,8 +94,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
 
-    private long maxSizeInMb;
-
     /** Cache - Uses Google Guava's cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
@@ -103,7 +101,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     protected void activate(Map<String, Object> configs) {
         // Read config and populate values.
         ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
-        maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
+        long maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitailize the cache.

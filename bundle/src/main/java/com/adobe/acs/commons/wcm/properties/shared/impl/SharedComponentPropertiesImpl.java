@@ -34,11 +34,11 @@ import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -168,18 +168,18 @@ public class SharedComponentPropertiesImpl implements SharedComponentProperties,
     }
 
     @SuppressWarnings("unchecked")
-    @CheckForNull
+    @Nullable
     @Override
-    public <AdapterType> AdapterType getAdapter(@Nonnull final Object adaptable,
-                                                @Nonnull final Class<AdapterType> adapterType) {
+    public <AdapterType> AdapterType getAdapter(@NotNull final Object adaptable,
+                                                @NotNull final Class<AdapterType> adapterType) {
         if (adaptable instanceof Resource && adapterType == SharedValueMapResourceAdapter.class) {
             return (AdapterType) getSharedValueMapResourceAdapter((Resource) adaptable);
         }
         return null;
     }
 
-    @Nonnull
-    SharedValueMapResourceAdapter getSharedValueMapResourceAdapter(@Nonnull final Resource adaptable) {
+    @NotNull
+    SharedValueMapResourceAdapter getSharedValueMapResourceAdapter(@NotNull final Resource adaptable) {
         final ValueMap globalProperties = getGlobalProperties(adaptable);
         final ValueMap sharedProperties = getSharedProperties(adaptable);
         final ValueMap mergedProperties = mergeProperties(globalProperties, sharedProperties, adaptable);

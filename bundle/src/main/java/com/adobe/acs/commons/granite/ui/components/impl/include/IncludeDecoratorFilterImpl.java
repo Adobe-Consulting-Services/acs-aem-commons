@@ -17,31 +17,30 @@
  */
 package com.adobe.acs.commons.granite.ui.components.impl.include;
 
-import org.apache.commons.collections.MapUtils;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
+import org.apache.commons.collections4.MapUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.engine.EngineConstants;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
-import javax.annotation.CheckForNull;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
 
 @Component(
         service = Filter.class,
@@ -105,34 +104,45 @@ public class IncludeDecoratorFilterImpl implements Filter {
 
         ValueMap parameters = ValueMap.EMPTY;
 
-        if(servletRequest instanceof SlingHttpServletRequest){
+        if(!(servletRequest instanceof SlingHttpServletRequest)){
+            chain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+        SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
 
-            SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
+        Predicate<String> typeCheckFn = (resourceType) -> request.getResourceResolver().isResourceType(request.getResource(), resourceType);
 
-            Predicate<String> typeCheckFn = (resourceType) -> request.getResourceResolver().isResourceType(request.getResource(), resourceType);
-
-            if(typeCheckFn.test(RESOURCE_TYPE)){
-                performFilter(request, servletResponse, chain, parameters);
-                return;
-            }else if(resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn)){
-                boolean ignoreChildren = resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn);
-                if(ignoreChildren){
-                    request.setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, request.getResource().getResourceType());
-                }
-                chain.doFilter(servletRequest, servletResponse);
-                if(ignoreChildren){
-                    request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
-                }
-                return;
+        if(typeCheckFn.test(RESOURCE_TYPE)){
+            Object ignoreResourceType = request.getAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
+            Object namespace = request.getAttribute(REQ_ATTR_NAMESPACE);
+            //if children ignore is active, but we have a new include, we de-activate the ignore children.
+            if(ignoreResourceType != null){
+                request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
+                request.removeAttribute(REQ_ATTR_NAMESPACE);
             }
-
+            performFilter(request, servletResponse, chain, parameters);
+            // we are now out of the nested include context. re-activate the ignore children if it was active before.
+            if(ignoreResourceType != null){
+                request.setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, ignoreResourceType);
+                request.setAttribute(REQ_ATTR_NAMESPACE, namespace);
+            }
+        }else if(resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn)){
+            boolean ignoreChildren = resourceTypesIgnoreChildren.stream().anyMatch(typeCheckFn);
+            if(ignoreChildren){
+                request.setAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE, request.getResource().getResourceType());
+            }
+            chain.doFilter(servletRequest, servletResponse);
+            if(ignoreChildren){
+                request.removeAttribute(REQ_ATTR_IGNORE_CHILDREN_RESOURCE_TYPE);
+            }
+        }else{
+            chain.doFilter(servletRequest, servletResponse);
         }
 
-        chain.doFilter(servletRequest, servletResponse);
     }
 
     private void performFilter(SlingHttpServletRequest request, ServletResponse servletResponse, FilterChain chain, ValueMap parameters) throws IOException, ServletException {
-        @CheckForNull Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
+        @Nullable Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
         if(parameterResource != null){
             parameters = parameterResource.getValueMap();
         }

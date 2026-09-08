@@ -20,8 +20,8 @@ package com.adobe.acs.commons.replication;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;

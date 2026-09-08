@@ -21,7 +21,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.slf4j.LoggerFactory;
@@ -87,7 +87,7 @@ public interface ReportExecutor {
     Enumeration<String> paramNames = request.getParameterNames();
     while (paramNames.hasMoreElements()) {
       String key = paramNames.nextElement();
-      parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
+      parameters.put(key, StringUtils.replace(request.getParameter(key), "'", "''"));
     }
     LoggerFactory.getLogger(this.getClass()).debug("Loading parameters from request: {}", parameters);
     return parameters;

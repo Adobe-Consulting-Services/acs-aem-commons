@@ -69,6 +69,7 @@ public class RemoteAssetsConfigImplTest {
           }
         };
         context.registerService(RequireAem.class, requireAem, "distribution","classic");
+        LogTester.reset();
     }
 
     @Test

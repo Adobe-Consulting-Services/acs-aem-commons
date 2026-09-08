@@ -24,6 +24,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 
 import javax.servlet.ServletException;
@@ -34,7 +35,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = {"POST"},
+        methods = {HttpConstants.METHOD_POST},
         resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
         selectors = {"stop"},
         extensions = {"json"}

@@ -18,7 +18,7 @@
 
 package com.adobe.acs.commons.util.visitors;
 
-import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;

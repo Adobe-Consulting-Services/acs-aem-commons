@@ -18,6 +18,7 @@
 package com.adobe.acs.commons.redirects.filter;
 
 import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
+import com.adobe.acs.commons.redirects.models.HandleQueryString;
 import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
 import com.adobe.acs.commons.redirects.models.RedirectMatch;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
@@ -71,10 +72,10 @@ import org.apache.http.message.BasicHeader;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
@@ -101,7 +102,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.adobe.acs.commons.redirects.models.RedirectRule.CACHE_CONTROL_HEADER_NAME;
+import static com.adobe.acs.commons.redirects.models.Redirects.CFG_PROP_IGNORE_SELECTORS;
+import static com.adobe.acs.commons.redirects.models.Redirects.readRedirects;
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
 import static org.osgi.framework.Constants.SERVICE_ID;
@@ -134,8 +136,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static final String SERVICE_NAME = "redirect-manager";
-
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
         @AttributeDefinition(name = "Enable Redirect Filter", description = "Indicates whether the redirect filter is enabled or not.", type = AttributeType.BOOLEAN)
@@ -145,13 +145,13 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + "Use if Location header should be rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
         boolean mapUrls() default true;
 
-        @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
-        String[] extensions() default {};
+        @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed. If empty there is no extension restriction! Requests without an extension are always allowed to be redirected.", type = AttributeType.STRING)
+        String[] extensions();
 
-        @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed", type = AttributeType.STRING)
+        @AttributeDefinition(name = "Request Paths", description = "List of paths for which redirection is allowed. If empty there is no path restriction!", type = AttributeType.STRING)
         String[] paths() default {"/content"};
 
-        @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Preserve Query String", description = "Preserve query string in redirects. Since v6.11 you can manage handling query string in Redirect Properties.", type = AttributeType.BOOLEAN)
         boolean preserveQueryString() default true;
 
         @AttributeDefinition(name = "Preserve Extension", description = "Whether to preserve extensions. "
@@ -159,12 +159,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + "e.g. append .html to the Location header. ", type = AttributeType.BOOLEAN)
         boolean preserveExtension() default true;
 
-        @AttributeDefinition(name = "Evaluate Selectors", description = "(Deprecated) Use the Evaluate URI mode in redirect rule to capture selectors,", type = AttributeType.BOOLEAN)
-        boolean evaluateSelectors() default false;
-
         @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
-        String[] additionalHeaders() default {};
+        String[] additionalHeaders();
 
         @AttributeDefinition(name = "Configuration bucket name", description = "name of the parent folder where to store redirect rules."
                 + " Default is settings. ", type = AttributeType.STRING)
@@ -175,9 +172,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 + " where 'settings' is the bucket and 'redirects' is the config name", type = AttributeType.STRING)
         String configName() default  DEFAULT_CONFIG_NAME;
     }
-
-    @Reference
-    ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     ConfigurationResourceResolver configResolver;
@@ -192,8 +186,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
-    private boolean evaluateSelectors;
-    private boolean preserveQueryString;
     private List<Header> onDeliveryHeaders = Collections.emptyList();
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
     private Collection<String> exts = Collections.emptySet();
@@ -216,7 +208,6 @@ public class RedirectFilter extends AnnotatedStandardMBean
     protected final void activate(Configuration config, BundleContext context) {
         this.config = config;
         enabled = config.enabled();
-        evaluateSelectors = config.evaluateSelectors();
 
         if (enabled) {
             Dictionary<String, Object> properties = new Hashtable<>();
@@ -239,8 +230,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 String value = kv.substring(idx + 1).trim();
                 onDeliveryHeaders.add(new BasicHeader(name, value));
             }
-            preserveQueryString = config.preserveQueryString();
-            log.debug("exts: {}, paths: {}, rewriteUrls: {}",
+             log.debug("exts: {}, paths: {}, rewriteUrls: {}",
                     exts, paths, mapUrls);
             executor = Executors.newSingleThreadExecutor();
 
@@ -316,19 +306,15 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     void invalidate(String changePath) {
         String redirectSubPath = config.bucketName() + "/" + config.configName();
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
-                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
-            Resource resource = resolver.resolve(changePath);
-            while(resource != null){
-                if(resource.getPath().endsWith(redirectSubPath)){
-                    log.debug("invalidating {}", resource.getPath());
-                    rulesCache.invalidate(resource.getPath());
-                    break;
-                }
-                resource = resource.getParent();
+
+        String cacheKey = changePath;
+        while( cacheKey != null){
+            if(cacheKey.endsWith(redirectSubPath)){
+                log.debug("invalidating {}", cacheKey);
+                rulesCache.invalidate(cacheKey);
+                break;
             }
-        } catch (LoginException e) {
-            log.error("Failed to get resolver for {}", SERVICE_NAME, e);
+            cacheKey = ResourceUtil.getParent(cacheKey);
         }
     }
 
@@ -337,36 +323,24 @@ public class RedirectFilter extends AnnotatedStandardMBean
         rulesCache.invalidateAll();
     }
 
-    RedirectConfiguration loadRules(String storagePath) {
-        RedirectConfiguration rules = null;
+    RedirectConfiguration loadRules(Resource storageResource) {
         long t0 = System.currentTimeMillis();
-        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
-                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
-            Resource storageResource = resolver.getResource(storagePath);
-            if(storageResource != null) {
-                String storageSuffix = getBucket() + "/" + getConfigName();
-                rules = new RedirectConfiguration(storageResource, storageSuffix);
-                log.debug("{} rules loaded from {} in {} ms", rules.getPathRules().size() + rules.getPatternRules().size(),
-                        storagePath, System.currentTimeMillis() - t0);
-            } else {
-                log.warn("redirects not found in {}", storagePath);
-            }
-        } catch (LoginException e) {
-            log.error("Failed to get resolver for {}", SERVICE_NAME, e);
-        }
+        String storageSuffix = getBucket() + "/" + getConfigName();
+        RedirectConfiguration rules = new RedirectConfiguration(storageResource, storageSuffix);
+        log.debug("{} rules loaded from {} in {} ms", rules.getPathRules().size() + rules.getPatternRules().size(),
+                storageResource.getPath(), System.currentTimeMillis() - t0);
         return rules;
     }
 
     public static Collection<RedirectRule> getRules(Resource resource) {
-        Collection<RedirectRule> rules = new ArrayList<>();
-        for (Resource res : resource.getChildren()) {
-            if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
-                RedirectRule rule = res.adaptTo(RedirectRule.class);
-                if(rule != null) {
-                    rules.add(rule);
-                }
-            }
-        }
+        List<Resource> resources = readRedirects(resource);
+        long t0 = System.currentTimeMillis();
+        Collection<RedirectRule> rules = resources
+            .stream()
+            .map(res -> res.adaptTo(RedirectRule.class))
+            .filter(res -> res != null)
+            .collect(Collectors.toList());
+        log.trace("mapped {} models in {} ms", resources.size(), System.currentTimeMillis() - t0);
         return rules;
     }
 
@@ -418,6 +392,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 slingResponse.setStatus(redirectRule.getStatusCode());
                 redirected = true;
             }
+        } else {
+            log.trace("No redirect rule found for request {}", slingRequest.getRequestPathInfo() );
         }
         return redirected;
     }
@@ -440,7 +416,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         if (StringUtils.startsWith(location, "/") && !StringUtils.startsWith(location, "//")) {
             String ext = pathInfo.getExtension();
             if (ext != null && config.preserveExtension() && !location.endsWith(ext)) {
-                location += "." + ext;
+                location = preserveExtension(location, ext);
             }
             if (mapUrls()) {
                 location = mapUrl(location, slingRequest);
@@ -449,27 +425,104 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 location = urlAdjuster.adjust(slingRequest, location);
             }
         }
-        if (preserveQueryString) {
-            String queryString = slingRequest.getQueryString();
-            if (queryString != null) {
-                location = preserveQueryString(location, queryString);
-            }
+        HandleQueryString pqs = getPreserveQueryString(match.getRule());
+        String queryString = slingRequest.getQueryString();
+        if (pqs != HandleQueryString.IGNORE && queryString != null) {
+            location = preserveQueryString(location, queryString, pqs == HandleQueryString.COMBINE);
         }
         return location;
     }
 
-    String preserveQueryString(String location, String queryString){
-        int idx = location.indexOf('?');
-        if (idx == -1) {
-            idx = location.indexOf('#');
-        }
-        if (idx != -1) {
-            location = location.substring(0, idx);
+    HandleQueryString getPreserveQueryString(RedirectRule rule){
+        HandleQueryString mode;
+        if(rule.getPreserveQueryString() == null) {
+            mode = config.preserveQueryString() ? HandleQueryString.COMBINE : HandleQueryString.IGNORE;
+        } else {
+            mode = HandleQueryString.valueOf(rule.getPreserveQueryString());
         }
 
-        location += "?" + queryString;
+        return mode;
+    }
 
-        return location;
+    String preserveExtension(String location, String ext) {
+        int locationQueryIndex = location.indexOf('?');
+        String baseLocation;
+        String locationQuery;
+        if (locationQueryIndex != -1) {
+            baseLocation = location.substring(0, locationQueryIndex);
+            locationQuery = location.substring(locationQueryIndex + 1);
+        } else {
+            baseLocation = location;
+            locationQuery = null;
+        }
+        StringBuilder finalUrl = new StringBuilder(baseLocation);
+        finalUrl.append('.').append(ext);
+        if(locationQuery != null){
+            finalUrl.append('?').append(locationQuery);
+        }
+        return finalUrl.toString();
+    }
+
+    /**
+     * Handles query string preservation in redirects
+     * @param location The target location URL
+     * @param queryString The request's query string
+     * @param combine If true, combines query parameters from both sources; if false, request query string replaces target's query string
+     * @return The final URL with processed query string
+     */
+    String preserveQueryString(String location, String queryString, boolean combine) {
+        // Split location into base URL and query string (if any)
+        String baseLocation;
+        String locationQuery;
+        int locationQueryIndex = location.indexOf('?');
+        int fragmentIndex = location.indexOf('#');
+        if (locationQueryIndex != -1) {
+            baseLocation = location.substring(0, locationQueryIndex);
+            locationQuery = location.substring(locationQueryIndex + 1, fragmentIndex == -1 ? location.length() : fragmentIndex);
+        } else {
+            baseLocation = location;
+            locationQuery = null;
+        }
+
+        // Remove any fragment, store it for later
+        String fragment = "";
+        if (fragmentIndex != -1) {
+            fragment = location.substring(fragmentIndex);
+        }
+
+        // Handle query parameters based on combine flag
+        StringBuilder finalQuery = new StringBuilder();
+        if (combine) {
+            // Add location query parameters first
+            if (locationQuery != null && !locationQuery.isEmpty()) {
+                finalQuery.append(locationQuery);
+            }
+
+            // Add request query parameters
+            if (queryString != null && !queryString.isEmpty()) {
+                if (finalQuery.length() > 0) {
+                    finalQuery.append('&');
+                }
+                finalQuery.append(queryString);
+            }
+        } else {
+            // Replace with request query string if it exists
+            if (queryString != null && !queryString.isEmpty()) {
+                finalQuery.append(queryString);
+            } else if (locationQuery != null && !locationQuery.isEmpty()) {
+                // Keep location query if request query is empty
+                finalQuery.append(locationQuery);
+            }
+        }
+
+        // Build final URL
+        StringBuilder finalUrl = new StringBuilder(baseLocation);
+        if (finalQuery.length() > 0) {
+            finalUrl.append('?').append(finalQuery);
+        }
+        finalUrl.append(fragment);
+
+        return finalUrl.toString();
     }
 
     String mapUrl(String url, SlingHttpServletRequest slingRequest) {
@@ -569,23 +622,22 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
         String configPath = configResource.getPath();
         try {
-            RedirectConfiguration rules = rulesCache.get(configPath, () -> {
-                RedirectConfiguration cfg = loadRules(configPath);
-                return cfg == null ? RedirectConfiguration.EMPTY : cfg;
-            });
+            log.trace("Loading redirect rules from caconfig {} mapped to resource path {}", configResource.getPath(), resource.getPath());
+            RedirectConfiguration rules = rulesCache.get(configPath, () -> loadRules(configResource));
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
-            if(evaluateSelectors && requestPathInfo.getSelectorString() != null) {
-                resourcePath += "." + requestPathInfo.getSelectorString();
-            }
 
             ValueMap properties = configResource.getValueMap();
             String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
-
+            boolean ignoreSelectors = properties.get(CFG_PROP_IGNORE_SELECTORS, false);
+            if(ignoreSelectors && requestPathInfo.getSelectorString() != null){
+                resourcePath = removeSelectors(resourcePath, resource.getResourceMetadata().getResolutionPathInfo());
+            }
             RedirectMatch m = rules.match(resourcePath, contextPrefix, slingRequest);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path
+                    log.trace("No redirect rule found for resource path {}, trying mapped url {}");
                     String mappedPath = URI.create(mappedUrl).getPath();  // /en/page.html
                     m = rules.match(mappedPath, "", slingRequest);
                 }
@@ -593,6 +645,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
             return m;
         } catch (ExecutionException e){
             log.error("failed to load redirect rules from {}", configPath, e);
+            return null;
+        } catch (IllegalArgumentException e) {
+            log.warn("Skipping mapped URL match, invalid URI", e);
             return null;
         }
     }
@@ -626,6 +681,14 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Pattern httpRegex = Pattern.compile("^(https?:\\/\\/|www\\.|\\/\\/)(.*)");
         Matcher httpMatcher = httpRegex.matcher(path);
         return httpMatcher.matches();
+    }
+
+    static String removeSelectors(String resolutionPath, String resolutionPathInfo){
+        if(resolutionPathInfo != null){
+            return resolutionPath.replace(resolutionPathInfo, "");
+        } else {
+            return resolutionPath;
+        }
     }
 
     /**
@@ -703,7 +766,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
             ccHeader = redirectRule.getDefaultCacheControlHeader();
         }
         if(!StringUtils.isEmpty(ccHeader)){
-            response.addHeader("Cache-Control", ccHeader);
+            // overwrite any previously set header with that name
+            response.setHeader("Cache-Control", ccHeader);
         }
     }
 }

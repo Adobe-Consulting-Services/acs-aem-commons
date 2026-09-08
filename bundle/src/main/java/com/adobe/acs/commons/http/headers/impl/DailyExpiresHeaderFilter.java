@@ -17,40 +17,55 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 
 import java.util.Calendar;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-//@formatter:off
-@Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Daily",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    metatype = true,
-    configurationFactory = true,
-    policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-  @Property(label = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE,
-      name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-      propertyPrivate = false,
-      value = { }),
-  @Property(label = "Expires Time",
-      description = "Time each day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.",
-      name = AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME,
-      propertyPrivate = false),
-  @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
+        "webconsole.configurationFactory.nameHint=Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]"
 })
-//@formatter:on
+@Designate(ocd = DailyExpiresHeaderFilter.Config.class, factory = true)
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - Cache Expires Header - Daily", description = "Adds an Expires header to responses (for example to enable Dispatcher TTL support).")
+    // meta annotation
+    public @interface Config {
+        @AttributeDefinition(name = "Filter Patterns", description = "Restricts adding the headers to request paths which match any of the supplied regular expression patterns.", cardinality = Integer.MAX_VALUE)
+        String[] filter_pattern() default {};
+
+        @AttributeDefinition(name = "Expires Time", description = "Time of day at which resources will expire. Must match SimpleDateFormat of \"HH:mm\".")
+        String expires_time();
+
+        @AttributeDefinition(name = "Allow Authorized Requests", description = "If the header should be added also to authorized requests (carrying a \"Authorization\" header, or cookie with name \"login-token\" or \"authorizization\").")
+        boolean allow_authorized() default true;
+
+        @AttributeDefinition(name = "Allow All Parameters", description = "If the header should be added also to requests carrying any parameters except for those given in \"block.params\".")
+        boolean allow_all_params() default false;
+
+        @AttributeDefinition(name = "Disallowed Parameter Name", description = "List of request parameter names that are not allowed to be present for the header to be added. Only relevant if \"allow.all.params\" is true.", cardinality = Integer.MAX_VALUE)
+        String[] block_params() default {};
+
+        @AttributeDefinition(name = "Allow Parameter Names", description = "List of request parameter names that are allowed to be present for the header to be added. Only relevant if \"allow.all.params\" is false.", cardinality = Integer.MAX_VALUE)
+        String[] pass_through_params() default {};
+
+        @AttributeDefinition(name = "Allow Non-Dispatcher Requests", description = "If the header should be added also to requests not coming from a dispatcher (i.e. requests not carrying the \"Server-Agent\" header containing value \"Communique-Dispatcher\").")
+        boolean allow_nondispatcher() default false;
+
+        @AttributeDefinition(name = "Service Ranking", description = "Service Ranking for the OSGi service.")
+        int service_ranking() default 0;
+    }
+
+    @Activate
+    public DailyExpiresHeaderFilter(Config config, BundleContext bundleContext) {
+        super(config.expires_time(), new AbstractCacheHeaderFilter.ServletRequestPredicates(config.filter_pattern(), config.allow_all_params(), config.block_params(), config.pass_through_params(), config.allow_authorized(), config.allow_nondispatcher()), config.service_ranking(), bundleContext);
+    }
 
     @Override
     protected void adjustExpires(Calendar next) {

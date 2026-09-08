@@ -26,16 +26,16 @@ import com.adobe.cq.dam.cfm.VariationDef;
 import com.adobe.cq.dam.cfm.VariationTemplate;
 import com.adobe.cq.dam.cfm.VersionDef;
 import com.adobe.cq.dam.cfm.VersionedContent;
+import com.day.cq.tagging.Tag;
 
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -162,9 +162,9 @@ public class MockContentFragment implements ContentFragment {
         return null;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
+    public <AdapterType> AdapterType adaptTo(@NotNull Class<AdapterType> aClass) {
         return null;
     }
 
@@ -177,5 +177,27 @@ public class MockContentFragment implements ContentFragment {
     public Calendar getLastModifiedDeep() throws ContentFragmentException {
         return Calendar.getInstance();
     }
-    
+
+    @Override
+    public @Nullable Calendar getLastModifiedDate() {
+        return Calendar.getInstance();
+    }
+
+    @Override
+    public @NotNull Tag[] getTags() throws ContentFragmentException {
+        return new Tag[0];
+    }
+
+    @Override
+    public @NotNull Tag[] getVariationTags(@NotNull String arg0) throws ContentFragmentException {
+        return new Tag[0];
+    }
+
+    @Override
+    public void setTags(@NotNull Tag[] arg0) throws ContentFragmentException {
+    }
+
+    @Override
+    public void setVariationTags(@NotNull Tag[] arg0, @NotNull String arg1) throws ContentFragmentException {
+    }
 }

@@ -17,20 +17,34 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
-import com.adobe.acs.commons.util.RequireAem;
-import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.adobe.acs.commons.util.impl.CacheMBean;
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
-import com.adobe.granite.ui.clientlibs.ClientLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
-import com.day.cq.wcm.contentsync.PathRewriterOptions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -49,6 +63,8 @@ import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -61,32 +77,18 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import com.adobe.acs.commons.util.RequireAem;
+import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.day.cq.wcm.contentsync.PathRewriterOptions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
@@ -125,8 +127,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         boolValue = DEFAULT_ENFORCE_MD5)
     private static final String PROP_ENFORCE_MD5 = "enforce.md5";
 
-    private static final String ATTR_JS_PATH = "src";
-    private static final String ATTR_CSS_PATH = "href";
+    private static final String ATTR_SRC = "src";
+    private static final String ATTR_HREF = "href";
 
     private static final String MIN_SELECTOR = "min";
     private static final String MIN_SELECTOR_SEGMENT = "." + MIN_SELECTOR;
@@ -195,12 +197,13 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private Attributes versionClientLibs(final String elementName, final Attributes attrs, final SlingHttpServletRequest request) {
         if (SaxElementUtils.isCss(elementName, attrs)) {
-            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
-                    attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, request);
+            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_HREF),
+                    attrs.getValue("", ATTR_HREF), LibraryType.CSS, request);
 
         } else if (SaxElementUtils.isJavaScript(elementName, attrs)) {
-            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
-                    attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, request);
+            String attributeName = StringUtils.equals(elementName, "script") ? ATTR_SRC : ATTR_HREF;
+            return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", attributeName),
+                    attrs.getValue("", attributeName), LibraryType.JS, request);
 
         } else {
             return attrs;
@@ -323,7 +326,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         return clientLibrariesCache.get(path);
     }
 
-    @Nonnull private String getMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException, ExecutionException {
+    @NotNull private String getMd5(@NotNull final HtmlLibrary htmlLibrary) throws IOException, ExecutionException {
         return md5Cache.get(new VersionedClientLibraryMd5CacheKey(htmlLibrary), new Callable<String>() {
 
             @Override
@@ -335,7 +338,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
 
     @SuppressWarnings("squid:S2070") // MD5 not used cryptographically
-    @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary, boolean isMinified) throws IOException {
+    @NotNull private String calculateMd5(@NotNull final HtmlLibrary htmlLibrary, boolean isMinified) throws IOException {
         // make sure that the minified version is being request in case minification is globally enabled
         // as this will reset the dirty flag on the clientlib
         try (InputStream input = htmlLibrary.getInputStream(isMinified)) {
@@ -409,8 +412,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 new OpenType[] { SimpleType.STRING, SimpleType.STRING });
     }
 
-    @Nonnull
-    UriInfo getUriInfo(@Nullable final String uri, @Nonnull SlingHttpServletRequest request) {
+    @NotNull
+    UriInfo getUriInfo(@Nullable final String uri, @NotNull SlingHttpServletRequest request) {
         if (uri != null) {
             Matcher matcher;
             if (enforceMd5) {
@@ -461,7 +464,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     try {
                         md5FromCache = getCacheEntry(uriInfo.cacheKey);
                     } catch (Exception e) {
-                        log.debug("Failed to get cache entry for '{}'", uriInfo.cacheKey);
+                        log.warn("Failed to get cache entry for '{}'", uriInfo.cacheKey);
                     }
 
                     // this static value "Invalid cache key parameter." happens when the cache key can't be

@@ -24,7 +24,7 @@ import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -152,7 +152,10 @@ public class QueryHelperImpl implements QueryHelper {
         final Row firstRow = rows.nextRow();
 
         final String plan = firstRow.getValue("plan").getString();
-        return StringUtils.contains(plan, " /* traverse ");
+        // since Oak 1.60 (https://issues.apache.org/jira/browse/OAK-10527) 
+        // with newline instead of space after "traverse"
+        // see https://github.com/apache/jackrabbit-oak/blame/28e456c8111bff9e7de3a2af9c032ba3dfa560f8/oak-core/src/main/java/org/apache/jackrabbit/oak/query/index/TraversingIndex.java#L162C22-L162C30
+        return StringUtils.contains(plan, " /* traverse");
     }
 
     @Override

@@ -28,14 +28,12 @@ import org.junit.Test;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
-import javax.json.Json;
-import javax.json.JsonObject;
+import javax.json.*;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestContentReader {
     @Rule
@@ -216,6 +214,39 @@ public class TestContentReader {
 
 
         JsonObject sanitizedContent = reader.sanitize(node);
-
     }
-}
+
+    @Test
+    public void sanitizeMixins() throws Exception {
+        JsonObject node = Json.createObjectBuilder()
+                .add("jcr:primaryType", "nt:unstructured")
+                .add("jcr:mixinTypes", Json.createArrayBuilder()
+                        .add("mix:versionable")
+                        .add("aem:unknown") // should be sanitized
+                        .build())
+                .build();
+
+        JsonArray  sanitizedMixins = reader.sanitize(node).getJsonArray("jcr:mixinTypes");
+        assertEquals(1, sanitizedMixins.size());
+        assertEquals("mix:versionable", ((JsonString)sanitizedMixins.get(0)).getString());
+    }
+
+    @Test
+    public void testToISO8601_ValidEcmaDate() {
+        // Example ECMA date: "Tue Jan 01 2019 12:34:56 GMT+0000"
+        String ecmaDate = "Tue Jan 01 2019 12:34:56 GMT+0000";
+        String iso = ContentReader.toISO8601(ecmaDate);
+        // Should be ISO8601 format, e.g. "2019-01-01T12:34:56.000Z" or similar
+        assertTrue("Should convert to ISO8601", iso.startsWith("2019-01-01T12:34:56"));
+    }
+
+    @Test
+    public void testToISO8601_InvalidDateReturnsInput() {
+        String invalid = "not a date";
+        assertEquals("not a date", ContentReader.toISO8601(invalid));
+    }
+
+    @Test
+    public void testToISO8601_NullInput() {
+         assertNull(ContentReader.toISO8601(null));
+    }}

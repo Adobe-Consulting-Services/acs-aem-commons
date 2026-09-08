@@ -28,7 +28,7 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;

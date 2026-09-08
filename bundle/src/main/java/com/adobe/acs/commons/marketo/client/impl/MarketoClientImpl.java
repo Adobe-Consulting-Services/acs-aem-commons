@@ -26,9 +26,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -46,6 +43,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.util.IOUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -154,7 +153,7 @@ public class MarketoClientImpl implements MarketoClient {
         return clientBuilder.build();
     }
 
-    protected <T> @Nonnull T getApiResponse(@Nonnull String url, String bearerToken,
+    protected <T> @NotNull T getApiResponse(@NotNull String url, String bearerToken,
             BiFunction<HttpGet, HttpResponse, ParsedResponse<T>> callback)
             throws MarketoApiException {
         CloseableHttpClient client = null;
@@ -187,7 +186,7 @@ public class MarketoClientImpl implements MarketoClient {
         }
     }
 
-    public @Nonnull String getApiToken(@Nonnull MarketoClientConfiguration config) throws MarketoApiException {
+    public @NotNull String getApiToken(@NotNull MarketoClientConfiguration config) throws MarketoApiException {
         log.trace("getApiToken");
         String url = String.format(
                 "https://%s/identity/oauth/token?grant_type=client_credentials&client_id=%s&client_secret=%s",
@@ -223,7 +222,7 @@ public class MarketoClientImpl implements MarketoClient {
         return fields;
     }
 
-    private @Nullable <T, R extends MarketoResponse<T>> T[] getApiPage(@Nonnull String urlBase, @Nonnull String token,
+    private @Nullable <T, R extends MarketoResponse<T>> T[] getApiPage(@NotNull String urlBase, @NotNull String token,
             int page, Class<R> responseType) throws MarketoApiException {
         log.trace("getApiPage({})", page);
         int offset = PAGE_SIZE * page;
@@ -253,7 +252,7 @@ public class MarketoClientImpl implements MarketoClient {
     }
 
     @Override
-    public List<MarketoForm> getForms(@Nonnull MarketoClientConfiguration config) throws MarketoApiException {
+    public List<MarketoForm> getForms(@NotNull MarketoClientConfiguration config) throws MarketoApiException {
         String apiToken = getApiToken(config);
         List<MarketoForm> forms = new ArrayList<>();
         String base = String.format("https://%s/rest/asset/v1/forms.json?status=approved&", config.getEndpointHost());

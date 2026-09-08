@@ -17,18 +17,20 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
@@ -36,20 +38,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.osgi.service.cm.ConfigurationException;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-
-import com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter;
-import com.adobe.acs.commons.http.headers.impl.DispatcherMaxAgeHeaderFilter;
+import org.osgi.util.converter.Converters;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherMaxAgeHeaderFilterTest {
 
-    DispatcherMaxAgeHeaderFilter filter;
-
-    Dictionary<String, Object> properties = null;
-
-    private long maxage = 2000;
 
     Set<String> agents = null;
     Set<String> cachecontrol = null;
@@ -58,70 +53,49 @@ public class DispatcherMaxAgeHeaderFilterTest {
     Map params = null;
 
     @Mock
-    ComponentContext componentContext;
-
-    @Mock
     HttpServletRequest request;
 
+    @Mock
+    HttpServletResponse response;
+
+    @Mock
+    BundleContext bundleContext;
+    
+    @Mock
+    FilterChain chain;
+    
     @Before
     public void setup() throws Exception {
-        properties = new Hashtable<String, Object>();
-        properties.put(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE, maxage);
-
         agents = new HashSet<String>();
         cachecontrol = new HashSet<String>();
         params = new HashMap();
 
-        filter = new DispatcherMaxAgeHeaderFilter();
-
         when(request.getMethod()).thenReturn("GET");
         when(request.getParameterMap()).thenReturn(params);
-        agents.add(AbstractDispatcherCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
-        when(request.getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME))
+        agents.add(AbstractCacheHeaderFilter.DISPATCHER_AGENT_HEADER_VALUE);
+        when(request.getHeaders(AbstractCacheHeaderFilter.SERVER_AGENT_NAME))
                 .thenReturn(Collections.enumeration(agents));
+        AbstractCacheHeaderFilterTest.mockResponseHeaders(response, params);
 
     }
 
-    @After
-    public void tearDown() throws Exception {
-        properties = null;
-        agents = null;
-        cachecontrol = null;
-        params = null;
-        reset(componentContext, request);
+    DispatcherMaxAgeHeaderFilter createFilter(long maxAge) {
+        Map<String, Object> props = new HashMap<>();
+        props.put("filter.pattern", new String[] { "/content/dam/.*" });
+        props.put("max.age", maxAge);
+        DispatcherMaxAgeHeaderFilter.Config config = Converters.standardConverter().convert(props).to(DispatcherMaxAgeHeaderFilter.Config.class);
+        return new DispatcherMaxAgeHeaderFilter(config, bundleContext);
     }
 
-    @Test
-    public void testGetHeaderName() {
-        assertEquals(DispatcherMaxAgeHeaderFilter.CACHE_CONTROL_NAME, filter.getHeaderName());
-    }
-
-    @Test
-    public void testGetHeaderValue() throws Exception {
-
-        when(componentContext.getProperties()).thenReturn(properties);
-
-        filter.doActivate(componentContext);
-        assertEquals("max-age=" + maxage, filter.getHeaderValue(request));
-    }
-
-    @Test(expected = ConfigurationException.class)
-    public void testActivateNoMaxAge() throws Exception {
-        properties.remove(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE);
-        when(componentContext.getProperties()).thenReturn(properties);
-        filter.activate(componentContext);
+    @Test(expected = IllegalArgumentException.class)
+    public void testActivateInvalidMaxAge() throws Exception {
+        createFilter(-1);
     }
 
     @Test
-    public void testDoActivateSuccess() throws Exception {
-
-        when(componentContext.getProperties()).thenReturn(properties);
-
-        filter.doActivate(componentContext);
-        assertEquals("max-age=" + maxage, filter.getHeaderValue(request));
-        verify(componentContext).getProperties();
-        verifyNoMoreInteractions(componentContext);
-
+    public void testDoFilter() throws Exception {
+        DispatcherMaxAgeHeaderFilter filter = createFilter(2000);
+        filter.doFilter(request, response, chain);
+        assertEquals("max-age=2000", response.getHeader("Cache-Control"));
     }
-
 }

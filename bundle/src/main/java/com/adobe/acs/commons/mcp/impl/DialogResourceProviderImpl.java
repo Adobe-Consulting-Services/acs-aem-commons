@@ -17,28 +17,30 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
-import com.adobe.acs.commons.mcp.form.DialogProvider;
-import com.adobe.acs.commons.mcp.form.GeneratedDialog;
-import com.adobe.acs.commons.mcp.form.GeneratedDialogWrapper;
-import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Iterator;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.commons.lang.reflect.MethodUtils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.spi.resource.provider.ResolveContext;
 import org.apache.sling.spi.resource.provider.ResourceContext;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.form.DialogProvider;
+import com.adobe.acs.commons.mcp.form.GeneratedDialog;
+import com.adobe.acs.commons.mcp.form.GeneratedDialogWrapper;
+import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 
 /**
  * Create a resource provider for a dialog, the resource type is identified in
@@ -102,14 +104,14 @@ public class DialogResourceProviderImpl extends ResourceProvider {
                     }
                 }
             } catch (RuntimeException | ReflectiveOperationException ex) {
-                LOGGER.debug("Unable to determine sling resource type for model bean: {} ", originalClass);
+                LOGGER.error("Unable to determine sling resource type for model bean: {} ", originalClass);
             }
         }
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public Resource getResource(@Nonnull ResolveContext resolveContext, @Nonnull String path, @Nonnull ResourceContext resourceContext, @CheckForNull Resource parent) {
+    public Resource getResource(@NotNull ResolveContext resolveContext, @NotNull String path, @NotNull ResourceContext resourceContext, @Nullable Resource parent) {
         LOGGER.debug("Get resource at path: {}", path);
         AbstractResourceImpl clone = null;
         if (root.equals(path)) {
@@ -134,9 +136,9 @@ public class DialogResourceProviderImpl extends ResourceProvider {
         return clone;
     }
 
-    @CheckForNull
+    @Nullable
     @Override
-    public Iterator<Resource> listChildren(@Nonnull ResolveContext resolveContext, @Nonnull Resource parent) {
+    public Iterator<Resource> listChildren(@NotNull ResolveContext resolveContext, @NotNull Resource parent) {
         LOGGER.debug("List children of {}", parent.getPath());
         if (parent instanceof AbstractResourceImpl) {
             AbstractResourceImpl res = (AbstractResourceImpl) parent;

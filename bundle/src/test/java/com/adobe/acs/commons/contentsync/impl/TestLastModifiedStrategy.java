@@ -20,10 +20,12 @@
 package com.adobe.acs.commons.contentsync.impl;
 
 import com.adobe.acs.commons.contentsync.CatalogItem;
+import com.adobe.acs.commons.contentsync.ContentReader;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -35,11 +37,14 @@ import org.junit.Test;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.GenericServlet;
+import javax.servlet.ServletRequest;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy.DEFAULT_GET_SERVLET;
 import static com.adobe.acs.commons.contentsync.impl.LastModifiedStrategy.REDIRECT_SERVLET;
@@ -84,6 +89,9 @@ public class TestLastModifiedStrategy {
         assertFalse(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
     }
 
+    /**
+     * isModified() returns true if the resource is newer
+     */
     @Test
     public void testPageModified() {
         String pagePath = "/content/wknd/page";
@@ -100,6 +108,29 @@ public class TestLastModifiedStrategy {
         Resource pageResource = page.adaptTo(Resource.class);
 
         assertTrue(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
+    }
+
+    /**
+     * local dates can be in the legacy ecma format and ValueMap won't cast those to Calendar.
+     * Assert that we fall back to parsing ecma dates and return a valid Calendar instance
+     */
+    @Test
+    public void testLastModifiedInEcmaFormat() {
+        String pagePath = "/content/wknd/page";
+        String remoteTimestamp = "Tue Jan 01 2019 12:34:56 GMT+0000";
+        String localTimestamp = "Wed Jan 02 2019 12:34:56 GMT+0000"; // younger than remote
+
+        JsonObject catalogItem = Json.createObjectBuilder()
+                .add("path", pagePath)
+                .add("jcr:primaryType", "cq:Page")
+                .add("lastModified", ContentReader.parseEcmaDate(remoteTimestamp).toInstant().toEpochMilli())
+                .build();
+
+        Page page = context.create().page(pagePath, null,
+                Collections.singletonMap("cq:lastModified", localTimestamp));
+        Resource pageResource = page.adaptTo(Resource.class);
+
+        assertFalse(updateStrategy.isModified(new CatalogItem(catalogItem), pageResource));
     }
 
     @Test
@@ -122,7 +153,7 @@ public class TestLastModifiedStrategy {
 
 
     @Test
-    public void testForwardRedirectServletToDefaultGetServlet() {
+    public void testForwardRedirectServletToDefaultGetServlet() throws LoginException {
         doAnswer(invocation -> {
             GenericServlet servlet = mock(GenericServlet.class);
             doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
@@ -135,7 +166,7 @@ public class TestLastModifiedStrategy {
         MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter("root", path);
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
         CatalogItem item = items.iterator().next();
         assertEquals("/content/cq:tags.json", item.getContentUri());
@@ -147,7 +178,7 @@ public class TestLastModifiedStrategy {
      * + jcr:content - export json rendered by ContentPolicyMappingServlet
      */
     @Test
-    public void testCustomRendererUseParent() throws IOException {
+    public void testCustomRendererUseParent() throws IOException, LoginException {
         String path = "/conf/wknd/settings/wcm/templates/article-page-template/policies";
         doAnswer(invocation -> {
             SlingHttpServletRequest request = invocation.getArgument(0, SlingHttpServletRequest.class);
@@ -167,7 +198,7 @@ public class TestLastModifiedStrategy {
         request.addRequestParameter("root", path);
         request.addRequestParameter("strategy", updateStrategy.getClass().getName());
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
         CatalogItem item = items.iterator().next();
         assertEquals("cq:Page", item.getPrimaryType());
@@ -177,7 +208,7 @@ public class TestLastModifiedStrategy {
     }
 
     @Test
-    public void testCustomExporter() {
+    public void testCustomExporter() throws LoginException {
         String path = "/content/wknd/page";
         String customExporter = "com.adobe.CustomJsonExporter";
         doAnswer(invocation -> {
@@ -192,11 +223,61 @@ public class TestLastModifiedStrategy {
         request.addRequestParameter("root", path);
         request.addRequestParameter("strategy", updateStrategy.getClass().getName());
 
-        List<CatalogItem> items = updateStrategy.getItems(request);
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
         assertEquals(1, items.size());
         CatalogItem item = items.iterator().next();
         assertEquals("cq:Page", item.getPrimaryType());
         assertEquals(path + ".infinity.json", item.getContentUri());
         assertEquals(customExporter, item.getCustomExporter());
     }
+
+    void sync(String ... requestParams)  {
+        doAnswer(invocation -> {
+            GenericServlet servlet = mock(GenericServlet.class);
+            doReturn(REDIRECT_SERVLET).when(servlet).getServletName();
+            return servlet;
+        }).when(servletResolver).resolveServlet(any(SlingHttpServletRequest.class));
+
+        context.create().page("/content/wknd");
+        context.create().page("/content/wknd/en");
+        context.create().page("/content/wknd/en/home");
+        MockSlingHttpServletRequest request = context.request();
+
+        for(int i = 0; i < requestParams.length; i += 2){
+            request.addRequestParameter(requestParams[i], requestParams[i + 1]);
+        }
+    }
+
+    @Test
+    public void testRecursive() throws LoginException {
+        sync("root", "/content/wknd",
+                "recursive", "true");
+
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
+        assertEquals(3, items.size());
+    }
+
+    @Test
+    public void testRecursiveDefault() throws LoginException {
+        sync("root", "/content/wknd");
+
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
+        assertEquals(3, items.size());
+    }
+
+    @Test
+    public void testNonRecursive() throws LoginException {
+        sync("root", "/content/wknd",
+                "recursive", "false");
+
+        List<CatalogItem> items = updateStrategy.getItems(getParameters(context.request()));
+        assertEquals(1, items.size());
+    }
+
+    private static Map<String, Object> getParameters(ServletRequest request){
+        Map<String, Object> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        return params;
+    }
+
 }

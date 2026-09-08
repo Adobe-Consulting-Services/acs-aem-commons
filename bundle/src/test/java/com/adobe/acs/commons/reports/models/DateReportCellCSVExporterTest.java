@@ -26,7 +26,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;

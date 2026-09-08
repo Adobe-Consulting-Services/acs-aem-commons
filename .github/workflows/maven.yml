@@ -5,13 +5,9 @@ on:
   push:
     branches:
       - master
-      - acs-aem-commons-6.0.0
-  # for PRs from forked repos and non forked repos
-  # in order to write status info to the PR we require write repository token (https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/)
-  pull_request_target:
+  pull_request:
     branches:
       - master
-      - acs-aem-commons-6.0.0
     types: [opened, synchronize, reopened]
 
 # restrict privileges except for setting commit status, adding PR comments and writing statuses
@@ -32,7 +28,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        jdk: [11, 17, 21]
+        jdk: [11, 17, 21, 25]
         include:
           # lengthy build steps should only be performed on linux with Java 11 (CodeCov analysis, deployment)
           - os: ubuntu-latest
@@ -47,10 +43,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        # always act on the modified source code (even for event pull_request_target)
-        # is considered potentially unsafe (https://securitylab.github.com/research/github-actions-preventing-pwn-requests/) but actions are only executed after approval from committers
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           # no additional git operations after checkout triggered in workflow, no need to store credentials
           persist-credentials: false
 
@@ -62,7 +55,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
           # generate settings.xml with the correct values
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-id: sonatype-central-portal # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_USERNAME # env variable for username in deploy
           server-password: MAVEN_PASSWORD # env variable for token in deploy
 
@@ -71,12 +64,13 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
-            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check,cloud" >> $GITHUB_ENV
+            echo "NVD_API_KEY=${{ secrets.NVD_API_KEY }}" >> $GITHUB_ENV
+            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check,cloud -DnvdApiKeyEnvironmentVariable=NVD_API_KEY" >> $GITHUB_ENV
             if [ "${{github.ref}}" = "refs/heads/master" ] && [ "${{github.event_name}}" = "push" ]; then
-              echo "MAVEN_USERNAME=${{ secrets.OSSRH_TOKEN_USER }}" >> $GITHUB_ENV
-              echo "MAVEN_PASSWORD=${{ secrets.OSSRH_TOKEN_PASSWORD }}" >> $GITHUB_ENV
+              echo "MAVEN_USERNAME=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}" >> $GITHUB_ENV
+              echo "MAVEN_PASSWORD=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}" >> $GITHUB_ENV
               echo "MVN_GOAL=clean deploy" >> $GITHUB_ENV
-              echo "STEP_NAME_SUFFIX=(Deploys to OSSRH)" >> $GITHUB_ENV
+              echo "STEP_NAME_SUFFIX=(Deploys to Sonatype Central Portal)" >> $GITHUB_ENV
             else
               echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
             fi
@@ -88,11 +82,16 @@ jobs:
       - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
 
-      - name: Publish Test Report
-        if: ${{ always() }} # make sure to run even if previous Maven execution failed (due to failed test)
-        uses: scacap/action-surefire-report@v1
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          check_name: Test report (${{ matrix.os }}, JDK ${{ matrix.jdk }})
+          name: Test Results (${{ matrix.os }}, JDK ${{ matrix.jdk }}))
+          path: |
+            **/target/surefire-reports/TEST*.xml
+            **/target/failsafe-reports/TEST*.xml
+            **/target/invoker-reports/TEST*.xml
+            **/target/it/**/build.log
 
       # https://about.codecov.io/blog/javascript-code-coverage-using-github-actions-and-codecov/
       - name: Upload code coverage to CodeCov (Main build)
@@ -106,3 +105,31 @@ jobs:
         with:
           changeLogPath: 'CHANGELOG.md'
           skipLabels: 'Skip-Changelog,skip-changelog'
+
+  publish-test-results:
+    name: "Publish Tests Results"
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+
+      # only needed unless run with comment_mode: off
+      pull-requests: write
+
+      # only needed for private repository
+      contents: read
+
+      # only needed for private repository
+      issues: read
+    if: always()
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "artifacts/**/*.xml"

@@ -18,7 +18,6 @@
 package com.adobe.acs.commons.redirectmaps.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -42,12 +41,15 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.testing.sling.MockResourceResolver;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +57,10 @@ import com.adobe.acs.commons.redirectmaps.models.RedirectConfigModel;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
 
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 
+@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TestServlets {
 
     private static final Logger log = LoggerFactory.getLogger(TestServlets.class);
@@ -191,7 +195,7 @@ public class TestServlets {
 
     };
 
-    @InjectMocks
+    @Mock
     private RedirectMapModel model;
 
     private List<RedirectConfigModel> redirectConfigs = new ArrayList<RedirectConfigModel>() {
@@ -229,10 +233,9 @@ public class TestServlets {
     };
 
     @Before
-    public void init() throws IOException, NoSuchFieldException {
+    public void init() throws IOException, NoSuchFieldException, IllegalAccessException {
         log.info("init");
 
-        MockitoAnnotations.initMocks(this);
 
         final MockResourceResolver mockResolver = new MockResourceResolver() {
             public Iterator<Resource> findResources(String query, String language) {
@@ -274,7 +277,7 @@ public class TestServlets {
                 .adaptTo(InputStream.class);
 
         log.debug("Setting up the resource /etc/redirectMap.txt/jcr:content");
-        doReturn(mockMapContentResource).when(mockFileResource).getChild(JcrConstants.JCR_CONTENT);
+        Mockito.lenient().doReturn(mockMapContentResource).when(mockFileResource).getChild(JcrConstants.JCR_CONTENT);
         doReturn("/etc/redirectMap.txt/jcr:content").when(mockMapContentResource).getPath();
         doReturn(mvm).when(mockMapContentResource).adaptTo(ModifiableValueMap.class);
         mockResolver.addResource(mockMapContentResource);

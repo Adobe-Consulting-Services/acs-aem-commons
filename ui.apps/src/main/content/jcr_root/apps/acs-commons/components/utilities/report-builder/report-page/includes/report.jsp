@@ -28,11 +28,16 @@
 					<cq:include path="parameters/${par.name}" resourceType="${par.valueMap.resourceType}" />
 				</div>
 			</c:forEach>
-			<div class="form-row">
-				<coral-checkbox value="-1" name="page">
-					All Results
-				</coral-checkbox>
-			</div>
+
+            <sling2:listChildren resource="${sling2:getRelativeResource(resource,'config')}" var="configs" />
+            <c:forEach var="conf" items="${configs}">
+                <c:if test="${conf.valueMap.hideAllResults != 'true' && conf.valueMap.hideAllResults != true}">
+                    <div class="form-row">
+                        <coral-checkbox value="-1" name="page">All Results</coral-checkbox>
+                    </div>
+                </c:if>
+            </c:forEach>
+
 			<div class="form-row">
 				<div class="form-left-cell">&nbsp;</div>
 				<button class="coral-Button coral-Button--primary">Execute Report</button>

@@ -98,8 +98,7 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
             }
 
         } catch (DynamicDeckDynamoException e) {
-            LOGGER.error("Back track: Error while parsing asset xml", e);
-            throw new WorkflowException("Error while performing back track operation", e);
+            throw new WorkflowException("Back track: Error while parsing asset xml", e);
         }
 
 

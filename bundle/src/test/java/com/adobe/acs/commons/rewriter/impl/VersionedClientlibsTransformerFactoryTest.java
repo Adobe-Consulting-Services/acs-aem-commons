@@ -23,7 +23,7 @@ import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
 import com.day.cq.wcm.contentsync.PathRewriterOptions;
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -317,6 +317,25 @@ public class VersionedClientlibsTransformerFactoryTest {
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
         verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testJavaScriptClientLibraryInLink() throws Exception {
+
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PATH))).thenReturn(htmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PATH + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));

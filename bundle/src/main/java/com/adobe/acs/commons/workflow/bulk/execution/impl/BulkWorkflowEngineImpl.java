@@ -25,7 +25,7 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;

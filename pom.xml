@@ -25,7 +25,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>6.3.3-SNAPSHOT</version>
+    <version>6.17.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -47,9 +47,10 @@
 
     <scm>
         <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
-        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
-        <tag>acs-aem-commons-6.3.0</tag>
+        <!-- use HTTPS to allow pushes in GitHub Action for Release -->
+        <developerConnection>scm:git:https://github.com/Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
+        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/${project.scm.tag}</url>
+        <tag>acs-aem-commons-6.15.2</tag>
     </scm>
 
     <!-- Do not remove developers section - this is required to release to maven central -->
@@ -77,31 +78,45 @@
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.25</sl4fj.version>
-        <oakpal.version>2.2.2</oakpal.version>
-        <bnd.version>6.1.0</bnd.version>
-        <!-- Supress CQRules:CQBP-84-\-dependencies -->
-        <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml
-        </sonar.issue.ignore.multicriteria.e1.resourceKey>
+        <bnd.version>6.4.0</bnd.version>
 
         <!-- the minimum AEM 6.5 version being supported -->
-        <aem.classic.api.version>6.5.10.0002</aem.classic.api.version>
+        <aem.classic.api.version>6.5.21.0000</aem.classic.api.version>
         <!-- the minimum AEMaaCS version being supported -->
-        <aem.sdk.api.version>2023.1.10675.20230113T110236Z-220900</aem.sdk.api.version>
+        <aem.sdk.api.version>2024.8.17569.20240822T203847Z-240700</aem.sdk.api.version>
 
-        <jacoco.version>0.8.7</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
+        <junit.jupiter.version>5.12.2</junit.jupiter.version> <!-- >= 5.x requires Java 11, 5.12.2 ships with surefire 3.5.5 -->
+        <njord.version>0.9.7</njord.version>
+        <!-- njord configuration (https://maveniverse.eu/docs/njord/configuration/#njord-properties) -->
+        <njord.releaseUrl>njord:template:release-sca</njord.releaseUrl>
+        <njord.snapshotUrl>njord:template:snapshot</njord.snapshotUrl>
+        <njord.publisher>sonatype-cp</njord.publisher>
+        <njord.autoPublish>true</njord.autoPublish>
+        <njord.publishingType>automatic</njord.publishingType>
+        <njord.waitForStates>true</njord.waitForStates>
         <!-- affects both m-compiler-p and m-javadoc-p-->
         <maven.compiler.release>8</maven.compiler.release>
         <!-- for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html), automatically adjusted during release -->
-        <project.build.outputTimestamp>1700663413</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1781977273</project.build.outputTimestamp>
+        
     </properties>
 
     <build>
+        <extensions>
+            <!-- deploys during m-deploy-p:deploy to a local staging repository (https://maveniverse.eu/docs/njord/what-is-it/)-->
+            <extension>
+                <groupId>eu.maveniverse.maven.njord</groupId>
+                <artifactId>extension3</artifactId>
+                <version>${njord.version}</version>
+            </extension>
+        </extensions>
         <pluginManagement>
             <plugins>
                 <!-- all standard Maven plugins (in group org.apache.maven.plugins) -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.5.0</version>
                     <configuration>
                         <archive>
                             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -110,7 +125,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <showDeprecation>true</showDeprecation>
                         <forceJavacCompilerUse>true</forceJavacCompilerUse>
@@ -118,37 +133,31 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M2</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M5</version>
-                    <configuration>
-                        <trimStackTrace>false</trimStackTrace>
-                    </configuration>
+                    <version>3.5.5</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.0.0-M5</version>
-                    <configuration>
-                        <trimStackTrace>false</trimStackTrace>
-                    </configuration>
+                    <version>3.5.5</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.12.0</version>
                     <configuration>
                         <excludePackageNames>
                             *.impl
@@ -158,41 +167,37 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M5</version>
+                    <version>3.3.1</version>
                     <configuration>
                         <releaseProfiles>release,cloud</releaseProfiles>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
+                        <!-- skip rebuilding the release with GitHub actions (https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/) -->
+                        <scmReleaseCommitComment>@{prefix} prepare release @{releaseLabel} [skip ci]</scmReleaseCommitComment>
                     </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.maven.release</groupId>
                             <artifactId>maven-release-oddeven-policy</artifactId>
-                            <version>3.0.0-M5</version>
+                            <version>3.3.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.2.8</version>
                 </plugin>
                 <!-- Bnd Maven Plugin -->
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
-                    <executions>
-                        <execution>
-                            <id>bnd-process</id>
-                            <goals>
-                                <goal>bnd-process</goal>
-                            </goals>
-                            <configuration>
-                                <bnd><![CDATA[
+                    <configuration>
+                        <bnd><![CDATA[
 # a lot of bundle header are generated from pom elements by default: https://github.com/bndtools/bnd/tree/master/maven/bnd-maven-plugin#default-bundle-headers
 Bundle-Category: acs-aem-commons
 # export all versioned packages except for conditional ones (https://github.com/bndtools/bnd/issues/3721#issuecomment-579026778)
@@ -210,16 +215,18 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
 # enable plugins (https://bnd.bndtools.org/instructions/plugin.html)
 -plugin.models: org.apache.sling.bnd.models.ModelsScannerPlugin
 -plugin.cac: org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
-# support processing of legacy Felix SCR annotations through the felix.scr.bnd plugin, look at https://github.com/apache/felix/blob/trunk/tools/org.apache.felix.scr.bnd/src/main/java/org/apache/felix/scrplugin/bnd/SCRDescriptorBndPlugin.java#L60
-# paths require special handling: https://bnd.bndtools.org/chapters/820-instructions.html#file
--plugin.felixscr: org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir="$(basedir)/target/classes";log=error
+-plugin.providertype:org.apache.sling.providertype.bndplugin.ProviderTypeScanner
 # support only DS 1.4 (https://github.com/bndtools/bnd/pull/3121/files)
 -dsannotations-options: version;maximum=1.4.0,inherit
 -metatypeannotations-options: version;maximum=1.4.0
-# also detect scr descriptors from bundle fragments (https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.component.html#d0e30931)
-Service-Component: OSGI-INF/*.xml
-                                ]]></bnd>
-                            </configuration>
+                        ]]></bnd>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>bnd-process</id>
+                            <goals>
+                                <goal>bnd-process</goal>
+                            </goals>
                         </execution>
                     </executions>
                     <dependencies>
@@ -235,12 +242,11 @@ Service-Component: OSGI-INF/*.xml
                             <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
                             <version>1.0.2</version>
                         </dependency>
-                        <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
-                            with the Bnd process -->
+                        <!-- enforce that provider types are not implemented/extended, https://github.com/apache/sling-org-apache-sling-providertype-bnd-plugin -->
                         <dependency>
-                            <groupId>org.apache.felix</groupId>
-                            <artifactId>org.apache.felix.scr.bnd</artifactId>
-                            <version>1.9.6</version>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.providertype.bnd-plugin</artifactId>
+                            <version>1.0.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -248,11 +254,26 @@ Service-Component: OSGI-INF/*.xml
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-baseline-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
+                    <executions>
+                        <execution>
+                            <id>baseline</id>
+                            <goals>
+                                <goal>baseline</goal>
+                            </goals>
+                            <configuration>
+                                <includeDistributionManagement>false</includeDistributionManagement>
+                                <diffignores>
+                                    <!-- ignore Bundle-Version header for baseline, i.e. no enforcement of specific bundle versions -->
+                                    <diffignore>Bundle-Version</diffignore>
+                                </diffignores>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>sling-maven-plugin</artifactId>
-                    <version>2.4.2</version>
+                    <version>3.0.4</version>
                     <configuration>
                         <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
                         <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
@@ -265,7 +286,7 @@ Service-Component: OSGI-INF/*.xml
                 <plugin>
                     <groupId>org.apache.jackrabbit</groupId>
                     <artifactId>filevault-package-maven-plugin</artifactId>
-                    <version>1.3.2</version>
+                    <version>1.4.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <group>adobe/consulting</group>
@@ -325,13 +346,13 @@ Service-Component: OSGI-INF/*.xml
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-classification-validator</artifactId>
-                            <version>1.0.1</version>
+                            <version>1.2.1</version>
                         </dependency>
                         <!-- the dependency containing the actual classification map -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator.maps</groupId>
                             <artifactId>aem-classification-map-repo-annotations</artifactId>
-                            <version>6.5.3.0</version>
+                            <version>2025.11.23482</version>
                         </dependency>
                         <!-- map containing additional deprecations from release notes -->
                         <dependency>
@@ -343,13 +364,13 @@ Service-Component: OSGI-INF/*.xml
                         <dependency>
                             <groupId>biz.netcentric.aem</groupId>
                             <artifactId>aem-nodetypes</artifactId>
-                            <version>6.5.7.0</version>
+                            <version>2023.10.0</version>
                         </dependency>
                         <!-- https://github.com/Netcentric/aem-cloud-validator -->
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-cloud-validator</artifactId>
-                            <version>1.2.2</version>
+                            <version>1.4.0</version>
                         </dependency>
                         <!-- https://github.com/apache/sling-org-apache-sling-repoinit-filevault-validator -->
                         <dependency>
@@ -361,14 +382,14 @@ Service-Component: OSGI-INF/*.xml
                         <dependency>
                             <groupId>biz.netcentric.filevault.validator</groupId>
                             <artifactId>aem-replication-metadata-validator</artifactId>
-                            <version>1.1.1</version>
+                            <version>1.4.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-                    <version>1.0.4</version>
+                    <version>1.0.6</version>
                     <configuration>
                         <userId>${crx.user}</userId>
                         <password>${crx.password}</password>
@@ -376,66 +397,30 @@ Service-Component: OSGI-INF/*.xml
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>jslint-maven-plugin</artifactId>
-                    <version>1.0.1</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.6.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>2.0.0</version>
+                    <version>2.7.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>net.adamcin.oakpal</groupId>
-                    <artifactId>oakpal-maven-plugin</artifactId>
-                    <version>${oakpal.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                            <version>${project.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>biz.netcentric.aem</groupId>
-                            <artifactId>aem-nodetypes</artifactId>
-                            <version>6.5.7.0</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <cndNames>
-                            <name>aem.cnd</name>
-                        </cndNames>
-                        <jcrNamespaces>
-                            <jcrNamespace>
-                                <prefix>crx</prefix>
-                                <uri>http://www.day.com/crx/1.0</uri>
-                            </jcrNamespace>
-                        </jcrNamespaces>
-                        <jcrPrivileges>
-                            <jcrPrivilege>crx:replicate</jcrPrivilege>
-                        </jcrPrivileges>
-                        <forcedRoots>
-                            <root>
-                                <path>/apps</path>
-                                <primaryType>nt:folder</primaryType>
-                            </root>
-                        </forcedRoots>
-                    </configuration>
+                    <version>3.6.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>8.1.2</version>
+                    <version>12.2.2</version>
                 </plugin>
+                <!-- used to validate/publish from a stage repository to Maven Central (https://maveniverse.eu/docs/njord/plugin-documentation/index.html) -->
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
+                    <groupId>eu.maveniverse.maven.plugins</groupId>
+                    <artifactId>njord</artifactId>
+                    <version>${njord.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -452,7 +437,7 @@ Service-Component: OSGI-INF/*.xml
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.5.4</version><!-- license-maven-plugin 2.0.0 requires 3.5.4 -->
+                                    <version>3.9.0</version><!-- njord requires Maven 3.9.0 -->
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>11</version>
@@ -480,19 +465,6 @@ Service-Component: OSGI-INF/*.xml
                     </execution>
                 </executions>
             </plugin>
-            <!-- use https://help.sonatype.com/repomanager2/staging-releases/configuring-your-project-for-deployment#ConfiguringYourProjectforDeployment-DeploymentwiththeNexusStagingMavenPlugin
-            instead of maven-deploy-plugin -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <!-- manually release in https://oss.sonatype.org/#stagingRepositories after the Maven release build -->
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -503,12 +475,6 @@ Service-Component: OSGI-INF/*.xml
                 <artifactId>acs-aem-commons-bundle</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.adobe.acs</groupId>
-                <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.adobe.aem</groupId>
@@ -542,11 +508,6 @@ Service-Component: OSGI-INF/*.xml
                 <artifactId>logback-classic</artifactId>
                 <version>1.2.3</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.tika</groupId>
-                <artifactId>tika-parsers</artifactId>
-                <version>1.17</version>
-            </dependency>
             <!-- should match https://github.com/apache/jackrabbit-oak/blob/jackrabbit-oak-1.8.0/oak-blob-cloud/pom.xml#L121 shipped with AEM 6.4 -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
@@ -568,11 +529,6 @@ Service-Component: OSGI-INF/*.xml
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>23.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>3.0.0</version>
             </dependency>
             <!-- should match Bnd version used by maven-bundle-plugin -->
             <dependency>
@@ -605,10 +561,11 @@ Service-Component: OSGI-INF/*.xml
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>5.10.0</version>
-                <scope>test</scope>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -616,26 +573,17 @@ Service-Component: OSGI-INF/*.xml
                 <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>junit-addons</groupId>
-                <artifactId>junit-addons</artifactId>
-                <version>1.4</version>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>xercesImpl</artifactId>
-                        <groupId>xerces</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>xmlParserAPIs</artifactId>
-                        <groupId>xerces</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.11.0</version><!-- >= 5.x requires Java 11 -->
+                <version>5.20.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>5.20.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -648,12 +596,18 @@ Service-Component: OSGI-INF/*.xml
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
-                <version>3.1.8-1.44.0</version>
+                <version>4.1.0-1.86.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
+                <version>3.3.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.osgi-mock.junit5</artifactId>
                 <version>3.3.6</version>
                 <scope>test</scope>
             </dependency>
@@ -671,8 +625,26 @@ Service-Component: OSGI-INF/*.xml
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
+                <version>3.4.4</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
+                <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.wcm</groupId>
+                <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
                 <version>5.1.2</version><!-- newer versions require Java 11, https://github.com/wcm-io/io.wcm.testing.aem-mock/issues/13 -->
                 <scope>test</scope>
                 <exclusions>
@@ -690,26 +662,8 @@ Service-Component: OSGI-INF/*.xml
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
-                <version>1.3</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.adamcin.oakpal</groupId>
-                <artifactId>oakpal-api</artifactId>
-                <version>${oakpal.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.adamcin.oakpal</groupId>
-                <artifactId>oakpal-core</artifactId>
-                <version>${oakpal.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.adamcin.oakpal</groupId>
-                <artifactId>oakpal-testing</artifactId>
-                <version>${oakpal.version}</version>
+                <artifactId>hamcrest</artifactId>
+                <version>3.0</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -738,38 +692,48 @@ Service-Component: OSGI-INF/*.xml
         <profile>
             <id>coverage</id>
             <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <argLine>@{jacoco.command}</argLine>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <configuration>
+                                <!--
+                                for IT where you need a forked JVM to run the tests you can use this system property to make sure that
+                                the JaCoCo agent correctly instruments your code
+                                set system property also via argLine as only that allows late evaluation -->
+                                <argLine>@{jacoco.command} -Djacoco.command=@{jacoco.command}</argLine>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
                 <plugins>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
+
                         <executions>
                             <execution>
-                                <id>default-prepare-agent</id>
+                                <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
+                                <!-- the same execution data file is used for both IT and UT-->
                                 <configuration>
-                                    <excludes>
-                                        <exclude>*</exclude>
-                                    </excludes>
+                                    <propertyName>jacoco.command</propertyName>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>jacoco-instrument</id>
-                                <goals>
-                                    <goal>instrument</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>jacoco-restore-instrumented-classes</id>
-                                <goals>
-                                    <goal>restore-instrumented-classes</goal>
-                                </goals>
-                            </execution>
-                            <execution>
                                 <id>report</id>
-                                <phase>prepare-package</phase>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
@@ -796,14 +760,17 @@ Service-Component: OSGI-INF/*.xml
                             </execution>
                         </executions>
                         <configuration>
-                            <cveValidForHours>24</cveValidForHours>
+                            <nvdValidForHours>24</nvdValidForHours>
                             <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
                             <skipProvidedScope>true</skipProvidedScope>
                             <skipSystemScope>true</skipSystemScope>
                             <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
                             <suppressionFiles>
-                                <suppressionFile>dependency-check-maven-plugin-suppression.xml</suppressionFile>
+                                <suppressionFile>${maven.multiModuleProjectDirectory}/dependency-check-maven-plugin-suppression.xml</suppressionFile>
                             </suppressionFiles>
+                            <!-- use the mirror provided by https://github.com/dependency-check/DependencyCheck_Builder which is updated daily -->
+                            <!-- compare with https://jeremylong.github.io/DependencyCheck/data/mirrornvd.html -->
+                            <nvdDatafeedUrl>https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/</nvdDatafeedUrl>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -874,18 +841,22 @@ Service-Component: OSGI-INF/*.xml
     </profiles>
 
     <distributionManagement>
-        <!-- the nexus-staging-maven-plugin only needs a snapshot repository -->
+        <repository>
+            <id>sonatype-central-portal</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>sonatype-central-portal</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
     <modules>
         <module>bundle</module>
-        <module>oakpal-checks</module>
+        <module>bundle-onprem</module>
         <module>ui.apps</module>
         <module>ui.content</module>
+        <module>ui.config</module>
         <module>all</module>
     </modules>
 </project>

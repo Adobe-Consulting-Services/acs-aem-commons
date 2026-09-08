@@ -141,7 +141,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
                 LOGGER.error("JSON does not contain an access_token");
             }
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Unable to fetch the access token", e);
         }
 
         LOGGER.info("JWT Access Token : {}", token);

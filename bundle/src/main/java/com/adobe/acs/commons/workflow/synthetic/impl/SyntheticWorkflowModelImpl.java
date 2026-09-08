@@ -24,7 +24,7 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.model.WorkflowModel;
 import com.day.cq.workflow.model.WorkflowNode;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

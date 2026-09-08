@@ -21,8 +21,7 @@ package com.adobe.acs.commons.reports.models;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
-
-import javax.inject.Inject;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 /**
  * Sling Model used for rendering PredictedTags in reports
@@ -30,11 +29,11 @@ import javax.inject.Inject;
 @Model(adaptables = Resource.class)
 public class PredictedTag {
 
-    @Inject
+    @ValueMapValue
     private String name;
-    @Inject
+    @ValueMapValue
     private Double confidence;
-    @Inject
+    @ValueMapValue
     private Boolean isCustom;
 
     public String getName() {

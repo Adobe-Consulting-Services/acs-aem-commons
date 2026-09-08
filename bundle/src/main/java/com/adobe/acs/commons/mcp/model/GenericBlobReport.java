@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
@@ -104,7 +104,6 @@ public class GenericBlobReport extends AbstractReport {
         } catch (IOException e) {
             LOG.error("Problems during de-serialization of report (path={})", blobreport.getPath(), e);
         }
-
     }
 
     @Override
@@ -126,7 +125,7 @@ public class GenericBlobReport extends AbstractReport {
             JsonNode elem = mapper.convertValue(properties, JsonNode.class);
             jsonRows.add(elem);
         }
-        Node parent = rr.getResource(path).adaptTo(Node.class);
+        Node parent = Optional.ofNullable(rr.getResource(path)).map(resource -> resource.adaptTo(Node.class)).orElse(null);
         if (parent != null) {
             try {
                 String jsonString = mapper.writeValueAsString(jsonRows);
@@ -144,6 +143,4 @@ public class GenericBlobReport extends AbstractReport {
             LOG.error("{} is not a JCR path, cannot persist report", path);
         }
     }
-
-    
 }

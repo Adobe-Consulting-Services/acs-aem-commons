@@ -20,7 +20,7 @@ package com.adobe.acs.commons.httpcache.invalidator;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.day.cq.wcm.commons.ReferenceSearch;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -110,7 +110,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
                 log.debug("invalidating {}", path);
                 httpCacheEngine.invalidateCache(path);
             } catch (HttpCacheException e){
-                log.debug("Job with the payload path - {} has invalidated the cache", path);
+                log.error("Job with the payload path - {} has invalidated the cache", path);
             }
         }
 
@@ -131,7 +131,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
 
             }
         } catch (Exception e){
-            log.debug("failed to invalidate references of {}", path);
+            log.error("failed to invalidate references of {}", path);
         }
     }
 }

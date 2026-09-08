@@ -40,15 +40,11 @@ public class CurrentEvolutionImpl implements Evolution {
 
     private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionImpl.class);
 
-    private final Resource resource;
     private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
-    private EvolutionConfig config;
 
     public CurrentEvolutionImpl(Resource resource, EvolutionConfig config) {
-        this.resource = resource;
-        this.config = config;
         try {
-            populate(this.resource, 0);
+            populate(resource, config, 0);
         } catch (RepositoryException e) {
             log.warn("Could not populate Evolution", e);
         }
@@ -74,7 +70,7 @@ public class CurrentEvolutionImpl implements Evolution {
         return Collections.unmodifiableList(this.versionEntries);
     }
 
-    private void populate(Resource r, int depth) throws PathNotFoundException, RepositoryException {
+    private void populate(Resource r, EvolutionConfig config, int depth) throws PathNotFoundException, RepositoryException {
         ValueMap map = r.getValueMap();
         List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
@@ -92,7 +88,7 @@ public class CurrentEvolutionImpl implements Evolution {
             String relPath = EvolutionPathUtil.getLastRelativeResourceName(child.getPath());
             if (config.handleResource(relPath)) {
                 versionEntries.add(new CurrentEvolutionEntryImpl(child, config));
-                populate(child, depth);
+                populate(child, config, depth);
             }
             depth--;
         }

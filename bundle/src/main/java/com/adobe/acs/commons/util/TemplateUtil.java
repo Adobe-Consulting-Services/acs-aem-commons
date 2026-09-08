@@ -17,10 +17,8 @@
  */
 package com.adobe.acs.commons.util;
 
-import javax.annotation.CheckForNull;
-
 import org.apache.sling.api.resource.ValueMap;
-
+import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.NameConstants;
@@ -43,7 +41,7 @@ public final class TemplateUtil {
      * @param templatePath the path of the template to check
      * @return true if the page is of the defined template
      */
-    public static boolean hasTemplate(@CheckForNull final Page page, @CheckForNull final String templatePath) {
+    public static boolean hasTemplate(@Nullable final Page page, @Nullable final String templatePath) {
         if (page == null) {
             return false;
         }
@@ -51,7 +49,7 @@ public final class TemplateUtil {
     }
 
     @SuppressWarnings("squid:S1144")
-    private static boolean hasTemplate(@CheckForNull final ValueMap valueMap, @CheckForNull final String templatePath) {
+    private static boolean hasTemplate(@Nullable final ValueMap valueMap, @Nullable final String templatePath) {
         if (valueMap != null && templatePath != null) {
             String path = valueMap.get(NameConstants.NN_TEMPLATE, String.class);
             if (templatePath.equals(path)) {

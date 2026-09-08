@@ -17,59 +17,38 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
-
-import com.adobe.acs.commons.http.headers.impl.WeeklyExpiresHeaderFilter;
+import org.osgi.util.converter.Converters;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WeeklyExpiresHeaderFilterTest {
 
-    WeeklyExpiresHeaderFilter filter = new WeeklyExpiresHeaderFilter();
-
-    Dictionary<String, Object> properties = null;
-
-    @Mock
-    ComponentContext componentContext;
-
     @Mock
     BundleContext bundleContext;
 
-    @Before
-    public void setup() throws Exception {
-        properties = new Hashtable<String, Object>();
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_TIME, "02:30");
-
-        when(componentContext.getProperties()).thenReturn(properties);
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        properties = null;
-        reset(componentContext, bundleContext);
+    WeeklyExpiresHeaderFilter createFilter(int dayOfWeek) {
+        Map<String, Object> props = new HashMap<>();
+        props.put("filter.pattern", new String[] { "/content/dam/.*" });
+        props.put("expires.time", "02:30");
+        props.put("expires.day-of-week", dayOfWeek);
+        WeeklyExpiresHeaderFilter.Config config = Converters.standardConverter().convert(props).to(WeeklyExpiresHeaderFilter.Config.class);
+        return new WeeklyExpiresHeaderFilter(config, bundleContext);
     }
 
     @Test
     public void testAdjustExpiresPastWeekday() throws Exception {
-
-
         Calendar actual = Calendar.getInstance();
         actual.set(Calendar.SECOND, 0);
         actual.set(Calendar.MILLISECOND, 0);
@@ -80,9 +59,7 @@ public class WeeklyExpiresHeaderFilterTest {
         expected.add(Calendar.DAY_OF_WEEK, 7);
 
         int dayOfWeek = expected.get(Calendar.DAY_OF_WEEK);
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, dayOfWeek);
-
-        filter.doActivate(componentContext);
+        WeeklyExpiresHeaderFilter filter = createFilter(dayOfWeek);
         filter.adjustExpires(actual);
 
         assertTrue(DateUtils.isSameInstant(expected, actual));
@@ -91,8 +68,6 @@ public class WeeklyExpiresHeaderFilterTest {
 
     @Test
     public void testAdjustExpiresSameDayPast() throws Exception {
-
-
         Calendar actual = Calendar.getInstance();
         actual.set(Calendar.SECOND, 0);
         actual.set(Calendar.MILLISECOND, 0);
@@ -102,9 +77,7 @@ public class WeeklyExpiresHeaderFilterTest {
         expected.add(Calendar.DAY_OF_WEEK, 7);
 
         int dayOfWeek = expected.get(Calendar.DAY_OF_WEEK);
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, dayOfWeek);
-
-        filter.doActivate(componentContext);
+        WeeklyExpiresHeaderFilter filter = createFilter(dayOfWeek);
         filter.adjustExpires(actual);
 
         assertTrue(DateUtils.isSameInstant(expected, actual));
@@ -113,8 +86,6 @@ public class WeeklyExpiresHeaderFilterTest {
 
     @Test
     public void testAdjustExpiresSameDayFuture() throws Exception {
-
-
         Calendar actual = Calendar.getInstance();
         actual.add(Calendar.MINUTE, 1);
         actual.set(Calendar.SECOND, 0);
@@ -123,9 +94,7 @@ public class WeeklyExpiresHeaderFilterTest {
         Calendar expected = Calendar.getInstance();
         expected.setTime(actual.getTime());
         int dayOfWeek = expected.get(Calendar.DAY_OF_WEEK);
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, dayOfWeek);
-
-        filter.doActivate(componentContext);
+        WeeklyExpiresHeaderFilter filter = createFilter(dayOfWeek);
         filter.adjustExpires(actual);
 
         assertTrue(DateUtils.isSameInstant(expected, actual));
@@ -134,8 +103,6 @@ public class WeeklyExpiresHeaderFilterTest {
 
     @Test
     public void testAdjustExpiresFutureWeekday() throws Exception {
-
-
         Calendar actual = Calendar.getInstance();
         actual.set(Calendar.SECOND, 0);
         actual.set(Calendar.MILLISECOND, 0);
@@ -144,30 +111,23 @@ public class WeeklyExpiresHeaderFilterTest {
         expected.setTime(actual.getTime());
         expected.add(Calendar.DAY_OF_WEEK, 2);
 
-        int dayOfweek = expected.get(Calendar.DAY_OF_WEEK);
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, dayOfweek);
-
-
-        filter.doActivate(componentContext);
+        int dayOfWeek = expected.get(Calendar.DAY_OF_WEEK);
+        WeeklyExpiresHeaderFilter filter = createFilter(dayOfWeek);
         filter.adjustExpires(actual);
 
         assertTrue(DateUtils.isSameInstant(expected, actual));
-        assertEquals(dayOfweek, actual.get(Calendar.DAY_OF_WEEK));
+        assertEquals(dayOfWeek, actual.get(Calendar.DAY_OF_WEEK));
     }
-
 
     @Test
     public void testDoActivateSuccess() throws Exception {
-
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, Calendar.SUNDAY);
-
         Calendar actual = Calendar.getInstance();
         actual.set(Calendar.SECOND, 0);
         actual.set(Calendar.MILLISECOND, 0);
         actual.set(Calendar.HOUR_OF_DAY, 1);
         actual.set(Calendar.MINUTE, 29);
 
-        filter.doActivate(componentContext);
+        WeeklyExpiresHeaderFilter filter = createFilter(Calendar.SUNDAY);
         filter.adjustExpires(actual);
 
         assertEquals(Calendar.SUNDAY, actual.get(Calendar.DAY_OF_WEEK));
@@ -176,28 +136,13 @@ public class WeeklyExpiresHeaderFilterTest {
         assertEquals(29, actual.get(Calendar.MINUTE));
     }
 
-    @Test(expected = ConfigurationException.class)
-    public void testDoActivateCallsParent() throws Exception {
-
-        properties.remove(WeeklyExpiresHeaderFilter.PROP_EXPIRES_TIME);
-        filter.doActivate(componentContext);
-    }
-
-    @Test(expected = ConfigurationException.class)
-    public void testDoActivateNoDayOfWeek() throws Exception {
-
-        filter.doActivate(componentContext);
-    }
-
-    @Test(expected = ConfigurationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testDoActivateInvalidLowDayOfWeek() throws Exception {
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, Calendar.SUNDAY - 1);
-        filter.doActivate(componentContext);
+        createFilter(Calendar.SUNDAY - 1);
     }
 
-    @Test(expected = ConfigurationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testDoActivateInvalidHighDayOfWeek() throws Exception {
-        properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_WEEK, Calendar.SATURDAY + 1);
-        filter.doActivate(componentContext);
+        createFilter(Calendar.SATURDAY + 1);
     }
 }

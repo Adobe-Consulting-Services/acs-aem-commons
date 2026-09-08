@@ -6,10 +6,322 @@ in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-<!-- Keep this up to date! After a release, change the tag name to the latest release -->- 
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->-
 
-## Unreleased ([details][unreleased changes details])
+## Unreleased
 
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
+
+### Fixed
+
+- #3757 Redirect Manager: catch IllegalArgumentException from URI.create() to prevent uncaught throwable on malicious/malformed request URLs
+- #2165 ResourceResolverMapTransformerFactory: stop decoding the query string/fragment of rewritten attributes, which allowed unescaped characters (eg. a double quote) to break out of the HTML attribute
+
+### Changed
+
+## [6.17.4] - 2026-06-20
+
+### Fixed
+
+- #3764 ACS AEM Commons 6.17.x cannot be deployed on AEM 6.5.21+
+- #3763 Fix URL Asset Import using stored Credentials
+- #3758 OverridePathSlingRequestWrapper: avoid repeated instantiation of SlingModelsScriptEngineFactory on every request
+- #3741 Reports tile hidden in Tools menu on AEM LTS (6.5.2.LTS) due to failing granite:rendercondition
+- #3164 Failed to construct URL when loading report with hash parameter
+
+### Changed
+
+- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
+- #3731 Redirect Manager: allow to delete all redirect manager rules below a common CAC path including the configuration node
+
+## [6.17.2] - 2026-05-05
+
+### Fixed 
+- #3716 Shade and relocate Handlebars
+- #3751 Ensure authorizable to onpremEnsure authorizable to onprem
+
+## [6.17.0] - 2026-04-29
+
+### Changed
+
+- #3644 All Result checkbox on Reports could be configurable 
+- #3732 Redirect Manager: evaluate "contextPrefixIgnored" for source path matching in addition to target path construction
+- #3734 RedirectManager: Support regular expression in source without capturing groups 
+- #3715 Add fallback logic for Page Root detection (Shared Component Properties) on Experience Fragments, Launches, and Version History
+
+### Fixed
+
+- #3730 RedirectManager: Trailing "*" in source path being converted to "(.*)" might destroy regular expression
+- #3718 Redirect Manager: Fix replacing sharded redirects from a spreadsheet 
+- #3742 Remove usage of Apache Tika 1.x
+
+## 6.16.0 - 2026-02-10
+
+### Changed
+
+- Respect com.day.cq.replication.Replicator's replicationStatusPerAgent setting in ReplicationStatusManagerImpl
+- #3682 Add "allow.authorized" flag for Cache Control header filter
+
+### Fixed
+
+- #3692 Redirect Manager: prevent java.lang.IllegalStateException in author logs when publishing redirects
+- #3683 RedirectFilter: Ignore Case value not showing in export
+- #3604 ClassCastException with org.apache.sling.distribution.DistributionRequestType in CloudDispatcherFlushRulesExecutor.handleEvent
+- #2524 Add dependency to enable PathField as report parameter. 
+
+## 6.15.4 - 2025-11-19
+
+### Changed
+
+- #3654 RedirectFilter should always emit a trace log if no entry was found
+- #3650 Clarify description of com.adobe.acs.commons.redirects.filter.RedirectFilter -> Request Extensions/Request Paths with regards to no values
+
+### Fixed
+
+- #3653 RedirectFilter.additionalHeaders() may duplicate Cache-Control headers
+- #3605 ACS Commons system notification page editor UI is broken
+
+## 6.15.0 - 2025-10-21
+
+### Changed
+
+- #3616 Content Sync: Fixed js errors when deleting configurations
+- #2745 Fixed circular dependency in EnsureOakIndex
+- #3631 Content Sync: refactor to use Sling Jobs
+- #3638 Redirect Manager: Fix search in tags property
+- #3627 Redirect Manager: Use bulk activation
+
+## 6.14.0 - 2025-07-15
+
+### Changed
+- #3636 Content Sync: support dedicated egress IP address
+- #3623 Content Sync: improve error handling
+
+## 6.14.0 - 2025-07-15
+
+### Changed
+
+- #3600 Content Sync: support OAuth authentication
+- #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
+- #3327 Update to mockito 5.x, which allows static mocking without needing mockito-inline. Java11+ is the standard nowadays, so we can use 5.x+
+- #3601 Content Sync: in case of an error print the exception and continue instead of aborting
+- #3596 Redirect Manager: com.adobe.acs.commons.redirects.servlets.* should expose error messages to end users
+- #3594 Redirect Manager: create parent structure if user enters a non-existing /conf path in Add Configuration.
+- #3626 Redirect Manager: Fix Replace Mode issue, delete only 'redirect-row' nodes
+
+### Fixed
+
+- #3582 Content Sync: fixed exception when deleting unknown resources on the target instance
+- #3579 Redirect manager: fulltext search toggle doesn't work
+
+## 6.12.0 - 2025-04-28
+
+### Changed
+
+- #3536 Granite Include Obscures included Resource Type
+- #3537 Content Sync: preserve mix:referenceable mixin on Assets and Content Fragments
+- #3551 Redirect Manager: correctly determine the redirect rules publication status for sharded and non-sharded redirects.
+- #3555 Content Sync: prevent timeout errors when sync-ing AEM cloud instances with large volumes of data
+- #3560 Redirect Manager: url-encode search terms in Full Text search mode
+- #3562 Fixed compilation errors in iscurrentusermemberof render condition
+- #3457 Allow disabling the ContentPolicyValueInjector
+
+ ## 6.11.0 - 2025-03-14
+
+### Changed
+- #3501 Redirect Manager: Large-Scale Import Optimization
+- #3507 - Rewrite javascript clientlibs when used in link tags for preloading.
+
+### Fixed
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+- #3539 - Fixed NPE issue in AcsCommonsConsoleAuthoringUIModeFilter, if cq-authoring-mode cookie is missing
+- Redirect Manager: ensure redirect configurations are orderable
+
+## 6.10.0 - 2024-12-13
+
+### Changed
+
+- #3494 - Remove offline instrumentation with Jacoco
+- #3509 - Redirect Manager: support combining query string in the target with query string in the request
+
+### Fixed
+
+- #3471 - EmailService not working due to unsatisfied reference to MailTemplateManager in AEM on prem
+- #3499 - MCP reports are not shown if the initial MCP job failed
+- #3497 - Redirect Manager: allow creating redirect configurations in a nested hierarchy
+- #3431 - Fix fontIconPicker javascript
+- #3526 - Downloading report causes "Writer already closed" error
+
+## 6.9.10 - 2024-12-13
+
+### Added
+
+- #3484 - Redirect Manager: A servlet to export redirects to a TXT file to use with pipeline-free redirects
+- #3480 - AEM Sites Copy Publish URLs
+
+### Fixed
+
+- #3479 - Fixed Configurations Model for Redirect Manager after change in "redirect" resource as "sling:Folder"
+- #3483 - Fixed issue with genericlist/body.jsp importing a class from an impl package.
+
+## 6.9.6 - 2024-11-20
+
+### Fixed
+
+- #3473 - Fix Broken Styling when the notification is active
+- #3474 - Fixed reintroduction of dependency to outdated Apache Commons Collections 3
+
+## 6.9.4 - 2024-11-07
+
+### Fixed
+
+- #3463 - Fixed syntax error in errorpagehandler default.jsp file
+
+## 6.9.2 - 2024-11-04
+
+### Fixed
+
+- #3464 - Fixed issue with IncludeDecoratorFilter not proceeding with chain
+
+## 6.9.0 - 2024-10-29
+
+### Fixed
+
+- #3459 - Top level properties in parameterized include are now respected.
+- #3460 - Fixes issue where double parameters were not working for the parameterized include
+- #3443 - Content Sync: don't drill down into content tree if recursion is off
+
+### Changed
+
+- #3385 Made nesting parameterized includes inside a multi-field (ignored resource types) possible
+
+## 6.8.0 - 2024-10-17
+
+### Added
+
+- #3448 - Adding support for URIs that should not use ErrorHandlerService using regex
+
+## 6.7.0 - 2024-10-01
+
+### Added
+
+- #3415 - Allow Robots.txt generation to serve different file by requested resource path
+- #3426 - Content Sync: view history of completed jobs
+- #3417 - Configurable recursion in Content Sync
+
+### Changed
+
+- #3420 - Redirect Map Manager - enable Redirect Map Manager in AEM CS (requires AEM CS release version 18311 or higher)
+- #3429 - UI Widgets - add uniq function to embedded lodash library to resolve issue with composite multifield widget
+- #3423 - Redirect Manager - status code is not retaining its value in the dialog after authoring
+- #3417 - Configurable recursion in Content Sync
+
+### Fixed
+
+- #3413 - Redirect Manager: Interface triggers an error because of wrong deprecated resource type
+
+## 6.6.4 - 2024-08-14
+
+### Fixed
+
+- #3380 - Remove forced red theme from system notification text body
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than
+  expected
+- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
+- #3357 - Added debugging and null checking to ReferencesModel to prevent NPE
+- #3398 - CreateRedirectConfigurationServlet throws PersistenceException when ancestor node types are different than
+  expected
+- #3275 - CCVAR: Fixed Same Attribute not updating correctly.
+- #3402 - EnsureOakIndexManagerImpl does not pick up changes in EnsureOakIndex configurations.
+
+### Changed
+
+- #3403 - Replace deprecated com.day.cq.contentsync.handler.util.RequestResponseFactory by
+  SlingHttpServletRequestBuilder
+- #3376 - Redirect Manager: refactor code to not require service user
+- #3408 - Reduce usage of Apache Commons Lang 2
+- #3401 - Move SyslogAppender into separate bundle for onprem only. SyslogAppender does not work in Cloud Service.
+- #3390 - Remove usage of commons collections 3
+
+## 6.6.2 - 2024-06-25
+
+### Fixed
+
+- #3355 - Fixed system notifications dismissal, and upgraded to CoralUI 3.
+
+### Added
+
+- #3333 - Use lodash embedded by ACS AEM Commons
+- #3323 - Add Provider Type Checker Plugin
+- #3338 - Prevent URL modification on dismiss
+
+### Fixed
+
+- #3241 - Fix overlapping Service-Component header entries leading to double registration of components
+- #3362 - Prevent System notification while exporting / updating experience fragment to Adobe Target
+
+## 6.6.0 - 2024-04-15
+
+## Added
+
+- #3308 - Added fulltext search support to Redirect Manager
+- #3306 - Sling Model Page injector
+- #3306 - Sling Model Content Policy injector
+- #3306 - Sling Model Tag injector
+- #3320 - Content Sync: add an option to disable ssl cert check
+
+### Fixed
+
+- #3310 - User mapping | moved author specific user mapping from config to config.author
+- #3301 - CM report fix WrongLogLevelInCatchBlock issue
+- #2854 - Code optimization: convert class fields to local variables
+- #2279 - Unit tests coverage for Deck Dynamo: servlet and service configuration
+- #3319 - Grant permissions to read redirects to everyone instead of anonymous
+
+## 6.5.0 - 2024-03-22
+
+### Changed
+
+- #3267 - Remove JSR305 dependency
+- #3262 - Allow to configure Component/BundleDisabler via Configuration Factories
+- #3296 - Add image cropping customisation
+
+### Fixed
+
+- #3270 - Re-enable accidentally disabled JUnit3/4 tests
+- #3200 - Remove useless public interface in Cloud Bundle to get javadocs to be built
+- #3294 - Cloud manager report issues partial fix
+- #3295 - Updated the annotations in QueryReportConfig fixing the query manager issue due to empty query language
+- #3284 - Allow anonymous to read redirect caconfig options
+
+## 6.4.0 - 2024-02-22
+
+## Added
+
+- #3238 - Content Sync make timeouts configurable
+- #3235 - Add an option to ignore selectors in the url.
+
+### Fix
+
+- #3264 - NullPointerException while displaying MCP forms
+
+## 6.3.8 - 2024-02-02
+
+### Fix
+
+- #3252 - Check if maxage header value is valid before setting it.
+
+## 6.3.6 - 2024-01-22
+
+### Fix
+
+- #3246 - PackageGarbageCollector is not cleaning up all packages since v6.3.4 (##3225)
+
+## 6.3.4 - 2024-01-17
+
+- #3223 - Project with class extending WCMUsePojo leads to build error: cannot access aQute.bnd.annotation.ConsumerType
+- #3225 - PackageGarbageCollector leaves temp files behind
 - #3187 - Remove warning during build on Java 11 or higher when DialogProviderAnnotationProcessor is invoked
 - #3242 - Actually update lodash to 4.17.21 (was mistakenly updated to 4.17.15 instead of 4.17.21)
 
@@ -17,8 +329,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 - #3162 - Renovator MCP: ensure old source path is removed
 - #3205 - HttpClientFactory: Expose a method to customize the underlying HttpClient
-- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<java.lang.String>
-- #3197 - Encrypt user credentials in ACS Content Sync   
+- #3209 - WARN org.apache.sling.models.impl.ModelAdapterFactory - Cannot provide default for java.util.List<
+  java.lang.String>
+- #3197 - Encrypt user credentials in ACS Content Sync
 - #3196 - Content Sync: prevent exception when creating parent nodes
 - #3194 - Redirect Manager: Ignore Case value is not persisting
 
@@ -38,19 +351,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Removed
 
-- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in Cloud Manager pipelines.
-  
+- #3183 - Removed .wrap package including JackrabbitSessionIWrap and related classes which is no longer supported in
+  Cloud Manager pipelines.
+
 ## 6.1.0 - 2023-09-08
 
 ## Added
 
 - #3159 - Add PageProperty annotation for Sling Models
 - #3170 - Added a new MCP tool to bulk tag AEM content pages via an Excel file input.
+
 ## Fixed
 
 - #3147 - Fixed setting initial content-type when importing CFs from a spreadsheet
 - #3040 - Fixed bug where namespaced multi-fields would have the namespace 2 times
-- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now displays more friendly values in UI to help remove the invalid nodes.
+- #3140 - Fixed issue where malformed MCP process nodes can cause a NPE that breaks the entire MPC reporting UI. Now
+  displays more friendly values in UI to help remove the invalid nodes.
 - #3150 - Support for case-insensitive redirect rules ( [NC] flag equivalent of apache)
 - #3138 - Re-arrange action removes data from redirect node
 

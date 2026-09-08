@@ -23,6 +23,8 @@ import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.designer.Style;
+import com.day.cq.wcm.api.policies.ContentPolicy;
+import com.day.cq.wcm.api.policies.ContentPolicyManager;
 import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -54,6 +56,36 @@ public class InjectorUtils {
         return null;
     }
 
+    public static ContentPolicy getContentPolicy(Object adaptable){
+        ResourceResolver resourceResolver = getResourceResolver(adaptable);
+        Resource resource = getResource(adaptable);
+
+        if (resourceResolver != null && resource != null) {
+
+            ContentPolicyManager manager = resourceResolver.adaptTo(ContentPolicyManager.class);
+
+            if(manager == null){
+                return  null;
+            }
+
+            final ContentPolicy policy;
+            if(adaptable instanceof SlingHttpServletRequest){
+                SlingHttpServletRequest request = (SlingHttpServletRequest) adaptable;
+                return manager.getPolicy(resource, request);
+            }else{
+                return manager.getPolicy(resource);
+            }
+        }
+        return null;
+    }
+
+    public static <T> T adaptFromResourceResolver(Object adaptable, Class<T> clazz){
+        ResourceResolver resourceResolver = getResourceResolver(adaptable);
+        if(resourceResolver != null){
+            return resourceResolver.adaptTo(clazz);
+        }
+        return null;
+    }
     public static ResourceResolver getResourceResolver(Object adaptable) {
         if (adaptable instanceof SlingHttpServletRequest) {
             return ((SlingHttpServletRequest) adaptable).getResourceResolver();

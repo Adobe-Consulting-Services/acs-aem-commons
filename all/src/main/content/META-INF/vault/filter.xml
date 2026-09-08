@@ -18,8 +18,5 @@
   -->
 
 <workspaceFilter version="1.0">
-    <filter root="/apps/acs-commons/config"/>
-    <filter root="/apps/acs-commons/config.author"/>
-    <filter root="/apps/acs-commons/config.publish"/>
-    <filter root="/apps/acs-commons/config.rde" type="cleanup"/>
+    <filter root="/apps/acs-commons/install"/>
 </workspaceFilter>

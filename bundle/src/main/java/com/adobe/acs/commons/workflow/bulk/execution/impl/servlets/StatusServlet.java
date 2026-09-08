@@ -30,11 +30,12 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ import java.util.Calendar;
  */
 @SuppressWarnings("serial")
 @SlingServlet(
-        methods = {"GET"},
+        methods = {HttpConstants.METHOD_GET},
         resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
         selectors = {"status"},
         extensions = {"json"}

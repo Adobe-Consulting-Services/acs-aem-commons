@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Bundle-SymbolicName: com.adobe.testz.package-imports
-Bundle-Version: 1.0.0
-Import-Package: com.day.cq.search;version="[2.0.0,3.0.0)"

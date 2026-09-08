@@ -17,10 +17,9 @@
  */
 package com.adobe.acs.commons.reports.models;
 
-import javax.inject.Inject;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 /**
  * Model for configuring a query-based report result.
@@ -28,12 +27,12 @@ import org.apache.sling.models.annotations.Model;
 @Model(adaptables = Resource.class)
 public interface QueryReportConfig {
 
-  @Inject
+  @ValueMapValue
   int getPageSize();
 
-  @Inject
+  @ValueMapValue
   String getQuery();
 
-  @Inject
+  @ValueMapValue
   String getQueryLanguage();
 }

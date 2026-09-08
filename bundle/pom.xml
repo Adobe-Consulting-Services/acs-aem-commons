@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>6.3.3-SNAPSHOT</version>
+        <version>6.17.5-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -46,9 +46,45 @@
     <build>
 
         <plugins>
+            <!-- extract only api-info.json from aem-sdk-api for provider type checks -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>extract-api-info-json-from-aem-sdk</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.adobe.aem</groupId>
+                                    <artifactId>aem-sdk-api</artifactId>
+                                    <version>${aem.sdk.api.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/aem-sdk-api-info</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>META-INF/api-info.json</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
+                <dependencies>
+                    <!-- https://github.com/apache/felix/tree/trunk/tools/org.apache.felix.scr.bnd, processes deprecated SCR annotations
+                        with the Bnd process -->
+                    <dependency>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.apache.felix.scr.bnd</artifactId>
+                        <version>1.9.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -121,7 +157,7 @@
                         <configuration>
                             <rules>
                                 <bannedDependencies>
-                                    <!-- here we need to explicitly list the set of dependencies which 
+                                    <!-- here we need to explicitly list the set of dependencies which
                                     are allowed with scope=compile -->
                                     <includes>
                                         <include>com.google.guava:*</include>
@@ -130,6 +166,8 @@
                                         <include>io.jsonwebtoken:jjwt-gson</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
+                                        <include>com.github.jknack:*</include>
+                                        <include>org.jsoup:jsoup</include>
                                     </includes>
                                 </bannedDependencies>
                             </rules>
@@ -140,7 +178,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -158,25 +195,36 @@
                                     <include>io.jsonwebtoken:jjwt-api</include>
                                     <include>io.jsonwebtoken:jjwt-impl</include>
                                     <include>io.jsonwebtoken:jjwt-gson</include>
+                                    <include>com.github.jknack:handlebars</include>
+                                    <include>org.jsoup:jsoup</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
+                                <!-- due to https://github.com/apache/maven-shade-plugin/issues/478 use a shaded name which doesn't include the original name -->
                                 <relocation>
                                     <pattern>com.google.common</pattern>
-                                    <shadedPattern>acscommons.com.google.common</shadedPattern>
+                                    <shadedPattern>acscommons.google.common</shadedPattern>
                                 </relocation>
                                 <!-- contained in guava as well -->
                                 <relocation>
                                     <pattern>com.google.thirdparty</pattern>
-                                    <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
+                                    <shadedPattern>acscommons.google.thirdparty</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.jcraft</pattern>
-                                    <shadedPattern>acscommons.com.jcraft</shadedPattern>
+                                    <shadedPattern>acscommons.jcraft</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>io.jsonwebtoken</pattern>
-                                    <shadedPattern>acscommons.io.jsonwebtoken</shadedPattern>
+                                    <shadedPattern>acscommons.jsonwebtoken</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.github.jknack.handlebars</pattern>
+                                    <shadedPattern>acscommons.github.jknack.handlebars</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.jsoup</pattern>
+                                    <shadedPattern>acscommons.jsoup</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
@@ -216,7 +264,27 @@
                                         <include>io/jsonwebtoken/**</include>
                                     </includes>
                                 </filter>
+                                <filter>
+                                    <artifact>com.github.jknack:handlebars</artifact>
+                                    <!-- do not filter files from that dependency as it contains also resources outside the namespace com.github.jknack.handlebars
+                                         those are just left not relocated, but included in the final artifact as is, which is fine as they don't cause any conflicts
+                                    -->
+                                </filter>
+                                <filter>
+                                    <artifact>org.jsoup:jsoup</artifact>
+                                    <includes>
+                                        <include>org/jsoup/**</include>
+                                    </includes>
+                                </filter>
                             </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <!-- overwrite Service-Component again, as incorrectly merged by Felix SCR Bnd Plugin -->
+                                        <Service-Component>OSGI-INF/*.xml</Service-Component>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
@@ -255,6 +323,17 @@
                 <artifactId>guava</artifactId>
                 <version>32.0.0-jre</version>
             </dependency>
+            <!-- use and shade newer Handlebars version than shipped with AEM -->
+            <dependency>
+                <groupId>com.github.jknack</groupId>
+                <artifactId>handlebars</artifactId>
+                <version>4.3.1</version><!-- last version compatible with Java 8-->
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.22.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -283,11 +362,6 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.servlets.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -356,6 +430,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.event</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
@@ -365,7 +444,6 @@
             <artifactId>javax.mail-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- for com.adobe.acs.commons.logging.impl.SyslogAppender  -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -395,11 +473,6 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.jknack</groupId>
-            <artifactId>handlebars</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- END runtime dependencies not contained in uber-jar -->
@@ -462,8 +535,8 @@
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
-        <!-- Due to the split of the JJWT library we need  
-                  - the api for compilation 
+        <!-- Due to the split of the JJWT library we need
+                  - the api for compilation
                   - and the impl for embedding together with
                   - the extension for serialization/deserialization support -->
         <dependency>
@@ -490,17 +563,38 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <!-- END: shaded and relocated dependencies -->
         <!-- ======================== -->
         <!-- START: test dependencies -->
         <dependency>
             <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
+            <artifactId>hamcrest</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -514,8 +608,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit-addons</groupId>
-            <artifactId>junit-addons</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -593,12 +687,6 @@
             <artifactId>org.apache.sling.models.impl</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.commons.html</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
         <!-- the custom annotation for AemObject -->
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -632,23 +720,27 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit5</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.wcm</groupId>
+            <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>com.drewnoakes</groupId>
-                    <artifactId>metadata-extractor</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>com.google.code.gson</groupId>
-                    <artifactId>gson</artifactId>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>oak-jcr</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>io.wcm</groupId>
-            <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
+            <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -669,10 +761,6 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.tika</groupId>
-                    <artifactId>tika-core</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.jackrabbit</groupId>

@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.contentsync;
 
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -27,56 +30,115 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.security.GeneralSecurityException;
+import java.util.*;
 import java.util.stream.Collectors;
+
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * HTTP connection to a remote AEM instance + some sugar methods to fetch data
  */
 public class RemoteInstance implements Closeable {
-    private static final int CONNECT_TIMEOUT = 5000;
-    private static final int SOCKET_TIMEOUT = 60000;
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final CloseableHttpClient httpClient;
     private final SyncHostConfiguration hostConfiguration;
 
-    public RemoteInstance(SyncHostConfiguration hostConfiguration) {
-        this.hostConfiguration = hostConfiguration;
-        this.httpClient = createHttpClient();
+    @Deprecated
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings) throws GeneralSecurityException, IOException {
+        throw new RuntimeException("@Deprecated");
     }
 
-    private CloseableHttpClient createHttpClient() {
-        BasicCredentialsProvider provider = new BasicCredentialsProvider();
-        provider.setCredentials(
-                AuthScope.ANY,
-                new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
-        RequestConfig requestConfig = RequestConfig
+    @Deprecated
+    public RemoteInstance(SyncHostConfiguration hostConfiguration, ValueMap generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        throw new RuntimeException("@Deprecated");
+    }
+
+    public RemoteInstance(HttpClientBuilderFactory builderFactory, SyncHostConfiguration hostConfiguration, GeneralSettingsModel generalSettings, IntegrationService integrationService) throws GeneralSecurityException, IOException {
+        this.hostConfiguration = hostConfiguration;
+        this.httpClient = createHttpClient(builderFactory.newBuilder(), hostConfiguration, generalSettings,  integrationService);
+    }
+
+    private CloseableHttpClient createHttpClient(HttpClientBuilder builder, SyncHostConfiguration hostConfiguration, GeneralSettingsModel generalSettings, IntegrationService integrationService)
+            throws GeneralSecurityException {
+        setAuthentication(hostConfiguration, builder, integrationService);
+        int soTimeout = generalSettings.getSocketTimeout();
+        int connTimeout = generalSettings.getConnectTimeout();
+        boolean disableCertCheck = generalSettings.isDisableCertCheck();
+        RequestConfig.Builder requestConfig = RequestConfig
                 .custom()
-                .setConnectTimeout(CONNECT_TIMEOUT)
-                .setSocketTimeout(SOCKET_TIMEOUT)
-                .setCookieSpec(CookieSpecs.STANDARD).build();
-        return
-                HttpClients.custom()
-                        .setDefaultRequestConfig(requestConfig)
-                        .setDefaultCredentialsProvider(provider)
-                        .build();
+                .setConnectTimeout(connTimeout)
+                .setSocketTimeout(soTimeout)
+                .setCookieSpec(CookieSpecs.STANDARD);
+        String proxyHost = System.getenv("AEM_PROXY_HOST");
+        if (proxyHost != null) {
+            int proxyPort = Integer.parseInt(System.getenv().getOrDefault("AEM_HTTPS_PROXY_PORT", "3128"));
+            log.debug("AEM_PROXY_HOST: {}, AEM_HTTPS_PROXY_PORT: {}", proxyHost, proxyPort);
+            requestConfig.setProxy(new HttpHost(proxyHost, proxyPort));
+        }
+        builder.setDefaultRequestConfig(requestConfig.build());
+        if (disableCertCheck) {
+            // Disable hostname verification and allow self-signed certificates
+            SSLContextBuilder sslbuilder = new SSLContextBuilder();
+            sslbuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                    sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
+            builder.setSSLSocketFactory(sslsf);
+        }
+        return builder.build();
+    }
+
+    void setAuthentication(SyncHostConfiguration hostConfiguration, HttpClientBuilder builder, IntegrationService integrationService){
+        if (hostConfiguration.isOAuthEnabled()) {
+            // If OAuth is enabled, use the AccessTokenProvider to get the token
+            try {
+                // the lifetime of Adobe's tokens is 24 hours, enough to request once and re-use across all the calls
+                String accessToken = integrationService.getAccessToken();
+                builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    request.addHeader("Authorization", "Bearer " + accessToken);
+                });
+            } catch (Exception e) {
+                String msg = String.format("Failed to get an access token: %s.", e.getMessage());
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            // If username and password are set, use them for basic authentication
+            BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            provider.setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials(hostConfiguration.getUsername(), hostConfiguration.getPassword()));
+            builder.setDefaultCredentialsProvider(provider);
+        }
+
+    }
+
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
     }
 
     public InputStream getStream(String path) throws IOException, URISyntaxException {
@@ -86,26 +148,36 @@ public class RemoteInstance implements Closeable {
     }
 
     public InputStream getStream(URI uri ) throws IOException {
+        log.debug("getStream: {}", uri);
         HttpGet request = new HttpGet(uri);
         CloseableHttpResponse response = httpClient.execute(request);
-        String msg;
-        switch (response.getStatusLine().getStatusCode()){
-            case HttpStatus.SC_OK:
-                return response.getEntity().getContent();
-            case HttpStatus.SC_MULTIPLE_CHOICES:
-                msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
-                        "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
-                throw new IOException(msg);
-            default:
-                msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + EntityUtils.toString(response.getEntity()));
-                throw new IOException(msg);
+        int statusCode = response.getStatusLine().getStatusCode();
+        log.debug("getStream() statusCode: {}", response.getStatusLine().getStatusCode());
+        if (statusCode == HttpStatus.SC_OK){
+            return response.getEntity().getContent();
+        } else {
+            String textResponse = response.getEntity() == null ? "" : EntityUtils.toString(response.getEntity());
+            String msg;
+            switch (statusCode){
+                case HttpStatus.SC_MULTIPLE_CHOICES:
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(),
+                            "It seems that the \"Json Max Results\" in Sling Get Servlet is too low. Increase it to a higher value, e.g. 1000.");
+                    throw new IOException(msg);
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new FileNotFoundException("Not found: " + uri);
+                default:
+                    msg = formatError(uri.toString(), response.getStatusLine().getStatusCode(), "Response: " + textResponse);
+                    throw new IOException(msg);
+            }
         }
     }
 
     public String getString(URI uri) throws IOException {
+        log.debug("getString: {}", uri);
         HttpGet request = new HttpGet(uri);
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             String str = EntityUtils.toString(response.getEntity());
+            log.debug("getString() statusCode: {}", response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 return str;
             } else {
@@ -131,6 +203,7 @@ public class RemoteInstance implements Closeable {
 
     public List<String> listChildren(String path) throws IOException, URISyntaxException {
         List<String> children;
+        log.debug("listChildren: {}", path);
         try (InputStream is = getStream(path + ".1.json"); JsonReader reader = Json.createReader(is)) {
             children = reader
                     .readObject()
@@ -139,6 +212,8 @@ public class RemoteInstance implements Closeable {
                     .filter(entry -> entry.getValue().getValueType() == JsonValue.ValueType.OBJECT)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
+        } catch (FileNotFoundException e){
+            children = Collections.emptyList();
         }
         return children;
     }
@@ -171,5 +246,9 @@ public class RemoteInstance implements Closeable {
     @Override
     public void close() throws IOException {
         httpClient.close();
+    }
+
+    public SyncHostConfiguration getHostConfiguration(){
+        return hostConfiguration;
     }
 }

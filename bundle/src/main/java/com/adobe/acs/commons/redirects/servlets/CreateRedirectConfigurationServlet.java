@@ -30,6 +30,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.apache.sling.servlets.post.HtmlResponse;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -78,7 +80,8 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
         ResourceResolver resolver = request.getResourceResolver();
         Resource root = resolver.getResource(rootPath);
         if(root == null){
-            throw new IllegalArgumentException("not found: " + rootPath);
+            root = ResourceUtil.getOrCreateResource(resolver, rootPath, JcrResourceConstants.NT_SLING_FOLDER,
+                    JcrResourceConstants.NT_SLING_FOLDER, false);
         }
 
         Map<String, String> rsp = new HashMap<>();
@@ -89,7 +92,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             Resource bucket = root.getChild(bucketName);
             if (bucket == null) {
                 bucket = resolver.create(root, bucketName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, "sling:Folder"));
+                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_FOLDER));
                 log.info("created {}", bucket.getPath());
             }
 
@@ -97,7 +100,7 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
             if (config == null) {
                 String contextPrefix = StringUtils.defaultString(request.getParameter(REQ_PARAM_CTX_PREFIX));
                 config = resolver.create(bucket, configName,
-                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED,
+                        ImmutableMap.of(JcrConstants.JCR_PRIMARYTYPE, JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
                                 ResourceResolver.PROPERTY_RESOURCE_TYPE, REDIRECTS_RESOURCE_PATH,
                                 REQ_PARAM_CTX_PREFIX, contextPrefix));
                 log.info("created {} with context prefix '{}'", config.getPath(), contextPrefix);
@@ -110,11 +113,11 @@ public class CreateRedirectConfigurationServlet extends SlingAllMethodsServlet {
                 rsp.put("message", msg);
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
             }
-        } catch(PersistenceException e){
-            rsp.put("message", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (PersistenceException e) {
+            HtmlResponse htmlResponse = new HtmlResponse();
+            htmlResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            htmlResponse.send(response, true);
             log.error("failed to create configuration", e);
-
         }
         om.writeValue(response.getWriter(), rsp);
 

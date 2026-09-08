@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 import javax.jcr.Session;
 
 import org.apache.jackrabbit.api.JackrabbitSession;
@@ -37,6 +36,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

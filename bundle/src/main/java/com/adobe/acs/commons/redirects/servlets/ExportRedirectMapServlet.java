@@ -27,18 +27,20 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.servlets.post.HtmlResponse;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
@@ -61,27 +63,33 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(ExportRedirectMapServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
 
-    static final String SPREADSHEETML_SHEET = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    static final String CONTENT_TYPE_EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException {
+        try {
+            String path = request.getParameter("path");
+            Resource root = request.getResourceResolver().getResource(path);
+            log.debug("Requesting redirect maps from {}", path);
 
-        String path = request.getParameter("path");
-        Resource root = request.getResourceResolver().getResource(path);
-        log.debug("Requesting redirect maps from {}", path);
+            Collection<RedirectRule> rules = RedirectFilter.getRules(root);
+            Workbook wb = export(rules);
 
-        Collection<RedirectRule> rules = RedirectFilter.getRules(root);
-        XSSFWorkbook wb = export(rules);
-
-        response.setContentType(SPREADSHEETML_SHEET);
-        response.setHeader("Content-Disposition", "attachment;filename=\"acs-redirects.xlsx\" ");
-        wb.write(response.getOutputStream());
+            response.setContentType(CONTENT_TYPE_EXCEL);
+            String fileName = root.getParent().getParent().getName() + "-redirects";
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + ".xlsx\" ");
+            wb.write(response.getOutputStream());
+        } catch (IOException e){
+            HtmlResponse htmlResponse = new HtmlResponse();
+            htmlResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to export redirects: " + e.getMessage());
+            htmlResponse.send(response, true);
+        }
     }
 
-    static XSSFWorkbook export(Collection<RedirectRule> rules) {
-        XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFCellStyle headerStyle = wb.createCellStyle();
+    static Workbook export(Collection<RedirectRule> rules) {
+        Workbook wb = new SXSSFWorkbook();
+        CellStyle headerStyle = wb.createCellStyle();
         headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         Font headerFont = wb.createFont();
@@ -117,6 +125,9 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         headerRow.createCell(11).setCellValue(ExportColumn.MODIFIED.getTitle());
         headerRow.createCell(12).setCellValue(ExportColumn.MODIFIED_BY.getTitle());
         headerRow.createCell(13).setCellValue(ExportColumn.CACHE_CONTROL.getTitle());
+        headerRow.createCell(14).setCellValue(ExportColumn.PRESERVE_QUERY_STRING.getTitle());
+        headerRow.createCell(15).setCellValue(ExportColumn.IGNORE_CASE.getTitle());
+        headerRow.createCell(16).setCellValue(ExportColumn.MATCH_TYPE.getTitle());
 
         // column width in POI is measured in 1/256th of the default character width
         sheet.setColumnWidth(0, 256 * 50);
@@ -133,6 +144,9 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
         sheet.setColumnWidth(11, 256 * 12);
         sheet.setColumnWidth(12, 256 * 30);
         sheet.setColumnWidth(13, 256 * 30);
+        sheet.setColumnWidth(14, 256 * 12);
+        sheet.setColumnWidth(15, 256 * 12);
+        sheet.setColumnWidth(16, 256 * 20);
 
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
@@ -185,8 +199,19 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
 
             Cell cell11 = row.createCell(13);
             cell11.setCellValue(rule.getCacheControlHeader());
+
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(rule.getPreserveQueryString());
+
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(rule.isCaseInsensitive());
+
+            Cell cell16 = row.createCell(16);
+            if (rule.getMatchType() != null) {
+                cell16.setCellValue(rule.getMatchType().name());
+            }
         }
-        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 13));
+        sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 16));
 
         return wb;
     }

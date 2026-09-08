@@ -26,8 +26,4 @@
           href="/acs-commons.html/etc/acs-commons/redirect-maps"
           id="acs-commons__redirect-maps"
           target="_blank">
-    <granite:rendercondition
-            jcr:primaryType="nt:unstructured"
-            sling:resourceType="acs-commons/console/renderconditions/require-aem"
-            distribution="classic"/>
 </jcr:root>

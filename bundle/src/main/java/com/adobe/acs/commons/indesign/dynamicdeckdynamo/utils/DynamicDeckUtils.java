@@ -161,11 +161,11 @@ public final class DynamicDeckUtils {
     public static InputStream getInddXmlRenditionInputStream(Resource assetResource) throws DynamicDeckDynamoException {
 
         String renditionName = StringUtils.replace(assetResource.getName(), ".indd", ".xml");
-        Rendition xmlRenditionAsset = assetResource.adaptTo(Asset.class).getRendition(renditionName);
 
-        if (null == xmlRenditionAsset) {
-            throw new DynamicDeckDynamoException("Asset xml rendition doesn't exists");
-        }
+        Rendition xmlRenditionAsset = Optional.ofNullable(assetResource.adaptTo(Asset.class))
+                .map(asset -> asset.getRendition(renditionName))
+                .orElseThrow(() -> new DynamicDeckDynamoException("Asset xml rendition doesn't exist"));
+
         return getInputStreamByResource(xmlRenditionAsset.adaptTo(Resource.class));
     }
 

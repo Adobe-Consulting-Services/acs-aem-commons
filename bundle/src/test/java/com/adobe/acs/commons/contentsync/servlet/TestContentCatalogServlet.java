@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.contentsync.servlet;
 
-import com.adobe.acs.commons.contentsync.CatalogItem;
 import com.adobe.acs.commons.contentsync.UpdateStrategy;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.ResourceNotFoundException;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.event.jobs.Job;
+import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
@@ -32,18 +35,20 @@ import org.junit.Test;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import java.io.IOException;
+import javax.json.JsonReader;
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static com.adobe.acs.commons.contentsync.ContentCatalogJobConsumer.JOB_TOPIC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestContentCatalogServlet {
     @Rule
@@ -51,101 +56,206 @@ public class TestContentCatalogServlet {
 
     private ContentCatalogServlet servlet;
     private UpdateStrategy updateStrategy;
+    private JobManager jobManager;
 
     @Before
     public void setUp() {
+
         updateStrategy = mock(UpdateStrategy.class);
+        jobManager = mock(JobManager.class);
         context.registerService(UpdateStrategy.class, updateStrategy);
+        context.registerService(JobManager.class, jobManager);
         servlet = context.registerInjectActivateService(new ContentCatalogServlet());
     }
 
     @Test
-    public void testMissingRequiredParameters() throws IOException {
-        doAnswer(invocation -> {
-            throw new IllegalArgumentException("root request parameter is required");
-        }).when(updateStrategy).getItems(eq(context.request()));
+    public void testSubmitNewJob() throws Exception {
 
+        String jobId = "2025/4/10/test-job";
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.QUEUED);
+        when(jobManager.addJob(eq(JOB_TOPIC), anyMap())).thenReturn(job);
+
+        // Execute
         MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter("root", "/content/test");
         MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
-        assertEquals(SC_INTERNAL_SERVER_ERROR, response.getStatus());
-        JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-        assertEquals("root request parameter is required", jsonResponse.getString("error"));
+        // Verify
+        assertEquals("application/json", response.getContentType());
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("QUEUED", result.getString("status"));
+    }
+
+    @Test
+    public void testFailedJobHaveErrorMessage() throws Exception {
+        // Setup
+        String jobId = "2025/4/10/test-job";
+        when(jobManager.getJobById(jobId)).thenReturn(null);
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.ERROR);
+        doReturn(new String[]{"Something went wrong"}).when(job).getProperty(eq(Job.PROPERTY_JOB_PROGRESS_LOG));
+        when(jobManager.getJobById(jobId)).thenReturn(job);
+        when(jobManager.getJobById(jobId)).thenReturn(job);
+
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter("jobId", jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.ERROR);
+
+        // Execute
+        MockSlingHttpServletResponse response = context.response();
+        servlet.doGet(request, response);
+
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("ERROR", result.getString("status"));
+        assertEquals("Something went wrong", result.getString(Job.PROPERTY_JOB_PROGRESS_LOG));
+    }
+
+    @Test
+    public void testJobNotFoundException() throws Exception {
+        // Setup
+        String jobId = "2025/4/10/test-job";
+
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter("jobId", jobId);
+
+        // Execute
+        MockSlingHttpServletResponse response = context.response();
+        servlet.doGet(request, response);
+
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("ERROR", result.getString("status"));
+        String msg = result.getString(Job.PROPERTY_JOB_PROGRESS_LOG);
+        assertTrue(msg, msg.contains("Sling job was not found by id"));
     }
 
     /**
-     * return an empty array if the requested path does not exist
+     * The job results node was not found
      */
     @Test
-    public void testContentTreeDoesNotExist() throws IOException {
+    public void testJobResultsNotFoundException() throws Exception {
+        // Setup
+        String jobId = "2025/4/10/test-job";
+
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        doReturn(new String[]{"Something went wrong"}).when(job).getProperty(eq(Job.PROPERTY_JOB_PROGRESS_LOG));
+        when(jobManager.getJobById(jobId)).thenReturn(job);
+
         MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", "/content/wknd");
+        request.addRequestParameter("jobId", jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.ERROR);
+
+        // Execute
         MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
-        assertEquals("application/json", response.getContentType());
-        assertEquals(SC_OK, response.getStatus());
-        JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-        assertTrue("resources[] is missing in the response json", jsonResponse.containsKey("resources"));
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
 
-        JsonArray resources = jsonResponse.getJsonArray("resources");
-
-        assertEquals(0, resources.size());
+        String resultsPath = ContentCatalogServlet.getJobResultsPath(job);
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("ERROR", result.getString("status"));
+        assertEquals("Something went wrong", result.getString(Job.PROPERTY_JOB_PROGRESS_LOG));
     }
 
     @Test
-    public void testPageTree() throws IOException {
-        doAnswer(invocation -> {
-            List<CatalogItem> items = new ArrayList<>();
-            JsonObject o1 = Json.createObjectBuilder()
-                    .add("path", "/content/wknd")
-                    .add("jcr:primaryType", "cq:Page")
-                    .build();
-            JsonObject o2 = Json.createObjectBuilder()
-                    .add("path", "/content/wknd/page1")
-                    .add("jcr:primaryType", "cq:Page")
-                    .build();
-            items.add(new CatalogItem(o1));
-            items.add(new CatalogItem(o2));
-            return items;
-        }).when(updateStrategy).getItems(eq(context.request()));
+    public void testGetActiveJobStatus() throws Exception {
+        // Setup
+        String jobId = "2025/4/10/test-job";
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.QUEUED);
+        when(jobManager.getJobById(jobId)).thenReturn(job);
 
         MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", "/content/wknd");
-        request.addRequestParameter("strategy", updateStrategy.getClass().getName());
+        request.addRequestParameter("jobId", jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.ACTIVE);
+
+        // Execute
         MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
-        assertEquals("application/json", response.getContentType());
-        assertEquals(SC_OK, response.getStatus());
-        JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-        assertTrue("resources[] is missing in the response json", jsonResponse.containsKey("resources"));
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
 
-        JsonArray resources = jsonResponse.getJsonArray("resources");
-        assertEquals(2, resources.size());
-
-        // first item is the root
-        JsonObject item1 = resources.getJsonObject(0);
-        assertEquals("/content/wknd", item1.getString("path"));
-        assertEquals("cq:Page", item1.getString("jcr:primaryType"));
-
-        JsonObject item2 = resources.getJsonObject(1);
-        assertEquals("/content/wknd/page1", item2.getString("path"));
-        assertEquals("cq:Page", item2.getString("jcr:primaryType"));
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("ACTIVE", result.getString("status"));
     }
 
     @Test
-    public void testInvalidStrategyPid() throws IOException {
+    public void testGetCompletedJobResults() throws Exception {
+        // Setup
+        String jobId = "2025/4/10/test-job";
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        when(job.getJobState()).thenReturn(Job.JobState.SUCCEEDED);
+        when(jobManager.getJobById(jobId)).thenReturn(job);
+
+        String resultsJson = "{\"resources\":[{\"path\":\"/content/test\",\"lastModified\":1234567890}]}";
         MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter("root", "/content/wknd");
-        request.addRequestParameter("strategy", "invalid");
+        request.addRequestParameter("jobId", jobId);
+
+        String resultsPath = ContentCatalogServlet.getJobResultsPath(job);
+        context.build()
+                .resource("/content/test")
+                .resource(ResourceUtil.getParent(resultsPath))
+                .file(ResourceUtil.getName(resultsPath), new ByteArrayInputStream(resultsJson.getBytes()));
+
+        // Execute
         MockSlingHttpServletResponse response = context.response();
         servlet.doGet(request, response);
 
-        assertEquals("application/json", response.getContentType());
-        assertEquals(SC_INTERNAL_SERVER_ERROR, response.getStatus());
-        JsonObject jsonResponse = Json.createReader(new StringReader(response.getOutputAsString())).readObject();
-        assertTrue(jsonResponse.getString("error").startsWith("Cannot find UpdateStrategy for pid"));
+        // Verify
+        JsonReader jsonReader = Json.createReader(new StringReader(response.getOutputAsString()));
+        JsonObject result = jsonReader.readObject();
+
+        assertEquals(jobId, result.getString("jobId"));
+        assertEquals("SUCCEEDED", result.getString("status"));
+        JsonArray resources = result.getJsonArray("resources");
+        assertEquals(1, resources.size());
+        assertEquals("/content/test", resources.get(0).asJsonObject().getString("path"));
     }
+
+    @Test
+    public void testGetJobResults_FiltersNonExistingResources() throws Exception {
+        String resultsPath = "/results/path";
+        // Simulate JSON results with two items, only one exists
+        JsonArray remoteItems = Json.createArrayBuilder()
+                .add(Json.createObjectBuilder().add("path", "/content/exists").build())
+                .add(Json.createObjectBuilder().add("path", "/content/missing").build())
+                .build();
+        JsonObject resultsJson = Json.createObjectBuilder()
+                .add(ContentCatalogServlet.JOB_RESOURCES, remoteItems)
+                .build();
+
+        // Simulate results resource
+        context.build()
+                .resource(ResourceUtil.getParent(resultsPath))
+                .file(ResourceUtil.getName(resultsPath), new ByteArrayInputStream(resultsJson.toString().getBytes(StandardCharsets.UTF_8)))
+                .resource("/content/exists")
+        ;
+
+
+        JsonArray filtered = servlet.getJobResults(context.request(), resultsPath);
+        assertEquals(1, filtered.size());
+        assertEquals("/content/exists", filtered.getJsonObject(0).getString("path"));
+    }
+
 }

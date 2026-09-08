@@ -30,7 +30,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -58,9 +58,9 @@ import java.util.regex.Pattern;
 @Component(
         label = "ACS AEM Commons - Dispatcher Flush Rules",
         description = "Facilitates the flushing of associated paths based on resources being replicated. "
-                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
+                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent. "
                 + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
-                + "'CQ-Action-Scope: ResourceOnly'."
+                + "'CQ-Action-Scope: ResourceOnly'. "
                 + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
                 + "due to dangerous cyclic conditions.",
         metatype = true,

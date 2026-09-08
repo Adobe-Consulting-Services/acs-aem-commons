@@ -21,7 +21,6 @@ import com.adobe.acs.commons.json.JsonObjectUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -153,7 +152,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      **/
     @Override
     public final Iterator<Resource> listChildren() {
-        return IteratorUtils.getIterator(this.orderedCache);
+        return this.orderedCache.iterator();
     }
 
     /**

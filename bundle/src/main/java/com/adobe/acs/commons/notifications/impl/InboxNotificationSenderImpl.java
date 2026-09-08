@@ -24,7 +24,7 @@ import com.adobe.granite.taskmanagement.TaskAction;
 import com.adobe.granite.taskmanagement.TaskManager;
 import com.adobe.granite.taskmanagement.TaskManagerException;
 import com.adobe.granite.taskmanagement.TaskManagerFactory;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;

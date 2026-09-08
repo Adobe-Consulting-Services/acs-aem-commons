@@ -1,0 +1,5 @@
+{
+  "allowedGroups": [
+    "$[env:aemCloudAdministrators;default=administrators]"
+  ]
+}

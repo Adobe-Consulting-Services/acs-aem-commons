@@ -34,7 +34,7 @@ import java.util.Map;
 @Component(label = "ACS AEM Commons - Color Conversion", description = "ACS AEM Commons - Color Conversion", metatype = true)
 @Service
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "checkstyle:localvariablename"})
-public final class ColorConversionImpl implements ColorConversion {
+public final class ColorConversionImpl implements ColorConversion { //nosonar
 
     private static final String DEFAULT_CMYK_PROFILE = "JapanColor2001Coated";
 
