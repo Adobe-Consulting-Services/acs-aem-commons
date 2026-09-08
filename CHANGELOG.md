@@ -10,9 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
+
 ### Fixed
 
 - #3628 Fix URL decoding issue in named transform image servlet
+- #3757 Redirect Manager: catch IllegalArgumentException from URI.create() to prevent uncaught throwable on malicious/malformed request URLs
+- #2165 ResourceResolverMapTransformerFactory: stop decoding the query string/fragment of rewritten attributes, which allowed unescaped characters (eg. a double quote) to break out of the HTML attribute
 
 ### Changed
 
