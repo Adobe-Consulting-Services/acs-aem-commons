@@ -23,7 +23,7 @@ import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
 import com.day.cq.wcm.contentsync.PathRewriterOptions;
-import junitx.util.PrivateAccessor;
+import com.adobe.acs.commons.testing.PrivateAccessor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;

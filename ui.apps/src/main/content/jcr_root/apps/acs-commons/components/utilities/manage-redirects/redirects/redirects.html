@@ -89,11 +89,22 @@
             <button class="coral-Button" icon="add" is="coral-button" style="margin-top: 1rem; margin-bottom: 1rem;"
                     variant="primary" id="addConfigurationButton">Add Configuration
             </button>
-            <coral-anchorlist data-sly-use.defs="com.adobe.acs.commons.redirects.models.Configurations"
-                              data-sly-list="${defs.configurations}">
-                <a icon="viewList" is="coral-anchorlist-item"
-                   href="/apps/acs-commons/content/redirect-manager.html${item.path}">${item.name}</a>
-            </coral-anchorlist>
+            <sly data-sly-use.defs="com.adobe.acs.commons.redirects.models.Configurations">
+                <ul class="redirect-configurations-list">
+                    <sly data-sly-list="${defs.configurations}">
+                        <li class="redirect-configuration-item">
+                            <a icon="viewList" is="coral-anchorlist-item"
+                               href="/apps/acs-commons/content/redirect-manager.html${item.path}">${item.name}</a>
+                            <button is="coral-button" icon="delete" variant="quiet"
+                                    class="delete-configuration-btn"
+                                    data-path="${item.path}"
+                                    data-name="${item.name}"
+                                    title="Delete ${item.name}">
+                            </button>
+                        </li>
+                    </sly>
+                </ul>
+            </sly>
         </sly>
 
         <sly data-sly-list="${resource.getChildren}">

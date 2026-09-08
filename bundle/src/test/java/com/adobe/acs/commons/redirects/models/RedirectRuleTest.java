@@ -38,7 +38,7 @@ import static com.adobe.acs.commons.redirects.Asserts.assertDateEquals;
 import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
 import static org.junit.Assert.assertNull;
 import static junit.framework.TestCase.assertTrue;
-import static junitx.framework.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 
 public class RedirectRuleTest {
