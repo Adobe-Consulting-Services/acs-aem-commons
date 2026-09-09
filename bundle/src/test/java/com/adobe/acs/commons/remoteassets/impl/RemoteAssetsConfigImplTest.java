@@ -26,7 +26,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -53,22 +54,24 @@ import static org.junit.Assert.fail;
 
 public class RemoteAssetsConfigImplTest {
 
-    @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
-    @Before
-    public final void setup() throws RepositoryException {
+    @BeforeClass
+    public static void setUpClass() throws RepositoryException {
         setupRemoteAssetsServiceUser(context);
-        
-        // does not work with a Mock here
+
         RequireAem requireAem = new RequireAem() {
-          
           @Override
           public Distribution getDistribution() {
             return null;
           }
         };
-        context.registerService(RequireAem.class, requireAem, "distribution","classic");
+        context.registerService(RequireAem.class, requireAem, "distribution", "classic");
+    }
+
+    @Before
+    public final void setup() {
         LogTester.reset();
     }
 
