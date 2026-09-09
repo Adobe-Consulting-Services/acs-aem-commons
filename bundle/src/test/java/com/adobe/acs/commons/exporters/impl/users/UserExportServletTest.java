@@ -40,7 +40,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,17 +52,17 @@ import com.google.gson.JsonPrimitive;
 
 public class UserExportServletTest {
 
-    @Rule
-    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     UsersExportServlet servlet;
 
-    @Before
-    public void setup() throws RepositoryException, Exception {
-        
+    @BeforeClass
+    public static void setupClass() throws RepositoryException, Exception {
+
         JackrabbitSession session = (JackrabbitSession) context.resourceResolver().adaptTo(Session.class);
         UserManager um = session.getUserManager();
-        
+
         context.registerAdapter(Resource.class, UserManager.class, um);
 
         Group allUsers = um.createGroup("allusers");
@@ -77,6 +78,14 @@ public class UserExportServletTest {
         allUsers.addMember(charly);
 
         session.save();
+    }
+
+    @Before
+    public void setup() {
+        // the mock request/response are shared across tests via the @ClassRule context;
+        // reset them so a previous test's filter params or CSV output don't leak into this one.
+        context.response().reset();
+        context.request().setParameterMap(java.util.Collections.emptyMap());
         servlet = new UsersExportServlet();
     }
 

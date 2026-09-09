@@ -22,7 +22,7 @@ package com.adobe.acs.commons.contentsync;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.jcr.RepositoryException;
@@ -36,8 +36,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class TestContentReader {
-    @Rule
-    public AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     ContentReader reader;
     JsonObject jcrContent;
