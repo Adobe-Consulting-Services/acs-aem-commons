@@ -31,7 +31,8 @@ import org.apache.sling.commons.scheduler.Scheduler;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -62,8 +63,8 @@ public class EnsureOakIndexJobHandlerTest {
      * That makes testing a bit slower and also requires to make all index definitions fully compliant.
      */
 
-    @Rule
-    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     EnsureOakIndexJobHandler handler;
 
@@ -80,12 +81,23 @@ public class EnsureOakIndexJobHandlerTest {
     @Mock
     Scheduler scheduler;
 
+    @BeforeClass
+    public static void setUpClass() {
+        context.build().resource(OAK_INDEX).commit();
+    }
 
     @Before
-    public void setup() {
+    public void setup() throws org.apache.sling.api.resource.PersistenceException {
 
-        // setup test content in the repo
-        context.build().resource(OAK_INDEX).commit();
+        // remove any index/definition content left by the previous test to keep tests isolated
+        Resource oakIndexRoot = context.resourceResolver().getResource(OAK_INDEX);
+        for (Resource child : oakIndexRoot.getChildren()) {
+            context.resourceResolver().delete(child);
+        }
+        Resource definitionsRoot = context.resourceResolver().getResource("/apps");
+        if (definitionsRoot != null) {
+            context.resourceResolver().delete(definitionsRoot);
+        }
 
         // setup dependencies
         Map<String,Object> props = new HashMap<>();
