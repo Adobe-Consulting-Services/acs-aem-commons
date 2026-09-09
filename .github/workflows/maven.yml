@@ -84,6 +84,10 @@ jobs:
           fi
 
       - name: ${{ matrix.namePrefix }} Build with Maven ${{ env.STEP_NAME_SUFFIX }}
+        # explicit bash: the default shell on windows-latest is pwsh, whose native-command argument
+        # tokenizer splits unquoted -D properties on the dot (e.g. "-Dlogback.configurationFile=...");
+        # bash (via Git Bash, present on all GitHub-hosted runners) passes the argument through intact
+        shell: bash
         run: mvn -e -B -V ${{ env.MVN_GOAL }} ${{ env.MVN_ADDITIONAL_OPTS }}
 
       - name: Upload Test Results
