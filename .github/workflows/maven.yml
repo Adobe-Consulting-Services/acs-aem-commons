@@ -63,9 +63,13 @@ jobs:
       - name: Set environment variables
         shell: bash
         run: |
+          # NOTE: logback.configurationFile must be a classpath-relative reference (no path prefix) -
+          # forked test JVMs run with the bundle module dir as their working directory, so a
+          # source-relative path here silently fails to resolve and Logback falls back to the
+          # noisy default config
           if [ "${{ matrix.isMainBuildEnv }}" = "true" ]; then
             echo "NVD_API_KEY=${{ secrets.NVD_API_KEY }}" >> $GITHUB_ENV
-            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml -Pcoverage,dependency-check,cloud -DnvdApiKeyEnvironmentVariable=NVD_API_KEY" >> $GITHUB_ENV
+            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=logback-test-no-logging.xml -Pcoverage,dependency-check,cloud -DnvdApiKeyEnvironmentVariable=NVD_API_KEY" >> $GITHUB_ENV
             if [ "${{github.ref}}" = "refs/heads/master" ] && [ "${{github.event_name}}" = "push" ]; then
               echo "MAVEN_USERNAME=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_USER }}" >> $GITHUB_ENV
               echo "MAVEN_PASSWORD=${{ secrets.SONATYPE_CENTRAL_PORTAL_TOKEN_PASSWORD }}" >> $GITHUB_ENV
@@ -75,7 +79,7 @@ jobs:
               echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
             fi
           else
-            echo "MVN_ADDITIONAL_OPTS=" >> $GITHUB_ENV
+            echo "MVN_ADDITIONAL_OPTS=-Dlogback.configurationFile=logback-test-no-logging.xml" >> $GITHUB_ENV
             echo "MVN_GOAL=clean verify" >> $GITHUB_ENV
           fi
 

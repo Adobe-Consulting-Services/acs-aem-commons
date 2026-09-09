@@ -295,6 +295,9 @@
                 <configuration>
                     <reuseForks>false</reuseForks>
                     <forkCount>1C</forkCount>
+                    <!-- keep console output to one summary line per test class; captured output for
+                         failing tests is still printed, so failures remain fully visible -->
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
                 <executions>
                     <execution>
