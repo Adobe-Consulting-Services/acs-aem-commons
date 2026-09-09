@@ -298,6 +298,13 @@
                     <!-- keep console output to one summary line per test class; captured output for
                          failing tests is still printed, so failures remain fully visible -->
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <!-- speed up unit tests that drive com.adobe.acs.commons.fam.impl.ActionManagerImpl to
+                         completion: tests run single-threaded and don't need the production-sized grace
+                         period/polling interval that guards against real concurrent task submission -->
+                    <systemPropertyVariables>
+                        <acs-commons.fam.hesitationDelay>1</acs-commons.fam.hesitationDelay>
+                        <acs-commons.fam.completionCheckInterval>5</acs-commons.fam.completionCheckInterval>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
