@@ -1,0 +1,39 @@
+.diagnosis-panel-with-margin {
+    margin: 3rem;
+}
+
+.notice-wide {
+    width: 100%;
+}
+
+.hidden {
+	display: none !important;
+}
+
+
+#configureAgentDialog ._coral-Dialog-content {
+    column-width: 600px;
+}
+
+.warn {
+    margin-top: 1rem;
+    display: flex;
+
+    &.narrow {
+        max-width: 37rem;
+    }
+
+    > .left {
+        flex-grow: 0;
+        margin-right: 1rem;
+    }
+
+    > .right {
+        flex-grow: 1;
+    }
+}
+
+.mb-1 {
+    margin-bottom: 1rem;
+}
+
