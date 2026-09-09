@@ -46,7 +46,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(MockitoJUnitRunner.class)
 public class ContentVariableJsonFilterTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

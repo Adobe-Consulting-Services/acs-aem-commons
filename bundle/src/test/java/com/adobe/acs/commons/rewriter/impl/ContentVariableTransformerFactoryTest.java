@@ -54,7 +54,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ContentVariableTransformerFactoryTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     @Mock
     private ContentHandler handler;
