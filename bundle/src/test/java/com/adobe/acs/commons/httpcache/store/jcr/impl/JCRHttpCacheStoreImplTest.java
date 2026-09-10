@@ -33,7 +33,8 @@ import javax.management.NotCompliantMBeanException;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -57,8 +58,8 @@ public class JCRHttpCacheStoreImplTest {
 
     private static final String INPUT = "SomeSillyTextForTesting";
 
-    @Rule
-    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     JCRHttpCacheStoreImpl store;
     Map<String, Object> config;
@@ -66,6 +67,11 @@ public class JCRHttpCacheStoreImplTest {
 
     // default
     Instant currentInstant = Clock.systemUTC().instant();
+
+    @BeforeClass
+    public static void setUpClass() throws NotCompliantMBeanException {
+        context.build().resource("/cache/root", new HashMap<>()).commit();
+    }
 
     @Before
     public void setup() throws NotCompliantMBeanException {
@@ -77,9 +83,19 @@ public class JCRHttpCacheStoreImplTest {
         config.put(JCRHttpCacheStoreImpl.PN_SAVEDELTA, 10);
         setTime(currentInstant);
 
-        // prepare repo
-        context.build().resource("/cache/root", new HashMap<>()).commit();
-
+        // Clean cache entries from previous test
+        try {
+            org.apache.sling.api.resource.Resource cacheRoot = context.resourceResolver().getResource("/cache");
+            if (cacheRoot != null) {
+                for (org.apache.sling.api.resource.Resource child : cacheRoot.getChildren()) {
+                    if (!child.getName().equals("root")) {
+                        context.resourceResolver().delete(child);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Ignore cleanup errors
+        }
     }
 
     private void setTime(Instant instant) {

@@ -42,11 +42,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.servlethelpers.MockSlingHttpServletRequest;
 import org.apache.sling.servlethelpers.MockSlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -57,8 +58,8 @@ import org.slf4j.LoggerFactory;
 public class ExplainScoreServletTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExplainScoreServletTest.class);
 
-    @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Test
     public void test_doPost_noParams() throws Exception {
@@ -100,12 +101,16 @@ public class ExplainScoreServletTest {
         params.put("statement", "select * from [nt:base]");
 
         final ExplainScoreServlet servlet = new ExplainScoreServlet();
-        final MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(context.resourceResolver());
+
+        // Use an independent resolver/session for this test since we log it out below;
+        // the shared @ClassRule context's resolver must stay open for other tests.
+        final ResourceResolver independentResolver = context.resourceResolver().clone(null);
+        final MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(independentResolver);
         final MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
         request.setParameterMap(params);
 
-        final Session jcr = context.resourceResolver().adaptTo(Session.class);
+        final Session jcr = independentResolver.adaptTo(Session.class);
 
         jcr.logout();
 

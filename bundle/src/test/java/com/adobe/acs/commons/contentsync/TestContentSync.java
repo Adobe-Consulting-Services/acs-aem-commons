@@ -37,7 +37,8 @@ import org.apache.sling.jcr.contentloader.internal.readers.JsonReader;
 import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.jcr.Node;
@@ -69,8 +70,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class TestContentSync {
-    @Rule
-    public AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     ContentSync contentSync;
     ContentReader reader;
@@ -81,6 +82,15 @@ public class TestContentSync {
 
     @Before
     public void setUp() throws Exception {
+        Resource hostsRoot = context.resourceResolver().getResource(HOSTS_PATH);
+        if (hostsRoot != null) {
+            context.resourceResolver().delete(hostsRoot);
+        }
+        Resource contentRoot = context.resourceResolver().getResource("/content");
+        if (contentRoot != null) {
+            context.resourceResolver().delete(contentRoot);
+        }
+
         context.registerInjectActivateService(new JsonReader());
         context.registerInjectActivateService(new ContentReaderWhiteboard());
         crypto = MockCryptoSupport.getInstance();

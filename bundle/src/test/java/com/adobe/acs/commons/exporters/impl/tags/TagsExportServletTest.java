@@ -28,7 +28,8 @@ import java.util.Map;
 import org.apache.http.HttpStatus;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 public class TagsExportServletTest {
@@ -43,18 +44,26 @@ public class TagsExportServletTest {
 
   private static final String EXPECTED_OUTPUT_WRONG_PATH_MESSAGE = "Path '/wrong/Path' do not contains tag root. Probably You've made mistake during typing path. Export tags cannot be done.";
 
-  @Rule
-  public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+  @ClassRule
+  public static final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
   private TagsExportServlet servlet;
 
   private TagsExportService service;
 
+  @BeforeClass
+  public static void setUpClass() {
+    context.load()
+        .json(TagsExportServletTest.class.getResourceAsStream("brandTestTags.json"), "/etc");
+  }
+
   @Before
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    // the mock response is shared across tests via the @ClassRule context; reset its
+    // buffer/status/headers so previous tests' output doesn't leak into this one.
+    context.response().reset();
+
     service = new TagsExportService();
-    context.load()
-        .json(getClass().getResourceAsStream("brandTestTags.json"), "/etc");
     context.registerService(TagsExportService.class, service);
     servlet = new TagsExportServlet();
     mockExportServiceInServlet();

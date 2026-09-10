@@ -41,7 +41,8 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -58,8 +59,8 @@ import com.day.cq.wcm.api.PageManager;
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicationStatusManagerImplTest {
 
-    @Rule
-    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Spy
     ReplicationStatusManagerImpl replicationStatusManager = new ReplicationStatusManagerImpl(true);
@@ -97,16 +98,24 @@ public class ReplicationStatusManagerImplTest {
 
     Node replicatedNode;
 
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        Session session = context.resourceResolver().adaptTo(Session.class);
+        InputStream cnd = ReplicationStatusManagerImplTest.class.getResourceAsStream("replication.cnd");
+        CndImporter.registerNodeTypes(new InputStreamReader(cnd, "UTF-8"), session);
+    }
+
     @Before
     public void setUp() throws Exception {
         resourceResolver = context.resourceResolver();
         session = resourceResolver.adaptTo(Session.class);
 
-        InputStream cnd = getClass().getResourceAsStream("replication.cnd");
-        CndImporter.registerNodeTypes(new InputStreamReader(cnd, "UTF-8"), session);
+        Resource contentRoot = resourceResolver.getResource("/content");
+        if (contentRoot != null) {
+            resourceResolver.delete(contentRoot);
+        }
 
         context.registerAdapter(ResourceResolver.class, PageManager.class, pageManager);
-
         context.load().json(getClass().getResourceAsStream("ReplicationStatusManagerImplTest.json"), "/content");
 
         /* Page */

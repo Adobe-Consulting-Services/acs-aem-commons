@@ -67,9 +67,11 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private static final transient Logger LOG = LoggerFactory.getLogger(ActionManagerImpl.class);
     // This is a delay of how long an action manager should wait before it can safely assume it really is done and no more work is being added
     // This helps prevent an action manager from closing itself down while the queue is warming up.
-    public static final transient int HESITATION_DELAY = 50;
+    // Overridable via system property so unit tests (which run single-threaded and don't need the
+    // production-sized grace period) can drive this queue to completion much faster.
+    public static final transient int HESITATION_DELAY = Integer.getInteger("acs-commons.fam.hesitationDelay", 50);
     // The cleanup task will wait this many milliseconds between its polling to see if the queue has been completely processed
-    public static final transient int COMPLETION_CHECK_INTERVAL = 100;
+    public static final transient int COMPLETION_CHECK_INTERVAL = Integer.getInteger("acs-commons.fam.completionCheckInterval", 100);
     private final AtomicInteger tasksAdded = new AtomicInteger();
     private final AtomicInteger tasksCompleted = new AtomicInteger();
     private final AtomicInteger tasksFilteredOut = new AtomicInteger();

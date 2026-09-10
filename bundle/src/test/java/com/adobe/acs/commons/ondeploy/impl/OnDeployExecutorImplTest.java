@@ -200,7 +200,7 @@ public class OnDeployExecutorImplTest {
         assertEquals("success", status2.getValueMap().get("status", ""));
         assertTrue(start.getTimeInMillis() <= System.currentTimeMillis());
         assertTrue(System.currentTimeMillis() - start.getTimeInMillis() < 10000);
-        assertTrue(start.getTimeInMillis() + 1000 <= end.getTimeInMillis());
+        assertTrue(start.getTimeInMillis() + 50 <= end.getTimeInMillis());
         assertTrue(end.getTimeInMillis() - start.getTimeInMillis() < 10000);
     }
 

@@ -23,13 +23,14 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 public class TagsExportServiceTest {
 
-  @Rule
-  public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+  @ClassRule
+  public static final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
   private static final String PATH_6_3 = "/etc";
 
@@ -58,10 +59,18 @@ public class TagsExportServiceTest {
 
   private TagsExportService tagsExportService;
 
+  @BeforeClass
+  public static void setUpClass() {
+    context.load()
+        .json(TagsExportServiceTest.class.getResourceAsStream("brandTestTags.json"), PATH_6_3);
+    // loaded once here (rather than per-test) since ContentLoader.json() throws if the
+    // target path already exists, and the two tests below both load identical content
+    context.load()
+        .json(TagsExportServiceTest.class.getResourceAsStream("brandTestCqTags.json"), PATH_OVER_6_4);
+  }
+
   @Before
   public void setUp() {
-    context.load()
-        .json(getClass().getResourceAsStream("brandTestTags.json"), PATH_6_3);
     tagsExportService = new TagsExportService();
   }
 
@@ -103,16 +112,12 @@ public class TagsExportServiceTest {
 
   @Test
   public void tagsUnderCqTags_shouldRecognizeCorrectlyNonLocalized() {
-    context.load()
-        .json(getClass().getResourceAsStream("brandTestCqTags.json"), PATH_OVER_6_4);
     String result = tagsExportService.exportNonLocalizedTagsForPath("/content/cq:tags/root/brandTest", context.resourceResolver());
     assertEquals(EXPECTED_OUTPUT_BRAND_TEST_NON_LOCALIZED, result);
   }
 
   @Test
   public void tagsUnderCqTags_shouldRecognizeCorrectlyLocalized() {
-    context.load()
-        .json(getClass().getResourceAsStream("brandTestCqTags.json"), PATH_OVER_6_4);
     String result = tagsExportService.exportLocalizedTagsForPath("/content/cq:tags/root/brandTest", context.resourceResolver());
     assertEquals(EXPECTED_OUTPUT_BRAND_TEST_LOCALIZED, result);
   }

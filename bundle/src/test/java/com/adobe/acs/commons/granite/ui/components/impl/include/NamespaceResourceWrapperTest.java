@@ -23,13 +23,15 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -46,20 +48,28 @@ public class NamespaceResourceWrapperTest {
 
     NamespaceResourceWrapper systemUnderTest;
 
-    @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     @Mock
     private ExpressionResolver expressionResolver;
 
     private String[] properties = new String[]{"name"};
 
-    @Before
-    public void setUp() throws Exception {
-
-        InputStream inputStream = getClass().getResourceAsStream("namespace-wrapper-test.json");
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        InputStream inputStream = NamespaceResourceWrapperTest.class.getResourceAsStream("namespace-wrapper-test.json");
         context.load().json(inputStream, "/apps/component");
         context.currentResource("/apps/component/items/column/items");
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        // the mock request is shared across tests via the @ClassRule context; clear any
+        // attributes set by a previous test (e.g. namespace/parameter attributes) so tests
+        // don't leak state into one another.
+        Collections.list(context.request().getAttributeNames())
+                .forEach(context.request()::removeAttribute);
 
         //this is to pass the parent.listChildren code (with granit:hide check) from the parent class (FilteringResourceWrapper)
         when(expressionResolver.resolve(anyString(), any(Locale.class), any(Class.class), any(SlingHttpServletRequest.class))).thenReturn(false);

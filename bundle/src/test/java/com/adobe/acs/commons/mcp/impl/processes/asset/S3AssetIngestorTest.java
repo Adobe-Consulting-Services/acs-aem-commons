@@ -40,8 +40,9 @@ import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +61,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 
@@ -73,7 +75,7 @@ public class S3AssetIngestorTest {
 
     private static final int FILE_SIZE = 57797;
 
-    private S3Mock s3Mock;
+    private static S3Mock s3Mock;
 
     @Rule // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
     public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
@@ -97,6 +99,27 @@ public class S3AssetIngestorTest {
 
     private AmazonS3 s3Client;
 
+    // starting the embedded S3Mock server (real Akka HTTP server + actor system) is expensive;
+    // do it once for the class and just clear the bucket contents between tests instead
+    private static int port;
+
+    @BeforeClass
+    public static void setupClass() {
+        port = FreePortFinder.findFreeLocalPort();
+        s3Mock = new S3Mock.Builder().withPort(port).withInMemoryBackend().build();
+        s3Mock.start();
+
+        AmazonS3 bootstrapClient = new AmazonS3Client(new AnonymousAWSCredentials());
+        bootstrapClient.setS3ClientOptions(S3ClientOptions.builder().setPathStyleAccess(true).build());
+        bootstrapClient.setEndpoint("http://localhost:" + port);
+        bootstrapClient.createBucket(TEST_BUCKET);
+    }
+
+    @AfterClass
+    public static void teardownClass() {
+        s3Mock.stop();
+    }
+
     @Before
     public void setup() throws PersistenceException {
         context.registerAdapter(ResourceResolver.class, AssetManager.class, new Function<ResourceResolver, AssetManager>() {
@@ -117,10 +140,6 @@ public class S3AssetIngestorTest {
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
         ingestor.dryRunMode = false;
 
-        int port = FreePortFinder.findFreeLocalPort();
-        s3Mock = new S3Mock.Builder().withPort(port).withInMemoryBackend().build();
-        s3Mock.start();
-
         S3ClientOptions options = S3ClientOptions.builder().setPathStyleAccess(true).build();
         s3Client = new AmazonS3Client(new AnonymousAWSCredentials());
         s3Client.setS3ClientOptions(options);
@@ -128,7 +147,11 @@ public class S3AssetIngestorTest {
         ingestor.s3Client = s3Client;
         ingestor.bucket = TEST_BUCKET;
 
-        s3Client.createBucket(TEST_BUCKET);
+        // the bucket is created once in @BeforeClass; clear out whatever the previous test left behind
+        // so every test still starts from a guaranteed-empty bucket, same as before
+        for (S3ObjectSummary summary : s3Client.listObjects(TEST_BUCKET).getObjectSummaries()) {
+            s3Client.deleteObject(TEST_BUCKET, summary.getKey());
+        }
 
         doAnswer(new Answer() {
             @Override
@@ -138,11 +161,6 @@ public class S3AssetIngestorTest {
                 return null;
             }
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
-    }
-
-    @After
-    public void teardown() {
-        s3Mock.stop();
     }
 
     @Test

@@ -40,7 +40,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -51,8 +51,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FileImporterTest {
 
-    @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    @ClassRule
+    public static final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @InjectMocks
     private FileImporter importer = new FileImporter();
