@@ -390,21 +390,16 @@ public class ScrMetadataIT {
                     StartElement start = event.asStartElement();
                     String elementName = start.getName().getLocalPart();
                     if (elementName.equals("Designate")) {
-                        // each designate defines a mapping between SCR component and metatype, the same metatype may be bound to multiple components
-                        Attribute pidAttribute = start.getAttributeByName(new QName("pid"));
-                        Descriptor descriptor = new Descriptor();
-                        descriptor.properties = properties;
+                        // Felix SCR Generator incorrectly generates both attributes "factoryPid" and "pid" for factories
+                        Attribute pidAttribute = start.getAttributeByName(new QName("factoryPid"));
                         if (pidAttribute != null) {
-                            descriptor.name = pidAttribute.getValue();
+                            result.name = pidAttribute.getValue();
+                            result.factory = true;
                         } else {
-                            pidAttribute = start.getAttributeByName(new QName("factoryPid"));
+                            pidAttribute = start.getAttributeByName(new QName("pid"));
                             if (pidAttribute != null) {
                                 descriptor.name = pidAttribute.getValue();
                             }
-                            descriptor.factory = true;
-                        }
-                        if (descriptor.name == null) {
-                            throw new IllegalArgumentException("Could not identify (factory)pid for " + name);
                         }
                         descriptors.add(descriptor);
                     } else if (elementName.equals("AD")) {
