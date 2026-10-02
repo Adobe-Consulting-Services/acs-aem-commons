@@ -384,6 +384,12 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                             <artifactId>aem-replication-metadata-validator</artifactId>
                             <version>1.4.1</version>
                         </dependency>
+                        <!-- https://github.com/Netcentric/aem-clientlib-validator -->
+                        <dependency>
+                            <groupId>biz.netcentric.filevault.validator</groupId>
+                            <artifactId>aem-clientlib-validator</artifactId>
+                            <version>1.0.0</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
