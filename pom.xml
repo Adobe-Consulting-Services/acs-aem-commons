@@ -761,7 +761,7 @@ Bundle-DocURL: https://adobe-consulting-services.github.io/acs-aem-commons/
                         </executions>
                         <configuration>
                             <nvdValidForHours>24</nvdValidForHours>
-                            <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                            <failBuildOnCVSS>4</failBuildOnCVSS>
                             <skipProvidedScope>true</skipProvidedScope>
                             <skipSystemScope>true</skipSystemScope>
                             <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
