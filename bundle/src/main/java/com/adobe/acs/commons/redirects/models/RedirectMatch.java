@@ -19,6 +19,7 @@ package com.adobe.acs.commons.redirects.models;
 
 import java.util.regex.Matcher;
 
+// TODO: merge with RedirectSource
 public class RedirectMatch {
     private final Matcher matcher;
     private final RedirectRule parent;

@@ -171,6 +171,14 @@
                                                         name="./source"
                                                         required="{Boolean}true"
                                                         rootPath="/content"/>
+                                                <effectiveSourcePreview
+                                                        jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                        emptyText="Computed source path"
+                                                        fieldLabel="Effective Source Path"
+                                                        fieldDescription="Read-only preview of the effective source after applying context prefix and matching options."
+                                                        disabled="{Boolean}true"
+                                                        name="effectiveSourcePreview"/>
                                                 <matchType
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/select"

@@ -17,19 +17,12 @@
  */
 package com.adobe.acs.commons.redirects.filter;
 
-import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
-import com.adobe.acs.commons.redirects.models.HandleQueryString;
-import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
-import com.adobe.acs.commons.redirects.models.RedirectMatch;
-import com.adobe.acs.commons.redirects.models.RedirectRule;
-import com.adobe.acs.commons.redirects.models.RedirectState;
-import com.adobe.acs.commons.redirects.models.Redirects;
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.day.cq.replication.ReplicationAction;
-import com.day.cq.replication.ReplicationEvent;
-import com.day.cq.wcm.api.WCMMode;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import static com.adobe.acs.commons.redirects.models.Redirects.readRedirects;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_ID;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
@@ -48,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -72,15 +66,14 @@ import org.apache.http.message.BasicHeader;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.apache.sling.engine.EngineConstants;
+import org.apache.sling.models.factory.ModelFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -102,12 +95,19 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.adobe.acs.commons.redirects.models.Redirects.CFG_PROP_IGNORE_SELECTORS;
-import static com.adobe.acs.commons.redirects.models.Redirects.readRedirects;
-import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
-import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
-import static org.osgi.framework.Constants.SERVICE_ID;
-import static org.osgi.framework.Constants.SERVICE_RANKING;
+import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
+import com.adobe.acs.commons.redirects.models.HandleQueryString;
+import com.adobe.acs.commons.redirects.models.RedirectConfiguration;
+import com.adobe.acs.commons.redirects.models.RedirectConfigurationModel;
+import com.adobe.acs.commons.redirects.models.RedirectMatch;
+import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.adobe.acs.commons.redirects.models.RedirectState;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationEvent;
+import com.day.cq.wcm.api.WCMMode;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * A request filter that implements support for virtual redirects.
@@ -183,6 +183,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
     )
     LocationHeaderAdjuster urlAdjuster;
 
+    @Reference
+    ModelFactory modelFactory;
+
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean mapUrls;
@@ -230,7 +233,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 String value = kv.substring(idx + 1).trim();
                 onDeliveryHeaders.add(new BasicHeader(name, value));
             }
-             log.debug("exts: {}, paths: {}, rewriteUrls: {}",
+            log.debug("exts: {}, paths: {}, rewriteUrls: {}",
                     exts, paths, mapUrls);
             executor = Executors.newSingleThreadExecutor();
 
@@ -407,8 +410,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     String evaluate(RedirectMatch match, SlingHttpServletRequest slingRequest){
         //fetches optional contextPrefix
         Resource configResource = configResolver.getResource(slingRequest.getResource(), config.bucketName(), config.configName());
-        ValueMap properties = configResource.getValueMap();
-        String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
+        String contextPrefix = modelFactory.createModel(configResource, RedirectConfigurationModel.class).getContextPrefix();
 
         RequestPathInfo pathInfo = slingRequest.getRequestPathInfo();
         String location = createFullPath(match.getRule().evaluate(match.getMatcher()), match.getRule(), contextPrefix);
@@ -627,13 +629,11 @@ public class RedirectFilter extends AnnotatedStandardMBean
             RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
             String resourcePath = requestPathInfo.getResourcePath(); // /content/mysite/en/page.html
 
-            ValueMap properties = configResource.getValueMap();
-            String contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
-            boolean ignoreSelectors = properties.get(CFG_PROP_IGNORE_SELECTORS, false);
-            if(ignoreSelectors && requestPathInfo.getSelectorString() != null){
+            RedirectConfigurationModel redirectConfig = modelFactory.createModel(configResource, RedirectConfigurationModel.class);
+            if(redirectConfig.isIgnoreSelectors() && requestPathInfo.getSelectorString() != null){
                 resourcePath = removeSelectors(resourcePath, resource.getResourceMetadata().getResolutionPathInfo());
             }
-            RedirectMatch m = rules.match(resourcePath, contextPrefix, slingRequest);
+            RedirectMatch m = rules.match(resourcePath, redirectConfig.getContextPrefix(), slingRequest);
             if (m == null && mapUrls()) { // try mapped url
                 String mappedUrl= mapUrl(resourcePath, slingRequest); // https://www.mysite.com/en/page.html
                 if(!resourcePath.equals(mappedUrl)) { // don't bother if sling mappings are not defined for this path

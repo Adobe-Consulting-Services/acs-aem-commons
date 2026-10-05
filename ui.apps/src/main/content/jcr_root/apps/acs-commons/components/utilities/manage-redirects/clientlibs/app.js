@@ -6,6 +6,8 @@
   var DIALOG_SELECTOR = "#editRuleDialog";
   var TABLE_SELECTOR = "#edit-redirect-coral-table";
   var PREFIX_DIALOG_SELECTOR = "#editPrefixDialog";
+  var EFFECTIVE_SOURCE_PREVIEW_SELECTOR = 'input[name="effectiveSourcePreview"]';
+  var effectiveSourceRequest;
 
   function showEditDialog() {
     var dialog = document.querySelector(DIALOG_SELECTOR);
@@ -15,6 +17,51 @@
   function showPrefixDialog() {
     var dialog = document.querySelector(PREFIX_DIALOG_SELECTOR);
     dialog.show();
+  }
+
+  function setEffectiveSourcePreview(value) {
+    $(DIALOG_FORM_SELECTOR)
+      .find(EFFECTIVE_SOURCE_PREVIEW_SELECTOR)
+      .val(value || "");
+  }
+
+  function refreshEffectiveSourcePreview() {
+    var form = $(DIALOG_FORM_SELECTOR);
+    var source = form.find('foundation-autocomplete[name="./source"]').val();
+    var configPath = $('input[name="caconfig"]').val();
+
+    if (!source || !source.trim() || !configPath) {
+      setEffectiveSourcePreview("");
+      return;
+    }
+
+    if (effectiveSourceRequest && effectiveSourceRequest.readyState !== 4) {
+      effectiveSourceRequest.abort();
+    }
+
+    effectiveSourceRequest = $.ajax({
+      url: configPath + ".effective-source.txt",
+      type: "GET",
+      data: {
+        source: source.trim(),
+        matchType: $("#match-type-select-box").val() || "AUTO_DETECT",
+        contextPrefixIgnored: form
+          .find('input[name="./contextPrefixIgnored"]')
+          .is(":checked"),
+        caseInsensitive: form
+          .find('input[name="./caseInsensitive"]')
+          .is(":checked"),
+        evaluateURI: form.find('input[name="./evaluateURI"]').is(":checked")
+      }
+    })
+      .done(function (effectiveSource) {
+        setEffectiveSourcePreview(effectiveSource);
+      })
+      .fail(function (xhr, status) {
+        if (status !== "abort") {
+          setEffectiveSourcePreview("");
+        }
+      });
   }
 
   [
@@ -237,6 +284,7 @@
 
     form.attr("action", path);
     form.attr("ruleId", name);
+    refreshEffectiveSourcePreview();
   }
 
   function updatePrefixFormData(ele) {
@@ -444,6 +492,25 @@
         '<td is="coral-table-cell" colspan="14" style="text-align: center;">No redirect rules match this search.</td>' +
       '</tr>';
 
+    $(document).on(
+      "input change",
+      DIALOG_SELECTOR +
+        ' foundation-autocomplete[name="./source"], ' +
+        DIALOG_SELECTOR +
+        ' foundation-autocomplete[name="./source"] input',
+      refreshEffectiveSourcePreview
+    );
+
+    $(document).on(
+      "click",
+      DIALOG_SELECTOR + " coral-tab",
+      function () {
+        if ($.trim($(this).text()) === "Basic") {
+          refreshEffectiveSourcePreview();
+        }
+      }
+    );
+
     $("#status-code-select-box").change(function (e) {
       var val = $(e.target).find(":selected").val();
       if (val == 301) {
@@ -548,10 +615,15 @@
 
   $(document).on(
     "change",
-    'input[name="./contextPrefixIgnored"],input[name="./evaluateURI"]',
+    'input[name="./contextPrefixIgnored"],input[name="./evaluateURI"],input[name="./caseInsensitive"]',
     function (e) {
       e.preventDefault();
       $(this).val($(this).is(":checked"));
+      if ($(this).is('input[name="./evaluateURI"],input[name="./caseInsensitive"]')) {
+        refreshEffectiveSourcePreview();
+      }
     }
   );
+
+  $(document).on("change", "#match-type-select-box", refreshEffectiveSourcePreview);
 }($, $(document)));

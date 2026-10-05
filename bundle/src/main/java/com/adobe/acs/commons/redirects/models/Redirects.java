@@ -17,14 +17,17 @@
  */
 package com.adobe.acs.commons.redirects.models;
 
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.Hit;
-import com.day.cq.search.result.SearchResult;
-import com.google.common.collect.Lists;
+import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.CACHE_CONTROL_HEADER_NAME;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.CREATED_BY_PROPERTY_NAME;
+import static com.adobe.acs.commons.redirects.models.RedirectRule.MODIFIED_BY_PROPERTY_NAME;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -35,16 +38,20 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
+import org.apache.sling.models.factory.ModelFactory;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
-import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.Query;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
+import com.day.cq.search.result.SearchResult;
+import com.google.common.collect.Lists;
 
 /**
  * Model for paginated output on http://localhost:4502/apps/acs-commons/content/redirect-manager.html
@@ -52,8 +59,11 @@ import static com.adobe.acs.commons.redirects.models.RedirectRule.*;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class Redirects {
 
+    @Deprecated
     public static final String CFG_PROP_CONTEXT_PREFIX = "contextPrefix";
+    @Deprecated
     public static final String CFG_PROP_IGNORE_SELECTORS = "ignoreSelectors";
+    @Deprecated
     public static final String CFG_PROP_PAGE_SIZE = "pageSize";
     private static final Logger log = LoggerFactory.getLogger(Redirects.class);
 
@@ -63,23 +73,20 @@ public class Redirects {
     @OSGiService
     private QueryBuilder queryBuilder;
 
+    @OSGiService
+    private ModelFactory modelFactory;
 
     int pageNumber = 1;
-    int pageSize = 100;
     List<List<Resource>> pages;
-
-    String contextPrefix;
-    boolean ignoreSelectors;
+    
+    private RedirectConfigurationModel redirectConfigurationModel;
 
     @PostConstruct
     protected void init() {
 
         Resource configResource = request.getRequestPathInfo().getSuffixResource();
-        ValueMap properties = configResource.getValueMap();
-        contextPrefix = properties.get(Redirects.CFG_PROP_CONTEXT_PREFIX, "");
-        ignoreSelectors = properties.get(Redirects.CFG_PROP_IGNORE_SELECTORS, false);
-        pageSize = properties.get(Redirects.CFG_PROP_PAGE_SIZE, 100);
-
+        redirectConfigurationModel = modelFactory.createModel(configResource, RedirectConfigurationModel.class);
+        
         if (ArrayUtils.contains(request.getRequestPathInfo().getSelectors(), "search")) {
             // Search
             pages = Collections.singletonList(search(request.getParameter("term"), configResource.getPath()));
@@ -91,7 +98,7 @@ public class Redirects {
                 pageNumber = Integer.parseInt(pg);
             }
             List<Resource> all = readRedirects(configResource);
-            pages = Lists.partition(all, pageSize);
+            pages = Lists.partition(all, redirectConfigurationModel.getPageSize());
         }
     }
 
@@ -149,11 +156,11 @@ public class Redirects {
     }
 
     public String getContextPrefix() {
-        return contextPrefix;
+        return redirectConfigurationModel.getContextPrefix();
     }
 
     public boolean getIgnoreSelectors() {
-        return ignoreSelectors;
+        return redirectConfigurationModel.isIgnoreSelectors();
     }
 
 

@@ -90,6 +90,17 @@ public class RedirectConfiguration {
         }
     }
 
+    public static String getEffectiveSource(RedirectRule rule, RedirectConfigurationModel redirectConfiguration) {
+        // initialize with values from request parameters
+        Pattern pattern = rule.getRegex();
+        if (pattern != null) {
+            return pattern.pattern();
+        } else {
+            return rule.getSource();
+        }
+        
+    }
+
     /**
      * @return resource path without .html extension
      */

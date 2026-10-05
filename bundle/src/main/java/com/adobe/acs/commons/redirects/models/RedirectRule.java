@@ -124,7 +124,7 @@ public class RedirectRule {
     @Named(REDIRECT_RESOURCE_REQUEST_ATTRIBUTE)
     private Resource redirectResource;
 
-    private Pattern ptrn;
+    private RedirectSource redirectSource;
 
     private SubstitutionElement[] substitutions;
     private String defaultCacheControlHeader = null;
@@ -161,18 +161,7 @@ public class RedirectRule {
         target = target.trim();
 
         MatchType mt = getMatchType();
-        if (mt == MatchType.PLAIN_TEXT) {
-            ptrn = null;
-        } else if (mt == MatchType.REGEX) {
-            ptrn = toRegexForced(source, caseInsensitive);
-        } else {
-            // AUTO_DETECT: existing behaviour
-            String regex = source;
-            if (regex.endsWith("*")) {
-                regex = regex.replaceAll("\\*$", "(.*)");
-            }
-            ptrn = toRegex(regex, caseInsensitive);
-        }
+        redirectSource = new RedirectSource(source, mt, contextPrefixIgnored, caseInsensitive, evaluateURI);
         substitutions = SubstitutionElement.parse(target);
 
         String cacheControlProperty = CACHE_CONTROL_HEADER_NAME + "_" + getStatusCode();
@@ -180,7 +169,7 @@ public class RedirectRule {
     }
 
     public String getSource() {
-        return source;
+        return redirectSource.getText();
     }
 
     public String getTarget() {
@@ -216,7 +205,7 @@ public class RedirectRule {
     }
 
     public Pattern getRegex() {
-        return ptrn;
+        return redirectSource.getPattern().orElse(null);
     }
 
     public Calendar getCreated() {
