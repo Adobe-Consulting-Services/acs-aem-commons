@@ -10,7 +10,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.6...HEAD
+
+### Fixed
+
+- #3808 ResourceResolverMapTransformerFactory: decode mapped paths with URI#getPath, like the OOTB LinkCheckerTransformer, instead of URLCodec, which replaced non-ASCII characters (eg. "©") with "?" (turning the rest of the path into a query string) and decoded "+" to a space
+
+### Changed
+
+## [6.17.6] - 2026-09-08
 
 ### Fixed
 
@@ -22,7 +30,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #3710 Use a dedicated service user/subservice for Redirects Package creation and replication
-- #3755: Allow disabling the static reference rewriter based on the Server-Agent Communique-Dispatcher header being present or not.
 
 ## [6.17.4] - 2026-06-20
 
