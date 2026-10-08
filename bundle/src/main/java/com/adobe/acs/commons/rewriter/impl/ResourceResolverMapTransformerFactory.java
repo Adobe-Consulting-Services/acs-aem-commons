@@ -19,8 +19,6 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -42,6 +40,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -124,15 +124,33 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
     }
 
     private static String mapPath(final SlingHttpServletRequest slingRequest, final String path) {
+        // The path may already contain percent-encoded characters (eg. a thumbnail
+        // rendition path with an encoded "jcr:content"); decode it first so that
+        // ResourceResolver#map, which encodes the path it is given, doesn't double-encode it.
+        return slingRequest.getResourceResolver().map(slingRequest, decodePath(path));
+    }
+
+    /**
+     * Decodes a URL path (without query string or fragment) the same way the OOTB LinkCheckerTransformer
+     * does: using {@link URI#getPath()}, which decodes the percent-encoded UTF-8 sequences and leaves every
+     * other character, including a "+", as-is.
+     * <p>
+     * A path that isn't a valid URI (eg. one containing a raw space) is returned unchanged, which is what
+     * LinkChecker's fallback of escaping it with {@code Text.escape(path, '%', true)} amounts to as well.
+     * <p>
+     * Unlike {@code URLCodec#decode(String)}, used before, this doesn't replace non-ASCII characters
+     * (eg. "©") with "?", turning the rest of the path into a query string (see #3808), nor decodes a
+     * "+" to a space.
+     *
+     * @param path the path to decode
+     * @return the decoded path, or the path itself if it isn't a valid URI
+     */
+    static String decodePath(final String path) {
         try {
-            // The path may already contain percent-encoded characters (eg. a thumbnail
-            // rendition path with an encoded "jcr:content"); decode it first so that
-            // ResourceResolver#map, which encodes the path it is given, doesn't double-encode it.
-            final String pathDecoded = new URLCodec().decode(path);
-            return slingRequest.getResourceResolver().map(slingRequest, pathDecoded);
-        } catch (DecoderException e) {
-            log.error("Could not decode the attribute value", e);
-            return slingRequest.getResourceResolver().map(slingRequest, path);
+            return new URI(path).getPath();
+        } catch (URISyntaxException e) {
+            log.debug("Not decoding path that isn't a valid URI: {}", e.getMessage());
+            return path;
         }
     }
 
