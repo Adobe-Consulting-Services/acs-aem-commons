@@ -17,7 +17,6 @@
  */
 package com.adobe.acs.commons.reports.models;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,8 +29,6 @@ import java.util.stream.Stream;
 import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -66,14 +63,13 @@ public class PathListReportExecutor implements ReportExecutor {
 
     List<String> extractPaths() throws ReportException {
         try {
-            Template template = new Handlebars().compileInline(config.getPathArea());
-            String pathsArea = template.apply(getParamPatternMap(request));
+            String pathsArea = ParameterTemplate.render(config.getPathArea(), getParamPatternMap(request));
 
             if (StringUtils.isNotEmpty(pathsArea)) {
                 return Arrays.asList(pathsArea.split("\r?\n"));
             }
-        } catch (IOException ioe) {
-            throw new ReportException("Exception templating query", ioe);
+        } catch (IllegalArgumentException iae) {
+            throw new ReportException("Exception templating query", iae);
         }
 
         return Collections.emptyList();

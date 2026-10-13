@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-6.17.0...HEAD
 
+### Changed
+
+- #3800 Report Builder: removed the embedded Handlebars library (unmaintained for Java 8 and accumulating vulnerabilities). Query and path list templates are now rendered by a built-in, Handlebars compatible subset: `{{name}}`, `{{{name}}}`, `{{#if name}}`, `{{#unless name}}` and `{{else}}`. Other Handlebars constructs (helpers, partials, `#each`, ...) are rejected with an error. The RTE dialog plugin no longer depends on the client-side Handlebars shipped with AEM.
+
 ### Fixed
 
 - #3533 ReferencesModel: fix NullPointerException in CSV export when a reference has a null or blank target, causing affected rows to be silently dropped from the report
