@@ -37,7 +37,7 @@
     <description>Core ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
 
     <properties>
-        <jjwt.version>0.11.5</jjwt.version>
+        <jjwt.version>0.13.0</jjwt.version>
     </properties>
 
     <!-- ====================================================================== -->
