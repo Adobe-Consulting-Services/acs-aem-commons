@@ -166,7 +166,6 @@
                                         <include>io.jsonwebtoken:jjwt-gson</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
-                                        <include>com.github.jknack:*</include>
                                         <include>org.jsoup:jsoup</include>
                                     </includes>
                                 </bannedDependencies>
@@ -195,7 +194,6 @@
                                     <include>io.jsonwebtoken:jjwt-api</include>
                                     <include>io.jsonwebtoken:jjwt-impl</include>
                                     <include>io.jsonwebtoken:jjwt-gson</include>
-                                    <include>com.github.jknack:handlebars</include>
                                     <include>org.jsoup:jsoup</include>
                                 </includes>
                             </artifactSet>
@@ -217,10 +215,6 @@
                                 <relocation>
                                     <pattern>io.jsonwebtoken</pattern>
                                     <shadedPattern>acscommons.jsonwebtoken</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.github.jknack.handlebars</pattern>
-                                    <shadedPattern>acscommons.github.jknack.handlebars</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.jsoup</pattern>
@@ -263,12 +257,6 @@
                                     <includes>
                                         <include>io/jsonwebtoken/**</include>
                                     </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.github.jknack:handlebars</artifact>
-                                    <!-- do not filter files from that dependency as it contains also resources outside the namespace com.github.jknack.handlebars
-                                         those are just left not relocated, but included in the final artifact as is, which is fine as they don't cause any conflicts
-                                    -->
                                 </filter>
                                 <filter>
                                     <artifact>org.jsoup:jsoup</artifact>
@@ -332,12 +320,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>32.0.0-jre</version>
-            </dependency>
-            <!-- use and shade newer Handlebars version than shipped with AEM -->
-            <dependency>
-                <groupId>com.github.jknack</groupId>
-                <artifactId>handlebars</artifactId>
-                <version>4.3.1</version><!-- last version compatible with Java 8-->
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
@@ -570,17 +552,6 @@
                 <exclusion>
                     <groupId>com.google.code.gson</groupId>
                     <artifactId>gson</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.github.jknack</groupId>
-            <artifactId>handlebars</artifactId>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -34,7 +34,7 @@
  *      e.g. /apps/<project>/components/text/dialog/items/tab1/items/text/uiSettings/cui/fullscreen
  *
  */
-(function ($, $document, Handlebars) {
+(function ($, $document) {
     "use strict";
 
     var _ = window._,
@@ -236,17 +236,20 @@
     CUI.rte.commands.CommandRegistry.register(INSERT_DIALOG_CONTENT_FEATURE, InsertTouchUIDialogCmd);
 
     //returns the picker dialog html
-    //Handlebars doesn't do anything useful here, but the framework expects a template
+    //the framework expects a template function, but the html is static
     function dlgTemplate() {
-        CUI.rte.Templates["dlg-" + INSERT_DIALOG_CONTENT_DIALOG] =
-            Handlebars.compile('<div data-rte-dialog="' + INSERT_DIALOG_CONTENT_DIALOG +
+        var html = '<div data-rte-dialog="' + INSERT_DIALOG_CONTENT_DIALOG +
                 '" class="coral--dark coral-Popover coral-RichText-dialog">' +
                 '<iframe width="1100px" height="700px"></iframe>' +
-                '</div>');
+                '</div>';
+
+        CUI.rte.Templates["dlg-" + INSERT_DIALOG_CONTENT_DIALOG] = function () {
+            return html;
+        };
     }
 
     dlgTemplate();
-})(jQuery, jQuery(document), Handlebars);
+})(jQuery, jQuery(document));
 
 (function($, $document){
     var SENDER = "acs-commons",
