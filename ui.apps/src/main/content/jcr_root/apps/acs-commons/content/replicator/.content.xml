@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Cross-Environment Replicator"
+        sling:resourceType="granite/ui/components/shell/page"
+        sling:vanityPath="/replicator">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[granite.ui.foundation,acs-commons.utilities.replicator]"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/text"
+            text="Cross-Environment Replicator"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <secondary jcr:primaryType="nt:unstructured">
+                <configure
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/replicator/configure"
+                    icon="gear"
+                    text="Configure Agents"
+                    variant="primary"
+                    x-cq-linkchecker="skip">
+                    <granite:rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                        path="/etc/replication/agents.author"
+                        privileges="jcr:addChildNodes"/>
+                </configure>
+            </secondary>
+        </actions>
+        <content
+            granite:class="diagnosis-panel-with-margin"
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+                <form
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    action="/replicator/jcr:content/content/items/form/items/post"
+                    async="{Boolean}true"
+                    dataPath="${requestPathInfo.suffix}"
+                    foundationForm="{Boolean}true"
+                    loadingMask="{Boolean}true"
+                    method="POST"
+                    style="vertical">
+                    <items jcr:primaryType="nt:unstructured">
+                        <path
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                            emptyText="Path of the page to replicate"
+                            fieldLabel="Path"
+                            filter="hierarchyNotFile"
+                            name="path"
+                            required="{Boolean}true"
+                            rootPath="/content"/>
+                        <host
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Replication Agent"
+                            name="agentId"
+                            required="{Boolean}true">
+                            <datasource
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="acs-commons/components/utilities/replicator/agentdatasource"/>
+                        </host>
+                        <notice
+                            granite:class="notice-wide hidden"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/alert"
+                            text="Notice: Enabling the &quot;Publish&quot; option below will replicate the content to the target AEM Author instance and publish it. If the &quot;Publish&quot; option remains unchecked, the content will simply be copied to the target AEM Author instance without being published."
+                            variant="warning"/>
+                        <publish
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                            checked="{Boolean}false"
+                            name="publish"
+                            text="Publish in the Target Environment"
+                            value="false"/>
+                        <debug
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                            checked="{Boolean}false"
+                            name="debug"
+                            text="Verbose mode"
+                            value="false"/>
+                        <submit
+                            granite:id="executeQueryButton"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                            text="Submit"
+                            type="submit"
+                            variant="primary"/>
+                        <iframe
+                            granite:id="replication_status_iframe"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="acs-commons/components/utilities/contentsync/iframe"
+                            text="Hello"/>
+                        <post
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="acs-commons/components/utilities/replicator"
+                            sling:vanityPath="/replicator/jcr:content/content/items/form/items/post"/>
+                    </items>
+                    <successresponse
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="acs-commons/components/utilities/replicator/submithandler"/>
+                </form>
+            </items>
+        </content>
+    </jcr:content>
+    <configure/>
+</jcr:root>
