@@ -24,21 +24,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
-             data-sly-call="${clientlib.all @ categories='coralui3'}"/>
+             data-sly-call="${clientlib.all @ categories=['coralui3', 'acs-commons.mcp.report-pagination']}"/>
     </head>
     <body class="coral--light">
         <div style="padding: 1rem 2rem;">
-            <nav aria-label="Report pagination">
-                <p aria-live="polite">Rows ${report.firstRow}–${report.lastRow} of ${report.totalRows}; page ${report.pageNumber} of ${report.pageCount}.</p>
-                <a data-sly-test="${report.hasPrevious}" is="coral-anchorbutton"
-                   href="${report.previousUrl}">Previous</a>
-                <a data-sly-test="${report.hasNext}" is="coral-anchorbutton"
-                   href="${report.nextUrl}">Next</a>
-                <form method="get" action="${request.requestURI}">
-                    <label>Rows per page <input type="number" name="pageSize" min="1" max="500" value="${report.pageSize}"/></label>
-                    <button is="coral-button" type="submit">Apply</button>
-                </form>
-            </nav>
+            <sly data-sly-use.pagination="../report-pagination.html"
+                 data-sly-call="${pagination.controls @ report=report, position='top'}"/>
             <table is="coral-table" lockable>
                 <colgroup data-sly-list.column="${report.columnNames}">
                     <col is="coral-table-column" sortable orderable/>
@@ -65,6 +56,7 @@
                     </tr>
                 </tbody>
             </table>
+            <sly data-sly-call="${pagination.controls @ report=report, position='bottom'}"/>
         </div>
     </body>
 </html>

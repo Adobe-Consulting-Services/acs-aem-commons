@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- Style MCP report pagination with Coral controls, directional buttons, and navigation above and below the results.
 - Add pagination to MCP HTML reports, with configurable page sizes and navigation for both report storage formats.
 
 ## [6.17.6] - 2026-09-08

@@ -1,0 +1,45 @@
+/* ACS AEM Commons report pagination layout; controls inherit the Coral theme. */
+.mcp-report-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    padding: 16px 0;
+}
+.mcp-report-pagination__summary {
+    flex: 1 1 180px;
+}
+.mcp-report-pagination__size,
+.mcp-report-pagination__navigation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+.mcp-report-pagination__input {
+    width: 80px;
+}
+.mcp-report-pagination__page {
+    min-width: 96px;
+    text-align: center;
+    white-space: nowrap;
+}
+@media (max-width: 640px) {
+    .mcp-report-pagination__summary {
+        flex-basis: 100%;
+    }
+    .mcp-report-pagination__navigation {
+        flex-basis: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .mcp-report-pagination__page {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+    .mcp-report-pagination__navigation > a:last-child,
+    .mcp-report-pagination__navigation > button:last-child {
+        justify-self: end;
+    }
+}
