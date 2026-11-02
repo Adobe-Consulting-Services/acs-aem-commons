@@ -17,7 +17,7 @@
   -->
 
 <!DOCTYPE html>
-<html data-sly-use.report="com.adobe.acs.commons.mcp.model.GenericBlobReport">
+<html data-sly-use.report="com.adobe.acs.commons.mcp.model.ReportPage">
     <head>
         <title>${report.name}</title>
         <meta charset="UTF-8">
@@ -28,6 +28,17 @@
     </head>
     <body class="coral--light">
         <div style="padding: 1rem 2rem;">
+            <nav aria-label="Report pagination">
+                <p aria-live="polite">Rows ${report.firstRow}–${report.lastRow} of ${report.totalRows}; page ${report.pageNumber} of ${report.pageCount}.</p>
+                <a data-sly-test="${report.hasPrevious}" is="coral-anchorbutton"
+                   href="${report.previousUrl}">Previous</a>
+                <a data-sly-test="${report.hasNext}" is="coral-anchorbutton"
+                   href="${report.nextUrl}">Next</a>
+                <form method="get" action="${request.requestURI}">
+                    <label>Rows per page <input type="number" name="pageSize" min="1" max="500" value="${report.pageSize}"/></label>
+                    <button is="coral-button" type="submit">Apply</button>
+                </form>
+            </nav>
             <table is="coral-table" lockable>
                 <colgroup data-sly-list.column="${report.columnNames}">
                     <col is="coral-table-column" sortable orderable/>

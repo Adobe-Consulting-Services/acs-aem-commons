@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- Add pagination to MCP HTML reports, with configurable page sizes and navigation for both report storage formats.
+
 ## [6.17.6] - 2026-09-08
 
 ### Fixed
