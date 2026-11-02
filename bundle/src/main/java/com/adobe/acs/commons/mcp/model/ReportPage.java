@@ -18,6 +18,11 @@
 package com.adobe.acs.commons.mcp.model;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.TreeSet;
+import java.util.Arrays;
 import javax.annotation.PostConstruct;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
@@ -78,6 +83,27 @@ public class ReportPage {
     public boolean isHasNext() { return page < getPageCount() - 1; }
     public String getPreviousUrl() { return pageUrl(page - 1); }
     public String getNextUrl() { return pageUrl(page + 1); }
+    /** A sliding window of at most five page links, including the current page. */
+    public List<Map<String, Object>> getPageLinks() {
+        List<Map<String, Object>> links = new ArrayList<>();
+        int count = Math.min(5, getPageCount());
+        int start = Math.max(0, Math.min(page - 2, getPageCount() - count));
+        for (int i = start; i < start + count; i++) {
+            Map<String, Object> link = new LinkedHashMap<>();
+            link.put("number", i + 1);
+            link.put("url", pageUrl(i));
+            link.put("current", i == page);
+            links.add(link);
+        }
+        return links;
+    }
+
+    public List<Integer> getPageSizes() {
+        TreeSet<Integer> sizes = new TreeSet<>(Arrays.asList(25, 50, 75, 100));
+        sizes.add(pageSize);
+        return new ArrayList<>(sizes);
+    }
+
     private String pageUrl(int target) {
         return request.getRequestURI() + "?page=" + target + "&pageSize=" + pageSize;
     }

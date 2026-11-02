@@ -25,7 +25,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import java.util.Collections;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertEquals;
+
 
 public class ReportPageTest {
     @Test
@@ -62,6 +62,35 @@ public class ReportPageTest {
         assertEquals(0, model.getFirstRow());
         assertEquals(0, model.getLastRow());
         assertTrue(model.getRows().isEmpty());
+    }
+
+    @Test
+    public void showsSlidingFivePageWindow() throws Exception {
+        GenericReport report = new GenericReport();
+        for (int i = 0; i < 1000; i++) {
+            report.getRows().add(new ValueMapDecorator(Collections.emptyMap()));
+        }
+        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
+        Resource resource = mock(Resource.class);
+        when(request.getResource()).thenReturn(resource);
+        when(resource.adaptTo(GenericReport.class)).thenReturn(report);
+        when(request.getRequestURI()).thenReturn("/report.html");
+        ReportPage model = new ReportPage();
+        FieldUtils.writeField(model, "request", request, true);
+        for (int page : new int[] {0, 4, 9}) {
+            when(request.getParameter("page")).thenReturn(String.valueOf(page));
+            model.init();
+            assertEquals(5, model.getPageLinks().size());
+            assertEquals(page == 0 ? 1 : page == 4 ? 3 : 6, model.getPageLinks().get(0).get("number"));
+            assertEquals(1, model.getPageLinks().stream().filter(link -> Boolean.TRUE.equals(link.get("current"))).count());
+        }
+        when(request.getParameter("pageSize")).thenReturn("33");
+        model.init();
+        assertTrue(model.getPageSizes().contains(33));
+        report.getRows().clear();
+        model.init();
+        assertEquals(1, model.getPageLinks().size());
+        assertEquals(true, model.getPageLinks().get(0).get("current"));
     }
 
     @Test

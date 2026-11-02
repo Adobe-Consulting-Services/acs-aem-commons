@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 
+- Add numbered page navigation and a results-per-page dropdown to MCP reports.
+
 - Style MCP report pagination with Coral controls, directional buttons, and navigation above and below the results.
 - Add pagination to MCP HTML reports, with configurable page sizes and navigation for both report storage formats.
 

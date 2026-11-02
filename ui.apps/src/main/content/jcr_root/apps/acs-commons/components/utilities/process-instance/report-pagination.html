@@ -22,21 +22,29 @@
             <span class="coral-Body--small">Rows ${report.firstRow}–${report.lastRow} of ${report.totalRows}</span>
         </div>
         <form class="mcp-report-pagination__size" method="get" action="${request.requestURI}">
-            <label for="report-page-size-${position}">Rows per page</label>
-            <input is="coral-textfield" class="mcp-report-pagination__input" id="report-page-size-${position}"
-                   type="number" name="pageSize" min="1" max="500" required value="${report.pageSize}"/>
-            <button is="coral-button" variant="secondary" type="submit">Apply</button>
+            <label id="report-page-size-label-${position}" for="report-page-size-${position}">Results per page</label>
+            <coral-select id="report-page-size-${position}" name="pageSize" data-report-page-size
+                          labelledby="report-page-size-label-${position}" data-sly-list.size="${report.pageSizes}">
+                <coral-select-item value="${size}" selected="${size == report.pageSize}">${size} Results</coral-select-item>
+            </coral-select>
         </form>
         <div class="mcp-report-pagination__navigation">
             <a data-sly-test="${report.hasPrevious}" is="coral-anchorbutton" variant="secondary"
-               icon="chevronLeft" href="${report.previousUrl}" rel="prev" aria-label="Go to previous report page">Previous</a>
+               icon="chevronLeft" title="Previous page" href="${report.previousUrl}" rel="prev" aria-label="Go to previous report page"></a>
             <button data-sly-test="${!report.hasPrevious}" is="coral-button" variant="secondary"
-                    icon="chevronLeft" type="button" disabled aria-label="Previous page unavailable">Previous</button>
-            <span class="mcp-report-pagination__page" aria-live="polite">Page ${report.pageNumber} of ${report.pageCount}</span>
+                    icon="chevronLeft" type="button" disabled aria-label="Previous page unavailable"></button>
+            <ol class="mcp-report-pagination__pages" data-sly-list.link="${report.pageLinks}">
+                <li>
+                    <a data-sly-test="${link.current}" is="coral-anchorbutton" variant="primary" href="${link.url}"
+                          class="mcp-report-pagination__current" aria-current="page" aria-label="Page ${link.number}, current page">${link.number}</a>
+                    <a data-sly-test="${!link.current}" is="coral-anchorbutton" variant="minimal"
+                       href="${link.url}" aria-label="Go to page ${link.number}">${link.number}</a>
+                </li>
+            </ol>
             <a data-sly-test="${report.hasNext}" is="coral-anchorbutton" variant="secondary"
-               icon="chevronRight" href="${report.nextUrl}" rel="next" aria-label="Go to next report page">Next</a>
+               icon="chevronRight" title="Next page" href="${report.nextUrl}" rel="next" aria-label="Go to next report page"></a>
             <button data-sly-test="${!report.hasNext}" is="coral-button" variant="secondary"
-                    icon="chevronRight" type="button" disabled aria-label="Next page unavailable">Next</button>
+                    icon="chevronRight" type="button" disabled aria-label="Next page unavailable"></button>
         </div>
     </nav>
 </template>
