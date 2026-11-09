@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+    # just update the embedded dependencies (scope filtering not supported: https://github.com/dependabot/dependabot-core/issues/15031)
+      - dependency-name: "com.google.guava:*"
+      - dependency-name: "io.jsonwebtoken:*"
+      - dependency-name: "com.jcraft:*"
+      - dependency-name: "org.jsoup:jsoup"
+      # don't include jknack:handlebars as not following semantic versioning
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
