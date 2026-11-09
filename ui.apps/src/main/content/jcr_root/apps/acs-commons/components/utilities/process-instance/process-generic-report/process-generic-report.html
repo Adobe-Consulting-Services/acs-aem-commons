@@ -17,17 +17,19 @@
   -->
 
 <!DOCTYPE html>
-<html data-sly-use.report="com.adobe.acs.commons.mcp.model.GenericReport">
+<html data-sly-use.report="com.adobe.acs.commons.mcp.model.ReportPage">
     <head>
         <title>${report.name}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
-             data-sly-call="${clientlib.all @ categories='coralui3'}"/>
+             data-sly-call="${clientlib.all @ categories=['coralui3', 'acs-commons.mcp.report-pagination']}"/>
     </head>
     <body class="coral--light">
         <div style="padding: 1rem 2rem;">
+            <sly data-sly-use.pagination="../report-pagination.html"
+                 data-sly-call="${pagination.controls @ report=report, position='top'}"/>
             <table is="coral-table" lockable>
                 <colgroup data-sly-list.column="${report.columnNames}">
                     <col is="coral-table-column" sortable orderable/>
@@ -54,6 +56,7 @@
                     </tr>
                 </tbody>
             </table>
+            <sly data-sly-call="${pagination.controls @ report=report, position='bottom'}"/>
         </div>
     </body>
 </html>

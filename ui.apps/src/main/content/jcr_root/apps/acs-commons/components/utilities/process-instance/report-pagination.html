@@ -1,0 +1,50 @@
+<!--
+  ~ ACS AEM Commons
+  ~
+  ~ Copyright (C) 2013 - 2023 Adobe
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<template data-sly-template.controls="${@ report, position}">
+    <nav class="mcp-report-pagination" aria-label="Report pagination ${position}">
+        <div class="mcp-report-pagination__summary">
+            <span class="coral-Body--small">Rows ${report.firstRow}–${report.lastRow} of ${report.totalRows}</span>
+        </div>
+        <form class="mcp-report-pagination__size" method="get" action="${request.requestURI}">
+            <label id="report-page-size-label-${position}" for="report-page-size-${position}">Results per page</label>
+            <coral-select id="report-page-size-${position}" name="pageSize" data-report-page-size
+                          labelledby="report-page-size-label-${position}" data-sly-list.size="${report.pageSizes}">
+                <coral-select-item value="${size}" selected="${size == report.pageSize}">${size} Results</coral-select-item>
+            </coral-select>
+        </form>
+        <div class="mcp-report-pagination__navigation">
+            <a data-sly-test="${report.hasPrevious}" is="coral-anchorbutton" variant="secondary"
+               icon="chevronLeft" title="Previous page" href="${report.previousUrl}" rel="prev" aria-label="Go to previous report page"></a>
+            <button data-sly-test="${!report.hasPrevious}" is="coral-button" variant="secondary"
+                    icon="chevronLeft" type="button" disabled aria-label="Previous page unavailable"></button>
+            <ol class="mcp-report-pagination__pages" data-sly-list.link="${report.pageLinks}">
+                <li>
+                    <a data-sly-test="${link.current}" is="coral-anchorbutton" variant="primary" href="${link.url}"
+                          class="mcp-report-pagination__current" aria-current="page" aria-label="Page ${link.number}, current page">${link.number}</a>
+                    <a data-sly-test="${!link.current}" is="coral-anchorbutton" variant="minimal"
+                       href="${link.url}" aria-label="Go to page ${link.number}">${link.number}</a>
+                </li>
+            </ol>
+            <a data-sly-test="${report.hasNext}" is="coral-anchorbutton" variant="secondary"
+               icon="chevronRight" title="Next page" href="${report.nextUrl}" rel="next" aria-label="Go to next report page"></a>
+            <button data-sly-test="${!report.hasNext}" is="coral-button" variant="secondary"
+                    icon="chevronRight" type="button" disabled aria-label="Next page unavailable"></button>
+        </div>
+    </nav>
+</template>
