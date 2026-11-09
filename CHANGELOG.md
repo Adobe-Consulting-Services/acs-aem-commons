@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #3808 ResourceResolverMapTransformerFactory: decode mapped paths with URI#getPath, like the OOTB LinkCheckerTransformer, instead of URLCodec, which replaced non-ASCII characters (eg. "©") with "?" (turning the rest of the path into a query string) and decoded "+" to a space
+
 ### Changed
 
 ## [6.17.6] - 2026-09-08
