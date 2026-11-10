@@ -37,7 +37,7 @@ import static org.mockito.Mockito.spy;
 
 public class PathListReportExecutorTest {
 
-    private static final String HANDLEBARS_PARAM = "{{paths}}";
+    private static final String TEMPLATE_PARAM = "{{paths}}";
     private static final String PATH_1 = "/this/is/path1";
     private static final String PATH_2 = "/this/is/path/2";
     private static final String WINDOWS_END_LINE = "\r\n";
@@ -68,11 +68,11 @@ public class PathListReportExecutorTest {
     public void testExtractPathsWithParams() throws ReportException {
         HashMap<String, String> params = new HashMap<>();
         params.put(PATHS, PATH_1 + LINUX_END_LINE + PATH_2 + LINUX_END_LINE + PATH_3);
-        testExtractedPaths(HANDLEBARS_PARAM, params);
+        testExtractedPaths(TEMPLATE_PARAM, params);
 
         params = new HashMap<>();
         params.put(PATHS, PATH_1 + WINDOWS_END_LINE + PATH_2 + WINDOWS_END_LINE + PATH_3);
-        testExtractedPaths(HANDLEBARS_PARAM, params);
+        testExtractedPaths(TEMPLATE_PARAM, params);
     }
 
     private void testExtractedPaths(final String pathAreaContent, final HashMap<String, String> params)

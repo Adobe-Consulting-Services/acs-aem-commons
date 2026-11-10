@@ -37,7 +37,7 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                         fieldLabel="Query"
-                        fieldDescription="This is templated with the URL parameters passed in the hash or the form values using Handlebars"
+                        fieldDescription="This is templated with the URL parameters passed in the hash or the form values: {{name}} (HTML escaped), {{{name}}} (not escaped), {{#if name}}...{{else}}...{{/if}} and {{#unless name}}...{{/unless}}"
                         name="./query"
                         required="{Boolean}true"/>
                     <queryLanguage

@@ -17,7 +17,6 @@
  */
 package com.adobe.acs.commons.reports.models;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -65,8 +64,6 @@ import com.adobe.acs.commons.util.impl.QueryHelperImpl;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
 
 /**
  * Model for executing report requests.
@@ -268,13 +265,11 @@ public class QueryReportExecutor implements ReportExecutor {
 
     private String prepareStatement() throws ReportException {
         try {
-            Map<String, String> parameters = getParamPatternMap(request);
-            Template template = new Handlebars().compileInline(config.getQuery());
-            String statement = template.apply(parameters);
+            String statement = ParameterTemplate.render(config.getQuery(), getParamPatternMap(request));
             log.trace("Loaded statement: {}", statement);
             return statement;
-        } catch (IOException ioe) {
-            throw new ReportException("Exception templating query", ioe);
+        } catch (IllegalArgumentException iae) {
+            throw new ReportException("Exception templating query", iae);
         }
     }
 

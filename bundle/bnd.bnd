@@ -17,7 +17,6 @@ Import-Package: \
   !com.google.thirdparty.*,\
   !com.jcraft.*,\
   !io.jsonwebtoken.*,\
-  !com.github.jknack.handlebars.*,\
   !org.jsoup.*,\
   !org.bouncycastle.jce.*,\
   !org.checkerframework.checker.nullness.qual,\
