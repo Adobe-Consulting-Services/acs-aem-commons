@@ -5,7 +5,8 @@
     "hiking-camping": {
       "jcr:primaryType": "sling:OrderedFolder",
       "trekker-ama-dablam.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "4762b252-835d-4345-928b-03f5a594125f"
       }
     }
   },
@@ -14,37 +15,47 @@
     "48-hours-of-wilderness": {
       "jcr:primaryType": "sling:Folder",
       "48-hours-of-wilderness-1.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "c28b3585-95f6-44d2-8ffa-58affc7e3abb"
       }
     },
     "arctic-surfing-in-lofoten": {
       "jcr:primaryType": "sling:OrderedFolder",
       "arctic-surfing-in-lofoten": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "d8a4b101-54bc-40df-89c9-dc05f9b1ef22"
       },
       "camp-tent.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "d760794b-71cd-4aee-a6c0-32b4019354de"
       },
       "surfer-ready-to-go.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "dab149eb-e4d6-4524-8676-cd90e37cbd37"
       },
       "camp-fire.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "b8bb8a57-e848-47b2-9bcb-554b3d52d3f8"
       },
       "majestic-rainbow.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "e5e26802-36e2-4348-80c3-c58013f16a86"
       },
       "fjord-waves.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "88ee494d-abe0-44fa-9e1d-3a8c3b07ef2b"
       },
       "surfer-wave-01.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "7ed62221-793a-496f-9195-0638d7601b01"
       },
       "surfer-wave-02.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "e9c2990d-4ca1-4748-b4d6-50d604720261"
       },
       "northern-lights.jpg": {
-        "jcr:primaryType": "dam:Asset"
+        "jcr:primaryType": "dam:Asset",
+        "jcr:uuid": "d9348f39-7e17-4faf-b94e-2a6cd1b4ff13"
       }
     }
   }
