@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #3808 ResourceResolverMapTransformerFactory: decode mapped paths with URI#getPath, like the OOTB LinkCheckerTransformer, instead of URLCodec, which replaced non-ASCII characters (eg. "©") with "?" (turning the rest of the path into a query string) and decoded "+" to a space
+- generate-user-uuid.groovy: move the shebang line back to the top of the file, above the license header, so the script runs again with Groovy 3 and later
 
 ### Changed
 
