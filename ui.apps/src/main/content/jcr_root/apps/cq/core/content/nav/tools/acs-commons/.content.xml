@@ -25,6 +25,7 @@
     <generic-lists/>
     <redirect-manager/>
     <contentsync/>
+    <replicator/>
     <reports/>
     <exporters/>
 
