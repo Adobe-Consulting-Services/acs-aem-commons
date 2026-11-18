@@ -1,3 +1,4 @@
+#!/usr/bin/env groovy
 /*
  * ACS AEM Commons
  *
@@ -15,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#!/usr/bin/env groovy
 
 if (this.args.length != 1) {
     System.err.println("[ERROR] Must provide a userId")
